@@ -115,17 +115,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // adding a11y tests for the new data grid
     it('a11y test on single document view', async () => {
       await testSubjects.click('docTableExpandToggleColumn');
-      await PageObjects.discover.clickDocViewerTab(0);
+      await PageObjects.discover.clickDocViewerTab('doc_view_table');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test on JSON view of the document', async () => {
-      await PageObjects.discover.clickDocViewerTab(1);
+      await PageObjects.discover.clickDocViewerTab('doc_view_source');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test for actions on a field', async () => {
-      await PageObjects.discover.clickDocViewerTab(0);
+      await PageObjects.discover.clickDocViewerTab('doc_view_table');
       if (await testSubjects.exists('openFieldActionsButton-Cancelled')) {
         await testSubjects.click('openFieldActionsButton-Cancelled');
       } else {

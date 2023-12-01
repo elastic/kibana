@@ -7,7 +7,7 @@
  */
 import { EuiFlyoutProps } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { type ComponentType } from 'react';
 
 export interface FlyoutDefaultActionItem {
@@ -46,4 +46,5 @@ export interface FlyoutCustomization {
     getActionItems?: () => FlyoutActionItem[];
   };
   Content?: ComponentType<FlyoutContentProps>;
+  docViewsRegistry?: DocViewRenderProps['docViewsRegistry'];
 }

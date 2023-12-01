@@ -26,11 +26,13 @@ const DocViewerTable = React.lazy(() => import('./components/doc_viewer_table'))
 const SourceViewer = React.lazy(() => import('./components/doc_viewer_source'));
 
 export interface UnifiedDocViewerSetup {
-  addDocView: DocViewsRegistry['addDocView'];
+  registry: DocViewsRegistry;
+  addDocView: DocViewsRegistry['add'];
 }
 
 export interface UnifiedDocViewerStart {
-  getDocViews: DocViewsRegistry['getDocViewsSorted'];
+  registry: DocViewsRegistry;
+  getDocViews: DocViewsRegistry['getAll'];
 }
 
 export interface UnifiedDocViewerStartDeps {
@@ -44,7 +46,8 @@ export class UnifiedDocViewerPublicPlugin
   private docViewsRegistry = new DocViewsRegistry();
 
   public setup(core: CoreSetup<UnifiedDocViewerStartDeps, UnifiedDocViewerStart>) {
-    this.docViewsRegistry.addDocView({
+    this.docViewsRegistry.add({
+      id: 'doc_view_table',
       title: i18n.translate('unifiedDocViewer.docViews.table.tableTitle', {
         defaultMessage: 'Table',
       }),
@@ -68,12 +71,13 @@ export class UnifiedDocViewerPublicPlugin
       },
     });
 
-    this.docViewsRegistry.addDocView({
+    this.docViewsRegistry.add({
+      id: 'doc_view_source',
       title: i18n.translate('unifiedDocViewer.docViews.json.jsonTitle', {
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, dataView, query, textBasedHits }) => {
+      component: ({ hit, dataView, textBasedHits }) => {
         return (
           <React.Suspense
             fallback={
@@ -96,7 +100,8 @@ export class UnifiedDocViewerPublicPlugin
     });
 
     return {
-      addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
+      registry: this.docViewsRegistry,
+      addDocView: this.docViewsRegistry.add.bind(this.docViewsRegistry),
     };
   }
 
@@ -105,7 +110,8 @@ export class UnifiedDocViewerPublicPlugin
     const { data, fieldFormats } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
-      getDocViews: this.docViewsRegistry.getDocViewsSorted.bind(this.docViewsRegistry),
+      registry: this.docViewsRegistry,
+      getDocViews: this.docViewsRegistry.getAll.bind(this.docViewsRegistry),
     };
     const services = { analytics, data, fieldFormats, storage, uiSettings, unifiedDocViewer };
     setUnifiedDocViewerServices(services);

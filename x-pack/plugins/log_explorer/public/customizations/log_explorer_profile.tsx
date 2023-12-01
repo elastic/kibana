@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { CustomizationCallback, DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
-import useObservable from 'react-use/lib/useObservable';
 import { combineLatest, from, map, Subscription, type BehaviorSubject } from 'rxjs';
 import { LogExplorerStateContainer } from '../components/log_explorer';
 import { LogExplorerCustomizations } from '../components/log_explorer/types';
@@ -133,21 +135,27 @@ export const createLogExplorerProfileCustomizations =
           viewSurroundingDocument: { disabled: true },
         },
       },
-      Content: (props) => {
-        const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
+      docViewsRegistry: (registry) => {
+        registry.add({
+          id: 'doc_view_log_overview',
+          title: i18n.translate('xpack.logExplorer.flyoutDetail.docViews.overview', {
+            defaultMessage: 'Overview',
+          }),
+          order: 0,
+          component: (props) => {
+            const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
 
-        const internalState = useObservable(
-          stateContainer.internalState.state$,
-          stateContainer.internalState.get()
-        );
+            return (
+              <KibanaContextProviderForPlugin>
+                <LogExplorerCustomizationsProvider value={logExplorerCustomizations}>
+                  <LazyCustomFlyoutContent {...props} />
+                </LogExplorerCustomizationsProvider>
+              </KibanaContextProviderForPlugin>
+            );
+          },
+        });
 
-        return (
-          <KibanaContextProviderForPlugin>
-            <LogExplorerCustomizationsProvider value={logExplorerCustomizations}>
-              <LazyCustomFlyoutContent {...props} dataView={internalState.dataView} />
-            </LogExplorerCustomizationsProvider>
-          </KibanaContextProviderForPlugin>
-        );
+        return registry;
       },
     });
 

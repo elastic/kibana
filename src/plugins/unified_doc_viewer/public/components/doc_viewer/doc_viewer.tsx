@@ -6,17 +6,27 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { DocViewer } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
-export function UnifiedDocViewer(props: DocViewRenderProps) {
+export function UnifiedDocViewer({ docViewsRegistry, ...props }: DocViewRenderProps) {
   const services = getUnifiedDocViewerServices();
+
+  const registry = useMemo(() => {
+    if (docViewsRegistry) {
+      return typeof docViewsRegistry === 'function'
+        ? docViewsRegistry(services.unifiedDocViewer.registry.clone())
+        : docViewsRegistry;
+    }
+    return services.unifiedDocViewer.registry;
+  }, [docViewsRegistry, services.unifiedDocViewer.registry]);
+
   return (
     <KibanaContextProvider services={services}>
-      <DocViewer docViews={services.unifiedDocViewer.getDocViews(props.hit)} {...props} />
+      <DocViewer docViews={registry.getAll()} {...props} />
     </KibanaContextProvider>
   );
 }

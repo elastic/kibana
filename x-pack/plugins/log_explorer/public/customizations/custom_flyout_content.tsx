@@ -5,19 +5,29 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FlyoutDetail } from '../components/flyout_detail/flyout_detail';
 import { FlyoutProps } from '../components/flyout_detail';
 import { useLogExplorerCustomizationsContext } from '../hooks/use_log_explorer_customizations';
 
 export const CustomFlyoutContent = ({
-  actions,
+  filter,
+  onAddColumn,
+  onRemoveColumn,
   dataView,
-  doc,
-  renderDefaultContent,
+  hit: doc,
 }: FlyoutProps) => {
   const { flyout } = useLogExplorerCustomizationsContext();
+
+  const actions = useMemo(
+    () => ({
+      addFilter: filter,
+      addColumn: onAddColumn,
+      removeColumn: onRemoveColumn,
+    }),
+    [filter, onAddColumn, onRemoveColumn]
+  );
 
   const renderPreviousContent = useCallback(
     () => (
@@ -36,12 +46,13 @@ export const CustomFlyoutContent = ({
     : renderPreviousContent();
 
   return (
-    <EuiFlexGroup direction="column">
-      {/* Apply custom Log Explorer detail */}
-      {content}
-      {/* Restore default content */}
-      <EuiFlexItem>{renderDefaultContent()}</EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup direction="column">
+        {/* Apply custom Log Explorer detail */}
+        {content}
+      </EuiFlexGroup>
+    </>
   );
 };
 
