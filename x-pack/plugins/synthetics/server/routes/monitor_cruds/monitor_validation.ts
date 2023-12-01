@@ -56,12 +56,21 @@ export interface ValidationResult {
   decodedMonitor?: SyntheticsMonitor;
 }
 
+export class MonitorValidationError extends Error {
+  result: ValidationResult;
+  constructor(result: ValidationResult) {
+    super(result.reason);
+    this.result = result;
+  }
+}
+
 /**
  * Validates monitor fields with respect to the relevant Codec identified by object's 'type' property.
  * @param monitorFields {MonitorFields} The mixed type representing the possible monitor payload from UI.
  */
 export function validateMonitor(monitorFields: MonitorFields): ValidationResult {
   const { [ConfigKey.MONITOR_TYPE]: monitorType } = monitorFields;
+
   if (monitorType !== MonitorTypeEnum.BROWSER && !monitorFields.name) {
     monitorFields.name = monitorFields.urls || monitorFields.hosts;
   }

@@ -53,7 +53,7 @@ export function mergeSourceMonitor(
   normalizedPreviousMonitor: EncryptedSyntheticsMonitor,
   monitor: EncryptedSyntheticsMonitor
 ) {
-  return mergeWith(normalizedPreviousMonitor, monitor, customizer);
+  return mergeWith({ ...normalizedPreviousMonitor }, monitor, customizer);
 }
 
 // Ensure that METADATA is merged deeply, to protect AAD and prevent decryption errors

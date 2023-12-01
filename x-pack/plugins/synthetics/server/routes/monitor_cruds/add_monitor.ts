@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
-import { AddMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
+import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
@@ -33,7 +33,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     // usually id is auto generated, but this is useful for testing
     const { id } = request.query;
 
-    const addMonitorAPI = new AddMonitorAPI(routeContext);
+    const addMonitorAPI = new AddEditMonitorAPI(routeContext);
 
     const {
       locations,
@@ -54,7 +54,10 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         });
       }
 
-      const monitorWithDefaults = await addMonitorAPI.normalizeMonitor(formattedConfig!);
+      const monitorWithDefaults = await addMonitorAPI.normalizeMonitor(
+        formattedConfig!,
+        request.body as CreateMonitorPayLoad
+      );
 
       const validationResult = validateMonitor(monitorWithDefaults);
 
