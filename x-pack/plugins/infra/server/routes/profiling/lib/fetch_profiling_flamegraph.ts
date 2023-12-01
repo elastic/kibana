@@ -6,14 +6,6 @@
  */
 
 import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import {
-  profilingAWSCostDiscountRate,
-  profilingCo2PerKWH,
-  profilingCostPervCPUPerHour,
-  profilingDatacenterPUE,
-  profilingPervCPUWattArm64,
-  profilingPervCPUWattX86,
-} from '@kbn/observability-plugin/common';
 import type { ProfilingDataAccessPluginStart } from '@kbn/profiling-data-access-plugin/server';
 import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import { HOST_FIELD } from '../../../../common/constants';
@@ -24,32 +16,11 @@ export async function fetchProfilingFlamegraph(
   profilingDataAccess: ProfilingDataAccessPluginStart,
   coreRequestContext: CoreRequestHandlerContext
 ): Promise<BaseFlameGraph> {
-  const [
-    co2PerKWH,
-    datacenterPUE,
-    pervCPUWattX86,
-    pervCPUWattArm64,
-    awsCostDiscountRate,
-    costPervCPUPerHour,
-  ] = await Promise.all([
-    coreRequestContext.uiSettings.client.get<number>(profilingCo2PerKWH),
-    coreRequestContext.uiSettings.client.get<number>(profilingDatacenterPUE),
-    coreRequestContext.uiSettings.client.get<number>(profilingPervCPUWattX86),
-    coreRequestContext.uiSettings.client.get<number>(profilingPervCPUWattArm64),
-    coreRequestContext.uiSettings.client.get<number>(profilingAWSCostDiscountRate),
-    coreRequestContext.uiSettings.client.get<number>(profilingCostPervCPUPerHour),
-  ]);
-
   return await profilingDataAccess.services.fetchFlamechartData({
+    core: coreRequestContext,
     esClient: coreRequestContext.elasticsearch.client.asCurrentUser,
     rangeFromMs: from,
     rangeToMs: to,
     kuery: `${HOST_FIELD} : "${hostname}"`,
-    co2PerKWH,
-    datacenterPUE,
-    pervCPUWattX86,
-    pervCPUWattArm64,
-    awsCostDiscountRate,
-    costPervCPUPerHour,
   });
 }
