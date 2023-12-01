@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBadge, EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { TrainedModelHealth } from '../ml_model_health';
@@ -99,7 +99,12 @@ describe('ModelSelectOption', () => {
 
 describe('LicenseBadge', () => {
   it('renders with link if URL is present', () => {
-    const wrapper = shallow(<LicenseBadge licenseType={DEFAULT_PROPS.licenseType!} licensePageUrl={DEFAULT_PROPS.licensePageUrl} />);
+    const wrapper = shallow(
+      <LicenseBadge
+        licenseType={DEFAULT_PROPS.licenseType!}
+        licensePageUrl={DEFAULT_PROPS.licensePageUrl}
+      />
+    );
     expect(wrapper.find(EuiLink)).toHaveLength(1);
   });
   it('renders without link if URL is not present', () => {
