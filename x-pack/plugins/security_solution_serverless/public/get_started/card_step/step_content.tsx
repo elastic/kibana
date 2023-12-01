@@ -63,7 +63,7 @@ const StepContentComponent = ({
       {step.description && (
         <EuiFlexItem grow={false} css={leftContentStyles} className="left-panel">
           <EuiText size="s">
-            {step.description?.map((desc, index) => (
+            {step.description.map((desc, index) => (
               <p
                 data-test-subj={`${stepId}-description-${index}`}
                 key={`${stepId}-description-${index}`}
