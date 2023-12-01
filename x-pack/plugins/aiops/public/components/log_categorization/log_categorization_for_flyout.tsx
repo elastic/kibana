@@ -361,7 +361,8 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                       content={i18n.translate(
                         'xpack.aiops.logCategorization.tabs.fullTimeRange.tooltip',
                         {
-                          defaultMessage: 'Patterns that occur in the selected time range.',
+                          defaultMessage:
+                            'Patterns that occur in the time range selected for the page.',
                         }
                       )}
                     >
