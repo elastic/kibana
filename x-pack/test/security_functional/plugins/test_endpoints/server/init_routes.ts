@@ -13,6 +13,7 @@ import type {
   ConcreteTaskInstance,
   BulkUpdateTaskResult,
 } from '@kbn/task-manager-plugin/server';
+import { restApiKeySchema } from '@kbn/security-plugin-types-server';
 import { PluginStartDependencies } from '.';
 
 export const SESSION_INDEX_CLEANUP_TASK_NAME = 'session_cleanup';
@@ -105,6 +106,19 @@ export function initRoutes(
 
         throw err;
       }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api_keys/_grant',
+      validate: { body: restApiKeySchema },
+    },
+    async (context, request, response) => {
+      const [, { security }] = await core.getStartServices();
+      return response.ok({
+        body: await security.authc.apiKeys.grantAsInternalUser(request, request.body),
+      });
     }
   );
 
