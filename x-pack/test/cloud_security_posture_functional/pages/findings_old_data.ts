@@ -55,7 +55,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     },
   ];
 
-  describe.skip('Old Data', function () {
+  describe('Old Data', function () {
     this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
 

@@ -93,7 +93,7 @@ export class ElasticAssistantPlugin
     const getElserId: GetElser = once(
       async (request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) => {
         return (await plugins.ml.trainedModelsProvider(request, savedObjectsClient).getELSER())
-          .name;
+          .model_id;
       }
     );
 
