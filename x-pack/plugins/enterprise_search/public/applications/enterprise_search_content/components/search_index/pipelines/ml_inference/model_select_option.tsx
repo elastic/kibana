@@ -32,6 +32,7 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 import { TrainedModelHealth } from '../ml_model_health';
 
 import { ModelSelectLogic } from './model_select_logic';
+import { TRAINED_MODELS_PATH } from './utils';
 
 export const getContextMenuPanel = (
   modelDetailsPageUrl?: string
@@ -41,17 +42,27 @@ export const getContextMenuPanel = (
       id: 0,
       items: [
         {
-          name: 'Tune model performance',
+          name: i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.modelSelectOption.actionMenu.tuneModelPerformance.label',
+            {
+              defaultMessage: 'Tune model performance',
+            }
+          ),
           icon: 'controlsHorizontal',
           onClick: () =>
-            KibanaLogic.values.navigateToUrl('/app/ml/trained_models', {
+            KibanaLogic.values.navigateToUrl(TRAINED_MODELS_PATH, {
               shouldNotCreateHref: true,
             }),
         },
         ...(modelDetailsPageUrl
           ? [
               {
-                name: 'Model details',
+                name: i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.modelSelectOption.actionMenu.modelDetails.label',
+                  {
+                    defaultMessage: 'Model details',
+                  }
+                ),
                 icon: 'popout',
                 href: modelDetailsPageUrl,
                 target: '_blank',
@@ -177,7 +188,17 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
               <EuiFlexGroup gutterSize="xs" alignItems="center">
                 {license && (
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">License: {license}</EuiBadge>
+                    <EuiBadge color="hollow">
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.pipelines.modelSelectOption.licenseBadge.label',
+                        {
+                          defaultMessage: 'License: {license}',
+                          values: {
+                            license,
+                          },
+                        }
+                      )}
+                    </EuiBadge>
                   </EuiFlexItem>
                 )}
                 {description && (
