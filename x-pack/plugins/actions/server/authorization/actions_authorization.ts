@@ -73,8 +73,18 @@ export class ActionsAuthorization {
           ? operationAlias[operation](authorization)
           : [authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation)];
 
+        if (operation === 'execute' && !actionTypeId) {
+          throw new Error('actionTypeId required to authorize execution of actions');
+        }
+
         const { hasAllRequested } = await checkPrivileges({
-          kibana: [...privileges, ...additionalPrivileges],
+          kibana: [
+            ...privileges,
+            ...additionalPrivileges,
+            // SentinelOne sub-actions require that a user have `all` privilege to Actions and Connectors.
+            // This is a temporary solution until a more robust RBAC approach can be implemented for sub-actions
+            actionTypeId === '.sentinelone' ? 'actions:execute-all' : 'actions:execute-read',
+          ],
         });
         if (!hasAllRequested) {
           throw Boom.forbidden(

@@ -33,7 +33,7 @@ export const ACTIONS_FEATURE = {
   privileges: {
     all: {
       app: [],
-      api: [],
+      api: ['actions:execute-all'],
       catalogue: [],
       management: {
         insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
@@ -50,7 +50,7 @@ export const ACTIONS_FEATURE = {
     },
     read: {
       app: [],
-      api: [],
+      api: ['actions:execute-read'],
       catalogue: [],
       management: {
         insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
