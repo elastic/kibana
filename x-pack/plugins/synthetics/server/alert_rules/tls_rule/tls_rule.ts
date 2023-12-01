@@ -34,6 +34,7 @@ import { TLSRuleExecutor } from './tls_rule_executor';
 import {
   SYNTHETICS_ALERT_RULE_TYPES,
   TLS_CERTIFICATE,
+  SYNTHETICS_RULE_TYPE_PRODUCER,
 } from '../../../common/constants/synthetics_alerts';
 import { generateAlertMessage, updateState, UptimeRuleTypeAlertDefinition } from '../common';
 import { ALERT_DETAILS_URL, getActionVariables } from '../action_variables';
@@ -55,7 +56,7 @@ export const registerSyntheticsTLSCheckRule = (
   return createLifecycleRuleType({
     id: SYNTHETICS_ALERT_RULE_TYPES.TLS,
     category: DEFAULT_APP_CATEGORIES.observability.id,
-    producer: 'uptime',
+    producer: SYNTHETICS_RULE_TYPE_PRODUCER,
     name: TLS_CERTIFICATE.name,
     validate: {
       params: schema.object({

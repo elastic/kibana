@@ -28,7 +28,11 @@ import {
   setRecoveredAlertsContext,
   UptimeRuleTypeAlertDefinition,
 } from './common';
-import { CLIENT_ALERT_TYPES, TLS } from '../../../../common/constants/uptime_alerts';
+import {
+  CLIENT_ALERT_TYPES,
+  TLS,
+  SYNTHETICS_RULE_TYPE_PRODUCER,
+} from '../../../../common/constants/uptime_alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { Cert, CertResult } from '../../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
@@ -119,7 +123,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 ) => ({
   id: CLIENT_ALERT_TYPES.TLS,
   category: DEFAULT_APP_CATEGORIES.observability.id,
-  producer: 'uptime',
+  producer: SYNTHETICS_RULE_TYPE_PRODUCER,
   name: tlsTranslations.alertFactoryName,
   validate: {
     params: schema.object({

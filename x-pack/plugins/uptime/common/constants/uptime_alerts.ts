@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
 import { ActionGroup } from '@kbn/alerting-plugin/common';
 
 export type MonitorStatusActionGroup =
@@ -47,3 +47,10 @@ export const UPTIME_RULE_TYPES = [
   'xpack.uptime.alerts.monitorStatus',
   'xpack.uptime.alerts.durationAnomaly',
 ];
+
+export const SYNTHETICS_RULE_TYPE_PRODUCER = i18n.translate(
+  'xpack.synthetics.alertRules.producer',
+  {
+    defaultMessage: 'Synthetics and Uptime',
+  }
+);

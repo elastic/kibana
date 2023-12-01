@@ -23,6 +23,7 @@ import { StatusRulePramsSchema } from '../../../common/rules/status_rule';
 import {
   MONITOR_STATUS,
   SYNTHETICS_ALERT_RULE_TYPES,
+  SYNTHETICS_RULE_TYPE_PRODUCER,
 } from '../../../common/constants/synthetics_alerts';
 import {
   setRecoveredAlertsContext,
@@ -53,7 +54,7 @@ export const registerSyntheticsStatusCheckRule = (
   return createLifecycleRuleType({
     id: SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS,
     category: DEFAULT_APP_CATEGORIES.observability.id,
-    producer: 'uptime',
+    producer: SYNTHETICS_RULE_TYPE_PRODUCER,
     name: STATUS_RULE_NAME,
     validate: {
       params: StatusRulePramsSchema,

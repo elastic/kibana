@@ -36,7 +36,11 @@ import {
   setRecoveredAlertsContext,
   UptimeRuleTypeAlertDefinition,
 } from './common';
-import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
+import {
+  CLIENT_ALERT_TYPES,
+  DURATION_ANOMALY,
+  SYNTHETICS_RULE_TYPE_PRODUCER,
+} from '../../../../common/constants/uptime_alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import { UptimeCorePluginsSetup } from '../adapters/framework';
 import { UptimeAlertTypeFactory } from './types';
@@ -105,7 +109,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
 ) => ({
   id: CLIENT_ALERT_TYPES.DURATION_ANOMALY,
   category: DEFAULT_APP_CATEGORIES.observability.id,
-  producer: 'uptime',
+  producer: SYNTHETICS_RULE_TYPE_PRODUCER,
   name: durationAnomalyTranslations.alertFactoryName,
   validate: {
     params: schema.object({
