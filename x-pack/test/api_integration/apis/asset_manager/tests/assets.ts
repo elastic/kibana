@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
     const to = new Date().toISOString();
 
     beforeEach(async () => {
-      await Promise.all([synthtraceInfra.clean(), synthtraceApm.clean()]);
+      await synthtraceInfra.clean();
     });
 
     it('should return all assets', async () => {
@@ -42,11 +42,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('supports hosts and services', async () => {
-      await Promise.all([
-        synthtraceInfra.index(generateHostsData({ from, to, count: 5 })),
-        synthtraceApm.index(generateServicesData({ from, to, count: 5 })),
-      ]);
-
       await supertest
         .get(ASSETS_ENDPOINT)
         .query({
