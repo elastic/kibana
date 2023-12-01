@@ -166,7 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for time interval panel', async () => {
-      await testSubjects.click('unifiedHistogramTimeIntervalSelector');
+      await testSubjects.click('unifiedHistogramTimeIntervalSelectorButton');
       await a11y.testAppSnapshot();
     });
 
