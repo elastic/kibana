@@ -47,6 +47,12 @@ export default function ({ getService }: FtrProviderContext) {
       return res.body;
     };
 
+    const deleteMonitor = async (monitorId: string, statusCode = 200) => {
+      const deleteResponse = await supertest
+        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + invalidMonitorId)
+        .set('kbn-xsrf', 'true');
+    };
+
     before(async () => {
       _httpMonitorJson = getFixtureJson('http_monitor');
       await testPrivateLocations.installSyntheticsPackage();
@@ -64,9 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('deletes monitor by id', async () => {
       const { id: monitorId } = await saveMonitor(httpMonitorJson as MonitorFields);
 
-      const deleteResponse = await supertest
-        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
-        .set('kbn-xsrf', 'true');
+      const deleteResponse = await deleteMonitor(monitorId);
 
       expect(deleteResponse.body).eql(monitorId);
 
@@ -78,22 +82,14 @@ export default function ({ getService }: FtrProviderContext) {
       const invalidMonitorId = 'invalid-id';
       const expected404Message = `Monitor id ${invalidMonitorId} not found!`;
 
-      const deleteResponse = await supertest
-        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + invalidMonitorId)
-        .set('kbn-xsrf', 'true');
+      const deleteResponse = await deleteMonitor(monitorId);
 
       expect(deleteResponse.status).eql(404);
       expect(deleteResponse.body.message).eql(expected404Message);
     });
 
     it('validates empty monitor id', async () => {
-      const emptyMonitorId = '';
-
-      // Route DELETE '/${SYNTHETICS_MONITORS}' should not exist
-      await supertest
-        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + emptyMonitorId)
-        .set('kbn-xsrf', 'true')
-        .expect(404);
+      const deleteResponse = await deleteMonitor(monitorId, 400);
     });
 
     it('validates param length', async () => {
