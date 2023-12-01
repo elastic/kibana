@@ -6,7 +6,7 @@
  */
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import type { AssetCriticalityRecord } from '../../../../common/api/asset_criticality';
+import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { getAssetCriticalityIndex } from '../../../../common/asset_criticality';
 import { assetCriticalityFieldMap } from './configurations';
