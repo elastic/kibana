@@ -105,22 +105,9 @@ export const getFieldSpecs = (indexPattern: string) => {
       searchable: true,
       aggregatable: true,
       esTypes: [field[1]],
-      readFromDocValues: true,
     };
   });
   return fieldSpecs;
-};
-
-const getFieldsMap = (indexPattern: string) => {
-  const fieldSpecs = getFieldSpecs(indexPattern);
-
-  if (!fieldSpecs) return {};
-
-  const fieldsMap = fieldSpecs.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
-    acc[curr.name] = curr;
-    return acc;
-  }, {});
-  return fieldsMap;
 };
 
 export const SearchBar: React.FunctionComponent<Props> = ({
@@ -161,7 +148,8 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   useEffect(() => {
     const fetchFields = async () => {
       try {
-        const fieldsMap = getFieldsMap(indexPattern);
+        const fieldSpecs = getFieldSpecs(indexPattern);
+        const fieldsMap = data.dataViews.fieldArrayToMap(fieldSpecs);
         const newDataView = await data.dataViews.create(
           { title: indexPattern, fields: fieldsMap },
           true

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { act } from '@testing-library/react';
 
 import type { FieldSpec } from '@kbn/data-plugin/common';
 
@@ -144,17 +145,19 @@ jest.mock('../hooks', () => {
 
 describe('SearchBar', () => {
   const testRenderer = createFleetTestRendererMock();
+  const result = testRenderer.render(
+    <SearchBar
+      value="test-index.name: test"
+      onChange={() => undefined}
+      fieldPrefix="test-index"
+      indexPattern=".test-index"
+    />
+  );
 
   it('renders the search box', async () => {
-    const result = testRenderer.render(
-      <SearchBar
-        value="test-index.name: test"
-        onChange={() => undefined}
-        fieldPrefix="test-index"
-        indexPattern=".test-index"
-      />
-    );
-    result.debug();
+    await act(async () => {
+      result.queryByTestId('queryInput');
+    });
     const textArea = result.queryByTestId('queryInput');
     expect(textArea).not.toBeNull();
     expect(textArea?.getAttribute('placeholder')).toEqual('Filter your data using KQL syntax');
