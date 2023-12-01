@@ -276,7 +276,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => 
       deleteAlertsAndRules();
       createRule(getNewRule());
       login(ROLES.reader);
-      visit(ALERTS_URL, { role: ROLES.reader });
+      visit(ALERTS_URL);
       waitForAlertsToPopulate();
     });
     it('should not allow users to change a single alert status', () => {

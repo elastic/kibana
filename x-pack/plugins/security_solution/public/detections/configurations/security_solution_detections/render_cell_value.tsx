@@ -178,7 +178,7 @@ export const getRenderCellValueHook = ({
           />
         );
       },
-      [browserFieldsByName, browserFields, columnHeaders, context]
+      [browserFieldsByName, columnHeaders, browserFields, context]
     );
     return result;
   };

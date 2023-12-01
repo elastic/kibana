@@ -29,6 +29,9 @@ import {
 } from '../../../../common/custom_threshold_rule/types';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
+jest.mock('../../../../common/custom_threshold_rule/get_view_in_app_url', () => ({
+  getViewInAppUrl: () => 'mockedViewInApp',
+}));
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
@@ -134,7 +137,7 @@ const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
   jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
 };
 
-describe('The metric threshold alert type', () => {
+describe('The custom threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
@@ -1339,6 +1342,7 @@ describe('The metric threshold alert type', () => {
         timestamp: STARTED_AT_MOCK_DATE.toISOString(),
         value: ['[NO DATA]', null],
         tags: [],
+        viewInAppUrl: 'mockedViewInApp',
       });
       expect(recentAction).toBeNoDataAction();
     });
@@ -1765,6 +1769,7 @@ const mockLibs: any = {
       groupByPageSize: 10_000,
     },
   },
+  locators: {},
 };
 
 const executor = createCustomThresholdExecutor(mockLibs);
@@ -1780,6 +1785,7 @@ const mockedIndex = {
 };
 const mockedDataView = {
   getIndexPattern: () => 'mockedIndexPattern',
+  getName: () => 'mockedDataViewName',
   ...mockedIndex,
 };
 const mockedSearchSource = {

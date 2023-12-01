@@ -520,6 +520,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       trainedModels: `${MACHINE_LEARNING_DOCS}ml-trained-models.html`,
       startTrainedModelsDeployment: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-model.html`,
       nlpElser: `${MACHINE_LEARNING_DOCS}ml-nlp-elser.html`,
+      nlpE5: `${MACHINE_LEARNING_DOCS}ml-nlp-e5.html`,
       nlpImportModel: `${MACHINE_LEARNING_DOCS}ml-nlp-import-model.html`,
     },
     transforms: {

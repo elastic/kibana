@@ -224,6 +224,7 @@ export interface ActionParamsProps<TParams> {
   actionConnector?: ActionConnector;
   isLoading?: boolean;
   isDisabled?: boolean;
+  selectedActionGroupId?: string;
   showEmailSubjectAndMessage?: boolean;
   executionMode?: ActionConnectorMode;
   onBlur?: (field?: string) => void;

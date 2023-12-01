@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { keyBy } from 'lodash';
+import { get, keyBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
 import type {
@@ -255,8 +255,9 @@ export async function extractAndWriteSecrets(opts: {
 export async function extractAndWriteOutputSecrets(opts: {
   output: NewOutput;
   esClient: ElasticsearchClient;
+  secretHashes?: Record<string, any>;
 }): Promise<{ output: NewOutput; secretReferences: PolicySecretReference[] }> {
-  const { output, esClient } = opts;
+  const { output, esClient, secretHashes = {} } = opts;
 
   const secretPaths = getOutputSecretPaths(output.type, output).filter(
     (path) => typeof path.value === 'string'
@@ -273,7 +274,12 @@ export async function extractAndWriteOutputSecrets(opts: {
 
   const outputWithSecretRefs = JSON.parse(JSON.stringify(output));
   secretPaths.forEach((secretPath, i) => {
-    set(outputWithSecretRefs, secretPath.path, { id: secrets[i].id });
+    const pathWithoutPrefix = secretPath.path.replace('secrets.', '');
+    const maybeHash = get(secretHashes, pathWithoutPrefix);
+    set(outputWithSecretRefs, secretPath.path, {
+      id: secrets[i].id,
+      ...(typeof maybeHash === 'string' && { hash: maybeHash }),
+    });
   });
 
   return {
@@ -435,12 +441,13 @@ export async function extractAndUpdateOutputSecrets(opts: {
   oldOutput: Output;
   outputUpdate: Partial<Output>;
   esClient: ElasticsearchClient;
+  secretHashes?: Record<string, any>;
 }): Promise<{
   outputUpdate: Partial<Output>;
   secretReferences: PolicySecretReference[];
   secretsToDelete: PolicySecretReference[];
 }> {
-  const { oldOutput, outputUpdate, esClient } = opts;
+  const { oldOutput, outputUpdate, esClient, secretHashes } = opts;
   const outputType = outputUpdate.type || oldOutput.type;
   const oldSecretPaths = getOutputSecretPaths(outputType, oldOutput);
   const updatedSecretPaths = getOutputSecretPaths(outputType, outputUpdate);
@@ -461,7 +468,13 @@ export async function extractAndUpdateOutputSecrets(opts: {
 
   const outputWithSecretRefs = JSON.parse(JSON.stringify(outputUpdate));
   toCreate.forEach((secretPath, i) => {
-    set(outputWithSecretRefs, secretPath.path, { id: createdSecrets[i].id });
+    const pathWithoutPrefix = secretPath.path.replace('secrets.', '');
+    const maybeHash = get(secretHashes, pathWithoutPrefix);
+
+    set(outputWithSecretRefs, secretPath.path, {
+      id: createdSecrets[i].id,
+      ...(typeof maybeHash === 'string' && { hash: maybeHash }),
+    });
   });
 
   const secretReferences = [
@@ -545,10 +558,12 @@ export function diffOutputSecretPaths(
     const newPath = newPathsByPath[oldPath.path];
     if (newPath && newPath.value) {
       const newValue = newPath.value;
-      if (typeof newValue === 'string') toCreate.push(newPath);
-      toDelete.push(oldPath);
-    } else {
-      noChange.push(newPath);
+      if (typeof newValue === 'string') {
+        toCreate.push(newPath);
+        toDelete.push(oldPath);
+      } else {
+        noChange.push(newPath);
+      }
     }
     delete newPathsByPath[oldPath.path];
   }

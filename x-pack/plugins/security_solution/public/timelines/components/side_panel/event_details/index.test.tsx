@@ -22,6 +22,7 @@ import {
   DEFAULT_PREVIEW_INDEX,
   ASSISTANT_FEATURE_ID,
 } from '../../../../../common/constants';
+import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 
 const ecsData: Ecs = {
   _id: '1',
@@ -69,6 +70,18 @@ jest.mock(
   }
 );
 
+jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => {
+  return {
+    useBulkGetUserProfiles: jest.fn().mockReturnValue({ isLoading: false, data: [] }),
+  };
+});
+
+jest.mock('../../../../common/components/user_profiles/use_suggest_users', () => {
+  return {
+    useSuggestUsers: jest.fn().mockReturnValue({ isLoading: false, data: [] }),
+  };
+});
+
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
@@ -112,6 +125,7 @@ jest.mock('../../../../explore/containers/risk_score', () => {
     }),
   };
 });
+jest.mock('../../../../common/hooks/use_upselling');
 
 const defaultProps = {
   scopeId: TimelineId.test,
@@ -167,6 +181,7 @@ describe('event details panel component', () => {
         },
       },
     });
+    (useUpsellingMessage as jest.Mock).mockReturnValue('Go for Platinum!');
   });
 
   afterEach(() => {

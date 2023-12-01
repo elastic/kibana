@@ -7,6 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const CURRENT_USER_PROFILE_FAILURE = i18n.translate(
+  'xpack.securitySolution.userProfiles.fetchCurrentUserProfile.failure',
+  { defaultMessage: 'Failed to find current user' }
+);
+
 export const USER_PROFILES_FAILURE = i18n.translate(
   'xpack.securitySolution.userProfiles.fetchUserProfiles.failure',
   {
@@ -14,6 +19,9 @@ export const USER_PROFILES_FAILURE = i18n.translate(
   }
 );
 
+/**
+ * Used whenever we need to display a user name and for some reason it is not available
+ */
 export const UNKNOWN_USER_PROFILE_NAME = i18n.translate(
   'xpack.securitySolution.userProfiles.unknownUser.displayName',
   { defaultMessage: 'Unknown' }
