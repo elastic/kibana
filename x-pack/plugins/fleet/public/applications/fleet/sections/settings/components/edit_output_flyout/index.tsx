@@ -588,7 +588,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 title={
                   <FormattedMessage
                     id="xpack.fleet.settings.editOutputFlyout.performanceTuningMustBeCustomWarning"
-                    defaultMessage={`Performance tuning preset must be "Custom" due to presence of reserved key in advanced YAML configuration`}
+                    defaultMessage='Performance tuning preset must be "Custom" due to presence of reserved key in advanced YAML configuration'
                   />
                 }
               >
