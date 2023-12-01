@@ -11,7 +11,7 @@ import { WritableDraft } from 'immer/dist/types/types-external';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 
-import { isValidSearch } from '../../common/options_list/suggestions_searching';
+import { isValidSearch } from '../../common/options_list/is_valid_search';
 import {
   OptionsListSortingType,
   OPTIONS_LIST_DEFAULT_SORT,
