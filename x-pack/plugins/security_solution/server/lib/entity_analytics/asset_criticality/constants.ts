@@ -33,3 +33,13 @@ export const assetCriticalityFieldMap: FieldMap = {
     required: false,
   },
 } as const;
+
+/**
+ * CriticalityModifiers are used to adjust the risk score based on the criticality of the asset.
+ */
+export const CriticalityModifiers = {
+  very_important: 2,
+  important: 1.5,
+  normal: 1,
+  not_important: 0.5,
+} as const;

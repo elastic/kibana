@@ -6,18 +6,14 @@
  */
 
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
+import { CriticalityModifiers } from './constants';
 
 /**
- * CriticalityModifiers are used to adjust the risk score based on the criticality of the asset.
- * TODO fix modifier values
+ * Retrieves the criticality modifier for a given criticality level.
+ *
+ * @param criticalityLevel The criticality level for which to get the modifier.
+ * @returns The associated criticality modifier for the given criticality level.
  */
-export const CriticalityModifiers = {
-  very_important: 1,
-  important: 1,
-  normal: 1,
-  not_important: 1,
-};
-
 export const getCriticalityModifier = (
   criticalityLevel?: AssetCriticalityRecord['criticality_level']
 ): number | undefined => {
