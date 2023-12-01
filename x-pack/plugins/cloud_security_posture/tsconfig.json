@@ -50,7 +50,6 @@
     "@kbn/share-plugin",
     "@kbn/core-http-server",
     "@kbn/core-http-browser",
-    "@kbn/subscription-tracking",
     "@kbn/discover-utils",
     "@kbn/unified-data-table",
     "@kbn/cell-actions",
@@ -60,7 +59,8 @@
     "@kbn/ui-actions-plugin",
     "@kbn/core-http-server-mocks",
     "@kbn/field-formats-plugin",
-    "@kbn/data-view-field-editor-plugin"
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/securitysolution-grouping"
   ],
   "exclude": ["target/**/*"]
 }

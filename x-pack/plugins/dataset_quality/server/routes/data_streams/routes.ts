@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
-import { dataStreamTypesRt } from '../../types/api_types';
+import { dataStreamTypesRt } from '../../../common/data_streams';
 import { DataStreamsStatResponse } from '../../types/data_stream';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { getDataStreams } from './get_data_streams';
@@ -58,7 +58,9 @@ const statsRoute = createDatasetQualityServerRoute({
       }));
 
     return {
-      items: values(merge(keyBy(dataStreams.items, 'name'), keyBy(dataStreamsStats.items, 'name'))),
+      dataStreamsStats: values(
+        merge(keyBy(dataStreams.items, 'name'), keyBy(dataStreamsStats.items, 'name'))
+      ),
       integrations,
     };
   },
