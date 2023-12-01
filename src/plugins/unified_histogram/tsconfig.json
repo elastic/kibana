@@ -28,6 +28,7 @@
     "@kbn/shared-ux-button-toolbar",
     "@kbn/calculate-width-from-char-count",
     "@kbn/i18n-react",
+    "@kbn/field-utils",
   ],
   "exclude": [
     "target/**/*",
