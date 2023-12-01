@@ -671,7 +671,9 @@ describe('agent policy', () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
 
       mockedAppContextService.getUninstallTokenService.mockReturnValueOnce({
-        checkTokenValidityForPolicy: jest.fn().mockRejectedValueOnce(new Error('reason')),
+        checkTokenValidityForPolicy: jest
+          .fn()
+          .mockResolvedValueOnce({ error: new Error('reason') }),
       } as unknown as UninstallTokenServiceInterface);
 
       const soClient = getAgentPolicyCreateMock();
