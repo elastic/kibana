@@ -18,7 +18,6 @@ export * from './get_threshold_rule_for_alert_testing';
 export * from './get_rule_actions';
 export * from './find_immutable_rule_by_id';
 export * from './create_rule_with_exception_entries';
-export * from './create_non_security_rule';
 export * from './downgrade_immutable_rule';
 export * from './get_eql_rule_for_alert_testing';
 export * from './get_simple_preview_rule';
