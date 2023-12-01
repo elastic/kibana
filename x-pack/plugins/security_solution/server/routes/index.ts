@@ -57,6 +57,7 @@ import { registerDashboardsRoutes } from '../lib/dashboards/routes';
 import { registerTagsRoutes } from '../lib/tags/routes';
 import { setAlertTagsRoute } from '../lib/detection_engine/routes/signals/set_alert_tags_route';
 import { setAlertAssigneesRoute } from '../lib/detection_engine/routes/signals/set_alert_assignees_route';
+import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/suggest_user_profiles_route';
 import {
   riskEngineDisableRoute,
   riskEngineInitRoute,
@@ -67,8 +68,12 @@ import {
 import { registerTimelineRoutes } from '../lib/timeline/routes';
 import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_score/routes/calculation';
 import { riskScorePreviewRoute } from '../lib/entity_analytics/risk_score/routes/preview';
-import { assetCriticalityStatusRoute } from '../lib/entity_analytics/asset_criticality/routes';
-import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/suggest_user_profiles_route';
+import {
+  assetCriticalityStatusRoute,
+  assetCriticalityUpsertRoute,
+  assetCriticalityGetRoute,
+  assetCriticalityDeleteRoute,
+} from '../lib/entity_analytics/asset_criticality/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -165,5 +170,8 @@ export const initRoutes = (
   }
   if (config.experimentalFeatures.entityAnalyticsAssetCriticalityEnabled) {
     assetCriticalityStatusRoute(router, logger);
+    assetCriticalityUpsertRoute(router, logger);
+    assetCriticalityGetRoute(router, logger);
+    assetCriticalityDeleteRoute(router, logger);
   }
 };
