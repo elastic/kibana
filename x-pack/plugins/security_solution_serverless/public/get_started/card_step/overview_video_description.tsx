@@ -10,8 +10,8 @@ import { WATCH_VIDEO_DESCRIPTION1, WATCH_VIDEO_DESCRIPTION2 } from '../translati
 
 const OverviewVideoDescriptionComponent = () => (
   <>
-    <p>{WATCH_VIDEO_DESCRIPTION1}</p>
-    <p className="step-paragraph">{WATCH_VIDEO_DESCRIPTION2}</p>
+    <span className="eui-displayInlineBlock">{WATCH_VIDEO_DESCRIPTION1}</span>
+    <span className="eui-displayInlineBlock step-paragraph">{WATCH_VIDEO_DESCRIPTION2}</span>
   </>
 );
 

@@ -17,9 +17,9 @@ import {
   OverviewSteps,
   CreateProjectSteps,
 } from '../types';
-import { ProductLine } from '../../../common/product';
 import { ALL_DONE_TEXT } from '../translations';
 import { fetchRuleManagementFilters } from '../apis';
+import { createProjectSteps, enablePrebuildRuleSteps, overviewVideoSteps } from '../sections';
 
 jest.mock('./step_content', () => ({
   StepContent: () => <div data-test-subj="mock-step-content" />,
@@ -27,6 +27,8 @@ jest.mock('./step_content', () => ({
 
 jest.mock('../context/step_context');
 jest.mock('../apis');
+
+jest.mock('../../common/services');
 
 jest.mock('@kbn/security-solution-plugin/public', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({ indicesExist: false }),
@@ -40,16 +42,11 @@ jest.mock('@kbn/security-solution-navigation', () => ({
 }));
 
 describe('CardStepComponent', () => {
-  const step = {
-    id: OverviewSteps.getToKnowElasticSecurity,
-  };
-
   const onStepClicked = jest.fn();
   const toggleTaskCompleteStatus = jest.fn();
   const expandedSteps = new Set([]);
 
   const props = {
-    activeProducts: new Set([ProductLine.security]),
     cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
     expandedSteps,
     finishedSteps: new Set<StepId>(),
@@ -57,7 +54,7 @@ describe('CardStepComponent', () => {
     toggleTaskCompleteStatus,
     onStepClicked,
     sectionId: SectionId.quickStart,
-    stepId: step.id,
+    step: overviewVideoSteps[0],
   };
   const testStepTitle = 'Watch the overview video';
 
@@ -102,6 +99,7 @@ describe('CardStepComponent', () => {
       finishedSteps: new Set<StepId>([CreateProjectSteps.createFirstProject]),
       description: undefined,
       splitPanel: undefined,
+      step: createProjectSteps[0],
     };
     const { getByText } = render(<CardStep {...mockProps} />);
 
@@ -129,7 +127,7 @@ describe('CardStepComponent', () => {
       finishedSteps: new Set<StepId>([EnablePrebuiltRulesSteps.enablePrebuiltRules]),
       sectionId: SectionId.getStartedWithAlerts,
       splitPanel: undefined,
-      stepId: EnablePrebuiltRulesSteps.enablePrebuiltRules,
+      step: enablePrebuildRuleSteps[0],
     };
     const { queryByText } = render(<CardStep {...mockProps} />);
 

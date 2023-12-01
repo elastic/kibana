@@ -40,9 +40,11 @@ type AutoCheckAddIntegrationsSteps = ({
 type AutoCheckEnablePrebuiltRulesSteps = ({
   abortSignal,
   kibanaServicesHttp,
+  onError,
 }: {
   abortSignal: MutableRefObject<AbortController>;
   kibanaServicesHttp: HttpSetup;
+  onError?: (error: Error) => void;
 }) => Promise<boolean>;
 
 export type CheckIfStepCompleted<T = StepId> =

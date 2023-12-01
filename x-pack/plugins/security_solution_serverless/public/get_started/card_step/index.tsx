@@ -13,19 +13,24 @@ import {
   EuiBadge,
   EuiButtonIcon,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 
 import classnames from 'classnames';
 import { useNavigateTo, SecurityPageName } from '@kbn/security-solution-navigation';
 
-import type { CardId, OnStepClicked, ToggleTaskCompleteStatus, SectionId, StepId } from '../types';
+import type {
+  CardId,
+  OnStepClicked,
+  ToggleTaskCompleteStatus,
+  SectionId,
+  StepId,
+  Step,
+} from '../types';
 import {
   ALL_DONE_TEXT,
   COLLAPSE_STEP_BUTTON_LABEL,
   EXPAND_STEP_BUTTON_LABEL,
 } from '../translations';
-import { getStepsByActiveProduct } from '../helpers';
-import type { ProductLine } from '../../../common/product';
 
 import { StepContent } from './step_content';
 import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
@@ -33,35 +38,27 @@ import { useStepContext } from '../context/step_context';
 import { useCardStepStyles } from '../styles/card_step.styles';
 
 const CardStepComponent: React.FC<{
-  activeProducts: Set<ProductLine>;
   cardId: CardId;
   expandedSteps: Set<StepId>;
   finishedSteps: Set<StepId>;
-  isExpandedCard: boolean;
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
   onStepClicked: OnStepClicked;
   sectionId: SectionId;
-  stepId: StepId;
+  step: Step;
 }> = ({
-  activeProducts,
   cardId,
   expandedSteps,
   finishedSteps = new Set(),
-  isExpandedCard,
   toggleTaskCompleteStatus,
   onStepClicked,
   sectionId,
-  stepId,
+  step,
 }) => {
   const { navigateTo } = useNavigateTo();
 
-  const isExpandedStep = expandedSteps.has(stepId);
-  const steps = useMemo(
-    () => getStepsByActiveProduct({ activeProducts, cardId, sectionId }),
-    [activeProducts, cardId, sectionId]
-  );
-  const { title, description, splitPanel, icon, autoCheckIfStepCompleted } =
-    steps?.find((step) => step.id === stepId) ?? {};
+  const isExpandedStep = expandedSteps.has(step.id);
+
+  const { id: stepId, title, description, splitPanel, icon, autoCheckIfStepCompleted } = step;
   const hasStepContent = description != null || splitPanel != null;
   const { indicesExist } = useStepContext();
 
@@ -71,6 +68,7 @@ const CardStepComponent: React.FC<{
     indicesExist,
     sectionId,
     stepId,
+    stepTitle: title,
     toggleTaskCompleteStatus,
   });
 
@@ -156,11 +154,9 @@ const CardStepComponent: React.FC<{
             <StepContent
               autoCheckIfStepCompleted={isExpandedStep ? autoCheckIfStepCompleted : undefined}
               cardId={cardId}
-              description={description}
               indicesExist={indicesExist}
               sectionId={sectionId}
-              splitPanel={splitPanel}
-              stepId={stepId}
+              step={step}
               toggleTaskCompleteStatus={toggleTaskCompleteStatus}
             />
           </div>

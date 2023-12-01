@@ -104,24 +104,33 @@ export const enablePrebuildRuleSteps: Array<Step<EnablePrebuiltRulesSteps.enable
     autoCheckIfStepCompleted: async ({
       abortSignal,
       kibanaServicesHttp,
+      onError,
     }: {
       abortSignal: MutableRefObject<AbortController>;
       kibanaServicesHttp: HttpSetup;
+      onError?: (e: Error) => void;
     }) => {
       // Check if there are any rules installed and enabled
-      const data = await fetchRuleManagementFilters({
-        http: kibanaServicesHttp,
-        signal: abortSignal.current.signal,
-        query: {
-          page: 1,
-          per_page: 20,
-          sort_field: 'enabled',
-          sort_order: 'desc',
-          filter: `${ENABLED_FIELD}: true`,
-        },
-      });
-      const isRulesInstalled = data?.total > 0;
-      return isRulesInstalled;
+      try {
+        const data = await fetchRuleManagementFilters({
+          http: kibanaServicesHttp,
+          signal: abortSignal.current.signal,
+          query: {
+            page: 1,
+            per_page: 20,
+            sort_field: 'enabled',
+            sort_order: 'desc',
+            filter: `${ENABLED_FIELD}: true`,
+          },
+        });
+        return data?.total > 0;
+      } catch (e) {
+        if (!abortSignal.current.signal.aborted) {
+          onError?.(e);
+        }
+
+        return false;
+      }
     },
   },
 ];

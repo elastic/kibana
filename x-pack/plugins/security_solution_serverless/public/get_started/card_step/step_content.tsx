@@ -13,29 +13,26 @@ import type {
   CardId,
   CheckIfStepCompleted,
   SectionId,
-  StepId,
+  Step,
   ToggleTaskCompleteStatus,
 } from '../types';
 
 const StepContentComponent = ({
   autoCheckIfStepCompleted,
   cardId,
-  description,
   indicesExist,
   sectionId,
-  splitPanel,
-  stepId,
+  step,
   toggleTaskCompleteStatus,
 }: {
   autoCheckIfStepCompleted?: CheckIfStepCompleted;
   cardId: CardId;
-  description?: React.ReactNode[];
   indicesExist: boolean;
   sectionId: SectionId;
-  splitPanel?: React.ReactNode;
-  stepId: StepId;
+  step: Step;
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
 }) => {
+  const { id: stepId, splitPanel } = step;
   const {
     stepContentGroupStyles,
     leftContentStyles,
@@ -50,6 +47,7 @@ const StepContentComponent = ({
     indicesExist,
     sectionId,
     stepId,
+    stepTitle: step.title,
     toggleTaskCompleteStatus,
   });
 
@@ -62,10 +60,10 @@ const StepContentComponent = ({
       direction="row"
       gutterSize="none"
     >
-      {description && (
+      {step.description && (
         <EuiFlexItem grow={false} css={leftContentStyles} className="left-panel">
           <EuiText size="s">
-            {description?.map((desc, index) => (
+            {step.description?.map((desc, index) => (
               <p
                 data-test-subj={`${stepId}-description-${index}`}
                 key={`${stepId}-description-${index}`}

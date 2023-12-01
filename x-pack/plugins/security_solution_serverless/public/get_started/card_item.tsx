@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import classnames from 'classnames';
 import type {
   CardId,
@@ -17,12 +17,10 @@ import type {
   StepId,
 } from './types';
 import { getCard } from './helpers';
-import type { ProductLine } from '../../common/product';
 import { CardStep } from './card_step';
 import { useCardItemStyles } from './styles/card_item.styles';
 
 const CardItemComponent: React.FC<{
-  activeProducts: Set<ProductLine>;
   activeStepIds: StepId[] | undefined;
   cardId: CardId;
   expandedCardSteps: ExpandedCardSteps;
@@ -31,7 +29,6 @@ const CardItemComponent: React.FC<{
   onStepClicked: OnStepClicked;
   sectionId: SectionId;
 }> = ({
-  activeProducts,
   activeStepIds,
   cardId,
   expandedCardSteps,
@@ -53,6 +50,41 @@ const CardItemComponent: React.FC<{
   });
 
   const cardItemPanelStyle = useCardItemStyles();
+  const getCardStep = useCallback(
+    (stepId: StepId) => cardItem?.steps?.find((step) => step.id === stepId),
+    [cardItem?.steps]
+  );
+  const steps = useMemo(
+    () =>
+      activeStepIds?.reduce<React.ReactElement[]>((acc, stepId) => {
+        const step = getCardStep(stepId);
+        if (step && cardItem) {
+          acc.push(
+            <CardStep
+              cardId={cardItem.id}
+              expandedSteps={expandedSteps}
+              finishedSteps={finishedSteps}
+              key={stepId}
+              toggleTaskCompleteStatus={toggleTaskCompleteStatus}
+              onStepClicked={onStepClicked}
+              sectionId={sectionId}
+              step={step}
+            />
+          );
+        }
+        return acc;
+      }, []),
+    [
+      activeStepIds,
+      cardItem,
+      expandedSteps,
+      finishedSteps,
+      getCardStep,
+      onStepClicked,
+      sectionId,
+      toggleTaskCompleteStatus,
+    ]
+  );
 
   return cardItem && activeStepIds ? (
     <EuiPanel
@@ -64,24 +96,7 @@ const CardItemComponent: React.FC<{
       data-test-subj={cardId}
     >
       <EuiFlexGroup gutterSize="s" direction="column">
-        <EuiFlexItem>
-          {activeStepIds.map((stepId) => {
-            return (
-              <CardStep
-                activeProducts={activeProducts}
-                cardId={cardItem.id}
-                expandedSteps={expandedSteps}
-                finishedSteps={finishedSteps}
-                isExpandedCard={isExpandedCard}
-                key={stepId}
-                toggleTaskCompleteStatus={toggleTaskCompleteStatus}
-                onStepClicked={onStepClicked}
-                sectionId={sectionId}
-                stepId={stepId}
-              />
-            );
-          })}
-        </EuiFlexItem>
+        <EuiFlexItem>{steps}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   ) : null;

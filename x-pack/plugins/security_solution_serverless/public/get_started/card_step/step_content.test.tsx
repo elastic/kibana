@@ -7,21 +7,20 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { StepContent } from './step_content';
-import { OverviewSteps, QuickStartSectionCardsId, SectionId } from '../types';
+import { QuickStartSectionCardsId, SectionId } from '../types';
+import { overviewVideoSteps } from '../sections';
+
+jest.mock('../context/step_context');
+jest.mock('../../common/services');
 
 describe('StepContent', () => {
   const toggleTaskCompleteStatus = jest.fn();
-  const description = ['Description Line 1', 'Description Line 2'];
-  const splitPanel = <div>{'Split Panel Content'}</div>;
+
   const props = {
     cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
-    description,
-    hasStepContent: false,
-    isExpandedStep: true,
     indicesExist: false,
     sectionId: SectionId.quickStart,
-    splitPanel,
-    stepId: OverviewSteps.getToKnowElasticSecurity,
+    step: overviewVideoSteps[0],
     toggleTaskCompleteStatus,
   };
 
@@ -31,10 +30,15 @@ describe('StepContent', () => {
 
     const splitPanelElement = getByTestId('split-panel');
 
-    expect(getByText('Description Line 1')).toBeInTheDocument();
-    expect(getByText('Description Line 2')).toBeInTheDocument();
+    expect(
+      getByText(
+        'Elastic Security unifies analytics, EDR, cloud security capabilities, and more into a SaaS solution that helps you improve your organization’s security posture, defend against a wide range of threats, and prevent breaches.'
+      )
+    ).toBeInTheDocument();
+    expect(
+      getByText('To explore the platform’s core features, watch the video:')
+    ).toBeInTheDocument();
 
     expect(splitPanelElement).toBeInTheDocument();
-    expect(splitPanelElement).toHaveTextContent('Split Panel Content');
   });
 });

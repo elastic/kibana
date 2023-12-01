@@ -21,6 +21,7 @@ interface Props {
   indicesExist: boolean;
   sectionId: SectionId;
   stepId: StepId;
+  stepTitle?: string;
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
 }
 
@@ -30,10 +31,15 @@ export const useCheckStepCompleted = ({
   indicesExist,
   sectionId,
   stepId,
+  stepTitle,
   toggleTaskCompleteStatus,
 }: Props) => {
-  const kibanaServicesHttp = useKibana().services.http;
+  const {
+    http: kibanaServicesHttp,
+    notifications: { toasts },
+  } = useKibana().services;
   const abortSignal = useRef(new AbortController());
+  const addError = useRef(toasts.addError.bind(toasts)).current;
 
   useEffect(() => {
     if (!autoCheckIfStepCompleted) {
@@ -45,6 +51,9 @@ export const useCheckStepCompleted = ({
         indicesExist,
         abortSignal,
         kibanaServicesHttp,
+        onError: (error: Error) => {
+          addError(error, { title: `Failed to check ${stepTitle ?? stepId} completion.` });
+        },
       });
 
       toggleTaskCompleteStatus({ stepId, cardId, sectionId, undo: !isDone });
@@ -62,5 +71,7 @@ export const useCheckStepCompleted = ({
     toggleTaskCompleteStatus,
     kibanaServicesHttp,
     indicesExist,
+    addError,
+    stepTitle,
   ]);
 };

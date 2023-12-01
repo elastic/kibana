@@ -10,7 +10,6 @@ import { CardItem } from './card_item';
 import type { ExpandedCardSteps, StepId } from './types';
 
 import { QuickStartSectionCardsId, SectionId, OverviewSteps } from './types';
-import { ProductLine } from '../../common/product';
 jest.mock('./card_step');
 
 describe('CardItemComponent', () => {
@@ -27,7 +26,6 @@ describe('CardItemComponent', () => {
   it('should render card', () => {
     const { getByTestId } = render(
       <CardItem
-        activeProducts={new Set([ProductLine.security])}
         activeStepIds={[OverviewSteps.getToKnowElasticSecurity]}
         cardId={QuickStartSectionCardsId.watchTheOverviewVideo}
         expandedCardSteps={expandedCardSteps}
@@ -45,7 +43,6 @@ describe('CardItemComponent', () => {
   it('should not render card when no active steps', () => {
     const { queryByText } = render(
       <CardItem
-        activeProducts={new Set([])}
         activeStepIds={[]}
         cardId={QuickStartSectionCardsId.watchTheOverviewVideo}
         expandedCardSteps={expandedCardSteps}
