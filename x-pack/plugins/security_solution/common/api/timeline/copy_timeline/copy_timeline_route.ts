@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export const wait = (time = 1000) => new Promise((resolve) => setTimeout(resolve, time));
+import * as rt from 'io-ts';
+
+import { SavedTimelineRuntimeType } from '../model/api';
+
+export const copyTimelineSchema = rt.type({
+  timeline: SavedTimelineRuntimeType,
+  timelineIdToCopy: rt.string,
+});
