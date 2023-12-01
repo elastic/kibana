@@ -38,7 +38,15 @@ export const kibanaContextMock = {
   services: {
     uiSettings: { get: jest.fn() },
     chrome: { recentlyAccessed: { add: jest.fn() } },
-    application: { navigateToApp: jest.fn(), navigateToUrl: jest.fn() },
+    application: {
+      navigateToApp: jest.fn(),
+      navigateToUrl: jest.fn(),
+      capabilities: {
+        ml: {
+          canCreateJob: true,
+        },
+      },
+    },
     http: {
       basePath: {
         get: jest.fn(),
