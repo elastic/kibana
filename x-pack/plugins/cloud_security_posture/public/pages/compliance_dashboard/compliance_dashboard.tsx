@@ -15,7 +15,7 @@ import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import type {
   PosturePolicyTemplate,
-  ComplianceDashboardData,
+  ComplianceDashboardDataV2,
   BaseCspSetupStatus,
 } from '../../../common/types';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
@@ -127,7 +127,7 @@ const IntegrationPostureDashboard = ({
   isIntegrationInstalled,
   dashboardType,
 }: {
-  complianceData: ComplianceDashboardData | undefined;
+  complianceData: ComplianceDashboardDataV2 | undefined;
   notInstalledConfig: CspNoDataPageProps;
   isIntegrationInstalled?: boolean;
   dashboardType: PosturePolicyTemplate;
@@ -188,8 +188,8 @@ const IntegrationPostureDashboard = ({
 
 export const getDefaultTab = (
   pluginStatus?: BaseCspSetupStatus,
-  cspmStats?: ComplianceDashboardData,
-  kspmStats?: ComplianceDashboardData
+  cspmStats?: ComplianceDashboardDataV2,
+  kspmStats?: ComplianceDashboardDataV2
 ) => {
   const cspmTotalFindings = cspmStats?.stats.totalFindings;
   const kspmTotalFindings = kspmStats?.stats.totalFindings;
@@ -223,7 +223,7 @@ export const getDefaultTab = (
   return preferredDashboard;
 };
 
-const determineDashboardDataRefetchInterval = (data: ComplianceDashboardData | undefined) => {
+const determineDashboardDataRefetchInterval = (data: ComplianceDashboardDataV2 | undefined) => {
   if (data?.stats.totalFindings === 0) {
     return NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS;
   }
@@ -258,7 +258,7 @@ const TabContent = ({ posturetype }: { posturetype: PosturePolicyTemplate }) => 
   let integrationLink;
   let dataTestSubj;
   let policyTemplate: PosturePolicyTemplate;
-  let getDashboardData: UseQueryResult<ComplianceDashboardData>;
+  let getDashboardData: UseQueryResult<ComplianceDashboardDataV2>;
 
   switch (posturetype) {
     case POSTURE_TYPE_CSPM:
