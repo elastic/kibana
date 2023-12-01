@@ -87,6 +87,10 @@ export default ({ getService }: FtrProviderContext) => {
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getOpenAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).toEqual(1);
+
+      // suppression start equal to alert timestamp
+      const suppressionStart = alerts.hits.hits[0]._source?.[TIMESTAMP];
+
       expect(alerts.hits.hits[0]._source).toEqual(
         expect.objectContaining({
           [ALERT_SUPPRESSION_TERMS]: [
@@ -95,12 +99,14 @@ export default ({ getService }: FtrProviderContext) => {
               value: 'agent-1',
             },
           ],
+          // suppression boundaries equal to alert time, since no alert been suppressed
+          [ALERT_SUPPRESSION_START]: suppressionStart,
+          [ALERT_SUPPRESSION_END]: suppressionStart,
           [ALERT_ORIGINAL_TIME]: firstTimestamp,
+          [TIMESTAMP]: suppressionStart,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         })
       );
-
-      const suppressionStart = alerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_START];
 
       const secondTimestamp = new Date().toISOString();
       const secondDocument = {
@@ -128,7 +134,6 @@ export default ({ getService }: FtrProviderContext) => {
       expect(secondAlerts.hits.hits.length).toEqual(1);
       expect(secondAlerts.hits.hits[0]._source).toEqual(
         expect.objectContaining({
-          [TIMESTAMP]: secondAlerts.hits.hits[0]._source?.[TIMESTAMP],
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'agent.name',
@@ -140,6 +145,12 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         })
       );
+      // suppression end value should be greater than second document timestamp, but lesser than current time
+      const suppressionEnd = new Date(
+        secondAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_END] as string
+      ).getTime();
+      expect(suppressionEnd).toBeLessThan(new Date().getTime());
+      expect(suppressionEnd).toBeGreaterThan(new Date(secondTimestamp).getDate());
     });
 
     it('should NOT suppress and update an alert if the alert is closed', async () => {

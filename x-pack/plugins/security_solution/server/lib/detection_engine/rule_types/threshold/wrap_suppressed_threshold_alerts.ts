@@ -14,6 +14,7 @@ import {
   ALERT_SUPPRESSION_TERMS,
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
 import type {
@@ -105,7 +106,8 @@ export const wrapSuppressedThresholdALerts = ({
       id,
       publicBaseUrl
     );
-
+    // suppression start/end equals to alert timestamp, since we suppress alerts for threshold rule type, not documents as for query rule type
+    const suppressionTime = new Date(baseAlert[TIMESTAMP]);
     return {
       _id: id,
       _index: '',
@@ -115,8 +117,8 @@ export const wrapSuppressedThresholdALerts = ({
           field,
           value,
         })),
-        [ALERT_SUPPRESSION_START]: startedAt,
-        [ALERT_SUPPRESSION_END]: to,
+        [ALERT_SUPPRESSION_START]: suppressionTime,
+        [ALERT_SUPPRESSION_END]: suppressionTime,
         [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         [ALERT_INSTANCE_ID]: instanceId,
       },
