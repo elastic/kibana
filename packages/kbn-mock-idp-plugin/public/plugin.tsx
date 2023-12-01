@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { PluginInitializer, Plugin } from '@kbn/core-plugins-browser';
+import type { PluginInitializer } from '@kbn/core-plugins-browser';
 import { AppNavLinkStatus } from '@kbn/core-application-browser';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -14,10 +14,24 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MOCK_IDP_LOGIN_PATH } from '@kbn/mock-idp-utils/src/constants';
+import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/public';
 import { RoleSwitcher } from './role_switcher';
 
-export const plugin: PluginInitializer<void, void> = (): Plugin => ({
-  setup(coreSetup) {
+export interface PluginSetupDependencies {
+  cloud?: CloudSetup;
+}
+
+export interface PluginStartDependencies {
+  cloud?: CloudStart;
+}
+
+export const plugin: PluginInitializer<
+  void,
+  void,
+  PluginSetupDependencies,
+  PluginStartDependencies
+> = () => ({
+  setup(coreSetup, plugins) {
     // Register Mock IDP login page
     coreSetup.http.anonymousPaths.register(MOCK_IDP_LOGIN_PATH);
     coreSetup.application.register({
@@ -36,7 +50,7 @@ export const plugin: PluginInitializer<void, void> = (): Plugin => ({
           <KibanaThemeProvider theme={coreStart.theme}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
-                <LoginPage />
+                <LoginPage projectType={plugins.cloud?.serverless.projectType} />
               </I18nProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>,
@@ -47,7 +61,7 @@ export const plugin: PluginInitializer<void, void> = (): Plugin => ({
       },
     });
   },
-  start(coreStart) {
+  start(coreStart, plugins) {
     // Register role switcher dropdown menu in the top right navigation of the Kibana UI
     coreStart.chrome.navControls.registerRight({
       order: 4000 + 1, // Make sure it comes after the user menu
@@ -56,7 +70,7 @@ export const plugin: PluginInitializer<void, void> = (): Plugin => ({
           <KibanaThemeProvider theme={coreStart.theme}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
-                <RoleSwitcher />
+                <RoleSwitcher projectType={plugins.cloud?.serverless.projectType} />
               </I18nProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>,

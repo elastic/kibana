@@ -15,7 +15,9 @@ import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import {
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_REALM_TYPE,
-  MOCK_IDP_ROLE_NAMES,
+  MOCK_IDP_SECURITY_ROLE_NAMES,
+  MOCK_IDP_OBSERVABILITY_ROLE_NAMES,
+  MOCK_IDP_SEARCH_ROLE_NAMES,
 } from '@kbn/mock-idp-utils/src/constants';
 import { createReloadPageToast } from './reload_page_toast';
 import type { CreateSAMLResponseParams } from '../server';
@@ -51,7 +53,11 @@ export const useAuthenticator = (reloadPage = false) => {
   });
 };
 
-export const RoleSwitcher: FunctionComponent = () => {
+export interface RoleSwitcherProps {
+  projectType?: string;
+}
+
+export const RoleSwitcher: FunctionComponent<RoleSwitcherProps> = ({ projectType }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { services } = useKibana<CoreStart>();
   const [currentUserState, getCurrentUser] = useCurrentUser();
@@ -78,6 +84,13 @@ export const RoleSwitcher: FunctionComponent = () => {
   }
 
   const [currentRole] = currentUserState.value.roles;
+
+  const roles =
+    projectType === 'security'
+      ? MOCK_IDP_SECURITY_ROLE_NAMES
+      : projectType === 'observability'
+      ? MOCK_IDP_OBSERVABILITY_ROLE_NAMES
+      : MOCK_IDP_SEARCH_ROLE_NAMES;
 
   return (
     <EuiPopover
@@ -108,7 +121,7 @@ export const RoleSwitcher: FunctionComponent = () => {
           {
             id: 0,
             title: 'Switch role',
-            items: MOCK_IDP_ROLE_NAMES.map((role) => ({
+            items: roles.map((role) => ({
               name: role,
               icon: currentUserState.value!.roles.includes(role) ? 'check' : 'empty',
               onClick: () => {

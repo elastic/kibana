@@ -17,18 +17,33 @@ import {
   EuiComboBoxOptionOption,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, FunctionComponent } from 'react';
 import { FormikProvider, useFormik, Field, Form } from 'formik';
 
-import { MOCK_IDP_ROLE_NAMES } from '@kbn/mock-idp-utils/src/constants';
+import {
+  MOCK_IDP_SECURITY_ROLE_NAMES,
+  MOCK_IDP_OBSERVABILITY_ROLE_NAMES,
+  MOCK_IDP_SEARCH_ROLE_NAMES,
+} from '@kbn/mock-idp-utils/src/constants';
 import { useAuthenticator } from './role_switcher';
 
-export function LoginPage() {
+export interface LoginPageProps {
+  projectType?: string;
+}
+
+export const LoginPage: FunctionComponent<LoginPageProps> = ({ projectType }) => {
+  const roles =
+    projectType === 'security'
+      ? MOCK_IDP_SECURITY_ROLE_NAMES
+      : projectType === 'observability'
+      ? MOCK_IDP_OBSERVABILITY_ROLE_NAMES
+      : MOCK_IDP_SEARCH_ROLE_NAMES;
+
   const [, switchCurrentUser] = useAuthenticator(true);
   const formik = useFormik({
     initialValues: {
       full_name: 'Test User',
-      role: MOCK_IDP_ROLE_NAMES[0],
+      role: roles[0],
     },
     async onSubmit(values) {
       await switchCurrentUser({
@@ -86,7 +101,7 @@ export function LoginPage() {
                       name="role"
                       placeholder="Select your role"
                       singleSelection={{ asPlainText: true }}
-                      options={MOCK_IDP_ROLE_NAMES.map((role) => ({ label: role }))}
+                      options={roles.map((role) => ({ label: role }))}
                       selectedOptions={
                         formik.values.role ? [{ label: formik.values.role }] : undefined
                       }
@@ -130,7 +145,7 @@ export function LoginPage() {
       </EuiPageTemplate>
     </FormikProvider>
   );
-}
+};
 
 const sanitizeUsername = (username: string) =>
   username.replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase();

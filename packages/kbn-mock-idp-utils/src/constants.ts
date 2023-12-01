@@ -20,9 +20,9 @@ export const MOCK_IDP_ATTRIBUTE_EMAIL = 'http://saml.elastic-cloud.com/attribute
 export const MOCK_IDP_ATTRIBUTE_NAME = 'http://saml.elastic-cloud.com/attributes/name';
 
 /** List of roles from `packages/kbn-es/src/serverless_resources/roles.yml`  */
-export const MOCK_IDP_ROLE_NAMES = [
-  'viewer',
-  'editor',
+export const MOCK_IDP_SEARCH_ROLE_NAMES = ['viewer', 'editor', 'system_indices_superuser'];
+export const MOCK_IDP_OBSERVABILITY_ROLE_NAMES = ['viewer', 'editor', 'system_indices_superuser'];
+export const MOCK_IDP_SECURITY_ROLE_NAMES = [
   't1_analyst',
   't2_analyst',
   't3_analyst',
