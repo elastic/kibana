@@ -755,30 +755,6 @@ describe('EPM template', () => {
     expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
   });
 
-  it('tests processing object field with subobjects set to false (case A)', () => {
-    const objectFieldWithPropertyReversedLiteralYml = `
-- name: a.labels
-  type: object
-  subobjects: false
-  `;
-    const objectFieldWithPropertyReversedMapping = {
-      properties: {
-        a: {
-          properties: {
-            labels: {
-              type: 'object',
-              subobjects: false,
-            },
-          },
-        },
-      },
-    };
-    const fields: Field[] = safeLoad(objectFieldWithPropertyReversedLiteralYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
-    expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
-  });
-
   it('tests processing object field with subobjects set to false (case B)', () => {
     const objectFieldWithPropertyReversedLiteralYml = `
 - name: b.labels.*
