@@ -113,7 +113,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
   switch (selectedGroup) {
     case GROUPING_OPTIONS.RESOURCE_NAME:
       return nullGroupMessage ? (
-        <NullGroupComponent title={NULL_GROUPING_MESSAGES.RESOURCE} field={selectedGroup} />
+        <NullGroupComponent title={NULL_GROUPING_MESSAGES.RESOURCE_NAME} field={selectedGroup} />
       ) : (
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
@@ -168,7 +168,10 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
       );
     case GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
       return nullGroupMessage ? (
-        <NullGroupComponent title={NULL_GROUPING_MESSAGES.CLOUD_ACCOUNT} field={selectedGroup} />
+        <NullGroupComponent
+          title={NULL_GROUPING_MESSAGES.CLOUD_ACCOUNT_NAME}
+          field={selectedGroup}
+        />
       ) : (
         <EuiFlexGroup alignItems="center" gutterSize="m">
           {benchmarkId && (
@@ -197,7 +200,10 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
       );
     case GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME:
       return nullGroupMessage ? (
-        <NullGroupComponent title={NULL_GROUPING_MESSAGES.KUBERNETES} field={selectedGroup} />
+        <NullGroupComponent
+          title={NULL_GROUPING_MESSAGES.ORCHESTRATOR_CLUSTER_NAME}
+          field={selectedGroup}
+        />
       ) : (
         <EuiFlexGroup alignItems="center" gutterSize="m">
           {benchmarkId && (
@@ -226,7 +232,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
       );
     default:
       return nullGroupMessage ? (
-        <NullGroupComponent title={NULL_GROUPING_MESSAGES.GENERIC_MESSAGE} field={selectedGroup} />
+        <NullGroupComponent title={NULL_GROUPING_MESSAGES.DEFAULT} field={selectedGroup} />
       ) : (
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>

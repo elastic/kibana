@@ -28,19 +28,20 @@ export const NULL_GROUPING_UNIT = i18n.translate('xpack.csp.findings.grouping.nu
 });
 
 export const NULL_GROUPING_MESSAGES = {
-  RESOURCE: i18n.translate('xpack.csp.findings.grouping.resource.nullGroupTitle', {
+  RESOURCE_NAME: i18n.translate('xpack.csp.findings.grouping.resource.nullGroupTitle', {
     defaultMessage: 'No resource',
   }),
   RULE_NAME: i18n.translate('xpack.csp.findings.grouping.rule.nullGroupTitle', {
     defaultMessage: 'No rule',
   }),
-  CLOUD_ACCOUNT: i18n.translate('xpack.csp.findings.grouping.cloudAccount.nullGroupTitle', {
+  CLOUD_ACCOUNT_NAME: i18n.translate('xpack.csp.findings.grouping.cloudAccount.nullGroupTitle', {
     defaultMessage: 'No cloud account',
   }),
-  KUBERNETES: i18n.translate('xpack.csp.findings.grouping.kubernetes.nullGroupTitle', {
-    defaultMessage: 'No Kubernetes cluster',
-  }),
-  GENERIC_MESSAGE: i18n.translate('xpack.csp.findings.grouping.default.nullGroupTitle', {
+  ORCHESTRATOR_CLUSTER_NAME: i18n.translate(
+    'xpack.csp.findings.grouping.kubernetes.nullGroupTitle',
+    { defaultMessage: 'No Kubernetes cluster' }
+  ),
+  DEFAULT: i18n.translate('xpack.csp.findings.grouping.default.nullGroupTitle', {
     defaultMessage: 'No grouping',
   }),
 };
