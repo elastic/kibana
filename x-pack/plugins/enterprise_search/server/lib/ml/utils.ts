@@ -11,7 +11,9 @@ import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
 
 export const ELSER_MODEL_ID = '.elser_model_2';
+export const ELSER_LINUX_OPTIMIZED_MODEL_ID = '.elser_model_2_linux-x86_64';
 export const E5_MODEL_ID = '.multilingual-e5-small';
+export const E5_LINUX_OPTIMIZED_MODEL_ID = '.multilingual-e5-small_linux-x86_64';
 export const LANG_IDENT_MODEL_ID = 'lang_ident_model_1';
 
 export const MODEL_TITLES_BY_TYPE: Record<string, string | undefined> = {
@@ -73,6 +75,12 @@ export const ELSER_MODEL_PLACEHOLDER: MlModel = {
   isPlaceholder: true,
 };
 
+export const ELSER_LINUX_OPTIMIZED_MODEL_PLACEHOLDER = {
+  ...ELSER_MODEL_PLACEHOLDER,
+  modelId: ELSER_LINUX_OPTIMIZED_MODEL_ID,
+  title: 'ELSER (Elastic Learned Sparse EncodeR), optimized for linux-x86_64',
+};
+
 export const E5_MODEL_PLACEHOLDER: MlModel = {
   ...BASE_MODEL,
   modelId: E5_MODEL_ID,
@@ -84,4 +92,10 @@ export const E5_MODEL_PLACEHOLDER: MlModel = {
   license: 'MIT',
   modelDetailsPageUrl: 'https://huggingface.co/intfloat/multilingual-e5-small',
   isPlaceholder: true,
+};
+
+export const E5_LINUX_OPTIMIZED_MODEL_PLACEHOLDER = {
+  ...E5_MODEL_PLACEHOLDER,
+  modelId: E5_LINUX_OPTIMIZED_MODEL_ID,
+  title: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
 };
