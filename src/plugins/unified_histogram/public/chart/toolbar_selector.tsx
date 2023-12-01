@@ -88,14 +88,15 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
       panelPaddingSize="s"
       button={
         <ToolbarButton
+          size="s"
           css={css`
             max-width: ${euiTheme.base * 12}px;
           `}
-          onClick={() => setIsOpen(!isOpen)}
           data-test-subj={`${dataTestSubj}Button`}
           data-selected-value={dataSelectedValue}
-          label={buttonLabel}
           aria-label={popoverTitle}
+          label={buttonLabel}
+          onClick={() => setIsOpen(!isOpen)}
         />
       }
       isOpen={isOpen}
