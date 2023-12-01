@@ -7,11 +7,17 @@
 
 import { schema } from '@kbn/config-schema';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { InfraProfilingRequestParamsRT } from '../../../common/http_api/profiling_api';
+import {
+  InfraProfilingFlamegraphRequestParamsRT,
+  InfraProfilingFunctionsRequestParamsRT,
+} from '../../../common/http_api/profiling_api';
 import type { InfraBackendLibs } from '../../lib/infra_types';
-import { fetchProfilingFlamegraph } from './lib/fetch_profiling_flamechart';
+import { fetchProfilingFlamegraph } from './lib/fetch_profiling_flamegraph';
+import { fetchProfilingFunctions } from './lib/fetch_profiling_functions';
 import { fetchProfilingStatus } from './lib/fetch_profiling_status';
 import { getProfilingDataAccess } from './lib/get_profiling_data_access';
+
+const CACHE_CONTROL_HEADER_VALUE = 'private, max-age=3600';
 
 export function initProfilingRoutes({ framework, getStartServices, logger }: InfraBackendLibs) {
   if (!Object.hasOwn(framework.plugins, 'profilingDataAccess')) {
@@ -48,18 +54,18 @@ export function initProfilingRoutes({ framework, getStartServices, logger }: Inf
 
   framework.registerRoute(
     {
-      method: 'post',
+      method: 'get',
       path: '/api/infra/profiling/flamegraph',
       validate: {
-        /**
-         * Allow any body object and validate it inside
-         * the handler using RT.
-         */
-        body: schema.object({}, { unknowns: 'allow' }),
+        query: schema.object({
+          hostname: schema.string(),
+          from: schema.number(),
+          to: schema.number(),
+        }),
       },
     },
     async (requestContext, request, response) => {
-      const params = decodeOrThrow(InfraProfilingRequestParamsRT)(request.body);
+      const params = decodeOrThrow(InfraProfilingFlamegraphRequestParamsRT)(request.query);
 
       const [coreRequestContext, profilingDataAccess] = await Promise.all([
         requestContext.core,
@@ -74,6 +80,46 @@ export function initProfilingRoutes({ framework, getStartServices, logger }: Inf
 
       return response.ok({
         body: flamegraph,
+        headers: {
+          'cache-control': CACHE_CONTROL_HEADER_VALUE,
+        },
+      });
+    }
+  );
+
+  framework.registerRoute(
+    {
+      method: 'get',
+      path: '/api/infra/profiling/functions',
+      validate: {
+        query: schema.object({
+          hostname: schema.string(),
+          from: schema.number(),
+          to: schema.number(),
+          startIndex: schema.number(),
+          endIndex: schema.number(),
+        }),
+      },
+    },
+    async (requestContext, request, response) => {
+      const params = decodeOrThrow(InfraProfilingFunctionsRequestParamsRT)(request.query);
+
+      const [coreRequestContext, profilingDataAccess] = await Promise.all([
+        requestContext.core,
+        getProfilingDataAccess(getStartServices),
+      ]);
+
+      const functions = await fetchProfilingFunctions(
+        params,
+        profilingDataAccess,
+        coreRequestContext
+      );
+
+      return response.ok({
+        body: functions,
+        headers: {
+          'cache-control': CACHE_CONTROL_HEADER_VALUE,
+        },
       });
     }
   );
