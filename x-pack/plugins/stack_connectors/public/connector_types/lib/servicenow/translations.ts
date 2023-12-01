@@ -56,6 +56,13 @@ export const TITLE_REQUIRED = i18n.translate(
   }
 );
 
+export const CORRELATION_ID_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.requiredCorrelationIdTextField',
+  {
+    defaultMessage: 'Correlation id is required.',
+  }
+);
+
 export const INCIDENT = i18n.translate('xpack.stackConnectors.components.serviceNow.title', {
   defaultMessage: 'Incident',
 });
