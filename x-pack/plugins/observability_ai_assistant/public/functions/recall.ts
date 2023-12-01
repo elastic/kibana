@@ -9,7 +9,9 @@ import type { Serializable } from '@kbn/utility-types';
 import dedent from 'dedent';
 import { last, omit } from 'lodash';
 import { CreateChatCompletionResponse } from 'openai';
-import { MessageRole, RegisterFunctionDefinition } from '../../common/types';
+import * as t from 'io-ts';
+import { decodeOrThrow, jsonRt } from '@kbn/io-ts-utils';
+import { Message, MessageRole, RegisterFunctionDefinition } from '../../common/types';
 import type { ObservabilityAIAssistantService } from '../types';
 
 export function registerRecallFunction({
@@ -87,150 +89,203 @@ export function registerRecallFunction({
         messages.filter((message) => message.message.role === MessageRole.User)
       );
 
-      const queriesWithUserPrompt =
-        userMessage && userMessage.message.content
-          ? [userMessage.message.content, ...queries]
-          : queries;
+      const suggestions = await retrieveSuggestions({
+        userMessage,
+        service,
+        signal,
+        contexts,
+        queries,
+      });
 
-      const recallResponse = await service.callApi(
-        'POST /internal/observability_ai_assistant/functions/recall',
-        {
-          params: {
-            body: {
-              queries: queriesWithUserPrompt,
-              contexts,
-            },
-          },
-          signal,
-        }
-      );
-
-      if (recallResponse.entries.length === 0) {
+      if (suggestions.length === 0) {
         return {
           content: [] as unknown as Serializable,
         };
       }
 
-      const suggestions = recallResponse.entries.map((entry) =>
-        omit(entry, 'labels', 'is_correction', 'score')
-      );
-
-      const systemMessageExtension =
-        dedent(`You have the function called select available to help you gather more information about documents you think are relevant to the conversation.
-      
-          Make sure you select the most relevant documents. 
-          It is critical that you don't select more than 5 documents.
-          Only consider the value of the "text" property when deciding what is relevant.
-          Call the function by passing the IDs of the documents that you found to be most relevant to the conversation.
-          Make sure to pass in the IDs in the order most relevant to least relevant.
-          If none of the documents seem relevant, you can call select with an empty list.
-          It is critical that you only call the select function with the value of the "id" property of the documents which are relevant.
-            
-          Here is an example of what the JSON list of documents might look like:
-          [
-            {"text":"Lens can be used to visualize most kinds of obsebrvaility signal data", "id":"some_sample_id_1"},
-            {"text":"Kibana alerting allows you to define alerts that trigger when certain conditions are met. Alerts in Kibana are based on Elasticsearch queries.", "id":"some_sample_id_2"},
-            {"text":"Synthetic sugars found in sodas still make your body believe your taking in sugar", "id":"some_sample_id_3"},
-            {"text":"Bergmann's rule is an ecogeographical rule that states that within a broadly distributed taxonomic clade, populations and species of larger size are found in colder environments, while populations and species of smaller size are found in warmer regions. ", "id":"some_sample_id_4"},
-            {"text":"To make it easier to query your data in Elasticsearch, it is important to store it in a way that makes it effective to query", "id":"some_sample_id_5"},
-            {"text":"Kibana Maps gives you a way to visualize data with a geographical perspective", "id":"some_sample_id_6"},
-            {"text":"Machine learning is a good way to scale compute resources to handle large amount of data", "id":"some_sample_id_7"},
-            {"text":"SLOs are a good way for a service manager to define the technical requirements for healthy service operation", "id":"some_sample_id_8"},
-            {"text":"Alerts allow you to react to issues as they happen without keeping a particular dashboard open at all times.", "id":"some_sample_id_9"},
-            {"text":"You can use Metricbeat to monitor your Elasticsearch instances", "id":"some_sample_id_10"},
-          ]
-          Don't use the IDs found in this example.
-
-        `);
-      const extendedSystemMessage = {
-        ...systemMessage,
-        message: {
-          ...systemMessage.message,
-          content: `${systemMessage.message.content}\n\n${systemMessageExtension}`,
-        },
-      };
-
-      const userMessageExtension = `\n\nHere are some documents that may be relevant to my question:\n\n${JSON.stringify(
+      const relevantDocuments = await scoreSuggestions({
         suggestions,
-        null,
-        2
-      )}`;
-
-      const extendedUserMessage = userMessage
-        ? {
-            ...userMessage,
-            message: {
-              ...userMessage.message,
-              content: `${userMessage.message.content}${userMessageExtension}`,
-            },
-          }
-        : {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              content: `${queries}${userMessageExtension}`,
-              role: MessageRole.User,
-            },
-          };
-
-      const select = {
-        name: 'select',
-        description:
-          'Use this function to obtain more information about documents that where recalled which contain information relevant to the conversation.',
-        parameters: {
-          type: 'object',
-          additionalProperties: false,
-          properties: {
-            selection: {
-              description: 'The IDs of the documents considered as relevant to the conversation',
-              type: 'array',
-              items: {
-                type: 'string',
-              },
-            },
-          },
-          required: ['selection'],
-        } as const,
-        contexts: ['core'],
-      };
-
-      const selectDocumentsResponse = (await service.callApi(
-        'POST /internal/observability_ai_assistant/chat',
-        {
-          params: {
-            query: {
-              stream: false,
-            },
-            body: {
-              connectorId,
-              messages: [extendedSystemMessage, extendedUserMessage],
-              functions: [select],
-              functionCall: 'select',
-            },
-          },
-          signal,
-        }
-      )) as CreateChatCompletionResponse;
-
-      if (selectDocumentsResponse.choices[0].message?.function_call?.name !== 'select') {
-        // For some reason the LLM didn't execute the requested function, let's return all KB hits for now
-        return {
-          content: suggestions as unknown as Serializable,
-        };
-      }
-
-      // What else could go wrong here?
-
-      const selectedDocumentIds = JSON.parse(
-        selectDocumentsResponse.choices[0].message.function_call.arguments!
-      ).selection;
-
-      const relevantDocuments = suggestions
-        .slice(0, 5)
-        .filter((suggestion) => selectedDocumentIds.includes(suggestion.id));
+        systemMessage,
+        userMessage,
+        queries,
+        service,
+        connectorId,
+        signal,
+      });
 
       return {
         content: relevantDocuments as unknown as Serializable,
       };
     }
   );
+}
+
+async function retrieveSuggestions({
+  userMessage,
+  queries,
+  service,
+  contexts,
+  signal,
+}: {
+  userMessage?: Message;
+  queries: string[];
+  service: ObservabilityAIAssistantService;
+  contexts: Array<'apm' | 'lens'>;
+  signal: AbortSignal;
+}) {
+  const queriesWithUserPrompt =
+    userMessage && userMessage.message.content
+      ? [userMessage.message.content, ...queries]
+      : queries;
+
+  const recallResponse = await service.callApi(
+    'POST /internal/observability_ai_assistant/functions/recall',
+    {
+      params: {
+        body: {
+          queries: queriesWithUserPrompt,
+          contexts,
+        },
+      },
+      signal,
+    }
+  );
+
+  return recallResponse.entries.map((entry) => omit(entry, 'labels', 'is_correction', 'score'));
+}
+
+const scoreFunctionRequestRt = t.type({
+  choices: t.tuple([
+    t.type({
+      message: t.type({
+        function_call: t.type({
+          name: t.literal('score'),
+          arguments: t.string,
+        }),
+      }),
+    }),
+  ]),
+});
+
+const scoreFunctionArgumentsRt = t.type({
+  scores: t.array(
+    t.type({
+      id: t.string,
+      score: t.number,
+    })
+  ),
+});
+
+async function scoreSuggestions({
+  suggestions,
+  systemMessage,
+  userMessage,
+  queries,
+  service,
+  connectorId,
+  signal,
+}: {
+  suggestions: Awaited<ReturnType<typeof retrieveSuggestions>>;
+  systemMessage: Message;
+  userMessage?: Message;
+  queries: string[];
+  service: ObservabilityAIAssistantService;
+  connectorId: string;
+  signal: AbortSignal;
+}) {
+  const systemMessageExtension =
+    dedent(`You have the function called score available to help you inform the user about how relevant you think a given document is to the conversation.
+    Please give a score between 1 and 7, fractions are allowed.
+    A higher score means it is more relevant.`);
+  const extendedSystemMessage = {
+    ...systemMessage,
+    message: {
+      ...systemMessage.message,
+      content: `${systemMessage.message.content}\n\n${systemMessageExtension}`,
+    },
+  };
+
+  const userMessageOrQueries =
+    userMessage && userMessage.message.content ? userMessage.message.content : queries.join(',');
+
+  const newUserMessageContent =
+    dedent(`Given the question "${userMessageOrQueries}", can you give me a score for how relevant the following documents are?
+
+  ${JSON.stringify(suggestions, null, 2)}`);
+
+  const newUserMessage: Message = {
+    '@timestamp': new Date().toISOString(),
+    message: {
+      role: MessageRole.User,
+      content: newUserMessageContent,
+    },
+  };
+
+  const scoreFunction = {
+    name: 'score',
+    description:
+      'Use this function to score documents based on how relevant they are to the conversation.',
+    parameters: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        scores: {
+          description: 'The document IDs and their scores',
+          type: 'array',
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              id: {
+                description: 'The ID of the document',
+                type: 'string',
+              },
+              score: {
+                description: 'The score for the document',
+                type: 'number',
+              },
+            },
+          },
+        },
+      },
+      required: ['score'],
+    } as const,
+    contexts: ['core'],
+  };
+
+  const response = (await service.callApi('POST /internal/observability_ai_assistant/chat', {
+    params: {
+      query: {
+        stream: false,
+      },
+      body: {
+        connectorId,
+        messages: [extendedSystemMessage, newUserMessage],
+        functions: [scoreFunction],
+        functionCall: 'score',
+      },
+    },
+    signal,
+  })) as CreateChatCompletionResponse;
+
+  const scoreFunctionRequest = decodeOrThrow(scoreFunctionRequestRt)(response);
+  const { scores } = decodeOrThrow(jsonRt.pipe(scoreFunctionArgumentsRt))(
+    scoreFunctionRequest.choices[0].message.function_call.arguments
+  );
+
+  if (scores.length === 0) {
+    return [];
+  }
+
+  const relevantDocumentIds = scores
+    .filter((document) => document.score > 4)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .map((document) => document.id);
+
+  const relevantDocuments = suggestions.filter((suggestion) =>
+    relevantDocumentIds.includes(suggestion.id)
+  );
+
+  return relevantDocuments;
 }
