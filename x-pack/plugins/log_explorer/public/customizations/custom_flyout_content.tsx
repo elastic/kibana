@@ -7,8 +7,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { FlyoutDetail } from '../components/flyout_detail/flyout_detail';
-import { FlyoutProps } from '../components/flyout_detail';
 import { useLogExplorerCustomizationsContext } from '../hooks/use_log_explorer_customizations';
 
 export const CustomFlyoutContent = ({
@@ -17,7 +17,7 @@ export const CustomFlyoutContent = ({
   onRemoveColumn,
   dataView,
   hit: doc,
-}: FlyoutProps) => {
+}: DocViewRenderProps) => {
   const { flyout } = useLogExplorerCustomizationsContext();
 
   const actions = useMemo(

@@ -5,9 +5,17 @@
  * 2.0.
  */
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 
-export type FlyoutProps = DocViewRenderProps;
+export interface FlyoutProps {
+  actions: {
+    addFilter: DocViewRenderProps['filter'];
+    addColumn: DocViewRenderProps['onAddColumn'];
+    removeColumn: DocViewRenderProps['onRemoveColumn'];
+  };
+  dataView: DocViewRenderProps['dataView'];
+  doc: DocViewRenderProps['hit'];
+}
 
 export interface LogDocument extends DataTableRecord {
   flattened: {

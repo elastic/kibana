@@ -5,13 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { FlyoutContentActions } from '@kbn/discover-plugin/public';
 import { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { AgentIcon, CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
 import { useMeasure } from 'react-use/lib';
 import { AgentName } from '@kbn/elastic-agent-utils';
 import { first } from 'lodash';
-import { FlyoutDoc } from './types';
+import { FlyoutDoc, FlyoutProps } from './types';
 import * as constants from '../../../common/constants';
 import { HighlightField } from './sub_components/highlight_field';
 import {
@@ -46,7 +45,7 @@ export function FlyoutHighlights({
 }: {
   formattedDoc: FlyoutDoc;
   flattenedDoc: DataTableRecord['flattened'];
-  actions: FlyoutContentActions;
+  actions: FlyoutProps['actions'];
 }) {
   const [ref, dimensions] = useMeasure<HTMLDivElement>();
   const { columns, fieldWidth } = useFlyoutColumnWidth(dimensions.width);
