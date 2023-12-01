@@ -27,6 +27,7 @@ export type SelectableEntry = EuiSelectableOption<{ value: string }>;
 
 export interface ToolbarSelectorProps {
   'data-test-subj': string;
+  'aria-label': string;
   buttonLabel: ReactElement | string;
   popoverTitle: ReactElement | string;
   options: SelectableEntry[];
@@ -35,6 +36,7 @@ export interface ToolbarSelectorProps {
 
 export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
   'data-test-subj': dataTestSubj,
+  'aria-label': ariaLabel,
   buttonLabel,
   popoverTitle,
   options,
@@ -78,6 +80,7 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
           onClick={() => setIsOpen(!isOpen)}
           data-test-subj={`${dataTestSubj}Button`}
           label={buttonLabel}
+          aria-label={ariaLabel}
         />
       }
       isOpen={isOpen}

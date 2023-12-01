@@ -77,6 +77,9 @@ export const BreakdownFieldSelector = ({
   return (
     <ToolbarSelector
       data-test-subj="unifiedHistogramBreakdownSelector"
+      aria-label={i18n.translate('unifiedHistogram.breakdownFieldSelectorAriaLabel', {
+        defaultMessage: 'Break down by',
+      })}
       buttonLabel={
         breakdown.field?.displayName ||
         i18n.translate('unifiedHistogram.noBreakdownFieldPlaceholder', {
