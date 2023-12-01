@@ -56,12 +56,6 @@ export function MobileSearchBar({
           gutterSize="s"
           responsive={false}
         >
-          {showTransactionTypeSelector && (
-            <EuiFlexItem grow={isSmall}>
-              <TransactionTypeSelect />
-            </EuiFlexItem>
-          )}
-
           {showUnifiedSearchBar && (
             <EuiFlexItem>
               <UnifiedSearchBar placeholder={searchBarPlaceholder} />
