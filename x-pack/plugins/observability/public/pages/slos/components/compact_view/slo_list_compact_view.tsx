@@ -130,6 +130,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       description: i18n.translate('xpack.observability.slo.item.actions.edit', {
         defaultMessage: 'Edit',
       }),
+      'data-test-subj': 'sloActionsEdit',
       enabled: (_) => hasWriteCapabilities,
       onClick: (slo: SLOWithSummaryResponse) => {
         navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
@@ -144,6 +145,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       description: i18n.translate('xpack.observability.slo.item.actions.createRule', {
         defaultMessage: 'Create new alert rule',
       }),
+      'data-test-subj': 'sloActionsCreateRule',
       enabled: (_) => hasWriteCapabilities,
       onClick: (slo: SLOWithSummaryResponse) => {
         setSloToAddRule(slo);
@@ -158,6 +160,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       description: i18n.translate('xpack.observability.slo.item.actions.manageRules', {
         defaultMessage: 'Manage rules',
       }),
+      'data-test-subj': 'sloActionsManageRules',
       enabled: (_) => hasWriteCapabilities,
       onClick: (slo: SLOWithSummaryResponse) => {
         const locator = locators.get<RulesParams>(rulesLocatorID);
@@ -173,6 +176,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       description: i18n.translate('xpack.observability.slo.item.actions.clone', {
         defaultMessage: 'Clone',
       }),
+      'data-test-subj': 'sloActionsClone',
       enabled: (_) => hasWriteCapabilities,
       onClick: (slo: SLOWithSummaryResponse) => {
         const newSlo = transformCreateSLOFormToCreateSLOInput(
@@ -191,6 +195,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       description: i18n.translate('xpack.observability.slo.item.actions.delete', {
         defaultMessage: 'Delete',
       }),
+      'data-test-subj': 'sloActionsDelete',
       enabled: (_) => hasWriteCapabilities,
       onClick: (slo: SLOWithSummaryResponse) => setSloToDelete(slo),
     },
@@ -233,6 +238,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       name: 'Name',
       width: '20%',
       truncateText: { lines: 2 },
+      'data-test-subj': 'sloItem',
       render: (_, slo: SLOWithSummaryResponse) => {
         const sloDetailsUrl = basePath.prepend(
           paths.observability.sloDetails(
