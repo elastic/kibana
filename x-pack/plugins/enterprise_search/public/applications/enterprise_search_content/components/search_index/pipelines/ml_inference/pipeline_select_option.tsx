@@ -46,7 +46,7 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <h4>{pipeline.pipelineName}</h4>
+          <h5>{pipeline.pipelineName}</h5>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
