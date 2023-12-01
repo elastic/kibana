@@ -114,6 +114,13 @@ describe('EditTimelineModal', () => {
       });
       expect(component.find('[data-test-subj="save-button"]').exists()).toEqual(true);
     });
+
+    test('Does not show save as new switch', () => {
+      const component = mount(<SaveTimelineModal {...props} />, {
+        wrappingComponent: TestProviders,
+      });
+      expect(component.find('[data-test-subj="save-as-new-switch"]').exists()).toEqual(false);
+    });
   });
 
   describe('update timeline', () => {
@@ -191,6 +198,13 @@ describe('EditTimelineModal', () => {
         wrappingComponent: TestProviders,
       });
       expect(component.find('[data-test-subj="save-button"]').exists()).toEqual(true);
+    });
+
+    test('Show save as new switch', () => {
+      const component = mount(<SaveTimelineModal {...props} />, {
+        wrappingComponent: TestProviders,
+      });
+      expect(component.find('[data-test-subj="save-as-new-switch"]').exists()).toEqual(true);
     });
   });
 
