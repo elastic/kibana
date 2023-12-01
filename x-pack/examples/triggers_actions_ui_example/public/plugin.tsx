@@ -18,7 +18,6 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { get } from 'lodash';
 import {
-  GetRenderCellValue,
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -148,7 +147,7 @@ export class TriggersActionsUiExamplePlugin
           }
 
           return <>{value}</>;
-        }) as ReturnType<GetRenderCellValue>,
+        }),
       sort,
     };
 

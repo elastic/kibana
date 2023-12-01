@@ -576,12 +576,17 @@ export type AlertsTableProps = {
 
 export type SetFlyoutAlert = (alertId: string) => void;
 
+export interface TimelineNonEcsData {
+  field: string;
+  value?: string[] | null;
+}
+
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
 export type GetRenderCellValue = ({
   setFlyoutAlert,
 }: {
   setFlyoutAlert: SetFlyoutAlert;
-}) => (...args: unknown[]) => React.ReactNode;
+}) => (props: EuiDataGridCellValueElementProps & { data: TimelineNonEcsData[] }) => React.ReactNode | JSX.Element | null | string;
 
 export type AlertTableFlyoutComponent =
   | React.FunctionComponent<AlertsTableFlyoutBaseProps>

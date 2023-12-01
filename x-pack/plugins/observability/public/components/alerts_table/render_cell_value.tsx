@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { EuiLink } from '@elastic/eui';
+import { GetRenderCellValue } from "@kbn/triggers-actions-ui-plugin/public";
 import React from 'react';
 import {
   ALERT_DURATION,
@@ -18,7 +19,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
 import type {
-  DeprecatedCellValueElementProps,
   TimelineNonEcsData,
 } from '@kbn/timelines-plugin/common';
 
@@ -69,8 +69,8 @@ export const getRenderCellValue = ({
 }: {
   setFlyoutAlert: (alertId: string) => void;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-}) => {
-  return ({ columnId, data }: DeprecatedCellValueElementProps) => {
+}) : ReturnType<GetRenderCellValue> => {
+  return ({ columnId, data }) => {
     if (!data) return null;
     const mappedNonEcsValue = getMappedNonEcsValue({
       data,
