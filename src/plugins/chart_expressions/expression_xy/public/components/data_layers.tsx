@@ -206,7 +206,14 @@ export const DataLayers: FC<Props> = ({
                   ],
                 },
               };
-              return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} minBarHeight={minBarHeight} />;
+              return (
+                <BarSeries
+                  key={index}
+                  {...seriesProps}
+                  {...valueLabelsSettings}
+                  minBarHeight={minBarHeight}
+                />
+              );
             case SeriesTypes.AREA:
               return (
                 <AreaSeries

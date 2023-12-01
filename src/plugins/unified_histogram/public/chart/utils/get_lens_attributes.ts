@@ -18,7 +18,7 @@ import type {
   Suggestion,
 } from '@kbn/lens-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { XYConfiguration } from '../../../../visualizations/common';
+import { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import { fieldSupportsBreakdown } from './field_supports_breakdown';
 
 export interface LensRequestData {
@@ -140,7 +140,7 @@ export const getLensAttributes = ({
     ? {
         ...suggestionVisualizationState,
       }
-    : {
+    : ({
         layers: [
           {
             accessors: ['count_column'],
@@ -185,7 +185,7 @@ export const getLensAttributes = ({
           yLeft: true,
           yRight: false,
         },
-      } as XYConfiguration;
+      } as XYConfiguration);
   const attributes = {
     title:
       title ??
