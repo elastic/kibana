@@ -36,26 +36,11 @@ export const NoDataViewsPrompt = ({
   emptyPromptColor = 'plain',
 }: NoDataViewsPromptComponentProps) => {
   const services = useServices();
-  const { showESQLViewLocator, dataViews } = services;
+  const { redirectToESQL } = services;
   let actions;
 
   if (canCreateNewDataView && showESQLView) {
-    const onClickEsql = async () => {
-      const defaultDataView = dataViews.getDefaultDataView({ displayErrors: false });
-      const params = {
-        query: {
-          esql: `from ${defaultDataView.getDefaultDatagetIndexPattern()} | limit 10`,
-        },
-        dataViewSpec: defaultDataView?.toSpec(),
-      };
-      const discoverLocation = await showESQLViewLocator?.locator.getLocation(params);
-      return await showESQLViewLocator.navigate({
-        query: {
-          esql: `from ${defaultDataView?.getIndexPattern()} | limit 10`,
-        },
-        url: `/app/${discoverLocation.app}${discoverLocation.path}`,
-      });
-    };
+    const onClickEsql = () => redirectToESQL;
 
     actions = (
       <>

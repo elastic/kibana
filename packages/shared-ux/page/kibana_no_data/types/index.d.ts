@@ -25,7 +25,7 @@ export interface Services {
   /** if set to true allows creation of an ad-hoc data view from data view editor */
   allowAdHocDataView?: boolean;
   /** Needed to redirect Kibana to ES|QL */
-  defaultDataView: DataView;
+  redirectToESQL: KibanaLocation<object>;
 }
 
 /**
@@ -35,10 +35,17 @@ export type KibanaNoDataPageServices = Services & NoDataCardServices & NoDataVie
 
 export interface KibanaDependencies {
   dataViews: {
+    defaultDataView: {
+      getIndexPattern: () => Promise<boolean>;
+      toSpec: () => Promise<boolean>;
+    };
     hasData: {
       hasESData: () => Promise<boolean>;
       hasUserDataView: () => Promise<boolean>;
     };
+  };
+  showESQLViewLocator: {
+    navigate: ({ query: { esql: string }, url: string }) => Promise<any>;
   };
 }
 /**

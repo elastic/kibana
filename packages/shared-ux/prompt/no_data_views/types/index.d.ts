@@ -30,9 +30,7 @@ export interface NoDataViewsPromptServices {
   openDataViewEditor: (options: DataViewEditorOptions) => () => void;
   /** A link to information about Data Views in Kibana */
   dataViewsDocLink: string;
-  showESQLViewLocator: DiscoverAppLocator;
-  // defaultDataView: DataView;
-  dataViews: DataViewsServicePublic;
+  redirectToESQL: any;
 }
 /**
  * Kibana-specific service types.
@@ -59,6 +57,7 @@ export interface NoDataViewsPromptKibanaDependencies {
         savedSearchId: string;
         indexPatternId: string;
       };
+      getLocation: (params: any) => KibanaLocation<{ app: string; path: string }>;
     };
   };
   dataView: DataViewsServicePublic;

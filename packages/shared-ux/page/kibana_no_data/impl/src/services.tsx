@@ -29,10 +29,10 @@ export const KibanaNoDataPageProvider: FC<KibanaNoDataPageServices> = ({
   children,
   ...services
 }) => {
-  const { defaultDataView, hasESData, hasUserDataView } = services;
+  const { redirectToESQL, hasESData, hasUserDataView } = services;
 
   return (
-    <KibanaNoDataPageContext.Provider value={{ defaultDataView, hasESData, hasUserDataView }}>
+    <KibanaNoDataPageContext.Provider value={{ redirectToESQL, hasESData, hasUserDataView }}>
       <NoDataViewsPromptProvider {...services}>
         <NoDataCardProvider {...services}>{children}</NoDataCardProvider>
       </NoDataViewsPromptProvider>
@@ -47,9 +47,23 @@ export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependenci
   children,
   ...dependencies
 }) => {
-  const { dataViews } = dependencies;
+  const { dataViews, discover, showESQLViewLocator } = dependencies;
+  const { defaultDataView } = dataViews;
+  const params = {
+    query: {
+      esql: `from ${defaultDataView.getIndexPattern()} | limit 10`,
+    },
+    dataViewSpec: defaultDataView?.toSpec(),
+  };
+  const discoverLocation = discover.locator?.getLocation(params);
+
   const value: Services = {
-    defaultDataView: dataViews,
+    redirectToESQL: showESQLViewLocator.navigate({
+      query: {
+        esql: `from ${defaultDataView?.getIndexPattern()} | limit 10`,
+      },
+      url: `/app/${discoverLocation.app}${discoverLocation.path}`,
+    }),
     hasESData: dataViews.hasData.hasESData,
     hasUserDataView: dataViews.hasData.hasUserDataView,
   };

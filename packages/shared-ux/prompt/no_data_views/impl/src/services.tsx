@@ -23,13 +23,7 @@ export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
 }) => {
   // Typescript types are widened to accept more than what is needed.  Take only what is necessary
   // so the context remains clean.
-  const {
-    canCreateNewDataView,
-    dataViewsDocLink,
-    openDataViewEditor,
-    showESQLViewLocator,
-    dataViews,
-  } = services;
+  const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor, redirectToESQL } = services;
 
   return (
     <NoDataViewsPromptContext.Provider
@@ -37,8 +31,7 @@ export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
         canCreateNewDataView,
         dataViewsDocLink,
         openDataViewEditor,
-        showESQLViewLocator,
-        dataViews,
+        redirectToESQL,
       }}
     >
       {children}
