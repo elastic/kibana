@@ -7,6 +7,7 @@
 
 import type { ExistsFilter, Filter } from '@kbn/es-query';
 import {
+  buildAlertAssigneesFilter,
   buildAlertsFilter,
   buildAlertStatusesFilter,
   buildAlertStatusFilter,
@@ -147,6 +148,47 @@ describe('alerts default_config', () => {
               {
                 term: {
                   'kibana.alert.workflow_status': 'in-progress',
+                },
+              },
+            ],
+          },
+        },
+      };
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
+    });
+  });
+
+  describe('buildAlertAssigneesFilter', () => {
+    test('given an empty list of assignees ids will return an empty filter', () => {
+      const filters: Filter[] = buildAlertAssigneesFilter([]);
+      expect(filters).toHaveLength(0);
+    });
+
+    test('builds filter containing all assignees ids passed into function', () => {
+      const filters = buildAlertAssigneesFilter(['user-id-1', 'user-id-2', 'user-id-3']);
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                term: {
+                  'kibana.alert.workflow_assignee_ids': 'user-id-1',
+                },
+              },
+              {
+                term: {
+                  'kibana.alert.workflow_assignee_ids': 'user-id-2',
+                },
+              },
+              {
+                term: {
+                  'kibana.alert.workflow_assignee_ids': 'user-id-3',
                 },
               },
             ],
