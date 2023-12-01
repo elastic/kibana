@@ -19,7 +19,7 @@ import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
-  packagesToInstall: Array<string | { name: string; version: string }>;
+  packagesToInstall: Array<{ name: string; version?: string; prerelease?: boolean }>;
   esClient: ElasticsearchClient;
   force?: boolean;
   spaceId: string;
@@ -41,11 +41,17 @@ export async function bulkInstallPackages({
 
   const packagesResults = await Promise.allSettled(
     packagesToInstall.map(async (pkg) => {
-      if (typeof pkg !== 'string') {
-        return Promise.resolve(pkg);
+      if (pkg.version !== undefined) {
+        return Promise.resolve(pkg as { name: string; version: string; prerelease?: boolean });
       }
 
-      return Registry.fetchFindLatestPackageOrThrow(pkg, { prerelease });
+      return Registry.fetchFindLatestPackageOrThrow(pkg.name, {
+        prerelease: prerelease || pkg.prerelease,
+      }).then((pkgRes) => ({
+        name: pkgRes.name,
+        version: pkgRes.version,
+        prerelease: pkg.prerelease,
+      }));
     })
   );
 
@@ -97,7 +103,7 @@ export async function bulkInstallPackages({
         installSource: 'registry',
         spaceId,
         force,
-        prerelease,
+        prerelease: prerelease || ('prerelease' in pkgKeyProps && pkgKeyProps.prerelease),
         authorizationHeader,
       });
 
