@@ -110,7 +110,7 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
       </EuiPopoverTitle>
       <EuiSelectable
         singleSelection
-        data-test-subj={`${dataTestSubj}Selector`}
+        data-test-subj={`${dataTestSubj}Selectable`}
         options={options}
         onChange={onSelectionChange}
         {...(searchable

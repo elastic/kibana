@@ -218,10 +218,12 @@ export class DiscoverPageObject extends FtrService {
   public async chooseBreakdownField(field: string) {
     await this.retry.try(async () => {
       await this.testSubjects.click('unifiedHistogramBreakdownSelectorButton');
-      await this.testSubjects.existOrFail('unifiedHistogramBreakdownFieldSelector');
+      await this.testSubjects.existOrFail('unifiedHistogramBreakdownSelectorSelectable');
     });
 
-    const option = await this.find.byCssSelector(`.euiSelectableListItem[value="${field}"]`);
+    const option = await this.find.byCssSelector(
+      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${field}"]`
+    );
     await option.click();
   }
 
@@ -273,10 +275,12 @@ export class DiscoverPageObject extends FtrService {
   public async setChartInterval(interval: string) {
     await this.retry.try(async () => {
       await this.testSubjects.click('unifiedHistogramTimeIntervalSelectorButton');
-      await this.testSubjects.existOrFail('unifiedHistogramTimeIntervalSelector');
+      await this.testSubjects.existOrFail('unifiedHistogramTimeIntervalSelectorSelectable');
     });
 
-    const option = await this.find.byCssSelector(`.euiSelectableListItem[value="${interval}"]`);
+    const option = await this.find.byCssSelector(
+      `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem[value="${interval}"]`
+    );
     await option.click();
     return await this.header.waitUntilLoadingHasFinished();
   }
