@@ -7,102 +7,102 @@
 
 import React, { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import type { EuiIconProps } from '@elastic/eui';
+import { EuiIconProps, EuiPanel } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
-  Cluster,
-  ComplianceDashboardData,
+  BenchmarkData,
+  ComplianceDashboardDataV2,
   Evaluation,
   PosturePolicyTemplate,
 } from '../../../../common/types';
-import { LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY } from '../../../common/constants';
 import { RisksTable } from '../compliance_charts/risks_table';
-import {
-  CSPM_POLICY_TEMPLATE,
-  KSPM_POLICY_TEMPLATE,
-  RULE_FAILED,
-} from '../../../../common/constants';
+import { RULE_FAILED } from '../../../../common/constants';
+import { LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY } from '../../../common/constants';
 import { NavFilter, useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
-import { ClusterDetailsBox } from './cluster_details_box';
 import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section';
 import {
   DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID,
   DASHBOARD_TABLE_HEADER_SCORE_TEST_ID,
 } from '../test_subjects';
 import { ComplianceScoreChart } from '../compliance_charts/compliance_score_chart';
+import { BenchmarkDetailsBox } from './benchmark_details_box';
+const BENCHMARK_DEFAULT_SORT_ORDER = 'asc';
 
-const CLUSTER_DEFAULT_SORT_ORDER = 'asc';
-
-export const getClusterIdQuery = (cluster: Cluster): NavFilter => {
-  if (cluster.meta.benchmark.posture_type === CSPM_POLICY_TEMPLATE) {
-    // TODO: remove assertion after typing CspFinding as discriminating union
-    return { 'cloud.account.id': cluster.meta.cloud!.account.id };
-  }
-  return { cluster_id: cluster.meta.assetIdentifierId };
+export const getBenchmarkIdQuery = (benchmark: BenchmarkData): NavFilter => {
+  return {
+    'rule.benchmark.id': benchmark.meta.benchmarkId,
+    'rule.benchmark.version': benchmark.meta.benchmarkVersion,
+  };
 };
 
 export const BenchmarksSection = ({
   complianceData,
   dashboardType,
 }: {
-  complianceData: ComplianceDashboardData;
+  complianceData: ComplianceDashboardDataV2;
   dashboardType: PosturePolicyTemplate;
 }) => {
   const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
 
-  const [clusterSorting, setClusterSorting] = useLocalStorage<'asc' | 'desc'>(
-    LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY,
-    CLUSTER_DEFAULT_SORT_ORDER
+  const [benchmarkSorting, setBenchmarkSorting] = useLocalStorage<'asc' | 'desc'>(
+    LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY,
+    BENCHMARK_DEFAULT_SORT_ORDER
   );
 
-  const isClusterSortingAsc = clusterSorting === 'asc';
+  const isBenchmarkSortingAsc = benchmarkSorting === 'asc';
 
-  const clusterSortingIcon: EuiIconProps['type'] = isClusterSortingAsc ? 'sortUp' : 'sortDown';
+  const benchmarkSortingIcon: EuiIconProps['type'] = isBenchmarkSortingAsc ? 'sortUp' : 'sortDown';
 
-  const navToFindingsByClusterAndEvaluation = (cluster: Cluster, evaluation: Evaluation) => {
+  const navToFindingsByBenchmarkAndEvaluation = (
+    benchmark: BenchmarkData,
+    evaluation: Evaluation
+  ) => {
     navToFindings({
       ...getPolicyTemplateQuery(dashboardType),
-      ...getClusterIdQuery(cluster),
+      ...getBenchmarkIdQuery(benchmark),
       'result.evaluation': evaluation,
     });
   };
 
-  const navToFailedFindingsByClusterAndSection = (cluster: Cluster, ruleSection: string) => {
+  const navToFailedFindingsByBenchmarkAndSection = (
+    benchmark: BenchmarkData,
+    ruleSection: string
+  ) => {
     navToFindings({
       ...getPolicyTemplateQuery(dashboardType),
-      ...getClusterIdQuery(cluster),
+      ...getBenchmarkIdQuery(benchmark),
       'rule.section': ruleSection,
       'result.evaluation': RULE_FAILED,
     });
   };
 
-  const navToFailedFindingsByCluster = (cluster: Cluster) => {
-    navToFindingsByClusterAndEvaluation(cluster, RULE_FAILED);
+  const navToFailedFindingsByBenchmark = (benchmark: BenchmarkData) => {
+    navToFindingsByBenchmarkAndEvaluation(benchmark, RULE_FAILED);
   };
 
-  const toggleClustersSortingDirection = () => {
-    setClusterSorting(isClusterSortingAsc ? 'desc' : 'asc');
+  const toggleBenchmarkSortingDirection = () => {
+    setBenchmarkSorting(isBenchmarkSortingAsc ? 'desc' : 'asc');
   };
 
-  const clusters = useMemo(() => {
-    return [...complianceData.clusters].sort((clusterA, clusterB) =>
-      isClusterSortingAsc
-        ? clusterA.stats.postureScore - clusterB.stats.postureScore
-        : clusterB.stats.postureScore - clusterA.stats.postureScore
+  const benchmarks = useMemo(() => {
+    return [...complianceData.benchmarks].sort((benchmarkA, benchmarkB) =>
+      isBenchmarkSortingAsc
+        ? benchmarkA.stats.postureScore - benchmarkB.stats.postureScore
+        : benchmarkB.stats.postureScore - benchmarkA.stats.postureScore
     );
-  }, [complianceData.clusters, isClusterSortingAsc]);
+  }, [complianceData.benchmarks, isBenchmarkSortingAsc]);
 
   return (
-    <>
+    <EuiPanel hasBorder>
       <EuiFlexGroup
         css={css`
-        border-bottom: ${euiTheme.border.thick};
-        border-bottom-color: ${euiTheme.colors.text};
-        padding-bottom: ${euiTheme.size.s};
+         border-bottom: ${euiTheme.border.thin};
+         border-bottom-color: ${euiTheme.colors.lightShade};
+         padding-bottom: ${euiTheme.size.s};
         .euiTitle {
           font-weight: ${euiTheme.font.weight.semiBold};
         };
@@ -114,32 +114,25 @@ export const BenchmarksSection = ({
         <EuiFlexItem grow={dashboardColumnsGrow.first}>
           <EuiTitle size="xxs">
             <div>
-              {dashboardType === KSPM_POLICY_TEMPLATE ? (
-                <FormattedMessage
-                  id="xpack.csp.dashboard.benchmarkSection.columnsHeader.clusterNameTitle"
-                  defaultMessage="Cluster Name"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.csp.dashboard.benchmarkSection.columnsHeader.accountNameTitle"
-                  defaultMessage="Account Name"
-                />
-              )}
+              <FormattedMessage
+                id="xpack.csp.dashboard.benchmarkSection.columnsHeader.benchmarks"
+                defaultMessage="Benchmarks"
+              />
             </div>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={dashboardColumnsGrow.second}>
           <button
             data-test-subj={DASHBOARD_TABLE_HEADER_SCORE_TEST_ID}
-            onClick={toggleClustersSortingDirection}
+            onClick={toggleBenchmarkSortingDirection}
           >
             <EuiTitle size="xxs">
               <div>
                 <FormattedMessage
-                  id="xpack.csp.dashboard.benchmarkSection.columnsHeader.postureScoreTitle"
-                  defaultMessage="Posture Score"
+                  id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceScoreTitle"
+                  defaultMessage="Compliance Score"
                 />
-                <EuiIcon className="euiTableSortIcon" type={clusterSortingIcon} />
+                <EuiIcon className="euiTableSortIcon" type={benchmarkSortingIcon} />
               </div>
             </EuiTitle>
           </button>
@@ -155,18 +148,20 @@ export const BenchmarksSection = ({
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {clusters.map((cluster) => (
+      {benchmarks.map((benchmark) => (
         <EuiFlexGroup
-          key={cluster.meta.assetIdentifierId}
+          key={benchmark.meta.benchmarkId}
           css={css`
             // card height with 3 items in risk table
             height: 200px;
-            border-bottom: ${euiTheme.border.thin};
             padding: ${euiTheme.size.base} 0 ${euiTheme.size.l};
+            &:not(:last-of-type) {
+              border-bottom: ${euiTheme.border.thin};
+            }
           `}
         >
           <EuiFlexItem grow={dashboardColumnsGrow.first}>
-            <ClusterDetailsBox cluster={cluster} />
+            <BenchmarkDetailsBox benchmark={benchmark} />
           </EuiFlexItem>
           <EuiFlexItem
             grow={dashboardColumnsGrow.second}
@@ -177,11 +172,11 @@ export const BenchmarksSection = ({
           >
             <ComplianceScoreChart
               compact
-              id={`${cluster.meta.assetIdentifierId}_score_chart`}
-              data={cluster.stats}
-              trend={cluster.trend}
+              id={`${benchmark.meta.benchmarkId}_score_chart`}
+              data={benchmark.stats}
+              trend={benchmark.trend}
               onEvalCounterClick={(evaluation) =>
-                navToFindingsByClusterAndEvaluation(cluster, evaluation)
+                navToFindingsByBenchmarkAndEvaluation(benchmark, evaluation)
               }
             />
           </EuiFlexItem>
@@ -193,27 +188,23 @@ export const BenchmarksSection = ({
             >
               <RisksTable
                 compact
-                data={cluster.groupedFindingsEvaluation}
+                data={benchmark.groupedFindingsEvaluation}
                 maxItems={3}
                 onCellClick={(resourceTypeName) =>
-                  navToFailedFindingsByClusterAndSection(cluster, resourceTypeName)
+                  navToFailedFindingsByBenchmarkAndSection(benchmark, resourceTypeName)
                 }
                 viewAllButtonTitle={i18n.translate(
-                  'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
+                  'xpack.csp.dashboard.risksTable.benchmarkCardViewAllButtonTitle',
                   {
-                    defaultMessage: 'View all failed findings for this {postureAsset}',
-                    values: {
-                      postureAsset:
-                        dashboardType === CSPM_POLICY_TEMPLATE ? 'cloud account' : 'cluster',
-                    },
+                    defaultMessage: 'View all failed findings for this benchmark',
                   }
                 )}
-                onViewAllClick={() => navToFailedFindingsByCluster(cluster)}
+                onViewAllClick={() => navToFailedFindingsByBenchmark(benchmark)}
               />
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}
-    </>
+    </EuiPanel>
   );
 };
