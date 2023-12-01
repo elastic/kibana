@@ -8,7 +8,7 @@
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { IErrorObject, RuleCreationValidConsumer } from '../../../types';
 
 const SELECT_LABEL: string = i18n.translate(
@@ -123,8 +123,14 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
     }, [consumers]);
 
   useEffect(() => {
-    // At initialization, select the first value
-    if (!validatedSelectedConsumer) onChange(consumers[0] as RuleCreationValidConsumer);
+    // At initialization, select Stack Alerts, or the first value
+    if (!validatedSelectedConsumer) {
+      if (consumers.includes(STACK_ALERTS_FEATURE_ID)) {
+        onChange(STACK_ALERTS_FEATURE_ID);
+        return;
+      }
+      onChange(consumers[0] as RuleCreationValidConsumer);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
