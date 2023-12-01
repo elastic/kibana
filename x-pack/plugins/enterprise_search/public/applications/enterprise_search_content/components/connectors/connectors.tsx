@@ -9,14 +9,21 @@ import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSearchBar,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { Status } from '../../../../../common/types/api';
-
+import { KibanaLogic } from '../../../shared/kibana';
 import { handlePageChange } from '../../../shared/table_pagination';
+import { NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 import { SelectConnector } from '../new_index/select_connector/select_connector';
 
@@ -30,21 +37,18 @@ export const baseBreadcrumbs = [
   }),
 ];
 export const Connectors: React.FC = () => {
-  const { makeRequest, onPaginate } = useActions(ConnectorsLogic);
-  const { data, status, searchParams } = useValues(ConnectorsLogic);
+  const { fetchConnectors, onPaginate, setIsFirstRequest } = useActions(ConnectorsLogic);
+  const { data, isLoading, searchParams, isEmpty, connectors } = useValues(ConnectorsLogic);
   const [searchQuery, setSearchValue] = useState('');
-  useEffect(() => {
-    makeRequest(searchParams);
-  }, [searchParams.from, searchParams.size]);
 
-  // Spinner while loading
-  // get filtered endpoint
-  // fix pagination
-  // add docs count
-  // add stats
-  // make table searchable
-  const isEmpty = (data?.connectors?.length ?? 0) <= 0;
-  const isLoading = status === Status.IDLE || status === Status.LOADING;
+  useEffect(() => {
+    setIsFirstRequest();
+  }, []);
+
+  useEffect(() => {
+    fetchConnectors({ ...searchParams, searchQuery });
+  }, [searchParams.from, searchParams.size, searchQuery]);
+
   return (
     <>
       {!isLoading && isEmpty ? (
@@ -55,26 +59,48 @@ export const Connectors: React.FC = () => {
           pageViewTelemetry="Connectors"
           isLoading={isLoading}
           pageHeader={{
-            pageTitle: 'Elasticsearch Connectors',
+            pageTitle: 'Elasticsearch connectors',
             rightSideGroupProps: {
               gutterSize: 's',
             },
             rightSideItems: isLoading
               ? []
               : [
-                  <EuiButton color="primary" iconType="plusInCircle" fill>
+                  <EuiButton
+                    key="newConnector"
+                    color="primary"
+                    iconType="plusInCircle"
+                    fill
+                    onClick={() => {
+                      KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
+                    }}
+                  >
                     <FormattedMessage
                       id="xpack.enterpriseSearch.connectors.newConnectorButtonLabel"
                       defaultMessage="New Connector"
                     />
                   </EuiButton>,
-                  <EuiButton>
+                  <EuiButton
+                    key="newConnectorNative"
+                    onClick={() => {
+                      KibanaLogic.values.navigateToUrl(
+                        NEW_INDEX_SELECT_CONNECTOR_PATH + '?filter=native'
+                      );
+                    }}
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel',
                       { defaultMessage: 'New Native Connector' }
                     )}
                   </EuiButton>,
-                  <EuiButton>
+                  <EuiButton
+                    key="newConnectorClient"
+                    onClick={() => {
+                      KibanaLogic.values.navigateToUrl(
+                        NEW_INDEX_SELECT_CONNECTOR_PATH + '?filter=connector_client'
+                      );
+                    }}
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
                       { defaultMessage: 'New Connectors Client' }
@@ -84,6 +110,7 @@ export const Connectors: React.FC = () => {
           }}
         >
           <ConnectorStats />
+          <EuiSpacer />
 
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
@@ -108,7 +135,7 @@ export const Connectors: React.FC = () => {
               />
             </EuiFlexItem>
             <ConnectorsTable
-              items={data?.connectors || []}
+              items={connectors || []}
               meta={data?.meta}
               onChange={handlePageChange(onPaginate)}
             />

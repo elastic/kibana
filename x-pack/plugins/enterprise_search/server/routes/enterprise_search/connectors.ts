@@ -26,6 +26,7 @@ import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
 import { startSync } from '../../lib/connectors/start_sync';
+import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
 import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
 import { updateDefaultPipeline } from '../../lib/pipelines/update_default_pipeline';
 import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
@@ -33,7 +34,10 @@ import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
-import { isAccessControlDisabledException } from '../../utils/identify_exceptions';
+import {
+  isAccessControlDisabledException,
+  isExpensiveQueriesNotAllowedException,
+} from '../../utils/identify_exceptions';
 
 export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
@@ -482,21 +486,53 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const { connector_type, from, size } = request.query;
+      const { connector_type, from, size, searchQuery } = request.query;
 
-      const result = await fetchConnectors(
-        client.asCurrentUser,
-        undefined,
-        connector_type as 'connector' | 'crawler' | undefined
-      );
+      let connectorResult;
+      let connectorCountResult;
+      try {
+        connectorResult = await fetchConnectors(
+          client.asCurrentUser,
+          undefined,
+          connector_type as 'connector' | 'crawler' | undefined,
+          searchQuery
+        );
+
+        const indicesSlice = connectorResult
+          .reduce((acc: string[], connector) => {
+            if (connector.index_name) {
+              acc.push(connector.index_name);
+            }
+            return acc;
+          }, [])
+          .slice(from, from + size);
+        connectorCountResult = await fetchIndexCounts(client, indicesSlice);
+      } catch (error) {
+        if (isExpensiveQueriesNotAllowedException(error)) {
+          return createError({
+            errorCode: ErrorCode.EXPENSIVE_QUERY_NOT_ALLOWED_ERROR,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.expensive_query_not_allowed_error',
+              {
+                defaultMessage:
+                  'Expensive search queries not allowed. "search.allow_expensive_queries" is set to false ',
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
+        }
+        throw error;
+      }
       return response.ok({
         body: {
-          connectors: result.slice(from, from + size),
+          connectors: connectorResult.slice(from, from + size),
+          counts: connectorCountResult,
           meta: {
             page: {
               from,
               size,
-              total: result.length,
+              total: connectorResult.length,
             },
           },
         },

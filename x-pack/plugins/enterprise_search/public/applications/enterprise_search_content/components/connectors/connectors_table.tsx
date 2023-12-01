@@ -7,8 +7,11 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import {
   CriteriaWithPagination,
+  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
@@ -21,14 +24,21 @@ import { Connector } from '@kbn/search-connectors';
 
 import { Meta } from '../../../../../common/types/pagination';
 
-import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
+import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../shared/kibana';
+import { EuiLinkTo } from '../../../shared/react_router_helpers/eui_components';
+import { SEARCH_INDEX_PATH } from '../../routes';
 import {
   connectorStatusToColor,
   connectorStatusToText,
 } from '../../utils/connector_status_helpers';
 
+import { ConnectorType } from './connector_type';
+import { ConnectorViewItem } from './connectors_logic';
+
 interface ConnectorsTableProps {
-  items: Connector[];
+  isLoading?: boolean;
+  items: ConnectorViewItem[];
   meta?: Meta;
   onChange: (criteria: CriteriaWithPagination<Connector>) => void;
 }
@@ -42,8 +52,10 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
     },
   },
   onChange,
+  isLoading,
 }) => {
-  const columns: Array<EuiBasicTableColumn<Connector>> = [
+  const { navigateToUrl } = useValues(KibanaLogic);
+  const columns: Array<EuiBasicTableColumn<ConnectorViewItem>> = [
     {
       field: 'name',
       name: i18n.translate(
@@ -52,6 +64,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           defaultMessage: 'Connector name',
         }
       ),
+      width: '25%',
     },
     {
       field: 'index_name',
@@ -61,15 +74,25 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           defaultMessage: 'Index name',
         }
       ),
+      render: (indexName: string) =>
+        indexName ? (
+          <EuiLinkTo to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName })}>
+            {indexName}
+          </EuiLinkTo>
+        ) : (
+          '--'
+        ),
+      width: '25%',
     },
     {
-      field: 'docs_count',
+      field: 'docsCount',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorTable.columns.docsCount',
         {
           defaultMessage: 'Docs count',
         }
       ),
+      truncateText: true,
     },
     {
       field: 'service_type',
@@ -79,6 +102,9 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           defaultMessage: 'Connector type',
         }
       ),
+      render: (serviceType: string) => <ConnectorType serviceType={serviceType} />,
+      truncateText: true,
+      width: '25%',
     },
     {
       field: 'status',
@@ -90,10 +116,9 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       ),
       render: (connector: Connector) => {
         const label = connectorStatusToText(connector.status);
-        return (
-          <EuiBadgeTo to={''} label={label} color={connectorStatusToColor(connector.status)} />
-        );
+        return <EuiBadge color={connectorStatusToColor(connector.status)}>{label}</EuiBadge>;
       },
+      truncateText: true,
     },
     {
       actions: [
@@ -102,6 +127,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
             'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewIndex',
             { defaultMessage: 'View this connector' }
           ),
+          enabled: (connector) => !!connector.index_name,
           icon: 'eye',
           isPrimary: false,
           name: (connector) =>
@@ -114,30 +140,13 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
                 },
               }
             ),
-          onClick: () => {},
-          type: 'icon',
-        },
-        {
-          color: 'danger',
-          description: i18n.translate(
-            'xpack.enterpriseSearch.content.connectorsTable.columns.actions.delete',
-            {
-              defaultMessage: 'Delete this connector',
-            }
-          ),
-          icon: 'trash',
-          isPrimary: false,
-          name: (connector) =>
-            i18n.translate(
-              'xpack.enterpriseSearch.content.connectors.connectorsTable.actions.delete.caption',
-              {
-                defaultMessage: 'Delete index {connectorName}',
-                values: {
-                  connectorName: connector.name,
-                },
-              }
-            ),
-          onClick: () => {},
+          onClick: (connector) => {
+            navigateToUrl(
+              generateEncodedPath(SEARCH_INDEX_PATH, {
+                indexName: connector.index_name || '',
+              })
+            );
+          },
           type: 'icon',
         },
       ],
@@ -156,6 +165,8 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           items={items}
           columns={columns}
           onChange={onChange}
+          tableLayout="fixed"
+          loading={isLoading}
           pagination={{
             pageIndex: meta.page.from / (meta.page.size || 1),
             pageSize: meta.page.size,

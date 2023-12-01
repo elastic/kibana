@@ -66,9 +66,32 @@ export const fetchConnectorByIndexName = async (
 export const fetchConnectors = async (
   client: ElasticsearchClient,
   indexNames?: string[],
-  connectorType?: 'connector' | 'crawler'
+  connectorType?: 'connector' | 'crawler',
+  searchQuery?: string
 ): Promise<Connector[]> => {
-  const query: QueryDslQueryContainer = indexNames
+  const q = searchQuery && searchQuery.length > 0 ? searchQuery : undefined;
+  const query: QueryDslQueryContainer = q
+    ? {
+        bool: {
+          should: [
+            {
+              wildcard: {
+                name: {
+                  value: `*${q}*`,
+                },
+              },
+            },
+            {
+              wildcard: {
+                index_name: {
+                  value: `*${q}*`,
+                },
+              },
+            },
+          ],
+        },
+      }
+    : indexNames
     ? { terms: { index_name: indexNames } }
     : { match_all: {} };
 
