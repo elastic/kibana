@@ -14,3 +14,11 @@ export const UPGRADE_INVESTIGATION_GUIDE = (requiredLicense: string) =>
       requiredLicense,
     },
   });
+
+export const UPGRADE_ALERT_ASSIGNMENTS = (requiredLicense: string) =>
+  i18n.translate('securitySolutionPackages.alertAssignments.upsell', {
+    defaultMessage: 'Upgrade to {requiredLicense} to make use of alert assignments',
+    values: {
+      requiredLicense,
+    },
+  });
