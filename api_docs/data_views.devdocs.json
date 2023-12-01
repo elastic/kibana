@@ -168,7 +168,7 @@
               "\nReturns scripted fields"
             ],
             "signature": [
-              "() => { storedFields: string[]; scriptFields: Record<string, ",
+              "() => { scriptFields: Record<string, ",
               "ScriptField",
               ">; docvalueFields: { field: string; format: string; }[]; runtimeFields: ",
               "MappingRuntimeFields",
@@ -6573,7 +6573,7 @@
               "\nReturns scripted fields"
             ],
             "signature": [
-              "() => { storedFields: string[]; scriptFields: Record<string, ",
+              "() => { scriptFields: Record<string, ",
               "ScriptField",
               ">; docvalueFields: { field: string; format: string; }[]; runtimeFields: ",
               "MappingRuntimeFields",
@@ -12015,7 +12015,7 @@
               "\nReturns scripted fields"
             ],
             "signature": [
-              "() => { storedFields: string[]; scriptFields: Record<string, ",
+              "() => { scriptFields: Record<string, ",
               "ScriptField",
               ">; docvalueFields: { field: string; format: string; }[]; runtimeFields: ",
               "MappingRuntimeFields",
