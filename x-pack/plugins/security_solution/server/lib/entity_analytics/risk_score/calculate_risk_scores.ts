@@ -27,7 +27,7 @@ import { RiskCategories } from '../../../../common/entity_analytics/risk_engine'
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
-import { getCriticalityModifier } from '../asset_criticality/helpers';
+import { applyCriticalityToScore, getCriticalityModifier } from '../asset_criticality/helpers';
 import { getAfterKeyForIdentifierType, getFieldForIdentifierAgg } from './helpers';
 import {
   buildCategoryCountDeclarations,
@@ -53,27 +53,37 @@ const formatForResponse = ({
   criticality?: AssetCriticalityRecord;
   now: string;
   identifierField: string;
-}): RiskScore => ({
-  '@timestamp': now,
-  id_field: identifierField,
-  id_value: bucket.key[identifierField],
-  asset_criticality_level: criticality?.criticality_level,
-  asset_criticality_modifier: getCriticalityModifier(criticality?.criticality_level),
-  calculated_level: bucket.risk_details.value.level,
-  calculated_score: bucket.risk_details.value.score,
-  calculated_score_norm: bucket.risk_details.value.normalized_score,
-  category_1_score: bucket.risk_details.value.category_1_score,
-  category_1_count: bucket.risk_details.value.category_1_count,
-  notes: bucket.risk_details.value.notes,
-  inputs: bucket.inputs.hits.hits.map((riskInput) => ({
-    id: riskInput._id,
-    index: riskInput._index,
-    description: `Alert from Rule: ${riskInput.fields?.[ALERT_RULE_NAME]?.[0] ?? 'RULE_NOT_FOUND'}`,
-    category: RiskCategories.category_1,
-    risk_score: riskInput.fields?.[ALERT_RISK_SCORE]?.[0] ?? undefined,
-    timestamp: riskInput.fields?.['@timestamp']?.[0] ?? undefined,
-  })),
-});
+}): RiskScore => {
+  const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
+  const normalizedScoreWithCriticality = applyCriticalityToScore({
+    score: bucket.risk_details.value.normalized_score,
+    modifier: criticalityModifier,
+  });
+
+  return {
+    '@timestamp': now,
+    id_field: identifierField,
+    id_value: bucket.key[identifierField],
+    asset_criticality_level: criticality?.criticality_level,
+    asset_criticality_modifier: criticalityModifier,
+    calculated_level: bucket.risk_details.value.level, // TODO calculate new level based on post-criticality score
+    calculated_score: bucket.risk_details.value.score,
+    calculated_score_norm: normalizedScoreWithCriticality,
+    category_1_score: bucket.risk_details.value.category_1_score,
+    category_1_count: bucket.risk_details.value.category_1_count,
+    notes: bucket.risk_details.value.notes,
+    inputs: bucket.inputs.hits.hits.map((riskInput) => ({
+      id: riskInput._id,
+      index: riskInput._index,
+      description: `Alert from Rule: ${
+        riskInput.fields?.[ALERT_RULE_NAME]?.[0] ?? 'RULE_NOT_FOUND'
+      }`,
+      category: RiskCategories.category_1,
+      risk_score: riskInput.fields?.[ALERT_RISK_SCORE]?.[0] ?? undefined,
+      timestamp: riskInput.fields?.['@timestamp']?.[0] ?? undefined,
+    })),
+  };
+};
 
 const filterFromRange = (range: CalculateScoresParams['range']): QueryDslQueryContainer => ({
   range: { '@timestamp': { lt: range.end, gte: range.start } },
