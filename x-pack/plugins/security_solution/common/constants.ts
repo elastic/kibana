@@ -265,6 +265,9 @@ export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable`;
 export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable`;
 export const RISK_ENGINE_PRIVILEGES_URL = `${RISK_ENGINE_URL}/privileges`;
 
+export const ASSET_CRITICALITY_URL = `/internal/asset_criticality`;
+export const ASSET_CRITICALITY_STATUS_URL = `${ASSET_CRITICALITY_URL}/status`;
+
 /**
  * Public Risk Score routes
  */
@@ -297,6 +300,7 @@ export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft` as const;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export` as const;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import` as const;
 export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged` as const;
+export const TIMELINE_COPY_URL = `${TIMELINE_URL}/_copy` as const;
 
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;

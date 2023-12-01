@@ -16,7 +16,6 @@ import { EuiButtonIcon, EuiPanel, EuiTextColor, EuiTitle } from '@elastic/eui';
 import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 
 import { InferencePipelineCard } from './inference_pipeline_card';
-import { TrainedModelHealth } from './ml_model_health';
 import { MLModelTypeBadge } from './ml_model_type_badge';
 
 export const DEFAULT_VALUES: InferencePipeline = {
@@ -37,13 +36,12 @@ describe('InferencePipelineCard', () => {
   it('renders the item', () => {
     const wrapper = shallow(<InferencePipelineCard {...mockValues} />);
     expect(wrapper.find(EuiPanel)).toHaveLength(1);
-    expect(wrapper.find(TrainedModelHealth)).toHaveLength(1);
   });
-  it('renders model type as title', () => {
+  it('renders pipeline as title', () => {
     const wrapper = shallow(<InferencePipelineCard {...mockValues} />);
     expect(wrapper.find(EuiTitle)).toHaveLength(1);
     const title = wrapper.find(EuiTitle).dive();
-    expect(title.text()).toBe('Named Entity Recognition');
+    expect(title.text()).toBe(DEFAULT_VALUES.pipelineName);
   });
   it('renders pipeline as title with unknown model type', () => {
     const values = {
@@ -57,11 +55,11 @@ describe('InferencePipelineCard', () => {
     const title = wrapper.find(EuiTitle).dive();
     expect(title.text()).toBe(DEFAULT_VALUES.pipelineName);
   });
-  it('renders pipeline as subtitle', () => {
+  it('renders model ID as subtitle', () => {
     const wrapper = shallow(<InferencePipelineCard {...mockValues} />);
     expect(wrapper.find(EuiTextColor)).toHaveLength(1);
     const subtitle = wrapper.find(EuiTextColor).dive();
-    expect(subtitle.text()).toBe(DEFAULT_VALUES.pipelineName);
+    expect(subtitle.text()).toBe(DEFAULT_VALUES.modelId);
   });
   it('renders model type as badge', () => {
     const wrapper = shallow(<InferencePipelineCard {...mockValues} />);
