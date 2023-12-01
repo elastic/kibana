@@ -42,7 +42,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.ruleRegistry.unsafe.indexUpgrade.enabled=true',
         // Without below line, default interval for rules is 1m
         // See https://github.com/elastic/kibana/pull/125396 for details
-        '--xpack.alerting.rules.minimumScheduleInterval.value=1m',
+        '--xpack.alerting.rules.minimumScheduleInterval.value=1s',
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'chartEmbeddablesEnabled',
