@@ -494,7 +494,7 @@ export function transformOutputToFullPolicyOutput(
   }
 
   if (output.type === outputType.Elasticsearch) {
-    newOutput.preset = getDefaultPresetForEsOutput(config_yaml ?? '');
+    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '');
   }
 
   return newOutput;

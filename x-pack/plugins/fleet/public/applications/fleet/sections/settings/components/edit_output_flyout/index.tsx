@@ -566,9 +566,10 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               <EuiSelect
                 value={inputs.presetInput.value}
                 onChange={(e) => inputs.presetInput.setValue(e.target.value)}
-                disabled={outputYmlIncludesReservedPerformanceKey(
-                  inputs.additionalYamlConfigInput.value
-                )}
+                disabled={
+                  inputs.presetInput.props.disabled ||
+                  outputYmlIncludesReservedPerformanceKey(inputs.additionalYamlConfigInput.value)
+                }
                 options={[
                   { value: 'balanced', text: 'Balanced' },
                   { value: 'custom', text: 'Custom' },

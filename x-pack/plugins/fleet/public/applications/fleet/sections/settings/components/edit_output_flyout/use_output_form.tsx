@@ -179,6 +179,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     if (!isPreconfigured) {
       return false;
     }
+
     return !allowEdit.includes(field);
   }
 
@@ -215,7 +216,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const presetInput = useInput(
-    output?.preset ?? getDefaultPresetForEsOutput(output?.config_yaml ?? '')
+    output?.preset ?? getDefaultPresetForEsOutput(output?.config_yaml ?? ''),
+    () => undefined,
+    isDisabled('preset')
   );
 
   // Remtote ES inputs
