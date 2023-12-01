@@ -258,8 +258,8 @@ export const SelectConnector: React.FC = () => {
             {filteredConnectors.map((connector) => (
               <EuiFlexItem key={connector.serviceType} grow>
                 <ConnectorCheckable
-                  isDisabled={connector.platinumOnly && !(hasPlatinumLicense || isCloud)}
-                  icon={connector.icon}
+                  isDisabled={(connector.platinumOnly && !(hasPlatinumLicense || isCloud)) ?? false}
+                  iconType={connector.icon}
                   isBeta={connector.isBeta}
                   isTechPreview={Boolean(connector.isTechPreview)}
                   showNativeBadge={connector.isNative && hasNativeAccess}

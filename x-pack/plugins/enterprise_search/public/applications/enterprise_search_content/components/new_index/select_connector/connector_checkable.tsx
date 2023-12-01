@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { MouseEvent, useState } from 'react';
 
 import { css } from '@emotion/react';
 
@@ -13,7 +13,6 @@ import {
   EuiBadge,
   EuiButtonIcon,
   EuiCard,
-  EuiCardProps,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -34,21 +33,22 @@ import { BETA_LABEL, NATIVE_LABEL, CONNECTOR_CLIENT_LABEL } from '../../../../sh
 import './connector_checkable.scss';
 import { PlatinumLicensePopover } from '../../shared/platinum_license_popover/platinum_license_popover';
 
-export type ConnectorCheckableProps = Omit<EuiCardProps, 'id' | 'label' | 'name' | 'value'> & {
+export interface ConnectorCheckableProps {
   documentationUrl: string | undefined;
-  icon: string;
+  iconType: string;
   isBeta: boolean;
+  isDisabled: boolean;
   isTechPreview: boolean;
   name: string;
   onConnectorSelect: (queryParams?: string) => void;
   serviceType: string;
   showNativeBadge: boolean;
-};
+}
 
 export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
   isDisabled,
   documentationUrl,
-  icon,
+  iconType,
   isBeta,
   isTechPreview,
   name,
@@ -74,7 +74,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
       }
       layout="horizontal"
       data-telemetry-id={`entSearchContent-connector-selectConnector-${serviceType}-select`}
-      icon={icon ? <EuiIcon type={icon} size="l" /> : undefined}
+      icon={iconType ? <EuiIcon type={iconType} size="l" /> : undefined}
       title={
         <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="spaceAround">
           <EuiFlexItem grow>
@@ -121,7 +121,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                     isDisabled={isDisabled}
                     color="primary"
                     iconType="boxesHorizontal"
-                    onClick={(e) => {
+                    onClick={(e: MouseEvent) => {
                       e.stopPropagation();
                       e.preventDefault();
                       setIsNativePopoverOpen(true);

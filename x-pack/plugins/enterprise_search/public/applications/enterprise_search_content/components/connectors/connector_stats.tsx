@@ -20,14 +20,11 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Status } from '../../../../../common/types/api';
-
 import { FetchSyncJobsStatsApiLogic } from '../../api/stats/fetch_sync_jobs_stats_api_logic';
 
 export const ConnectorStats: React.FC = () => {
   const { makeRequest } = useActions(FetchSyncJobsStatsApiLogic);
-  const { data, status } = useValues(FetchSyncJobsStatsApiLogic);
-  const _isLoading = status === Status.LOADING;
+  const { data } = useValues(FetchSyncJobsStatsApiLogic);
 
   useEffect(() => {
     makeRequest({});
