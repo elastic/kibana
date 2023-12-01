@@ -105,35 +105,35 @@ export const BulkActionBase = z.object({
 });
 
 export type BulkDeleteRules = z.infer<typeof BulkDeleteRules>;
-export const BulkDeleteRules = BulkActionBase.and(
+export const BulkDeleteRules = BulkActionBase.merge(
   z.object({
     action: z.literal('delete'),
   })
 );
 
 export type BulkDisableRules = z.infer<typeof BulkDisableRules>;
-export const BulkDisableRules = BulkActionBase.and(
+export const BulkDisableRules = BulkActionBase.merge(
   z.object({
     action: z.literal('disable'),
   })
 );
 
 export type BulkEnableRules = z.infer<typeof BulkEnableRules>;
-export const BulkEnableRules = BulkActionBase.and(
+export const BulkEnableRules = BulkActionBase.merge(
   z.object({
     action: z.literal('enable'),
   })
 );
 
 export type BulkExportRules = z.infer<typeof BulkExportRules>;
-export const BulkExportRules = BulkActionBase.and(
+export const BulkExportRules = BulkActionBase.merge(
   z.object({
     action: z.literal('export'),
   })
 );
 
 export type BulkDuplicateRules = z.infer<typeof BulkDuplicateRules>;
-export const BulkDuplicateRules = BulkActionBase.and(
+export const BulkDuplicateRules = BulkActionBase.merge(
   z.object({
     action: z.literal('duplicate'),
     duplicate: z
@@ -254,7 +254,7 @@ export const BulkActionEditPayload = z.union([
 ]);
 
 export type BulkEditRules = z.infer<typeof BulkEditRules>;
-export const BulkEditRules = BulkActionBase.and(
+export const BulkEditRules = BulkActionBase.merge(
   z.object({
     action: z.literal('edit'),
     /**
