@@ -131,7 +131,7 @@ export function buildSearchBody(
           filter: [{ ids: { values: [id] } }, { term: { _index: index } }],
         },
       },
-      stored_fields: computedFields.storedFields,
+      stored_fields: ['*'],
       script_fields: computedFields.scriptFields,
       version: true,
     },
