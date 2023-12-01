@@ -8,6 +8,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import {
@@ -20,7 +21,7 @@ import { UserPanelContent } from './content';
 const flyoutContextValue = {
   openLeftPanel: () => window.alert('openLeftPanel called'),
   panels: {},
-} as unknown as ExpandableFlyoutContext;
+} as unknown as ExpandableFlyoutContextValue;
 
 storiesOf('Components/UserPanelContent', module)
   .addDecorator((storyFn) => (
