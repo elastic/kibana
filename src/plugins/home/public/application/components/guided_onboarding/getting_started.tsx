@@ -77,11 +77,14 @@ export const GettingStarted = () => {
   const [filteredCards, setFilteredCards] = useState<GuideCardConstants[]>();
   const { search } = useLocation();
   const query = parse(search);
-  const [filter, setFilter] = useState<GuideFilterValues | GuideFilterValuesClassic>(
-    (query.useCase as GuideFilterValues) ?? 'search'
-  );
   // using for A/B testing
   const [classicGuide] = useState<boolean>(false);
+  const [filter, setFilter] = useState<GuideFilterValues | GuideFilterValuesClassic>(
+    classicGuide
+      ? (query.useCase as GuideFilterValues) ?? 'all'
+      : (query.useCase as GuideFilterValues) ?? 'search'
+  );
+
   const history = useHistory();
 
   useEffect(() => {
