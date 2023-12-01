@@ -364,6 +364,7 @@ describe('api', () => {
           incident: {
             externalId: apiParams.incident.externalId,
             correlation_id: null,
+            close_notes: null,
           },
         },
         logger: mockedLogger,
@@ -384,6 +385,7 @@ describe('api', () => {
           incident: {
             externalId: null,
             correlation_id: apiParams.incident.correlation_id,
+            close_notes: null,
           },
         },
         logger: mockedLogger,
@@ -404,6 +406,7 @@ describe('api', () => {
           incident: {
             externalId: apiParams.incident.externalId,
             correlation_id: null,
+            close_notes: null,
           },
         },
         logger: mockedLogger,
@@ -412,6 +415,7 @@ describe('api', () => {
       expect(externalService.closeIncident).toHaveBeenCalledWith({
         incidentId: 'incident-3',
         correlationId: null,
+        closeNotes: null,
       });
     });
 
@@ -422,6 +426,7 @@ describe('api', () => {
           incident: {
             externalId: null,
             correlation_id: apiParams.incident.correlation_id,
+            close_notes: 'test close notes',
           },
         },
         logger: mockedLogger,
@@ -430,6 +435,7 @@ describe('api', () => {
       expect(externalService.closeIncident).toHaveBeenCalledWith({
         incidentId: null,
         correlationId: 'ruleId',
+        closeNotes: 'test close notes',
       });
     });
   });

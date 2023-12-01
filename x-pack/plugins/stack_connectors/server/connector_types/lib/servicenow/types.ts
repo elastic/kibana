@@ -108,6 +108,7 @@ export interface ExternalServiceParamsUpdate {
 export interface ExternalServiceParamsClose {
   incidentId: string | null;
   correlationId: string | null;
+  closeNotes: string | null;
 }
 
 export interface ExternalService {

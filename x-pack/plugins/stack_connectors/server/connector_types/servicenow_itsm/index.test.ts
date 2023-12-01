@@ -89,6 +89,7 @@ describe('ServiceNow', () => {
               incident: {
                 correlationId: 'custom_correlation_id',
                 externalId: null,
+                closeNotes: 'test close notes',
               },
             },
           },
@@ -102,6 +103,9 @@ describe('ServiceNow', () => {
         expect(
           (api.closeIncident as jest.Mock).mock.calls[0][0].params.incident.correlationId
         ).toBe('custom_correlation_id');
+        expect((api.closeIncident as jest.Mock).mock.calls[0][0].params.incident.closeNotes).toBe(
+          'test close notes'
+        );
       });
     });
   });

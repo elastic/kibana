@@ -119,6 +119,7 @@ export const ExecutorSubActionCloseIncidentParamsSchema = schema.object({
   incident: schema.object({
     externalId: schema.nullable(schema.string()),
     correlation_id: schema.nullable(schema.string({ defaultValue: DEFAULT_ALERTS_GROUPING_KEY })),
+    close_notes: schema.nullable(schema.string()),
   }),
 });
 
