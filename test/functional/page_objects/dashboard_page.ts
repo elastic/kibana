@@ -556,7 +556,6 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async selectDashboardTags(tagNames: string[]) {
-    await this.testSubjects.click('savedObjectTagSelector');
     const tagsComboBox = await this.testSubjects.find('savedObjectTagSelector');
     for (const tagName of tagNames) {
       await this.comboBox.setElement(tagsComboBox, tagName);
