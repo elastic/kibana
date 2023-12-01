@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '@kbn/observability-shared-plugin/public';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { Annotation } from '../../../../../common/annotations';
 import {
   asAbsoluteDateTime,
@@ -70,7 +70,7 @@ export function BreakdownChart({
   id,
 }: Props) {
   const history = useHistory();
-  const chartTheme = useChartTheme();
+  const chartThemes = useChartThemes();
   const { core } = useApmPluginContext();
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
   const {
@@ -115,7 +115,8 @@ export function BreakdownChart({
           showLegend
           showLegendExtra
           legendPosition={Position.Bottom}
-          theme={chartTheme}
+          theme={chartThemes.theme}
+          baseTheme={chartThemes.baseTheme}
           xDomain={{ min, max }}
           flatLegend
           onPointerUpdate={updatePointerEvent}

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { LIGHT_THEME, DARK_THEME, SettingsProps, PartialTheme } from '@elastic/charts';
+import { LIGHT_THEME, DARK_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { useMemo } from 'react';
 import { useTheme } from './use_theme';
 
-export function useChartThemes(): Pick<SettingsProps, 'theme' | 'baseTheme'> {
+export function useChartThemes(): { baseTheme: Theme; theme: PartialTheme[] } {
   const theme = useTheme();
   const baseTheme = theme.darkMode ? DARK_THEME : LIGHT_THEME;
 
@@ -33,7 +33,7 @@ export function useChartThemes(): Pick<SettingsProps, 'theme' | 'baseTheme'> {
     };
 
     return {
-      themeOverrides,
+      theme: [themeOverrides],
       baseTheme,
     };
   }, [baseTheme]);

@@ -17,7 +17,7 @@ import {
   EuiFlexGrid,
   EuiSpacer,
 } from '@elastic/eui';
-import { useChartTheme } from '@kbn/observability-shared-plugin/public';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import {
   Chart,
   Partition,
@@ -80,7 +80,7 @@ export function StorageDetailsPerService({
   indexLifecyclePhase,
 }: Props) {
   const { core } = useApmPluginContext();
-  const chartTheme = useChartTheme();
+  const chartThemes = useChartThemes();
   const router = useApmRouter();
   const { euiTheme } = useEuiTheme();
 
@@ -202,8 +202,9 @@ export function StorageDetailsPerService({
                           emptySizeRatio: 0.3,
                         },
                       },
-                      ...chartTheme,
+                      ...chartThemes.theme,
                     ]}
+                    baseTheme={chartThemes.baseTheme}
                     locale={i18n.getLocale()}
                     showLegend
                   />
