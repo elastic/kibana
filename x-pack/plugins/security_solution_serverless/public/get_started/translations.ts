@@ -60,67 +60,113 @@ export const SECTION_3_TITLE = i18n.translate(
   }
 );
 
-export const SECTION_1_CARD_1_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.section1.card1.title',
+export const CREATE_PROJECT_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.createProject.title',
   {
     defaultMessage: 'Create your first project',
   }
 );
 
-export const SECTION_1_CARD_2_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.section1.card2.title',
+export const WATCH_VIDEO_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.watchVideo.title',
   {
     defaultMessage: 'Watch the overview video',
   }
 );
 
-export const SECTION_1_CARD_2_TITLE_TASK_1_BUTTON_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.section1.card2.task1.button.title',
+export const WATCH_VIDEO_BUTTON_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.watchVideo.button.title',
   {
     defaultMessage: 'Elastic Security',
   }
 );
 
-export const SECTION_2_CARD_1_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.section2.card1.title',
-  {
-    defaultMessage: 'Add integrations',
-  }
-);
-
-export const SECTION_2_CARD_1_TITLE_TASK_1_BUTTON_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.section2.card1.task1.button.title',
-  {
-    defaultMessage: 'Connect to existing data sources',
-  }
-);
-
-export const SECTION_2_CARD_2_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.section2.card2.title',
-  {
-    defaultMessage: 'View and analyze your data using dashboards',
-  }
-);
-
-export const SECTION_2_CARD_2_TASK_1_BUTTON_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.section2.card2.task1.button.title',
-  {
-    defaultMessage: 'Analyze data using dashboards',
-  }
-);
-
-export const INTRODUCTION_STEP1_DESCRIPTION1 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.introduction.step1.description1',
+export const WATCH_VIDEO_DESCRIPTION1 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.watchVideo.description1',
   {
     defaultMessage: `Elastic Security unifies analytics, EDR, cloud security capabilities, and more into a SaaS solution that helps you improve your organization’s security posture, defend against a wide range of threats, and prevent breaches.
     `,
   }
 );
 
-export const INTRODUCTION_STEP1_DESCRIPTION2 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.introduction.step1.description2',
+export const WATCH_VIDEO_DESCRIPTION2 = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.watchVideo.description2',
   {
     defaultMessage: `To explore the platform’s core features, watch the video:`,
+  }
+);
+
+export const ADD_INTEGRATIONS_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.addIntegrations.title',
+  {
+    defaultMessage: 'Add integrations',
+  }
+);
+
+export const ADD_INTEGRATIONS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.addIntegrations.description',
+  {
+    defaultMessage:
+      'Use third-party integrations to import data from common sources and help you gather relevant information in one place. To find integrations for your use case, search for tools and data providers on the Add integrations page.',
+  }
+);
+
+export const ADD_INTEGRATIONS_IMAGE_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.addIntegrations.image.title',
+  {
+    defaultMessage: 'Connect to existing data sources',
+  }
+);
+
+export const VIEW_DASHBOARDS = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.viewDashboards.title',
+  {
+    defaultMessage: 'View and analyze your data using dashboards',
+  }
+);
+
+export const VIEW_DASHBOARDS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.viewDashboards.description',
+  {
+    defaultMessage:
+      'Use dashboards to visualize data and stay up-to-date with key information. Create your own, or use Elastic’s default dashboards — including alerts, user authentication events, known vulnerabilities, and more.',
+  }
+);
+
+export const VIEW_DASHBOARDS_IMAGE_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.viewDashboards.image.title',
+  {
+    defaultMessage: 'Analyze data using dashboards',
+  }
+);
+
+export const ENABLE_RULES = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.enableRules.title',
+  {
+    defaultMessage: 'Enable prebuilt rules',
+  }
+);
+
+export const ENABLE_RULES_DESCRIPTION = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.enableRules.description',
+  {
+    defaultMessage:
+      'Elastic Security comes with prebuilt detection rules that run in the background and create alerts when their conditions are met.',
+  }
+);
+
+export const VIEW_ALERTS_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.viewAlerts.title',
+  {
+    defaultMessage: 'View alerts',
+  }
+);
+
+export const VIEW_ALERTS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.viewAlerts.description',
+  {
+    defaultMessage:
+      'Visualize, sort, filter, and investigate alerts from across your infrastructure. Examine individual alerts of interest, and discover general patterns in alert volume and severity.',
   }
 );
 
@@ -142,109 +188,6 @@ export const PRODUCT_BADGE_EDR = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.productBadge.edr',
   {
     defaultMessage: 'EDR',
-  }
-);
-
-export const CONFIGURE_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.title',
-  {
-    defaultMessage: 'Configure',
-  }
-);
-
-export const CONFIGURE_STEP1 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1',
-  {
-    defaultMessage: 'Learn about Elastic Agent',
-  }
-);
-
-export const CONFIGURE_STEP1_DESCRIPTION1 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1.description1',
-  {
-    defaultMessage:
-      'Deploy the Elastic Agent to each endpoint you want to protect. This allows it to monitor and protect them by collecting data and enforcing your security policies. It sends that data to the Elastic Stack for analysis and storage.',
-  }
-);
-
-export const CONFIGURE_STEP1_DESCRIPTION2 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1.description2',
-  {
-    defaultMessage: 'In the next step, you will deploy the Elastic Agent to your endpoints.',
-  }
-);
-
-export const CONFIGURE_STEP2 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2',
-  {
-    defaultMessage: 'Deploy Elastic Agent to protect your endpoints',
-  }
-);
-
-export const CONFIGURE_STEP2_DESCRIPTION1 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2.description1',
-  {
-    defaultMessage: 'Deploy the Elastic Agent to each endpoint you want to monitor or protect.',
-  }
-);
-
-export const CONFIGURE_STEP3_DESCRIPTION1 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.description1',
-  {
-    defaultMessage:
-      'Use third-party integrations to import data from common sources and help you gather relevant information in one place. To find integrations for your use case, search for tools and data providers on the Add integrations page.',
-  }
-);
-
-export const SECTION_3_CARD_1_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.section3.card1.title',
-  {
-    defaultMessage: 'Enable prebuilt rules',
-  }
-);
-
-export const SECTION_3_CARD_1_TASK_1_BUTTON_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.section3.card1.task1.button.title',
-  {
-    defaultMessage: 'Enable prebuilt rules',
-  }
-);
-
-export const SECTION_3_CARD_2_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.section3.card2.title',
-  {
-    defaultMessage: 'View alerts',
-  }
-);
-
-export const SECTION_3_CARD_2_TASK_1_BUTTON_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.section3.card2.task1.button.title',
-  {
-    defaultMessage: 'View alerts',
-  }
-);
-
-export const CONFIGURE_STEP4_DESCRIPTION1 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step4.description1',
-  {
-    defaultMessage:
-      'Elastic Security comes with prebuilt detection rules that run in the background and create alerts when their conditions are met.',
-  }
-);
-
-export const EXPLORE_STEP1_DESCRIPTION1 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description1',
-  {
-    defaultMessage:
-      'Visualize, sort, filter, and investigate alerts from across your infrastructure. Examine individual alerts of interest, and discover general patterns in alert volume and severity.',
-  }
-);
-
-export const EXPLORE_STEP2_DESCRIPTION1 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2.description1',
-  {
-    defaultMessage:
-      'Use dashboards to visualize data and stay up-to-date with key information. Create your own, or use Elastic’s default dashboards — including alerts, user authentication events, known vulnerabilities, and more.',
   }
 );
 

@@ -5,16 +5,26 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 
 import React, { useCallback } from 'react';
 import { useStepContext } from '../context/step_context';
-import { GetStartedWithAlertsCardsId, SectionId, ViewAlertsSteps } from '../types';
+import {
+  AddAndValidateYourDataCardsId,
+  AddIntegrationsSteps,
+  GetStartedWithAlertsCardsId,
+  SectionId,
+  ViewAlertsSteps,
+} from '../types';
+import { AddIntegrationCallout } from './add_integration_callout';
+import { VIEW_ALERTS } from './translations';
 
 const AlertsButtonComponent = () => {
-  const { toggleTaskCompleteStatus } = useStepContext();
+  const { toggleTaskCompleteStatus, finishedSteps } = useStepContext();
+  const isIntegrationsStepComplete = finishedSteps[
+    AddAndValidateYourDataCardsId.addIntegrations
+  ]?.has(AddIntegrationsSteps.connectToDataSources);
 
   const onClick = useCallback(() => {
     toggleTaskCompleteStatus({
@@ -26,12 +36,18 @@ const AlertsButtonComponent = () => {
   }, [toggleTaskCompleteStatus]);
 
   return (
-    <LinkButton id={SecurityPageName.alerts} onClick={onClick} fill>
-      <FormattedMessage
-        id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description2.button"
-        defaultMessage="View alerts"
-      />
-    </LinkButton>
+    <>
+      {!isIntegrationsStepComplete && <AddIntegrationCallout stepName={VIEW_ALERTS} />}
+      <LinkButton
+        className="step-paragraph"
+        disabled={!isIntegrationsStepComplete}
+        fill
+        id={SecurityPageName.alerts}
+        onClick={onClick}
+      >
+        {VIEW_ALERTS}
+      </LinkButton>
+    </>
   );
 };
 

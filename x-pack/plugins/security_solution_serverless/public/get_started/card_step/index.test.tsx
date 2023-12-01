@@ -120,7 +120,7 @@ describe('CardStepComponent', () => {
 
   it('should show the step as completed when it is done', async () => {
     (fetchRuleManagementFilters as jest.Mock).mockResolvedValue({
-      rules_summary: { custom_count: 1, prebuilt_installed_count: 1 },
+      total: 1,
     });
     const mockProps = {
       ...props,

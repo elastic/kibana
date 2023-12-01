@@ -16,7 +16,7 @@ export const RIGHT_CONTENT_WIDTH = 480;
 
 export const useStepContentStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const shadow = useEuiShadow('s');
+  const imageShadow = useEuiShadow('s');
 
   const stepContentGroupStyles = css`
     &.step-content-group {
@@ -39,9 +39,13 @@ export const useStepContentStyles = () => {
 
   const descriptionStyles = css`
     &.step-content-description {
-      margin-bottom: ${euiTheme.base * 2}px;
-      margin-block-end: ${euiTheme.base * 2}px !important;
+      margin-bottom: 0px;
+      margin-block-end: 0px !important;
       line-height: ${euiTheme.size.l};
+
+      & .step-paragraph {
+        margin-top: ${euiTheme.size.xl};
+      }
     }
   `;
 
@@ -58,7 +62,7 @@ export const useStepContentStyles = () => {
       width: ${RIGHT_CONTENT_WIDTH}px;
       border-radius: ${euiTheme.border.radius.medium};
       overflow: hidden;
-      box-shadow: ${shadow};
+      ${imageShadow};
     }
   `;
 

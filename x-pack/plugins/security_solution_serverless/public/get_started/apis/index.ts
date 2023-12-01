@@ -5,19 +5,28 @@
  * 2.0.
  */
 
-import type { GetRuleManagementFiltersResponse } from '@kbn/security-solution-plugin/common';
-import { RULE_MANAGEMENT_FILTERS_URL } from '@kbn/security-solution-plugin/common';
+import type { FetchRulesResponse } from '@kbn/security-solution-plugin/public';
+import { DETECTION_ENGINE_RULES_URL_FIND } from '@kbn/security-solution-plugin/common';
 import type { HttpSetup } from '@kbn/core/public';
 
 export const fetchRuleManagementFilters = async ({
   http,
   signal,
+  query,
 }: {
   http: HttpSetup;
   signal?: AbortSignal;
-}): Promise<GetRuleManagementFiltersResponse> =>
-  http.fetch<GetRuleManagementFiltersResponse>(RULE_MANAGEMENT_FILTERS_URL, {
+  query?: {
+    page: number;
+    per_page: number;
+    sort_field: string;
+    sort_order: string;
+    filter: string;
+  };
+}): Promise<FetchRulesResponse> =>
+  http.fetch<FetchRulesResponse>(DETECTION_ENGINE_RULES_URL_FIND, {
     method: 'GET',
-    version: '1',
+    version: '2023-10-31',
     signal,
+    query,
   });

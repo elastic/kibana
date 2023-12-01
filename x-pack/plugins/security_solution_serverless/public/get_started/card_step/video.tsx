@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { useStepContext } from '../context/step_context';
-import { SECTION_1_CARD_2_TITLE_TASK_1_BUTTON_TITLE } from '../translations';
+import { WATCH_VIDEO_BUTTON_TITLE } from '../translations';
 import { OverviewSteps, QuickStartSectionCardsId, SectionId } from '../types';
 
 const VideoComponent: React.FC = () => {
@@ -76,7 +76,7 @@ const VideoComponent: React.FC = () => {
           src={`//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html${
             isVideoPlaying ? '?autoplay=1' : ''
           }`}
-          title={SECTION_1_CARD_2_TITLE_TASK_1_BUTTON_TITLE}
+          title={WATCH_VIDEO_BUTTON_TITLE}
         />
       )}
     </div>

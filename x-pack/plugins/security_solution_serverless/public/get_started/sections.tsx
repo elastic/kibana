@@ -8,6 +8,7 @@ import type { MutableRefObject } from 'react';
 import React from 'react';
 
 import type { HttpSetup } from '@kbn/core/public';
+import { KQL_FILTER_ENABLED_RULES } from '@kbn/security-solution-plugin/common';
 import type { Step, StepId } from './types';
 import {
   SectionId,
@@ -36,20 +37,21 @@ import { DashboardButton } from './step_links/dashboard_button';
 import overviewVideo from './images/overview_video.svg';
 import { Video } from './card_step/video';
 import { fetchRuleManagementFilters } from './apis';
+import { OverviewVideoDescription } from './card_step/overview_video_description';
 
 export const createProjectSteps = [
   {
     id: CreateProjectSteps.createFirstProject,
-    title: i18n.SECTION_1_CARD_1_TITLE,
+    title: i18n.CREATE_PROJECT_TITLE,
     icon: { type: 'addDataApp', size: 'xl' as const },
   },
 ];
 export const overviewVideoSteps = [
   {
     icon: { type: overviewVideo, size: 'xl' as const },
-    title: i18n.SECTION_1_CARD_2_TITLE,
+    title: i18n.WATCH_VIDEO_TITLE,
     id: OverviewSteps.getToKnowElasticSecurity,
-    description: [i18n.INTRODUCTION_STEP1_DESCRIPTION1, i18n.INTRODUCTION_STEP1_DESCRIPTION2],
+    description: [<OverviewVideoDescription />],
     splitPanel: <Video />,
   },
 ];
@@ -58,12 +60,12 @@ export const addIntegrationsSteps: Array<Step<AddIntegrationsSteps.connectToData
   {
     icon: { type: 'fleetApp', size: 'xl' as const },
     id: AddIntegrationsSteps.connectToDataSources,
-    title: i18n.SECTION_2_CARD_1_TITLE,
-    description: [i18n.CONFIGURE_STEP3_DESCRIPTION1, <AddIntegrationButton />],
+    title: i18n.ADD_INTEGRATIONS_TITLE,
+    description: [i18n.ADD_INTEGRATIONS_DESCRIPTION, <AddIntegrationButton />],
     splitPanel: (
       <img
         src={connectToDataSources}
-        alt={i18n.SECTION_2_CARD_1_TITLE_TASK_1_BUTTON_TITLE}
+        alt={i18n.ADD_INTEGRATIONS_IMAGE_TITLE}
         height="100%"
         width="100%"
       />
@@ -77,12 +79,12 @@ export const viewDashboardSteps = [
   {
     id: ViewDashboardSteps.analyzeData,
     icon: { type: 'dashboardApp', size: 'xl' as const },
-    title: i18n.SECTION_2_CARD_2_TITLE,
-    description: [i18n.EXPLORE_STEP2_DESCRIPTION1, <DashboardButton />],
+    title: i18n.VIEW_DASHBOARDS,
+    description: [i18n.VIEW_DASHBOARDS_DESCRIPTION, <DashboardButton />],
     splitPanel: (
       <img
         src={analyzeDataUsingDashboards}
-        alt={i18n.SECTION_2_CARD_2_TASK_1_BUTTON_TITLE}
+        alt={i18n.VIEW_DASHBOARDS_IMAGE_TITLE}
         height="100%"
         width="100%"
       />
@@ -92,17 +94,12 @@ export const viewDashboardSteps = [
 
 export const enablePrebuildRuleSteps: Array<Step<EnablePrebuiltRulesSteps.enablePrebuiltRules>> = [
   {
-    title: i18n.SECTION_3_CARD_1_TITLE,
+    title: i18n.ENABLE_RULES,
     icon: { type: 'advancedSettingsApp', size: 'xl' as const },
     id: EnablePrebuiltRulesSteps.enablePrebuiltRules,
-    description: [i18n.CONFIGURE_STEP4_DESCRIPTION1, <AddElasticRulesButton />],
+    description: [i18n.ENABLE_RULES_DESCRIPTION, <AddElasticRulesButton />],
     splitPanel: (
-      <img
-        src={enablePrebuiltRules}
-        alt={i18n.SECTION_3_CARD_1_TASK_1_BUTTON_TITLE}
-        height="100%"
-        width="100%"
-      />
+      <img src={enablePrebuiltRules} alt={i18n.ENABLE_RULES} height="100%" width="100%" />
     ),
     autoCheckIfStepCompleted: async ({
       abortSignal,
@@ -111,12 +108,19 @@ export const enablePrebuildRuleSteps: Array<Step<EnablePrebuiltRulesSteps.enable
       abortSignal: MutableRefObject<AbortController>;
       kibanaServicesHttp: HttpSetup;
     }) => {
+      // Check if there are any rules installed and enabled
       const data = await fetchRuleManagementFilters({
         http: kibanaServicesHttp,
         signal: abortSignal.current.signal,
+        query: {
+          page: 1,
+          per_page: 20,
+          sort_field: 'enabled',
+          sort_order: 'desc',
+          filter: KQL_FILTER_ENABLED_RULES,
+        },
       });
-      const isRulesInstalled =
-        data?.rules_summary?.custom_count > 0 || data?.rules_summary?.prebuilt_installed_count > 0;
+      const isRulesInstalled = data?.total > 0;
       return isRulesInstalled;
     },
   },
@@ -125,17 +129,10 @@ export const enablePrebuildRuleSteps: Array<Step<EnablePrebuiltRulesSteps.enable
 export const viewAlertSteps = [
   {
     icon: { type: 'watchesApp', size: 'xl' as const },
-    title: i18n.SECTION_3_CARD_2_TITLE,
+    title: i18n.VIEW_ALERTS_TITLE,
     id: ViewAlertsSteps.viewAlerts,
-    description: [i18n.EXPLORE_STEP1_DESCRIPTION1, <AlertsButton />],
-    splitPanel: (
-      <img
-        src={viewAlerts}
-        alt={i18n.SECTION_3_CARD_2_TASK_1_BUTTON_TITLE}
-        height="100%"
-        width="100%"
-      />
-    ),
+    description: [i18n.VIEW_ALERTS_DESCRIPTION, <AlertsButton />],
+    splitPanel: <img src={viewAlerts} alt={i18n.VIEW_ALERTS_TITLE} height="100%" width="100%" />,
   },
 ];
 
