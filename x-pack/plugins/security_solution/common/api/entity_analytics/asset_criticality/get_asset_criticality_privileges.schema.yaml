@@ -1,0 +1,39 @@
+openapi: 3.0.0
+info:
+  title: Get Asset Criticality Privileges Schema
+  version: 1.0.0
+paths:
+  /internal/risk_score/criticality/privileges:
+    get:
+      summary: Get Asset Criticality Privileges
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetCriticalityPrivileges'
+              example:
+                elasticsearch:
+                  index:
+                    ".asset-criticality.asset-criticality-*":
+                      read: true
+                      write: false
+                has_all_required: false
+components:
+  schemas:
+    AssetCriticalityPrivileges:
+      type: object
+      properties:
+        has_all_required:
+          type: boolean
+        elasticsearch:
+          type: object
+          properties:
+            index:
+              type: object
+              properties:
+                read:
+                  type: boolean
+                write:
+                  type: boolean
