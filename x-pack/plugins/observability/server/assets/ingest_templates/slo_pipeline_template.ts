@@ -22,6 +22,7 @@ export const getSLOPipelineTemplate = (id: string, indexNamePrefix: string) => (
         field: '@timestamp',
         index_name_prefix: indexNamePrefix,
         date_rounding: 'M',
+        date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
       },
     },
   ],
