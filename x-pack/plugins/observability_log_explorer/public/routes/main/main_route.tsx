@@ -63,9 +63,7 @@ const ConnectedContent = React.memo(() => {
 
   const [state] = useActor(useObservabilityLogExplorerPageStateContext());
 
-  if (state.matches('uninitialized')) {
-    return <InitializingContent />;
-  } else if (state.matches('initialized')) {
+  if (state.matches('initialized')) {
     return (
       <InitializedContent
         logExplorerController={state.context.controller}
@@ -74,7 +72,7 @@ const ConnectedContent = React.memo(() => {
       />
     );
   } else {
-    return null;
+    return <InitializingContent />;
   }
 });
 

@@ -28,7 +28,7 @@ export const ConnectedDiscoverLink = React.memo(() => {
 
   const [pageState] = useActor(useObservabilityLogExplorerPageStateContext());
 
-  if (pageState.matches('initialized.validLogExplorerState')) {
+  if (pageState.matches({ initialized: 'validLogExplorerState' })) {
     return <DiscoverLinkForValidState discover={discover} pageState={pageState} />;
   } else {
     return <DiscoverLinkForUnknownState />;
@@ -37,7 +37,7 @@ export const ConnectedDiscoverLink = React.memo(() => {
 
 type InitializedPageState = MatchedStateFromActor<
   ObservabilityLogExplorerService,
-  'initialized.validLogExplorerState'
+  { initialized: 'validLogExplorerState' }
 >;
 
 export const DiscoverLinkForValidState = React.memo(
