@@ -6,7 +6,7 @@
  */
 
 import createContainer from 'constate';
-import { LogExplorerController } from './types';
+import type { LogExplorerController } from './types';
 
 const useLogExplorerController = ({ controller }: { controller: LogExplorerController }) =>
   controller;

@@ -9,7 +9,7 @@ import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  IKbnUrlStateStorage,
+  type IKbnUrlStateStorage,
   redirectWhenMissing,
   SavedObjectNotFound,
 } from '@kbn/kibana-utils-plugin/public';

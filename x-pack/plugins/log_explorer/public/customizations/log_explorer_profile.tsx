@@ -6,13 +6,14 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { CustomizationCallback } from '@kbn/discover-plugin/public';
+import type { CustomizationCallback } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { waitFor } from 'xstate/lib/waitFor';
-import { LogExplorerController, LogExplorerControllerProvider } from '../controller';
-import { LogExplorerStartDeps } from '../types';
+import type { LogExplorerController } from '../controller';
+import { LogExplorerControllerProvider } from '../controller/provider';
+import type { LogExplorerStartDeps } from '../types';
 import { dynamic } from '../utils/dynamic';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 import { createCustomSearchBar } from './custom_search_bar';

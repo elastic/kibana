@@ -36,13 +36,13 @@ type InitialState = LogExplorerPublicStateUpdate;
 
 export const createLogExplorerControllerFactory =
   ({ core, plugins: { data } }: Dependencies) =>
-  ({
+  async ({
     customizations = {},
     initialState,
   }: {
     customizations?: LogExplorerCustomizations;
     initialState?: InitialState;
-  }): LogExplorerController => {
+  }): Promise<LogExplorerController> => {
     const datasetsClient = new DatasetsService().start({
       http: core.http,
     }).client;
@@ -95,4 +95,5 @@ export const createLogExplorerControllerFactory =
     };
   };
 
+export type CreateLogExplorerControllerFactory = typeof createLogExplorerControllerFactory;
 export type CreateLogExplorerController = ReturnType<typeof createLogExplorerControllerFactory>;

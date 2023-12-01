@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createMemoryHistory } from 'history';
 import { LogExplorerDiscoverServices } from './types';
@@ -18,7 +17,7 @@ type DiscoverHistory = ReturnType<LogExplorerDiscoverServices['history']>;
  */
 export const createDiscoverMemoryHistory = (): DiscoverHistory =>
   createMemoryHistory({
-    initialEntries: [{ search: `?${APP_STATE_URL_KEY}=()` }],
+    initialEntries: [{ search: `?_a=()` }],
   });
 
 /**

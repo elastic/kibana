@@ -17,13 +17,13 @@ export const createController =
   }): InvokeCreator<ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent> =>
   (context, event) =>
   (send) => {
-    const controller = createLogExplorerController({
+    createLogExplorerController({
       initialState: context.initialLogExplorerState,
-    });
-
-    send({
-      type: 'CONTROLLER_CREATED',
-      controller,
+    }).then((controller) => {
+      send({
+        type: 'CONTROLLER_CREATED',
+        controller,
+      });
     });
   };
 

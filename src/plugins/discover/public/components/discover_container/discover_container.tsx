@@ -11,7 +11,7 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverMainRoute } from '../../application/main';
 import type { DiscoverServices } from '../../build_services';
 import type { CustomizationCallback } from '../../customizations';
