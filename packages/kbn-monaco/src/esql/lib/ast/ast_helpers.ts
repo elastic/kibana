@@ -175,11 +175,17 @@ function getUnquotedText(ctx: ParserRuleContext) {
   );
 }
 
+const TICKS_REGEX = /(`)/g;
+
+function isQuoted(text: string | undefined) {
+  return text && TICKS_REGEX.test(text);
+}
+
 export function sanifyIdentifierString(ctx: ParserRuleContext) {
   return (
     getUnquotedText(ctx)?.text ||
-    getQuotedText(ctx)?.text.replace(/(`)/g, '') ||
-    ctx.text.replace(/(`)/g, '') // for some reason some quoted text is not detected correctly by the parser
+    getQuotedText(ctx)?.text.replace(TICKS_REGEX, '') ||
+    ctx.text.replace(TICKS_REGEX, '') // for some reason some quoted text is not detected correctly by the parser
   );
 }
 
@@ -211,13 +217,14 @@ export function createColumnStar(ctx: TerminalNode): ESQLColumn {
 
 export function createColumn(ctx: ParserRuleContext): ESQLColumn {
   const text = sanifyIdentifierString(ctx);
+  const hasQuotes = Boolean(getQuotedText(ctx) || isQuoted(ctx.text));
   return {
     type: 'column',
     name: text,
     text,
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception || text === ''),
-    quoted: Boolean(getQuotedText(ctx)),
+    quoted: hasQuotes,
   };
 }
 
