@@ -13,7 +13,7 @@ export interface HeaderMenuPortalProps {
   containerRef: React.RefObject<HTMLDivElement>;
 }
 
-export function SloCardBadgesPortal({ children, containerRef }: HeaderMenuPortalProps) {
+export function SloCardBadgesPortal({ children, containerRef }: Props) {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
 
   useEffect(() => {
