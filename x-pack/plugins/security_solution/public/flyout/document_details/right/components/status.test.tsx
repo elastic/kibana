@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import { DocumentStatus } from './status';
@@ -19,7 +20,7 @@ jest.mock('../../../../detections/components/alerts_table/timeline_actions/use_a
 
 const flyoutContextValue = {
   closeFlyout: jest.fn(),
-} as unknown as ExpandableFlyoutContext;
+} as unknown as ExpandableFlyoutContextValue;
 
 const renderStatus = (contextValue: RightPanelContext) =>
   render(
