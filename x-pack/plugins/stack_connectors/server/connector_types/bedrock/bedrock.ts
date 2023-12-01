@@ -10,7 +10,6 @@ import aws from 'aws4';
 import type { AxiosError } from 'axios';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
-import { DashboardActionParams, DashboardActionResponse } from '../../../common/openai/types';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
@@ -28,8 +27,12 @@ import type {
   StreamActionParams,
 } from '../../../common/bedrock/types';
 import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/bedrock/constants';
-import { StreamingResponse } from '../../../common/bedrock/types';
-import { DashboardActionParamsSchema } from '../../../common/openai/schema';
+import {
+  DashboardActionParams,
+  DashboardActionResponse,
+  StreamingResponse,
+} from '../../../common/bedrock/types';
+import { DashboardActionParamsSchema } from '../../../common/bedrock/schema';
 
 interface SignedRequest {
   host: string;
