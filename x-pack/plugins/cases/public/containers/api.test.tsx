@@ -501,6 +501,31 @@ describe('Cases API', () => {
         signal: abortCtrl.signal,
       });
     });
+
+    it('should not send empty custom fields', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          customFields: {
+            emptyCustomFieldKey: {
+              type: CustomFieldTypes.TOGGLE,
+              options: [],
+            },
+          },
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
+        method: 'POST',
+        body: JSON.stringify({
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          ...DEFAULT_QUERY_PARAMS,
+        }),
+        signal: abortCtrl.signal,
+      });
+    });
   });
 
   describe('getCasesStatus', () => {

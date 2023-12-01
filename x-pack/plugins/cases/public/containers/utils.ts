@@ -203,7 +203,9 @@ export const constructCustomFieldsFilter = (
     }
   }
 
-  return {
-    customFields: valuesByCustomFieldKey,
-  };
+  return Object.keys(valuesByCustomFieldKey).length
+    ? {
+        customFields: valuesByCustomFieldKey,
+      }
+    : {};
 };
