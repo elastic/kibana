@@ -10,6 +10,7 @@ import React from 'react';
 import { useValues, useActions } from 'kea';
 
 import {
+  EuiCallOut,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -28,6 +29,7 @@ import { IndexViewLogic } from '../../index_view_logic';
 
 import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
 import { ModelSelect } from './model_select';
+import { ModelSelectLogic } from './model_select_logic';
 import { PipelineSelectOption } from './pipeline_select_option';
 
 const PIPELINE_SELECT_PLACEHOLDER_VALUE = 'pipeline_placeholder$$';
@@ -56,6 +58,7 @@ export const ConfigurePipeline: React.FC = () => {
   const { selectExistingPipeline, setInferencePipelineConfiguration } =
     useActions(MLInferenceLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
+  const { modelStateChangeError } = useValues(ModelSelectLogic);
   const { pipelineName } = configuration;
 
   const nameError = formErrors.pipelineName !== undefined && pipelineName.length > 0;
@@ -133,6 +136,22 @@ export const ConfigurePipeline: React.FC = () => {
                 }
               />
             </EuiFormRow>
+            {modelStateChangeError && (
+              <>
+                <EuiSpacer />
+                <EuiCallOut
+                  title={i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.modelError.title',
+                    { defaultMessage: 'Error changing model state' }
+                  )}
+                  color="danger"
+                  iconType="error"
+                >
+                  {modelStateChangeError}
+                </EuiCallOut>
+                <EuiSpacer />
+              </>
+            )}
             <EuiFormRow
               fullWidth
               label={i18n.translate(
