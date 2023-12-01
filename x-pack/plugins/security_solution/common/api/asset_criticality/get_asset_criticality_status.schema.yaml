@@ -15,7 +15,6 @@ paths:
                 $ref: '#/components/schemas/AssetCriticalityStatusResponse'
         '400':
           description: Invalid request
-              responses:
 
 components:
   schemas:

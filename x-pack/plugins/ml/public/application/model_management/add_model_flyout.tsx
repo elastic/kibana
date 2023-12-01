@@ -42,52 +42,52 @@ export interface AddModelFlyoutProps {
   onSubmit: (modelId: string) => void;
 }
 
+type FlyoutTabId = 'clickToDownload' | 'manualDownload';
+
 /**
  * Flyout for downloading elastic curated models and showing instructions for importing third-party models.
  */
 export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, modelDownloads }) => {
   const canCreateTrainedModels = usePermissionCheck('canCreateTrainedModels');
-  const isElserTabVisible = canCreateTrainedModels && modelDownloads.length > 0;
+  const isClickToDownloadTabVisible = canCreateTrainedModels && modelDownloads.length > 0;
 
-  const [selectedTabId, setSelectedTabId] = useState(isElserTabVisible ? 'elser' : 'thirdParty');
+  const [selectedTabId, setSelectedTabId] = useState<FlyoutTabId>(
+    isClickToDownloadTabVisible ? 'clickToDownload' : 'manualDownload'
+  );
 
   const tabs = useMemo(() => {
     return [
-      ...(isElserTabVisible
+      ...(isClickToDownloadTabVisible
         ? [
             {
-              id: 'elser',
+              id: 'clickToDownload' as const,
               name: (
-                <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="logoElastic" size="m" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.addModelFlyout.elserTabLabel"
-                      defaultMessage="ELSER"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.addModelFlyout.clickToDownloadTabLabel"
+                  defaultMessage="Click to Download"
+                />
               ),
               content: (
-                <ElserTabContent modelDownloads={modelDownloads} onModelDownload={onSubmit} />
+                <ClickToDownloadTabContent
+                  modelDownloads={modelDownloads}
+                  onModelDownload={onSubmit}
+                />
               ),
             },
           ]
         : []),
       {
-        id: 'thirdParty',
+        id: 'manualDownload' as const,
         name: (
           <FormattedMessage
             id="xpack.ml.trainedModels.addModelFlyout.thirdPartyLabel"
-            defaultMessage="Third-party"
+            defaultMessage="Manual Download"
           />
         ),
-        content: <ThirdPartyTabContent />,
+        content: <ManualDownloadTabContent />,
       },
     ];
-  }, [isElserTabVisible, modelDownloads, onSubmit]);
+  }, [isClickToDownloadTabVisible, modelDownloads, onSubmit]);
 
   const selectedTabContent = useMemo(() => {
     return tabs.find((obj) => obj.id === selectedTabId)?.content;
@@ -133,15 +133,18 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
   );
 };
 
-interface ElserTabContentProps {
+interface ClickToDownloadTabContentProps {
   modelDownloads: ModelItem[];
   onModelDownload: (modelId: string) => void;
 }
 
 /**
- * ELSER tab content for selecting a model to download.
+ * Tab content for selecting a model to download.
  */
-const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDownload }) => {
+const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
+  modelDownloads,
+  onModelDownload,
+}) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -157,26 +160,33 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
           <React.Fragment key={modelName}>
             {modelName === 'elser' ? (
               <div>
-                <EuiTitle size={'s'}>
-                  <h3>
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.elserTitle"
-                      defaultMessage="Elastic Learned Sparse EncodeR (ELSER)"
-                    />
-                  </h3>
-                </EuiTitle>
+                <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="logoElastic" size="l" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size={'s'}>
+                      <h3>
+                        <FormattedMessage
+                          id="xpack.ml.trainedModels.modelsList.elserTitle"
+                          defaultMessage="ELSER (Elastic Learned Sparse EncodeR)"
+                        />
+                      </h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <EuiSpacer size="s" />
                 <p>
                   <EuiText color={'subdued'} size={'s'}>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.addModelFlyout.elserDescription"
-                      defaultMessage="ELSER is designed to efficiently use context in natural language queries with better results than BM25 alone."
+                      defaultMessage="ELSER is Elastic's NLP model for English semantic search, utilizing sparse vectors. It prioritizes intent and contextual meaning over literal term matching, optimized specifically for English documents and queries on the Elastic platform."
                     />
                   </EuiText>
                 </p>
                 <EuiSpacer size="s" />
                 <p>
-                  <EuiLink href={docLinks.links.ml.nlpElser} external>
+                  <EuiLink href={docLinks.links.ml.nlpElser} external target={'_blank'}>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.modelsList.elserViewDocumentationLinkLabel"
                       defaultMessage="View documentation"
@@ -184,6 +194,52 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
                   </EuiLink>
                 </p>
                 <EuiSpacer size={'m'} />
+              </div>
+            ) : null}
+
+            {modelName === 'e5' ? (
+              <div>
+                <EuiTitle size={'s'}>
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.e5Title"
+                      defaultMessage="E5 (EmbEddings from bidirEctional Encoder rEpresentations)"
+                    />
+                  </h3>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <p>
+                  <EuiText color={'subdued'} size={'s'}>
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.addModelFlyout.e5Description"
+                      defaultMessage="E5 is an NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model performs best for non-English language documents and queries."
+                    />
+                  </EuiText>
+                </p>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup justifyContent={'spaceBetween'} gutterSize={'none'}>
+                  <EuiFlexItem grow={false}>
+                    <EuiLink href={docLinks.links.ml.nlpE5} external target={'_blank'}>
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.modelsList.elserViewDocumentationLinkLabel"
+                        defaultMessage="View documentation"
+                      />
+                    </EuiLink>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge
+                      color="hollow"
+                      target={'_blank'}
+                      href={'https://huggingface.co/elastic/multilingual-e5-small-optimized'}
+                    >
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.modelsList.mitLicenseLabel"
+                        defaultMessage="License: MIT"
+                      />
+                    </EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size={'l'} />
               </div>
             ) : null}
 
@@ -197,7 +253,7 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
                 ),
               }}
             >
-              {models.map((model) => {
+              {models.map((model, index) => {
                 return (
                   <React.Fragment key={model.model_id}>
                     <EuiCheckableCard
@@ -256,11 +312,12 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
                       checked={model.model_id === selectedModelId}
                       onChange={setSelectedModelId.bind(null, model.model_id)}
                     />
-                    <EuiSpacer size="m" />
+                    {index < models.length - 1 ? <EuiSpacer size="m" /> : null}
                   </React.Fragment>
                 );
               })}
             </EuiFormFieldset>
+            <EuiSpacer size="xxl" />
           </React.Fragment>
         );
       })}
@@ -279,9 +336,9 @@ const ElserTabContent: FC<ElserTabContentProps> = ({ modelDownloads, onModelDown
 };
 
 /**
- * Third-party tab content for showing instructions for importing third-party models.
+ * Manual download tab content for showing instructions for importing third-party models.
  */
-const ThirdPartyTabContent: FC = () => {
+const ManualDownloadTabContent: FC = () => {
   const {
     services: { docLinks },
   } = useMlKibana();
