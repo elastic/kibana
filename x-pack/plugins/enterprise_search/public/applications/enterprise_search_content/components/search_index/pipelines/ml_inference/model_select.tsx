@@ -51,9 +51,6 @@ export const ModelSelect: React.FC = () => {
     });
   };
 
-  // Make the list dynamically grow with the number of selection items, up to 4 of them
-  const getSelectionListHeight = (selectableModels: MlModel[]) => Math.min(selectableModels.length, 4) * 90;
-
   const renderOption = (option: ModelSelectOptionProps) => <ModelSelectOption {...option} />;
 
   return (
@@ -67,7 +64,7 @@ export const ModelSelect: React.FC = () => {
         showIcons: false,
         onFocusBadge: false,
       }}
-      height={getSelectionListHeight(selectableModels)}
+      height={360}
       onChange={onChange}
       renderOption={renderOption}
       isLoading={isLoading}
