@@ -18,7 +18,7 @@ import {
 import {
   createHostAssetCriticalityEnrichments,
   createUserAssetCriticalityEnrichments,
-  getDoesAssetCriticalityIndexExist,
+  doesAssetCriticalityIndexExist,
 } from './enrichment_by_type/asset_criticality';
 
 import type {
@@ -82,11 +82,11 @@ export const enrichEvents: EnrichEventsFunction = async ({
     }
 
     if (isAssetCriticalityEnabled) {
-      const doesAssetCriticalityIndexExist = await getDoesAssetCriticalityIndexExist({
+      const assetCriticalityIndexExist = await doesAssetCriticalityIndexExist({
         spaceId,
         services,
       });
-      if (doesAssetCriticalityIndexExist) {
+      if (assetCriticalityIndexExist) {
         enrichments.push(
           createUserAssetCriticalityEnrichments({
             services,

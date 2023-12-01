@@ -77,7 +77,7 @@ export type GetIsRiskScoreAvailable = (params: {
   isNewRiskScoreModuleInstalled: boolean;
 }) => Promise<boolean>;
 
-export type GetIsAssetCriticalityAvailable = (params: {
+export type DoesAssetCriticalityAvailable = (params: {
   spaceId: string;
   services: RuleServices;
 }) => Promise<boolean>;

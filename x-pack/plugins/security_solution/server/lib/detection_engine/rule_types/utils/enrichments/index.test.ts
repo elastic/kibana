@@ -12,8 +12,9 @@ import { searchEnrichments } from './search_enrichments';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 import { createAlert } from './__mocks__/alerts';
 import { getIsHostRiskScoreAvailable } from './enrichment_by_type/host_risk';
-
 import { getIsUserRiskScoreAvailable } from './enrichment_by_type/user_risk';
+import { doesAssetCriticalityIndexExist } from './enrichment_by_type/asset_criticality';
+import { allowedExperimentalValues } from '../../../../../../common';
 
 jest.mock('./search_enrichments', () => ({
   searchEnrichments: jest.fn(),
@@ -30,7 +31,14 @@ jest.mock('./enrichment_by_type/user_risk', () => ({
   ...jest.requireActual('./enrichment_by_type/user_risk'),
   getIsUserRiskScoreAvailable: jest.fn(),
 }));
+
+jest.mock('./enrichment_by_type/asset_criticality', () => ({
+  ...jest.requireActual('./enrichment_by_type/asset_criticality'),
+  doesAssetCriticalityIndexExist: jest.fn(),
+}));
+
 const mockGetIsUserRiskScoreAvailable = getIsUserRiskScoreAvailable as jest.Mock;
+const mockDoesAssetCriticalityIndexExist = doesAssetCriticalityIndexExist as jest.Mock;
 
 const hostEnrichmentResponse = [
   {
@@ -66,6 +74,30 @@ const userEnrichmentResponse = [
   },
 ];
 
+const assetCriticalityUserResponse = [
+  {
+    fields: {
+      id_value: ['user name 1'],
+      criticality_level: ['important'],
+    },
+  },
+];
+
+const assetCriticalityHostResponse = [
+  {
+    fields: {
+      id_value: ['host name 2'],
+      criticality_level: ['very_important'],
+    },
+  },
+  {
+    fields: {
+      id_value: ['host name 1'],
+      criticality_level: ['low'],
+    },
+  },
+];
+
 describe('enrichEvents', () => {
   let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
   let alertServices: RuleExecutorServicesMock;
@@ -75,6 +107,11 @@ describe('enrichEvents', () => {
   beforeEach(() => {
     ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
     alertServices = alertsMock.createRuleExecutorServices();
+  });
+  afterEach(() => {
+    mockGetIsUserRiskScoreAvailable.mockClear();
+    mockGetIsUserRiskScoreAvailable.mockClear();
+    doesAssetCriticalityIndexExist.mockClear();
   });
 
   it('return the same events, if risk indexes are not available', async () => {
@@ -110,7 +147,7 @@ describe('enrichEvents', () => {
     expect(enrichedEvents).toEqual(events);
   });
 
-  it('return enriched events', async () => {
+  it('return enriched events with risk score', async () => {
     mockSearchEnrichments
       .mockReturnValueOnce(hostEnrichmentResponse)
       .mockReturnValueOnce(userEnrichmentResponse);
@@ -155,6 +192,54 @@ describe('enrichEvents', () => {
             calculated_score_norm: 90,
           },
         },
+      }),
+    ]);
+  });
+
+  it('return enriched events with asset criticality', async () => {
+    mockSearchEnrichments
+      .mockReturnValueOnce(assetCriticalityUserResponse)
+      .mockReturnValueOnce(assetCriticalityHostResponse);
+
+    mockGetIsUserRiskScoreAvailable.mockImplementation(() => false);
+    mockGetIsHostRiskScoreAvailable.mockImplementation(() => false);
+    mockDoesAssetCriticalityIndexExist.mockImplementation(() => true);
+
+    const enrichedEvents = await enrichEvents({
+      logger: ruleExecutionLogger,
+      services: alertServices,
+      events: [
+        createAlert('1', {
+          ...createEntity('host', 'host name 1'),
+          ...createEntity('user', 'user name 1'),
+        }),
+        createAlert('2', createEntity('host', 'user name 1')),
+      ],
+      spaceId: 'default',
+      experimentalFeatures: {
+        ...allowedExperimentalValues,
+        entityAnalyticsAssetCriticalityEnabled: true,
+      },
+    });
+
+    expect(enrichedEvents).toEqual([
+      createAlert('1', {
+        ...createEntity('user', 'user name 1'),
+        ...createEntity('host', 'host name 1'),
+
+        kibana: {
+          alert: {
+            host: {
+              criticality_level: 'low',
+            },
+            user: {
+              criticality_level: 'important',
+            },
+          },
+        },
+      }),
+      createAlert('2', {
+        ...createEntity('host', 'user name 1'),
       }),
     ]);
   });

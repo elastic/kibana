@@ -10,13 +10,13 @@ import { cloneDeep } from 'lodash';
 import { createSingleFieldMatchEnrichment } from '../create_single_field_match_enrichment';
 import type {
   CreateCriticalityEnrichment,
-  GetIsAssetCriticalityAvailable,
+  DoesAssetCriticalityAvailable,
   CreateEnrichmentFunction,
 } from '../types';
 import { getFieldValue } from '../utils/events';
 import { getAssetCriticalityIndex } from '../../../../../../../common/asset_criticality';
 
-export const getDoesAssetCriticalityIndexExist: GetIsAssetCriticalityAvailable = async ({
+export const doesAssetCriticalityIndexExist: DoesAssetCriticalityAvailable = async ({
   spaceId,
   services,
 }) => {
