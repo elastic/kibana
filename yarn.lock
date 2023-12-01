@@ -1589,14 +1589,7 @@
   resolved "https://registry.yarnpkg.com/@elastic/ecs-helpers/-/ecs-helpers-2.1.1.tgz#8a375b307c33a959938d9ae8f9abb466eb9fb3bf"
   integrity sha512-ItoNazMnYdlUCmkBYTXc3SG6PF7UlVTbvMdHPvXkfTMPdwGv2G1Xtp5CjDHaGHGOZSwaDrW4RSCXvA/lMSU+rg==
 
-"@elastic/ecs-pino-format@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ecs-pino-format/-/ecs-pino-format-1.2.0.tgz#3ee709eb2343b4d1a7a6d23bc467673d8c0de2c2"
-  integrity sha512-7TGPoxPMHkhqdp98u9F1+4aNwktgh8tlG/PX2c/d/RcAqHziaRCc72tuwGLMu9K/w/M5bWz0eKbcFXr4fSZGwg==
-  dependencies:
-    "@elastic/ecs-helpers" "^1.1.0"
-
-"@elastic/ecs-pino-format@^1.4.0":
+"@elastic/ecs-pino-format@^1.2.0", "@elastic/ecs-pino-format@^1.4.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@elastic/ecs-pino-format/-/ecs-pino-format-1.5.0.tgz#48610e06e939b50bfa3629da0d2fcb1c74a69a20"
   integrity sha512-7MMVmT50ucEl7no8mUgCIl+pffBVNRl36uZi0vmalWa2xPWISBxM9k9WSP/WTgOkmGj9G35e5g3UfCS1zxshBg==
