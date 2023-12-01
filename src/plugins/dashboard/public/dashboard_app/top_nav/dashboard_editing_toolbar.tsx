@@ -81,7 +81,11 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
   );
 
   const createNewEmbeddable = useCallback(
-    async (embeddableFactory: EmbeddableFactory, initialInput?: Partial<EmbeddableInput>) => {
+    async (
+      embeddableFactory: EmbeddableFactory,
+      initialInput?: Partial<EmbeddableInput>,
+      dismissNotification?: boolean
+    ) => {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, embeddableFactory.type);
       }
@@ -117,20 +121,31 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
       if (newEmbeddable) {
         dashboard.setScrollToPanelId(newEmbeddable.id);
         dashboard.setHighlightPanelId(newEmbeddable.id);
-        toasts.addSuccess({
-          title: dashboardReplacePanelActionStrings.getSuccessMessage(newEmbeddable.getTitle()),
-          'data-test-subj': 'addEmbeddableToDashboardSuccess',
-        });
+
+        if (!dismissNotification) {
+          toasts.addSuccess({
+            title: dashboardReplacePanelActionStrings.getSuccessMessage(newEmbeddable.getTitle()),
+            'data-test-subj': 'addEmbeddableToDashboardSuccess',
+          });
+        }
       }
       return newEmbeddable;
     },
     [trackUiMetric, dashboard, toasts]
   );
 
+  const deleteEmbeddable = useCallback(
+    (embeddableId: string) => {
+      dashboard.removeEmbeddable(embeddableId);
+    },
+    [dashboard]
+  );
+
   const extraButtons = [
     <EditorMenu
       createNewVisType={createNewVisType}
       createNewEmbeddable={createNewEmbeddable}
+      deleteEmbeddable={deleteEmbeddable}
       isDisabled={isDisabled}
     />,
     <AddFromLibraryButton

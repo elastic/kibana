@@ -29,6 +29,7 @@ const onAddPanelActionClick =
 export const getAddPanelActionMenuItems = (
   actions: Array<Action<object>> | undefined,
   createNewEmbeddable: (embeddableFactory: EmbeddableFactory) => void,
+  deleteEmbeddable: (embeddableId: string) => void,
   closePopover: () => void
 ) => {
   const actionsWithContext =
@@ -36,6 +37,7 @@ export const getAddPanelActionMenuItems = (
       action,
       context: {
         createNewEmbeddable,
+        deleteEmbeddable,
       },
       trigger: addPanelMenuTrigger,
     })) ?? [];

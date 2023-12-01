@@ -20,6 +20,7 @@ export interface FlyoutWrapperProps {
   displayFlyoutHeader?: boolean;
   language?: string;
   attributesChanged?: boolean;
+  isNewPanel?: boolean;
   onCancel?: () => void;
   onApply?: () => void;
   navigateToLensEditor?: () => void;
@@ -70,6 +71,10 @@ export interface EditConfigPanelProps {
   displayFlyoutHeader?: boolean;
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
   canEditTextBasedQuery?: boolean;
+  /** The flyout is used for adding a new panel by scratch */
+  isNewPanel?: boolean;
+  /** Handler for deleting the embeddable, used in case a user cancels a newly created chart */
+  onDeletePanel?: () => void;
 }
 
 export interface LayerConfigurationProps {

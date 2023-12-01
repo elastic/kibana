@@ -18,6 +18,8 @@ interface Context {
   startDependencies: LensPluginStartDependencies;
   overlays: OverlayStart;
   theme: ThemeServiceStart;
+  isNewPanel?: boolean;
+  onDeletePanel?: () => void;
 }
 
 export async function isEditActionCompatible(embeddable: IEmbeddable) {
@@ -31,6 +33,8 @@ export async function executeEditAction({
   startDependencies,
   overlays,
   theme,
+  isNewPanel,
+  onDeletePanel,
 }: Context) {
   const isCompatibleAction = await isEditActionCompatible(embeddable);
   if (!isCompatibleAction || !isLensEmbeddable(embeddable)) {
@@ -38,7 +42,11 @@ export async function executeEditAction({
   }
   const rootEmbeddable = embeddable.getRoot();
   const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-  const ConfigPanel = await embeddable.openConfingPanel(startDependencies);
+  const ConfigPanel = await embeddable.openConfingPanel(
+    startDependencies,
+    isNewPanel,
+    onDeletePanel
+  );
   if (ConfigPanel) {
     const handle = overlays.openFlyout(
       toMountPoint(

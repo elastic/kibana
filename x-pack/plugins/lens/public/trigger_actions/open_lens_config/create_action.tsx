@@ -17,7 +17,12 @@ import type { LensPluginStartDependencies } from '../../plugin';
 const ACTION_CREATE_ESQL_CHART = 'ACTION_CREATE_ESQL_CHART';
 
 interface Context {
-  createNewEmbeddable: (embeddableFactory: EmbeddableFactory) => Promise<undefined | IEmbeddable>;
+  createNewEmbeddable: (
+    embeddableFactory: EmbeddableFactory,
+    initialInput?: Partial<EmbeddableInput>,
+    dismissNotification?: boolean
+  ) => Promise<undefined | IEmbeddable>;
+  deleteEmbeddable: (embeddableId: string) => void;
   initialInput?: Partial<EmbeddableInput>;
 }
 
@@ -50,8 +55,13 @@ export class CreateESQLPanelAction implements Action<Context> {
     return isCreateActionCompatible(this.core);
   }
 
-  public async execute({ createNewEmbeddable }: Context) {
+  public async execute({ createNewEmbeddable, deleteEmbeddable }: Context) {
     const { executeCreateAction } = await getAsyncHelpers();
-    executeCreateAction({ deps: this.startDependencies, core: this.core, createNewEmbeddable });
+    executeCreateAction({
+      deps: this.startDependencies,
+      core: this.core,
+      createNewEmbeddable,
+      deleteEmbeddable,
+    });
   }
 }

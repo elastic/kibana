@@ -37,13 +37,16 @@ export async function executeCreateAction({
   deps,
   core,
   createNewEmbeddable,
+  deleteEmbeddable,
 }: {
   deps: LensPluginStartDependencies;
   core: CoreStart;
   createNewEmbeddable: (
     embeddableFactory: EmbeddableFactory,
-    initialInput?: Partial<EmbeddableInput>
+    initialInput?: Partial<EmbeddableInput>,
+    dismissNotification?: boolean
   ) => Promise<undefined | IEmbeddable>;
+  deleteEmbeddable: (embeddableId: string) => void;
 }) {
   const isCompatibleAction = isCreateActionCompatible(core);
   const defaultDataView = await deps.dataViews.getDefaultDataView({
@@ -105,14 +108,20 @@ export async function executeCreateAction({
   if (!factory) {
     return undefined;
   }
-  const embeddable = await createNewEmbeddable(factory, input);
+  const embeddable = await createNewEmbeddable(factory, input, true);
   // open the flyout if embeddable has been created successfully
   if (embeddable) {
+    const onDeletePanel = () => {
+      deleteEmbeddable(embeddable.id);
+    };
+
     executeEditAction({
       embeddable,
       startDependencies: deps,
       overlays: core.overlays,
       theme: core.theme,
+      isNewPanel: true,
+      onDeletePanel,
     });
   }
 }

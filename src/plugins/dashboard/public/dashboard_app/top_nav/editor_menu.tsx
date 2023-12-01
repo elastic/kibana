@@ -32,6 +32,8 @@ interface Props {
   createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
   /** Handler for creating a new embeddable of a specified type */
   createNewEmbeddable: (embeddableFactory: EmbeddableFactory) => void;
+  /** Handler for deleting an embeddable */
+  deleteEmbeddable: (embeddableId: string) => void;
 }
 
 interface FactoryGroup {
@@ -47,7 +49,12 @@ interface UnwrappedEmbeddableFactory {
   isEditable: boolean;
 }
 
-export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }: Props) => {
+export const EditorMenu = ({
+  createNewVisType,
+  createNewEmbeddable,
+  deleteEmbeddable,
+  isDisabled,
+}: Props) => {
   const {
     embeddable,
     visualizations: {
@@ -139,7 +146,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }
       setAddPanelActions(registeredActions);
     }
     loadPanelActions();
-  }, [createNewEmbeddable, embeddableFactories, uiActions]);
+  }, [uiActions]);
 
   factories.forEach(({ factory }) => {
     const { grouping } = factory;
@@ -256,7 +263,12 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }
       })),
 
       ...promotedVisTypes.map(getVisTypeMenuItem),
-      ...getAddPanelActionMenuItems(addPanelActions, createNewEmbeddable, closePopover),
+      ...getAddPanelActionMenuItems(
+        addPanelActions,
+        createNewEmbeddable,
+        deleteEmbeddable,
+        closePopover
+      ),
     ];
     if (aggsBasedVisTypes.length > 0) {
       initialPanelItems.push({
