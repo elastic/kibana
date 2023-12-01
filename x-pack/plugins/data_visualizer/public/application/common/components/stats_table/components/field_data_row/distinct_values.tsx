@@ -10,6 +10,7 @@ import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { SUPPORTED_FIELD_TYPES } from '../../../../../../../common/constants';
 import { useDataVisualizerKibana } from '../../../../../kibana_context';
 import { FieldDataRowProps } from '../../types';
 
@@ -32,7 +33,7 @@ export const DistinctValues = ({ showIcon, config }: Props) => {
   const { sampleCount } = stats;
 
   const tooltipContent =
-    type === 'text' ? (
+    type === SUPPORTED_FIELD_TYPES.TEXT ? (
       <FormattedMessage
         id="xpack.dataVisualizer.partialResultsMessage"
         defaultMessage="The cardinality for text fields is sampled and calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
@@ -50,7 +51,7 @@ export const DistinctValues = ({ showIcon, config }: Props) => {
     ) : null;
 
   const icon = showIcon ? (
-    type === 'text' ? (
+    type === SUPPORTED_FIELD_TYPES.TEXT ? (
       <EuiToolTip content={tooltipContent}>
         <EuiIcon type="partial" size={'m'} className={'columnHeader__icon'} />
       </EuiToolTip>

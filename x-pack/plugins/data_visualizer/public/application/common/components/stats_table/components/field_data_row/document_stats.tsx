@@ -11,6 +11,7 @@ import React from 'react';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SUPPORTED_FIELD_TYPES } from '../../../../../../../common/constants';
 import { useDataVisualizerKibana } from '../../../../../kibana_context';
 import { isIndexBasedFieldVisConfig } from '../../../../../../../common/types/field_vis_config';
 import type { FieldDataRowProps } from '../../types/field_data_row';
@@ -51,7 +52,7 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
   );
 
   const tooltipContent =
-    type === 'text' ? (
+    type === SUPPORTED_FIELD_TYPES.TEXT ? (
       <FormattedMessage
         id="xpack.dataVisualizer.partialResultsMessage"
         defaultMessage="The % of documents for text fields is sampled and calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
@@ -69,7 +70,7 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
     ) : null;
 
   const icon = showIcon ? (
-    type === 'text' ? (
+    type === SUPPORTED_FIELD_TYPES.TEXT ? (
       <EuiToolTip content={tooltipContent}>
         <EuiIcon type="partial" size={'m'} className={'columnHeader__icon'} />
       </EuiToolTip>
