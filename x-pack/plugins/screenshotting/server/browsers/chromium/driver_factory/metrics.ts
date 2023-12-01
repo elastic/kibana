@@ -11,6 +11,7 @@ import { PerformanceMetrics } from '../../../../common/types';
 
 declare module 'puppeteer' {
   interface CDPSession {
+    // @ts-expect-error required to augment the actual definition from puppeteer
     send(command: 'Performance.getMetrics'): Promise<RawMetrics>;
   }
 }
