@@ -6,13 +6,14 @@
  */
 import numeral from '@elastic/numeral';
 
-/*
- * Retrieve a number abbreviated in the following format:
-    thousand: 'k'
-    million: 'm'
-    billion: 'b'
-    trillion: 't'
- */
+/**
+ * Returns an abbreviated number when the value is greater than or equal to 1000.
+ * The abbreviated number is formatted using numeral:
+ * - thousand: k
+ * - million: m
+ * - billion: b
+ * - trillion: t
+ * */
 export const getAbbreviatedNumber = (value: number) => {
   if (isNaN(value)) {
     return 0;
