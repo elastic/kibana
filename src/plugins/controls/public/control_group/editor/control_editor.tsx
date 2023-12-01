@@ -177,6 +177,8 @@ export const ControlEditor = ({
           const factory = getControlFactory(controlType);
           return (
             <EuiKeyPadMenuItem
+              key={controlType}
+              data-test-subj={`create__${controlType}`}
               isSelected={controlType === selectedControlType}
               disabled={
                 fieldRegistry && selectedField

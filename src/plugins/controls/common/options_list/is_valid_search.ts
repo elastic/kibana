@@ -24,8 +24,7 @@ export const isValidSearch = ({
   fieldType?: string;
   searchTechnique?: OptionsListSearchTechnique;
 }): boolean => {
-  if (!searchString) return false;
-  if (searchString.length === 0) return true;
+  if (!searchString || searchString.length === 0) return true;
 
   switch (fieldType) {
     case 'ip': {
