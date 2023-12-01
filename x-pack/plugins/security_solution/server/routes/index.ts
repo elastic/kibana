@@ -29,28 +29,10 @@ import { querySignalsRoute } from '../lib/detection_engine/routes/signals/query_
 import { setSignalsStatusRoute } from '../lib/detection_engine/routes/signals/open_close_signals_route';
 import { deleteIndexRoute } from '../lib/detection_engine/routes/index/delete_index_route';
 import { readPrivilegesRoute } from '../lib/detection_engine/routes/privileges/read_privileges_route';
-import {
-  createTimelinesRoute,
-  deleteTimelinesRoute,
-  exportTimelinesRoute,
-  getTimelineRoute,
-  getTimelinesRoute,
-  importTimelinesRoute,
-  patchTimelinesRoute,
-  persistFavoriteRoute,
-  resolveTimelineRoute,
-} from '../lib/timeline/routes/timelines';
-import { getDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/get_draft_timelines';
-import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/clean_draft_timelines';
-
-import { persistNoteRoute, deleteNoteRoute } from '../lib/timeline/routes/notes';
-
-import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 
 import type { SetupPlugins, StartPlugins } from '../plugin';
 import type { ConfigType } from '../config';
 import type { ITelemetryEventsSender } from '../lib/telemetry/sender';
-import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import type {
   CreateRuleOptions,
   CreateSecurityRuleTypeWrapperProps,
@@ -81,6 +63,7 @@ import {
   riskEngineStatusRoute,
   riskEnginePrivilegesRoute,
 } from '../lib/entity_analytics/risk_engine/routes';
+import { registerTimelineRoutes } from '../lib/timeline/routes';
 import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_score/routes/calculation';
 import { riskScorePreviewRoute } from '../lib/entity_analytics/risk_score/routes/preview';
 import { assetCriticalityStatusRoute } from '../lib/entity_analytics/asset_criticality/routes';
@@ -122,24 +105,7 @@ export const initRoutes = (
 
   registerResolverRoutes(router, getStartServices, config);
 
-  createTimelinesRoute(router, config, security);
-  patchTimelinesRoute(router, config, security);
-
-  importTimelinesRoute(router, config, security);
-  exportTimelinesRoute(router, config, security);
-  getDraftTimelinesRoute(router, config, security);
-  getTimelineRoute(router, config, security);
-  resolveTimelineRoute(router, config, security);
-  getTimelinesRoute(router, config, security);
-  cleanDraftTimelinesRoute(router, config, security);
-  deleteTimelinesRoute(router, config, security);
-  persistFavoriteRoute(router, config, security);
-
-  installPrepackedTimelinesRoute(router, config, security);
-
-  persistNoteRoute(router, config, security);
-  deleteNoteRoute(router, config, security);
-  persistPinnedEventRoute(router, config, security);
+  registerTimelineRoutes(router, config, security);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status

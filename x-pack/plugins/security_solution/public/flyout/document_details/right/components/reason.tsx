@@ -41,11 +41,11 @@ export const Reason: FC = () => {
         indexName,
         scopeId,
         banner: {
-          title: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle"
-              defaultMessage="Preview alert reason"
-            />
+          title: i18n.translate(
+            'xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle',
+            {
+              defaultMessage: 'Preview alert reason',
+            }
           ),
           backgroundColor: 'warning',
           textColor: 'warning',
