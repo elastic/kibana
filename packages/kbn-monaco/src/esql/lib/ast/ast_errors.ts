@@ -44,7 +44,7 @@ export function createError(exception: RecognitionException) {
       ? `SyntaxError: expected {${getExpectedSymbols(exception.expectedTokens).join(
           ', '
         )}} but found "${token.text}"`
-      : '',
+      : exception.message,
     location: getPosition(token),
   };
 }
