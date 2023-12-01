@@ -11,6 +11,7 @@ import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 
 import { ExternalPageName } from '../../navigation/links/constants';
 import { useAddIntegrationCalloutStyles } from '../styles/add_integration_callout.styles';
+import { ADD_INTEGRATIONS } from './translations';
 
 const AddIntegrationCalloutComponent = ({ stepName }: { stepName?: string }) => {
   const { calloutWrapperStyles, calloutTitleStyles } = useAddIntegrationCalloutStyles();
@@ -31,14 +32,11 @@ const AddIntegrationCalloutComponent = ({ stepName }: { stepName?: string }) => 
             <span css={calloutTitleStyles}>
               <FormattedMessage
                 id="xpack.securitySolutionServerless.getStarted.viewDashboard.addIntegrationCallout.description"
-                defaultMessage="To {stepName} {addIntegration} First"
+                defaultMessage="To {stepName} {addIntegration} first"
                 values={{
                   addIntegration: (
                     <LinkAnchor id={ExternalPageName.integrationsSecurity}>
-                      <FormattedMessage
-                        id="xpack.securitySolutionServerless.getStarted.addIntegration.link.title"
-                        defaultMessage="Add integrations"
-                      />
+                      {ADD_INTEGRATIONS}
                     </LinkAnchor>
                   ),
                   stepName: stepName ?? (

@@ -38,7 +38,7 @@ export const VIEW_ALERTS = i18n.translate(
 export const VIEW_ALERTS_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.task.viewAlerts.callout.title',
   {
-    defaultMessage: 'view Alerts',
+    defaultMessage: 'view alerts',
   }
 );
 
