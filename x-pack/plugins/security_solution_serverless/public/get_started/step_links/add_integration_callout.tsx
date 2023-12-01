@@ -41,7 +41,7 @@ const AddIntegrationCalloutComponent = ({ stepName }: { stepName?: string }) => 
                   ),
                   stepName: stepName ?? (
                     <FormattedMessage
-                      id="xpack.securitySolutionServerless.getStarted.addIntegration.link.action"
+                      id="xpack.securitySolutionServerless.getStarted.addIntegrationCallout.link.action"
                       defaultMessage="enable this step"
                     />
                   ),
