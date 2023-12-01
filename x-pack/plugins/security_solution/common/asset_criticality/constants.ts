@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export * from './indices';
-export * from './constants';
+export const ASSET_CRITICALITY_INDEX_PATTERN = '.asset-criticality.asset-criticality-*';
+
+export const ASSET_CRITICALITY_REQUIRED_ES_INDEX_PRIVILEGES = Object.freeze({
+  [ASSET_CRITICALITY_INDEX_PATTERN]: ['read', 'write'],
+});
