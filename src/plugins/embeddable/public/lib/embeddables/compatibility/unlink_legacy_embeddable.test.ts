@@ -6,60 +6,34 @@
  * Side Public License, v 1.
  */
 
-import { DashboardPanelState } from '@kbn/dashboard-plugin/common';
-import { type DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-import {
-  buildMockDashboard,
-  getMockedDashboardServices,
-  setStubDashboardServices,
-} from '@kbn/dashboard-plugin/public/mocks';
-import { ErrorEmbeddable, IContainer, SavedObjectEmbeddableInput } from '../..';
+import { ErrorEmbeddable, IContainer, PanelState, SavedObjectEmbeddableInput } from '../..';
 import { embeddablePluginMock } from '../../../mocks';
+import { createHelloWorldContainerAndEmbeddable } from '../../../tests/helpers';
 import { ReferenceOrValueEmbeddable } from '../../reference_or_value_embeddable';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
 } from '../../test_samples';
 import { ViewMode } from '../../types';
-import { isErrorEmbeddable } from '../is_error_embeddable';
 import { CommonLegacyEmbeddable } from './legacy_embeddable_to_api';
 import { canLinkLegacyEmbeddable } from './link_legacy_embeddable';
 import { canUnlinkLegacyEmbeddable, unlinkLegacyEmbeddable } from './unlink_legacy_embeddable';
 
-let container: DashboardContainer;
+let container: IContainer;
 let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;
 
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 
-beforeAll(() => {
-  setStubDashboardServices();
-  const dashboardServices = getMockedDashboardServices();
-  dashboardServices.embeddable.getEmbeddableFactory = jest.fn().mockReturnValue(embeddableFactory);
-});
-
 beforeEach(async () => {
-  container = buildMockDashboard();
-
-  const contactCardEmbeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Kibanana',
-  });
-
-  if (isErrorEmbeddable(contactCardEmbeddable)) {
-    throw new Error('Failed to create embeddable');
-  }
+  const result = await createHelloWorldContainerAndEmbeddable();
+  container = result.container;
   embeddable = embeddablePluginMock.mockRefOrValEmbeddable<
     ContactCardEmbeddable,
     ContactCardEmbeddableInput
-  >(contactCardEmbeddable, {
-    mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: contactCardEmbeddable.id },
-    mockedByValueInput: { firstName: 'Kibanana', id: contactCardEmbeddable.id },
+  >(result.embeddable, {
+    mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: result.embeddable.id },
+    mockedByValueInput: { firstName: 'Kibanana', id: result.embeddable.id },
   });
   embeddable.updateInput({ viewMode: ViewMode.EDIT });
 });
@@ -156,7 +130,7 @@ test('Unlink unwraps all attributes from savedObject', async () => {
     (key) => !originalPanelKeySet.has(key)
   );
   expect(newPanelId).toBeDefined();
-  const newPanel = container.getInput().panels[newPanelId!] as DashboardPanelState & {
+  const newPanel = container.getInput().panels[newPanelId!] as PanelState & {
     explicitInput: { attributes: unknown };
   };
   expect(newPanel.type).toEqual(embeddable.type);

@@ -7,12 +7,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  CanDuplicatePanels,
-  CanExpandPanels,
-  PresentationContainer,
-  TracksOverlays,
-} from '@kbn/presentation-containers';
+import { CanDuplicatePanels, CanExpandPanels, TracksOverlays } from '@kbn/presentation-containers';
 import { HasTypeDisplayName, PublishesSavedObjectId } from '@kbn/presentation-publishing';
 import { DashboardPanelState } from '../../../common';
 import { DashboardContainer } from '../embeddable/dashboard_container';
@@ -23,8 +18,7 @@ export type AwaitingDashboardAPI = DashboardAPI | null;
 
 export const buildApiFromDashboardContainer = (container?: DashboardContainer) => container ?? null;
 
-export type DashboardExternallyAccessibleApi = PresentationContainer &
-  HasTypeDisplayName &
+export type DashboardExternallyAccessibleApi = HasTypeDisplayName &
   CanDuplicatePanels &
   TracksOverlays &
   PublishesSavedObjectId &

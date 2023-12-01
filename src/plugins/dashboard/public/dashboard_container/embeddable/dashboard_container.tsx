@@ -35,7 +35,7 @@ import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
-import { PanelPackage } from '@kbn/presentation-containers/interfaces/presentation_container';
+import { PanelPackage } from '@kbn/presentation-containers';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
 import { DASHBOARD_APP_ID, DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
@@ -365,10 +365,6 @@ export class DashboardContainer
     duplicateDashboardPanel.bind(this)(id);
   }
 
-  public removePanel(id: string) {
-    this.removeEmbeddable(id);
-  }
-
   public canRemovePanels = () => !this.getExpandedPanelId();
 
   public getTypeDisplayName = () => dashboardTypeDisplayName;
@@ -384,6 +380,9 @@ export class DashboardContainer
       panelType,
       true
     );
+    if (this.getExpandedPanelId() !== undefined) {
+      this.setExpandedPanelId(newId);
+    }
     this.setHighlightPanelId(newId);
     return newId;
   }

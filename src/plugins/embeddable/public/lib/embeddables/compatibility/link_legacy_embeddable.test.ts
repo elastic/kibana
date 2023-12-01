@@ -6,29 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { type DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-import {
-  buildMockDashboard,
-  getMockedDashboardServices,
-  setStubDashboardServices,
-} from '@kbn/dashboard-plugin/public/mocks';
-import { EmbeddableInput, ErrorEmbeddable, IContainer } from '../..';
+import { EmbeddableInput, ErrorEmbeddable, IContainer, SavedObjectEmbeddableInput } from '../..';
 import { core } from '../../../kibana_services';
 import { embeddablePluginMock } from '../../../mocks';
+import { createHelloWorldContainerAndEmbeddable } from '../../../tests/helpers';
 import { ReferenceOrValueEmbeddable } from '../../reference_or_value_embeddable';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
 } from '../../test_samples';
 import { ViewMode } from '../../types';
-import { isErrorEmbeddable } from '../is_error_embeddable';
 import { CommonLegacyEmbeddable } from './legacy_embeddable_to_api';
 import { canLinkLegacyEmbeddable, linkLegacyEmbeddable } from './link_legacy_embeddable';
 
-let container: DashboardContainer;
+let container: IContainer;
 let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 
@@ -39,46 +31,27 @@ const defaultCapabilities = {
   navLinks: {},
 };
 
-Object.defineProperty(core.application, 'capabilities', {
-  value: defaultCapabilities,
-});
-
-beforeAll(() => {
-  setStubDashboardServices();
-  const dashboardServices = getMockedDashboardServices();
-  dashboardServices.embeddable.getEmbeddableFactory = jest.fn().mockReturnValue(embeddableFactory);
-});
-
 beforeEach(async () => {
+  const result = await createHelloWorldContainerAndEmbeddable();
+  container = result.container;
+  embeddable = embeddablePluginMock.mockRefOrValEmbeddable<
+    ContactCardEmbeddable,
+    ContactCardEmbeddableInput
+  >(result.embeddable, {
+    mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: result.embeddable.id },
+    mockedByValueInput: { firstName: 'Kibanana', id: result.embeddable.id },
+  });
+  embeddable.updateInput({ viewMode: ViewMode.EDIT });
+});
+
+const assignDefaultCapabilities = () => {
   Object.defineProperty(core.application, 'capabilities', {
     value: defaultCapabilities,
   });
-
-  container = buildMockDashboard();
-
-  const contactCardEmbeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Kibanana',
-  });
-
-  if (isErrorEmbeddable(contactCardEmbeddable)) {
-    throw new Error('Failed to create embeddable');
-  } else {
-    embeddable = embeddablePluginMock.mockRefOrValEmbeddable<
-      ContactCardEmbeddable,
-      ContactCardEmbeddableInput
-    >(contactCardEmbeddable, {
-      mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: contactCardEmbeddable.id },
-      mockedByValueInput: { firstName: 'Kibanana', id: contactCardEmbeddable.id },
-    });
-    embeddable.updateInput({ viewMode: ViewMode.EDIT });
-  }
-});
+};
 
 test('Cannot link an Error Embeddable to the library', async () => {
+  assignDefaultCapabilities();
   const errorEmbeddable = new ErrorEmbeddable(
     'Wow what an awful error',
     { id: ' 404' },
@@ -90,6 +63,7 @@ test('Cannot link an Error Embeddable to the library', async () => {
 });
 
 test('Cannot link an ES|QL Embeddable to the library', async () => {
+  assignDefaultCapabilities();
   const filterableEmbeddable = embeddablePluginMock.mockFilterableEmbeddable(embeddable, {
     initialFilters: [],
     initialQuery: {
@@ -111,11 +85,13 @@ test('Cannot link a visualize embeddable to the library without visualize save p
 });
 
 test('Can link an embeddable to the library when it has value type input', async () => {
+  assignDefaultCapabilities();
   embeddable.updateInput(await embeddable.getInputAsValueType());
   expect(await canLinkLegacyEmbeddable(embeddable as unknown as CommonLegacyEmbeddable)).toBe(true);
 });
 
 test('Cannot link an embedable when its input is by reference', async () => {
+  assignDefaultCapabilities();
   embeddable.updateInput(await embeddable.getInputAsRefType());
   expect(await canLinkLegacyEmbeddable(embeddable as unknown as CommonLegacyEmbeddable)).toBe(
     false
@@ -123,6 +99,7 @@ test('Cannot link an embedable when its input is by reference', async () => {
 });
 
 test('Cannot link an embedable when view mode is set to view', async () => {
+  assignDefaultCapabilities();
   embeddable.updateInput(await embeddable.getInputAsRefType());
   embeddable.updateInput({ viewMode: ViewMode.VIEW });
   expect(await canLinkLegacyEmbeddable(embeddable as unknown as CommonLegacyEmbeddable)).toBe(
@@ -131,6 +108,7 @@ test('Cannot link an embedable when view mode is set to view', async () => {
 });
 
 test('Cannot link an embedable when it is not a child of a Dashboard container', async () => {
+  assignDefaultCapabilities();
   let orphanContactCard = await embeddableFactory.create({
     id: 'orphanContact',
     firstName: 'Orphan',
@@ -149,6 +127,7 @@ test('Cannot link an embedable when it is not a child of a Dashboard container',
 });
 
 test('Linking an embeddable replaces embeddableId and retains panel count', async () => {
+  assignDefaultCapabilities();
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
@@ -165,6 +144,7 @@ test('Linking an embeddable replaces embeddableId and retains panel count', asyn
 });
 
 test('Link legacy embeddable returns reference type input', async () => {
+  assignDefaultCapabilities();
   const complicatedAttributes = {
     attribute1: 'The best attribute',
     attribute2: 22,
@@ -186,5 +166,7 @@ test('Link legacy embeddable returns reference type input', async () => {
   const newPanel = container.getInput().panels[newPanelId!];
   expect(newPanel.type).toEqual(embeddable.type);
   expect((newPanel.explicitInput as unknown as { attributes: unknown }).attributes).toBeUndefined();
-  expect(newPanel.explicitInput.savedObjectId).toBe('testSavedObjectId');
+  expect((newPanel.explicitInput as SavedObjectEmbeddableInput).savedObjectId).toBe(
+    'testSavedObjectId'
+  );
 });

@@ -20,6 +20,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/std",
     "@kbn/expressions-plugin",
+    "@kbn/presentation-panel",
     "@kbn/data-plugin",
     "@kbn/core-overlays-browser-mocks",
     "@kbn/core-theme-browser-mocks",
@@ -33,7 +34,7 @@
     "@kbn/content-management-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/unified-search-plugin",
-    "@kbn/data-views-plugin",
+    "@kbn/data-views-plugin"
   ],
   "exclude": ["target/**/*"]
 }

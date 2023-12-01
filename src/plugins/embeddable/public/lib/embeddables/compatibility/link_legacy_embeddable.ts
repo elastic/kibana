@@ -15,17 +15,13 @@ import { isFilterableEmbeddable } from '../../filterable_embeddable';
 import { isReferenceOrValueEmbeddable } from '../../reference_or_value_embeddable';
 import { isErrorEmbeddable } from '../is_error_embeddable';
 import { CommonLegacyEmbeddable } from './legacy_embeddable_to_api';
-import { hasDashboardRequiredMethods } from './embeddable_compatibility_utils';
+import { IContainer } from '../../containers';
 
 export const canLinkLegacyEmbeddable = async (embeddable: CommonLegacyEmbeddable) => {
   // linking and unlinking legacy embeddables is only supported on Dashboard
   if (
     isErrorEmbeddable(embeddable) ||
-    !(
-      embeddable.getRoot() &&
-      embeddable.getRoot().isContainer &&
-      embeddable.getRoot().type === 'dashboard'
-    ) ||
+    !(embeddable.getRoot() && embeddable.getRoot().isContainer) ||
     !isReferenceOrValueEmbeddable(embeddable)
   ) {
     return false;
@@ -49,12 +45,8 @@ export const canLinkLegacyEmbeddable = async (embeddable: CommonLegacyEmbeddable
 };
 
 export const linkLegacyEmbeddable = async (embeddable: CommonLegacyEmbeddable) => {
-  const dashboard = embeddable.getRoot();
-  if (
-    !isReferenceOrValueEmbeddable(embeddable) ||
-    !hasDashboardRequiredMethods(dashboard) ||
-    !apiIsPresentationContainer(dashboard)
-  ) {
+  const root = embeddable.getRoot() as IContainer;
+  if (!isReferenceOrValueEmbeddable(embeddable) || !apiIsPresentationContainer(root)) {
     throw new IncompatibleActionError();
   }
 
@@ -63,16 +55,12 @@ export const linkLegacyEmbeddable = async (embeddable: CommonLegacyEmbeddable) =
   embeddable.updateInput(newInput);
 
   // Replace panel in parent.
-  const panelToReplace = dashboard.getInput().panels[embeddable.id];
+  const panelToReplace = root.getInput().panels[embeddable.id];
   if (!panelToReplace) {
     throw new PanelNotFoundError();
   }
-  const replacedPanelId = await dashboard.replacePanel(panelToReplace.explicitInput.id, {
+  await root.replacePanel(panelToReplace.explicitInput.id, {
     panelType: embeddable.type,
     initialState: { ...newInput },
   });
-
-  if (dashboard.getExpandedPanelId() !== undefined) {
-    dashboard.setExpandedPanelId(replacedPanelId);
-  }
 };

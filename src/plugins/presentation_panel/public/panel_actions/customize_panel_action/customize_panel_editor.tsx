@@ -54,7 +54,9 @@ export const CustomizePanelEditor = ({
    */
   const editMode = api.viewMode.value === 'edit';
   const [hideTitle, setHideTitle] = useState(api.hidePanelTitle?.value);
-  const [panelDescription, setPanelDescription] = useState(api.panelDescription?.value);
+  const [panelDescription, setPanelDescription] = useState(
+    api.panelDescription?.value ?? api.defaultPanelDescription?.value
+  );
   const [panelTitle, setPanelTitle] = useState(
     api.panelTitle?.value ?? api.defaultPanelTitle?.value
   );

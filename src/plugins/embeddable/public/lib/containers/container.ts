@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import deepEqual from 'fast-deep-equal';
 import { isEqual, xor } from 'lodash';
 import { EMPTY, merge, Subscription } from 'rxjs';
 import {
@@ -19,27 +19,29 @@ import {
   switchMap,
   take,
 } from 'rxjs/operators';
-import deepEqual from 'fast-deep-equal';
+import { v4 as uuidv4 } from 'uuid';
 
+import { PresentationContainer, PanelPackage } from '@kbn/presentation-containers';
+
+import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
+import { EmbeddableStart } from '../../plugin';
 import {
   Embeddable,
+  EmbeddableFactory,
   EmbeddableInput,
   EmbeddableOutput,
   ErrorEmbeddable,
-  EmbeddableFactory,
   IEmbeddable,
   isErrorEmbeddable,
 } from '../embeddables';
+import { EmbeddableFactoryNotFoundError, PanelNotFoundError } from '../errors';
 import {
-  IContainer,
   ContainerInput,
   ContainerOutput,
-  PanelState,
   EmbeddableContainerSettings,
+  IContainer,
+  PanelState,
 } from './i_container';
-import { EmbeddableStart } from '../../plugin';
-import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
-import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -49,7 +51,7 @@ export abstract class Container<
     TContainerOutput extends ContainerOutput = ContainerOutput
   >
   extends Embeddable<TContainerInput, TContainerOutput>
-  implements IContainer<TChildInput, TContainerInput, TContainerOutput>
+  implements IContainer<TChildInput, TContainerInput, TContainerOutput>, PresentationContainer
 {
   public readonly isContainer: boolean = true;
   public readonly children: {
@@ -111,6 +113,19 @@ export abstract class Container<
           )
         )
       )
+    );
+  }
+
+  public removePanel(id: string) {
+    this.removeEmbeddable(id);
+  }
+
+  public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
+    return await this.replaceEmbeddable(
+      idToRemove,
+      initialState as Partial<EmbeddableInput>,
+      panelType,
+      true
     );
   }
 
