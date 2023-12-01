@@ -141,7 +141,7 @@ export const ConfigurePipeline: React.FC = () => {
                 <EuiSpacer />
                 <EuiCallOut
                   title={i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.modelError.title',
+                    'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.modelStateChangeError.title',
                     { defaultMessage: 'Error changing model state' }
                   )}
                   color="danger"
