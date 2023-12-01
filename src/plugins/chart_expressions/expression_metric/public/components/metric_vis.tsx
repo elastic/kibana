@@ -29,7 +29,6 @@ import type {
   DatatableColumn,
   DatatableRow,
   IInterpreterRenderHandlers,
-  RenderMode,
 } from '@kbn/expressions-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import {
@@ -140,7 +139,6 @@ export interface MetricVisComponentProps {
   config: Pick<VisParams, 'metric' | 'dimensions'>;
   renderComplete: IInterpreterRenderHandlers['done'];
   fireEvent: IInterpreterRenderHandlers['event'];
-  renderMode: RenderMode;
   filterable: boolean;
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }
@@ -150,7 +148,6 @@ export const MetricVis = ({
   config,
   renderComplete,
   fireEvent,
-  renderMode,
   filterable,
   overrides,
 }: MetricVisComponentProps) => {
