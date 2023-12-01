@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { monaco } from '@kbn/monaco';
 import {
   parseErrors,
   parseWarning,
