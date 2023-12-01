@@ -1926,58 +1926,6 @@ describe('Alerts Client', () => {
         });
       });
 
-      describe('updateAlertsMaintenanceWindowIdByScopedQuery', () => {
-        test('should update alerts with MW ids when provided with maintenance windows', async () => {
-          const alertsClient = new AlertsClient(alertsClientParams);
-
-          const alert1 = new Alert('1');
-          const alert2 = new Alert('2');
-          const alert3 = new Alert('3');
-          const alert4 = new Alert('4');
-
-          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
-            '1': alert1,
-            '2': alert2,
-            '3': alert3,
-            '4': alert4,
-          });
-
-          jest
-            .spyOn(AlertsClient.prototype, 'getMaintenanceWindowScopedQueryAlerts')
-            .mockResolvedValueOnce({
-              mw1: [alert1.getUuid(), alert2.getUuid()],
-              mw2: [alert3.getUuid()],
-            });
-
-          const updateSpy = jest
-            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIds')
-            .mockResolvedValueOnce({});
-
-          const result = await alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery({
-            ...getParamsByUpdateMaintenanceWindowIds,
-            maintenanceWindows: [
-              ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
-              { id: 'mw3' } as unknown as MaintenanceWindow,
-            ],
-          });
-
-          expect(alert1.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
-          expect(alert2.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
-          expect(alert3.getMaintenanceWindowIds()).toEqual(['mw3', 'mw2']);
-
-          expect(result).toEqual({
-            alertIds: [alert1.getUuid(), alert2.getUuid(), alert3.getUuid()],
-            maintenanceWindowIds: ['mw3', 'mw1', 'mw2'],
-          });
-
-          expect(updateSpy).toHaveBeenLastCalledWith([
-            alert1.getUuid(),
-            alert2.getUuid(),
-            alert3.getUuid(),
-          ]);
-        });
-      });
-
       describe('report()', () => {
         test('should create legacy alert with id, action group', async () => {
           const mockGetUuidCurrent = jest
