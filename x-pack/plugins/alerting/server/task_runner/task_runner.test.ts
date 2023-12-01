@@ -851,7 +851,7 @@ describe('Task Runner', () => {
 
     expect(alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery).toHaveBeenLastCalledWith({
       executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-      maintenanceWindows: [mockMaintenanceWindows[1]],
+      maintenanceWindows: mockMaintenanceWindows,
       ruleId: '1',
       spaceId: 'default',
     });
