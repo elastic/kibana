@@ -25,8 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     );
   }
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/172248
-  describe.skip('value suggestions', function describeIndexTests() {
+  describe('value suggestions', function describeIndexTests() {
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -55,8 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/172246
-      describe.skip('discover', () => {
+      describe('discover', () => {
         afterEach(async () => {
           await queryBar.clearQuery();
         });
