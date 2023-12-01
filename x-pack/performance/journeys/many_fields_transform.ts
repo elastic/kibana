@@ -15,7 +15,7 @@ export const journey = new Journey({
   .step('Go to Transforms', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(kbnUrl.get(`app/management/data/transform`));
     await kibanaPage.waitForHeader();
-    await page.waitForSelector(subj('transformButtonCreate'));
+    await page.waitForSelector(subj('transformCreateFirstButton'));
     await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
   })
   .step('Go to data view selection', async ({ page }) => {
