@@ -35,6 +35,7 @@
       "visualizations",
       "dashboard",
       "expressions",
+      "logExplorer",
       "licensing"
     ],
     "optionalPlugins": [
