@@ -18,9 +18,7 @@ import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
 import {
-  AllowedXYOverrides,
   CommonXYDataLayerConfig,
   EndValue,
   FittingFunction,
@@ -54,6 +52,7 @@ interface Props {
   timeZone?: string;
   emphasizeFitting?: boolean;
   fillOpacity?: number;
+  minBarHeight: number;
   shouldShowValueLabels?: boolean;
   valueLabels: ValueLabelMode;
   defaultXScaleType: XScaleType;
@@ -61,7 +60,6 @@ interface Props {
   uiState?: PersistedState;
   singleTable?: boolean;
   isDarkMode: boolean;
-  overrides?: AllowedXYOverrides;
 }
 
 export const DataLayers: FC<Props> = ({
@@ -72,6 +70,7 @@ export const DataLayers: FC<Props> = ({
   syncColors,
   valueLabels,
   fillOpacity,
+  minBarHeight,
   formatFactory,
   paletteService,
   fittingFunction,
@@ -86,7 +85,6 @@ export const DataLayers: FC<Props> = ({
   uiState,
   singleTable,
   isDarkMode,
-  overrides,
 }) => {
   // for singleTable mode we should use y accessors from all layers for creating correct series name and getting color
   const allYAccessors = layers.flatMap((layer) => layer.accessors);
@@ -194,7 +192,7 @@ export const DataLayers: FC<Props> = ({
                 />
               );
             case SeriesTypes.BAR:
-              const valueLabelsSettings: Partial<BarSeriesProps> = {
+              const valueLabelsSettings: Pick<BarSeriesProps, 'displayValueSettings'> = {
                 displayValueSettings: {
                   // This format double fixes two issues in elastic-chart
                   // * when rotating the chart, the formatter is not correctly picked
@@ -207,9 +205,8 @@ export const DataLayers: FC<Props> = ({
                     LabelOverflowConstraint.BarGeometry,
                   ],
                 },
-                ...getOverridesFor(overrides, 'barSeries'),
               };
-              return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
+              return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} minBarHeight={minBarHeight} />;
             case SeriesTypes.AREA:
               return (
                 <AreaSeries

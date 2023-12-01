@@ -239,6 +239,7 @@ export interface XYArgs extends DataLayerArgs {
   addTimeMarker?: boolean;
   markSizeRatio?: number;
   minTimeBarInterval?: string;
+  minBarHeight?: number;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
   detailedTooltip?: boolean;
@@ -290,6 +291,7 @@ export interface LayeredXYArgs {
   addTimeMarker?: boolean;
   markSizeRatio?: number;
   minTimeBarInterval?: string;
+  minBarHeight: number;
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
   splitRowAccessor?: ExpressionValueVisDimension | string;
@@ -313,6 +315,7 @@ export interface XYProps {
   addTimeMarker?: boolean;
   markSizeRatio?: number;
   minTimeBarInterval?: string;
+  minBarHeight: number;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
   detailedTooltip?: boolean;

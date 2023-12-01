@@ -948,6 +948,7 @@ export function XYChart({
               syncColors={syncColors}
               valueLabels={valueLabels}
               fillOpacity={args.fillOpacity}
+              minBarHeight={args.minBarHeight}
               formatFactory={formatFactory}
               paletteService={paletteService}
               fittingFunction={fittingFunction}
@@ -964,7 +965,6 @@ export function XYChart({
               uiState={uiState}
               singleTable={singleTable}
               isDarkMode={darkMode}
-              overrides={overrides}
             />
           )}
           {referenceLineLayers.length ? (
