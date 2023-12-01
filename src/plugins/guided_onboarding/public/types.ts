@@ -24,13 +24,6 @@ export interface GuidedOnboardingPluginSetup {
 }
 
 export interface GuidedOnboardingPluginStart {
-  // getEsEndpointModal: (
-  //   core: CoreStart,
-  //   share: SharePluginStart,
-  //   cloud: CloudStart,
-  //   docLinks: DocLinksStart,
-  //   onClose?: () => {}
-  // ) => any;
   guidedOnboardingApi?: GuidedOnboardingApi;
 }
 

@@ -14,12 +14,12 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { maybeAddCloudLinks } from './maybe_add_cloud_links';
 
-export interface CloudLinksDepsSetup {
+interface CloudLinksDepsSetup {
   cloud?: CloudSetup;
   security?: SecurityPluginSetup;
 }
 
-export interface CloudLinksDepsStart {
+interface CloudLinksDepsStart {
   cloud?: CloudStart;
   security?: SecurityPluginStart;
   share: SharePluginStart;

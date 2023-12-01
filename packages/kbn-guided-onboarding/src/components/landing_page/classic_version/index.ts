@@ -9,3 +9,5 @@
 export { GuideCards as GuideCardsClassic } from './guide_cards';
 export { GuideFilters as GuideFiltersClassic } from './guide_filters';
 export type { GuideFilterValues as GuideFilterValuesClassic } from './guide_filters';
+export { guideCards as guideCardsClassic } from './guide_cards.constants';
+export type { GuideCardConstants as GuideCardConstantsClassic } from './guide_cards.constants';

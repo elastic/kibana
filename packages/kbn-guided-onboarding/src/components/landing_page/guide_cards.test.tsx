@@ -14,6 +14,7 @@ import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { I18nStart } from '@kbn/core-i18n-browser';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 
 const defaultProps: GuideCardsProps = {
   activateGuide: jest.fn(),
@@ -25,14 +26,7 @@ const defaultProps: GuideCardsProps = {
   i18nStart: {} as unknown as I18nStart,
   share: sharePluginMock.createSetupContract(),
   cloud: cloudMock.createSetup(),
-  docLinks: {
-    links: {
-      // @ts-ignore only defining what we need
-      fleet: {
-        packageSignatures: 'elastic.co',
-      },
-    },
-  },
+  docLinks: docLinksServiceMock.createStartContract(),
   navigateToUrl: jest.fn(),
 };
 

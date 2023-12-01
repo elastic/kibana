@@ -22,27 +22,24 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type {
+import {
   GuideFilterValues,
-  GuideFilterValuesClassic,
   GuideId,
   GuideState,
-} from '@kbn/guided-onboarding';
-
-import {
   GuideCards,
   GuideFilters,
-  GuideCardsClassic,
-  GuideFiltersClassic,
 } from '@kbn/guided-onboarding';
 import {
   GuideCardConstants,
   guideCards,
 } from '@kbn/guided-onboarding/src/components/landing_page/guide_cards.constants';
 import {
-  GuideCardConstants as GuideCardConstantsClassic,
-  guideCards as guideCardsClassic,
-} from '@kbn/guided-onboarding/src/components/landing_page/classic_version/guide_cards.constants';
+  GuideCardsClassic,
+  GuideFiltersClassic,
+  guideCardsClassic,
+  type GuideCardConstantsClassic,
+  type GuideFilterValuesClassic,
+} from '@kbn/guided-onboarding/classic';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
@@ -266,15 +263,6 @@ export const GettingStarted = () => {
       navigateToApp={application.navigateToApp}
       activeFilter={filter as GuideFilterValues}
       guidesState={guidesState}
-      // @ts-ignore A/B testing type check
-      filteredCards={filteredCards}
-      openModal={openModal}
-      i18nStart={i18nStart}
-      theme={theme}
-      docLinks={docLinks}
-      cloud={cloud!}
-      share={share}
-      navigateToUrl={application.navigateToUrl}
     />
   );
   return (

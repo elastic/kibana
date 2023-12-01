@@ -48,7 +48,7 @@ export const GuideFilters = ({
     color: ${euiTheme.colors.lightestShade};
   `;
 
-  // set up telemetry for the initial page load where it defaults to the security solution
+  // set up telemetry for the initial page load where it defaults to the search solution
   useMount(() => {
     trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding_search');
   });
