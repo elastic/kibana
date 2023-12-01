@@ -7,15 +7,14 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { uniq } from 'lodash/fp';
-import type { SetAlertAssigneesRequestBodyDecoded } from '../../../../../common/api/detection_engine/alert_assignees';
-import { setAlertAssigneesRequestBody } from '../../../../../common/api/detection_engine/alert_assignees';
+import { SetAlertAssigneesRequestBody } from '../../../../../common/api/detection_engine/alert_assignees';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,
   DETECTION_ENGINE_ALERT_ASSIGNEES_URL,
 } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { validateAlertAssigneesArrays } from './helpers';
 
 export const setAlertAssigneesRoute = (router: SecuritySolutionPluginRouter) => {
@@ -32,10 +31,7 @@ export const setAlertAssigneesRoute = (router: SecuritySolutionPluginRouter) => 
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidation<
-              typeof setAlertAssigneesRequestBody,
-              SetAlertAssigneesRequestBodyDecoded
-            >(setAlertAssigneesRequestBody),
+            body: buildRouteValidationWithZod(SetAlertAssigneesRequestBody),
           },
         },
       },
@@ -44,17 +40,12 @@ export const setAlertAssigneesRoute = (router: SecuritySolutionPluginRouter) => 
         const core = await context.core;
         const securitySolution = await context.securitySolution;
         const esClient = core.elasticsearch.client.asCurrentUser;
-        const siemClient = securitySolution?.getAppClient();
         const siemResponse = buildSiemResponse(response);
         const validationErrors = validateAlertAssigneesArrays(assignees);
         const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
         if (validationErrors.length) {
           return siemResponse.error({ statusCode: 400, body: validationErrors });
-        }
-
-        if (!siemClient) {
-          return siemResponse.error({ statusCode: 404 });
         }
 
         const assigneesToAdd = uniq(assignees.add);

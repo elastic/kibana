@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './suggest_user_profiles/suggest_user_profiles_route';
+export * from './suggest_user_profiles_route.gen';

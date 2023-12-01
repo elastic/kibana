@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.eql({
           error: 'Bad Request',
-          message: '[request body]: Invalid value "[]" supplied to "ids"',
+          message: '[request body]: ids: Array must contain at least 1 element(s)',
           statusCode: 400,
         });
       });
@@ -64,7 +64,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.eql({
           error: 'Bad Request',
-          message: '[request body]: Invalid value "" supplied to "ids"',
+          message:
+            '[request body]: ids.1: String must contain at least 1 character(s), ids.1: Invalid',
           statusCode: 400,
         });
       });

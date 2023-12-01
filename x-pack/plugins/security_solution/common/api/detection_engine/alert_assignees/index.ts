@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './set_alert_assignees/set_alert_assignees_route';
+export * from './set_alert_assignees_route.gen';
