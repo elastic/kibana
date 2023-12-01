@@ -563,7 +563,7 @@ export class AlertsClient<
     };
   }
 
-  public async getMaintenanceWindowScopedQueryAlerts({
+  private async getMaintenanceWindowScopedQueryAlerts({
     ruleId,
     spaceId,
     executionUuid,
@@ -588,7 +588,7 @@ export class AlertsClient<
     return getScopedQueryHitsWithIds(response.aggregations);
   }
 
-  public async updateAlertMaintenanceWindowIds(idsToUpdate: string[]) {
+  private async updateAlertMaintenanceWindowIds(idsToUpdate: string[]) {
     const esClient = await this.options.elasticsearchClientPromise;
     const newAlerts = Object.values(this.legacyAlertsClient.getProcessedAlerts('new'));
 
@@ -613,7 +613,7 @@ export class AlertsClient<
         script: {
           source: `
             if (params.containsKey(ctx._source['${ALERT_UUID}'])) {
-              ctx._source['${ALERT_MAINTENANCE_WINDOW_IDS}'] = params['${ALERT_UUID}'];
+              ctx._source['${ALERT_MAINTENANCE_WINDOW_IDS}'] = params[ctx._source['${ALERT_UUID}']];
             }
           `,
           lang: 'painless',
@@ -622,7 +622,7 @@ export class AlertsClient<
       });
       return response;
     } catch (err) {
-      this.options.logger.error(`Error updating alert maintenance window IDs: ${err}`);
+      this.options.logger.warn(`Error updating alert maintenance window IDs: ${err}`);
       throw err;
     }
   }
@@ -694,7 +694,11 @@ export class AlertsClient<
 
     if (uniqueAlertsId.length) {
       // Update alerts with new maintenance window IDs, await not needed
-      this.updateAlertMaintenanceWindowIds(uniqueAlertsId);
+      this.updateAlertMaintenanceWindowIds(uniqueAlertsId).catch(() => {
+        this.options.logger.debug(
+          'Failed to update new alerts with scoped query maintenance window Ids by updateByQuery.'
+        );
+      });
     }
 
     return {

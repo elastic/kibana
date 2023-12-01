@@ -1736,6 +1736,7 @@ describe('Alerts Client', () => {
 
         test('should get the persistent lifecycle alerts affected by scoped query successfully', async () => {
           const alertsClient = new AlertsClient(alertsClientParams);
+          // @ts-ignore
           const result = await alertsClient.getMaintenanceWindowScopedQueryAlerts(
             getParamsByMaintenanceWindowScopedQuery
           );
@@ -1754,7 +1755,7 @@ describe('Alerts Client', () => {
               autoRecoverAlerts: false,
             },
           });
-
+          // @ts-ignore
           const result = await alertsClient.getMaintenanceWindowScopedQueryAlerts(
             getParamsByMaintenanceWindowScopedQuery
           );
@@ -1770,6 +1771,7 @@ describe('Alerts Client', () => {
           const { ruleId, ...paramsWithoutRuleId } = getParamsByMaintenanceWindowScopedQuery;
 
           await expect(
+            // @ts-ignore
             alertsClient.getMaintenanceWindowScopedQueryAlerts(
               paramsWithoutRuleId as GetMaintenanceWindowScopedQueryAlertsParams
             )
@@ -1783,6 +1785,7 @@ describe('Alerts Client', () => {
           const { spaceId, ...paramsWithoutRuleId } = getParamsByMaintenanceWindowScopedQuery;
 
           await expect(
+            // @ts-ignore
             alertsClient.getMaintenanceWindowScopedQueryAlerts(
               paramsWithoutRuleId as GetMaintenanceWindowScopedQueryAlertsParams
             )
@@ -1796,6 +1799,7 @@ describe('Alerts Client', () => {
           const { executionUuid, ...paramsWithoutRuleId } = getParamsByMaintenanceWindowScopedQuery;
 
           await expect(
+            // @ts-ignore
             alertsClient.getMaintenanceWindowScopedQueryAlerts(
               paramsWithoutRuleId as GetMaintenanceWindowScopedQueryAlertsParams
             )
@@ -1819,6 +1823,7 @@ describe('Alerts Client', () => {
             '3': alert3,
           });
 
+          // @ts-ignore
           await alertsClient.updateAlertMaintenanceWindowIds([
             alert1.getUuid(),
             alert2.getUuid(),
@@ -1842,6 +1847,82 @@ describe('Alerts Client', () => {
               [alert3.getUuid()]: ['mw2', 'mw3'],
             },
           });
+        });
+
+        test('should call warn if ES errors', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce('something went wrong!');
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          const alert1 = new Alert('1', { meta: { maintenanceWindowIds: ['mw1'] } });
+
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+            '1': alert1,
+          });
+
+          await expect(
+            // @ts-ignore
+            alertsClient.updateAlertMaintenanceWindowIds([alert1.getUuid()])
+          ).rejects.toBe('something went wrong!');
+
+          expect(logger.warn).toHaveBeenCalledWith(
+            'Error updating alert maintenance window IDs: something went wrong!'
+          );
+        });
+      });
+
+      describe('updateAlertsMaintenanceWindowIdByScopedQuery', () => {
+        test('should update alerts with MW ids when provided with maintenance windows', async () => {
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          const alert1 = new Alert('1');
+          const alert2 = new Alert('2');
+          const alert3 = new Alert('3');
+          const alert4 = new Alert('4');
+
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+            '1': alert1,
+            '2': alert2,
+            '3': alert3,
+            '4': alert4,
+          });
+
+          jest
+            // @ts-ignore
+            .spyOn(AlertsClient.prototype, 'getMaintenanceWindowScopedQueryAlerts')
+            // @ts-ignore
+            .mockResolvedValueOnce({
+              mw1: [alert1.getUuid(), alert2.getUuid()],
+              mw2: [alert3.getUuid()],
+            });
+
+          const updateSpy = jest
+            // @ts-ignore
+            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIds')
+            // @ts-ignore
+            .mockResolvedValueOnce({});
+
+          const result = await alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery({
+            ...getParamsByUpdateMaintenanceWindowIds,
+            maintenanceWindows: [
+              ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
+              { id: 'mw3' } as unknown as MaintenanceWindow,
+            ],
+          });
+
+          expect(alert1.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
+          expect(alert2.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
+          expect(alert3.getMaintenanceWindowIds()).toEqual(['mw3', 'mw2']);
+
+          expect(result).toEqual({
+            alertIds: [alert1.getUuid(), alert2.getUuid(), alert3.getUuid()],
+            maintenanceWindowIds: ['mw3', 'mw1', 'mw2'],
+          });
+
+          expect(updateSpy).toHaveBeenLastCalledWith([
+            alert1.getUuid(),
+            alert2.getUuid(),
+            alert3.getUuid(),
+          ]);
         });
       });
 

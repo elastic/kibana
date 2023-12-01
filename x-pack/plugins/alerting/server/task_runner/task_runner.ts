@@ -577,9 +577,7 @@ export class TaskRunner<
         notifyOnActionGroupChange:
           notifyWhen === RuleNotifyWhen.CHANGE ||
           some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
-        maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds.length
-          ? maintenanceWindowsWithoutScopedQueryIds
-          : [],
+        maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
       });
     });
 
@@ -599,7 +597,7 @@ export class TaskRunner<
         });
     } catch (e) {
       this.logger.debug(
-        `Failed to update alert matched my maintenance window scoped query for rule  ${ruleLabel}.`
+        `Failed to update alert matched by maintenance window scoped query for rule  ${ruleLabel}.`
       );
     }
 
