@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AssetCriticalityRecord } from '../../../../common/api/asset_criticality';
+import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 
 /**
  * CriticalityModifiers are used to adjust the risk score based on the criticality of the asset.

@@ -25,7 +25,7 @@ import type {
 } from '../../../../common/entity_analytics/risk_engine';
 import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import type { AssetCriticalityRecord } from '../../../../common/api/asset_criticality';
+import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 import { getCriticalityModifier } from '../asset_criticality/helpers';
 import { getAfterKeyForIdentifierType, getFieldForIdentifierAgg } from './helpers';

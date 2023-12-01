@@ -7,7 +7,7 @@
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
-import type { AssetCriticalityRecord } from '../../../../common/api/asset_criticality';
+import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import { assetCriticalityDataClientMock } from './asset_criticality_data_client.mock';
 import { assetCriticalityServiceFactory } from './asset_criticality_service';

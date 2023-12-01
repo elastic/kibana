@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import type { AssetCriticalityRecord } from '../../../../common/api/asset_criticality';
+import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityDataClient } from './asset_criticality_data_client';
 
 interface CriticalityIdentifier {
