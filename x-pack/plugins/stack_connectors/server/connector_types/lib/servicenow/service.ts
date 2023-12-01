@@ -318,7 +318,7 @@ export const createExternalService: ServiceFactory = ({
         incident: {
           state: '7', // used for "closed" status in serviceNow
           close_code: 'Closed/Resolved by Caller',
-          close_notes: closeNotes ?? 'Closed by caller',
+          close_notes: closeNotes ?? 'Closed by Caller',
         },
       });
 

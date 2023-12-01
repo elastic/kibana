@@ -1232,7 +1232,7 @@ describe('ServiceNow service', () => {
           data: {
             close_code: 'Closed/Resolved by Caller',
             state: '7',
-            close_notes: 'Closed by caller',
+            close_notes: 'Closed by Caller',
           },
         });
 
