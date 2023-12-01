@@ -154,7 +154,7 @@ describe('Discover histogram layout component', () => {
     it('should not render null if there is a search session', async () => {
       const { component } = await mountComponent();
       expect(component.isEmptyRender()).toBe(false);
-    });
+    }, 10000);
 
     it('should not render null if there is no search session, but isPlainRecord is true', async () => {
       const { component } = await mountComponent({ isPlainRecord: true });

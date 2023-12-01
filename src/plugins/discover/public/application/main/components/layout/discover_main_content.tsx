@@ -57,7 +57,8 @@ export const DiscoverMainContent = ({
   stateContainer,
   onDropFieldToTable,
   panelsToggle,
-}: DiscoverMainContentProps) => {
+  isChartAvailable,
+}: DiscoverMainContentProps & { isChartAvailable?: boolean }) => {
   const { trackUiMetric } = useDiscoverServices();
 
   const setDiscoverViewMode = useCallback(
@@ -84,10 +85,21 @@ export const DiscoverMainContent = ({
         isTextBasedQuery={isPlainRecord}
         stateContainer={stateContainer}
         setDiscoverViewMode={setDiscoverViewMode}
-        prepend={panelsToggle}
+        prepend={
+          React.isValidElement(panelsToggle)
+            ? React.cloneElement(panelsToggle, { isChartAvailable })
+            : undefined
+        }
       />
     );
-  }, [viewMode, setDiscoverViewMode, isPlainRecord, stateContainer, panelsToggle]);
+  }, [
+    viewMode,
+    setDiscoverViewMode,
+    isPlainRecord,
+    stateContainer,
+    panelsToggle,
+    isChartAvailable,
+  ]);
 
   const showChart = useAppStateSelector((state) => !state.hideChart);
 
@@ -107,17 +119,7 @@ export const DiscoverMainContent = ({
           responsive={false}
           data-test-subj="dscMainContent"
         >
-          {showChart && (
-            <EuiHorizontalRule
-              margin="none"
-              // TODO: find a better solution
-              // css={css`
-              //   .unifiedHistogramLayoutMainPanel--emptyChart & {
-              //     display: none;
-              //   }
-              // `}
-            />
-          )}
+          {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}

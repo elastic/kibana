@@ -239,6 +239,8 @@ export const UnifiedHistogramLayout = ({
   });
 
   const chart = suggestionUnsupported ? undefined : originalChart;
+  const isChartAvailable = Boolean(chart);
+
   const [topPanelNode] = useState(() =>
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
@@ -272,7 +274,7 @@ export const UnifiedHistogramLayout = ({
     <>
       <InPortal node={topPanelNode}>
         <Chart
-          hiddenPanel={hidden}
+          hiddenPanel={hidden || !isChartAvailable}
           className={chartClassName}
           services={services}
           dataView={dataView}
@@ -309,7 +311,11 @@ export const UnifiedHistogramLayout = ({
           withDefaultActions={withDefaultActions}
         />
       </InPortal>
-      <InPortal node={mainPanelNode}>{children}</InPortal>
+      <InPortal node={mainPanelNode}>
+        {React.isValidElement(children)
+          ? React.cloneElement(children, { isChartAvailable })
+          : children}
+      </InPortal>
       <ResizableLayout
         className={className}
         mode={panelsMode}

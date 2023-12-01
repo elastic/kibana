@@ -64,7 +64,7 @@ export const DiscoverHistogramLayout = ({
         // The documents grid doesn't rerender when the chart visibility changes
         // which causes it to render blank space, so we need to force a rerender
         key={`docKey${hideChart}`}
-        panelsToggle={hideChart ? panelsToggle : undefined}
+        panelsToggle={panelsToggle}
       />
     </UnifiedHistogramContainer>
   );

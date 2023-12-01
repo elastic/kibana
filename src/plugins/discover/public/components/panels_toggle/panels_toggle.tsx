@@ -18,11 +18,13 @@ import { SidebarToggleState } from '../../application/types';
 export interface PanelsToggleProps {
   stateContainer: DiscoverStateContainer;
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
+  isChartAvailable?: boolean;
 }
 
 export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   stateContainer,
   sidebarToggleState$,
+  isChartAvailable,
 }) => {
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
 
@@ -33,38 +35,52 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   const sidebarToggleState = useObservable(sidebarToggleState$);
   const isSidebarCollapsed = sidebarToggleState?.isCollapsed ?? false;
 
+  const isInsideHistogram = typeof isChartAvailable === 'undefined';
+  const isInsideTabs = typeof isChartAvailable === 'boolean';
+
+  const buttons = [
+    ...((isInsideHistogram && !isChartHidden && isSidebarCollapsed) ||
+    (isInsideTabs && (isChartHidden || !isChartAvailable) && isSidebarCollapsed)
+      ? [
+          {
+            label: i18n.translate('discover.panelsToggle.showSidebarButton', {
+              defaultMessage: 'Show sidebar',
+            }),
+            iconType: 'transitionLeftIn',
+            'data-test-subj': 'dscShowSidebarButton',
+            onClick: () => sidebarToggleState?.toggle?.(false),
+          },
+        ]
+      : []),
+    ...((isInsideHistogram && !isChartHidden) || (isInsideTabs && isChartAvailable && isChartHidden)
+      ? [
+          {
+            label: isChartHidden
+              ? i18n.translate('discover.panelsToggle.showChartButton', {
+                  defaultMessage: 'Show chart',
+                })
+              : i18n.translate('discover.panelsToggle.hideChartButton', {
+                  defaultMessage: 'Hide chart',
+                }),
+            iconType: isChartHidden ? 'transitionTopIn' : 'transitionTopOut',
+            'data-test-subj': 'dscToggleHistogramButton',
+            onClick: onToggleChart,
+          },
+        ]
+      : []),
+  ];
+
+  if (!buttons.length) {
+    return null;
+  }
+
   return (
     <IconButtonGroup
       legend={i18n.translate('discover.panelsToggle.panelsVisibilityLegend', {
         defaultMessage: 'Panels visibility',
       })}
       buttonSize="s"
-      buttons={[
-        ...(isSidebarCollapsed
-          ? [
-              {
-                label: i18n.translate('discover.panelsToggle.showSidebarButton', {
-                  defaultMessage: 'Show sidebar',
-                }),
-                iconType: 'transitionLeftIn',
-                'data-test-subj': 'dscShowSidebarButton',
-                onClick: () => sidebarToggleState?.toggle?.(false),
-              },
-            ]
-          : []),
-        {
-          label: isChartHidden
-            ? i18n.translate('discover.panelsToggle.showChartButton', {
-                defaultMessage: 'Show chart',
-              })
-            : i18n.translate('discover.panelsToggle.hideChartButton', {
-                defaultMessage: 'Hide chart',
-              }),
-          iconType: isChartHidden ? 'transitionTopIn' : 'transitionTopOut',
-          'data-test-subj': 'dscToggleHistogramButton',
-          onClick: onToggleChart,
-        },
-      ]}
+      buttons={buttons}
     />
   );
 };
