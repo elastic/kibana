@@ -43,8 +43,6 @@ export const fetchMlModels = async (
     trainedModelsProvider
   );
 
-  console.log('compatibleElserModelId', compatibleElserModelId, 'compatibleE5ModelId', compatibleE5ModelId)
-
   // This array will contain all models, let's add placeholders first (compatible variants only)
   const models: MlModel[] = [
     ELSER_MODEL_PLACEHOLDER,
@@ -52,8 +50,6 @@ export const fetchMlModels = async (
     E5_MODEL_PLACEHOLDER,
     E5_LINUX_OPTIMIZED_MODEL_PLACEHOLDER,
   ].filter((model) => isCompatiblePromotedModelId(model.modelId));
-
-  console.log('placeholders', models)
 
   // Fetch all models and their deployment stats using the ML client
   const modelsResponse = await trainedModelsProvider.getTrainedModels({});
