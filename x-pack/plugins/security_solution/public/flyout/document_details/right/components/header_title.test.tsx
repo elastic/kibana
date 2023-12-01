@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import {
@@ -28,7 +29,7 @@ moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
-const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
+const flyoutContextValue = {} as unknown as ExpandableFlyoutContextValue;
 const mockContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
   getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
