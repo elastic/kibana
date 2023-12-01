@@ -27,3 +27,23 @@ export const getCriticalityModifier = (
 
   return CriticalityModifiers[criticalityLevel];
 };
+
+/**
+ * Applies asset criticality to a normalized risk score using bayesian inference.
+ * @param modifier - The criticality modifier to apply to the score.
+ * @param score - The normalized risk score to which the criticality modifier is applied
+ *
+ * @returns The risk score with the criticality modifier applied.
+ */
+export const applyCriticalityToScore = ({
+  modifier,
+  score,
+}: {
+  modifier: number | undefined;
+  score: number;
+}): number => {
+  const factor = modifier ?? 1;
+  const priorProbability = score / (100 - Math.min(score, 99));
+  const newProbability = priorProbability * factor;
+  return Math.floor((100 * newProbability) / (1 + newProbability));
+};
