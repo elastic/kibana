@@ -124,7 +124,6 @@ enabled:
   - test/functional/apps/kibana_overview/config.ts
   - test/functional/apps/management/config.ts
   - test/functional/apps/saved_objects_management/config.ts
-  - test/functional/apps/sharing/config.ts
   - test/functional/apps/status_page/config.ts
   - test/functional/apps/visualize/group1/config.ts
   - test/functional/apps/visualize/group2/config.ts
