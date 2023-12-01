@@ -3824,6 +3824,25 @@ components:
           type: string
         install_format_schema_version:
           type: string
+        latest_install_failed_attempts:
+          description: Latest failed install errors
+          type: array
+          items:
+            type: object
+            properties:
+              created_at:
+                type: string
+              target_version:
+                type: string
+              error:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  message:
+                    type: string
+                  stack:
+                    type: string
         verification_status:
           type: string
           enum:
@@ -3863,6 +3882,7 @@ components:
         - install_started_at
         - install_source
         - verification_status
+        - latest_install_failed_attempts
     search_result:
       title: Search result
       type: object
@@ -5331,18 +5351,49 @@ components:
         - name
         - hosts
         - type
+    output_create_request_remote_elasticsearch:
+      title: remote_elasticsearch
+      type: object
+      properties:
+        id:
+          type: string
+        is_default:
+          type: boolean
+        is_default_monitoring:
+          type: boolean
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - remote_elasticsearch
+        hosts:
+          type: array
+          items:
+            type: string
+        service_token:
+          type: string
+        secrets:
+          type: object
+          properties:
+            service_token:
+              type: string
+      required:
+        - name
     output_create_request:
       title: Output
       oneOf:
         - $ref: '#/components/schemas/output_create_request_elasticsearch'
         - $ref: '#/components/schemas/output_create_request_kafka'
         - $ref: '#/components/schemas/output_create_request_logstash'
+        - $ref: '#/components/schemas/output_create_request_remote_elasticsearch'
       discriminator:
         propertyName: type
         mapping:
           elasticsearch: '#/components/schemas/output_create_request_elasticsearch'
           kafka: '#/components/schemas/output_create_request_kafka'
           logstash: '#/components/schemas/output_create_request_logstash'
+          remote_elasticsearch: '#/components/schemas/output_create_request_remote_elasticsearch'
     output_update_request_elasticsearch:
       title: elasticsearch
       type: object
