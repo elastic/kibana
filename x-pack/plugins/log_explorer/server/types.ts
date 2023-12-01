@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
 
-export interface LogExplorerLocatorDependencies {
-  discoverAppLocator?: LocatorPublic<DiscoverAppLocatorParams>;
+export interface LogExplorerSetupDeps {
+  share: SharePluginSetup;
 }

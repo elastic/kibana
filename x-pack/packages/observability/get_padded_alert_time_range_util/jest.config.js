@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-
-export interface LogExplorerLocatorDependencies {
-  discoverAppLocator?: LocatorPublic<DiscoverAppLocatorParams>;
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/observability/get_padded_alert_time_range_util'],
+};

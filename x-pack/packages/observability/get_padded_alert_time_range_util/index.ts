@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-
-export interface LogExplorerLocatorDependencies {
-  discoverAppLocator?: LocatorPublic<DiscoverAppLocatorParams>;
-}
+export { getPaddedAlertTimeRange } from './src/get_padded_alert_time_range';
