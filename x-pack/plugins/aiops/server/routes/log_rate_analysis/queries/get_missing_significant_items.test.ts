@@ -57,8 +57,8 @@ describe('getMissingSignificantItems', () => {
         normalizedScore: 0.07472703283204607,
         pValue: 0.012783309213417932,
         score: 4.359614926663956,
-        total_bg_count: 2528,
-        total_doc_count: 6650,
+        total_bg_count: 1975,
+        total_doc_count: 4669,
       },
     ]);
   });
