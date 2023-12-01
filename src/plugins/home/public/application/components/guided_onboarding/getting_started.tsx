@@ -22,13 +22,27 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { GuideFilterValues, GuideId, GuideState } from '@kbn/guided-onboarding';
+import type {
+  GuideFilterValues,
+  GuideFilterValuesClassic,
+  GuideId,
+  GuideState,
+} from '@kbn/guided-onboarding';
 
-import { GuideCards, GuideFilters } from '@kbn/guided-onboarding';
+import {
+  GuideCards,
+  GuideFilters,
+  GuideCardsClassic,
+  GuideFiltersClassic,
+} from '@kbn/guided-onboarding';
 import {
   GuideCardConstants,
   guideCards,
 } from '@kbn/guided-onboarding/src/components/landing_page/guide_cards.constants';
+import {
+  GuideCardConstants as GuideCardConstantsClassic,
+  guideCards as guideCardsClassic,
+} from '@kbn/guided-onboarding/src/components/landing_page/classic_version/guide_cards.constants';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
@@ -66,9 +80,11 @@ export const GettingStarted = () => {
   const [filteredCards, setFilteredCards] = useState<GuideCardConstants[]>();
   const { search } = useLocation();
   const query = parse(search);
-  const [filter, setFilter] = useState<GuideFilterValues>(
+  const [filter, setFilter] = useState<GuideFilterValues | GuideFilterValuesClassic>(
     (query.useCase as GuideFilterValues) ?? 'search'
   );
+  // using for A/B testing
+  const [classicGuide] = useState<boolean>(false);
   const history = useHistory();
 
   useEffect(() => {
@@ -143,11 +159,20 @@ export const GettingStarted = () => {
     [guidedOnboardingService]
   );
 
-  // filter cards for solution
+  // filter cards for solution and based on classic or new format
   useEffect(() => {
-    const tempFiltered = guideCards.filter((card: GuideCardConstants) => card.solution === filter);
-    setFilteredCards(tempFiltered);
-  }, [filter]);
+    if (!classicGuide) {
+      const tempFiltered = guideCards.filter(
+        (card: GuideCardConstants) => card.solution === filter
+      );
+      setFilteredCards(tempFiltered);
+    } else {
+      const tempFiltered = guideCardsClassic.filter(
+        (card: GuideCardConstantsClassic) => card.solution === filter
+      );
+      setFilteredCards(tempFiltered);
+    }
+  }, [filter, classicGuide]);
 
   if (isLoading) {
     return (
@@ -202,6 +227,56 @@ export const GettingStarted = () => {
     );
   }
 
+  const setGuideFilters = !classicGuide ? (
+    <GuideFilters
+      application={application}
+      activeFilter={filter as GuideFilterValues}
+      // @ts-ignore A/B testing type issue
+      setActiveFilter={setFilter}
+      data-test-subj="onboarding-guideFilters"
+      trackUiMetric={trackUiMetric}
+    />
+  ) : (
+    <GuideFiltersClassic
+      application={application}
+      activeFilter={filter}
+      setActiveFilter={setFilter}
+      data-test-subj="onboarding-guideFilters"
+    />
+  );
+
+  const setGuideCards = !classicGuide ? (
+    <GuideCards
+      activateGuide={activateGuide}
+      navigateToApp={application.navigateToApp}
+      activeFilter={filter as GuideFilterValues}
+      guidesState={guidesState}
+      filteredCards={filteredCards}
+      openModal={openModal}
+      i18nStart={i18nStart}
+      theme={theme}
+      docLinks={docLinks}
+      cloud={cloud!}
+      share={share}
+      navigateToUrl={application.navigateToUrl}
+    />
+  ) : (
+    <GuideCardsClassic
+      activateGuide={activateGuide}
+      navigateToApp={application.navigateToApp}
+      activeFilter={filter as GuideFilterValues}
+      guidesState={guidesState}
+      // @ts-ignore A/B testing type check
+      filteredCards={filteredCards}
+      openModal={openModal}
+      i18nStart={i18nStart}
+      theme={theme}
+      docLinks={docLinks}
+      cloud={cloud!}
+      share={share}
+      navigateToUrl={application.navigateToUrl}
+    />
+  );
   return (
     <KibanaPageTemplate panelled={false}>
       <EuiPageTemplate.Section data-test-subj="guided-onboarding--landing-page">
@@ -213,28 +288,9 @@ export const GettingStarted = () => {
           <p>{subtitle}</p>
         </EuiText>
         <EuiSpacer size="l" />
-        <GuideFilters
-          application={application}
-          activeFilter={filter}
-          setActiveFilter={setFilter}
-          data-test-subj="onboarding--guideFilters"
-          trackUiMetric={trackUiMetric}
-        />
+        {setGuideFilters}
         <EuiSpacer size="xxl" />
-        <GuideCards
-          activateGuide={activateGuide}
-          navigateToApp={application.navigateToApp}
-          activeFilter={filter}
-          guidesState={guidesState}
-          filteredCards={filteredCards}
-          openModal={openModal}
-          i18nStart={i18nStart}
-          theme={theme}
-          docLinks={docLinks}
-          cloud={cloud!}
-          share={share}
-          navigateToUrl={application.navigateToUrl}
-        />
+        {setGuideCards}
         <EuiSpacer size="s" />
         <div className="eui-textCenter">
           {/* data-test-subj used for FS tracking */}

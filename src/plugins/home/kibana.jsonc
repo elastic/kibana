@@ -7,6 +7,6 @@
     "server": true,
     "browser": true,
     "requiredPlugins": ["dataViews", "share", "urlForwarding", "kibanaReact" ],
-    "optionalPlugins": ["usageCollection", "customIntegrations", "cloud", "guidedOnboarding"],
+    "optionalPlugins": ["usageCollection", "customIntegrations", "cloud", "guidedOnboarding", "cloudExperiments"],
   }
 }
