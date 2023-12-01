@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+export const _IGNORED = '_ignored';
 
-export const dataStreamTypesRt = t.partial({
-  type: t.union([
-    t.literal('logs'),
-    t.literal('metrics'),
-    t.literal('traces'),
-    t.literal('synthetics'),
-    t.literal('profiling'),
-  ]),
-});
+export const DATA_STREAM_DATASET = 'data_stream.dataset';
+export const DATA_STREAM_NAMESPACE = 'data_stream.namespace';
+export const DATA_STREAM_TYPE = 'data_stream.type';
