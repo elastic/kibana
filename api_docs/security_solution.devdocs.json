@@ -1748,6 +1748,27 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-public.TimelineModel.savedSearch",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "savedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.SavedSearch",
+                "text": "SavedSearch"
+              },
+              " | null"
+            ],
+            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-public.TimelineModel.isDiscoverSavedSearchLoaded",
             "type": "CompoundType",
             "tags": [],
