@@ -27,7 +27,7 @@ import type {
   StartDependencies,
 } from './types';
 import { registerConnectorsRoutes } from './routes/connectors_routes';
-import {registerTelemetryUsageCollector} from "@kbn/serverless-search/server/collectors/connectors/telemetry";
+import { registerTelemetryUsageCollector } from './collectors/connectors/telemetry';
 
 export interface RouteDependencies {
   http: CoreSetup<StartDependencies>['http'];
