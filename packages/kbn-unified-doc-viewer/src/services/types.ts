@@ -9,6 +9,7 @@
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataTableRecord, IgnoredReason } from '@kbn/discover-utils/types';
+import { DocViewsRegistry } from './doc_views_registry';
 
 export interface FieldMapping {
   filterable?: boolean;
@@ -40,6 +41,7 @@ export interface DocViewRenderProps {
   filter?: DocViewFilterFn;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
+  docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
 }
 export type DocViewerComponent = React.FC<DocViewRenderProps>;
 export type DocViewRenderFn = (
@@ -48,8 +50,8 @@ export type DocViewRenderFn = (
 ) => () => void;
 
 export interface BaseDocViewInput {
+  id: string;
   order: number;
-  shouldShow?: (hit: DataTableRecord) => boolean;
   title: string;
 }
 
@@ -65,13 +67,9 @@ interface ComponentDocViewInput extends BaseDocViewInput {
   directive?: undefined;
 }
 
-export type DocViewInput = ComponentDocViewInput | RenderDocViewInput;
+export type DocView = ComponentDocViewInput | RenderDocViewInput;
 
-export type DocView = DocViewInput & {
-  shouldShow: NonNullable<DocViewInput['shouldShow']>;
-};
-
-export type DocViewInputFn = () => DocViewInput;
+export type DocViewFactory = () => DocView;
 
 export interface FieldRecordLegacy {
   action: {
