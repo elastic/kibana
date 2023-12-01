@@ -20,6 +20,7 @@ export interface FetchConnectorsApiLogicArgs {
 export interface FetchConnectorsApiLogicResponse {
   connectors: Connector[];
   counts: Record<string, number>;
+  isInitialRequest: boolean;
   meta: Meta;
 }
 
@@ -29,10 +30,13 @@ export const fetchConnectors = async ({
   size,
   searchQuery,
 }: FetchConnectorsApiLogicArgs): Promise<FetchConnectorsApiLogicResponse> => {
+  const isInitialRequest = from === 0 && !searchQuery;
   const route = '/internal/enterprise_search/connectors';
   const query = { connector_type: connectorType, from, searchQuery, size };
-  const result = await HttpLogic.values.http.get<FetchConnectorsApiLogicResponse>(route, { query });
-  return result;
+  const response = await HttpLogic.values.http.get<FetchConnectorsApiLogicResponse>(route, {
+    query,
+  });
+  return { ...response, isInitialRequest };
 };
 
 export const FetchConnectorsApiLogic = createApiLogic(
