@@ -50,7 +50,9 @@ export const PipelineDetails: FC<Props> = memo(
     const [isProcessorConfigValid, setIsProcessorConfigValid] = useState<boolean>(true);
     const [processorConfigError, setProcessorConfigError] = useState<string | undefined>();
 
-    const { currentContext } = useTestTrainedModelsContext();
+    const {
+      currentContext: { pipelineConfig },
+    } = useTestTrainedModelsContext();
     const [processorConfigString, setProcessorConfigString] = useState<string>(
       JSON.stringify(initialPipelineConfig ?? {}, null, 2)
     );
@@ -79,7 +81,7 @@ export const PipelineDetails: FC<Props> = memo(
     };
 
     const resetProcessorConfig = () => {
-      setProcessorConfigString(JSON.stringify(currentContext.pipelineConfig ?? {}, null, 2));
+      setProcessorConfigString(JSON.stringify(pipelineConfig, null, 2));
       setIsProcessorConfigValid(true);
       setProcessorConfigError(undefined);
     };

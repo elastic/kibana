@@ -30,12 +30,14 @@ import { InferrerType } from './models';
 import { INPUT_TYPE } from './models/inference_base';
 import { TextExpansionInference } from './models/text_expansion';
 import { type InferecePipelineCreationState } from '../create_pipeline_for_model/state';
+import { getInferencePropertiesFromPipelineConfig } from '../create_pipeline_for_model/get_inference_properties_from_pipeline_config';
 
 interface Props {
   model: estypes.MlTrainedModelConfig;
   inputType: INPUT_TYPE;
   deploymentId: string;
   handlePipelineConfigUpdate?: (configUpdate: Partial<InferecePipelineCreationState>) => void;
+  externalPipelineConfig?: estypes.IngestPipeline;
 }
 
 const DEFAULT_PIPELINE_OBS = new BehaviorSubject({});
@@ -45,39 +47,68 @@ export const SelectedModel: FC<Props> = ({
   inputType,
   deploymentId,
   handlePipelineConfigUpdate,
+  externalPipelineConfig,
 }) => {
   const { trainedModels } = useMlApiContext();
   const {
     currentContext: { createPipelineFlyoutOpen, pipelineConfig },
+    setCurrentContext,
   } = useTestTrainedModelsContext();
   const pipeline = (createPipelineFlyoutOpen && pipelineConfig) || undefined;
 
   const inferrer = useMemo<InferrerType | undefined>(() => {
-    if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
-      const taskType = Object.keys(model.inference_config ?? {})[0];
+    const taskType = Object.keys(model.inference_config ?? {})[0];
+    let tempInferrer;
 
+    if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
       switch (taskType) {
         case SUPPORTED_PYTORCH_TASKS.NER:
-          return new NerInference(trainedModels, model, inputType, deploymentId);
+          tempInferrer = new NerInference(trainedModels, model, inputType, deploymentId);
+          break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION:
-          return new TextClassificationInference(trainedModels, model, inputType, deploymentId);
+          tempInferrer = new TextClassificationInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId
+          );
+          break;
         case SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION:
-          return new ZeroShotClassificationInference(trainedModels, model, inputType, deploymentId);
+          tempInferrer = new ZeroShotClassificationInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId
+          );
+          break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING:
-          return new TextEmbeddingInference(trainedModels, model, inputType, deploymentId);
+          tempInferrer = new TextEmbeddingInference(trainedModels, model, inputType, deploymentId);
+          break;
         case SUPPORTED_PYTORCH_TASKS.FILL_MASK:
-          return new FillMaskInference(trainedModels, model, inputType, deploymentId);
+          tempInferrer = new FillMaskInference(trainedModels, model, inputType, deploymentId);
+          break;
         case SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING:
-          return new QuestionAnsweringInference(trainedModels, model, inputType, deploymentId);
+          tempInferrer = new QuestionAnsweringInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId
+          );
+          break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION:
-          return new TextExpansionInference(trainedModels, model, inputType, deploymentId);
+          tempInferrer = new TextExpansionInference(trainedModels, model, inputType, deploymentId);
+          break;
         default:
           break;
       }
     } else if (model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
-      return new LangIdentInference(trainedModels, model, inputType, deploymentId);
+      tempInferrer = new LangIdentInference(trainedModels, model, inputType, deploymentId);
     }
-  }, [inputType, model, trainedModels, deploymentId]);
+    if (tempInferrer) {
+      tempInferrer.setSwitchtoCreationMode(setCurrentContext);
+    }
+    return tempInferrer;
+  }, [inputType, model, trainedModels, deploymentId, setCurrentContext]);
 
   const updatedPipeline = useObservable(
     inferrer?.getPipeline$() ?? DEFAULT_PIPELINE_OBS,
@@ -92,10 +123,35 @@ export const SelectedModel: FC<Props> = ({
   }, [updatedPipeline]);
 
   useEffect(() => {
+    const type = Object.keys(model.inference_config ?? {})[0];
+    if (inferrer && externalPipelineConfig) {
+      const {
+        inputField,
+        labels,
+        multi_label: multiLabel,
+        question,
+      } = getInferencePropertiesFromPipelineConfig(type, externalPipelineConfig);
+
+      inferrer.setInputField(inputField);
+      if (
+        type === SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION &&
+        inferrer instanceof ZeroShotClassificationInference
+      ) {
+        inferrer.setLabelsText(Array.isArray(labels) ? labels.join(',') : labels);
+        inferrer.setMultiLabel(Boolean(multiLabel));
+      } else if (
+        type === SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING &&
+        inferrer instanceof QuestionAnsweringInference
+      ) {
+        inferrer.setQuestionText(question);
+      }
+    }
+
     return () => {
       inferrer?.destroy();
     };
-  }, [inferrer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inferrer, model.model_id]);
 
   if (inferrer !== undefined) {
     return <InferenceInputForm inferrer={inferrer} inputType={inputType} />;

@@ -10,6 +10,7 @@ import React, { FC, useState, useMemo } from 'react';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiTab, EuiTabs, useEuiPaddingSize } from '@elastic/eui';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SelectedModel } from './selected_model';
 import { type ModelItem } from '../models_list';
 import { INPUT_TYPE } from './models/inference_base';
@@ -19,11 +20,13 @@ import { type InferecePipelineCreationState } from '../create_pipeline_for_model
 interface ContentProps {
   model: ModelItem;
   handlePipelineConfigUpdate?: (configUpdate: Partial<InferecePipelineCreationState>) => void;
+  externalPipelineConfig?: estypes.IngestPipeline;
 }
 
 export const TestTrainedModelContent: FC<ContentProps> = ({
   model,
   handlePipelineConfigUpdate,
+  externalPipelineConfig,
 }) => {
   const [deploymentId, setDeploymentId] = useState<string>(model.deployment_ids[0]);
   const mediumPadding = useEuiPaddingSize('m');
@@ -103,6 +106,7 @@ export const TestTrainedModelContent: FC<ContentProps> = ({
         inputType={onlyShowTab ?? inputType}
         deploymentId={deploymentId ?? model.model_id}
         handlePipelineConfigUpdate={handlePipelineConfigUpdate}
+        externalPipelineConfig={externalPipelineConfig}
       />
     </>
   );

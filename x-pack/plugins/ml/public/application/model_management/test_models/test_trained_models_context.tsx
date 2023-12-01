@@ -9,10 +9,9 @@ import { createContext, Dispatch, useContext } from 'react';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface TestTrainedModelsContextType {
-  pipelineConfig: estypes.IngestPipeline | undefined;
+  pipelineConfig?: estypes.IngestPipeline;
   createPipelineFlyoutOpen: boolean;
   defaultSelectedDataViewId?: string;
-  defaultSelectedField?: string;
 }
 export const TestTrainedModelsContext = createContext<
   | {

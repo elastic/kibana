@@ -9,6 +9,7 @@ import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ModelItem } from '../models_list';
 import { TestTrainedModelContent } from '../test_models/test_trained_model_content';
@@ -18,9 +19,14 @@ import { type InferecePipelineCreationState } from './state';
 interface ContentProps {
   model: ModelItem;
   handlePipelineConfigUpdate: (configUpdate: Partial<InferecePipelineCreationState>) => void;
+  externalPipelineConfig?: estypes.IngestPipeline;
 }
 
-export const TestTrainedModel: FC<ContentProps> = ({ model, handlePipelineConfigUpdate }) => {
+export const TestTrainedModel: FC<ContentProps> = ({
+  model,
+  handlePipelineConfigUpdate,
+  externalPipelineConfig,
+}) => {
   const {
     services: {
       docLinks: { links },
@@ -65,6 +71,7 @@ export const TestTrainedModel: FC<ContentProps> = ({ model, handlePipelineConfig
         <TestTrainedModelContent
           model={model}
           handlePipelineConfigUpdate={handlePipelineConfigUpdate}
+          externalPipelineConfig={externalPipelineConfig}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

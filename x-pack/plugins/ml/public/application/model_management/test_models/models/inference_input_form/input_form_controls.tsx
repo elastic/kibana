@@ -10,7 +10,6 @@ import React, { FC } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useTestTrainedModelsContext } from '../../test_trained_models_context';
 import type { InferrerType } from '..';
 
 interface Props {
@@ -26,11 +25,6 @@ export const InputFormControls: FC<Props> = ({
   inferrer,
   showCreatePipelineButton,
 }) => {
-  const {
-    currentContext: { createPipelineFlyoutOpen },
-    setCurrentContext,
-  } = useTestTrainedModelsContext();
-
   return (
     <>
       <EuiFlexItem grow={false}>
@@ -46,19 +40,20 @@ export const InputFormControls: FC<Props> = ({
           />
         </EuiButton>
       </EuiFlexItem>
-      {!createPipelineFlyoutOpen && showCreatePipelineButton ? (
+      {showCreatePipelineButton ? (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             disabled={createPipelineButtonDisabled}
             data-test-subj={'mlTestModelCreatePipelineButton'}
-            onClick={() =>
-              setCurrentContext({
-                pipelineConfig: inferrer.getPipeline(),
-                defaultSelectedDataViewId: inferrer.getSelectedDataViewId(),
-                defaultSelectedField: inferrer.getInputField(),
-                createPipelineFlyoutOpen: true,
-              })
-            }
+            onClick={() => {
+              if (inferrer.switchToCreationMode) {
+                inferrer.switchToCreationMode({
+                  pipelineConfig: inferrer.getPipeline(),
+                  defaultSelectedDataViewId: inferrer.getSelectedDataViewId(),
+                  createPipelineFlyoutOpen: true,
+                });
+              }
+            }}
           >
             <FormattedMessage
               id="xpack.ml.trainedModels.testModelsFlyout.inferenceInputForm.createPipelineButton"
