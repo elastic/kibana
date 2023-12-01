@@ -18,6 +18,16 @@ describe('applyCriticalityToScore', () => {
     expect(result).toEqual(90);
   });
 
+  it.skip('works with a non-integer score', () => {
+    const result = applyCriticalityToScore({ modifier: 1.5, score: 91.84 });
+    expect(result).toEqual(93);
+  });
+
+  it.skip('returns the original float score if the modifier is 1', () => {
+    const result = applyCriticalityToScore({ modifier: 1, score: 91.84 });
+    expect(result).toEqual(91.84);
+  });
+
   it('returns an increased score if the modifier is greater than 1', () => {
     const result = applyCriticalityToScore({ modifier: 1.5, score: 90 });
     expect(result).toEqual(93);
