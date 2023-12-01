@@ -397,6 +397,23 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.sendUsageTo (any)',
         'usageCollection.uiCounters.debug (boolean)',
         'usageCollection.uiCounters.enabled (boolean)',
+
+        // Included because Mock IDP plugin is enabled in functional tests and depends on cloud plugin to determine serverless project type
+        'xpack.cloud.base_url (string)',
+        'xpack.cloud.billing_url (string)',
+        'xpack.cloud.cname (string)',
+        'xpack.cloud.deployment_url (string)',
+        'xpack.cloud.id (string)',
+        'xpack.cloud.is_elastic_staff_owned (boolean)',
+        'xpack.cloud.organization_url (string)',
+        'xpack.cloud.performance_url (string)',
+        'xpack.cloud.profile_url (string)',
+        'xpack.cloud.projects_url (any)',
+        'xpack.cloud.serverless.project_id (string)',
+        'xpack.cloud.serverless.project_name (string)',
+        'xpack.cloud.serverless.project_type (string)',
+        'xpack.cloud.trial_end_date (string)',
+        'xpack.cloud.users_and_roles_url (string)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's
