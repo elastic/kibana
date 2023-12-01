@@ -7,13 +7,17 @@
 
 import { mockLogger } from '../../__mocks__';
 
-import { fetchTelemetryMetrics } from '@kbn/search-connectors';
-
 import { registerTelemetryUsageCollector } from './telemetry';
 
-jest.mock('@kbn/search-connectors', () => ({
-  fetchTelemetryMetrics: jest.fn(),
-}));
+const error = {
+  meta: {
+    body: {
+      error: {
+        type: 'error',
+      },
+    },
+  },
+};
 
 describe('Connectors Telemetry Usage Collector', () => {
   const makeUsageCollectorStub = jest.fn();
@@ -22,7 +26,11 @@ describe('Connectors Telemetry Usage Collector', () => {
     makeUsageCollector: makeUsageCollectorStub,
     registerCollector: registerStub,
   } as any;
-  const clientMock = {} as any;
+  const mockClient = {
+    asInternalUser: {
+      count: jest.fn(),
+    },
+  } as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -30,7 +38,7 @@ describe('Connectors Telemetry Usage Collector', () => {
 
   describe('registerTelemetryUsageCollector', () => {
     it('should make and register the usage collector', () => {
-      registerTelemetryUsageCollector(usageCollectionMock, clientMock, mockLogger);
+      registerTelemetryUsageCollector(usageCollectionMock, mockClient, mockLogger);
 
       expect(registerStub).toHaveBeenCalledTimes(1);
       expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
@@ -41,13 +49,17 @@ describe('Connectors Telemetry Usage Collector', () => {
 
   describe('fetchTelemetryMetrics', () => {
     it('should return telemetry data', async () => {
-      (fetchTelemetryMetrics as jest.Mock).mockImplementationOnce(() =>
+      mockClient.asInternalUser.count.mockImplementationOnce(() =>
         Promise.resolve({
-          native: { total: 5 },
-          clients: { total: 2 },
+          count: 5,
         })
       );
-      registerTelemetryUsageCollector(usageCollectionMock, clientMock, mockLogger);
+      mockClient.asInternalUser.count.mockImplementationOnce(() =>
+        Promise.resolve({
+          count: 2,
+        })
+      );
+      registerTelemetryUsageCollector(usageCollectionMock, mockClient, mockLogger);
       const telemetryMetrics = await makeUsageCollectorStub.mock.calls[0][0].fetch();
 
       expect(telemetryMetrics).toEqual({
@@ -56,6 +68,19 @@ describe('Connectors Telemetry Usage Collector', () => {
         },
         clients: {
           total: 2,
+        },
+      });
+    });
+    it('should return default telemetry metrics on error', async () => {
+      mockClient.asInternalUser.count.mockImplementationOnce(() => Promise.reject(error));
+      registerTelemetryUsageCollector(usageCollectionMock, mockClient, mockLogger);
+      const telemetryMetrics = await makeUsageCollectorStub.mock.calls[0][0].fetch();
+      expect(telemetryMetrics).toEqual({
+        native: {
+          total: 0,
+        },
+        clients: {
+          total: 0,
         },
       });
     });

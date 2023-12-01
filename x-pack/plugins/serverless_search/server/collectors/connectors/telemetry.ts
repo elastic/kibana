@@ -7,8 +7,17 @@
 
 import { IClusterClient, Logger } from '@kbn/core/server';
 
+import { CONNECTORS_INDEX } from '@kbn/search-connectors';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { fetchTelemetryMetrics, Telemetry } from '@kbn/search-connectors';
+
+interface Telemetry {
+  native: {
+    total: number;
+  };
+  clients: {
+    total: number;
+  };
+}
 
 /**
  * Register the telemetry collector
@@ -33,4 +42,75 @@ export const registerTelemetryUsageCollector = (
     },
   });
   usageCollection.registerCollector(telemetryUsageCollector);
+};
+
+/**
+ * Fetch the aggregated telemetry metrics
+ */
+
+export const fetchTelemetryMetrics = async (
+  client: IClusterClient,
+  log: Logger
+): Promise<Telemetry> => {
+  const defaultTelemetryMetrics: Telemetry = {
+    native: {
+      total: 0,
+    },
+    clients: {
+      total: 0,
+    },
+  };
+
+  try {
+    const nativeCountResponse = await client.asInternalUser.count({
+      index: CONNECTORS_INDEX,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                is_native: true,
+              },
+            },
+          ],
+          must_not: [
+            {
+              term: {
+                service_type: {
+                  value: 'elastic-crawler',
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const clientsCountResponse = await client.asInternalUser.count({
+      index: CONNECTORS_INDEX,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                is_native: false,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    return {
+      native: {
+        total: nativeCountResponse.count,
+      },
+      clients: {
+        total: clientsCountResponse.count,
+      },
+    } as Telemetry;
+  } catch (error) {
+    log.error(`Failed to retrieve telemetry data: ${error}`);
+    return defaultTelemetryMetrics;
+  }
 };
