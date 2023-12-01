@@ -18,6 +18,7 @@ import { CasesService } from './cases_service';
 import { createCasesClientMock } from '../../client/mocks';
 import { mockCases } from '../../mocks';
 import type { Cases } from '../../../common';
+import { CaseStatuses } from '@kbn/cases-components';
 
 jest.mock('./cases_oracle_service');
 jest.mock('./cases_service');
@@ -60,6 +61,7 @@ describe('CasesConnector', () => {
 
   const owner = 'cases';
   const timeWindow = '7d';
+  const reopenClosedCases = false;
 
   const groupedAlertsWithOracleKey = [
     {
@@ -183,7 +185,14 @@ describe('CasesConnector', () => {
     describe('run', () => {
       describe('Oracle records', () => {
         it('generates the oracle keys correctly with grouping by one field', async () => {
-          await connector.run({ alerts, groupingBy: ['host.name'], owner, rule, timeWindow });
+          await connector.run({
+            alerts,
+            groupingBy: ['host.name'],
+            owner,
+            rule,
+            timeWindow,
+            reopenClosedCases,
+          });
 
           expect(mockGetRecordId).toHaveBeenCalledTimes(2);
 
@@ -203,7 +212,7 @@ describe('CasesConnector', () => {
         });
 
         it('generates the oracle keys correct with grouping by multiple fields', async () => {
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
 
           expect(mockGetRecordId).toHaveBeenCalledTimes(3);
 
@@ -218,7 +227,7 @@ describe('CasesConnector', () => {
         });
 
         it('gets the oracle records correctly', async () => {
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
 
           expect(mockBulkGetRecords).toHaveBeenCalledWith([
             groupedAlertsWithOracleKey[0].oracleKey,
@@ -228,7 +237,7 @@ describe('CasesConnector', () => {
         });
 
         it('created the non found oracle records correctly', async () => {
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
 
           expect(mockBulkCreateRecord).toHaveBeenCalledWith([
             {
@@ -245,7 +254,7 @@ describe('CasesConnector', () => {
         it('does not create oracle records if there are no 404 errors', async () => {
           mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
 
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
 
           expect(mockBulkCreateRecord).not.toHaveBeenCalled();
         });
@@ -261,7 +270,7 @@ describe('CasesConnector', () => {
             },
           ]);
 
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
 
           /**
            * TODO: Change it to: expect(mockBulkCreateRecord).not.toHaveBeenCalled();
@@ -271,14 +280,14 @@ describe('CasesConnector', () => {
 
         it('does not increase the counter if the time window has not passed', async () => {
           mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
 
           expect(mockBulkUpdateRecord).not.toHaveBeenCalled();
         });
 
         it('updates the counter correctly if the time window has passed', async () => {
           dateMathMock.parse.mockImplementation(() => moment('2023-11-10T10:23:42.769Z'));
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
 
           expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
             { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
@@ -317,7 +326,7 @@ describe('CasesConnector', () => {
             },
           ]);
 
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
 
           // 1. Get all records
           expect(mockBulkGetRecords).toHaveBeenCalledWith([
@@ -347,7 +356,7 @@ describe('CasesConnector', () => {
 
       describe('Cases', () => {
         it('generates the case ids correctly', async () => {
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
 
           expect(mockGetCaseId).toHaveBeenCalledTimes(3);
 
@@ -367,7 +376,7 @@ describe('CasesConnector', () => {
 
           mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
 
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
 
           expect(mockGetCaseId).toBeCalledTimes(3);
 
@@ -409,7 +418,7 @@ describe('CasesConnector', () => {
         });
 
         it('gets the cases correctly', async () => {
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
 
           expect(casesClientMock.cases.bulkGet).toHaveBeenCalledWith({
             ids: ['mock-id-1', 'mock-id-2', 'mock-id-3'],
@@ -436,7 +445,7 @@ describe('CasesConnector', () => {
             ],
           });
 
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
 
           expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
             cases: [
@@ -473,15 +482,53 @@ describe('CasesConnector', () => {
             ],
           });
 
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
 
           expect(casesClientMock.cases.bulkCreate).not.toHaveBeenCalled();
+        });
+
+        it('does not reopen closed cases if reopenClosedCases=false', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [{ ...cases[0], status: CaseStatuses.closed }],
+            errors: [],
+          });
+
+          await connector.run({
+            alerts,
+            groupingBy,
+            owner,
+            rule,
+            timeWindow,
+            reopenClosedCases: false,
+          });
+
+          expect(casesClientMock.cases.bulkUpdate).not.toHaveBeenCalled();
+        });
+
+        it('reopen closed cases if reopenClosedCases=true', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [{ ...cases[0], status: CaseStatuses.closed }],
+            errors: [],
+          });
+
+          await connector.run({
+            alerts,
+            groupingBy,
+            owner,
+            rule,
+            timeWindow,
+            reopenClosedCases: true,
+          });
+
+          expect(casesClientMock.cases.bulkUpdate).toHaveBeenCalledWith({
+            cases: [{ id: cases[0].id, status: 'open', version: cases[0].version }],
+          });
         });
       });
 
       describe('Alerts', () => {
         it('attach the alerts to the correct cases correctly', async () => {
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow });
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
@@ -595,7 +642,7 @@ describe('CasesConnector', () => {
 
     describe('Oracle records', () => {
       it('generates the oracle keys correctly with no grouping', async () => {
-        await connector.run({ alerts, groupingBy: [], owner, rule, timeWindow });
+        await connector.run({ alerts, groupingBy: [], owner, rule, timeWindow, reopenClosedCases });
 
         expect(mockGetRecordId).toHaveBeenCalledTimes(1);
 
@@ -608,7 +655,7 @@ describe('CasesConnector', () => {
       });
 
       it('gets the oracle records correctly', async () => {
-        await connector.run({ alerts, groupingBy: [], owner, rule, timeWindow });
+        await connector.run({ alerts, groupingBy: [], owner, rule, timeWindow, reopenClosedCases });
 
         expect(mockBulkGetRecords).toHaveBeenCalledWith(['so-oracle-record-0']);
       });
@@ -616,7 +663,7 @@ describe('CasesConnector', () => {
 
     describe('Cases', () => {
       it('generates the case ids correctly', async () => {
-        await connector.run({ alerts, groupingBy: [], owner, rule, timeWindow });
+        await connector.run({ alerts, groupingBy: [], owner, rule, timeWindow, reopenClosedCases });
 
         expect(mockGetCaseId).toHaveBeenCalledTimes(1);
 
@@ -630,7 +677,7 @@ describe('CasesConnector', () => {
       });
 
       it('gets the cases correctly', async () => {
-        await connector.run({ alerts, groupingBy: [], owner, rule, timeWindow });
+        await connector.run({ alerts, groupingBy: [], owner, rule, timeWindow, reopenClosedCases });
 
         expect(casesClientMock.cases.bulkGet).toHaveBeenCalledWith({
           ids: ['mock-id-1'],
@@ -640,7 +687,7 @@ describe('CasesConnector', () => {
 
     describe('Alerts', () => {
       it('attach all alerts to the same case when the grouping is not defined', async () => {
-        await connector.run({ alerts, groupingBy: [], owner, rule, timeWindow });
+        await connector.run({ alerts, groupingBy: [], owner, rule, timeWindow, reopenClosedCases });
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
 
         expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {

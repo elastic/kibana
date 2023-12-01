@@ -13,8 +13,9 @@ import { partition, pick } from 'lodash';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from '@kbn/core/server';
 import dateMath from '@kbn/datemath';
+import { CaseStatuses } from '@kbn/cases-components';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
-import type { Case } from '../../../common';
+import type { Case, Cases } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
 import { CASES_CONNECTOR_SUB_ACTION, MAX_CONCURRENT_ES_REQUEST } from './constants';
 import type {
@@ -318,20 +319,38 @@ export class CasesConnector extends SubActionConnector<
     groupedAlertsWithCaseId: Map<string, GroupedAlertsWithCaseId>
   ): Promise<Map<string, GroupedAlertsWithCases>> {
     const bulkCreateReq: BulkCreateCasesRequest['cases'] = [];
+    const bulkUpdateCasesResponse: Cases = [];
     const casesMap = new Map<string, GroupedAlertsWithCases>();
 
     const ids = Array.from(groupedAlertsWithCaseId.values()).map(({ caseId }) => caseId);
     const { cases, errors } = await casesClient.cases.bulkGet({ ids });
+    const [closedCases, nonClosedCases] = partition(
+      cases,
+      (req) => req.status === CaseStatuses.closed
+    );
 
-    for (const theCase of cases) {
+    for (const theCase of nonClosedCases) {
       if (groupedAlertsWithCaseId.has(theCase.id)) {
         const data = groupedAlertsWithCaseId.get(theCase.id) as GroupedAlertsWithCaseId;
         casesMap.set(theCase.id, { ...data, theCase });
       }
     }
 
-    if (errors.length === 0) {
+    if (errors.length === 0 && closedCases.length === 0) {
       return casesMap;
+    }
+
+    if (params.reopenClosedCases && closedCases.length > 0) {
+      const bulkUpdateReq = closedCases.map((theCase) => ({
+        id: theCase.id,
+        version: theCase.version,
+        status: CaseStatuses.open,
+      }));
+
+      /**
+       * TODO: bulkUpdate throws an error. Retry on errors.
+       */
+      bulkUpdateCasesResponse.concat(await casesClient.cases.bulkUpdate({ cases: bulkUpdateReq }));
     }
 
     /**
@@ -356,7 +375,7 @@ export class CasesConnector extends SubActionConnector<
      */
     const bulkCreateCasesResponse = await casesClient.cases.bulkCreate({ cases: bulkCreateReq });
 
-    for (const res of bulkCreateCasesResponse.cases) {
+    for (const res of [...bulkCreateCasesResponse.cases, ...bulkUpdateCasesResponse]) {
       if (groupedAlertsWithCaseId.has(res.id)) {
         const data = groupedAlertsWithCaseId.get(res.id) as GroupedAlertsWithCaseId;
         casesMap.set(res.id, { ...data, theCase: res });
