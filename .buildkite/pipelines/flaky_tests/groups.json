@@ -2,35 +2,67 @@
   "groups": [
     {
       "key": "cypress/security_solution",
-      "name": "Security Solution - Cypress"
+      "name": "Security Solution - Cypress",
+      "target": "cypress:run:ess",
+      "root_dir": "x-pack/test/security_solution_cypress",
+      "job_title": "kibana-security-solution-chrome",
+      "msg": "--- Security Solution Cypress tests (Chrome)"    
     },
     {
       "key": "cypress/security_serverless",
-      "name": "[Serverless] Security Solution - Cypress"
+      "name": "[Serverless] Security Solution - Cypress",
+      "target": "cypress:run:serverless",
+      "root_dir": "x-pack/test/security_solution_cypress",
+      "job_title": "kibana-serverless-security-cypress",
+      "msg": "--- Security Serverless Cypress Tests"    
     },
     {
       "key": "cypress/security_solution_investigations",
-      "name": "Security Solution Investigations - Cypress"
+      "name": "Security Solution Investigations - Cypress",
+      "target": "cypress:investigations:run:ess",
+      "root_dir": "x-pack/test/security_solution_cypress",
+      "job_title": "kibana-security-solution-chrome",
+      "msg": "--- Investigations - Security Solution Cypress Tests"    
     },
     {
       "key": "cypress/security_serverless_investigations",
-      "name": "[Serverless] Security Solution Investigations - Cypress"
+      "name": "[Serverless] Security Solution Investigations - Cypress",
+      "target": "cypress:investigations:run:serverless",
+      "root_dir": "x-pack/test/security_solution_cypress",
+      "job_title": "kibana-security-solution-chrome",
+      "msg": "--- Serverless Investigations - Security Cypress Tests"    
     },
     {
       "key": "cypress/security_solution_explore",
-      "name": "Security Solution Explore - Cypress"
+      "name": "Security Solution Explore - Cypress",
+      "target": "cypress:explore:run:ess",
+      "root_dir": "x-pack/test/security_solution_cypress",
+      "job_title": "kibana-security-solution-chrome",
+      "msg": "--- Explore Cypress Tests on Security Solution"    
     },
     {
       "key": "cypress/security_serverless_explore",
-      "name": "[Serverless] Security Solution Explore - Cypress"
+      "name": "[Serverless] Security Solution Explore - Cypress",
+      "target": "cypress:explore:run:serverless",
+      "root_dir": "x-pack/test/security_solution_cypress",
+      "job_title": "kibana-security-solution-chrome",
+      "msg": "--- Serverless Explore - Security Cypress Tests"    
     },
     {
       "key": "cypress/defend_workflows",
-      "name": "Security Solution Defend Workflows - Cypress"
+      "name": "Security Solution Defend Workflows - Cypress",
+      "target": "cypress:dw:run",
+      "root_dir": "x-pack/plugins/security_solution",
+      "job_title": "kibana-defend-workflows-cypress",
+      "msg": "--- Defend Workflows Cypress tests"    
     },
     {
       "key": "cypress/defend_workflows_serverless",
-      "name": "[Serverless] Security Solution Defend Workflows - Cypress"
+      "name": "[Serverless] Security Solution Defend Workflows - Cypress",
+      "target": "cypress:dw:serverless:run",
+      "root_dir": "x-pack/plugins/security_solution",
+      "job_title": "kibana-defend-workflows-serverless-cypress",
+      "msg": "--- Defend Workflows Cypress tests on Serverless"    
     },
     {
       "key": "cypress/osquery_cypress",

@@ -49,7 +49,7 @@ function getTestSuitesFromJson(json: string) {
     fail(`JSON test config must be an array`);
   }
 
-  /** @type {Array<{ type: 'group', key: string; count: number } | { type: 'ftrConfig', ftrConfig: string; count: number }>} */
+  /** @type {Array<{ type: 'group', key: string; count: number; target: string; root_dir: string; job_title: string; msg: string } | { type: 'ftrConfig', ftrConfig: string; count: number }>} */
   const testSuites = [];
   for (const item of parsed) {
     if (typeof item !== 'object' || item === null) {
@@ -80,12 +80,20 @@ function getTestSuitesFromJson(json: string) {
     }
 
     const key = item.key;
+    const root_dir = item.root_dir;
+    const target = item.target;
+    const job_title = item.job_title;
+    const msg = item.msg;
     if (typeof key !== 'string') {
       fail(`testSuite.key must be a string`);
     }
     testSuites.push({
       key,
       count,
+      root_dir,
+      target,
+      job_title,
+      msg,
     });
   }
 
@@ -163,25 +171,51 @@ for (const testSuite of testSuites) {
         );
       }
       const agentQueue = suiteName.includes('defend_workflows') ? 'n2-4-virt' : 'n2-4-spot';
-      steps.push({
-        command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
-        label: group.name,
-        agents: { queue: agentQueue },
-        depends_on: 'build',
-        parallelism: testSuite.count,
-        concurrency,
-        concurrency_group: process.env.UUID,
-        concurrency_method: 'eager',
-        env: {
-          // disable split of test cases between parallel jobs when running them in flaky test runner
-          // by setting chunks vars to value 1, which means all test will run in one job
-          CLI_NUMBER: 1,
-          CLI_COUNT: 1,
-          // The security solution cypress tests don't recognize CLI_NUMBER and CLI_COUNT, they use `BUILDKITE_PARALLEL_JOB_COUNT` and `BUILDKITE_PARALLEL_JOB`, which cannot be overridden here.
-          // Use `RUN_ALL_TESTS` to make Security Solution Cypress tests run all tests instead of a subset.
-          RUN_ALL_TESTS: 'true',
-        },
-      });
+      if (testSuite.target) {
+        steps.push({
+          command: `.buildkite/scripts/steps/functional/security_cypress_exec.sh`,
+          label: group.name,
+          agents: { queue: agentQueue },
+          depends_on: 'build',
+          parallelism: testSuite.count,
+          concurrency,
+          concurrency_group: process.env.UUID,
+          concurrency_method: 'eager',
+          env: {
+            // disable split of test cases between parallel jobs when running them in flaky test runner
+            // by setting chunks vars to value 1, which means all test will run in one job
+            CLI_NUMBER: 1,
+            CLI_COUNT: 1,
+            // The security solution cypress tests don't recognize CLI_NUMBER and CLI_COUNT, they use `BUILDKITE_PARALLEL_JOB_COUNT` and `BUILDKITE_PARALLEL_JOB`, which cannot be overridden here.
+            // Use `RUN_ALL_TESTS` to make Security Solution Cypress tests run all tests instead of a subset.
+            RUN_ALL_TESTS: 'true',
+            TARGET: testSuite.target,
+            ROOT_DIR: testSuite.root_dir,
+            JOB_TITLE: testSuite.job_title,
+            MSG: testSuite.msg,
+          },
+        });
+      } else {
+        steps.push({
+          command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
+          label: group.name,
+          agents: { queue: agentQueue },
+          depends_on: 'build',
+          parallelism: testSuite.count,
+          concurrency,
+          concurrency_group: process.env.UUID,
+          concurrency_method: 'eager',
+          env: {
+            // disable split of test cases between parallel jobs when running them in flaky test runner
+            // by setting chunks vars to value 1, which means all test will run in one job
+            CLI_NUMBER: 1,
+            CLI_COUNT: 1,
+            // The security solution cypress tests don't recognize CLI_NUMBER and CLI_COUNT, they use `BUILDKITE_PARALLEL_JOB_COUNT` and `BUILDKITE_PARALLEL_JOB`, which cannot be overridden here.
+            // Use `RUN_ALL_TESTS` to make Security Solution Cypress tests run all tests instead of a subset.
+            RUN_ALL_TESTS: 'true',
+          },
+        });
+      }
       break;
     default:
       throw new Error(`unknown test suite: ${testSuite.key}`);
