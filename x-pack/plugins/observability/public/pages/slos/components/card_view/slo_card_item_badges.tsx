@@ -26,27 +26,15 @@ interface Props {
   handleCreateRule: () => void;
 }
 
-const Container = styled.div<{ topPosition: string }>`
-  position: absolute;
+const Container = styled.div`
   display: inline-block;
-  top: ${({ topPosition }) => topPosition};
-  left: 7px;
-  z-index: 1;
+  margin-top: 5px;
 `;
 
-export function SloCardItemBadges({
-  slo,
-  activeAlerts,
-  rules,
-  handleCreateRule,
-  hasGroupBy,
-  isEmbeddable,
-}: Props) {
-  const topPosition =
-    hasGroupBy && isEmbeddable ? '75px' : hasGroupBy || isEmbeddable ? '55px' : '35px';
+export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }: Props) {
   return (
-    <Container topPosition={topPosition}>
-      <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center" wrap>
+    <Container>
+      <EuiFlexGroup direction="row" responsive={false} gutterSize="xs" alignItems="center" wrap>
         {!slo.summary ? (
           <LoadingBadges />
         ) : (
