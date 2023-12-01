@@ -23,7 +23,7 @@ import {
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
-type EditPanelActionApi = PublishesViewMode & HasEditCapabilities;
+export type EditPanelActionApi = PublishesViewMode & HasEditCapabilities;
 
 const isApiCompatible = (api: unknown | null): api is EditPanelActionApi => {
   return hasEditCapabilities(api) && apiPublishesViewMode(api);
@@ -68,6 +68,11 @@ export class EditPanelAction
 
   public getIconType() {
     return 'pencil';
+  }
+
+  public async getHref({ embeddable }: EmbeddableApiContext): Promise<string | undefined> {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    return embeddable?.getEditHref?.();
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {

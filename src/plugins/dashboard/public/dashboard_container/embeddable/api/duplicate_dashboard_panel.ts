@@ -30,7 +30,7 @@ export async function duplicateDashboardPanel(this: DashboardContainer, idToDupl
 
   // duplicate panel input
   const duplicatedPanelState: PanelState<EmbeddableInput> = await (async () => {
-    const newTitle = await getCloneTitle(embeddable, embeddable.getTitle() || '');
+    const newTitle = await incrementPanelTitle(embeddable, embeddable.getTitle() || '');
     const id = uuidv4();
     if (isReferenceOrValueEmbeddable(embeddable)) {
       return {
@@ -80,7 +80,7 @@ export async function duplicateDashboardPanel(this: DashboardContainer, idToDupl
   });
 }
 
-const getCloneTitle = async (embeddable: IEmbeddable, rawTitle: string) => {
+export const incrementPanelTitle = async (embeddable: IEmbeddable, rawTitle: string) => {
   if (rawTitle === '') return '';
 
   const clonedTag = dashboardClonePanelActionStrings.getClonedTag();

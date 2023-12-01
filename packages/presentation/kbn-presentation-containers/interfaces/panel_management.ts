@@ -37,9 +37,3 @@ export const useExpandedPanelId = (api: Partial<CanExpandPanels> | undefined) =>
   useReactiveVarFromSubject<string | undefined, CanExpandPanels['expandedPanelId']>(
     apiCanExpandPanels(api) ? api.expandedPanelId : undefined
   );
-
-/**
- * Gets this API's expanded panel state as a one-time imperative action.
- */
-export const getExpandedPanelId = (api: Partial<CanExpandPanels> | undefined) =>
-  api?.expandedPanelId?.getValue();

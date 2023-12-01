@@ -69,7 +69,7 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
         'data-test-subj': 'unlinkPanelSuccess',
       });
     } catch (e) {
-      this.toastsService.addSuccess({
+      this.toastsService.addDanger({
         title: dashboardUnlinkFromLibraryActionStrings.getFailureMessage(),
         'data-test-subj': 'unlinkPanelFailure',
       });

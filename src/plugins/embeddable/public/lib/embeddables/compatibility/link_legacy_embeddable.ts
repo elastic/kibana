@@ -20,6 +20,7 @@ import { hasDashboardRequiredMethods } from './embeddable_compatibility_utils';
 export const canLinkLegacyEmbeddable = async (embeddable: CommonLegacyEmbeddable) => {
   // linking and unlinking legacy embeddables is only supported on Dashboard
   if (
+    isErrorEmbeddable(embeddable) ||
     !(
       embeddable.getRoot() &&
       embeddable.getRoot().isContainer &&
@@ -41,7 +42,6 @@ export const canLinkLegacyEmbeddable = async (embeddable: CommonLegacyEmbeddable
 
   return Boolean(
     canSave &&
-      !isErrorEmbeddable(embeddable) &&
       isReferenceOrValueEmbeddable(embeddable) &&
       !embeddable.inputIsRefType(embeddable.getInput()) &&
       !isTextBasedEmbeddable

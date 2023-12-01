@@ -14,10 +14,11 @@ import { Toast } from '@kbn/core/public';
 import { pluginServices } from '../services/plugin_services';
 import { ReplacePanelActionApi } from './replace_panel_action';
 import { dashboardReplacePanelActionStrings } from './_dashboard_actions_strings';
+import { ReplacePanelSOFinder } from '.';
 
 interface Props {
   api: ReplacePanelActionApi;
-  savedObjectsFinder: React.ComponentType<any>;
+  savedObjectsFinder: ReplacePanelSOFinder;
   onClose: () => void;
 }
 
@@ -48,7 +49,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
   };
 
   public onReplacePanel = async (savedObjectId: string, type: string, name: string) => {
-    this.props.api.parent.value.replacePanel(this.props.api.id.value, {
+    this.props.api.parentApi.value.replacePanel(this.props.api.uuid.value, {
       panelType: type,
       initialState: { savedObjectId },
     });

@@ -14,12 +14,13 @@ import { tracksOverlays } from '@kbn/presentation-containers';
 import { pluginServices } from '../services/plugin_services';
 import { ReplacePanelActionApi } from './replace_panel_action';
 import { ReplacePanelFlyout } from './replace_panel_flyout';
+import { ReplacePanelSOFinder } from '.';
 
 export const openReplacePanelFlyout = async ({
   savedObjectFinder,
   api,
 }: {
-  savedObjectFinder: React.ComponentType<any>;
+  savedObjectFinder: ReplacePanelSOFinder;
   api: ReplacePanelActionApi;
 }) => {
   const {

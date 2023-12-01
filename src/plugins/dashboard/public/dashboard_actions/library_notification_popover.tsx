@@ -25,31 +25,21 @@ import {
 import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
 
 export interface LibraryNotificationProps {
-  context: { api: UnlinkPanelFromLibraryActionApi };
+  api: UnlinkPanelFromLibraryActionApi;
   unlinkAction: UnlinkFromLibraryAction;
-  displayName: string;
-  icon: string;
-  id: string;
 }
 
-export function LibraryNotificationPopover({
-  unlinkAction,
-  displayName,
-  context,
-  icon,
-  id,
-}: LibraryNotificationProps) {
+export function LibraryNotificationPopover({ unlinkAction, api }: LibraryNotificationProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { api } = context;
 
   return (
     <EuiPopover
       button={
         <EuiButtonIcon
           color="text"
-          iconType={icon}
+          iconType={'folderCheck'}
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-          data-test-subj={`embeddablePanelNotification-${id}`}
+          data-test-subj={'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'}
           aria-label={dashboardLibraryNotificationStrings.getPopoverAriaLabel()}
         />
       }
@@ -57,7 +47,7 @@ export function LibraryNotificationPopover({
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="upCenter"
     >
-      <EuiPopoverTitle>{displayName}</EuiPopoverTitle>
+      <EuiPopoverTitle>{dashboardLibraryNotificationStrings.getDisplayName()}</EuiPopoverTitle>
       <div style={{ width: '300px' }}>
         <EuiText>
           <p>{dashboardLibraryNotificationStrings.getTooltip()}</p>

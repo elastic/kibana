@@ -7,7 +7,7 @@
  */
 
 import { Subscription } from 'rxjs';
-import { PanelEmbeddable } from '../../../embeddable_panel/types';
+import { LegacyCompatibleEmbeddable } from '../../../embeddable_panel/types';
 import { core, embeddableStart } from '../../../kibana_services';
 import { Container } from '../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../errors';
@@ -28,11 +28,11 @@ const getLatestAppId = async (): Promise<string | undefined> => {
   return appId;
 };
 
-const getExplicitInput = (embeddable: PanelEmbeddable) =>
+const getExplicitInput = (embeddable: LegacyCompatibleEmbeddable) =>
   (embeddable.getRoot() as Container)?.getInput()?.panels?.[embeddable.id]?.explicitInput ??
   embeddable.getInput();
 
-const getAppTarget = async (embeddable: PanelEmbeddable) => {
+const getAppTarget = async (embeddable: LegacyCompatibleEmbeddable) => {
   const app = embeddable ? embeddable.getOutput().editApp : undefined;
   const path = embeddable ? embeddable.getOutput().editPath : undefined;
   if (!app || !path) return;
@@ -45,11 +45,12 @@ const getAppTarget = async (embeddable: PanelEmbeddable) => {
     valueInput: getExplicitInput(embeddable),
     embeddableId: embeddable.id,
     searchSessionId: embeddable.getInput().searchSessionId,
+    originatingPath: embeddable.getAppContext()?.getCurrentPath?.(),
   };
   return { app, path, state };
 };
 
-export const editLegacyEmbeddable = async (embeddable: PanelEmbeddable) => {
+export const editLegacyEmbeddable = async (embeddable: LegacyCompatibleEmbeddable) => {
   const { editableWithExplicitInput } = embeddable.getOutput();
 
   if (editableWithExplicitInput) {
@@ -97,9 +98,10 @@ export const editLegacyEmbeddable = async (embeddable: PanelEmbeddable) => {
   }
 };
 
-export const canEditEmbeddable = (embeddable: PanelEmbeddable) => {
+export const canEditEmbeddable = (embeddable: LegacyCompatibleEmbeddable) => {
   return Boolean(
     embeddable &&
+      embeddable.getInput().viewMode === 'edit' &&
       embeddable.getOutput().editable &&
       !embeddable.getOutput().inlineEditable &&
       (embeddable.getOutput().editUrl ||

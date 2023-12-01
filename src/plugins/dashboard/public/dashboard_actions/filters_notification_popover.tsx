@@ -6,49 +6,66 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
   EuiButton,
   EuiButtonIcon,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
 } from '@elastic/eui';
 
+import { css } from '@emotion/react';
+import { AggregateQuery, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
 import { getEditPanelAction } from '@kbn/presentation-panel-plugin/public';
-import { FiltersNotificationPopoverContents } from './filters_notification_popover_contents';
-import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
+import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { FiltersNotificationActionApi } from './filters_notification_action';
+import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
 
-export interface FiltersNotificationProps {
-  api: FiltersNotificationActionApi;
-  displayName: string;
-  icon: string;
-  id: string;
-}
-
-export function FiltersNotificationPopover({
-  displayName,
-  icon,
-  api,
-  id,
-}: FiltersNotificationProps) {
+export function FiltersNotificationPopover({ api }: { api: FiltersNotificationActionApi }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [disableEditbutton, setDisableEditButton] = useState(false);
 
   const editPanelAction = getEditPanelAction();
+
+  const filters = useMemo(() => api.localFilters?.value, [api]);
+  const displayName = dashboardFilterNotificationActionStrings.getDisplayName();
+
+  const { queryString, queryLanguage } = useMemo(() => {
+    const localQuery = api.localQuery?.value;
+    if (!localQuery) return {};
+    if (isOfQueryType(localQuery)) {
+      if (typeof localQuery.query === 'string') {
+        return { queryString: localQuery.query };
+      } else {
+        return { queryString: JSON.stringify(localQuery.query, null, 2) };
+      }
+    } else {
+      setDisableEditButton(true);
+      const language: 'sql' | 'esql' | undefined = getAggregateQueryMode(localQuery);
+      return {
+        queryString: localQuery[language as keyof AggregateQuery],
+        queryLanguage: language,
+      };
+    }
+  }, [api, setDisableEditButton]);
+
+  const dataViews = useMemo(() => api.parentApi.value?.getAllDataViews(), [api]);
 
   return (
     <EuiPopover
       button={
         <EuiButtonIcon
           color="text"
-          iconType={icon}
+          iconType={'filter'}
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-          data-test-subj={`embeddablePanelNotification-${id}`}
+          data-test-subj={`embeddablePanelNotification-${api.uuid.value}`}
           aria-label={displayName}
         />
       }
@@ -57,7 +74,39 @@ export function FiltersNotificationPopover({
       anchorPosition="upCenter"
     >
       <EuiPopoverTitle>{displayName}</EuiPopoverTitle>
-      <FiltersNotificationPopoverContents api={api} setDisableEditButton={setDisableEditButton} />
+      <EuiForm
+        component="div"
+        css={css`
+          min-width: 300px;
+        `}
+      >
+        {Boolean(queryString) && (
+          <EuiFormRow
+            label={dashboardFilterNotificationActionStrings.getQueryTitle()}
+            data-test-subj={'filtersNotificationModal__query'}
+            display="rowCompressed"
+          >
+            <EuiCodeBlock
+              language={queryLanguage}
+              paddingSize="s"
+              aria-labelledby={`${dashboardFilterNotificationActionStrings.getQueryTitle()}: ${queryString}`}
+              tabIndex={0} // focus so that keyboard controls will not skip over the code block
+            >
+              {queryString}
+            </EuiCodeBlock>
+          </EuiFormRow>
+        )}
+        {filters && filters.length > 0 && (
+          <EuiFormRow
+            label={dashboardFilterNotificationActionStrings.getFiltersTitle()}
+            data-test-subj={'filtersNotificationModal__filterItems'}
+          >
+            <EuiFlexGroup wrap={true} gutterSize="xs">
+              <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
+            </EuiFlexGroup>
+          </EuiFormRow>
+        )}
+      </EuiForm>
       <EuiPopoverFooter>
         {!disableEditbutton && (
           <EuiFlexGroup

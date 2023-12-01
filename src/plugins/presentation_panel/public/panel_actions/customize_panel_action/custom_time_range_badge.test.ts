@@ -5,122 +5,57 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
 
-export {};
+import { Filter, TimeRange, type AggregateQuery, type Query } from '@kbn/es-query';
 
-// import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-// import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
+import { PublishesLocalUnifiedSearch } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
+import { CustomTimeRangeBadge } from './custom_time_range_badge';
 
-// import {
-//   TimeRangeEmbeddable,
-//   TimeRangeContainer,
-//   TIME_RANGE_EMBEDDABLE,
-// } from '../../../lib/test_samples/embeddables';
-// import { CustomTimeRangeBadge } from './custom_time_range_badge';
-// import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
+const mockTimeRange: TimeRange = { from: 'now-17m', to: 'now' };
 
-// const editPanelAction = {
-//   execute: jest.fn(),
-// } as unknown as EditPanelAction;
+describe('custom time range badge action', () => {
+  let action: CustomTimeRangeBadge;
+  let context: { embeddable: PublishesLocalUnifiedSearch };
 
-// test(`badge is not compatible with embeddable that inherits from parent`, async () => {
-//   const container = new TimeRangeContainer(
-//     {
-//       timeRange: { from: 'now-15m', to: 'now' },
-//       panels: {
-//         '1': {
-//           type: TIME_RANGE_EMBEDDABLE,
-//           explicitInput: {
-//             id: '1',
-//           },
-//         },
-//       },
-//       id: '123',
-//     },
-//     () => undefined
-//   );
+  let updateTimeRange: (timeRange: TimeRange | undefined) => void;
 
-//   await container.untilEmbeddableLoaded('1');
+  beforeEach(() => {
+    const timeRangeSubject = new BehaviorSubject<TimeRange | undefined>(undefined);
+    updateTimeRange = (timeRange) => timeRangeSubject.next(timeRange);
 
-//   const child = container.getChild<TimeRangeEmbeddable>('1');
+    action = new CustomTimeRangeBadge();
+    context = {
+      embeddable: {
+        localTimeRange: timeRangeSubject,
+        localFilters: new BehaviorSubject<Filter[] | undefined>(undefined),
+        localQuery: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
+      },
+    };
+  });
 
-//   const compatible = await new CustomTimeRangeBadge(
-//     overlayServiceMock.createStartContract(),
-//     themeServiceMock.createStartContract(),
-//     editPanelAction,
-//     [],
-//     'MM YYYY'
-//   ).isCompatible({
-//     embeddable: child,
-//   });
-//   expect(compatible).toBe(false);
-// });
+  it('is compatible when api has a time range', async () => {
+    updateTimeRange(mockTimeRange);
+    expect(await action.isCompatible(context)).toBe(true);
+  });
 
-// test(`badge is compatible with embeddable that has custom time range`, async () => {
-//   const container = new TimeRangeContainer(
-//     {
-//       timeRange: { from: 'now-15m', to: 'now' },
-//       panels: {
-//         '1': {
-//           type: TIME_RANGE_EMBEDDABLE,
-//           explicitInput: {
-//             id: '1',
-//             timeRange: { to: '123', from: '456' },
-//           },
-//         },
-//       },
-//       id: '123',
-//     },
-//     () => undefined
-//   );
+  it('is incompatible when api is missing required functions', async () => {
+    const emptyContext = { embeddable: {} };
+    expect(await action.isCompatible(emptyContext)).toBe(false);
+  });
 
-//   await container.untilEmbeddableLoaded('1');
-
-//   const child = container.getChild<TimeRangeEmbeddable>('1');
-
-//   const compatible = await new CustomTimeRangeBadge(
-//     overlayServiceMock.createStartContract(),
-//     themeServiceMock.createStartContract(),
-//     editPanelAction,
-//     [],
-//     'MM YYYY'
-//   ).isCompatible({
-//     embeddable: child,
-//   });
-//   expect(compatible).toBe(true);
-// });
-
-// test('Attempting to execute on incompatible embeddable throws an error', async () => {
-//   const container = new TimeRangeContainer(
-//     {
-//       timeRange: { from: 'now-15m', to: 'now' },
-//       panels: {
-//         '1': {
-//           type: TIME_RANGE_EMBEDDABLE,
-//           explicitInput: {
-//             id: '1',
-//           },
-//         },
-//       },
-//       id: '123',
-//     },
-//     () => undefined
-//   );
-
-//   await container.untilEmbeddableLoaded('1');
-
-//   const child = container.getChild<TimeRangeEmbeddable>('1');
-
-//   const badge = await new CustomTimeRangeBadge(
-//     overlayServiceMock.createStartContract(),
-//     themeServiceMock.createStartContract(),
-//     editPanelAction,
-//     [],
-//     'MM YYYY'
-//   );
-
-//   async function check() {
-//     await badge.execute({ embeddable: child });
-//   }
-//   await expect(check()).rejects.toThrow(Error);
-// });
+  it('calls onChange when time range changes', () => {
+    const onChange = jest.fn();
+    updateTimeRange(mockTimeRange);
+    updateTimeRange(undefined);
+    action.subscribeToCompatibilityChanges(context, onChange);
+    expect(onChange).toHaveBeenCalledWith(false, action);
+  });
+});

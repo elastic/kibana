@@ -50,6 +50,7 @@ export {
 } from './interfaces/publishes_uuid';
 export {
   apiPublishesLocalUnifiedSearch,
+  apiPublishesPartialLocalUnifiedSearch,
   apiPublishesWritableLocalUnifiedSearch,
   useLocalFilters,
   useLocalQuery,

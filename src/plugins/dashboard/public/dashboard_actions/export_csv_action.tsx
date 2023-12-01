@@ -25,7 +25,7 @@ export type ExportContext = EmbeddableApiContext & {
   asString?: boolean;
 };
 
-type ExportCsvActionApi = HasInspectorAdapters & Partial<PublishesPanelTitle>;
+export type ExportCsvActionApi = HasInspectorAdapters & Partial<PublishesPanelTitle>;
 
 const isApiCompatible = (api: unknown | null): api is ExportCsvActionApi =>
   Boolean(apiHasInspectorAdapters(api));
@@ -74,7 +74,7 @@ export class ExportCSVAction implements Action<ExportContext> {
     return;
   };
 
-  private exportCSV = async (embeddable: ExportCsvActionApi) => {
+  private exportCSV = async (embeddable: ExportCsvActionApi, asString = false) => {
     const formatFactory = this.getFormatter();
     // early exit if not formatter is available
     if (!formatFactory) {
@@ -110,14 +110,19 @@ export class ExportCSVAction implements Action<ExportContext> {
         {}
       );
 
+      // useful for testing
+      if (asString) {
+        return content as unknown as Promise<void>;
+      }
+
       if (content) {
         return downloadMultipleAs(content);
       }
     }
   };
 
-  public async execute({ embeddable }: ExportContext): Promise<void> {
+  public async execute({ embeddable, asString }: ExportContext): Promise<void> {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return await this.exportCSV(embeddable);
+    return await this.exportCSV(embeddable, asString);
   }
 }

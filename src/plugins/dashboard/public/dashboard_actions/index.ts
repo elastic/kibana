@@ -8,7 +8,10 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { getSavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import {
+  getSavedObjectFinder,
+  SavedObjectFinderProps,
+} from '@kbn/saved-objects-finder-plugin/public';
 
 import { DashboardStartDependencies } from '../plugin';
 import { AddToLibraryAction } from './add_to_library_action';
@@ -27,6 +30,8 @@ interface BuildAllDashboardActionsProps {
   plugins: DashboardStartDependencies;
 }
 
+export type ReplacePanelSOFinder = (props: Omit<SavedObjectFinderProps, 'services'>) => JSX.Element;
+
 export const buildAllDashboardActions = async ({
   core,
   plugins,
@@ -43,7 +48,7 @@ export const buildAllDashboardActions = async ({
     core.uiSettings,
     savedObjectsTaggingOss?.getTaggingApi()
   );
-  const changeViewAction = new ReplacePanelAction(SavedObjectFinder);
+  const changeViewAction = new ReplacePanelAction(SavedObjectFinder as ReplacePanelSOFinder);
   uiActions.registerAction(changeViewAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
 

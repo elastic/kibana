@@ -170,6 +170,10 @@ export abstract class Embeddable<
   public canUnlinkFromLibrary: LegacyEmbeddableAPI['canUnlinkFromLibrary'];
   public getFallbackTimeRange: LegacyEmbeddableAPI['getFallbackTimeRange'];
 
+  public getEditHref(): string | undefined {
+    return this.getOutput().editUrl ?? undefined;
+  }
+
   public getAppContext(): EmbeddableAppContext | undefined {
     return this.parent?.getAppContext();
   }

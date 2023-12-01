@@ -5,96 +5,49 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export {};
 
-// import { EmbeddableOutput, isErrorEmbeddable } from '../../..';
+import { PresentationContainer } from '@kbn/presentation-containers';
+import { ViewMode } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
+import { RemovePanelAction, RemovePanelActionApi } from './remove_panel_action';
 
-// import {
-//   MockFilter,
-//   FILTERABLE_EMBEDDABLE,
-//   FilterableEmbeddable,
-//   FilterableEmbeddableInput,
-// } from '../../../lib/test_samples/embeddables/filterable_embeddable';
-// import { ViewMode } from '../../../lib/types';
-// import { EmbeddableStart } from '../../../plugin';
-// import { embeddablePluginMock } from '../../../mocks';
-// import { RemovePanelAction } from './remove_panel_action';
-// import { FilterableContainer } from '../../../lib/test_samples/embeddables/filterable_container';
-// import { FilterableEmbeddableFactory } from '../../../lib/test_samples/embeddables/filterable_embeddable_factory';
-// import { ContactCardEmbeddable } from '../../../lib/test_samples/embeddables/contact_card/contact_card_embeddable';
+describe('Remove panel action', () => {
+  let action: RemovePanelAction;
+  let context: { embeddable: RemovePanelActionApi };
 
-// const { setup, doStart } = embeddablePluginMock.createInstance();
-// setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-// const getFactory = doStart().getEmbeddableFactory;
-// let container: FilterableContainer;
-// let embeddable: FilterableEmbeddable;
+  beforeEach(() => {
+    action = new RemovePanelAction();
+    context = {
+      embeddable: {
+        uuid: new BehaviorSubject<string>('superId'),
+        viewMode: new BehaviorSubject<ViewMode>('edit'),
+        parentApi: new BehaviorSubject<PresentationContainer>({
+          removePanel: jest.fn(),
+          canRemovePanels: jest.fn().mockReturnValue(true),
+          replacePanel: jest.fn(),
+        }),
+      },
+    };
+  });
 
-// beforeEach(async () => {
-//   const derivedFilter: MockFilter = {
-//     $state: { store: 'appState' },
-//     meta: { disabled: false, alias: 'name', negate: false },
-//     query: { match: {} },
-//   };
-//   container = new FilterableContainer(
-//     { id: 'hello', panels: {}, filters: [derivedFilter], viewMode: ViewMode.EDIT },
-//     getFactory as EmbeddableStart['getEmbeddableFactory']
-//   );
+  it('is compatible when api meets all conditions', async () => {
+    expect(await action.isCompatible(context)).toBe(true);
+  });
 
-//   const filterableEmbeddable = await container.addNewEmbeddable<
-//     FilterableEmbeddableInput,
-//     EmbeddableOutput,
-//     FilterableEmbeddable
-//   >(FILTERABLE_EMBEDDABLE, {
-//     id: '123',
-//     viewMode: ViewMode.EDIT,
-//   });
+  it('is incompatible when context lacks necessary functions', async () => {
+    const emptyContext = {
+      embeddable: {},
+    };
+    expect(await action.isCompatible(emptyContext)).toBe(false);
+  });
 
-//   if (isErrorEmbeddable(filterableEmbeddable)) {
-//     throw new Error('Error creating new filterable embeddable');
-//   } else {
-//     embeddable = filterableEmbeddable;
-//   }
-// });
+  it('is incompatible when view mode is view', async () => {
+    context.embeddable.viewMode = new BehaviorSubject<ViewMode>('view');
+    expect(await action.isCompatible(context)).toBe(false);
+  });
 
-// test('Removes the embeddable', async () => {
-//   const removePanelAction = new RemovePanelAction();
-//   expect(container.getChild(embeddable.id)).toBeDefined();
-
-//   await removePanelAction.execute({ embeddable });
-
-//   expect(container.getChild(embeddable.id)).toBeUndefined();
-// });
-
-// test('Is not compatible when embeddable is not in a parent', async () => {
-//   const action = new RemovePanelAction();
-//   expect(
-//     await action.isCompatible({
-//       embeddable: new ContactCardEmbeddable(
-//         {
-//           firstName: 'Sandor',
-//           lastName: 'Clegane',
-//           id: '123',
-//         },
-//         { execAction: (() => null) as any }
-//       ),
-//     })
-//   ).toBe(false);
-// });
-
-// test('Execute throws an error when called with an embeddable not in a parent', async () => {
-//   const action = new RemovePanelAction();
-//   async function check() {
-//     await action.execute({ embeddable: container });
-//   }
-//   await expect(check()).rejects.toThrow(Error);
-// });
-
-// test('Returns title', async () => {
-//   const action = new RemovePanelAction();
-//   expect(action.getDisplayName()).toBeDefined();
-// });
-
-// test('Returns an icon type', async () => {
-//   const action = new RemovePanelAction();
-//   expect(action.getIconType()).toBeDefined();
-// });
+  it('calls the parent removePanel method on execute', async () => {
+    action.execute(context);
+    expect(context.embeddable.parentApi.value.removePanel).toHaveBeenCalled();
+  });
+});

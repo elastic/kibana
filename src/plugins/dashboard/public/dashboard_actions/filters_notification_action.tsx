@@ -13,11 +13,13 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import {
-  apiPublishesLocalUnifiedSearch,
+  apiPublishesPartialLocalUnifiedSearch,
+  apiPublishesUniqueId,
   apiPublishesViewMode,
   EmbeddableApiContext,
   PublishesLocalUnifiedSearch,
   PublishesParentApi,
+  PublishesUniqueId,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { merge } from 'rxjs';
@@ -28,12 +30,17 @@ import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_s
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
-export type FiltersNotificationActionApi = PublishesViewMode &
+export type FiltersNotificationActionApi = PublishesUniqueId &
+  PublishesViewMode &
   Partial<PublishesLocalUnifiedSearch> &
   PublishesParentApi<DashboardPluginInternalFunctions>;
 
 const isApiCompatible = (api: unknown | null): api is FiltersNotificationActionApi =>
-  Boolean(apiPublishesViewMode(api) && apiPublishesLocalUnifiedSearch(api));
+  Boolean(
+    apiPublishesUniqueId(api) &&
+      apiPublishesViewMode(api) &&
+      apiPublishesPartialLocalUnifiedSearch(api)
+  );
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
   if (!isApiCompatible(api) || api.viewMode.value !== 'edit') return false;
@@ -50,8 +57,6 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
   public readonly type = BADGE_FILTERS_NOTIFICATION;
   public readonly order = 2;
 
-  private displayName = dashboardFilterNotificationActionStrings.getDisplayName();
-  private icon = 'filter';
   private settingsService;
 
   constructor() {
@@ -68,24 +73,19 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
 
     return (
       <KibanaReactContextProvider>
-        <FiltersNotificationPopover
-          displayName={this.displayName}
-          icon={this.getIconType({ embeddable })}
-          api={embeddable}
-          id={this.id}
-        />
+        <FiltersNotificationPopover api={embeddable} />
       </KibanaReactContextProvider>
     );
   };
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return this.displayName;
+    return dashboardFilterNotificationActionStrings.getDisplayName();
   }
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return this.icon;
+    return 'filter';
   }
 
   public isCompatible = async ({ embeddable }: EmbeddableApiContext) => {
@@ -93,7 +93,7 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
   };
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
-    return apiPublishesLocalUnifiedSearch(embeddable);
+    return apiPublishesPartialLocalUnifiedSearch(embeddable);
   }
 
   public subscribeToCompatibilityChanges(
@@ -102,9 +102,7 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
   ) {
     if (!isApiCompatible(embeddable)) return;
     return merge([embeddable.localQuery, embeddable.localFilters, embeddable.viewMode]).subscribe(
-      () => {
-        onChange(compatibilityCheck(embeddable), this);
-      }
+      () => onChange(compatibilityCheck(embeddable), this)
     );
   }
 

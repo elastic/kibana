@@ -5,138 +5,67 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export {};
 
-// import { of } from 'rxjs';
+import { ViewMode } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
+import { EditPanelAction, EditPanelActionApi } from './edit_panel_action';
 
-// import { ViewMode } from '../../../lib';
-// import { EditPanelAction } from './edit_panel_action';
-// import { embeddablePluginMock } from '../../../mocks';
-// import { applicationServiceMock } from '@kbn/core/public/mocks';
-// import { ContactCardEmbeddable } from '../../../lib/test_samples';
-// import { Embeddable, EmbeddableInput } from '../../../lib/embeddables';
+describe('Edit panel action', () => {
+  let action: EditPanelAction;
+  let context: { embeddable: EditPanelActionApi };
+  let updateViewMode: (viewMode: ViewMode) => void;
 
-// const { doStart } = embeddablePluginMock.createInstance();
-// const start = doStart();
-// const getFactory = start.getEmbeddableFactory;
-// const applicationMock = applicationServiceMock.createStartContract();
-// const stateTransferMock = embeddablePluginMock.createStartContract().getStateTransfer();
+  beforeEach(() => {
+    const viewModeSubject = new BehaviorSubject<ViewMode>('edit');
+    updateViewMode = (viewMode) => viewModeSubject.next(viewMode);
 
-// class EditableEmbeddable extends Embeddable {
-//   public readonly type = 'EDITABLE_EMBEDDABLE';
+    action = new EditPanelAction();
+    context = {
+      embeddable: {
+        viewMode: viewModeSubject,
+        onEdit: jest.fn(),
+        isEditingEnabled: jest.fn().mockReturnValue(true),
+        getTypeDisplayName: jest.fn().mockReturnValue('A very fun panel type'),
+      },
+    };
+  });
 
-//   constructor(input: EmbeddableInput, editable: boolean) {
-//     super(input, {
-//       editUrl: 'www.google.com',
-//       editable,
-//     });
-//   }
+  it('is compatible when api meets all conditions', async () => {
+    expect(await action.isCompatible(context)).toBe(true);
+  });
 
-//   public reload() {}
-// }
+  it('is incompatible when context lacks necessary functions', async () => {
+    const emptyContext = {
+      embeddable: {},
+    };
+    expect(await action.isCompatible(emptyContext)).toBe(false);
+  });
 
-// test('is compatible when edit url is available, in edit mode and editable', async () => {
-//   const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
-//   expect(
-//     await action.isCompatible({
-//       embeddable: new EditableEmbeddable({ id: '123', viewMode: ViewMode.EDIT }, true),
-//     })
-//   ).toBe(true);
-// });
+  it('is incompatible when view mode is view', async () => {
+    context.embeddable.viewMode = new BehaviorSubject<ViewMode>('view');
+    expect(await action.isCompatible(context)).toBe(false);
+  });
 
-// test('redirects to app using state transfer', async () => {
-//   applicationMock.currentAppId$ = of('superCoolCurrentApp');
-//   const testPath = '/test-path';
-//   const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
-//   const embeddable = new EditableEmbeddable(
-//     {
-//       id: '123',
-//       viewMode: ViewMode.EDIT,
-//       coolInput1: 1,
-//       coolInput2: 2,
-//     } as unknown as EmbeddableInput,
-//     true
-//   );
-//   embeddable.getOutput = jest.fn(() => ({ editApp: 'ultraVisualize', editPath: '/123' }));
-//   embeddable.getAppContext = jest.fn().mockReturnValue({
-//     getCurrentPath: () => testPath,
-//   });
-//   await action.execute({ embeddable });
-//   expect(stateTransferMock.navigateToEditor).toHaveBeenCalledWith('ultraVisualize', {
-//     path: '/123',
-//     state: {
-//       originatingApp: 'superCoolCurrentApp',
-//       embeddableId: '123',
-//       valueInput: {
-//         id: '123',
-//         viewMode: ViewMode.EDIT,
-//         coolInput1: 1,
-//         coolInput2: 2,
-//       },
-//       originatingPath: testPath,
-//     },
-//   });
-// });
+  it('is incompatible when editing is not enabled', async () => {
+    context.embeddable.isEditingEnabled = jest.fn().mockReturnValue(false);
+    expect(await action.isCompatible(context)).toBe(false);
+  });
 
-// test('getHref returns the edit urls', async () => {
-//   const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
-//   expect(action.getHref).toBeDefined();
+  it('calls the onEdit method on execute', async () => {
+    action.execute(context);
+    expect(context.embeddable.onEdit).toHaveBeenCalled();
+  });
 
-//   if (action.getHref) {
-//     const embeddable = new EditableEmbeddable({ id: '123', viewMode: ViewMode.EDIT }, true);
-//     expect(
-//       await action.getHref({
-//         embeddable,
-//       })
-//     ).toBe(embeddable.getOutput().editUrl);
-//   }
-// });
+  it('returns an href if one is available', async () => {
+    const href = '#/very-fun-panel-type/edit';
+    context.embeddable.getEditHref = jest.fn().mockReturnValue(href);
+    expect(await action.getHref(context)).toBe(href);
+  });
 
-// test('is not compatible when edit url is not available', async () => {
-//   const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
-//   const embeddable = new ContactCardEmbeddable(
-//     {
-//       id: '123',
-//       firstName: 'sue',
-//       viewMode: ViewMode.EDIT,
-//     },
-//     {
-//       execAction: () => Promise.resolve(undefined),
-//     }
-//   );
-//   expect(
-//     await action.isCompatible({
-//       embeddable,
-//     })
-//   ).toBe(false);
-// });
-
-// test('is not visible when edit url is available but in view mode', async () => {
-//   const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
-//   expect(
-//     await action.isCompatible({
-//       embeddable: new EditableEmbeddable(
-//         {
-//           id: '123',
-//           viewMode: ViewMode.VIEW,
-//         },
-//         true
-//       ),
-//     })
-//   ).toBe(false);
-// });
-
-// test('is not compatible when edit url is available, in edit mode, but not editable', async () => {
-//   const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
-//   expect(
-//     await action.isCompatible({
-//       embeddable: new EditableEmbeddable(
-//         {
-//           id: '123',
-//           viewMode: ViewMode.EDIT,
-//         },
-//         false
-//       ),
-//     })
-//   ).toBe(false);
-// });
+  it('calls onChange when view mode changes', () => {
+    const onChange = jest.fn();
+    updateViewMode('view');
+    action.subscribeToCompatibilityChanges(context, onChange);
+    expect(onChange).toHaveBeenCalledWith(false, action);
+  });
+});

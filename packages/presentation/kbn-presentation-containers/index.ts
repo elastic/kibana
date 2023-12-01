@@ -12,7 +12,6 @@ export {
   type CanExpandPanels,
   apiCanExpandPanels,
   useExpandedPanelId,
-  getExpandedPanelId,
 } from './interfaces/panel_management';
 export {
   apiIsPresentationContainer,

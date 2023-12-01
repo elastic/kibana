@@ -17,6 +17,7 @@ import { HasTypeDisplayName } from './has_type';
 export interface HasEditCapabilities extends HasTypeDisplayName {
   onEdit: () => void;
   isEditingEnabled: () => boolean;
+  getEditHref?: () => string | undefined;
 }
 
 /**

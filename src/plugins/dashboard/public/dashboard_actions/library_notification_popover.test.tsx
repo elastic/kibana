@@ -1,100 +1,62 @@
-// /*
-//  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-//  * or more contributor license agreements. Licensed under the Elastic License
-//  * 2.0 and the Server Side Public License, v 1; you may not use this file except
-//  * in compliance with, at your election, the Elastic License 2.0 or the Server
-//  * Side Public License, v 1.
-//  */
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
 
-// import React from 'react';
-// import { EuiPopover } from '@elastic/eui';
-// import { mountWithIntl } from '@kbn/test-jest-helpers';
-// import { findTestSubject } from '@elastic/eui/lib/test';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { I18nProvider } from '@kbn/i18n-react';
+import { ViewMode } from '@kbn/presentation-publishing';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { BehaviorSubject } from 'rxjs';
+import { LibraryNotificationPopover } from './library_notification_popover';
+import {
+  UnlinkFromLibraryAction,
+  UnlinkPanelFromLibraryActionApi,
+} from './unlink_from_library_action';
 
-// import {
-//   ContactCardEmbeddable,
-//   ContactCardEmbeddableFactory,
-//   ContactCardEmbeddableInput,
-//   ContactCardEmbeddableOutput,
-//   CONTACT_CARD_EMBEDDABLE,
-// } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-// import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+const mockUnlinkFromLibraryAction = {
+  execute: jest.fn(),
+  isCompatible: jest.fn().mockResolvedValue(true),
+  getDisplayName: jest.fn().mockReturnValue('Test Unlink'),
+} as unknown as UnlinkFromLibraryAction;
 
-// import {
-//   LibraryNotificationPopover,
-//   LibraryNotificationProps,
-// } from './library_notification_popover';
-// import { buildMockDashboard } from '../mocks';
-// import { pluginServices } from '../services/plugin_services';
-// import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
+describe('library notification popover', () => {
+  let api: UnlinkPanelFromLibraryActionApi;
 
-// describe('LibraryNotificationPopover', () => {
-//   const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-//   pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-//     .fn()
-//     .mockReturnValue(mockEmbeddableFactory);
+  beforeEach(async () => {
+    api = {
+      viewMode: new BehaviorSubject<ViewMode>('edit'),
+      canUnlinkFromLibrary: jest.fn().mockResolvedValue(true),
+      unlinkFromLibrary: jest.fn(),
+    };
+  });
 
-//   let container: DashboardContainer;
-//   let defaultProps: LibraryNotificationProps;
+  const renderAndOpenPopover = async () => {
+    render(
+      <I18nProvider>
+        <LibraryNotificationPopover api={api} unlinkAction={mockUnlinkFromLibraryAction} />
+      </I18nProvider>
+    );
+    await userEvent.click(
+      await screen.findByTestId('embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION')
+    );
+    await waitForEuiPopoverOpen();
+  };
 
-//   beforeEach(async () => {
-//     container = buildMockDashboard();
+  it('renders the unlink button', async () => {
+    await renderAndOpenPopover();
+    expect(await screen.findByText('Test Unlink')).toBeInTheDocument();
+  });
 
-//     const contactCardEmbeddable = await container.addNewEmbeddable<
-//       ContactCardEmbeddableInput,
-//       ContactCardEmbeddableOutput,
-//       ContactCardEmbeddable
-//     >(CONTACT_CARD_EMBEDDABLE, {
-//       firstName: 'Kibanana',
-//     });
-
-//     if (isErrorEmbeddable(contactCardEmbeddable)) {
-//       throw new Error('Failed to create embeddable');
-//     }
-
-//     defaultProps = {
-//       unlinkAction: {
-//         execute: jest.fn(),
-//         getDisplayName: () => 'test unlink',
-//       } as unknown as LibraryNotificationProps['unlinkAction'],
-//       displayName: 'test display',
-//       context: { embeddable: contactCardEmbeddable },
-//       icon: 'testIcon',
-//       id: 'testId',
-//     };
-//   });
-
-//   function mountComponent(props?: Partial<LibraryNotificationProps>) {
-//     return mountWithIntl(<LibraryNotificationPopover {...{ ...defaultProps, ...props }} />);
-//   }
-
-//   test('click library notification badge should open and close popover', () => {
-//     const component = mountComponent();
-//     const btn = findTestSubject(component, `embeddablePanelNotification-${defaultProps.id}`);
-//     btn.simulate('click');
-//     let popover = component.find(EuiPopover);
-//     expect(popover.prop('isOpen')).toBe(true);
-//     btn.simulate('click');
-//     popover = component.find(EuiPopover);
-//     expect(popover.prop('isOpen')).toBe(false);
-//   });
-
-//   test('popover should contain button with unlink action display name', () => {
-//     const component = mountComponent();
-//     const btn = findTestSubject(component, `embeddablePanelNotification-${defaultProps.id}`);
-//     btn.simulate('click');
-//     const popover = component.find(EuiPopover);
-//     const unlinkButton = findTestSubject(popover, 'libraryNotificationUnlinkButton');
-//     expect(unlinkButton.text()).toEqual('test unlink');
-//   });
-
-//   test('clicking unlink executes unlink action', () => {
-//     const component = mountComponent();
-//     const btn = findTestSubject(component, `embeddablePanelNotification-${defaultProps.id}`);
-//     btn.simulate('click');
-//     const popover = component.find(EuiPopover);
-//     const unlinkButton = findTestSubject(popover, 'libraryNotificationUnlinkButton');
-//     unlinkButton.simulate('click');
-//     expect(defaultProps.unlinkAction.execute).toHaveBeenCalled();
-//   });
-// });
+  it('calls the unlink action execute method on click', async () => {
+    await renderAndOpenPopover();
+    const button = await screen.findByTestId('libraryNotificationUnlinkButton');
+    await userEvent.click(button);
+    expect(mockUnlinkFromLibraryAction.execute).toHaveBeenCalled();
+  });
+});

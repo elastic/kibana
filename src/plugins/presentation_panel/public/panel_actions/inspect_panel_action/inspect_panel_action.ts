@@ -19,7 +19,7 @@ import { inspector } from '../../kibana_services';
 
 export const ACTION_INSPECT_PANEL = 'openInspector';
 
-type InspectPanelActionApi = HasInspectorAdapters &
+export type InspectPanelActionApi = HasInspectorAdapters &
   Partial<PublishesPanelTitle & PublishesParentApi>;
 const isApiCompatible = (api: unknown | null): api is InspectPanelActionApi => {
   return Boolean(api) && apiHasInspectorAdapters(api);

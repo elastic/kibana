@@ -23,22 +23,10 @@ export class LibraryNotificationAction implements Action<EmbeddableApiContext> {
 
   constructor(private unlinkAction: UnlinkFromLibraryAction) {}
 
-  private displayName = dashboardLibraryNotificationStrings.getDisplayName();
-
-  private icon = 'folderCheck';
-
   public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
     const { embeddable } = context;
     if (!unlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
-    return (
-      <LibraryNotificationPopover
-        unlinkAction={this.unlinkAction}
-        displayName={this.displayName}
-        context={{ api: embeddable }}
-        icon={this.getIconType({ embeddable })}
-        id={this.id}
-      />
-    );
+    return <LibraryNotificationPopover unlinkAction={this.unlinkAction} api={embeddable} />;
   };
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
@@ -64,12 +52,12 @@ export class LibraryNotificationAction implements Action<EmbeddableApiContext> {
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!unlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
-    return this.displayName;
+    return dashboardLibraryNotificationStrings.getDisplayName();
   }
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
     if (!unlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
-    return this.icon;
+    return 'folderCheck';
   }
 
   public isCompatible = async ({ embeddable }: EmbeddableApiContext) => {

@@ -23,7 +23,7 @@ import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
 
-type ClonePanelActionApi = PublishesViewMode &
+export type ClonePanelActionApi = PublishesViewMode &
   PublishesUniqueId &
   PublishesParentApi<CanDuplicatePanels> &
   Partial<PublishesBlockingError>;

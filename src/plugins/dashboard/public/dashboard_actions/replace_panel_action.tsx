@@ -22,6 +22,7 @@ import {
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { ReplacePanelSOFinder } from '.';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
 import { dashboardReplacePanelActionStrings } from './_dashboard_actions_strings';
 
@@ -45,7 +46,7 @@ export class ReplacePanelAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_REPLACE_PANEL;
   public order = 3;
 
-  constructor(private savedobjectfinder: React.ComponentType<any>) {}
+  constructor(private savedObjectFinder: ReplacePanelSOFinder) {}
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
@@ -67,7 +68,7 @@ export class ReplacePanelAction implements Action<EmbeddableApiContext> {
 
     openReplacePanelFlyout({
       api: embeddable,
-      savedObjectFinder: this.savedobjectfinder,
+      savedObjectFinder: this.savedObjectFinder,
     });
   }
 }

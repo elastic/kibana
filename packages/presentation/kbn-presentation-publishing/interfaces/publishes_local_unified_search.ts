@@ -33,6 +33,16 @@ export const apiPublishesLocalUnifiedSearch = (
   );
 };
 
+export const apiPublishesPartialLocalUnifiedSearch = (
+  unknownApi: null | unknown
+): unknownApi is Partial<PublishesLocalUnifiedSearch> => {
+  return Boolean(
+    (unknownApi && (unknownApi as PublishesLocalUnifiedSearch)?.localTimeRange !== undefined) ||
+      (unknownApi as PublishesLocalUnifiedSearch)?.localFilters !== undefined ||
+      (unknownApi as PublishesLocalUnifiedSearch)?.localQuery !== undefined
+  );
+};
+
 export const apiPublishesWritableLocalUnifiedSearch = (
   unknownApi: null | unknown
 ): unknownApi is PublishesWritableLocalUnifiedSearch => {

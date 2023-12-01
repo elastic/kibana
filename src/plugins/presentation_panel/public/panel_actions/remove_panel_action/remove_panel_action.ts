@@ -21,7 +21,7 @@ import { getContainerParentFromAPI, PresentationContainer } from '@kbn/presentat
 
 export const ACTION_REMOVE_PANEL = 'deletePanel';
 
-type RemovePanelActionApi = PublishesViewMode &
+export type RemovePanelActionApi = PublishesViewMode &
   PublishesUniqueId &
   PublishesParentApi<PresentationContainer>;
 

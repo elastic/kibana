@@ -5,140 +5,80 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export {};
 
-// import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
 
-// import {
-//   FilterableContainer,
-//   FILTERABLE_EMBEDDABLE,
-//   FilterableEmbeddableFactory,
-//   FilterableEmbeddableInput,
-//   FilterableEmbeddable,
-//   ContactCardEmbeddable,
-// } from '../../../lib/test_samples';
-// import { of } from '../../../tests/helpers';
-// import { EmbeddableStart } from '../../../plugin';
-// import { embeddablePluginMock } from '../../../mocks';
-// import { InspectPanelAction } from './inspect_panel_action';
-// import { EmbeddableOutput, isErrorEmbeddable, ErrorEmbeddable } from '../../../lib/embeddables';
+import { TracksOverlays } from '@kbn/presentation-containers';
+import { BehaviorSubject } from 'rxjs';
+import { inspector } from '../../kibana_services';
+import { InspectPanelActionApi, InspectPanelAction } from './inspect_panel_action';
 
-// const setupTests = async () => {
-//   const { setup, doStart } = embeddablePluginMock.createInstance();
-//   setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-//   const getFactory = doStart().getEmbeddableFactory;
-//   const container = new FilterableContainer(
-//     {
-//       id: 'hello',
-//       panels: {},
-//       filters: [
-//         {
-//           $state: { store: 'appState' },
-//           meta: { disabled: false, alias: 'name', negate: false },
-//           query: { match: {} },
-//         },
-//       ],
-//     },
-//     getFactory as EmbeddableStart['getEmbeddableFactory']
-//   );
+describe('Inspect panel action', () => {
+  let action: InspectPanelAction;
+  let context: { embeddable: InspectPanelActionApi };
 
-//   const embeddable: FilterableEmbeddable | ErrorEmbeddable = await container.addNewEmbeddable<
-//     FilterableEmbeddableInput,
-//     EmbeddableOutput,
-//     FilterableEmbeddable
-//   >(FILTERABLE_EMBEDDABLE, {
-//     id: '123',
-//   });
+  beforeEach(() => {
+    action = new InspectPanelAction();
+    context = {
+      embeddable: {
+        getInspectorAdapters: jest.fn().mockReturnValue({
+          filters: `My filters are extremely interesting. Please inspect them.`,
+        }),
+      },
+    };
+  });
 
-//   if (isErrorEmbeddable(embeddable)) {
-//     throw new Error('Error creating new filterable embeddable');
-//   }
+  it('is incompatible when context lacks necessary functions', async () => {
+    const emptyContext = {
+      embeddable: {},
+    };
+    expect(await action.isCompatible(emptyContext)).toBe(false);
+  });
 
-//   return {
-//     embeddable,
-//     container,
-//   };
-// };
+  it('is compatible when inspector adapters are available', async () => {
+    inspector.isAvailable = jest.fn().mockReturnValue(true);
 
-// test('Is compatible when inspector adapters are available', async () => {
-//   const inspector = inspectorPluginMock.createStartContract();
-//   inspector.isAvailable.mockImplementation(() => true);
+    expect(await action.isCompatible(context)).toBe(true);
+    expect(inspector.isAvailable).toHaveBeenCalledTimes(1);
+    expect(inspector.isAvailable).toHaveBeenCalledWith({
+      filters: expect.any(String),
+    });
+  });
 
-//   const { embeddable } = await setupTests();
-//   const inspectAction = new InspectPanelAction(inspector);
+  it('is not compatible when inspector adapters are not available', async () => {
+    inspector.isAvailable = jest.fn().mockReturnValue(false);
 
-//   expect(await inspectAction.isCompatible({ embeddable })).toBe(true);
-//   expect(inspector.isAvailable).toHaveBeenCalledTimes(1);
-//   expect(inspector.isAvailable.mock.calls[0][0]).toMatchObject({
-//     filters: expect.any(String),
-//   });
-// });
+    expect(await action.isCompatible(context)).toBe(false);
+    expect(inspector.isAvailable).toHaveBeenCalledTimes(1);
+    expect(inspector.isAvailable).toHaveBeenCalledWith({
+      filters: expect.any(String),
+    });
+  });
 
-// test('Is not compatible when inspector adapters are not available', async () => {
-//   const inspector = inspectorPluginMock.createStartContract();
-//   inspector.isAvailable.mockImplementation(() => false);
-//   const inspectAction = new InspectPanelAction(inspector);
+  test('Executes when inspector adapters are available', async () => {
+    inspector.isAvailable = jest.fn().mockReturnValue(true);
+    inspector.open = jest.fn().mockReturnValue({ onClose: Promise.resolve(undefined) });
 
-//   expect(
-//     await inspectAction.isCompatible({
-//       embeddable: new ContactCardEmbeddable(
-//         {
-//           firstName: 'Davos',
-//           lastName: 'Seaworth',
-//           id: '123',
-//         },
-//         { execAction: () => Promise.resolve(undefined) }
-//       ),
-//     })
-//   ).toBe(false);
-//   expect(inspector.isAvailable).toHaveBeenCalledTimes(1);
-//   expect(inspector.isAvailable.mock.calls[0][0]).toMatchInlineSnapshot(`undefined`);
-// });
+    expect(inspector.open).toHaveBeenCalledTimes(0);
 
-// test('Executes when inspector adapters are available', async () => {
-//   const inspector = inspectorPluginMock.createStartContract();
-//   inspector.isAvailable.mockImplementation(() => true);
+    await action.execute(context);
 
-//   const { embeddable } = await setupTests();
-//   const inspectAction = new InspectPanelAction(inspector);
+    expect(inspector.open).toHaveBeenCalledTimes(1);
+  });
 
-//   expect(inspector.open).toHaveBeenCalledTimes(0);
-
-//   await inspectAction.execute({ embeddable });
-
-//   expect(inspector.open).toHaveBeenCalledTimes(1);
-// });
-
-// test('Execute throws an error when inspector adapters are not available', async () => {
-//   const inspector = inspectorPluginMock.createStartContract();
-//   inspector.isAvailable.mockImplementation(() => false);
-//   const inspectAction = new InspectPanelAction(inspector);
-
-//   const [, error] = await of(
-//     inspectAction.execute({
-//       embeddable: new ContactCardEmbeddable(
-//         {
-//           firstName: 'John',
-//           lastName: 'Snow',
-//           id: '123',
-//         },
-//         { execAction: () => Promise.resolve(undefined) }
-//       ),
-//     })
-//   );
-
-//   expect(error).toBeInstanceOf(Error);
-//   expect((error as Error).message).toMatchInlineSnapshot(`"Action not compatible with context"`);
-// });
-
-// test('Returns title', async () => {
-//   const inspector = inspectorPluginMock.createStartContract();
-//   const inspectAction = new InspectPanelAction(inspector);
-//   expect(inspectAction.getDisplayName()).toBe('Inspect');
-// });
-
-// test('Returns an icon', async () => {
-//   const inspector = inspectorPluginMock.createStartContract();
-//   const inspectAction = new InspectPanelAction(inspector);
-//   expect(inspectAction.getIconType()).toBe('inspect');
-// });
+  it('opens overlay on parent if parent is an overlay tracker', async () => {
+    inspector.open = jest.fn().mockReturnValue({ onClose: Promise.resolve(undefined) });
+    context.embeddable.parentApi = new BehaviorSubject<unknown>({
+      openOverlay: jest.fn(),
+      clearOverlays: jest.fn(),
+    });
+    await action.execute(context);
+    expect((context.embeddable.parentApi.value as TracksOverlays).openOverlay).toHaveBeenCalled();
+  });
+});

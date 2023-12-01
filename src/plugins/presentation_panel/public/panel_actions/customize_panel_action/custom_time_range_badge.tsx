@@ -18,12 +18,11 @@ import { renderToString } from 'react-dom/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { apiPublishesLocalUnifiedSearch, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { core } from '../../kibana_services';
-import { CustomizePanelAction } from './customize_panel_action';
+import { customizePanelAction } from '../panel_actions';
 
 export const CUSTOM_TIME_RANGE_BADGE = 'CUSTOM_TIME_RANGE_BADGE';
 
 export class CustomTimeRangeBadge
-  extends CustomizePanelAction
   implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
 {
   public readonly type = CUSTOM_TIME_RANGE_BADGE;
@@ -55,6 +54,10 @@ export class CustomTimeRangeBadge
     return embeddable.localTimeRange.subscribe((localTimeRange) => {
       onChange(Boolean(localTimeRange), this);
     });
+  }
+
+  public async execute({ embeddable }: EmbeddableApiContext) {
+    customizePanelAction.execute({ embeddable });
   }
 
   public getIconType() {

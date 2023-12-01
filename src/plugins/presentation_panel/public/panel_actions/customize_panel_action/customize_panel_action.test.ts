@@ -5,64 +5,67 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export {};
 
-// import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
-// import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-// import { Container, isErrorEmbeddable } from '../../..';
-// import { CustomizePanelAction } from './customize_panel_action';
-// import {
-//   ContactCardEmbeddable,
-//   ContactCardEmbeddableInput,
-//   ContactCardEmbeddableOutput,
-// } from '../../../lib/test_samples/embeddables/contact_card/contact_card_embeddable';
-// import {
-//   CONTACT_CARD_EMBEDDABLE,
-//   ContactCardEmbeddableFactory,
-// } from '../../../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-// import { HelloWorldContainer } from '../../../lib/test_samples/embeddables/hello_world_container';
-// import { embeddablePluginMock } from '../../../mocks';
-// import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { TracksOverlays } from '@kbn/presentation-containers';
+import { ViewMode } from '@kbn/presentation-publishing';
 
-// let container: Container;
-// let embeddable: ContactCardEmbeddable;
-// const overlays = overlayServiceMock.createStartContract();
-// const theme = themeServiceMock.createStartContract();
-// const editPanelActionMock = { execute: jest.fn() } as unknown as EditPanelAction;
+import { BehaviorSubject } from 'rxjs';
+import { core } from '../../kibana_services';
+import { CustomizePanelAction, CustomizePanelActionApi } from './customize_panel_action';
 
-// function createHelloWorldContainer(input = { id: '123', panels: {} }) {
-//   const { setup, doStart } = embeddablePluginMock.createInstance();
-//   setup.registerEmbeddableFactory(
-//     CONTACT_CARD_EMBEDDABLE,
-//     new ContactCardEmbeddableFactory((() => {}) as any, {} as any)
-//   );
-//   const getEmbeddableFactory = doStart().getEmbeddableFactory;
+describe('Customize panel action', () => {
+  let action: CustomizePanelAction;
+  let context: { embeddable: CustomizePanelActionApi };
 
-//   return new HelloWorldContainer(input, { getEmbeddableFactory } as any);
-// }
+  beforeEach(() => {
+    action = new CustomizePanelAction();
+    context = {
+      embeddable: {
+        parentApi: new BehaviorSubject<unknown>({}),
+        viewMode: new BehaviorSubject<ViewMode>('edit'),
+        dataViews: new BehaviorSubject<DataView[] | undefined>(undefined),
+      },
+    };
+  });
 
-// beforeAll(async () => {
-//   container = createHelloWorldContainer();
-//   const contactCardEmbeddable = await container.addNewEmbeddable<
-//     ContactCardEmbeddableInput,
-//     ContactCardEmbeddableOutput,
-//     ContactCardEmbeddable
-//   >(CONTACT_CARD_EMBEDDABLE, {
-//     id: 'robert',
-//     firstName: 'Robert',
-//     lastName: 'Baratheon',
-//   });
-//   if (isErrorEmbeddable(contactCardEmbeddable)) {
-//     throw new Error('Error creating new hello world embeddable');
-//   } else {
-//     embeddable = contactCardEmbeddable;
-//   }
-// });
+  it('is compatible in edit mode', async () => {
+    expect(await action.isCompatible(context)).toBe(true);
+  });
 
-// test('execute should open flyout', async () => {
-//   const customizePanelAction = new CustomizePanelAction(overlays, theme, editPanelActionMock);
-//   const spy = jest.spyOn(overlays, 'openFlyout');
-//   await customizePanelAction.execute({ embeddable });
+  it('is compatible in view mode when API exposes writable unified search', async () => {
+    context.embeddable.viewMode = new BehaviorSubject<ViewMode>('view');
+    context.embeddable.localTimeRange = new BehaviorSubject<TimeRange | undefined>({
+      from: 'now-15m',
+      to: 'now',
+    });
+    context.embeddable.localFilters = new BehaviorSubject<Filter[] | undefined>([]);
+    context.embeddable.localQuery = new BehaviorSubject<Query | AggregateQuery | undefined>(
+      undefined
+    );
+    expect(await action.isCompatible(context)).toBe(true);
+  });
 
-//   expect(spy).toHaveBeenCalled();
-// });
+  it('is incompatible when context lacks necessary functions', async () => {
+    const emptyContext = {
+      embeddable: {},
+    };
+    expect(await action.isCompatible(emptyContext)).toBe(false);
+  });
+
+  it('opens a flyout on execute', async () => {
+    core.overlays.openFlyout = jest.fn();
+    await action.execute(context);
+    expect(core.overlays.openFlyout).toHaveBeenCalled();
+  });
+
+  it('opens overlay on parent if parent is an overlay tracker', async () => {
+    context.embeddable.parentApi = new BehaviorSubject<unknown>({
+      openOverlay: jest.fn(),
+      clearOverlays: jest.fn(),
+    });
+    await action.execute(context);
+    expect((context.embeddable.parentApi.value as TracksOverlays).openOverlay).toHaveBeenCalled();
+  });
+});

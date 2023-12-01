@@ -19,7 +19,7 @@ import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings
 
 export const ACTION_ADD_TO_LIBRARY = 'saveToLibrary';
 
-type AddPanelToLibraryActionApi = PublishesViewMode &
+export type AddPanelToLibraryActionApi = PublishesViewMode &
   CanLinkToLibrary &
   Partial<PublishesPanelTitle>;
 
