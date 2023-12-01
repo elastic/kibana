@@ -290,6 +290,7 @@ const nodeToEuiCollapsibleNavProps = (
   }
 
   const items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced> = [
+    // @ts-ignore - TODO
     {
       id,
       path,
@@ -519,6 +520,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
         if (item.renderItem) {
           return item;
         }
+        // @ts-ignore - TODO
         const parsed: EuiCollapsibleNavSubItemProps = {
           ...item,
           items: serializeAccordionItems(item.items),
@@ -539,6 +541,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   }
 
   return (
+    // @ts-ignore - TODO
     <EuiCollapsibleNavItem
       {...props}
       className={className}

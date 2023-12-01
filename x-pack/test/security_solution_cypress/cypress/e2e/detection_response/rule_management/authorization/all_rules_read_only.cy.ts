@@ -33,7 +33,7 @@ describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServer
 
   beforeEach(() => {
     login(ROLES.t1_analyst);
-    visitRulesManagementTable(ROLES.t1_analyst);
+    visitRulesManagementTable();
     cy.get(RULE_NAME).should('have.text', getNewRule().name);
   });
 

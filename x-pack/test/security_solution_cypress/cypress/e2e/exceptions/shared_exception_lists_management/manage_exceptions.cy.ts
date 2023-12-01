@@ -40,22 +40,20 @@ import {
   findSharedExceptionListItemsByName,
 } from '../../../tasks/exceptions_table';
 import { visitRuleDetailsPage } from '../../../tasks/rule_details';
-import { deleteEndpointExceptionList, deleteExceptionLists } from '../../../tasks/api_calls/common';
+import {
+  deleteAlertsAndRules,
+  deleteEndpointExceptionList,
+  deleteExceptionLists,
+} from '../../../tasks/api_calls/common';
 
-// https://github.com/elastic/kibana/issues/171235
-// FLAKY: https://github.com/elastic/kibana/issues/171242
-describe.skip('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, () => {
+describe('Manage exceptions', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
+    deleteAlertsAndRules();
     deleteExceptionLists();
     deleteEndpointExceptionList();
-    cy.task('esArchiverLoad', { archiveName: 'exceptions' });
     createRule(getNewRule()).as('createdRule');
     visit(EXCEPTIONS_URL);
-  });
-
-  afterEach(() => {
-    cy.task('esArchiverUnload', 'exceptions');
   });
 
   const exceptionName = 'My item name';
@@ -63,7 +61,7 @@ describe.skip('Add, edit and delete exception', { tags: ['@ess', '@serverless'] 
   const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
   const EXCEPTION_LIST_NAME = 'Newly created list';
 
-  describe('Add, Edit and delete Exception item', () => {
+  describe('Add, edit and delete exception item', () => {
     it('should create exception item from Shared Exception List page and linked to a Rule', () => {
       // Click on "Create shared exception list" button on the header
       // Click on "Create exception item"
