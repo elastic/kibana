@@ -21,13 +21,13 @@ export const PipelineSelect: React.FC = () => {
   } = useValues(MLInferenceLogic);
   const { selectExistingPipeline } = useActions(MLInferenceLogic);
 
-  const { existingPipeline, pipelineName } = configuration;
+  const { pipelineName } = configuration;
 
   const getPipelineOptions = (
     pipelineOptions: MLInferencePipelineOption[]
   ): PipelineSelectOptionProps[] => {
     return pipelineOptions.map((pipelineOption) => ({
-      checked: existingPipeline && pipelineOption.pipelineName === pipelineName ? 'on' : undefined,
+      checked: pipelineOption.pipelineName === pipelineName ? 'on' : undefined,
       disabled: pipelineOption.disabled,
       label: pipelineOption.pipelineName,
       pipeline: pipelineOption,
@@ -46,10 +46,6 @@ export const PipelineSelect: React.FC = () => {
   };
 
   const getActiveOptionIndex = (): number | undefined => {
-    if (!existingPipeline) {
-      return undefined;
-    }
-
     const index = existingInferencePipelines.findIndex(
       (pipelineOption) => pipelineOption.pipelineName === pipelineName
     );
