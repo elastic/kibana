@@ -121,7 +121,6 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
 
     const selectedFields = sortedSelectedFields || [];
     const newFields = dataViewId ? fieldsExistenceReader.getNewFields(dataViewId) : [];
-    console.log({ newFields });
     const fieldsToSort =
       allFields && newFields.length
         ? allFields.map((field) => {

@@ -96,6 +96,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
             ? ExistenceFetchStatus.succeeded
             : ExistenceFetchStatus.unknown,
         isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== props.dataViewId,
+        getNewFields: () => [],
       })
     );
 
@@ -156,6 +157,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
             ? ExistenceFetchStatus.succeeded
             : ExistenceFetchStatus.unknown,
         isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== props.dataViewId,
+        getNewFields: () => [],
       })
     );
 
@@ -438,6 +440,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
             ? ExistenceFetchStatus.succeeded
             : ExistenceFetchStatus.unknown,
         isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== knownDataViewId,
+        getNewFields: () => [],
       })
     );
 
