@@ -19,7 +19,7 @@ export const journey = new Journey({
     await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
   })
   .step('Go to data view selection', async ({ page }) => {
-    const createButtons = page.locator(subj('transformButtonCreate'));
+    const createButtons = page.locator(subj('transformCreateFirstButton'));
     await createButtons.first().click();
     await page.waitForSelector(subj('savedObjectsFinderTable'));
   })
