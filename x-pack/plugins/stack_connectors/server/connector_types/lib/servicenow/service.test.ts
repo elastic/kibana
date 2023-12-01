@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 
 import { createExternalService } from './service';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
@@ -481,7 +481,7 @@ describe('ServiceNow service', () => {
         throw new Error('An error has occurred');
       });
       await expect(service.getIncident('1')).rejects.toThrow(
-        'Unable to get incident with id 1. Error: An error has occurred'
+        '[Action][ServiceNow]: Unable to get incident with id 1. Error: An error has occurred Reason: unknown: errorResponse was null'
       );
     });
 
@@ -1055,12 +1055,14 @@ describe('ServiceNow service', () => {
       });
 
       test('it should throw an error when the no incidents found with given incidentId ', async () => {
-        requestMock.mockImplementationOnce(() => ({
-          status: 404,
-          data: {
-            result: {},
-          },
-        }));
+        const axiosError = {
+          message: 'Request failed with status code 404',
+          response: { status: 404 },
+        } as AxiosError;
+
+        requestMock.mockImplementation(() => {
+          throw axiosError;
+        });
 
         const res = await service.closeIncident({ incidentId: 'xyz', correlationId: null });
 

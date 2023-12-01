@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
@@ -159,17 +159,8 @@ export const createExternalService: ServiceFactory = ({
 
       checkInstance(res);
 
-      if (res.status === 404) {
-        const error: AxiosError = new Error(`Unable to get incident with id ${id}`) as AxiosError;
-        error.response = { status: res.status } as AxiosResponse;
-        throw error;
-      }
-
       return { ...res.data.result };
     } catch (error) {
-      if (error?.response?.status) {
-        throw error;
-      }
       throw createServiceError(error, `Unable to get incident with id ${id}`);
     }
   };
@@ -264,7 +255,9 @@ export const createExternalService: ServiceFactory = ({
     }
   };
 
-  const getIncidentByCorrelationId = async (correlationId: string): Promise<ServiceNowIncident> => {
+  const getIncidentByCorrelationId = async (
+    correlationId: string
+  ): Promise<ServiceNowIncident | null> => {
     try {
       const res = await request({
         axios: axiosInstance,
@@ -291,18 +284,10 @@ export const createExternalService: ServiceFactory = ({
 
       if (correlationId == null && incidentId == null) {
         throw new Error('No correlationId or incidentId found.');
-      } else if (incidentId) {
-        try {
-          incidentToBeClosed = await getIncident(incidentId);
-        } catch (err) {
-          if (err.response.status === 404) {
-            logger.warn(
-              `[ServiceNow][CloseIncident] No incident found with incidentId: ${incidentId}.`
-            );
+      }
 
-            return null;
-          }
-        }
+      if (incidentId) {
+        incidentToBeClosed = await getIncident(incidentId);
       } else if (correlationId) {
         incidentToBeClosed = await getIncidentByCorrelationId(correlationId);
       }
@@ -311,6 +296,7 @@ export const createExternalService: ServiceFactory = ({
         logger.warn(
           `[ServiceNow][CloseIncident] No incident found with correlation_id: ${correlationId} or incidentId: ${incidentId}.`
         );
+
         return null;
       }
 
@@ -337,6 +323,14 @@ export const createExternalService: ServiceFactory = ({
 
       return closedIncident;
     } catch (error) {
+      if (error?.response?.status === 404) {
+        logger.warn(
+          `[ServiceNow][CloseIncident] No incident found with incidentId: ${params.incidentId}.`
+        );
+
+        return null;
+      }
+
       throw createServiceError(error, 'Unable to close incident');
     }
   };
