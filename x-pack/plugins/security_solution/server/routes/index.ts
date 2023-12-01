@@ -66,8 +66,12 @@ import {
 import { registerTimelineRoutes } from '../lib/timeline/routes';
 import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_score/routes/calculation';
 import { riskScorePreviewRoute } from '../lib/entity_analytics/risk_score/routes/preview';
-import { assetCriticalityStatusRoute } from '../lib/entity_analytics/asset_criticality/routes';
-
+import {
+  assetCriticalityStatusRoute,
+  assetCriticalityUpsertRoute,
+  assetCriticalityGetRoute,
+  assetCriticalityDeleteRoute,
+} from '../lib/entity_analytics/asset_criticality/routes';
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
@@ -161,5 +165,8 @@ export const initRoutes = (
   }
   if (config.experimentalFeatures.entityAnalyticsAssetCriticalityEnabled) {
     assetCriticalityStatusRoute(router, logger);
+    assetCriticalityUpsertRoute(router, logger);
+    assetCriticalityGetRoute(router, logger);
+    assetCriticalityDeleteRoute(router, logger);
   }
 };
