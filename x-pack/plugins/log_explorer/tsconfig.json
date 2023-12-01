@@ -27,7 +27,8 @@
     "@kbn/deeplinks-observability",
     "@kbn/field-formats-plugin",
     "@kbn/custom-icons",
-    "@kbn/elastic-agent-utils"
+    "@kbn/elastic-agent-utils",
+    "@kbn/unified-doc-viewer"
   ],
   "exclude": ["target/**/*"]
 }
