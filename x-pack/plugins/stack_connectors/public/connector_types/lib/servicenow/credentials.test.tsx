@@ -68,6 +68,6 @@ describe('Credentials', () => {
     expect(screen.getByLabelText('JWT verifier key ID')).toBeInTheDocument();
     expect(screen.getByLabelText('Client secret')).toBeInTheDocument();
     expect(screen.getByLabelText('Private key')).toBeInTheDocument();
-    expect(screen.getByLabelText('Private key Password')).toBeInTheDocument();
+    expect(screen.getByLabelText('Private key password')).toBeInTheDocument();
   });
 });
