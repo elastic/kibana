@@ -14,20 +14,24 @@ import { z } from 'zod';
 
 export type EntityAnalyticsPrivileges = z.infer<typeof EntityAnalyticsPrivileges>;
 export const EntityAnalyticsPrivileges = z.object({
-  has_all_required: z.boolean().optional(),
-  privileges: z
-    .object({
-      elasticsearch: z
+  has_all_required: z.boolean(),
+  privileges: z.object({
+    elasticsearch: z.object({
+      cluster: z
         .object({
-          cluster: z.object({}).catchall(z.boolean()).optional(),
-          index: z
-            .object({
-              read: z.boolean().optional(),
-              write: z.boolean().optional(),
-            })
-            .optional(),
+          manage_index_templates: z.boolean().optional(),
+          manage_transform: z.boolean().optional(),
         })
         .optional(),
-    })
-    .optional(),
+      index: z
+        .object({})
+        .catchall(
+          z.object({
+            read: z.boolean().optional(),
+            write: z.boolean().optional(),
+          })
+        )
+        .optional(),
+    }),
+  }),
 });
