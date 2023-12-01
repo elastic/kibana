@@ -420,9 +420,6 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: ruleFields.queryBar?.saved_id ?? undefined,
         ...(ruleType === 'threshold' && {
-          ...(ruleFields.enableThresholdSuppression && {
-            alert_suppression: { duration: ruleFields.groupByDuration },
-          }),
           threshold: {
             field: ruleFields.threshold?.field ?? [],
             value: parseInt(ruleFields.threshold?.value, 10) ?? 0,
@@ -437,6 +434,9 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
                   ]
                 : [],
           },
+          ...(ruleFields.enableThresholdSuppression && {
+            alert_suppression: { duration: ruleFields.groupByDuration },
+          }),
         }),
       }
     : isThreatMatchFields(ruleFields)

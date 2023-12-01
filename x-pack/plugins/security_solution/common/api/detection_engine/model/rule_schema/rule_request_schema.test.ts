@@ -1257,7 +1257,7 @@ describe('rules schema', () => {
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", type: Invalid literal value, expected \\"query\\", type: Invalid literal value, expected \\"saved_query\\", saved_id: Required, and 14 more"`
+        `"alert_suppression.duration: Required"`
       );
     });
   });

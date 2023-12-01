@@ -56,6 +56,7 @@ import { BadgeList } from './badge_list';
 import { DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -429,9 +430,7 @@ const prepareDefinitionSectionListItems = (
   rule: Partial<RuleResponse>,
   isInteractive: boolean,
   savedQuery: SavedQuery | undefined,
-  {
-    isAlertSuppressionForThresholdRuleFeatureEnabled,
-  }: { isAlertSuppressionForThresholdRuleFeatureEnabled: boolean }
+  { alertSuppressionForThresholdRuleEnabled }: Partial<ExperimentalFeatures>
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -673,7 +672,7 @@ const prepareDefinitionSectionListItems = (
       });
     }
 
-    if (rule.type !== 'threshold' || isAlertSuppressionForThresholdRuleFeatureEnabled) {
+    if (rule.type !== 'threshold' || alertSuppressionForThresholdRuleEnabled) {
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="alertSuppressionDurationPropertyTitle">
@@ -743,7 +742,7 @@ export const RuleDefinitionSection = ({
     ruleType: rule.type,
   });
 
-  const isAlertSuppressionForThresholdRuleFeatureEnabled = useIsExperimentalFeatureEnabled(
+  const alertSuppressionForThresholdRuleEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForThresholdRuleEnabled'
   );
 
@@ -751,7 +750,7 @@ export const RuleDefinitionSection = ({
     rule,
     isInteractive,
     savedQuery,
-    { isAlertSuppressionForThresholdRuleFeatureEnabled }
+    { alertSuppressionForThresholdRuleEnabled }
   );
 
   return (

@@ -435,12 +435,42 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ]
   );
 
+  /**
+   * Component that allows selection of suppression intervals disabled:
+   *  - if suppression license is not valid(i.e. less than platinum)
+   *  - or for not threshold rule - when groupBy fields not selected
+   */
+  const isGroupByChildrenDisabled =
+    !isAlertSuppressionLicenseValid || isThresholdRule ? false : !groupByFields?.length;
+
+  /**
+   * Per rule execution radio option is disabled
+   *  - if suppression license is not valid(i.e. less than platinum)
+   *  - always disabled for threshold rule
+   */
+  const isPerRuleExecutionDisabled = !isAlertSuppressionLicenseValid || isThresholdRule;
+
+  /**
+   * Per time period execution radio option is disabled
+   *  - if suppression license is not valid(i.e. less than platinum)
+   *  - disabled for threshold rule when enabled suppression is not checked
+   */
+  const isPerTimePeriodDisabled =
+    !isAlertSuppressionLicenseValid || (isThresholdRule && !enableThresholdSuppression);
+
+  /**
+   * Suppression duration is disabled when
+   *  - if suppression license is not valid(i.e. less than platinum)
+   *  - when suppression by rule execution is selected in radio button
+   *  - whe threshold suppression is not enabled and no group by fields selected
+   * */
+  const isDurationDisabled =
+    !isAlertSuppressionLicenseValid || (!enableThresholdSuppression && groupByFields?.length === 0);
+
   const GroupByChildren = useCallback(
     ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
       <EuiRadioGroup
-        disabled={
-          !isAlertSuppressionLicenseValid || isThresholdRule ? false : !groupByFields?.length
-        }
+        disabled={isGroupByChildrenDisabled}
         idSelected={groupByRadioSelection.value}
         options={[
           {
@@ -454,12 +484,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 <> {i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION}</>
               </EuiToolTip>
             ),
-            disabled: !isAlertSuppressionLicenseValid || isThresholdRule,
+            disabled: isPerRuleExecutionDisabled,
           },
           {
             id: GroupByOptions.PerTimePeriod,
-            disabled:
-              !isAlertSuppressionLicenseValid || (isThresholdRule && !enableThresholdSuppression),
+            disabled: isPerTimePeriodDisabled,
             label: (
               <>
                 {i18n.ALERT_SUPPRESSION_PER_TIME_PERIOD}
@@ -467,9 +496,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   data-test-subj="alertSuppressionDurationInput"
                   durationValueField={groupByDurationValue}
                   durationUnitField={groupByDurationUnit}
+                  // Suppression duration is also disabled suppression by rule execution is selected in radio button
                   isDisabled={
-                    !isAlertSuppressionLicenseValid ||
-                    (!enableThresholdSuppression && groupByFields?.length === 0) ||
+                    isDurationDisabled ||
                     groupByRadioSelection.value !== GroupByOptions.PerTimePeriod
                   }
                   minimumValue={1}
@@ -484,7 +513,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         data-test-subj="groupByDurationOptions"
       />
     ),
-    [isAlertSuppressionLicenseValid, groupByFields, isThresholdRule, enableThresholdSuppression]
+    [
+      isThresholdRule,
+      isDurationDisabled,
+      isPerTimePeriodDisabled,
+      isPerRuleExecutionDisabled,
+      isGroupByChildrenDisabled,
+    ]
   );
 
   const AlertSuppressionMissingFields = useCallback(
