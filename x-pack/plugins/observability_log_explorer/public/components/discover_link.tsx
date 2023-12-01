@@ -28,18 +28,19 @@ export const ConnectedDiscoverLink = React.memo(() => {
 
   const [pageState] = useActor(useObservabilityLogExplorerPageStateContext());
 
-  if (pageState.matches('uninitialized')) {
-    return null;
-  } else if (pageState.matches('initialized')) {
-    return <DiscoverLinkForState discover={discover} pageState={pageState} />;
+  if (pageState.matches('initialized.validLogExplorerState')) {
+    return <DiscoverLinkForValidState discover={discover} pageState={pageState} />;
   } else {
-    return null;
+    return <DiscoverLinkForUnknownState />;
   }
 });
 
-type InitializedPageState = MatchedStateFromActor<ObservabilityLogExplorerService, 'initialized'>;
+type InitializedPageState = MatchedStateFromActor<
+  ObservabilityLogExplorerService,
+  'initialized.validLogExplorerState'
+>;
 
-export const DiscoverLinkForState = React.memo(
+export const DiscoverLinkForValidState = React.memo(
   ({
     discover,
     pageState: {
@@ -65,6 +66,17 @@ export const DiscoverLinkForState = React.memo(
     return <DiscoverLink discover={discover} discoverLinkParams={discoverLinkParams} />;
   }
 );
+
+export const DiscoverLinkForUnknownState = React.memo(() => (
+  <EuiHeaderLink
+    color="primary"
+    iconType="discoverApp"
+    data-test-subj="logExplorerDiscoverFallbackLink"
+    disabled
+  >
+    {discoverLinkTitle}
+  </EuiHeaderLink>
+));
 
 export const DiscoverLink = React.memo(
   ({

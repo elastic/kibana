@@ -55,6 +55,10 @@ export type ObservabilityLogExplorerTypeState =
       context: CommonObservabilityLogExplorerContext;
     }
   | {
-      value: 'initialized';
+      value: 'initialized.unknownLogExplorerState';
+      context: CommonObservabilityLogExplorerContext & WithController;
+    }
+  | {
+      value: 'initialized.validLogExplorerState';
       context: CommonObservabilityLogExplorerContext & WithLogExplorerState & WithController;
     };
