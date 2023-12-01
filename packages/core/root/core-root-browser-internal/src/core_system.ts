@@ -141,7 +141,7 @@ export class CoreSystem {
       browserSupportsCsp,
       kibanaVersion: injectedMetadata.version,
     });
-    this.docLinks = new DocLinksService();
+    this.docLinks = new DocLinksService(this.coreContext);
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();

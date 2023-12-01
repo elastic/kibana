@@ -6,13 +6,18 @@
  * Side Public License, v 1.
  */
 
+import type { BuildFlavor } from '@kbn/config';
 import { DocLinksMeta } from './types';
 
 export interface GetDocLinksMetaOptions {
   kibanaBranch: string;
+  buildFlavor: BuildFlavor;
 }
 
-export const getDocLinksMeta = ({ kibanaBranch }: GetDocLinksMetaOptions): DocLinksMeta => {
+export const getDocLinksMeta = ({
+  kibanaBranch,
+  buildFlavor,
+}: GetDocLinksMetaOptions): DocLinksMeta => {
   return {
     version: kibanaBranch === 'main' ? 'master' : kibanaBranch,
     elasticWebsiteUrl: 'https://www.elastic.co/',
