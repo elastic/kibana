@@ -16,9 +16,9 @@ import {
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { RunActionResponseSchema, StreamingResponseSchema } from '../../../common/openai/schema';
-import { initDashboard } from './create_dashboard';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { PassThrough, Transform } from 'stream';
-jest.mock('./create_dashboard');
+jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 
 describe('OpenAIConnector', () => {
   let mockRequest: jest.Mock;
