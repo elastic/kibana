@@ -506,7 +506,7 @@ async function getExpressionSuggestionsByType(
     // Suggest fields or variables
     if (argDef.type === 'column' || argDef.type === 'any') {
       // ... | <COMMAND> <suggest>
-      if (!nodeArg) {
+      if (!nodeArg || (isNewExpression && commandDef.signature.multipleParams)) {
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             [argDef.innerType || 'any'],
@@ -516,6 +516,11 @@ async function getExpressionSuggestionsByType(
               functions: canHaveAssignments,
               fields: true,
               variables: anyVariables,
+            },
+            {
+              ignoreFields: isNewExpression
+                ? command.args.filter(isColumnItem).map(({ name }) => name)
+                : [],
             }
           ))
         );
