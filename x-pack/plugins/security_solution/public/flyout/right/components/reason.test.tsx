@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { FormattedMessage, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { REASON_DETAILS_PREVIEW_BUTTON_TEST_ID, REASON_TITLE_TEST_ID } from './test_ids';
 import { Reason } from './reason';
 import { RightPanelContext } from '../context';
@@ -89,12 +89,7 @@ describe('<Reason />', () => {
         indexName: panelContextValue.indexName,
         scopeId: panelContextValue.scopeId,
         banner: {
-          title: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle"
-              defaultMessage="Preview alert reason"
-            />
-          ),
+          title: 'Preview alert reason',
           backgroundColor: 'warning',
           textColor: 'warning',
         },

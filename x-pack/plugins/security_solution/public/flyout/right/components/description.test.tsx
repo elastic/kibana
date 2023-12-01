@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import {
   DESCRIPTION_TITLE_TEST_ID,
@@ -126,12 +126,7 @@ describe('<Description />', () => {
           indexName: panelContext.indexName,
           scopeId: panelContext.scopeId,
           banner: {
-            title: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.about.description.rulePreviewTitle"
-                defaultMessage="Preview rule details"
-              />
-            ),
+            title: 'Preview rule details',
             backgroundColor: 'warning',
             textColor: 'warning',
           },
