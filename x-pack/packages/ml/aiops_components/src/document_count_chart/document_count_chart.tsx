@@ -507,6 +507,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
               yScaleType={ScaleType.Linear}
               xAccessor="time"
               yAccessors={['value']}
+              stackAccessors={['true']}
               data={adjustedChartPoints}
               timeZone={timeZone}
               color={barColor}
@@ -522,6 +523,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
               yScaleType={ScaleType.Linear}
               xAccessor="time"
               yAccessors={['value']}
+              stackAccessors={['true']}
               data={adjustedChartPointsSplit}
               timeZone={timeZone}
               color={barHighlightColor}
