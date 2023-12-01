@@ -179,7 +179,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     if (!this.pluginsStatus || !this.overall$) {
       throw new Error(`StatusService#setup must be called before #start`);
     }
-    this.pluginsStatus.blockNewRegistrations();
+    this.pluginsStatus.start();
     this.logStatusChanges();
   }
 
