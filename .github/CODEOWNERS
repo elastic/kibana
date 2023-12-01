@@ -1267,7 +1267,6 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 
 ## Security Solution sub teams - Threat Hunting Explore
 /x-pack/plugins/security_solution/common/api/tags @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/common/api/risk_score @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/network @elastic/security-threat-hunting-explore
@@ -1475,7 +1474,7 @@ x-pack/plugins/security_solution/server/lib/entity_analytics @elastic/security-e
 x-pack/plugins/security_solution/server/lib/risk_score @elastic/security-entity-analytics
 x-pack/test/security_solution_api_integration/test_suites/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
-x-pack/plugins/security_solution/common/api/asset_criticality @elastic/security-entity-analytics
+x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
 /x-pack/plugins/security_solution/public/entity_analytics @elastic/security-entity-analytics
 /x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-entity-analytics
 
