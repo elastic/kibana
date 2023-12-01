@@ -22,6 +22,9 @@ import { getUsefulLinks } from './info_sections/useful_links';
 const WIZARD_CTX_INSTRUCTION = 'wizard-instruction';
 const WIZARD_CTX_DEFAULT = 'wizard-main';
 
+const IS_DRY_RUN = process.env.DRY_RUN?.match(/(1|true)/i);
+const IS_AUTOMATED_RUN = process.env.AUTO_PROMOTE_RC?.match(/(1|true)/i);
+
 type StateNames =
   | 'start'
   | 'initialize'
@@ -52,13 +55,14 @@ const states: Record<StateNames, StateShape> = {
     description: 'No description',
     display: false,
     post: async () => {
-      if (process.env.DRY_RUN?.match(/(1|true)/i)) {
+      if (IS_DRY_RUN) {
         buildkite.setAnnotation(
           DRY_RUN_CTX,
           'warning',
           `Dry run: tag won't be pushed, slack won't be notified.`
         );
       }
+
       buildkite.setAnnotation(COMMIT_INFO_CTX, 'info', `<h4>:kibana: Release candidates</h4>`);
     },
   },
@@ -238,14 +242,13 @@ export async function transition(targetStateName: StateNames, data?: any) {
 }
 
 function updateWizardState(stateData: Record<string, 'ok' | 'nok' | 'pending' | undefined>) {
-  const isAutomated = process.env.AUTO_PROMOTE_RC?.match(/(1|true)/i);
-  const wizardHeader = isAutomated
+  const wizardHeader = IS_AUTOMATED_RUN
     ? `<h3>:kibana: Kibana Serverless automated release candidate promotion :robot_face:</h3>`
     : `<h3>:kibana: Kibana Serverless deployment wizard :mage:</h3>`;
 
   const wizardSteps = Object.keys(states)
     .filter((stateName) => states[stateName].display)
-    .filter((stateName) => !(isAutomated && states[stateName].skipWhenAutomated))
+    .filter((stateName) => !(IS_AUTOMATED_RUN && states[stateName].skipWhenAutomated))
     .map((stateName) => {
       const stateInfo = states[stateName];
       const stateStatus = stateData[stateName];
@@ -274,7 +277,13 @@ ${wizardSteps.join('\n')}
 function updateWizardInstruction(targetState: string, stateData: any) {
   const { instructionStyle, instruction } = states[targetState];
 
-  if (instruction) {
+  if (IS_AUTOMATED_RUN) {
+    buildkite.setAnnotation(
+      WIZARD_CTX_INSTRUCTION,
+      'info',
+      `<i>It's an automated run, no action needed.</i>`
+    );
+  } else if (instruction) {
     buildkite.setAnnotation(
       WIZARD_CTX_INSTRUCTION,
       instructionStyle || 'info',
