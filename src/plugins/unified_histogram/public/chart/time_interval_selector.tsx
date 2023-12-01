@@ -6,49 +6,31 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import React, { useCallback } from 'react';
+import { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { search } from '@kbn/data-plugin/public';
 import type { UnifiedHistogramChartContext } from '../types';
+import { ToolbarSelector, ToolbarSelectorProps, SelectableEntry } from './toolbar_selector';
 
 export interface TimeIntervalSelectorProps {
   chart: UnifiedHistogramChartContext;
   onTimeIntervalChange: (timeInterval: string) => void;
 }
 
-const TRUNCATION_PROPS = { truncation: 'middle' as const };
-const SINGLE_SELECTION = { asPlainText: true };
-
-export const TimeIntervalSelector = ({
+export const TimeIntervalSelector: React.FC<TimeIntervalSelectorProps> = ({
   chart,
   onTimeIntervalChange,
-}: TimeIntervalSelectorProps) => {
-  const [popoverDisabled, setPopoverDisabled] = useState(false);
-  const disablePopover = useCallback(() => setPopoverDisabled(true), []);
-  const enablePopover = useCallback(() => setTimeout(() => setPopoverDisabled(false)), []);
-
-  const changeTimeInterval = useCallback(
-    (newOptions: EuiComboBoxOptionOption[]) => {
-      const selectedOption = newOptions[0]?.name;
+}) => {
+  const onChange: ToolbarSelectorProps['onChange'] = useCallback(
+    (chosenOption) => {
+      const selectedOption = chosenOption?.value;
       if (selectedOption) {
         onTimeIntervalChange(selectedOption);
       }
     },
     [onTimeIntervalChange]
   );
-
-  const { euiTheme } = useEuiTheme();
-  const timeIntervalCss = css`
-    width: 100%;
-    min-width: ${euiTheme.base * 9}px;
-    max-width: ${euiTheme.base * 10}px;
-    &:focus-within {
-      min-width: ${euiTheme.base * 12}px;
-      max-width: ${euiTheme.base * 24}px;
-    }
-  `;
 
   const selectedOptionIdx = search.aggs.intervalOptions.findIndex(
     (opt) => opt.val === chart.timeInterval
@@ -58,56 +40,42 @@ export const TimeIntervalSelector = ({
       ? search.aggs.intervalOptions[selectedOptionIdx].display
       : search.aggs.intervalOptions[0].display;
 
-  const options = search.aggs.intervalOptions
+  const options: SelectableEntry[] = search.aggs.intervalOptions
     .filter(({ val }) => val !== 'custom')
     .map(({ display, val }) => {
       return {
-        name: val,
+        key: val,
+        value: val,
         label: display,
-        // icon: val === chart.timeInterval ? 'check' : 'empty',
-        // onClick: () => {
-        //   onTimeIntervalChange?.(val);
-        // },
-        // 'data-test-subj': `unifiedHistogramTimeInterval-${display}`,
-        // className: val === chart.timeInterval ? 'unifiedHistogramIntervalSelected' : '',
+        checked: val === chart.timeInterval ? ('on' as EuiSelectableOption['checked']) : undefined,
       };
     });
 
-  const selectedOptions = options.filter(({ name }) => name === chart.timeInterval);
-
   return (
-    <EuiToolTip
-      position="top"
-      content={
-        popoverDisabled
-          ? undefined
-          : i18n.translate('unifiedHistogram.timeIntervalWithValue', {
-              defaultMessage: 'Time interval: {timeInterval}',
+    <ToolbarSelector
+      data-test-subj="unifiedHistogramTimeIntervalSelector"
+      data-selected-value={chart.timeInterval}
+      searchable={false}
+      buttonLabel={
+        chart.timeInterval !== 'auto'
+          ? i18n.translate('unifiedHistogram.timeIntervalSelector.buttonLabel', {
+              defaultMessage: `Interval: {timeInterval}`,
               values: {
-                timeInterval: intervalDisplay,
+                timeInterval: intervalDisplay.toLowerCase(),
               },
             })
+          : i18n.translate('unifiedHistogram.timeIntervalSelector.autoIntervalButtonLabel', {
+              defaultMessage: 'Auto interval',
+            })
       }
-      anchorProps={{ css: timeIntervalCss }}
-    >
-      <EuiComboBox
-        data-test-subj="unifiedHistogramTimeIntervalSelector"
-        placeholder={i18n.translate('unifiedHistogram.autoTimeIntervalPlaceholder', {
-          defaultMessage: 'Auto interval',
-        })}
-        aria-label={i18n.translate('unifiedHistogram.timeIntervals', {
-          defaultMessage: 'Time intervals',
-        })}
-        singleSelection={SINGLE_SELECTION}
-        options={options}
-        selectedOptions={selectedOptions}
-        onChange={changeTimeInterval}
-        truncationProps={TRUNCATION_PROPS}
-        compressed
-        fullWidth={true}
-        onFocus={disablePopover}
-        onBlur={enablePopover}
-      />
-    </EuiToolTip>
+      popoverTitle={i18n.translate(
+        'unifiedHistogram.timeIntervalSelector.timeIntervalPopoverTitle',
+        {
+          defaultMessage: 'Select time interval',
+        }
+      )}
+      options={options}
+      onChange={onChange}
+    />
   );
 };

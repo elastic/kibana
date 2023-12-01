@@ -14,7 +14,12 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { UnifiedHistogramBreakdownContext } from '../types';
 import { fieldSupportsBreakdown } from './utils/field_supports_breakdown';
-import { ToolbarSelector, EMPTY_OPTION, SelectableEntry } from './toolbar_selector';
+import {
+  ToolbarSelector,
+  ToolbarSelectorProps,
+  EMPTY_OPTION,
+  SelectableEntry,
+} from './toolbar_selector';
 
 export interface BreakdownFieldSelectorProps {
   dataView: DataView;
@@ -55,7 +60,7 @@ export const BreakdownFieldSelector = ({
     options.unshift({
       key: EMPTY_OPTION,
       value: EMPTY_OPTION,
-      label: i18n.translate('unifiedHistogram.noBreakdownFieldPlaceholder', {
+      label: i18n.translate('unifiedHistogram.breakdownFieldSelector.noBreakdownButtonLabel', {
         defaultMessage: 'No breakdown',
       }),
       checked: !breakdown?.field ? ('on' as EuiSelectableOption['checked']) : undefined,
@@ -64,8 +69,8 @@ export const BreakdownFieldSelector = ({
     return options;
   }, [dataView, breakdown.field]);
 
-  const onChange = useCallback(
-    (chosenOption: SelectableEntry | undefined) => {
+  const onChange: ToolbarSelectorProps['onChange'] = useCallback(
+    (chosenOption) => {
       const field = chosenOption?.value
         ? dataView.fields.find((currentField) => currentField.name === chosenOption.value)
         : undefined;
@@ -77,18 +82,20 @@ export const BreakdownFieldSelector = ({
   return (
     <ToolbarSelector
       data-test-subj="unifiedHistogramBreakdownSelector"
-      aria-label={i18n.translate('unifiedHistogram.breakdownFieldSelectorAriaLabel', {
-        defaultMessage: 'Break down by',
-      })}
+      data-selected-value={breakdown?.field?.name}
+      searchable
       buttonLabel={
-        breakdown.field?.displayName ||
-        i18n.translate('unifiedHistogram.noBreakdownFieldPlaceholder', {
+        breakdown?.field?.displayName ||
+        i18n.translate('unifiedHistogram.breakdownFieldSelector.noBreakdownButtonLabel', {
           defaultMessage: 'No breakdown',
         })
       }
-      popoverTitle={i18n.translate('unifiedHistogram.breakdownFieldPopoverTitle', {
-        defaultMessage: 'Select breakdown field',
-      })}
+      popoverTitle={i18n.translate(
+        'unifiedHistogram.breakdownFieldSelector.breakdownFieldPopoverTitle',
+        {
+          defaultMessage: 'Select breakdown field',
+        }
+      )}
       options={fieldOptions}
       onChange={onChange}
     />

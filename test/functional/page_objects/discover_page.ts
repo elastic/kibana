@@ -259,10 +259,8 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getChartInterval() {
-    const selectedOptions = await this.comboBox.getComboBoxSelectedOptions(
-      'unifiedHistogramTimeIntervalSelector'
-    );
-    return selectedOptions[0];
+    const button = await this.testSubjects.find('unifiedHistogramTimeIntervalSelectorButton');
+    return await button.getAttribute('data-selected-value');
   }
 
   public async getChartIntervalWarningIcon() {
@@ -273,7 +271,13 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async setChartInterval(interval: string) {
-    await this.comboBox.set('unifiedHistogramTimeIntervalSelector', interval);
+    await this.retry.try(async () => {
+      await this.testSubjects.click('unifiedHistogramTimeIntervalSelectorButton');
+      await this.testSubjects.existOrFail('unifiedHistogramTimeIntervalSelector');
+    });
+
+    const option = await this.find.byCssSelector(`.euiSelectableListItem[value="${interval}"]`);
+    await option.click();
     return await this.header.waitUntilLoadingHasFinished();
   }
 

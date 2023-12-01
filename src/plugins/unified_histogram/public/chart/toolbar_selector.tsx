@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, ReactElement, useState } from 'react';
+import React, { useCallback, ReactElement, useState, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
+  EuiSelectableProps,
   EuiSelectableOption,
   useEuiTheme,
 } from '@elastic/eui';
@@ -27,19 +28,21 @@ export type SelectableEntry = EuiSelectableOption<{ value: string }>;
 
 export interface ToolbarSelectorProps {
   'data-test-subj': string;
-  'aria-label': string;
+  'data-selected-value'?: string; // currently selected value
   buttonLabel: ReactElement | string;
-  popoverTitle: ReactElement | string;
+  popoverTitle: string;
   options: SelectableEntry[];
+  searchable: boolean;
   onChange?: (chosenOption: SelectableEntry | undefined) => void;
 }
 
 export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
   'data-test-subj': dataTestSubj,
-  'aria-label': ariaLabel,
+  'data-selected-value': dataSelectedValue,
   buttonLabel,
   popoverTitle,
   options,
+  searchable,
   onChange,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -47,8 +50,8 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
   const [searchTerm, setSearchTerm] = useState<string>();
 
   const onSelectionChange = useCallback(
-    (newOptions: SelectableEntry[]) => {
-      const chosenOption = newOptions.find(({ checked }) => checked === 'on');
+    (newOptions) => {
+      const chosenOption = newOptions.find(({ checked }: SelectableEntry) => checked === 'on');
 
       onChange?.(
         chosenOption?.value && chosenOption?.value !== EMPTY_OPTION ? chosenOption : undefined
@@ -56,6 +59,17 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
       setIsOpen(false);
     },
     [onChange, setIsOpen]
+  );
+
+  const searchProps: EuiSelectableProps['searchProps'] = useMemo(
+    () =>
+      searchable
+        ? {
+            'data-test-subj': `${dataTestSubj}SelectorSearch`,
+            onChange: (value) => setSearchTerm(value),
+          }
+        : undefined,
+    [dataTestSubj, searchable, setSearchTerm]
   );
 
   const panelMinWidth = calculateWidthFromEntries(options, ['label']);
@@ -79,8 +93,9 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
           `}
           onClick={() => setIsOpen(!isOpen)}
           data-test-subj={`${dataTestSubj}Button`}
+          data-selected-value={dataSelectedValue}
           label={buttonLabel}
-          aria-label={ariaLabel}
+          aria-label={popoverTitle}
         />
       }
       isOpen={isOpen}
@@ -93,24 +108,25 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
         </EuiFlexGroup>
       </EuiPopoverTitle>
       <EuiSelectable
-        searchable
         singleSelection
         data-test-subj={`${dataTestSubj}Selector`}
-        searchProps={{
-          'data-test-subj': `${dataTestSubj}SelectorSearch`,
-          onChange: (value) => setSearchTerm(value),
-        }}
         options={options}
         onChange={onSelectionChange}
-        noMatchesMessage={
-          <FormattedMessage
-            id="unifiedHistogram.toolbarSelectorPopover.noResults"
-            defaultMessage="No results found for {term}"
-            values={{
-              term: <strong>{searchTerm}</strong>,
-            }}
-          />
-        }
+        {...(searchable
+          ? {
+              searchable,
+              searchProps,
+              noMatchesMessage: (
+                <FormattedMessage
+                  id="unifiedHistogram.toolbarSelectorPopover.noResults"
+                  defaultMessage="No results found for {term}"
+                  values={{
+                    term: <strong>{searchTerm}</strong>,
+                  }}
+                />
+              ),
+            }
+          : {})}
       >
         {(list, search) => (
           <>
