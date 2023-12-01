@@ -11,10 +11,8 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiBadge,
-  useEuiTheme,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 
 import classnames from 'classnames';
@@ -55,7 +53,6 @@ const CardStepComponent: React.FC<{
   sectionId,
   stepId,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const { navigateTo } = useNavigateTo();
 
   const isExpandedStep = expandedSteps.has(stepId);
@@ -102,7 +99,10 @@ const CardStepComponent: React.FC<{
     stepTitleStyles,
     allDoneTextStyles,
     toggleButtonStyles,
+    getStepGroundStyles,
+    stepItemStyles,
   } = useCardStepStyles();
+  const stepGroundStyles = getStepGroundStyles({ hasStepContent });
 
   const panelClassNames = classnames({
     'step-panel-collapsed': !isExpandedStep,
@@ -119,41 +119,18 @@ const CardStepComponent: React.FC<{
       id={stepId}
       css={stepPanelStyles}
     >
-      <EuiFlexGroup
-        gutterSize="none"
-        css={css`
-          cursor: ${hasStepContent ? 'pointer' : 'default'};
-          gap: ${euiTheme.size.base};
-        `}
-      >
-        <EuiFlexItem
-          grow={false}
-          onClick={toggleStep}
-          css={css`
-            align-self: center;
-          `}
-        >
+      <EuiFlexGroup gutterSize="none" css={stepGroundStyles}>
+        <EuiFlexItem grow={false} onClick={toggleStep} css={stepItemStyles}>
           <span className="step-icon" css={stepIconStyles}>
             {icon && <EuiIcon {...icon} size="l" className="eui-alignMiddle" />}
           </span>
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={1}
-          onClick={toggleStep}
-          css={css`
-            align-self: center;
-          `}
-        >
+        <EuiFlexItem grow={1} onClick={toggleStep} css={stepItemStyles}>
           <span className="step-title" css={stepTitleStyles}>
             {title}
           </span>
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            align-self: center;
-          `}
-        >
+        <EuiFlexItem grow={false} css={stepItemStyles}>
           <div>
             {isDone && (
               <EuiBadge className="all-done-badge" css={allDoneTextStyles} color="success">

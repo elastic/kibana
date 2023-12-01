@@ -32,6 +32,13 @@ export const useCardStepStyles = () => {
           overflow: hidden;
         }
       `,
+      getStepGroundStyles: ({ hasStepContent }: { hasStepContent: boolean }) => css`
+        cursor: ${hasStepContent ? 'pointer' : 'default'};
+        gap: ${euiTheme.size.base};
+      `,
+      stepItemStyles: css`
+        align-self: center;
+      `,
       stepIconStyles: css`
         &.step-icon {
           border-radius: 50%;
@@ -68,6 +75,7 @@ export const useCardStepStyles = () => {
       euiTheme.colors.body,
       euiTheme.colors.successText,
       euiTheme.font.weight.semiBold,
+      euiTheme.size.base,
       euiTheme.size.m,
       euiTheme.size.xxxl,
     ]
