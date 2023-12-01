@@ -329,13 +329,19 @@ describe('autocomplete', () => {
       ),
       '|',
     ]);
-    testSuggestions('from a | where stringField >= stringField and ', [
-      ...getFieldNamesByType('boolean'),
-      ...getFunctionSignaturesByReturnType('where', 'boolean', { evalMath: true }),
-    ]);
-    testSuggestions('from a | where stringField >= stringField and numberField ', [
-      ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['number']),
-    ]);
+    for (const op of ['and', 'or']) {
+      testSuggestions(`from a | where stringField >= stringField ${op} `, [
+        ...getFieldNamesByType('any'),
+        ...getFunctionSignaturesByReturnType('where', 'any', { evalMath: true }),
+      ]);
+      testSuggestions(`from a | where stringField >= stringField ${op} numberField `, [
+        ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['number']),
+      ]);
+      testSuggestions(`from a | where stringField >= stringField ${op} numberField == `, [
+        ...getFieldNamesByType('number'),
+        ...getFunctionSignaturesByReturnType('where', 'number', { evalMath: true }),
+      ]);
+    }
     testSuggestions('from a | stats a=avg(numberField) | where a ', [
       ...getFunctionSignaturesByReturnType('where', 'any', { builtin: true }, ['number']),
     ]);
@@ -349,10 +355,6 @@ describe('autocomplete', () => {
       // make the fields suggest aware of the previous STATS, leave the other callbacks untouched
       [[{ name: 'a', type: 'number' }], undefined, undefined]
     );
-    testSuggestions('from a | where stringField >= stringField and numberField == ', [
-      ...getFieldNamesByType('number'),
-      ...getFunctionSignaturesByReturnType('where', 'number', { evalMath: true }),
-    ]);
     // The editor automatically inject the final bracket, so it is not useful to test with just open bracket
     testSuggestions(
       'from a | where log10()',

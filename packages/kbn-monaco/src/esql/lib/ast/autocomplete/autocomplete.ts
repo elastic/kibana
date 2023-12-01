@@ -737,9 +737,18 @@ async function getBuiltinFunctionNextArgument(
     const nestedType = extractFinalTypeFromArg(nodeArg.args[cleanedArgs.length - 1], references);
 
     if (isFnComplete.reason === 'fewArgs') {
+      const finalType = nestedType || nodeArgType || 'any';
       suggestions.push(
         ...(await getFieldsOrFunctionsSuggestions(
-          [nestedType || nodeArgType || 'any'],
+          // this is a special case with AND/OR
+          // <COMMAND> expression AND/OR <suggest>
+          // technically another boolean value should be suggested, but it is a better experience
+          // to actually suggest a wider set of fields/functions
+          [
+            finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.builtin
+              ? 'any'
+              : finalType,
+          ],
           command.name,
           getFieldsByType,
           {
