@@ -434,9 +434,6 @@ export class TaskRunner<
       return false;
     });
 
-    const maintenanceWindowsWithScopedQuery = maintenanceWindows.filter(
-      ({ scopedQuery }) => scopedQuery
-    );
     const maintenanceWindowsWithoutScopedQuery = maintenanceWindows.filter(
       ({ scopedQuery }) => !scopedQuery
     );
@@ -598,7 +595,7 @@ export class TaskRunner<
           ruleId: rule.id,
           spaceId,
           executionUuid: this.executionId,
-          maintenanceWindows: maintenanceWindowsWithScopedQuery,
+          maintenanceWindows,
         });
     } catch (e) {
       this.logger.debug(
