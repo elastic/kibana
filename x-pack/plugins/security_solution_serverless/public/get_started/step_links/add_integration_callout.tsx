@@ -13,7 +13,7 @@ import { ExternalPageName } from '../../navigation/links/constants';
 import { useAddIntegrationsCalloutStyles } from '../styles/add_integrations_callout.styles';
 import { ADD_INTEGRATIONS } from './translations';
 
-const AddIntegrationCalloutComponent = ({ stepName }: { stepName?: string }) => {
+const AddIntegrationsCalloutComponent = ({ stepName }: { stepName?: string }) => {
   const { calloutWrapperStyles, calloutTitleStyles } = useAddIntegrationsCalloutStyles();
   const { euiTheme } = useEuiTheme();
 
@@ -57,4 +57,4 @@ const AddIntegrationCalloutComponent = ({ stepName }: { stepName?: string }) => 
   );
 };
 
-export const AddIntegrationCallout = React.memo(AddIntegrationCalloutComponent);
+export const AddIntegrationCallout = React.memo(AddIntegrationsCalloutComponent);

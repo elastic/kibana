@@ -19,13 +19,9 @@ const StepCompleteButtonComponent = ({
   onClick: () => void;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const handleStepButtonClicked = useCallback(
-    (e) => {
-      e.preventDefault();
-      onClick?.();
-    },
-    [onClick]
-  );
+  const handleStepButtonClicked = useCallback(() => {
+    onClick?.();
+  }, [onClick]);
   return (
     <EuiButtonEmpty
       color="primary"

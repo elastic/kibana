@@ -13,25 +13,34 @@ export const useAddIntegrationsCalloutStyles = () => {
   const { euiTheme } = useEuiTheme();
   const backgroundColor = useEuiBackgroundColor('primary');
 
-  const calloutWrapperStyles = css`
-    border-radius: ${euiTheme.border.radius.medium};
-    border: 1px solid ${euiTheme.colors.lightShade};
-    padding: ${euiTheme.size.xs} ${euiTheme.size.m};
-    background-color: ${backgroundColor};
-    margin-top: ${euiTheme.size.base};
-  `;
-
-  const calloutTitleStyles = css`
-    color: ${euiTheme.colors.title};
-    font-size: ${euiTheme.size.m};
-    font-weight: ${euiTheme.font.weight.regular};
-    line-height: ${euiTheme.base * 1.25}px;
-    margin-left: ${euiTheme.size.xs};
-  `;
-
   const customStyles = useMemo(
-    () => ({ calloutWrapperStyles, calloutTitleStyles }),
-    [calloutTitleStyles, calloutWrapperStyles]
+    () => ({
+      calloutWrapperStyles: css`
+        border-radius: ${euiTheme.border.radius.medium};
+        border: 1px solid ${euiTheme.colors.lightShade};
+        padding: ${euiTheme.size.xs} ${euiTheme.size.m};
+        background-color: ${backgroundColor};
+        margin-top: ${euiTheme.size.base};
+      `,
+      calloutTitleStyles: css`
+        color: ${euiTheme.colors.title};
+        font-size: ${euiTheme.size.m};
+        font-weight: ${euiTheme.font.weight.regular};
+        line-height: ${euiTheme.base * 1.25}px;
+        margin-left: ${euiTheme.size.xs};
+      `,
+    }),
+    [
+      backgroundColor,
+      euiTheme.base,
+      euiTheme.border.radius.medium,
+      euiTheme.colors.lightShade,
+      euiTheme.colors.title,
+      euiTheme.font.weight.regular,
+      euiTheme.size.base,
+      euiTheme.size.m,
+      euiTheme.size.xs,
+    ]
   );
 
   return customStyles;

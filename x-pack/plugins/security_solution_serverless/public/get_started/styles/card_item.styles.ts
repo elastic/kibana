@@ -28,7 +28,7 @@ export const useCardItemStyles = () => {
         ${shadow};
         transition: box-shadow ${SHADOW_ANIMATION_DURATION}ms ease-out;
 
-        & .step-icon {
+        .step-icon {
           background-color: ${iconHoveredBackgroundColor};
         }
       }

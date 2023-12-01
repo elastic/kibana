@@ -18,7 +18,6 @@ import { css } from '@emotion/react';
 
 import { useUserName } from '../../common/hooks/use_user_name';
 import { getProjectFeaturesUrl } from '../../navigation/links/util';
-import launch from '../images/launch.png';
 
 import {
   GET_STARTED_PAGE_TITLE,
@@ -30,24 +29,23 @@ import { CONTENT_WIDTH } from '../helpers';
 import { ProductTierBadge } from './product_tier_badge';
 import { useKibana } from '../../common/services';
 import type { ProductTier } from '../../../common/product';
+import { useWelcomeHeaderStyles } from '../styles/welcome_header.styles';
 
 const WelcomeHeaderComponent: React.FC<{ productTier?: ProductTier }> = ({ productTier }) => {
   const { euiTheme } = useEuiTheme();
   const userName = useUserName();
   const { cloud } = useKibana().services;
+  const {
+    headerStyles,
+    headerTitleStyles,
+    headerSubtitleStyles,
+    headerDescriptionStyles,
+    currentPlanWrapperStyles,
+    currentPlanTextStyles,
+  } = useWelcomeHeaderStyles();
 
   return (
-    <EuiFlexGroup
-      css={css`
-        background-image: url(${launch});
-        background-size: 40%;
-        background-repeat: no-repeat;
-        background-position-x: right;
-        background-position-y: center;
-        padding: ${euiTheme.base * 0.625}px 0;
-      `}
-      data-test-subj="welcome-header"
-    >
+    <EuiFlexGroup css={headerStyles} data-test-subj="welcome-header">
       <EuiFlexItem
         grow={false}
         css={css`
@@ -55,63 +53,22 @@ const WelcomeHeaderComponent: React.FC<{ productTier?: ProductTier }> = ({ produ
         `}
       >
         {userName && (
-          <EuiTitle
-            size="l"
-            css={css`
-              padding-bottom: ${euiTheme.size.s};
-              font-size: ${euiTheme.base}px;
-              color: ${euiTheme.colors.darkShade};
-              font-weight: ${euiTheme.font.weight.bold};
-              line-height: ${euiTheme.size.l};
-            `}
-          >
+          <EuiTitle size="l" css={headerTitleStyles}>
             <span>{GET_STARTED_PAGE_TITLE(userName)}</span>
           </EuiTitle>
         )}
         <EuiSpacer size="s" />
-        <span
-          css={css`
-            font-size: ${euiTheme.size.l};
-            color: ${euiTheme.colors.title};
-            font-weight: ${euiTheme.font.weight.bold};
-          `}
-          className="eui-displayBlock"
-        >
+        <span css={headerSubtitleStyles} className="eui-displayBlock">
           {GET_STARTED_PAGE_SUBTITLE}
         </span>
         <EuiSpacer size="s" />
-        <span
-          className="eui-displayBlock"
-          css={css`
-            font-size: ${euiTheme.base}px;
-            color: ${euiTheme.colors.subduedText};
-            line-height: ${euiTheme.size.l};
-            font-weight: ${euiTheme.font.weight.regular};
-          `}
-        >
+        <span className="eui-displayBlock" css={headerDescriptionStyles}>
           {GET_STARTED_PAGE_DESCRIPTION}
         </span>
         <EuiSpacer size="l" />
         <div>
-          <div
-            className="eui-displayInlineBlock"
-            css={css`
-              background-color: ${euiTheme.colors.lightestShade};
-              border-radius: 56px;
-              padding: ${euiTheme.size.xs} ${euiTheme.size.xs} ${euiTheme.size.xs}
-                ${euiTheme.size.s};
-              height: ${euiTheme.size.xl};
-            `}
-          >
-            <span
-              css={css`
-                font-size: ${euiTheme.size.m};
-                font-weight: ${euiTheme.font.weight.bold};
-                padding-right: ${euiTheme.size.xs};
-              `}
-            >
-              {CURRENT_PLAN_LABEL}
-            </span>
+          <div className="eui-displayInlineBlock" css={currentPlanWrapperStyles}>
+            <span css={currentPlanTextStyles}>{CURRENT_PLAN_LABEL}</span>
             <ProductTierBadge productTier={productTier} />
             {productTier && (
               <EuiButtonIcon
