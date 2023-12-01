@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('discoverQueryHits'); // to cancel out tooltips
         const actualInterval = await PageObjects.discover.getChartInterval();
 
-        const expectedInterval = 'Auto';
+        const expectedInterval = 'auto';
         expect(actualInterval).to.be(expectedInterval);
       });
 

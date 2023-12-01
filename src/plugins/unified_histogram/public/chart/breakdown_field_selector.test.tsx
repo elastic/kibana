@@ -13,7 +13,7 @@ import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 
 describe('BreakdownFieldSelector', () => {
-  it('should pass fields that support breakdown as options to the EuiComboBox', () => {
+  it('should render correctly', () => {
     const onBreakdownFieldChange = jest.fn();
     const breakdown: UnifiedHistogramBreakdownContext = {
       field: undefined,
@@ -27,8 +27,11 @@ describe('BreakdownFieldSelector', () => {
       />
     );
 
+    const button = screen.getByTestId('unifiedHistogramBreakdownSelectorButton');
+    expect(button.getAttribute('data-selected-value')).toBe(null);
+
     act(() => {
-      screen.getByTestId('unifiedHistogramBreakdownSelectorButton').click();
+      button.click();
     });
 
     const options = screen.getAllByRole('option');
@@ -72,8 +75,11 @@ describe('BreakdownFieldSelector', () => {
       />
     );
 
+    const button = screen.getByTestId('unifiedHistogramBreakdownSelectorButton');
+    expect(button.getAttribute('data-selected-value')).toBe('extension');
+
     act(() => {
-      screen.getByTestId('unifiedHistogramBreakdownSelectorButton').click();
+      button.click();
     });
 
     const options = screen.getAllByRole('option');
