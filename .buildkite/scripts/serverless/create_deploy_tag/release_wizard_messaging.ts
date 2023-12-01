@@ -230,8 +230,10 @@ export async function transition(targetStateName: StateNames, data?: any) {
 }
 
 function updateWizardState(stateData: Record<string, 'ok' | 'nok' | 'pending' | undefined>) {
-  const wizardHeader = `<h3>:kibana: Kibana Serverless deployment wizard :mage:</h3>`;
   const isAutomated = process.env.AUTO_PROMOTE_RC?.match(/(1|true)/i);
+  const wizardHeader = isAutomated
+    ? `<h3>:kibana: Kibana Serverless automated release candidate promotion :robot_face:</h3>`
+    : `<h3>:kibana: Kibana Serverless deployment wizard :mage:</h3>`;
 
   const wizardSteps = Object.keys(states)
     .filter((stateName) => states[stateName].display)
