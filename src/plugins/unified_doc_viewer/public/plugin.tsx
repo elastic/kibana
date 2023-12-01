@@ -27,12 +27,10 @@ const SourceViewer = React.lazy(() => import('./components/doc_viewer_source'));
 
 export interface UnifiedDocViewerSetup {
   registry: DocViewsRegistry;
-  addDocView: DocViewsRegistry['add'];
 }
 
 export interface UnifiedDocViewerStart {
   registry: DocViewsRegistry;
-  getDocViews: DocViewsRegistry['getAll'];
 }
 
 export interface UnifiedDocViewerStartDeps {
@@ -101,7 +99,6 @@ export class UnifiedDocViewerPublicPlugin
 
     return {
       registry: this.docViewsRegistry,
-      addDocView: this.docViewsRegistry.add.bind(this.docViewsRegistry),
     };
   }
 
@@ -111,7 +108,6 @@ export class UnifiedDocViewerPublicPlugin
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
       registry: this.docViewsRegistry,
-      getDocViews: this.docViewsRegistry.getAll.bind(this.docViewsRegistry),
     };
     const services = { analytics, data, fieldFormats, storage, uiSettings, unifiedDocViewer };
     setUnifiedDocViewerServices(services);
