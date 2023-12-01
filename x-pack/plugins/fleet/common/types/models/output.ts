@@ -44,6 +44,7 @@ interface NewBaseOutput {
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
   secrets?: {};
+  preset?: 'custom' | 'balanced';
 }
 
 export interface NewElasticsearchOutput extends NewBaseOutput {

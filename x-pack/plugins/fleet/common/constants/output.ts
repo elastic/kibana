@@ -119,3 +119,13 @@ export const kafkaSupportedVersions = [
   '2.5.1',
   '2.6.0',
 ];
+
+export const RESERVED_CONFIG_YML_KEYS = [
+  'bulk_max_size',
+  'workers',
+  'queue.mem.events',
+  'flush.min_events',
+  'flush.timeout',
+  'compression',
+  'idle_timeout',
+];

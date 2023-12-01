@@ -11,6 +11,7 @@ import {
   FLEET_SERVER_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   outputType,
+  RESERVED_CONFIG_YML_KEYS,
 } from '../constants';
 
 /**
@@ -32,4 +33,16 @@ export function getAllowedOutputTypeForPolicy(agentPolicy: AgentPolicy) {
   }
 
   return Object.values(outputType);
+}
+
+export function outputYmlIncludesReservedPerformanceKey(configYml: string) {
+  return RESERVED_CONFIG_YML_KEYS.some((key) => configYml.includes(key));
+}
+
+export function getDefaultPresetForEsOutput(configYaml: string): 'balanced' | 'custom' {
+  if (outputYmlIncludesReservedPerformanceKey(configYaml)) {
+    return 'custom';
+  }
+
+  return 'balanced';
 }

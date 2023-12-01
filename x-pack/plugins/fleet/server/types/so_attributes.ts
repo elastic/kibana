@@ -144,6 +144,7 @@ interface OutputSoBaseAttributes {
   allow_edit?: string[];
   output_id?: string;
   ssl?: string | null; // encrypted ssl field
+  preset?: 'balanced' | 'custom';
 }
 
 interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {

@@ -19,6 +19,10 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 
 import _ from 'lodash';
 
+import pMap from 'p-map';
+
+import { getDefaultPresetForEsOutput } from '../../common/services/output_helpers';
+
 import type {
   NewOutput,
   Output,
@@ -494,6 +498,10 @@ class OutputService {
       data.shipper = null;
     }
 
+    if (!data.preset && data.type === outputType.Elasticsearch) {
+      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '');
+    }
+
     if (output.config_yaml) {
       const configJs = safeLoad(output.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
@@ -913,6 +921,10 @@ class OutputService {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
 
+    if (!data.preset && data.type === outputType.Elasticsearch) {
+      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '');
+    }
+
     // Remove the shipper data if the shipper is not enabled from the yaml config
     if (!data.config_yaml && data.shipper) {
       updateData.shipper = null;
@@ -951,6 +963,26 @@ class OutputService {
           .warn(`Error cleaning up secrets for output ${id}: ${err.message}`);
       }
     }
+  }
+
+  public async backfillAllOutputPresets(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient
+  ) {
+    const outputs = await this.list(soClient);
+
+    await pMap(
+      outputs.items,
+      async (output) => {
+        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '');
+
+        await outputService.update(soClient, esClient, output.id, { preset });
+        await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id);
+      },
+      {
+        concurrency: 5,
+      }
+    );
   }
 }
 

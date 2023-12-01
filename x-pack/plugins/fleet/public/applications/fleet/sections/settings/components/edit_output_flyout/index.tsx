@@ -31,14 +31,18 @@ import {
   EuiBetaBadge,
   useEuiTheme,
   EuiText,
+  EuiAccordion,
+  EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
 
+import { outputYmlIncludesReservedPerformanceKey } from '../../../../../../../common/services/output_helpers';
+
 import { ExperimentalFeaturesService } from '../../../../../../services';
 
-import { outputType } from '../../../../../../../common/constants';
+import { outputType, RESERVED_CONFIG_YML_KEYS } from '../../../../../../../common/constants';
 
 import { MultiRowInput } from '../multi_row_input';
 import type { Output, FleetProxy } from '../../../../types';
@@ -506,30 +510,6 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               />
             </EuiFormRow>
           )}
-          <EuiFormRow
-            label={
-              <EuiLink href={docLinks.links.fleet.esSettings} external target="_blank">
-                {i18n.translate('xpack.fleet.settings.editOutputFlyout.yamlConfigInputLabel', {
-                  defaultMessage: 'Advanced YAML configuration',
-                })}
-              </EuiLink>
-            }
-            {...inputs.additionalYamlConfigInput.formRowProps}
-            fullWidth
-          >
-            <YamlCodeEditorWithPlaceholder
-              value={inputs.additionalYamlConfigInput.value}
-              onChange={inputs.additionalYamlConfigInput.setValue}
-              disabled={inputs.additionalYamlConfigInput.props.disabled}
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.yamlConfigInputPlaceholder',
-                {
-                  defaultMessage:
-                    '# YAML settings here will be added to the output section of each agent policy.',
-                }
-              )}
-            />
-          </EuiFormRow>
           <EuiFormRow fullWidth {...inputs.defaultOutputInput.formRowProps}>
             <EuiSwitch
               {...inputs.defaultOutputInput.props}
@@ -574,6 +554,95 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             />
           </EuiFormRow>
           <EuiSpacer size="l" />
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.performanceTuningLabel"
+                defaultMessage="Performance tuning"
+              />
+            }
+          >
+            <>
+              <EuiSelect
+                value={inputs.presetInput.value}
+                onChange={(e) => inputs.presetInput.setValue(e.target.value)}
+                disabled={outputYmlIncludesReservedPerformanceKey(
+                  inputs.additionalYamlConfigInput.value
+                )}
+                options={[
+                  { value: 'balanced', text: 'Balanced' },
+                  { value: 'custom', text: 'Custom' },
+                ]}
+              />
+            </>
+          </EuiFormRow>
+
+          {outputYmlIncludesReservedPerformanceKey(inputs.additionalYamlConfigInput.value) && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiCallOut
+                color="warning"
+                iconType="alert"
+                size="s"
+                title={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.performanceTuningMustBeCustomWarning"
+                    defaultMessage={`Performance tuning preset must be "Custom" due to presence of reserved key in advanced YAML configuration`}
+                  />
+                }
+              >
+                <EuiAccordion
+                  id="performanceTuningMustBeCustomWarningDetails"
+                  buttonContent={
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.performanceTuningMustBeCustomWarningDetails"
+                      defaultMessage="Show reserved keys"
+                    />
+                  }
+                >
+                  <ul>
+                    {RESERVED_CONFIG_YML_KEYS.map((key) => (
+                      <li key={key}>
+                        <EuiCode>{key}</EuiCode>
+                      </li>
+                    ))}
+                  </ul>
+                </EuiAccordion>
+              </EuiCallOut>
+            </>
+          )}
+
+          <EuiSpacer size="l" />
+          <EuiFormRow
+            label={
+              <EuiLink href={docLinks.links.fleet.esSettings} external target="_blank">
+                {i18n.translate('xpack.fleet.settings.editOutputFlyout.yamlConfigInputLabel', {
+                  defaultMessage: 'Advanced YAML configuration',
+                })}
+              </EuiLink>
+            }
+            {...inputs.additionalYamlConfigInput.formRowProps}
+            fullWidth
+          >
+            <YamlCodeEditorWithPlaceholder
+              value={inputs.additionalYamlConfigInput.value}
+              onChange={(value) => {
+                if (outputYmlIncludesReservedPerformanceKey(value)) {
+                  inputs.presetInput.setValue('custom');
+                }
+
+                inputs.additionalYamlConfigInput.setValue(value);
+              }}
+              disabled={inputs.additionalYamlConfigInput.props.disabled}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.yamlConfigInputPlaceholder',
+                {
+                  defaultMessage:
+                    '# YAML settings here will be added to the output section of each agent policy.',
+                }
+              )}
+            />
+          </EuiFormRow>
           <AdvancedOptionsSection enabled={form.isShipperEnabled} inputs={inputs} />
         </EuiForm>
       </EuiFlyoutBody>
