@@ -156,6 +156,43 @@ describe('getSharingData', () => {
     ]);
   });
 
+  test('getSearchSource supports nested fields', async () => {
+    const fields = [
+      ...indexPatternMock.fields,
+      {
+        name: 'cool-field-2.field',
+        type: 'keyword',
+        subType: {
+          nested: {
+            path: 'cool-field-2.field.path',
+          },
+        },
+      },
+    ];
+    const index = {
+      ...indexPatternMock,
+      name: 'the-data-view',
+      timeFieldName: 'cool-timefield',
+      fields: {
+        getAll: () => fields,
+        getByName: (name: string) => fields.find((field) => field.name === name),
+      },
+    } as unknown as IndexPattern;
+    const searchSourceMock = createSearchSourceMock({ index });
+    const { getSearchSource } = await getSharingData(
+      searchSourceMock,
+      {
+        columns: ['cool-field-1', 'cool-field-2'],
+      },
+      services
+    );
+    expect(getSearchSource().fields).toStrictEqual([
+      'cool-timefield',
+      'cool-field-1',
+      'cool-field-2.*',
+    ]);
+  });
+
   test('fields have prepended timeField', async () => {
     const index = { ...indexPatternMock } as IndexPattern;
     index.timeFieldName = 'cool-timefield';

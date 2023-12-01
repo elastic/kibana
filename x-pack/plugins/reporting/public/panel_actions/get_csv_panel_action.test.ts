@@ -119,7 +119,9 @@ describe('GetCsvReportPanelAction', () => {
       createCopy: () => mockSearchSource,
       removeField: jest.fn(),
       setField: jest.fn(),
-      getField: jest.fn(),
+      getField: jest.fn((name) =>
+        name === 'index' ? { fields: { getAll: () => [], getByName: () => undefined } } : undefined
+      ),
       getSerializedFields: jest.fn().mockImplementation(() => ({ testData: 'testDataValue' })),
     } as unknown as SearchSource;
     context.embeddable.getSavedSearch = () => {
