@@ -14,7 +14,6 @@ import {
 import React from 'react';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { TimeComparison } from '../../shared/time_comparison';
-import { TransactionTypeSelect } from '../../shared/transaction_type_select';
 import { MobileFilters } from './service_overview/filters';
 import { UnifiedSearchBar } from '../../shared/unified_search_bar';
 
@@ -66,6 +65,7 @@ export function MobileSearchBar({
       <EuiSpacer size={isSmall ? 's' : 'm'} />
       <EuiFlexGroup
         justifyContent="spaceBetween"
+        gutterSize={isMedium ? 's' : 'm'}
         direction={isLarge || isMedium ? 'column' : 'row'}
       >
         {showTimeComparison && (
