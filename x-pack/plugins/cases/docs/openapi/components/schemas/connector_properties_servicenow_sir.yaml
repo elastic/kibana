@@ -21,32 +21,39 @@ properties:
     properties:
       category:
         description: The category of the incident. 
-        type: string
-        nullable: true
+        type:
+          - "string"
+          - "null"
       destIp:
         description: Indicates whether cases will send a comma-separated list of destination IPs.
-        type: boolean
-        nullable: true
+        type:
+          - "boolean"
+          - "null"
       malwareHash:
         description: Indicates whether cases will send a comma-separated list of malware hashes. 
-        type: boolean
-        nullable: true
+        type:
+          - "boolean"
+          - "null"
       malwareUrl:
         description: Indicates whether cases will send a comma-separated list of malware URLs. 
-        type: boolean
-        nullable: true
+        type:
+          - "boolean"
+          - "null"
       priority:
         description: The priority of the issue.
-        type: string
-        nullable: true
+        type:
+          - "string"
+          - "null"
       sourceIp:
         description: Indicates whether cases will send a comma-separated list of source IPs.
-        type: boolean
-        nullable: true
+        type:
+          - "boolean"
+          - "null"
       subcategory:
         description: The subcategory of the incident.
-        type: string
-        nullable: true
+        type:
+          - "string"
+          - "null"
   id:
     description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
     type: string
@@ -56,6 +63,7 @@ properties:
   type:
     description: The type of connector.
     type: string
-    example: .servicenow-sir
+    examples:
+      - .servicenow-sir
     enum:
       - .servicenow-sir

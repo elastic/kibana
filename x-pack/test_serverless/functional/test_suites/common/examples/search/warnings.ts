@@ -7,7 +7,6 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import { asyncForEach } from '@kbn/std';
 import assert from 'assert';
 import type { WebElementWrapper } from '../../../../../../../test/functional/services/lib/web_element_wrapper';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -107,15 +106,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         const toasts = await find.allByCssSelector(toastsSelector);
         expect(toasts.length).to.be(2);
-        const expects = ['The data might be incomplete or wrong.', 'Query result'];
-        await asyncForEach(toasts, async (t, index) => {
-          expect(await t.getVisibleText()).to.eql(expects[index]);
-        });
+        await testSubjects.click('viewWarningBtn');
       });
-
-      // click "see full error" button in the toast
-      const [openShardModalButton] = await testSubjects.findAll('viewWarningBtn');
-      await openShardModalButton.click();
 
       // request
       await retry.try(async () => {
@@ -164,10 +156,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         toasts = await find.allByCssSelector(toastsSelector);
         expect(toasts.length).to.be(2);
-        const expects = ['The data might be incomplete or wrong.', 'Query result'];
-        await asyncForEach(toasts, async (t, index) => {
-          expect(await t.getVisibleText()).to.eql(expects[index]);
-        });
       });
 
       // warnings tab

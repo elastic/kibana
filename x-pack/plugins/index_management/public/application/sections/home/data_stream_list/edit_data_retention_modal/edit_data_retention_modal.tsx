@@ -17,8 +17,9 @@ import {
   EuiSpacer,
   EuiLink,
   EuiText,
-  EuiBadge,
+  EuiCallOut,
 } from '@elastic/eui';
+import { ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -34,83 +35,22 @@ import {
   NumericField,
 } from '../../../../../shared_imports';
 
+import { reactRouterNavigate } from '../../../../../shared_imports';
+import { getIndexListUri } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
-import { splitSizeAndUnits } from '../../../../../../common';
+import { splitSizeAndUnits, DataStream } from '../../../../../../common';
+import { timeUnits } from '../../../../constants/time_units';
+import { isDSLWithILMIndices } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
-import { UnitField } from './unit_field';
+import { UnitField } from '../../../../components/shared';
 import { updateDataRetention } from '../../../../services/api';
 
 interface Props {
-  dataRetention: string;
-  dataStreamName: string;
+  dataStream: DataStream;
+  ilmPolicyName?: string;
+  ilmPolicyLink: string;
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
-
-export const timeUnits = [
-  {
-    value: 'd',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.daysLabel',
-      {
-        defaultMessage: 'days',
-      }
-    ),
-  },
-  {
-    value: 'h',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.hoursLabel',
-      {
-        defaultMessage: 'hours',
-      }
-    ),
-  },
-  {
-    value: 'm',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.minutesLabel',
-      {
-        defaultMessage: 'minutes',
-      }
-    ),
-  },
-  {
-    value: 's',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.secondsLabel',
-      {
-        defaultMessage: 'seconds',
-      }
-    ),
-  },
-  {
-    value: 'ms',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.millisecondsLabel',
-      {
-        defaultMessage: 'milliseconds',
-      }
-    ),
-  },
-  {
-    value: 'micros',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.microsecondsLabel',
-      {
-        defaultMessage: 'microseconds',
-      }
-    ),
-  },
-  {
-    value: 'nanos',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.nanosecondsLabel',
-      {
-        defaultMessage: 'nanoseconds',
-      }
-    ),
-  },
-];
 
 const configurationFormSchema: FormSchema = {
   dataRetention: {
@@ -124,7 +64,12 @@ const configurationFormSchema: FormSchema = {
     formatters: [fieldFormatters.toInt],
     validations: [
       {
-        validator: ({ value }) => {
+        validator: ({ value, formData }) => {
+          // If infiniteRetentionPeriod is set, we dont need to validate the data retention field
+          if (formData.infiniteRetentionPeriod) {
+            return undefined;
+          }
+
           if (!value) {
             return {
               message: i18n.translate(
@@ -168,14 +113,84 @@ const configurationFormSchema: FormSchema = {
       }
     ),
   },
+  dataRetentionEnabled: {
+    type: FIELD_TYPES.TOGGLE,
+    defaultValue: false,
+    label: i18n.translate(
+      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionEnabledField',
+      {
+        defaultMessage: 'Enable data retention',
+      }
+    ),
+  },
+};
+
+interface MixedIndicesCalloutProps {
+  history: ScopedHistory;
+  ilmPolicyLink: string;
+  ilmPolicyName?: string;
+  dataStreamName: string;
+}
+
+const MixedIndicesCallout = ({
+  ilmPolicyLink,
+  ilmPolicyName,
+  dataStreamName,
+  history,
+}: MixedIndicesCalloutProps) => {
+  return (
+    <EuiCallOut
+      title={i18n.translate(
+        'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMTitle',
+        { defaultMessage: 'Some indices are managed by ILM' }
+      )}
+      color="warning"
+      iconType="warning"
+      data-test-subj="someIndicesAreManagedByILMCallout"
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMBody"
+          defaultMessage="One or more indices are managed by an ILM policy ({viewAllIndicesLink}). Updating data retention for this data stream won't affect these indices. Instead you will have to update the {ilmPolicyLink} policy."
+          values={{
+            ilmPolicyLink: (
+              <EuiLink data-test-subj="viewIlmPolicyLink" href={ilmPolicyLink}>
+                {ilmPolicyName}
+              </EuiLink>
+            ),
+            viewAllIndicesLink: (
+              <EuiLink
+                {...reactRouterNavigate(
+                  history,
+                  getIndexListUri(`data_stream="${dataStreamName}"`, true)
+                )}
+                data-test-subj="viewAllIndicesLink"
+              >
+                <FormattedMessage
+                  id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.viewAllIndices"
+                  defaultMessage="view indices"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    </EuiCallOut>
+  );
 };
 
 export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
-  dataRetention,
-  dataStreamName,
+  dataStream,
+  ilmPolicyName,
+  ilmPolicyLink,
   onClose,
 }) => {
-  const { size, unit } = splitSizeAndUnits(dataRetention);
+  const lifecycle = dataStream?.lifecycle;
+  const dataStreamName = dataStream?.name as string;
+
+  const { history } = useAppContext();
+  const dslWithIlmIndices = isDSLWithILMIndices(dataStream);
+  const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
   const {
     services: { notificationService },
   } = useAppContext();
@@ -184,7 +199,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
     defaultValue: {
       dataRetention: size,
       timeUnit: unit || 'd',
-      infiniteRetentionPeriod: !dataRetention,
+      dataRetentionEnabled: lifecycle?.enabled,
+      // When data retention is not set and lifecycle is enabled, is the only scenario in
+      // which data retention will be infinite. If lifecycle isnt set or is not enabled, we
+      // dont have inifinite data retention.
+      infiniteRetentionPeriod: lifecycle?.enabled && !lifecycle?.data_retention,
     },
     schema: configurationFormSchema,
     id: 'editDataRetentionForm',
@@ -203,7 +222,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       if (responseData) {
         const successMessage = i18n.translate(
           'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.successDataRetentionNotification',
-          { defaultMessage: 'Data retention updated' }
+          {
+            defaultMessage:
+              'Data retention {disabledDataRetention, plural, one { disabled } other { updated } }',
+            values: { disabledDataRetention: !data.dataRetentionEnabled ? 1 : 0 },
+          }
         );
         notificationService.showSuccessToast(successMessage);
 
@@ -233,21 +256,29 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.modalTitleText"
               defaultMessage="Edit data retention"
-            />{' '}
-            <EuiBadge color="hollow">
-              <EuiText size="xs">
-                {i18n.translate(
-                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.techPreviewLabel',
-                  {
-                    defaultMessage: 'Technical preview',
-                  }
-                )}
-              </EuiText>
-            </EuiBadge>
+            />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
+          {dslWithIlmIndices && (
+            <>
+              <MixedIndicesCallout
+                history={history}
+                ilmPolicyLink={ilmPolicyLink}
+                ilmPolicyName={ilmPolicyName}
+                dataStreamName={dataStreamName}
+              />
+              <EuiSpacer />
+            </>
+          )}
+
+          <UseField
+            path="dataRetentionEnabled"
+            component={ToggleField}
+            data-test-subj="dataRetentionEnabledField"
+          />
+
           <UseField
             path="dataRetention"
             component={NumericField}
@@ -266,14 +297,14 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             componentProps={{
               fullWidth: false,
               euiFieldProps: {
-                disabled: formData.infiniteRetentionPeriod,
+                disabled: formData.infiniteRetentionPeriod || !formData.dataRetentionEnabled,
                 'data-test-subj': `dataRetentionValue`,
                 min: 1,
                 append: (
                   <UnitField
                     path="timeUnit"
                     options={timeUnits}
-                    disabled={formData.infiniteRetentionPeriod}
+                    disabled={formData.infiniteRetentionPeriod || !formData.dataRetentionEnabled}
                     euiFieldProps={{
                       'data-test-subj': 'timeUnit',
                       'aria-label': i18n.translate(
@@ -293,6 +324,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             path="infiniteRetentionPeriod"
             component={ToggleField}
             data-test-subj="infiniteRetentionPeriod"
+            componentProps={{
+              euiFieldProps: {
+                disabled: !formData.dataRetentionEnabled,
+              },
+            }}
           />
 
           <EuiSpacer />

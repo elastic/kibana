@@ -7,6 +7,7 @@
 
 import { TOASTER } from '../screens/alerts_detection_rules';
 import { KQL_INPUT, openNavigationPanelFor, REFRESH_BUTTON } from '../screens/security_header';
+import { openNavigationPanelFor as openServerlessNavigationPanelFor } from '../screens/serverless_security_header';
 
 export const clearSearchBar = () => {
   cy.get(KQL_INPUT).clear();
@@ -14,12 +15,16 @@ export const clearSearchBar = () => {
 };
 
 export const kqlSearch = (search: string) => {
-  cy.get(KQL_INPUT).type(search);
+  cy.get(KQL_INPUT).type(search, { force: true });
 };
 
-export const navigateFromHeaderTo = (page: string) => {
-  openNavigationPanelFor(page);
-  cy.get(page).click({ force: true });
+export const navigateFromHeaderTo = (page: string, isServerless: boolean = false) => {
+  if (isServerless) {
+    openServerlessNavigationPanelFor(page);
+  } else {
+    openNavigationPanelFor(page);
+  }
+  cy.get(page).click();
 };
 
 export const refreshPage = () => {

@@ -58,7 +58,6 @@ import {
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import type { Rule } from '../../../rule_management/logic';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../detections/components/rules/step_about_rule_details';
@@ -74,6 +73,7 @@ import {
 import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
 import { StepPanel } from '../../../../detections/components/rules/step_panel';
 import {
+  getMachineLearningJobId,
   getStepsData,
   redirectToDetections,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
@@ -124,7 +124,7 @@ import { MissingPrivilegesCallOut } from '../../../../detections/components/call
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
-import type { Status } from '../../../../../common/api/detection_engine';
+import type { RuleResponse, Status } from '../../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -141,7 +141,6 @@ import { RuleScheduleSection } from '../../../rule_management/components/rule_de
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
-import { castRuleAsRuleResponse } from './cast_rule_as_rule_response';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -219,7 +218,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     useListsConfig();
 
   const {
-    indexPattern,
+    sourcererDataView,
     runtimeMappings,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
@@ -238,12 +237,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   } = useRuleWithFallback(ruleId);
 
   const { pollForSignalIndex } = useSignalHelpers();
-  const [rule, setRule] = useState<Rule | null>(null);
+  const [rule, setRule] = useState<RuleResponse | null>(null);
   const isLoading = ruleLoading && rule == null;
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
   const startMlJobsIfNeeded = useCallback(async () => {
-    await startMlJobs(rule?.machine_learning_job_id);
+    if (rule) {
+      await startMlJobs(getMachineLearningJobId(rule));
+    }
   }, [rule, startMlJobs]);
 
   const pageTabs = useRuleDetailsTabs({ rule, ruleId, isExistingRule, hasIndexRead });
@@ -403,6 +404,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     );
   }, [ruleId, lastExecutionStatus, lastExecutionDate, ruleLoading, isExistingRule, refreshRule]);
 
+  // Extract rule index if available on rule type
+  let ruleIndex: string[] | undefined;
+  if (rule != null && 'index' in rule && Array.isArray(rule.index)) {
+    ruleIndex = rule.index;
+  }
+
   const ruleError = useMemo(() => {
     return ruleLoading ? (
       <EuiFlexItem>
@@ -410,12 +417,22 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       </EuiFlexItem>
     ) : (
       <RuleStatusFailedCallOut
+        ruleName={rule?.immutable ? rule?.name : undefined}
+        dataSources={rule?.immutable ? ruleIndex : undefined}
         status={lastExecutionStatus}
         date={lastExecutionDate}
         message={lastExecutionMessage}
       />
     );
-  }, [lastExecutionStatus, lastExecutionDate, lastExecutionMessage, ruleLoading]);
+  }, [
+    lastExecutionStatus,
+    lastExecutionDate,
+    lastExecutionMessage,
+    ruleLoading,
+    rule?.immutable,
+    rule?.name,
+    ruleIndex,
+  ]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -541,7 +558,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <SiemSearchBar
             id={InputsModelId.global}
             pollForSignalIndex={pollForSignalIndex}
-            indexPattern={indexPattern}
+            sourcererDataView={sourcererDataView}
           />
         </FiltersGlobal>
         <RuleDetailsContextProvider>
@@ -649,7 +666,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
                         {rule !== null && !isStartingJobs && (
                           <RuleDefinitionSection
-                            rule={castRuleAsRuleResponse(rule)}
+                            rule={rule}
                             isInteractive
                             dataTestSubj="definitionRule"
                           />
@@ -659,9 +676,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     <EuiSpacer />
                     <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
                       <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                        {rule != null && (
-                          <RuleScheduleSection rule={castRuleAsRuleResponse(rule)} />
-                        )}
+                        {rule != null && <RuleScheduleSection rule={rule} />}
                       </StepPanel>
                     </EuiFlexItem>
                     {hasActions && (

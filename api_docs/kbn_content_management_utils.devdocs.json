@@ -81,8 +81,8 @@
                     "pluginId": "@kbn/content-management-utils",
                     "scope": "common",
                     "docId": "kibKbnContentManagementUtilsPluginApi",
-                    "section": "def-common.SOContentStorageConstrutorParams",
-                    "text": "SOContentStorageConstrutorParams"
+                    "section": "def-common.SOContentStorageConstructorParams",
+                    "text": "SOContentStorageConstructorParams"
                   },
                   "<Types>"
                 ],
@@ -763,7 +763,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"conflict\" | \"exactMatch\" | \"aliasMatch\">; aliasTargetId: ",
+          "<\"exactMatch\" | \"aliasMatch\" | \"conflict\">; aliasTargetId: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -883,7 +883,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{} & { error: string; message: string; statusCode: number; metadata: Readonly<{} & {}>; }> | undefined>; attributes: ",
+          "<Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined>; attributes: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1282,7 +1282,7 @@
                 "section": "def-common.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
-              "<object>; meta: { outcome: \"conflict\" | \"exactMatch\" | \"aliasMatch\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
+              "<object>; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
             ],
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
@@ -1709,7 +1709,7 @@
                 "section": "def-common.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
-              "<Attributes>; meta: { outcome: \"conflict\" | \"exactMatch\" | \"aliasMatch\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
+              "<Attributes>; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
             ],
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
@@ -2725,18 +2725,18 @@
       },
       {
         "parentPluginId": "@kbn/content-management-utils",
-        "id": "def-common.SOContentStorageConstrutorParams",
+        "id": "def-common.SOContentStorageConstructorParams",
         "type": "Interface",
         "tags": [],
-        "label": "SOContentStorageConstrutorParams",
+        "label": "SOContentStorageConstructorParams",
         "description": [],
         "signature": [
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "common",
             "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-common.SOContentStorageConstrutorParams",
-            "text": "SOContentStorageConstrutorParams"
+            "section": "def-common.SOContentStorageConstructorParams",
+            "text": "SOContentStorageConstructorParams"
           },
           "<Types>"
         ],
@@ -2746,7 +2746,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-utils",
-            "id": "def-common.SOContentStorageConstrutorParams.savedObjectType",
+            "id": "def-common.SOContentStorageConstructorParams.savedObjectType",
             "type": "string",
             "tags": [],
             "label": "savedObjectType",
@@ -2757,7 +2757,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-utils",
-            "id": "def-common.SOContentStorageConstrutorParams.cmServicesDefinition",
+            "id": "def-common.SOContentStorageConstructorParams.cmServicesDefinition",
             "type": "Object",
             "tags": [],
             "label": "cmServicesDefinition",
@@ -2777,7 +2777,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-utils",
-            "id": "def-common.SOContentStorageConstrutorParams.allowedSavedObjectAttributes",
+            "id": "def-common.SOContentStorageConstructorParams.allowedSavedObjectAttributes",
             "type": "Array",
             "tags": [],
             "label": "allowedSavedObjectAttributes",
@@ -2791,7 +2791,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-utils",
-            "id": "def-common.SOContentStorageConstrutorParams.createArgsToSoCreateOptions",
+            "id": "def-common.SOContentStorageConstructorParams.createArgsToSoCreateOptions",
             "type": "Function",
             "tags": [],
             "label": "createArgsToSoCreateOptions",
@@ -2812,7 +2812,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-utils",
-            "id": "def-common.SOContentStorageConstrutorParams.updateArgsToSoUpdateOptions",
+            "id": "def-common.SOContentStorageConstructorParams.updateArgsToSoUpdateOptions",
             "type": "Function",
             "tags": [],
             "label": "updateArgsToSoUpdateOptions",
@@ -2833,7 +2833,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-utils",
-            "id": "def-common.SOContentStorageConstrutorParams.searchArgsToSOFindOptions",
+            "id": "def-common.SOContentStorageConstructorParams.searchArgsToSOFindOptions",
             "type": "Function",
             "tags": [],
             "label": "searchArgsToSOFindOptions",
@@ -2854,11 +2854,13 @@
           },
           {
             "parentPluginId": "@kbn/content-management-utils",
-            "id": "def-common.SOContentStorageConstrutorParams.enableMSearch",
+            "id": "def-common.SOContentStorageConstructorParams.enableMSearch",
             "type": "CompoundType",
             "tags": [],
             "label": "enableMSearch",
-            "description": [],
+            "description": [
+              "\nMSearch is a feature that allows searching across multiple content types\n(for example, could be used in a general content finder or the like)\n\ndefaults to false"
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -2868,7 +2870,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-utils",
-            "id": "def-common.SOContentStorageConstrutorParams.mSearchAdditionalSearchFields",
+            "id": "def-common.SOContentStorageConstructorParams.mSearchAdditionalSearchFields",
             "type": "Array",
             "tags": [],
             "label": "mSearchAdditionalSearchFields",
@@ -2882,7 +2884,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-utils",
-            "id": "def-common.SOContentStorageConstrutorParams.logger",
+            "id": "def-common.SOContentStorageConstructorParams.logger",
             "type": "Object",
             "tags": [],
             "label": "logger",
@@ -2902,7 +2904,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-utils",
-            "id": "def-common.SOContentStorageConstrutorParams.throwOnResultValidationError",
+            "id": "def-common.SOContentStorageConstructorParams.throwOnResultValidationError",
             "type": "boolean",
             "tags": [],
             "label": "throwOnResultValidationError",
@@ -3147,7 +3149,7 @@
           "Return value for Saved Object get, T is item returned"
         ],
         "signature": [
-          "{ item: T; meta: { outcome: \"conflict\" | \"exactMatch\" | \"aliasMatch\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
+          "{ item: T; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
         ],
         "path": "packages/kbn-content-management-utils/src/types.ts",
         "deprecated": false,
@@ -4019,7 +4021,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ error?: Readonly<{} & { error: string; message: string; statusCode: number; metadata: Readonly<{} & {}>; }> | undefined; namespaces?: string[] | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; version?: string | undefined; originId?: string | undefined; } & { type: string; id: string; references: Readonly<{ name?: string | undefined; } & { type: string; id: string; }>[]; attributes: Readonly<{ [x: string]: any; } & {}>; }> | undefined>"
+              "<Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; namespaces?: string[] | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; version?: string | undefined; originId?: string | undefined; } & { type: string; id: string; references: Readonly<{ name?: string | undefined; } & { type: string; id: string; }>[]; attributes: Readonly<{ [x: string]: any; } & {}>; }> | undefined>"
             ],
             "path": "packages/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,

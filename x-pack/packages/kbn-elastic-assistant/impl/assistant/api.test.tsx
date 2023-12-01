@@ -54,7 +54,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"}}',
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"assistantLangChain":true}',
           headers: { 'Content-Type': 'application/json' },
           method: 'POST',
           signal: undefined,
@@ -72,15 +72,34 @@ describe('API tests', () => {
 
       await fetchConnectorExecuteAction(testProps);
 
-      expect(mockHttp.fetch).toHaveBeenCalledWith('/api/actions/connector/foo/_execute', {
-        body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"}}',
-        headers: { 'Content-Type': 'application/json' },
-        method: 'POST',
-        signal: undefined,
-      });
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeStream"},"assistantLangChain":false}',
+          method: 'POST',
+          asResponse: true,
+          rawResponse: true,
+          signal: undefined,
+        }
+      );
     });
 
-    it('returns API_ERROR when the response status is not ok', async () => {
+    it('returns API_ERROR when the response status is error and langchain is on', async () => {
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
+
+      const testProps: FetchConnectorExecuteAction = {
+        assistantLangChain: true,
+        http: mockHttp,
+        messages,
+        apiConfig,
+      };
+
+      const result = await fetchConnectorExecuteAction(testProps);
+
+      expect(result).toEqual({ response: API_ERROR, isStream: false, isError: true });
+    });
+
+    it('returns API_ERROR when the response status is error, langchain is off, and response is not a reader', async () => {
       (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
 
       const testProps: FetchConnectorExecuteAction = {
@@ -92,11 +111,18 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-      expect(result).toEqual({ response: API_ERROR, isError: true });
+      expect(result).toEqual({
+        response: `${API_ERROR}\n\nCould not get reader from response`,
+        isStream: false,
+        isError: true,
+      });
     });
 
-    it('returns API_ERROR when there are no choices', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'ok', data: '' });
+    it('returns API_ERROR when the response is error, langchain is off, and response is a reader', async () => {
+      const mockReader = jest.fn();
+      (mockHttp.fetch as jest.Mock).mockRejectedValue({
+        response: { body: { getReader: jest.fn().mockImplementation(() => mockReader) } },
+      });
       const testProps: FetchConnectorExecuteAction = {
         assistantLangChain: false,
         http: mockHttp,
@@ -106,7 +132,25 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-      expect(result).toEqual({ response: API_ERROR, isError: true });
+      expect(result).toEqual({
+        response: mockReader,
+        isStream: true,
+        isError: true,
+      });
+    });
+
+    it('returns API_ERROR when there are no choices', async () => {
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'ok', data: '' });
+      const testProps: FetchConnectorExecuteAction = {
+        assistantLangChain: true,
+        http: mockHttp,
+        messages,
+        apiConfig,
+      };
+
+      const result = await fetchConnectorExecuteAction(testProps);
+
+      expect(result).toEqual({ response: API_ERROR, isStream: false, isError: true });
     });
 
     it('returns the value of the action_input property when assistantLangChain is true, and `content` has properly prefixed and suffixed JSON with the action_input property', async () => {
@@ -126,7 +170,11 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-      expect(result).toEqual({ response: 'value from action_input', isError: false });
+      expect(result).toEqual({
+        response: 'value from action_input',
+        isStream: false,
+        isError: false,
+      });
     });
 
     it('returns the original content when assistantLangChain is true, and `content` has properly formatted JSON WITHOUT the action_input property', async () => {
@@ -146,7 +194,7 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-      expect(result).toEqual({ response, isError: false });
+      expect(result).toEqual({ response, isStream: false, isError: false });
     });
 
     it('returns the original when assistantLangChain is true, and `content` is not JSON', async () => {
@@ -166,7 +214,7 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-      expect(result).toEqual({ response, isError: false });
+      expect(result).toEqual({ response, isStream: false, isError: false });
     });
   });
 
@@ -271,6 +319,9 @@ describe('API tests', () => {
         evalParams: {
           agents: ['not', 'alphabetical'],
           dataset: '{}',
+          datasetName: 'Test Dataset',
+          projectName: 'Test Project Name',
+          runName: 'Test Run Name',
           evalModel: ['not', 'alphabetical'],
           evalPrompt: 'evalPrompt',
           evaluationType: ['not', 'alphabetical'],
@@ -288,9 +339,12 @@ describe('API tests', () => {
         query: {
           models: 'alphabetical,not',
           agents: 'alphabetical,not',
+          datasetName: 'Test Dataset',
           evaluationType: 'alphabetical,not',
           evalModel: 'alphabetical,not',
           outputIndex: 'outputIndex',
+          projectName: 'Test Project Name',
+          runName: 'Test Run Name',
         },
         signal: undefined,
       });

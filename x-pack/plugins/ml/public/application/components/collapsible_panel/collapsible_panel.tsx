@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { type FC } from 'react';
-import { css } from '@emotion/react';
+import { PanelHeaderItems } from './panel_header_items';
 import { useCurrentThemeVars } from '../../contexts/kibana';
 
 export interface CollapsiblePanelProps {
@@ -67,27 +67,7 @@ export const CollapsiblePanel: FC<CollapsiblePanelProps> = ({
           </EuiFlexItem>
           {headerItems ? (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize={'l'} alignItems={'center'}>
-                {headerItems.map((item, i) => {
-                  return (
-                    <EuiFlexItem key={i} grow={false}>
-                      <div
-                        css={
-                          i < headerItems?.length - 1
-                            ? css`
-                                border-right: ${euiTheme.euiBorderWidthThin} solid
-                                  ${euiTheme.euiBorderColor};
-                                padding-right: ${euiTheme.euiPanelPaddingModifiers.paddingLarge};
-                              `
-                            : null
-                        }
-                      >
-                        {item}
-                      </div>
-                    </EuiFlexItem>
-                  );
-                })}
-              </EuiFlexGroup>
+              <PanelHeaderItems headerItems={headerItems} />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>

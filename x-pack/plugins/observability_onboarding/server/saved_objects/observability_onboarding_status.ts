@@ -22,6 +22,10 @@ export interface SystemLogsState {
   namespace: string;
 }
 
+export interface ElasticAgentStepPayload {
+  agentId: string;
+}
+
 export type ObservabilityOnboardingType = 'logFiles' | 'systemLogs';
 
 type ObservabilityOnboardingFlowState =
@@ -37,6 +41,7 @@ export interface ObservabilityOnboardingFlow {
     {
       status: string;
       message?: string;
+      payload?: ElasticAgentStepPayload;
     }
   >;
 }
@@ -57,6 +62,10 @@ const LogFilesStateSchema = schema.object({
 
 const SystemLogsStateSchema = schema.object({
   namespace: schema.string(),
+});
+
+const ElasticAgentStepPayloadSchema = schema.object({
+  agentId: schema.string(),
 });
 
 export const observabilityOnboardingFlow: SavedObjectsType = {
@@ -84,6 +93,7 @@ export const observabilityOnboardingFlow: SavedObjectsType = {
             schema.object({
               status: schema.string(),
               message: schema.maybe(schema.string()),
+              payload: schema.maybe(ElasticAgentStepPayloadSchema),
             })
           ),
         }),

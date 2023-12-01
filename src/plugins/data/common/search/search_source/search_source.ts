@@ -458,7 +458,9 @@ export class SearchSource {
     const last$ = s$
       .pipe(
         catchError((e) => {
-          requestResponder?.error({ json: e });
+          requestResponder?.error({
+            json: 'attributes' in e ? e.attributes : { message: e.message },
+          });
           return EMPTY;
         }),
         last(undefined, null),
@@ -777,12 +779,11 @@ export class SearchSource {
     const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
     // get some special field types from the index pattern
-    const { docvalueFields, scriptFields, storedFields, runtimeFields } = index
+    const { docvalueFields, scriptFields, runtimeFields } = index
       ? index.getComputedFields()
       : {
           docvalueFields: [],
           scriptFields: {},
-          storedFields: ['*'],
           runtimeFields: {},
         };
     const fieldListProvided = !!body.fields;
@@ -796,7 +797,7 @@ export class SearchSource {
           ...scriptFields,
         }
       : {};
-    body.stored_fields = storedFields;
+    body.stored_fields = ['*'];
     body.runtime_mappings = runtimeFields || {};
 
     // apply source filters from index pattern if specified by the user
@@ -946,7 +947,7 @@ export class SearchSource {
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields(recurse = false, includeFields = true): SerializedSearchSourceFields {
+  public getSerializedFields(recurse = false): SerializedSearchSourceFields {
     const {
       filter: originalFilters,
       aggs: searchSourceAggs,
@@ -961,9 +962,7 @@ export class SearchSource {
       ...searchSourceFields,
     };
     if (index) {
-      serializedSearchSourceFields.index = index.isPersisted()
-        ? index.id
-        : index.toSpec(includeFields);
+      serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toMinimalSpec();
     }
     if (sort) {
       serializedSearchSourceFields.sort = !Array.isArray(sort) ? [sort] : sort;

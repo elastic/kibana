@@ -8,13 +8,13 @@
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useState } from 'react';
+import numeral from '@elastic/numeral';
 
 interface Props {
   initialBurnRate?: number;
   maxBurnRate: number;
   errors?: string[];
   onChange: (burnRate: number) => void;
-  helpText?: string;
 }
 
 export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors }: Props) {
@@ -48,10 +48,10 @@ export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors }:
     >
       <EuiFieldNumber
         fullWidth
-        step={0.1}
-        min={1}
+        step={0.01}
+        min={0.01}
         max={maxBurnRate}
-        value={String(burnRate)}
+        value={numeral(burnRate).format('0[.0]')}
         onChange={(event) => onBurnRateChange(event)}
         data-test-subj="burnRate"
       />

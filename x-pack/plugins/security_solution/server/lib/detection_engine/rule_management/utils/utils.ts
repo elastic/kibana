@@ -9,25 +9,26 @@ import { partition } from 'lodash/fp';
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
 
+import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
+import type { FindResult, PartialRule } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
-import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
 
+import type {
+  AlertSuppression,
+  AlertSuppressionCamel,
+  InvestigationFields,
+  RuleResponse,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import type {
   FindRulesResponse,
   RuleToImport,
 } from '../../../../../common/api/detection_engine/rule_management';
-import type {
-  AlertSuppression,
-  RuleResponse,
-  AlertSuppressionCamel,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
 
-import type { RuleAlertType, RuleParams } from '../../rule_schema';
-import { isAlertType } from '../../rule_schema';
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
+import type { InvestigationFieldsCombined, RuleAlertType, RuleParams } from '../../rule_schema';
+import { hasValidRuleType } from '../../rule_schema';
 import { internalRuleToAPIResponse } from '../normalization/rule_converters';
 
 type PromiseFromStreams = RuleToImport | Error;
@@ -125,7 +126,7 @@ export const transformFindAlerts = (ruleFindResults: FindResult<RuleParams>): Fi
 };
 
 export const transform = (rule: PartialRule<RuleParams>): RuleResponse | null => {
-  if (isAlertType(rule)) {
+  if (hasValidRuleType(rule)) {
     return internalRuleToAPIResponse(rule);
   }
 
@@ -247,7 +248,7 @@ export const migrateLegacyActionsIds = async (
         // can we swap the pre 8.0 action connector(s) id with the new,
         // post-8.0 action id (swap the originId for the new _id?)
         const newActions: Array<RuleAction | Error> = await pMap(
-          rule.actions ?? [],
+          (rule.actions as RuleAction[]) ?? [],
           (action: RuleAction) => swapActionIds(action, savedObjectsClient),
           { concurrency: MAX_CONCURRENT_SEARCHES }
         );
@@ -380,3 +381,27 @@ export const convertAlertSuppressionToSnake = (
         missing_fields_strategy: input.missingFieldsStrategy,
       }
     : undefined;
+
+/**
+ * In ESS 8.10.x "investigation_fields" are mapped as string[].
+ * For 8.11+ logic is added on read in our endpoints to migrate
+ * the data over to it's intended type of { field_names: string[] }.
+ * The SO rule type will continue to support both types until we deprecate,
+ * but APIs will only support intended object format.
+ * See PR 169061
+ */
+export const migrateLegacyInvestigationFields = (
+  investigationFields: InvestigationFieldsCombined | undefined
+): InvestigationFields | undefined => {
+  if (investigationFields && Array.isArray(investigationFields)) {
+    if (investigationFields.length) {
+      return {
+        field_names: investigationFields,
+      };
+    }
+
+    return undefined;
+  }
+
+  return investigationFields;
+};

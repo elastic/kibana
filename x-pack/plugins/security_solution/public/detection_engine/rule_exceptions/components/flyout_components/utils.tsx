@@ -33,9 +33,9 @@ import type {
   ExceptionListRuleReferencesInfoSchema,
   ExceptionListRuleReferencesSchema,
 } from '../../../../../common/api/detection_engine/rule_exceptions';
-import type { Rule } from '../../../rule_management/logic/types';
 import { LinkToRuleDetails, LinkToListDetails } from '../../../../exceptions/components';
 import * as i18n from './translations';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 /**
  * Adds user defined name to all new exceptionItems
@@ -261,7 +261,7 @@ export const getRulesTableColumn = () => [
     align: 'left' as HorizontalAlignment,
     name: i18n.TAGS_COLUMN,
     'data-test-subj': 'ruleNameCell',
-    render: (tags: Rule['tags']) => {
+    render: (tags: RuleResponse['tags']) => {
       if (tags.length === 0) {
         return null;
       }
@@ -286,7 +286,7 @@ export const getRulesTableColumn = () => [
   {
     name: i18n.ACTION_COLUMN,
     'data-test-subj': 'ruleAction-view',
-    render: (rule: Rule) => {
+    render: (rule: RuleResponse) => {
       return (
         <LinkToRuleDetails
           external

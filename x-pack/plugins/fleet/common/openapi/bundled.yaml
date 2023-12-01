@@ -1750,12 +1750,6 @@ paths:
             schema:
               type: object
               properties:
-                revoke:
-                  type: boolean
-                  description: Revokes API keys of agents
-                force:
-                  type: boolean
-                  description: Unenroll hosted agents too
                 agents:
                   oneOf:
                     - type: string
@@ -1764,6 +1758,17 @@ paths:
                       items:
                         type: string
                       description: list of agent IDs
+                revoke:
+                  type: boolean
+                  description: Revokes API keys of agents
+                force:
+                  type: boolean
+                  description: Unenrolls hosted agents too
+                includeInactive:
+                  type: boolean
+                  description: >-
+                    When passing agents by KQL query, unenrolls inactive agents
+                    too
               required:
                 - agents
             example:
@@ -2853,7 +2858,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/output_create_request'
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/output_create_request'
         '400':
           $ref: '#/components/responses/error'
       operationId: get-output
@@ -2900,7 +2908,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/output_update_request'
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/output_update_request'
         '400':
           $ref: '#/components/responses/error'
       parameters:
@@ -3813,6 +3824,25 @@ components:
           type: string
         install_format_schema_version:
           type: string
+        latest_install_failed_attempts:
+          description: Latest failed install errors
+          type: array
+          items:
+            type: object
+            properties:
+              created_at:
+                type: string
+              target_version:
+                type: string
+              error:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  message:
+                    type: string
+                  stack:
+                    type: string
         verification_status:
           type: string
           enum:
@@ -3852,6 +3882,7 @@ components:
         - install_started_at
         - install_source
         - verification_status
+        - latest_install_failed_attempts
     search_result:
       title: Search result
       type: object
@@ -4485,6 +4516,12 @@ components:
             enum:
               - metrics
               - logs
+        keep_monitoring_alive:
+          description: >-
+            When set to true, monitoring will be enabled but logs/metrics
+            collection will be disabled
+          type: boolean
+          nullable: true
         data_output_id:
           type: string
           nullable: true
@@ -5228,6 +5265,16 @@ components:
           type: number
         required_acks:
           type: number
+        secrets:
+          type: object
+          properties:
+            password:
+              type: string
+            ssl:
+              type: object
+              properties:
+                key:
+                  type: string
       required:
         - name
         - type
@@ -5292,22 +5339,61 @@ components:
               type: number
             loadbalance:
               type: boolean
+        secrets:
+          type: object
+          properties:
+            ssl:
+              type: object
+              properties:
+                key:
+                  type: string
       required:
         - name
         - hosts
         - type
+    output_create_request_remote_elasticsearch:
+      title: remote_elasticsearch
+      type: object
+      properties:
+        id:
+          type: string
+        is_default:
+          type: boolean
+        is_default_monitoring:
+          type: boolean
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - remote_elasticsearch
+        hosts:
+          type: array
+          items:
+            type: string
+        service_token:
+          type: string
+        secrets:
+          type: object
+          properties:
+            service_token:
+              type: string
+      required:
+        - name
     output_create_request:
       title: Output
       oneOf:
         - $ref: '#/components/schemas/output_create_request_elasticsearch'
         - $ref: '#/components/schemas/output_create_request_kafka'
         - $ref: '#/components/schemas/output_create_request_logstash'
+        - $ref: '#/components/schemas/output_create_request_remote_elasticsearch'
       discriminator:
         propertyName: type
         mapping:
           elasticsearch: '#/components/schemas/output_create_request_elasticsearch'
           kafka: '#/components/schemas/output_create_request_kafka'
           logstash: '#/components/schemas/output_create_request_logstash'
+          remote_elasticsearch: '#/components/schemas/output_create_request_remote_elasticsearch'
     output_update_request_elasticsearch:
       title: elasticsearch
       type: object

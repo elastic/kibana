@@ -42,7 +42,7 @@ export const useGetCaseConfiguration = () => {
   const { showErrorToast } = useCasesToast();
 
   return useQuery<CasesConfigurationUI | null, ServerError, CasesConfigurationUI>(
-    casesQueriesKeys.configuration(),
+    casesQueriesKeys.configuration({ owner }),
     ({ signal }) => getCaseConfigure({ owner, signal }),
     {
       select: transformConfiguration,

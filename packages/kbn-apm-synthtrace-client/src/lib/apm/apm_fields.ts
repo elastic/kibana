@@ -38,6 +38,7 @@ export type ApmUserAgentFields = Partial<{
 export interface ApmException {
   message: string;
 }
+
 export interface Observer {
   type: string;
   version: string;
@@ -94,6 +95,7 @@ export type ApmFields = Fields<{
     'error.type': string;
     'event.ingested': number;
     'event.name': string;
+    'event.action': string;
     'event.outcome': string;
     'event.outcome_numeric':
       | number
@@ -121,6 +123,7 @@ export type ApmFields = Fields<{
     'kubernetes.pod.uid': string;
     'labels.name': string;
     'labels.telemetry_auto_version': string;
+    'labels.lifecycle_state': string;
     'metricset.name': string;
     'network.carrier.icc': string;
     'network.carrier.mcc': string;

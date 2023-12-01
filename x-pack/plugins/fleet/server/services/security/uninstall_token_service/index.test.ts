@@ -499,5 +499,80 @@ describe('UninstallTokenService', () => {
         });
       });
     });
+
+    describe('check validity of tokens', () => {
+      const okaySO = getDefaultSO(canEncrypt);
+
+      const errorWithDecryptionSO2 = {
+        ...getDefaultSO2(canEncrypt),
+        error: new Error('error reason'),
+      };
+      const missingTokenSO2 = {
+        ...getDefaultSO2(canEncrypt),
+        attributes: {
+          ...getDefaultSO2(canEncrypt).attributes,
+          token: undefined,
+          token_plain: undefined,
+        },
+      };
+
+      describe('checkTokenValidityForAllPolicies', () => {
+        it('resolves if all of the tokens are available', async () => {
+          mockCreatePointInTimeFinderAsInternalUser();
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForAllPolicies()
+          ).resolves.not.toThrowError();
+        });
+
+        it('rejects if any of the tokens is missing', async () => {
+          mockCreatePointInTimeFinderAsInternalUser([okaySO, missingTokenSO2]);
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForAllPolicies()
+          ).rejects.toThrowError(
+            'Invalid uninstall token: Saved object is missing the `token` attribute.'
+          );
+        });
+
+        it('rejects if token decryption gives error', async () => {
+          mockCreatePointInTimeFinderAsInternalUser([okaySO, errorWithDecryptionSO2]);
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForAllPolicies()
+          ).rejects.toThrowError('Error when reading Uninstall Token: error reason');
+        });
+      });
+
+      describe('checkTokenValidityForPolicy', () => {
+        it('resolves if token is available', async () => {
+          mockCreatePointInTimeFinderAsInternalUser();
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForPolicy(okaySO.attributes.policy_id)
+          ).resolves.not.toThrowError();
+        });
+
+        it('rejects if token is missing', async () => {
+          mockCreatePointInTimeFinderAsInternalUser([okaySO, missingTokenSO2]);
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForPolicy(missingTokenSO2.attributes.policy_id)
+          ).rejects.toThrowError(
+            'Invalid uninstall token: Saved object is missing the `token` attribute.'
+          );
+        });
+
+        it('rejects if token decryption gives error', async () => {
+          mockCreatePointInTimeFinderAsInternalUser([okaySO, errorWithDecryptionSO2]);
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForPolicy(
+              errorWithDecryptionSO2.attributes.policy_id
+            )
+          ).rejects.toThrowError('Error when reading Uninstall Token: error reason');
+        });
+      });
+    });
   });
 });

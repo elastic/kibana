@@ -10,11 +10,15 @@ import type { BaseFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
 import * as t from 'io-ts';
 import { profilingUseLegacyFlamegraphAPI } from '@kbn/observability-plugin/common';
 import { HOST_NAME } from '../../../common/es_fields/apm';
-import { toKueryFilterFormat } from '../../../common/utils/to_kuery_filter_format';
+import {
+  mergeKueries,
+  toKueryFilterFormat,
+} from '../../../common/utils/kuery_utils';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   environmentRt,
+  kueryRt,
   rangeRt,
   serviceTransactionDataSourceRt,
 } from '../default_api_types';
@@ -28,6 +32,7 @@ const profilingFlamegraphRoute = createApmServerRoute({
       rangeRt,
       environmentRt,
       serviceTransactionDataSourceRt,
+      kueryRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -48,7 +53,7 @@ const profilingFlamegraphRoute = createApmServerRoute({
         await plugins.profilingDataAccess?.start(),
       ]);
     if (profilingDataAccessStart) {
-      const { start, end, environment, documentType, rollupInterval } =
+      const { start, end, environment, documentType, rollupInterval, kuery } =
         params.query;
       const { serviceName } = params.path;
 
@@ -71,7 +76,10 @@ const profilingFlamegraphRoute = createApmServerRoute({
           esClient: esClient.asCurrentUser,
           rangeFromMs: start,
           rangeToMs: end,
-          kuery: toKueryFilterFormat(HOST_NAME, serviceHostNames),
+          kuery: mergeKueries([
+            `(${toKueryFilterFormat(HOST_NAME, serviceHostNames)})`,
+            kuery,
+          ]),
           useLegacyFlamegraphAPI,
         });
 
@@ -91,6 +99,7 @@ const profilingFunctionsRoute = createApmServerRoute({
       environmentRt,
       serviceTransactionDataSourceRt,
       t.type({ startIndex: toNumberRt, endIndex: toNumberRt }),
+      kueryRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -113,6 +122,7 @@ const profilingFunctionsRoute = createApmServerRoute({
         endIndex,
         documentType,
         rollupInterval,
+        kuery,
       } = params.query;
       const { serviceName } = params.path;
 
@@ -134,7 +144,10 @@ const profilingFunctionsRoute = createApmServerRoute({
         esClient: esClient.asCurrentUser,
         rangeFromMs: start,
         rangeToMs: end,
-        kuery: toKueryFilterFormat(HOST_NAME, serviceHostNames),
+        kuery: mergeKueries([
+          `(${toKueryFilterFormat(HOST_NAME, serviceHostNames)})`,
+          kuery,
+        ]),
         startIndex,
         endIndex,
       });
@@ -157,7 +170,7 @@ const profilingStatusRoute = createApmServerRoute({
     if (profilingDataAccessStart) {
       try {
         const response = await profilingDataAccessStart?.services.getStatus({
-          esClient: esClient.asCurrentUser,
+          esClient,
           soClient: (await context.core).savedObjects.client,
           spaceId: (
             await plugins.spaces?.start()

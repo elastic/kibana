@@ -12,14 +12,17 @@ import type { Message } from '../assistant_context/types';
 import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
 
 export const getMessageFromRawResponse = (rawResponse: FetchConnectorExecuteResponse): Message => {
-  const { response, isError } = rawResponse;
+  const { response, isStream, isError } = rawResponse;
   const dateTimeString = new Date().toLocaleString(); // TODO: Pull from response
   if (rawResponse) {
     return {
       role: 'assistant',
-      content: response,
+      ...(isStream
+        ? { reader: response as ReadableStreamDefaultReader<Uint8Array> }
+        : { content: response as string }),
       timestamp: dateTimeString,
       isError,
+      traceData: rawResponse.traceData,
     };
   } else {
     return {

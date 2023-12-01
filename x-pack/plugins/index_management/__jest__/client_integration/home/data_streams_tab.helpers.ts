@@ -264,9 +264,12 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
     {
       name: 'indexName',
       uuid: 'indexId',
+      preferILM: false,
+      managedBy: 'Data stream lifecycle',
     },
   ],
   generation: 1,
+  nextGenerationManagedBy: 'Data stream lifecycle',
   health: 'green',
   indexTemplateName: 'indexTemplate',
   storageSize: '1b',
@@ -278,6 +281,7 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
   },
   hidden: false,
   lifecycle: {
+    enabled: true,
     data_retention: '7d',
   },
   ...dataStream,

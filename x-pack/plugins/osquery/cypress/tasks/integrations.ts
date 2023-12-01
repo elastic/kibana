@@ -13,6 +13,7 @@ import {
   CONFIRM_MODAL_BTN_SEL,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   DATA_COLLECTION_SETUP_STEP,
+  DATE_PICKER_ABSOLUTE_TAB,
   DATE_PICKER_ABSOLUTE_TAB_SEL,
   TOAST_CLOSE_BTN,
   TOAST_CLOSE_BTN_SEL,
@@ -33,8 +34,10 @@ export const addIntegration = (agentPolicy = DEFAULT_POLICY) => {
 export const addCustomIntegration = (integrationName: string, policyName: string) => {
   cy.getBySel(ADD_POLICY_BTN).click();
   cy.getBySel(DATA_COLLECTION_SETUP_STEP).find('.euiLoadingSpinner').should('not.exist');
-  cy.getBySel('packagePolicyNameInput').type(`{selectall}{backspace}${integrationName}`);
-  cy.getBySel('createAgentPolicyNameField').type(`{selectall}{backspace}${policyName}`);
+  cy.getBySel('packagePolicyNameInput').clear();
+  cy.getBySel('packagePolicyNameInput').type(`${integrationName}`);
+  cy.getBySel('createAgentPolicyNameField').clear();
+  cy.getBySel('createAgentPolicyNameField').type(`${policyName}`);
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // No agent is enrolled with this policy, close "Add agent" modal
   cy.getBySel('confirmModalCancelButton').click();
@@ -53,7 +56,8 @@ export const integrationExistsWithinPolicyDetails = (integrationName: string) =>
 };
 
 export const interceptAgentPolicyId = (cb: (policyId: string) => void) => {
-  cy.intercept('POST', '**/api/fleet/agent_policies**', (req) => {
+  // create policy has agent_policies?SOMEPARAMS=true , this ? helps to distinguish it from the delete agent_policies/delete route
+  cy.intercept('POST', '**/api/fleet/agent_policies?**', (req) => {
     req.continue((res) => {
       cb(res.body.item.id);
 
@@ -98,7 +102,7 @@ export function closeModalIfVisible() {
 export function closeDateTabIfVisible() {
   cy.get('body').then(($body) => {
     if ($body.find(DATE_PICKER_ABSOLUTE_TAB_SEL).length) {
-      cy.getBySel(DATE_PICKER_ABSOLUTE_TAB_SEL).clickOutside();
+      cy.getBySel(DATE_PICKER_ABSOLUTE_TAB).clickOutside();
     }
   });
 }

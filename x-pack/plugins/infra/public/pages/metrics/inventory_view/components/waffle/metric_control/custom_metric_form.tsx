@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   EuiForm,
   EuiButton,
@@ -78,7 +78,7 @@ export const CustomMetricForm = withTheme(
       } else if (aggregation && field) {
         const newMetric: SnapshotCustomMetricInput = {
           type: 'custom',
-          id: uuidv1(),
+          id: uuidv4(),
           label,
           aggregation,
           field,

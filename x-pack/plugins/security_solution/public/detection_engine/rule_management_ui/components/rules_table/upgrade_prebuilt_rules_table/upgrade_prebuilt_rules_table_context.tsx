@@ -7,6 +7,7 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { EuiButton } from '@elastic/eui';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
@@ -270,10 +271,21 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         {previewedRule && (
           <RuleDetailsFlyout
             rule={previewedRule}
-            actionButtonLabel={i18n.UPDATE_BUTTON_LABEL}
-            isActionButtonDisabled={canPreviewedRuleBeUpgraded}
-            onActionButtonClick={upgradeOneRule}
+            dataTestSubj="updatePrebuiltRulePreview"
             closeFlyout={closeRulePreview}
+            ruleActions={
+              <EuiButton
+                disabled={canPreviewedRuleBeUpgraded}
+                onClick={() => {
+                  upgradeOneRule(previewedRule.rule_id ?? '');
+                  closeRulePreview();
+                }}
+                fill
+                data-test-subj="updatePrebuiltRuleFromFlyoutButton"
+              >
+                {i18n.UPDATE_BUTTON_LABEL}
+              </EuiButton>
+            }
           />
         )}
       </>

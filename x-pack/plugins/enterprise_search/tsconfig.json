@@ -60,6 +60,9 @@
     "@kbn/share-plugin",
     "@kbn/search-api-panels",
     "@kbn/search-connectors",
-    "@kbn/logs-shared-plugin"
+    "@kbn/logs-shared-plugin",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-application-browser",
+    "@kbn/core-capabilities-common"
   ]
 }

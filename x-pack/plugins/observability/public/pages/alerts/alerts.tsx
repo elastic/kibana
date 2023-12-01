@@ -19,12 +19,10 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { rulesLocatorID } from '../../../common';
 import { RulesParams } from '../../locators/rules';
 import { useKibana } from '../../utils/kibana_react';
-import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { useToasts } from '../../hooks/use_toast';
-import { LoadingObservability } from '../../components/loading_observability';
 import { renderRuleStats, RuleStatsState } from './components/rule_stats';
 import { ObservabilityAlertSearchBar } from '../../components/alert_search_bar/alert_search_bar';
 import {
@@ -94,7 +92,6 @@ function InternalAlertsPage() {
     error: 0,
     snoozed: 0,
   });
-  const { hasAnyData, isAllRequestsComplete } = useHasData();
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
   const timeBuckets = useTimeBuckets();
   const bucketSize = useMemo(
@@ -173,10 +170,6 @@ function InternalAlertsPage() {
 
   const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
 
-  if (!hasAnyData && !isAllRequestsComplete) {
-    return <LoadingObservability />;
-  }
-
   return (
     <Provider value={alertSearchBarStateContainer}>
       <ObservabilityPageTemplate
@@ -226,7 +219,6 @@ function InternalAlertsPage() {
                 id={ALERTS_TABLE_ID}
                 featureIds={observabilityAlertFeatureIds}
                 query={esQuery}
-                showExpandToDetails={false}
                 showAlertStatusWithFlapping
                 pageSize={ALERTS_PER_PAGE}
               />

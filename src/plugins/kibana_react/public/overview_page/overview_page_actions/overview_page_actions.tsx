@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ApplicationStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '../../app_links';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 interface Props {
   addDataHref: string;
@@ -35,7 +35,11 @@ export const overviewPageActions = ({
     application.capabilities.navLinks;
 
   const actionAddData = (
-    <RedirectAppLinks application={application}>
+    <RedirectAppLinks
+      coreStart={{
+        application,
+      }}
+    >
       <EuiButtonEmpty
         data-test-subj="homeAddData"
         className="kbnOverviewPageHeader__actionButton"
@@ -52,7 +56,11 @@ export const overviewPageActions = ({
 
   const actionStackManagement =
     managementHref && showManagementLink && isManagementEnabled ? (
-      <RedirectAppLinks application={application}>
+      <RedirectAppLinks
+        coreStart={{
+          application,
+        }}
+      >
         <EuiButtonEmpty
           data-test-subj="homeManage"
           className="kbnOverviewPageHeader__actionButton"
@@ -69,7 +77,11 @@ export const overviewPageActions = ({
 
   const actionDevTools =
     devToolsHref && showDevToolsLink && isDevToolsEnabled ? (
-      <RedirectAppLinks application={application}>
+      <RedirectAppLinks
+        coreStart={{
+          application,
+        }}
+      >
         <EuiButtonEmpty
           data-test-subj="homeDevTools"
           className="kbnOverviewPageHeader__actionButton"

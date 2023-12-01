@@ -30,7 +30,7 @@ Array [
           class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children"
         >
           <span
-            class="euiThemeProvider emotion-euiColorMode-dark-colorClassName"
+            class="euiThemeProvider emotion-euiColorMode-dark"
           >
             <ul
               class="euiListGroup emotion-euiListGroup-none"
@@ -733,6 +733,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   }
   basePath={
     BasePath {
+      "assetsHrefBase": "/test",
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
@@ -918,6 +919,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   }
   basePath={
     BasePath {
+      "assetsHrefBase": "/test",
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],

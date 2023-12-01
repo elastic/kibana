@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { NotificationsSetup, ThemeServiceStart, DocLinksStart } from '@kbn/core/public';
-import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JOB_STATUSES } from '../../common/constants';
-import { JobId, JobSummary, JobSummarySet } from '../../common/types';
+
+import { DocLinksStart, NotificationsSetup, ThemeServiceStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JOB_STATUS } from '@kbn/reporting-common';
+import { JobId } from '@kbn/reporting-common/types';
+
 import {
   getFailureToast,
-  getWarningToast,
-  getSuccessToast,
   getGeneralErrorToast,
-  getWarningMaxSizeToast,
+  getSuccessToast,
   getWarningFormulasToast,
+  getWarningMaxSizeToast,
+  getWarningToast,
 } from '../notifier';
+import { JobSummary, JobSummarySet } from '../types';
 import { Job } from './job';
 import { ReportingAPIClient } from './reporting_api_client';
 
@@ -84,7 +87,7 @@ export class ReportingNotifierStreamHandler {
             ),
             completedOptions
           );
-        } else if (job.status === JOB_STATUSES.WARNINGS) {
+        } else if (job.status === JOB_STATUS.WARNINGS) {
           this.notifications.toasts.addWarning(
             getWarningToast(
               job,
@@ -141,9 +144,9 @@ export class ReportingNotifierStreamHandler {
         for (const job of jobs) {
           const { id: jobId, status: jobStatus } = job;
           if (storedJobs.includes(jobId)) {
-            if (jobStatus === JOB_STATUSES.COMPLETED || jobStatus === JOB_STATUSES.WARNINGS) {
+            if (jobStatus === JOB_STATUS.COMPLETED || jobStatus === JOB_STATUS.WARNINGS) {
               completedJobs.push(getReportStatus(job));
-            } else if (jobStatus === JOB_STATUSES.FAILED) {
+            } else if (jobStatus === JOB_STATUS.FAILED) {
               failedJobs.push(getReportStatus(job));
             } else {
               pending.push(jobId);

@@ -25,18 +25,14 @@ import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539 Do we need to run it in Serverless?
 describe('Shared exception lists - read only', { tags: ['@ess', '@skipInServerless'] }, () => {
-  before(() => {
-    cy.task('esArchiverResetKibana');
-  });
-
   beforeEach(() => {
     deleteExceptionList(getExceptionList().list_id, getExceptionList().namespace_type);
 
     // Create exception list not used by any rules
     createExceptionList(getExceptionList(), getExceptionList().list_id);
 
-    login(ROLES.reader);
-    visit(EXCEPTIONS_URL, { role: ROLES.reader });
+    login(ROLES.t1_analyst);
+    visit(EXCEPTIONS_URL);
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown

@@ -20,10 +20,10 @@ export interface RRuleAttributes {
   byweekday?: Array<string | number>;
   bymonth?: number[];
   bysetpos?: number[];
-  bymonthday: number[];
-  byyearday: number[];
-  byweekno: number[];
-  byhour: number[];
-  byminute: number[];
-  bysecond: number[];
+  bymonthday?: number[];
+  byyearday?: number[];
+  byweekno?: number[];
+  byhour?: number[];
+  byminute?: number[];
+  bysecond?: number[];
 }

@@ -6,15 +6,8 @@
  */
 
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import type { InventoryItemType } from '../inventory_models/types';
-import type { LogsLocatorDependencies, LogsLocatorParams } from './logs_locator';
-
-export const NODE_LOGS_LOCATOR_ID = 'NODE_LOGS_LOCATOR';
-
-export interface NodeLogsLocatorParams extends LogsLocatorParams {
-  nodeId: string;
-  nodeType: InventoryItemType;
-}
+import { NODE_LOGS_LOCATOR_ID, NodeLogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import type { LogsLocatorDependencies } from './logs_locator';
 
 export type NodeLogsLocator = LocatorPublic<NodeLogsLocatorParams>;
 

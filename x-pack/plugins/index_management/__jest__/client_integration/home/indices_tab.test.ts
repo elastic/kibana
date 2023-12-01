@@ -12,19 +12,11 @@ import { setupEnvironment, nextTick } from '../helpers';
 import { IndicesTestBed, setup } from './indices_tab.helpers';
 import { createDataStreamPayload, createNonDataStreamIndex } from './data_streams_tab.helpers';
 
-/**
- * The below import is required to avoid a console error warn from the "brace" package
- * console.warn ../node_modules/brace/index.js:3999
-      Could not load worker ReferenceError: Worker is not defined
-          at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
- */
-import { stubWebWorker } from '@kbn/test-jest-helpers';
 import { createMemoryHistory } from 'history';
 import {
   breadcrumbService,
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
-stubWebWorker();
 
 describe('<IndexManagementHome />', () => {
   let testBed: IndicesTestBed;
@@ -143,6 +135,10 @@ describe('<IndexManagementHome />', () => {
   it('navigates to the index details page when the index name is clicked', async () => {
     const indexName = 'testIndex';
     httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+    httpRequestsMockHelpers.setLoadIndexDetailsResponse(
+      indexName,
+      createNonDataStreamIndex(indexName)
+    );
 
     testBed = await setup(httpSetup, {
       history: createMemoryHistory(),
@@ -158,6 +154,10 @@ describe('<IndexManagementHome />', () => {
   it('index page works with % character in index name', async () => {
     const indexName = 'test%';
     httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+    httpRequestsMockHelpers.setLoadIndexDetailsResponse(
+      encodeURIComponent(indexName),
+      createNonDataStreamIndex(indexName)
+    );
 
     testBed = await setup(httpSetup);
     const { component, actions } = testBed;
@@ -374,7 +374,7 @@ describe('<IndexManagementHome />', () => {
       const { tableCellsValues } = table.getMetaData('indexTable');
 
       expect(tableCellsValues).toEqual([
-        ['', 'test', 'green', 'open', '1', '1', '10000', '156kb', ''],
+        ['', 'test', 'green', 'open', '1', '1', '10,000', '156kb', ''],
       ]);
     });
 
@@ -399,7 +399,7 @@ describe('<IndexManagementHome />', () => {
         const { table } = testBed;
         const { tableCellsValues } = table.getMetaData('indexTable');
 
-        expect(tableCellsValues).toEqual([['', 'test', '1', '1', '']]);
+        expect(tableCellsValues).toEqual([['', 'test', '']]);
       });
     });
   });

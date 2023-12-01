@@ -13,12 +13,19 @@ import semverGt from 'semver/functions/gt';
 import semverMajor from 'semver/functions/major';
 import semverMinor from 'semver/functions/minor';
 
+import moment from 'moment';
+
 import type { PostAgentUpgradeResponse } from '../../../common/types';
 import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultFleetErrorHandler } from '../../errors';
-import { isAgentUpgradeable } from '../../../common/services';
+import {
+  getRecentUpgradeInfoForAgent,
+  isAgentUpgradeable,
+  AGENT_UPGRADE_COOLDOWN_IN_MIN,
+  isAgentUpgrading,
+} from '../../../common/services';
 import { getMaxVersion } from '../../../common/services/get_min_max_version';
 import { getAgentById } from '../../services/agents';
 import type { Agent } from '../../types';
@@ -67,6 +74,24 @@ export const postAgentUpgradeHandler: RequestHandler<
       }
     }
 
+    const { hasBeenUpgradedRecently, timeToWaitMs } = getRecentUpgradeInfoForAgent(agent);
+    const timeToWaitString = moment
+      .utc(moment.duration(timeToWaitMs).asMilliseconds())
+      .format('mm[m]ss[s]');
+
+    if (hasBeenUpgradedRecently) {
+      return response.customError({
+        statusCode: 429,
+        body: {
+          message: `agent ${request.params.agentId} was upgraded less than ${AGENT_UPGRADE_COOLDOWN_IN_MIN} minutes ago. Please wait ${timeToWaitString} before trying again to ensure the upgrade will not be rolled back.`,
+        },
+        headers: {
+          // retry-after expects seconds
+          'retry-after': Math.ceil(timeToWaitMs / 1000).toString(),
+        },
+      });
+    }
+
     if (agent.unenrollment_started_at || agent.unenrolled_at) {
       return response.customError({
         statusCode: 400,
@@ -75,6 +100,16 @@ export const postAgentUpgradeHandler: RequestHandler<
         },
       });
     }
+
+    if (!force && isAgentUpgrading(agent)) {
+      return response.customError({
+        statusCode: 400,
+        body: {
+          message: `agent ${request.params.agentId} is already upgrading`,
+        },
+      });
+    }
+
     if (!force && !isAgentUpgradeable(agent, latestAgentVersion, version)) {
       return response.customError({
         statusCode: 400,

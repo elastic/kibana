@@ -109,7 +109,10 @@ export function ObservabilityLogExplorerPageObject({
   getService,
 }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
+  const dataGrid = getService('dataGrid');
+  const es = getService('es');
   const log = getService('log');
+  const queryBar = getService('queryBar');
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
@@ -119,6 +122,8 @@ export function ObservabilityLogExplorerPageObject({
     'search'
   > & {
     search?: Record<string, string>;
+    from?: string;
+    to?: string;
   };
 
   return {
@@ -167,6 +172,27 @@ export function ObservabilityLogExplorerPageObject({
       };
     },
 
+    async setupDataStream(datasetName: string, namespace: string = 'default') {
+      const dataStream = `logs-${datasetName}-${namespace}`;
+      log.info(`===== Setup initial data stream "${dataStream}". =====`);
+      await es.indices.createDataStream({ name: dataStream });
+
+      return async () => {
+        log.info(`===== Removing data stream "${dataStream}". =====`);
+        await es.indices.deleteDataStream({
+          name: dataStream,
+        });
+      };
+    },
+
+    ingestLogEntries(dataStream: string, docs: MockLogDoc[] = []) {
+      log.info(`===== Ingesting ${docs.length} docs for "${dataStream}" data stream. =====`);
+      return es.bulk({
+        body: docs.flatMap((doc) => [{ create: { _index: dataStream } }, createLogDoc(doc)]),
+        refresh: 'wait_for',
+      });
+    },
+
     async setupAdditionalIntegrations() {
       log.info(`===== Setup additional integration packages. =====`);
       log.info(`===== Install ${additionalPackages.length} mock integration packages. =====`);
@@ -183,11 +209,11 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     async navigateTo(options: NavigateToAppOptions = {}) {
-      const { search = {}, ...extraOptions } = options;
+      const { search = {}, from = FROM, to = TO, ...extraOptions } = options;
       const composedSearch = querystring.stringify({
         ...search,
         _g: rison.encode({
-          time: { from: FROM, to: TO },
+          time: { from, to },
         }),
       });
 
@@ -242,7 +268,7 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     getPanelTitle(contextMenu: WebElementWrapper) {
-      return contextMenu.findByClassName('euiContextMenuPanelTitle');
+      return contextMenu.findByClassName('euiContextMenuPanel__title');
     },
 
     async getDatasetSelectorButtonText() {
@@ -251,7 +277,10 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     getPanelEntries(contextMenu: WebElementWrapper) {
-      return contextMenu.findAllByCssSelector('.euiContextMenuItem:not([disabled])', 2000);
+      return contextMenu.findAllByCssSelector(
+        'button.euiContextMenuItem:not([disabled]):not([data-test-subj="contextMenuPanelTitleButton"])',
+        2000
+      );
     },
 
     getAllLogDatasetsButton() {
@@ -260,6 +289,11 @@ export function ObservabilityLogExplorerPageObject({
 
     getUnmanagedDatasetsButton() {
       return testSubjects.find('unmanagedDatasets');
+    },
+
+    async getFlyoutDetail(rowIndex: number = 0) {
+      await dataGrid.clickRowToggle({ rowIndex });
+      return testSubjects.find('logExplorerFlyoutDetail');
     },
 
     async getIntegrations() {
@@ -359,24 +393,99 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     // Query Bar
-    getQueryBar() {
-      return testSubjects.find('queryInput');
-    },
-
-    async getQueryBarValue() {
-      const queryBar = await testSubjects.find('queryInput');
-      return queryBar.getAttribute('value');
-    },
-
-    async typeInQueryBar(query: string) {
-      const queryBar = await this.getQueryBar();
-      await queryBar.clearValueWithKeyboard();
-      return queryBar.type(query);
+    getQueryBarValue() {
+      return queryBar.getQueryString();
     },
 
     async submitQuery(query: string) {
-      await this.typeInQueryBar(query);
-      await testSubjects.click('querySubmitButton');
+      await queryBar.setQuery(query);
+      await queryBar.clickQuerySubmitButton();
     },
+  };
+}
+
+interface MockLogDoc {
+  time: number;
+  logFilepath?: string;
+  serviceName?: string;
+  namespace: string;
+  datasetName: string;
+  message?: string;
+  logLevel?: string;
+  traceId?: string;
+  hostName?: string;
+  orchestratorClusterId?: string;
+  orchestratorClusterName?: string;
+  orchestratorResourceId?: string;
+  cloudProvider?: string;
+  cloudRegion?: string;
+  cloudAz?: string;
+  cloudProjectId?: string;
+  cloudInstanceId?: string;
+  agentName?: string;
+
+  [key: string]: unknown;
+}
+
+export function createLogDoc({
+  time,
+  logFilepath,
+  serviceName,
+  namespace,
+  datasetName,
+  message,
+  logLevel,
+  traceId,
+  hostName,
+  orchestratorClusterId,
+  orchestratorClusterName,
+  orchestratorResourceId,
+  cloudProvider,
+  cloudRegion,
+  cloudAz,
+  cloudProjectId,
+  cloudInstanceId,
+  agentName,
+  ...extraFields
+}: MockLogDoc) {
+  return {
+    input: {
+      type: 'log',
+    },
+    '@timestamp': new Date(time).toISOString(),
+    log: {
+      file: {
+        path: logFilepath,
+      },
+    },
+    ...(serviceName
+      ? {
+          service: {
+            name: serviceName,
+          },
+        }
+      : {}),
+    data_stream: {
+      namespace,
+      type: 'logs',
+      dataset: datasetName,
+    },
+    message,
+    event: {
+      dataset: datasetName,
+    },
+    ...(logLevel && { 'log.level': logLevel }),
+    ...(traceId && { 'trace.id': traceId }),
+    ...(hostName && { 'host.name': hostName }),
+    ...(orchestratorClusterId && { 'orchestrator.cluster.id': orchestratorClusterId }),
+    ...(orchestratorClusterName && { 'orchestrator.cluster.name': orchestratorClusterName }),
+    ...(orchestratorResourceId && { 'orchestrator.resource.id': orchestratorResourceId }),
+    ...(cloudProvider && { 'cloud.provider': cloudProvider }),
+    ...(cloudRegion && { 'cloud.region': cloudRegion }),
+    ...(cloudAz && { 'cloud.availability_zone': cloudAz }),
+    ...(cloudProjectId && { 'cloud.project.id': cloudProjectId }),
+    ...(cloudInstanceId && { 'cloud.instance.id': cloudInstanceId }),
+    ...(agentName && { 'agent.name': agentName }),
+    ...extraFields,
   };
 }

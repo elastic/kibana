@@ -23,7 +23,7 @@ For example:
 
 ```json
 {
-  "user_settings_override_yaml": "elastic.apm.active: true\nelastic.apm.serverUrl: https://<my_apm_endpoint>\nelastic.apm.secretToken: <my_APM_token>\nelastic.apm.globalLabels.deploymentId: <my_deployment_ID>\nelastic.apm.centralConfig: false\nelastic.apm.breakdownMetrics: false\nelastic.apm.transactionSampleRate: 0.1\nelastic.apm.metricsInterval: 120s\nelastic.apm.captureSpanStackTraces: false"
+  "user_settings_override_yaml": "elastic.apm.active: true\nelastic.apm.serverUrl: https://<my_apm_endpoint>\nelastic.apm.secretToken: <my_APM_token>"
 }
 ```
 
@@ -37,12 +37,6 @@ For on-premise deployments or developers outside Elastic, you can configure an A
 elastic.apm.active: true
 elastic.apm.serverUrl: https://<my_apm_endpoint>
 elastic.apm.secretToken: <my_APM_token>
-elastic.apm.globalLabels.deploymentId: <my_deployment_ID>
-elastic.apm.centralConfig: false
-elastic.apm.breakdownMetrics: false
-elastic.apm.transactionSampleRate: 0.1
-elastic.apm.metricsInterval: 120s
-elastic.apm.captureSpanStackTraces: false
 ```
 
 When running in ECE you can update `kibana.yml` settings via the ECE web UI under "Edit user setting" for the kibana nodes in the deployment.

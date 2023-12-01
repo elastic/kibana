@@ -43,7 +43,7 @@ const ES_PASSWORD = 'password';
 
 const DEFAULT_AGENT_COUNT = 50000;
 
-const INDEX_BULK_OP = '{ "index":{ } }\n';
+const INDEX_BULK_OP = '{ "index":{ "_id": "{{id}}" } }\n';
 
 const {
   delete: deleteAgentsFirst = false,
@@ -145,6 +145,10 @@ function createAgentWithStatus({
   hostname: string;
 }) {
   const baseAgent = {
+    agent: {
+      id: uuidv4(),
+      version,
+    },
     access_api_key_id: 'api-key-1',
     active: true,
     policy_id: policyId,
@@ -235,7 +239,12 @@ async function deleteAgents() {
 
 async function createAgentDocsBulk(agents: Agent[]) {
   const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
-  const body = agents.flatMap((agent) => [INDEX_BULK_OP, JSON.stringify(agent) + '\n']).join('');
+  const body = agents
+    .flatMap((agent) => [
+      INDEX_BULK_OP.replace(/{{id}}/, agent.agent?.id ?? ''),
+      JSON.stringify(agent) + '\n',
+    ])
+    .join('');
   const res = await fetch(`${ES_URL}/.fleet-agents/_bulk`, {
     method: 'post',
     body,

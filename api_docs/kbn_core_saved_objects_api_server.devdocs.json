@@ -3901,6 +3901,22 @@
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_update.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsBulkUpdateOptions.migrationVersionCompatibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "migrationVersionCompatibility",
+            "description": [
+              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
+            ],
+            "signature": [
+              "\"raw\" | \"compatible\" | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_update.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5063,7 +5079,7 @@
             "tags": [],
             "label": "bulkUpdate",
             "description": [
-              "\nBulk Updates multiple SavedObject at once\n"
+              "\nBulk Updates multiple SavedObject at once\n\nThe savedObjects `bulkUpdate` API will update documents client-side and then reindex the updated documents.\nThese update operations are done in-memory, and cause memory constraint issues when\nupdating many objects with large `json` blobs stored in some fields. As such, we recommend against using\n`bulkUpdate` for savedObjects that:\n- use arrays (as these tend to be large objects)\n- store large `json` blobs in some fields\n"
             ],
             "signature": [
               "<T = unknown>(objects: ",
@@ -5857,7 +5873,8 @@
               "Optional purpose used to determine filtering and authorization checks; default is 'collectMultiNamespaceReferences'"
             ],
             "signature": [
-              "\"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | undefined"
+              "SavedObjectsCollectMultiNamespaceReferencesPurpose",
+              " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/collect_multinamespace_references.ts",
             "deprecated": false,
@@ -7606,7 +7623,7 @@
               "\nThe outcome for a successful `resolve` call is one of the following values:\n\n * `'exactMatch'` -- One document exactly matched the given ID.\n * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different\n   than the given ID.\n * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the\n   `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID."
             ],
             "signature": [
-              "\"conflict\" | \"exactMatch\" | \"aliasMatch\""
+              "\"exactMatch\" | \"aliasMatch\" | \"conflict\""
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts",
             "deprecated": false,

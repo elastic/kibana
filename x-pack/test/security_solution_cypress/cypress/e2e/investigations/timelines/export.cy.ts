@@ -19,12 +19,10 @@ import { TOASTER } from '../../../screens/alerts_detection_rules';
 import { TIMELINE_CHECKBOX } from '../../../screens/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { expectedExportedTimeline, getTimeline } from '../../../objects/timeline';
-import { cleanKibana } from '../../../tasks/common';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165744
-describe('Export timelines', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     login();
     cy.intercept({
       method: 'POST',
@@ -38,11 +36,6 @@ describe('Export timelines', { tags: ['@ess', '@serverless', '@brokenInServerles
       cy.wrap(response).as('timelineResponse2');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId2');
     });
-    visit(TIMELINES_URL);
-  });
-
-  beforeEach(() => {
-    login();
     visit(TIMELINES_URL);
   });
 

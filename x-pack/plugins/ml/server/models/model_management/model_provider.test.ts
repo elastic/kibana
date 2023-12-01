@@ -8,6 +8,7 @@
 import { modelsProvider } from './models_provider';
 import { type IScopedClusterClient } from '@kbn/core/server';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import type { MlClient } from '../../lib/ml_client';
 
 describe('modelsProvider', () => {
   const mockClient = {
@@ -36,8 +37,10 @@ describe('modelsProvider', () => {
     },
   } as unknown as jest.Mocked<IScopedClusterClient>;
 
+  const mockMlClient = {} as unknown as jest.Mocked<MlClient>;
+
   const mockCloud = cloudMock.createSetup();
-  const modelService = modelsProvider(mockClient, mockCloud);
+  const modelService = modelsProvider(mockClient, mockMlClient, mockCloud);
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -53,6 +56,7 @@ describe('modelsProvider', () => {
           hidden: true,
           name: '.elser_model_1',
           version: 1,
+          modelName: 'elser',
         },
         {
           config: { input: { field_names: ['text_field'] } },
@@ -60,6 +64,7 @@ describe('modelsProvider', () => {
           description: 'Elastic Learned Sparse EncodeR v2',
           name: '.elser_model_2',
           version: 2,
+          modelName: 'elser',
         },
         {
           arch: 'amd64',
@@ -69,6 +74,7 @@ describe('modelsProvider', () => {
           os: 'Linux',
           recommended: true,
           version: 2,
+          modelName: 'elser',
         },
       ]);
     });
@@ -104,6 +110,7 @@ describe('modelsProvider', () => {
           hidden: true,
           name: '.elser_model_1',
           version: 1,
+          modelName: 'elser',
         },
         {
           config: { input: { field_names: ['text_field'] } },
@@ -111,6 +118,7 @@ describe('modelsProvider', () => {
           description: 'Elastic Learned Sparse EncodeR v2',
           name: '.elser_model_2',
           version: 2,
+          modelName: 'elser',
         },
         {
           arch: 'amd64',
@@ -119,6 +127,7 @@ describe('modelsProvider', () => {
           name: '.elser_model_2_linux-x86_64',
           os: 'Linux',
           version: 2,
+          modelName: 'elser',
         },
       ]);
     });

@@ -19,7 +19,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { AssetTitleMap } from '../applications/integrations/sections/epm/constants';
 import { useStartServices } from '../hooks';
@@ -68,7 +68,11 @@ export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps
               <EuiSplitPanel.Inner grow={false} key={index}>
                 <EuiText size="m">
                   <p>
-                    <RedirectAppLinks application={application}>
+                    <RedirectAppLinks
+                      coreStart={{
+                        application,
+                      }}
+                    >
                       <EuiLink href={view.url}>{view.name}</EuiLink>
                     </RedirectAppLinks>
                   </p>

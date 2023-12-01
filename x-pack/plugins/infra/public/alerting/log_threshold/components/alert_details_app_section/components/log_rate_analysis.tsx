@@ -162,7 +162,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
 
   const onAnalysisCompleted = (analysisResults: LogRateAnalysisResultsData | undefined) => {
     const significantFieldValues = orderBy(
-      analysisResults?.significantTerms?.map((item) => ({
+      analysisResults?.significantItems?.map((item) => ({
         field: item.fieldName,
         value: item.fieldValue,
         docCount: item.doc_count,
@@ -228,7 +228,9 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
           : ''
       }
 
-      Do not mention indidivual p-values from the analysis results. Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`;
+      Do not mention individual p-values from the analysis results.
+      Do not repeat the full list of field names and field values back to the user.
+      Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`;
 
     const now = new Date().toISOString();
 

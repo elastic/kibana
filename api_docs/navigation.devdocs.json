@@ -674,6 +674,24 @@
     "misc": [
       {
         "parentPluginId": "navigation",
+        "id": "def-public.TopNavMenuBadgeProps",
+        "type": "Type",
+        "tags": [],
+        "label": "TopNavMenuBadgeProps",
+        "description": [],
+        "signature": [
+          "EuiBadgeProps",
+          " & { badgeText: string; toolTipProps?: Partial<",
+          "EuiToolTipProps",
+          "> | undefined; renderCustomBadge?: ((props: { badgeText: string; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>) | undefined; }"
+        ],
+        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
         "id": "def-public.TopNavMenuProps",
         "type": "Type",
         "tags": [],
@@ -696,7 +714,15 @@
             "section": "def-public.TopNavMenuData",
             "text": "TopNavMenuData"
           },
-          "[] | undefined; badges?: Badge[] | undefined; showSearchBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; unifiedSearch?: ",
+          "[] | undefined; badges?: ",
+          {
+            "pluginId": "navigation",
+            "scope": "public",
+            "docId": "kibNavigationPluginApi",
+            "section": "def-public.TopNavMenuBadgeProps",
+            "text": "TopNavMenuBadgeProps"
+          },
+          "[] | undefined; showSearchBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; unifiedSearch?: ",
           {
             "pluginId": "unifiedSearch",
             "scope": "public",

@@ -10,13 +10,13 @@ import { EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { EuiFlexGroup } from '@elastic/eui';
-import { assetDetailsDashboards } from '../../../../../common/visualizations';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import useAsync from 'react-use/lib/useAsync';
 import {
   MetricsSectionTitle,
-  NginxMetricsSectionTitle,
   KubernetesMetricsSectionTitle,
 } from '../../../components/section_titles';
-import { useMetadataStateProviderContext } from '../../../hooks/use_metadata_state';
+import { useMetadataStateContext } from '../../../hooks/use_metadata_state';
 import { MetricsGrid } from './metrics_grid';
 
 interface Props {
@@ -26,51 +26,45 @@ interface Props {
   logsDataView?: DataView;
 }
 
-const { host, nginx, kubernetes } = assetDetailsDashboards;
-
 export const MetricsSection = ({ assetName, metricsDataView, logsDataView, dateRange }: Props) => {
+  const model = findInventoryModel('host');
+
+  const { value } = useAsync(() => {
+    return model.metrics.getDashboards();
+  });
+
+  const dashboards = useMemo(
+    () => ({
+      hosts: value?.assetDetails.get({
+        metricsDataView,
+        logsDataView,
+      }),
+      kubernetes: value?.assetDetailsKubernetesNode.get({
+        metricsDataView,
+      }),
+    }),
+
+    [logsDataView, metricsDataView, value?.assetDetails, value?.assetDetailsKubernetesNode]
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <Section title={MetricsSectionTitle}>
         <MetricsGrid
           assetName={assetName}
           dateRange={dateRange}
-          charts={host.hostMetricChartsFullPage}
-          filterFieldName={host.keyField}
-          metricsDataView={metricsDataView}
-          logsDataView={logsDataView}
-          data-test-subj="infraAssetDetailsMetricsChart"
+          data-test-subj="infraAssetDetailsHostMetricsChart"
+          charts={dashboards.hosts?.charts ?? []}
+          filterFieldName={model.fields.name}
         />
       </Section>
-      <Section dependsOn={kubernetes.dependsOn} title={KubernetesMetricsSectionTitle}>
+      <Section dependsOn={dashboards?.kubernetes?.dependsOn} title={KubernetesMetricsSectionTitle}>
         <MetricsGrid
           assetName={assetName}
           dateRange={dateRange}
-          filterFieldName={kubernetes.keyField}
-          charts={kubernetes.kubernetesCharts}
-          metricsDataView={metricsDataView}
-          logsDataView={logsDataView}
           data-test-subj="infraAssetDetailsKubernetesMetricsChart"
-        />
-      </Section>
-      <Section dependsOn={nginx.dependsOn} title={NginxMetricsSectionTitle}>
-        <MetricsGrid
-          assetName={assetName}
-          dateRange={dateRange}
-          filterFieldName={nginx.keyField}
-          charts={[
-            ...nginx.nginxStubstatusCharts.map((chart) => ({
-              ...chart,
-              dependsOn: ['nginx.stubstatus'],
-            })),
-            ...nginx.nginxAccessCharts.map((chart) => ({
-              ...chart,
-              dependsOn: ['nginx.access'],
-            })),
-          ]}
-          metricsDataView={metricsDataView}
-          logsDataView={logsDataView}
-          data-test-subj="infraAssetDetailsNginxMetricsChart"
+          charts={dashboards.kubernetes?.charts ?? []}
+          filterFieldName={model.fields.name}
         />
       </Section>
     </EuiFlexGroup>
@@ -82,19 +76,33 @@ export const MetricsSectionCompact = ({
   metricsDataView,
   logsDataView,
   dateRange,
-}: Props) => (
-  <Section title={MetricsSectionTitle}>
-    <MetricsGrid
-      assetName={assetName}
-      dateRange={dateRange}
-      filterFieldName={host.keyField}
-      charts={host.hostMetricFlyoutCharts}
-      metricsDataView={metricsDataView}
-      logsDataView={logsDataView}
-      data-test-subj="infraAssetDetailsMetricsChart"
-    />
-  </Section>
-);
+}: Props) => {
+  const model = findInventoryModel('host');
+  const { value } = useAsync(() => {
+    return model.metrics.getDashboards();
+  });
+
+  const charts = useMemo(
+    () =>
+      value?.assetDetailsFlyout.get({
+        metricsDataView,
+        logsDataView,
+      }).charts ?? [],
+    [metricsDataView, logsDataView, value?.assetDetailsFlyout]
+  );
+
+  return (
+    <Section title={MetricsSectionTitle}>
+      <MetricsGrid
+        assetName={assetName}
+        dateRange={dateRange}
+        filterFieldName={model.fields.name}
+        charts={charts}
+        data-test-subj="infraAssetDetailsHostMetricsChart"
+      />
+    </Section>
+  );
+};
 
 const Section = ({
   title,
@@ -106,7 +114,7 @@ const Section = ({
   children: React.ReactNode;
 }) => {
   const Title = title;
-  const { metadata } = useMetadataStateProviderContext();
+  const { metadata } = useMetadataStateContext();
 
   const shouldRender = useMemo(
     () =>
