@@ -38,9 +38,12 @@ export const applyCriticalityToScore = ({
   modifier: number | undefined;
   score: number;
 }): number => {
-  const factor = modifier ?? 1;
+  if (modifier == null) {
+    return score;
+  }
+
   const priorProbability = score / (100 - Math.min(score, 99));
-  const newProbability = priorProbability * factor;
+  const newProbability = priorProbability * modifier;
   // TODO we lose precision here with the Math.floor
   return Math.floor((100 * newProbability) / (1 + newProbability));
 };

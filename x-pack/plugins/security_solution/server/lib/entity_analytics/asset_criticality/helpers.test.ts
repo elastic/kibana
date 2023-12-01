@@ -13,6 +13,11 @@ describe('applyCriticalityToScore', () => {
     expect(result).toEqual(90);
   });
 
+  it('returns the original floating point score if the modifier is undefined', () => {
+    const result = applyCriticalityToScore({ modifier: undefined, score: 90.5 });
+    expect(result).toEqual(90.5);
+  });
+
   it('returns the same score if the modifier is 1', () => {
     const result = applyCriticalityToScore({ modifier: 1, score: 90 });
     expect(result).toEqual(90);
