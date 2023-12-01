@@ -147,6 +147,7 @@ describe('http normalizers', () => {
                 id: 'germany',
                 isServiceManaged: false,
                 label: 'Germany',
+                agentPolicyId: 'germany',
               },
             ],
             'check.request.body': {
@@ -210,6 +211,7 @@ describe('http normalizers', () => {
                 id: 'germany',
                 isServiceManaged: false,
                 label: 'Germany',
+                agentPolicyId: 'germany',
               },
             ],
             'check.request.body': {
@@ -316,6 +318,7 @@ describe('http normalizers', () => {
                 id: 'germany',
                 isServiceManaged: false,
                 label: 'Germany',
+                agentPolicyId: 'germany',
               },
             ],
             max_redirects: '2',
@@ -379,6 +382,7 @@ describe('http normalizers', () => {
                 id: 'germany',
                 isServiceManaged: false,
                 label: 'Germany',
+                agentPolicyId: 'germany',
               },
             ],
             max_redirects: '0',

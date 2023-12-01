@@ -140,6 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       newMonitor.locations.push({
         id: testFleetPolicyID,
+        agentPolicyId: testFleetPolicyID,
         label: 'Test private location 0',
         isServiceManaged: false,
         geo: {
@@ -186,8 +187,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       httpMonitorJson.locations.push({
         id: testFleetPolicyID2,
+        agentPolicyId: testFleetPolicyID2,
         label: 'Test private location ' + 1,
         isServiceManaged: false,
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
       });
 
       const apiResponse = await supertestAPI
@@ -256,7 +262,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await supertestAPI
-        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId)
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId + '?ui=true')
         .set('kbn-xsrf', 'true')
         .send(httpMonitorJson)
         .expect(200);
@@ -322,6 +328,7 @@ export default function ({ getService }: FtrProviderContext) {
         locations: [
           {
             id: testFleetPolicyID,
+            agentPolicyId: testFleetPolicyID,
             label: 'Test private location 0',
             isServiceManaged: false,
             geo: {

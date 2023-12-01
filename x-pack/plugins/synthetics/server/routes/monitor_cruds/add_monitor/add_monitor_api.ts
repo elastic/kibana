@@ -188,7 +188,8 @@ export class AddEditMonitorAPI {
     monitorPayload: CreateMonitorPayLoad,
     prevLocations?: MonitorFields['locations']
   ) {
-    const { savedObjectsClient, syntheticsMonitorClient } = this.routeContext;
+    const { savedObjectsClient, syntheticsMonitorClient, request } = this.routeContext;
+    const ui = (request.query as { ui?: boolean }).ui;
     const {
       locations,
       private_locations: privateLocations,
@@ -212,7 +213,7 @@ export class AddEditMonitorAPI {
     if (!locations && !privateLocations && prevLocations) {
       locationsVal = prevLocations;
     } else {
-      const monitorLocations = parseMonitorLocations(monitorPayload, prevLocations);
+      const monitorLocations = parseMonitorLocations(monitorPayload, prevLocations, ui);
 
       if (monitorLocations.privateLocations.length > 0) {
         this.allPrivateLocations = await getPrivateLocations(savedObjectsClient);

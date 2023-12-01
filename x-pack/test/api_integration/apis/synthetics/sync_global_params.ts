@@ -104,6 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const pvtLoc = {
         id: testFleetPolicyID,
+        agentPolicyId: testFleetPolicyID,
         label: 'Test private location 0',
         isServiceManaged: false,
         geo: {
@@ -212,6 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
       const newMonitor = httpMonitorJson;
       const pvtLoc = {
         id: testFleetPolicyID,
+        agentPolicyId: testFleetPolicyID,
         label: 'Test private location 0',
         isServiceManaged: false,
         geo: {

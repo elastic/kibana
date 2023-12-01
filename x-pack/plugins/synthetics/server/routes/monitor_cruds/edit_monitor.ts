@@ -42,6 +42,9 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     params: schema.object({
       monitorId: schema.string(),
     }),
+    query: schema.object({
+      ui: schema.maybe(schema.boolean()),
+    }),
     body: schema.any(),
   },
   writeAccess: true,

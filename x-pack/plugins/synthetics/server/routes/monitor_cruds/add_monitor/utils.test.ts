@@ -146,4 +146,19 @@ describe('parseMonitorLocations', () => {
       privateLocations: [],
     });
   });
+
+  it('should handle private location removed', function () {
+    const result = parseMonitorLocations(
+      {
+        locations: [localLoc],
+      } as any,
+      [pvtLoc1],
+      true
+    );
+
+    expect(result).toEqual({
+      locations: ['local'],
+      privateLocations: [],
+    });
+  });
 });

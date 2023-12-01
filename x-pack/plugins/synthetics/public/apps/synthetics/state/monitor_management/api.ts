@@ -50,7 +50,9 @@ export const updateMonitorAPI = async ({
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
   id: string;
 }): Promise<UpsertMonitorResponse> => {
-  return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
+  return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor, null, {
+    ui: true,
+  });
 };
 
 export const getDecryptedMonitorAPI = async ({ id }: { id: string }): Promise<SyntheticsMonitor> =>

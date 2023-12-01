@@ -625,10 +625,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
               {
                 geo: {
-                  lat: '',
-                  lon: '',
+                  lat: 0,
+                  lon: 0,
                 },
                 id: testPolicyId,
+                agentPolicyId: testPolicyId,
                 isServiceManaged: false,
                 label: 'Test private location 0',
               },
@@ -1230,20 +1231,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { monitors } = response.body;
 
-        // add urls and ports to mimic hydration
-        const updates = {
-          [ConfigKey.URLS]: 'https://modified-host.com',
-          [ConfigKey.PORT]: 443,
-        };
-
-        const modifiedMonitor = { ...monitors[0], ...updates };
-
-        await supertest
-          .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitors[0]?.config_id)
-          .set('kbn-xsrf', 'true')
-          .send(modifiedMonitor)
-          .expect(200);
-
         // update project monitor via push api
         const { body } = await supertest
           .put(
@@ -1822,10 +1809,11 @@ export default function ({ getService }: FtrProviderContext) {
             {
               label: 'Test private location 0',
               isServiceManaged: false,
+              agentPolicyId: testPolicyId,
               id: testPolicyId,
               geo: {
-                lat: '',
-                lon: '',
+                lat: 0,
+                lon: 0,
               },
             },
           ]);
