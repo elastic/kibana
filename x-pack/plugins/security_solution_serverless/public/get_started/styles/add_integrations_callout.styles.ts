@@ -9,7 +9,7 @@ import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemo } from 'react';
 
-export const useAddIntegrationCalloutStyles = () => {
+export const useAddIntegrationsCalloutStyles = () => {
   const { euiTheme } = useEuiTheme();
   const backgroundColor = useEuiBackgroundColor('primary');
 

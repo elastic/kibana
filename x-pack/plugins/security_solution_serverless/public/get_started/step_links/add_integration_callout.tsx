@@ -10,11 +10,11 @@ import { EuiCallOut, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 
 import { ExternalPageName } from '../../navigation/links/constants';
-import { useAddIntegrationCalloutStyles } from '../styles/add_integration_callout.styles';
+import { useAddIntegrationsCalloutStyles } from '../styles/add_integrations_callout.styles';
 import { ADD_INTEGRATIONS } from './translations';
 
 const AddIntegrationCalloutComponent = ({ stepName }: { stepName?: string }) => {
-  const { calloutWrapperStyles, calloutTitleStyles } = useAddIntegrationCalloutStyles();
+  const { calloutWrapperStyles, calloutTitleStyles } = useAddIntegrationsCalloutStyles();
   const { euiTheme } = useEuiTheme();
 
   return (
