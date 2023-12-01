@@ -6,9 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isArray } from 'lodash';
 import { getFieldAsString, supportedSchemas } from './supported_schemas';
 import type { ResolverEntityIndex } from '../../../../../../common/endpoint/types';
+
+const toArray = <T>(input: T | T[]) => ([] as T[]).concat(input);
 
 export function resolverEntity(hits: Array<estypes.SearchHit<unknown>>) {
   const responseBody: ResolverEntityIndex = [];
@@ -22,16 +23,11 @@ export function resolverEntity(hits: Array<estypes.SearchHit<unknown>>) {
         // track that all the constraints are true, if one of them is false then this schema is not valid so mark it
         // that we did not find the schema
 
-        const areValuesEqual = () => {
-          if (isArray(constraint.value)) {
-            return constraint.value.some((constraintValue) => {
-              return constraintValue.toLowerCase() === fieldValue?.toLowerCase();
-            });
-          }
-          return fieldValue?.toLowerCase() === constraint.value.toLowerCase();
-        };
-
-        foundSchema = foundSchema && areValuesEqual();
+        foundSchema =
+          foundSchema &&
+          toArray(constraint.value).some(
+            (constraintValue) => constraintValue.toLowerCase() === fieldValue?.toLowerCase()
+          );
       }
 
       if (foundSchema && id !== undefined && id !== '') {
