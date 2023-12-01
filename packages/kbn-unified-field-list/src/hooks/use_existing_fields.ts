@@ -25,7 +25,6 @@ const generateId = htmlIdGenerator();
 export interface ExistingFieldsInfo {
   fetchStatus: ExistenceFetchStatus;
   existingFieldsByFieldNameMap: Record<string, boolean>;
-  newFieldsByFieldNameMap: Record<string, boolean>;
   newFields?: DataViewField[];
   numberOfFetches: number;
   hasDataViewRestrictions?: boolean;
@@ -64,7 +63,6 @@ const initialData: ExistingFieldsByDataViewMap = {};
 const unknownInfo: ExistingFieldsInfo = {
   fetchStatus: ExistenceFetchStatus.unknown,
   existingFieldsByFieldNameMap: {},
-  newFieldsByFieldNameMap: {},
   numberOfFetches: 0,
 };
 
