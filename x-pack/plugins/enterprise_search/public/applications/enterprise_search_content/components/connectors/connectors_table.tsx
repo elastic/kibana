@@ -11,6 +11,7 @@ import { useValues } from 'kea';
 
 import {
   CriteriaWithPagination,
+  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
@@ -25,16 +26,18 @@ import { Meta } from '../../../../../common/types/pagination';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
-import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
+import { EuiLinkTo } from '../../../shared/react_router_helpers/eui_components';
 import { SEARCH_INDEX_PATH } from '../../routes';
 import {
   connectorStatusToColor,
   connectorStatusToText,
 } from '../../utils/connector_status_helpers';
 
+import { ConnectorType } from './connector_type';
 import { ConnectorViewItem } from './connectors_logic';
 
 interface ConnectorsTableProps {
+  isLoading?: boolean;
   items: ConnectorViewItem[];
   meta?: Meta;
   onChange: (criteria: CriteriaWithPagination<Connector>) => void;
@@ -49,6 +52,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
     },
   },
   onChange,
+  isLoading,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const columns: Array<EuiBasicTableColumn<ConnectorViewItem>> = [
@@ -60,6 +64,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           defaultMessage: 'Connector name',
         }
       ),
+      width: '25%',
     },
     {
       field: 'index_name',
@@ -69,6 +74,15 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           defaultMessage: 'Index name',
         }
       ),
+      render: (indexName: string) =>
+        indexName ? (
+          <EuiLinkTo to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName })}>
+            {indexName}
+          </EuiLinkTo>
+        ) : (
+          '--'
+        ),
+      width: '25%',
     },
     {
       field: 'docsCount',
@@ -78,6 +92,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           defaultMessage: 'Docs count',
         }
       ),
+      truncateText: true,
     },
     {
       field: 'service_type',
@@ -87,6 +102,9 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           defaultMessage: 'Connector type',
         }
       ),
+      render: (serviceType: string) => <ConnectorType serviceType={serviceType} />,
+      truncateText: true,
+      width: '25%',
     },
     {
       field: 'status',
@@ -98,10 +116,9 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       ),
       render: (connector: Connector) => {
         const label = connectorStatusToText(connector.status);
-        return (
-          <EuiBadgeTo to={''} label={label} color={connectorStatusToColor(connector.status)} />
-        );
+        return <EuiBadge color={connectorStatusToColor(connector.status)}>{label}</EuiBadge>;
       },
+      truncateText: true,
     },
     {
       actions: [
@@ -148,6 +165,8 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           items={items}
           columns={columns}
           onChange={onChange}
+          tableLayout="fixed"
+          loading={isLoading}
           pagination={{
             pageIndex: meta.page.from / (meta.page.size || 1),
             pageSize: meta.page.size,
