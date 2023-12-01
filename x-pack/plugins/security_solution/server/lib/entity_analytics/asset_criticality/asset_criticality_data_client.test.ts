@@ -105,5 +105,13 @@ describe('AssetCriticalityDataClient', () => {
         expect.objectContaining({ size: defaultSize })
       );
     });
+
+    it('ignores an index_not_found_exception if the criticality index does not exist', async () => {
+      subject.search({ query: { match_all: {} } });
+
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({ ignore_unavailable: true })
+      );
+    });
   });
 });

@@ -63,6 +63,7 @@ export class AssetCriticalityDataClient {
   }): Promise<SearchResponse<AssetCriticalityRecord>> {
     const response = await this.options.esClient.search<AssetCriticalityRecord>({
       index: this.getIndex(),
+      ignore_unavailable: true,
       body: { query },
       size: Math.min(size ?? Infinity, MAX_CRITICALITY_RESPONSE_SIZE),
     });
