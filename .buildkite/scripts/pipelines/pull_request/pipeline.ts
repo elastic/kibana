@@ -9,7 +9,7 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
-import { areChangesSkippable, doAnyChangesMatch, isDraftPR } from '#pipeline-utils';
+import { areChangesSkippable, doAnyChangesMatch } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 
@@ -39,19 +39,6 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
 (async () => {
   try {
-    // Ideally could use process.env.BUILDKITE_PULL_REQUEST_DRAFT, but its not being set properly in CI
-    if (!GITHUB_PR_LABELS.includes('ci:run_on_draft') && (await isDraftPR())) {
-      console.log(
-        'Skipping CI for draft PR. If you need to run CI for this PR add the label ci:run_on_draft and retrigger CI.'
-      );
-
-      // Since we skip everything, including post-build, we need to at least make sure the commit status gets set
-      execSync('BUILD_SUCCESSFUL=true .buildkite/scripts/lifecycle/commit_status_complete.sh', {
-        stdio: 'inherit',
-      });
-      process.exit(0);
-    }
-
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable) {
