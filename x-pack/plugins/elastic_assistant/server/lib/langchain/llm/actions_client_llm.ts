@@ -11,8 +11,11 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { LLM } from 'langchain/llms/base';
 import { get } from 'lodash/fp';
 
-import { getMessageContentAndRole } from '../helpers';
+import { CallbackManagerForLLMRun } from 'langchain/callbacks';
+import { GenerationChunk } from 'langchain/schema';
+import { Readable } from 'stream';
 import { RequestBody } from '../types';
+import { getMessageContentAndRole } from '../helpers';
 
 const LLM_TYPE = 'ActionsClientLlm';
 
@@ -74,9 +77,91 @@ export class ActionsClientLlm extends LLM {
   _modelType() {
     return 'base_chat_model';
   }
+  formatRequestForActionsClient(prompt: string): {
+    actionId: string;
+    params: { subActionParams: { messages: Array<{ content?: string; role: string }> } };
+  } {
+    const assistantMessage = getMessageContentAndRole(prompt);
+    this.#logger.debug(
+      `ActionsClientLlm#_call assistantMessage:\n${JSON.stringify(assistantMessage)} `
+    );
+    // create a new connector request body with the assistant message:
+    return {
+      actionId: this.#connectorId,
+      params: {
+        ...this.#request.body.params, // the original request body params
+        subActionParams: {
+          ...this.#request.body.params.subActionParams, // the original request body params.subActionParams
+          messages: [assistantMessage], // the assistant message
+        },
+      },
+    };
+  }
+  async *_streamResponseChunks(
+    prompt: string,
+    options: this['ParsedCallOptions'],
+    runManager?: CallbackManagerForLLMRun
+  ): AsyncGenerator<GenerationChunk> {
+    console.log('THIS SHOULD BE _streamResponseChunks', this.llmType);
+    // create an actions client from the authenticated request context:
+    const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
+    const actionStreamResult = await actionsClient.execute(
+      this.formatRequestForActionsClient(prompt)
+    );
 
-  async _call(prompt: string): Promise<string> {
+    console.log('THIS SHOULD BE actionStreamResult', actionStreamResult);
+    if (actionStreamResult.status === 'error') {
+      throw new Error(
+        `${LLM_TYPE}: action result status is error: ${actionStreamResult?.message} - ${actionStreamResult?.serviceMessage}`
+      );
+    }
+    // Initialize an empty string to store the OpenAI buffer.
+    let openAIBuffer: string = '';
+    for await (const data of actionStreamResult.data as Readable) {
+      const decoder = new TextDecoder();
+      const decoded = decoder.decode(data);
+      console.log('decoded???', decoded);
+      const lines = decoded.split('\n');
+      lines[0] = openAIBuffer + lines[0];
+      openAIBuffer = lines.pop() || '';
+      console.log('lines???', lines);
+      const chunk = new GenerationChunk({
+        text: getOpenAIChunks(lines).join(''),
+      });
+      yield chunk;
+      void runManager?.handleLLMNewToken(chunk.text ?? '');
+    }
+    console.log('AFTER BUFFER????', { openAIBuffer, isAborted: options.signal?.aborted });
+    if (options.signal?.aborted) {
+      throw new Error('AbortError');
+    }
+  }
+
+  async _call(
+    prompt: string,
+    options: this['ParsedCallOptions'],
+    runManager?: CallbackManagerForLLMRun
+  ): Promise<string> {
     console.log('WE ARE HERE at start of _call');
+    if (this.streaming) {
+      try {
+        const stream = this._streamResponseChunks(prompt, options, runManager);
+        console.log('THIS SHOULD BE stream', stream);
+        let finalResult: GenerationChunk | undefined;
+        for await (const chunk of stream) {
+          if (finalResult === undefined) {
+            finalResult = chunk;
+          } else {
+            finalResult = finalResult.concat(chunk);
+          }
+        }
+        console.log('finalResult', finalResult);
+        return finalResult?.text ?? '';
+      } catch (err) {
+        console.log('WE ARE HERE ERROR _call??????', err);
+        return err;
+      }
+    }
     // convert the Langchain prompt to an assistant message:
     const assistantMessage = getMessageContentAndRole(prompt);
     this.#logger.debug(
@@ -120,3 +205,17 @@ export class ActionsClientLlm extends LLM {
     return content; // per the contact of _call, return a string
   }
 }
+const getOpenAIChunks = (lines: string[]): string[] => {
+  const nextChunk = lines
+    .map((str) => str.substring(6))
+    .filter((str) => !!str && str !== '[DONE]')
+    .map((line) => {
+      try {
+        const openaiResponse = JSON.parse(line);
+        return openaiResponse.choices[0]?.delta.content ?? '';
+      } catch (err) {
+        return '';
+      }
+    });
+  return nextChunk;
+};

@@ -51,34 +51,32 @@ export const getStreamObservable = ({
         .read()
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
-            console.log('WE ARE HERE reading langchain', { done, value });
+            console.log('WE ARE HERE reading langchain', { done, value, chunks });
             if (done) {
-              console.log('WE ARE HERE DONE', { done, langChainBuffer });
-              // if (langChainBuffer) {
-              //   chunks.push(langChainBuffer);
+              // if (openAIBuffer) {
+              //   chunks.push(openAIBuffer);
               // }
-              // observer.next({
-              //   chunks,
-              //   message: chunks.join(''),
-              //   loading: false,
-              // });
+              observer.next({
+                chunks,
+                message: chunks.join(''),
+                loading: false,
+              });
               observer.complete();
               return;
             }
+
             const decoded = decoder.decode(value);
             console.log('WE ARE HERE decoded value', decoded);
-            let nextChunks;
+            let nextChunks = [];
             if (isError) {
               nextChunks = [`${API_ERROR}\n\n${JSON.parse(decoded).message}`];
             } else {
-              const output = decoded;
-              // const lines = output.split('\n');
-              nextChunks = [output];
+              nextChunks = [decoded];
             }
 
-            console.log('nextChunks', nextChunks);
             nextChunks.forEach((chunk: string) => {
               chunks.push(chunk);
+              console.log('chunks', JSON.stringify(chunks));
               observer.next({
                 chunks,
                 message: chunks.join(''),

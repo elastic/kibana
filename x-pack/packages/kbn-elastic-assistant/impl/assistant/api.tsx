@@ -57,23 +57,13 @@ export const fetchConnectorExecuteAction = async ({
           messages: outboundMessages,
         };
 
-  const requestBody = !assistantLangChain
-    ? {
-        params: {
-          subActionParams: body,
-          subAction: 'invokeStream',
-        },
-        assistantLangChain,
-      }
-    : // langchain handles streaming by taking the full text from the LLM invokeAI response
-      // and streaming it back to the client with their special chain of actions
-      {
-        params: {
-          subActionParams: body,
-          subAction: 'invokeAI',
-        },
-        assistantLangChain,
-      };
+  const requestBody = {
+    params: {
+      subActionParams: body,
+      subAction: 'invokeStream',
+    },
+    assistantLangChain,
+  };
 
   try {
     console.log('WE ARE HERE before fetch');
