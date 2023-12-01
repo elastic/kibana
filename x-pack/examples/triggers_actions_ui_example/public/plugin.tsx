@@ -28,7 +28,7 @@ import {
   AlertTableFlyoutComponent,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
-import { EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGridColumn } from '@elastic/eui';
 
 export interface TriggersActionsUiExamplePublicSetupDeps {
   alerting: AlertingSetup;
@@ -138,8 +138,7 @@ export class TriggersActionsUiExamplePlugin
       id: 'observabilityCases',
       columns,
       useInternalFlyout,
-      getRenderCellValue: () =>
-        ((props: EuiDataGridCellValueElementProps & { data: any[] }) => {
+      getRenderCellValue: () => (props) => {
           const value = props.data.find((d) => d.field === props.columnId)?.value ?? [];
 
           if (Array.isArray(value)) {
@@ -147,7 +146,7 @@ export class TriggersActionsUiExamplePlugin
           }
 
           return <>{value}</>;
-        }),
+        },
       sort,
     };
 
