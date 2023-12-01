@@ -18,6 +18,7 @@ const CURRENT_COMMIT_META_KEY = 'current-commit-hash';
 
 const DEPLOY_TAG_META_KEY = 'deploy-tag';
 const COMMIT_INFO_CTX = 'commit-info';
+const DRY_RUN_CTX = 'dry-run';
 
 const octokit = getGithubClient();
 
@@ -51,6 +52,7 @@ export {
   COMMIT_INFO_CTX,
   DEPLOY_TAG_META_KEY,
   CURRENT_COMMIT_META_KEY,
+  DRY_RUN_CTX,
 };
 
 export interface CommitWithStatuses extends GitCommitExtract {
@@ -79,11 +81,10 @@ export function sendSlackMessage(payload: any) {
     )}`;
 
     buildkite.setAnnotation(
-      'slack-playground-link',
-      'info',
-      `DRY_RUN, showing the slack message <a href="${slackPlaygroundLink}">here</a>.`
+      DRY_RUN_CTX,
+      'warning',
+      `Preview slack message <a href="${slackPlaygroundLink}">here</a>.`
     );
-
     console.log('DRY_RUN, not sending slack message:', slackPlaygroundLink);
 
     return Promise.resolve();

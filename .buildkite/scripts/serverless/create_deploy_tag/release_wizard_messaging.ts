@@ -11,6 +11,7 @@ import {
   COMMIT_INFO_CTX,
   CURRENT_COMMIT_META_KEY,
   DEPLOY_TAG_META_KEY,
+  DRY_RUN_CTX,
   octokit,
   SELECTED_COMMIT_META_KEY,
   sendSlackMessage,
@@ -51,6 +52,13 @@ const states: Record<StateNames, StateShape> = {
     description: 'No description',
     display: false,
     post: async () => {
+      if (process.env.DRY_RUN?.match(/(1|true)/i)) {
+        buildkite.setAnnotation(
+          DRY_RUN_CTX,
+          'warning',
+          `Dry run: tag won't be pushed, slack won't be notified.`
+        );
+      }
       buildkite.setAnnotation(COMMIT_INFO_CTX, 'info', `<h4>:kibana: Release candidates</h4>`);
     },
   },
