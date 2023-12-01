@@ -8,7 +8,7 @@
 import React, { ReactNode, useEffect, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import ReactDOM from 'react-dom';
-export interface HeaderMenuPortalProps {
+export interface Props {
   children: ReactNode;
   containerRef: React.RefObject<HTMLDivElement>;
 }
