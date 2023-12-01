@@ -196,7 +196,7 @@ export const commandDefinitions: CommandDefinition[] = [
     }),
     examples: ['… | where status_code == 200'],
     signature: {
-      multipleParams: true,
+      multipleParams: false,
       params: [{ name: 'expression', type: 'boolean' }],
     },
     options: [],
