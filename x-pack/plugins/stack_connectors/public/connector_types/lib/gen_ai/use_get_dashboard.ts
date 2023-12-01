@@ -7,20 +7,20 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { getDashboardId } from './constants';
+
 import { getDashboard } from './api';
 import * as i18n from './translations';
 
 interface Props {
   connectorId: string;
+  selectedProvider: string;
 }
 
 export interface UseGetDashboard {
   dashboardUrl: string | null;
   isLoading: boolean;
 }
-
-export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
+export const useGetDashboard = ({ connectorId, selectedProvider }: Props): UseGetDashboard => {
   const {
     dashboard,
     http,
@@ -84,7 +84,7 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
 
           if (res.status && res.status === 'error') {
             toasts.addDanger({
-              title: i18n.GET_DASHBOARD_API_ERROR,
+              title: i18n.GET_DASHBOARD_API_ERROR(selectedProvider),
               text: `${res.serviceMessage ?? res.message}`,
             });
           }
@@ -94,7 +94,7 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
           setDashboardCheckComplete(true);
           setIsLoading(false);
           toasts.addDanger({
-            title: i18n.GET_DASHBOARD_API_ERROR,
+            title: i18n.GET_DASHBOARD_API_ERROR(selectedProvider),
             text: error.message,
           });
         }
@@ -103,7 +103,7 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
 
     if (spaceId != null && connectorId.length > 0 && !dashboardCheckComplete) {
       abortCtrl.current.abort();
-      fetchData(getDashboardId(spaceId));
+      fetchData(getDashboardId(selectedProvider, spaceId));
     }
 
     return () => {
@@ -111,10 +111,24 @@ export const useGetDashboard = ({ connectorId }: Props): UseGetDashboard => {
       setIsLoading(false);
       abortCtrl.current.abort();
     };
-  }, [connectorId, dashboardCheckComplete, dashboardUrl, http, setUrl, spaceId, toasts]);
+  }, [
+    connectorId,
+    dashboardCheckComplete,
+    dashboardUrl,
+    http,
+    selectedProvider,
+    setUrl,
+    spaceId,
+    toasts,
+  ]);
 
   return {
     isLoading,
     dashboardUrl,
   };
 };
+
+const getDashboardId = (selectedProvider: string, spaceId: string): string =>
+  `generative-ai-token-usage-${
+    selectedProvider.toLowerCase().includes('openai') ? 'openai' : 'bedrock'
+  }-${spaceId}`;

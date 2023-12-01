@@ -8,7 +8,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { Logger } from '@kbn/logging';
-import { getDashboard } from './dashboard';
+import { getDashboard } from './gen_ai_dashboard';
 
 export interface OutputError {
   message: string;
@@ -19,10 +19,12 @@ export const initDashboard = async ({
   logger,
   savedObjectsClient,
   dashboardId,
+  genAIProvider,
 }: {
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   dashboardId: string;
+  genAIProvider: 'OpenAI' | 'Bedrock';
 }): Promise<{
   success: boolean;
   error?: OutputError;
@@ -50,13 +52,13 @@ export const initDashboard = async ({
   try {
     await savedObjectsClient.create<DashboardAttributes>(
       'dashboard',
-      getDashboard(dashboardId).attributes,
+      getDashboard(genAIProvider, dashboardId).attributes,
       {
         overwrite: true,
         id: dashboardId,
       }
     );
-    logger.info(`Successfully created Gen Ai Dashboard ${dashboardId}`);
+    logger.info(`Successfully created Generative AI Dashboard ${dashboardId}`);
     return { success: true };
   } catch (error) {
     return {
