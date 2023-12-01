@@ -16,8 +16,8 @@ export const defaultFinishedSteps: Partial<Record<CardId, StepId[]>> = {
   [QuickStartSectionCardsId.createFirstProject]: [CreateProjectSteps.createFirstProject],
 };
 
-export const isDefaultFinishedCardStep = (cardId: CardId, stepId: StepId) => 
-    !!defaultFinishedSteps[cardId]?.includes(stepId);
+export const isDefaultFinishedCardStep = (cardId: CardId, stepId: StepId) =>
+  !!defaultFinishedSteps[cardId]?.includes(stepId);
 
 export const getCardTimeInMinutes = (activeSteps: Step[] | undefined, stepsDone: Set<StepId>) =>
   activeSteps?.reduce(
@@ -57,9 +57,8 @@ export const findCardByStepId = (
   stepId: string
 ): { matchedCard: Card | null; matchedStep: Step | null } => {
   const cards = getSections().flatMap((s) => s.cards);
-  let matchedStep: Step | null = null;
-  const matchedCard =
-    cards.find((c) => !!c.steps?.find((step) => stepId === step.id)) ?? null;
+  const matchedStep: Step | null = null;
+  const matchedCard = cards.find((c) => !!c.steps?.find((step) => stepId === step.id)) ?? null;
 
   return { matchedCard, matchedStep };
 };
