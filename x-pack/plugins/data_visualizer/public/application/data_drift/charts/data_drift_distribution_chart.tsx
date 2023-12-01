@@ -83,8 +83,8 @@ export const DataDriftDistributionChart = ({
     DVStorageMapped<typeof DV_DATA_DRIFT_DISTRIBUTION_CHART_TYPE>
   >(
     DV_DATA_DRIFT_DISTRIBUTION_CHART_TYPE,
-    // By default we will exclude frozen data tier
-    DATA_DRIFT_COMPARISON_CHART_TYPE.BAR
+    // By default we will set default comparison chart in expanded row as area chart
+    DATA_DRIFT_COMPARISON_CHART_TYPE.AREA
   );
 
   if (!item || item.comparisonDistribution.length === 0) return <NoChartsData />;
