@@ -352,6 +352,7 @@ export interface DocLinks {
     readonly entityAnalytics: {
       readonly riskScorePrerequisites: string;
     };
+    readonly detectionEngineOverview: string;
   };
   readonly query: {
     readonly eql: string;

@@ -16,6 +16,7 @@ import { WindowsEventCollectionCard } from './components/cards/windows_event_col
 import { AttackSurfaceReductionCard } from './components/cards/attack_surface_reduction_card';
 import { BehaviourProtectionCard } from './components/cards/protection_seetings_card/behaviour_protection_card';
 import { MemoryProtectionCard } from './components/cards/memory_protection_card';
+import { RelatedDetectionRulesCallout } from './components/related_detection_rules_callout';
 import { RansomwareProtectionCard } from './components/cards/ransomware_protection_card';
 import { MalwareProtectionsCard } from './components/cards/malware_protections_card';
 import type { PolicyFormComponentCommonProps } from './types';
@@ -29,7 +30,7 @@ const PROTECTIONS_SECTION_TITLE = i18n.translate(
 
 const SETTINGS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.settings',
-  { defaultMessage: 'Settings' }
+  { defaultMessage: 'Settingssss' }
 );
 
 export type PolicySettingsFormProps = PolicyFormComponentCommonProps;
@@ -53,6 +54,8 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 
       {!ProtectionsUpSellingComponent && (
         <>
+          <RelatedDetectionRulesCallout></RelatedDetectionRulesCallout>
+          <EuiSpacer size="l" />
           <MalwareProtectionsCard {...props} data-test-subj={getTestId('malware')} />
           <EuiSpacer size="l" />
 
