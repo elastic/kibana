@@ -12,6 +12,7 @@ import type {
   RegistryPolicyTemplate,
   RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import merge from 'lodash/merge';
 import {
   CLOUDBEAT_AWS,
@@ -30,6 +31,7 @@ import { getDefaultAwsVarsGroup } from './aws_credentials_form/aws_credentials_f
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
 import { cloudPostureIntegrations } from '../../common/constants';
 import { DEFAULT_EKS_VARS_GROUP } from './eks_credentials_form';
+import { AwsCredentialsType } from '../../../common/types';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
@@ -203,11 +205,18 @@ export const getArmTemplateUrlFromCspmPackage = (packageInfo: PackageInfo): stri
 /**
  * Input vars that are hidden from the user
  */
-export const getPostureInputHiddenVars = (inputType: PostureInput, packageInfo: PackageInfo) => {
+export const getPostureInputHiddenVars = (
+  inputType: PostureInput,
+  packageInfo: PackageInfo,
+  setupTechnology: SetupTechnology
+) => {
   switch (inputType) {
     case 'cloudbeat/cis_aws':
       return {
-        'aws.credentials.type': { value: getDefaultAwsVarsGroup(packageInfo), type: 'text' },
+        'aws.credentials.type': {
+          value: getDefaultAwsVarsGroup(packageInfo, setupTechnology),
+          type: 'text',
+        },
       };
     case 'cloudbeat/cis_eks':
       return { 'aws.credentials.type': { value: DEFAULT_EKS_VARS_GROUP, type: 'text' } };
@@ -263,3 +272,7 @@ export const getCspmCloudShellDefaultValue = (packageInfo: PackageInfo): string 
 
   return cloudShellUrl;
 };
+
+export const getAwsCredentialsType = (
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
+): AwsCredentialsType | undefined => input.streams[0].vars?.['aws.credentials.type'].value;

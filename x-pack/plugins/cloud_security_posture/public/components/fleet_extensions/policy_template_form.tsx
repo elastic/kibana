@@ -545,11 +545,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
      */
     const setEnabledPolicyInput = useCallback(
       (inputType: PostureInput) => {
-        const inputVars = getPostureInputHiddenVars(inputType, packageInfo);
+        const inputVars = getPostureInputHiddenVars(inputType, packageInfo, setupTechnology);
         const policy = getPosturePolicy(newPolicy, inputType, inputVars);
         updatePolicy(policy);
       },
-      [newPolicy, updatePolicy, packageInfo]
+      [setupTechnology, packageInfo, newPolicy, updatePolicy]
     );
 
     // search for non null fields of the validation?.vars object
@@ -587,6 +587,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       refetch();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading, input.policy_template, isEditPage]);
+
+    useEffect(() => {
+      setEnabledPolicyInput(input.type);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [setupTechnology]);
 
     useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
 
@@ -741,6 +746,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           onChange={onChange}
           setIsValid={setIsValid}
           disabled={isEditPage}
+          setupTechnology={setupTechnology}
         />
         <EuiSpacer />
       </>

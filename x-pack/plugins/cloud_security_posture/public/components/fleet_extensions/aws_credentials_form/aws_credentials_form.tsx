@@ -6,26 +6,25 @@
  */
 import React from 'react';
 import {
-  EuiFieldText,
-  EuiFieldPassword,
+  EuiCallOut,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSelect,
-  EuiCallOut,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
-  getAwsCredentialsFormManualOptions,
-  AwsOptions,
+  DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
+  getAwsCredentialsFormManualOptions,
 } from './get_aws_credentials_form_options';
 import { RadioGroup } from '../csp_boxed_radio_group';
 import {
@@ -36,11 +35,11 @@ import {
 import { SetupFormat, useAwsCredentialsForm } from './hooks';
 import { AWS_ORGANIZATION_ACCOUNT } from '../policy_template_form';
 import { AwsCredentialsType } from '../../../../common/types';
+import { AwsInputVarFields } from './aws_input_var_fields';
 
 interface AWSSetupInfoContentProps {
   integrationLink: string;
 }
-
 const AWSSetupInfoContent = ({ integrationLink }: AWSSetupInfoContentProps) => {
   return (
     <>
@@ -87,7 +86,14 @@ const getSetupFormatOptions = (): Array<{ id: SetupFormat; label: string }> => [
   },
 ];
 
-export const getDefaultAwsVarsGroup = (packageInfo: PackageInfo): AwsCredentialsType => {
+export const getDefaultAwsVarsGroup = (
+  packageInfo: PackageInfo,
+  setupTechnology?: SetupTechnology
+): AwsCredentialsType => {
+  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
+    return DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
+  }
+
   const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
   if (hasCloudFormationTemplate) {
     return 'cloud_formation';
@@ -96,7 +102,7 @@ export const getDefaultAwsVarsGroup = (packageInfo: PackageInfo): AwsCredentials
   return DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
 };
 
-interface Props {
+export interface AwsFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
@@ -217,7 +223,7 @@ export const AwsCredentialsForm = ({
   onChange,
   setIsValid,
   disabled,
-}: Props) => {
+}: AwsFormProps) => {
   const {
     awsCredentialsType,
     setupFormat,
@@ -303,38 +309,4 @@ const AwsCredentialTypeSelector = ({
       }}
     />
   </EuiFormRow>
-);
-
-const AwsInputVarFields = ({
-  fields,
-  onChange,
-}: {
-  fields: Array<AwsOptions[keyof AwsOptions]['fields'][number] & { value: string; id: string }>;
-  onChange: (key: string, value: string) => void;
-}) => (
-  <div>
-    {fields.map((field) => (
-      <EuiFormRow key={field.id} label={field.label} fullWidth hasChildLabel={true} id={field.id}>
-        <>
-          {field.type === 'password' && (
-            <EuiFieldPassword
-              id={field.id}
-              type="dual"
-              fullWidth
-              value={field.value || ''}
-              onChange={(event) => onChange(field.id, event.target.value)}
-            />
-          )}
-          {field.type === 'text' && (
-            <EuiFieldText
-              id={field.id}
-              fullWidth
-              value={field.value || ''}
-              onChange={(event) => onChange(field.id, event.target.value)}
-            />
-          )}
-        </>
-      </EuiFormRow>
-    ))}
-  </div>
 );

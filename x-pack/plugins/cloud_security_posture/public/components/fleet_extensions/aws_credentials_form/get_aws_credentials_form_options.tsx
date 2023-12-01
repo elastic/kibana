@@ -106,6 +106,7 @@ export const getAwsCredentialsFormManualOptions = (): Array<{
 };
 
 export const DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE = 'assume_role';
+export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = 'direct_access_keys';
 
 export const getAwsCredentialsFormOptions = (): AwsOptions => ({
   assume_role: {
