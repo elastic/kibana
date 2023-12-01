@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 import { RangeSliderEmbeddableInput } from '..';
-import { ControlOutput, RangeSliderEmbeddable, RangeSliderEmbeddableFactory } from '../../public';
+import {
+  ControlFactory,
+  ControlOutput,
+  RangeSliderEmbeddable,
+  RangeSliderEmbeddableFactory,
+} from '../../public';
 import * as rangeSliderStateModule from '../../public/range_slider/range_slider_reducers';
 import { RangeSliderComponentState } from '../../public/range_slider/types';
 
