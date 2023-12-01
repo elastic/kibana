@@ -285,7 +285,7 @@ export const createCustomThresholdExecutor = ({
             }
             return formatAlertResult(evaluation).currentValue;
           }),
-          viewInAppUrl: await getViewInAppUrl(
+          viewInAppUrl: getViewInAppUrl(
             alertResults.length === 1 ? alertResults[0][group].metrics : [],
             indexedStartedAt,
             logExplorerLocator,

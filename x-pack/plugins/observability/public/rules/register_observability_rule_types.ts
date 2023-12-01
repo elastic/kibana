@@ -154,6 +154,7 @@ export const registerObservabilityRuleTypes = async (
             (searchConfiguration?.query as { query: string }).query,
             dataViewId
           ),
+          hasBasePath: true,
         };
       },
       alertDetailsAppSection: lazy(

@@ -79,12 +79,12 @@ export function AlertActions({
   const alert = parseObservabilityAlert(dataFieldEs);
 
   useEffect(() => {
-    if (typeof alert.link === 'string' || typeof alert.link === 'undefined') {
+    if (!alert.hasBasePath) {
       setViewInAppUrl(prepend(alert.link ?? ''));
     } else {
-      alert.link.then((link) => setViewInAppUrl(link));
+      setViewInAppUrl(alert.link);
     }
-  }, [alert.link, prepend]);
+  }, [alert.hasBasePath, alert.link, prepend]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 

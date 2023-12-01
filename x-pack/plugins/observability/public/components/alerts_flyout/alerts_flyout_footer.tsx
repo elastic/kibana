@@ -29,12 +29,12 @@ export function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { isInApp: 
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
 
   useEffect(() => {
-    if (typeof alert.link === 'string' || typeof alert.link === 'undefined') {
+    if (!alert.hasBasePath) {
       setViewInAppUrl(prepend(alert.link ?? ''));
     } else {
-      alert.link.then((link) => setViewInAppUrl(link));
+      setViewInAppUrl(alert.link);
     }
-  }, [alert.link, prepend]);
+  }, [alert.hasBasePath, alert.link, prepend]);
 
   return (
     <EuiFlyoutFooter>

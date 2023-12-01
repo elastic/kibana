@@ -11,7 +11,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { CustomThresholdExpressionMetric } from './types';
 
-export const getViewInAppUrl = async (
+export const getViewInAppUrl = (
   metrics: CustomThresholdExpressionMetric[],
   startedAt?: string,
   logExplorerLocator?: LocatorPublic<DiscoverAppLocatorParams>,

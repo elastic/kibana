@@ -23,7 +23,7 @@ import {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import { LOG_EXPLORER_LOCATOR_ID, LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
@@ -146,8 +146,6 @@ export interface ObservabilityPublicPluginsStart {
   serverless?: ServerlessPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
-
-const LOG_EXPLORER_LOCATOR_ID = 'LOG_EXPLORER_LOCATOR';
 
 export class Plugin
   implements
