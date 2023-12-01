@@ -628,3 +628,5 @@ export interface DocLinks {
     readonly settings: string;
   };
 }
+
+export type BuildFlavor = 'serverless' | 'traditional';

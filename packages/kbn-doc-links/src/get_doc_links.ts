@@ -7,8 +7,7 @@
  */
 
 import { deepFreeze } from '@kbn/std';
-import type { BuildFlavor } from '@kbn/config';
-import type { DocLinks } from './types';
+import type { DocLinks, BuildFlavor } from './types';
 import { getDocLinksMeta } from './get_doc_meta';
 
 export interface GetDocLinkOptions {
