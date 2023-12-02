@@ -319,6 +319,10 @@ export const DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL =
 export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL =
   `${DETECTION_ENGINE_SIGNALS_URL}/finalize_migration` as const;
 export const DETECTION_ENGINE_ALERT_TAGS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/tags` as const;
+export const DETECTION_ENGINE_ALERT_ASSIGNEES_URL =
+  `${DETECTION_ENGINE_SIGNALS_URL}/assignees` as const;
+export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =
+  `${DETECTION_ENGINE_SIGNALS_URL}/_find` as const;
 
 export const ALERTS_AS_DATA_URL = '/internal/rac/alerts' as const;
 export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;
@@ -450,13 +454,6 @@ export enum BulkActionsDryRunErrCode {
   MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
   ESQL_INDEX_PATTERN = 'ESQL_INDEX_PATTERN',
 }
-
-export const RISKY_HOSTS_DOC_LINK =
-  'https://www.elastic.co/guide/en/security/current/host-risk-score.html';
-export const RISKY_USERS_DOC_LINK =
-  'https://www.elastic.co/guide/en/security/current/user-risk-score.html';
-export const RISKY_ENTITY_SCORE_DOC_LINK =
-  'https://www.elastic.co/guide/en/security/current/advanced-entity-analytics-overview.html#entity-risk-scoring';
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 
