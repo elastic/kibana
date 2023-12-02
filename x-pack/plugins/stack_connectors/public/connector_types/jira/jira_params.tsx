@@ -285,6 +285,9 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           label={i18n.translate('xpack.stackConnectors.components.jira.summaryFieldLabel', {
             defaultMessage: 'Summary (required)',
           })}
+          labelAppend={i18n.translate('xpack.stackConnectors.components.jira.summaryFieldRequiredLabel', {
+            defaultMessage: 'Required',
+          })}
         >
           <TextFieldWithMessageVariables
             index={index}
