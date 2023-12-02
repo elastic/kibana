@@ -58,6 +58,10 @@ const refreshLabel = i18n.translate('indexPatternManagement.editDataView.refresh
   defaultMessage: 'Refresh',
 });
 
+const isLoadingLabel = i18n.translate('indexPatternManagement.editDataView.refreshLabel', {
+  defaultMessage: 'Loading...',
+});
+
 export const IndexHeader: React.FC<IndexHeaderProps> = ({
   defaultIndex,
   indexPattern,
@@ -79,9 +83,10 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
             iconType="refresh"
             aria-label={refreshAriaLabel}
             data-test-subj="refreshDataViewButton"
-            disabled={isRefreshing}
+            isLoading={isRefreshing}
+            isDisabled={isRefreshing}
           >
-            {refreshLabel}
+            {isRefreshing ? isLoadingLabel : refreshLabel}
           </EuiButton>
         </EuiToolTip>,
         canSave && (

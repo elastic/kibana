@@ -491,7 +491,17 @@ export class SettingsPageObject extends FtrService {
       await this.testSubjects.click(`detail-link-${dataViewName}`);
     }
     await this.testSubjects.click('refreshDataViewButton');
-    // todo - await on refresh button being available again
+    await this.retry.try(async () => {
+      const btn = await this.testSubjects.find('refreshDataViewButton');
+      const disabled = await btn.getAttribute('disabled');
+      expect(disabled).to.be('true');
+    });
+
+    await this.retry.try(async () => {
+      const btn = await this.testSubjects.find('refreshDataViewButton');
+      const disabled = await btn.getAttribute('disabled');
+      expect(disabled).to.be('');
+    });
   }
 
   async allowHiddenClick() {
