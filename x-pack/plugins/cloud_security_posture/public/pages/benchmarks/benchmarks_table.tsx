@@ -20,6 +20,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { generatePath } from 'react-router-dom';
 import type { BenchmarkVersion2, BenchmarkScore } from '../../../common/types';
 import * as TEST_SUBJ from './test_subjects';
 import { isCommonError } from '../../components/cloud_posture_page';
@@ -27,8 +29,6 @@ import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
 import { ComplianceScoreBar } from '../../components/compliance_score_bar';
 import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { generatePath } from 'react-router';
 import { benchmarksNavigation } from '../../common/navigation/constants';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
@@ -167,12 +167,12 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     // render: (benchmarkId: string) => {
     //   return getBenchmarkCisName(benchmarkId);
     // },
-    render: (complianceScore: BenchmarkVersion2['id'], benchmarkId)=> (
+    render: (complianceScore: BenchmarkVersion2['id'], benchmarkId) => (
       <IntegrationButtonLink
         packageName={getBenchmarkCisName(benchmarkId.id)}
         benchmarkId={benchmarkId.id}
         benchmarkVersion={benchmarkId.version}
-        />
+      />
     ),
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CIS_NAME,
   },
