@@ -25,13 +25,16 @@ image::management/connectors/images/resilient-connector.png[IBM Resilient connec
 [[resilient-connector-configuration]]
 ==== Connector configuration
 
-IBM Resilient connectors have the following configuration properties:
+IBM Resilient connectors have a name and the following configuration properties:
 
-Name::      The name of the connector.
-URL::       IBM Resilient instance URL.
-Organization ID:: IBM Resilient organization ID.
-API key ID::  The authentication key ID for HTTP Basic authentication.
-API key secret::  The authentication key secret for HTTP Basic authentication.
+API key ID::
+The authentication key ID for HTTP Basic authentication.
+API key secret::
+The authentication key secret for HTTP Basic authentication.
+Organization ID::
+The {ibm-r} organization ID.
+URL::
+The {ibm-r} instance URL.
 
 [float]
 [[resilient-action-configuration]]
@@ -46,11 +49,17 @@ image::management/connectors/images/resilient-params-test.png[IBM Resilient conn
 
 IBM Resilient actions have the following configuration properties.
 
-Incident types:: The type of the incident.
-Severity code:: The severity of the incident.
-Name:: A name for the issue, used for searching the contents of the knowledge base.
-Description:: The details about the incident.
-Additional comments:: Additional information for the client, such as how to troubleshoot the issue.
+Additional comments::
+Extra information for the client, such as how to troubleshoot the issue.
+Description::
+The details about the incident.
+Name::
+A name for the issue, used for searching the contents of the knowledge base.
+Incident type::
+The type of the incident.
+Severity::
+The severity of the incident.
+
 
 [float]
 [[resilient-connector-networking-configuration]]

@@ -40,7 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
       await actions.common.openNewConnectorForm('resilient');
       await testSubjects.setValue('nameInput', 'IBM Resilient test connector');
-      // await testSubjects.setValue('config.apiUrl-input', 'https://example.com');
       await testSubjects.setValue('config.apiUrl-input', smallUrl);
       await testSubjects.setValue('config.orgId-input', '201');
       await testSubjects.setValue('secrets.apiKeyId-input', 'tester');
@@ -50,6 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Close all toasts since it is unable to get incident types from example site
       await pageObjects.common.clearAllToasts();
       await pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.common.clearAllToasts();
       await commonScreenshots.takeScreenshot('resilient-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
