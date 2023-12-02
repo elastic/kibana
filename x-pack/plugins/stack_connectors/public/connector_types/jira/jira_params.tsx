@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
@@ -283,11 +284,15 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             incident.summary !== undefined
           }
           label={i18n.translate('xpack.stackConnectors.components.jira.summaryFieldLabel', {
-            defaultMessage: 'Summary (required)',
+            defaultMessage: 'Summary',
           })}
-          labelAppend={i18n.translate('xpack.stackConnectors.components.jira.summaryFieldRequiredLabel', {
-            defaultMessage: 'Required',
-          })}
+          labelAppend={
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.stackConnectors.components.jira.summaryFieldRequiredLabel', {
+                defaultMessage: 'Required',
+              })}
+            </EuiText>
+          }
         >
           <TextFieldWithMessageVariables
             index={index}
