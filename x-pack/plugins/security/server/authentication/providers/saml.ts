@@ -369,9 +369,10 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         method: 'POST',
         path: '/_security/saml/authenticate',
         body: {
-          ids: !isIdPInitiatedLogin ? [stateRequestId] : [],
+          // ids: !isIdPInitiatedLogin ? [stateRequestId] : [],
+          ids: [],
           content: samlResponse,
-          ...(providerRealm ? { realm: providerRealm } : {}),
+          // ...(providerRealm ? { realm: providerRealm } : {}),
         },
       })) as any;
     } catch (err) {
