@@ -12,6 +12,7 @@ const github = new Octokit({
   auth: process.env.GITHUB_TOKEN,
 });
 
+// test commit
 let prChangesCache: null | RestEndpointMethodTypes['pulls']['listFiles']['response']['data'] = null;
 
 export const getPrChanges = async (
