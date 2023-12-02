@@ -18,6 +18,7 @@ class ESDocLinks {
   public metadata: string = '';
   public roleDescriptors: string = '';
   public securityApis: string = '';
+  public ingestionPipelines: string = '';
   // Client links
   public elasticsearchClients: string = '';
   // go
@@ -57,11 +58,12 @@ class ESDocLinks {
     this.kibanaFeedback = newDocLinks.kibana.feedback;
     this.kibanaRunApiInConsole = newDocLinks.console.serverlessGuide;
     this.metadata = newDocLinks.security.mappingRoles;
-    this.roleDescriptors = newDocLinks.security.mappingRoles;
+    this.roleDescriptors = newDocLinks.serverlessSecurity.apiKeyPrivileges;
     this.securityApis = newDocLinks.apis.securityApis;
+    this.ingestionPipelines = newDocLinks.ingest.pipelines;
 
     // Client links
-    this.elasticsearchClients = newDocLinks.serverlessClients.httpApis;
+    this.elasticsearchClients = newDocLinks.serverlessClients.clientLib;
     // Go
     this.goApiReference = newDocLinks.serverlessClients.goApiReference;
     this.goBasicConfig = newDocLinks.serverlessClients.goGettingStarted;
@@ -76,7 +78,7 @@ class ESDocLinks {
     this.phpClient = newDocLinks.serverlessClients.phpGettingStarted;
     // Python
     this.pythonApiReference = newDocLinks.serverlessClients.pythonGettingStarted;
-    this.pythonBasicConfig = newDocLinks.clients.pythonConnecting;
+    this.pythonBasicConfig = newDocLinks.serverlessClients.pythonGettingStarted;
     this.pythonClient = newDocLinks.serverlessClients.pythonGettingStarted;
     // Python
     this.rubyBasicConfig = newDocLinks.serverlessClients.rubyGettingStarted;

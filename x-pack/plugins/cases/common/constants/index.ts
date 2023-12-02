@@ -128,6 +128,10 @@ export const MAX_CASES_TO_UPDATE = 100 as const;
 export const MAX_BULK_CREATE_ATTACHMENTS = 100 as const;
 export const MAX_USER_ACTIONS_PER_CASE = 10000 as const;
 export const MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES = 100 as const;
+export const MAX_CUSTOM_FIELDS_PER_CASE = 10 as const;
+export const MAX_CUSTOM_FIELD_KEY_LENGTH = 36 as const; // uuidv4 length
+export const MAX_CUSTOM_FIELD_LABEL_LENGTH = 50 as const;
+export const MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH = 160 as const;
 
 /**
  * Cases features
@@ -158,6 +162,7 @@ export const READ_CASES_CAPABILITY = 'read_cases' as const;
 export const UPDATE_CASES_CAPABILITY = 'update_cases' as const;
 export const DELETE_CASES_CAPABILITY = 'delete_cases' as const;
 export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
+export const CASES_SETTINGS_CAPABILITY = 'cases_settings' as const;
 export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 
 /**
@@ -198,6 +203,7 @@ export const SEARCH_DEBOUNCE_MS = 500;
 export const LOCAL_STORAGE_KEYS = {
   casesQueryParams: 'cases.list.queryParams',
   casesFilterOptions: 'cases.list.filterOptions',
+  casesTableColumns: 'cases.list.tableColumns',
 };
 
 /**

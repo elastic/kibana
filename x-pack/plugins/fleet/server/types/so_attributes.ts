@@ -15,6 +15,7 @@ import type {
   ShipperOutput,
   KafkaAcknowledgeReliabilityLevel,
   KafkaConnectionTypeType,
+  AgentUpgradeDetails,
 } from '../../common/types';
 import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
@@ -73,6 +74,7 @@ export interface AgentSOAttributes {
   unenrollment_started_at?: string;
   upgraded_at?: string | null;
   upgrade_started_at?: string | null;
+  upgrade_details?: AgentUpgradeDetails;
   access_api_key_id?: string;
   default_api_key?: string;
   default_api_key_id?: string;
@@ -146,10 +148,24 @@ interface OutputSoBaseAttributes {
 
 interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
   type: OutputType['Elasticsearch'];
+  secrets?: {};
+}
+
+export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttributes {
+  type: OutputType['RemoteElasticsearch'];
+  service_token?: string;
+  secrets?: {
+    service_token?: { id: string };
+  };
 }
 
 interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
   type: OutputType['Logstash'];
+  secrets?: {
+    ssl?: {
+      key?: { id: string };
+    };
+  };
 }
 
 export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
@@ -191,10 +207,17 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
   timeout?: number;
   broker_timeout?: number;
   required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
+  secrets?: {
+    password?: { id: string };
+    ssl?: {
+      key?: { id: string };
+    };
+  };
 }
 
 export type OutputSOAttributes =
   | OutputSoElasticsearchAttributes
+  | OutputSoRemoteElasticsearchAttributes
   | OutputSoLogstashAttributes
   | OutputSoKafkaAttributes;
 

@@ -23,14 +23,30 @@ import { useKibana } from '../../lib/kibana';
 import type { State } from '../../store';
 import { createStore } from '../../store';
 import { TimelineId } from '../../../../common/types';
+import * as timelineActions from '../../../timelines/store/timeline/actions';
 import type { ComponentType, FC, PropsWithChildren } from 'react';
 import React from 'react';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import TestRenderer from 'react-test-renderer';
 
-const mockDiscoverStateContainerRef = {
+const { act } = TestRenderer;
+
+let mockDiscoverStateContainerRef = {
   current: discoverPluginMock.getDiscoverStateMock({}),
 };
 
 jest.mock('../../lib/kibana');
+
+const mockDispatch = jest.fn();
+
+jest.mock('react-redux', () => {
+  const actual = jest.requireActual('react-redux');
+  return {
+    ...actual,
+    useDispatch: () => mockDispatch,
+  };
+});
+
 const mockState: State = {
   ...mockGlobalState,
   timeline: {
@@ -64,6 +80,9 @@ const getTestProviderWithCustomState = (state: State = mockState) => {
 };
 
 const renderTestHook = (customWrapper: ComponentType = getTestProviderWithCustomState()) => {
+  mockDiscoverStateContainerRef = {
+    current: discoverPluginMock.getDiscoverStateMock({}),
+  };
   return renderHook(() => useDiscoverInTimelineActions(mockDiscoverStateContainerRef), {
     wrapper: customWrapper,
   });
@@ -119,6 +138,13 @@ export const savedSearchMock = {
 } as unknown as SavedSearch;
 
 const startServicesMock = createStartServicesMock();
+
+startServicesMock.dataViews.get = jest.fn(
+  async () =>
+    ({
+      getIndexPattern: jest.fn(),
+    } as unknown as DataView)
+);
 
 describe('useDiscoverInTimelineActions', () => {
   beforeEach(() => {
@@ -188,15 +214,15 @@ describe('useDiscoverInTimelineActions', () => {
   describe('resetDiscoverAppState', () => {
     it('should reset Discover AppState to a default state', async () => {
       const { result, waitFor } = renderTestHook();
-      result.current.resetDiscoverAppState();
+      await result.current.resetDiscoverAppState();
       await waitFor(() => {
         const appState = mockDiscoverStateContainerRef.current.appState.getState();
-        expect(appState).toMatchObject(result.current.defaultDiscoverAppState);
+        expect(appState).toMatchObject(result.current.getDefaultDiscoverAppState());
       });
     });
     it('should reset Discover time to a default state', async () => {
       const { result, waitFor } = renderTestHook();
-      result.current.resetDiscoverAppState();
+      await result.current.resetDiscoverAppState();
       await waitFor(() => {
         const globalState = mockDiscoverStateContainerRef.current.globalState.get();
         expect(globalState).toMatchObject({ time: { from: 'now-15m', to: 'now' } });
@@ -206,7 +232,9 @@ describe('useDiscoverInTimelineActions', () => {
   describe('updateSavedSearch', () => {
     it('should add defaults to the savedSearch before updating saved search', async () => {
       const { result } = renderTestHook();
-      await result.current.updateSavedSearch(savedSearchMock, TimelineId.active);
+      await act(async () => {
+        await result.current.updateSavedSearch(savedSearchMock, TimelineId.active);
+      });
 
       expect(startServicesMock.savedSearch.save).toHaveBeenNthCalledWith(
         1,
@@ -223,7 +251,7 @@ describe('useDiscoverInTimelineActions', () => {
         })
       );
     });
-    it('should send update request when savedSearchId is already available', async () => {
+    it('should initialize saved search when it is not set on the timeline model yet', async () => {
       const localMockState: State = {
         ...mockGlobalState,
         timeline: {
@@ -242,24 +270,53 @@ describe('useDiscoverInTimelineActions', () => {
 
       const LocalTestProvider = getTestProviderWithCustomState(localMockState);
       const { result } = renderTestHook(LocalTestProvider);
-      await result.current.updateSavedSearch(savedSearchMock, TimelineId.active);
+      await act(async () => {
+        await result.current.updateSavedSearch(savedSearchMock, TimelineId.active);
+      });
 
-      expect(startServicesMock.savedSearch.save).toHaveBeenNthCalledWith(
+      expect(mockDispatch).toHaveBeenNthCalledWith(
         1,
-        expect.objectContaining({
-          timeRestore: true,
-          timeRange: {
-            from: 'now-20d',
-            to: 'now',
-          },
-          tags: ['security-solution-default'],
-          id: 'saved_search_id',
-        }),
-        expect.objectContaining({
-          copyOnSave: false,
+        timelineActions.initializeSavedSearch({
+          id: TimelineId.active,
+          savedSearch: savedSearchMock,
         })
       );
     });
+
+    it('should update saved search when it has changes', async () => {
+      const changedSavedSearchMock = { ...savedSearchMock, title: 'changed' };
+      const localMockState: State = {
+        ...mockGlobalState,
+        timeline: {
+          ...mockGlobalState.timeline,
+          timelineById: {
+            ...mockGlobalState.timeline.timelineById,
+            [TimelineId.active]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.active],
+              title: 'Active Timeline',
+              description: 'Active Timeline Description',
+              savedSearchId: 'saved_search_id',
+              savedSearch: savedSearchMock,
+            },
+          },
+        },
+      };
+
+      const LocalTestProvider = getTestProviderWithCustomState(localMockState);
+      const { result } = renderTestHook(LocalTestProvider);
+      await act(async () => {
+        await result.current.updateSavedSearch(changedSavedSearchMock, TimelineId.active);
+      });
+
+      expect(mockDispatch).toHaveBeenNthCalledWith(
+        1,
+        timelineActions.updateSavedSearch({
+          id: TimelineId.active,
+          savedSearch: changedSavedSearchMock,
+        })
+      );
+    });
+
     it('should raise appropriate notification in case of any error in saving discover saved search', () => {});
   });
 });

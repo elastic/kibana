@@ -107,7 +107,7 @@
             "label": "sharingSavedObjectProps",
             "description": [],
             "signature": [
-              "{ outcome?: \"conflict\" | \"exactMatch\" | \"aliasMatch\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
+              "{ outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
             "deprecated": false,
@@ -135,7 +135,7 @@
             "label": "sharingSavedObjectProps",
             "description": [],
             "signature": [
-              "{ outcome?: \"conflict\" | \"exactMatch\" | \"aliasMatch\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
+              "{ outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/saved_search_attribute_service.ts",
             "deprecated": false,
@@ -1208,7 +1208,7 @@
                 "section": "def-common.SearchSourceSearchOptions",
                 "text": "SearchSourceSearchOptions"
               },
-              " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean, includeFields?: boolean) => ",
+              " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1508,6 +1508,20 @@
           },
           {
             "parentPluginId": "savedSearch",
+            "id": "def-common.SavedSearch.sampleSize",
+            "type": "number",
+            "tags": [],
+            "label": "sampleSize",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/saved_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedSearch",
             "id": "def-common.SavedSearch.breakdownField",
             "type": "string",
             "tags": [],
@@ -1549,7 +1563,7 @@
             "label": "sharingSavedObjectProps",
             "description": [],
             "signature": [
-              "{ outcome?: \"conflict\" | \"exactMatch\" | \"aliasMatch\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
+              "{ outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
@@ -1580,6 +1594,36 @@
         "type": "number",
         "tags": [],
         "label": "LATEST_VERSION",
+        "description": [],
+        "signature": [
+          "1"
+        ],
+        "path": "src/plugins/saved_search/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedSearch",
+        "id": "def-common.MAX_SAVED_SEARCH_SAMPLE_SIZE",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_SAVED_SEARCH_SAMPLE_SIZE",
+        "description": [],
+        "signature": [
+          "10000"
+        ],
+        "path": "src/plugins/saved_search/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedSearch",
+        "id": "def-common.MIN_SAVED_SEARCH_SAMPLE_SIZE",
+        "type": "number",
+        "tags": [],
+        "label": "MIN_SAVED_SEARCH_SAMPLE_SIZE",
         "description": [],
         "signature": [
           "1"

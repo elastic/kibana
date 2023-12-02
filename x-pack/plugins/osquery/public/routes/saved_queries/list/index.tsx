@@ -34,6 +34,7 @@ export interface SavedQuerySO {
   saved_object_id: string;
   description?: string;
   query: string;
+  timeout?: number;
   ecs_mapping: ECSMapping;
   updated_at: string;
   prebuilt?: boolean;

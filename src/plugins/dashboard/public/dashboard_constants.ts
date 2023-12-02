@@ -77,7 +77,7 @@ export const DASHBOARD_CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
 // Default State
 // ------------------------------------------------------------------
 export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerInput, 'id'> = {
-  viewMode: ViewMode.EDIT, // new dashboards start in  edit mode.
+  viewMode: ViewMode.VIEW,
   timeRestore: false,
   query: { query: '', language: 'kuery' },
   description: '',

@@ -35,6 +35,7 @@ import { savedObjectTypes } from '../../packages';
 import { indexPatternTypes, getIndexPatternSavedObjects } from '../index_pattern/install';
 import { saveKibanaAssetsRefs } from '../../packages/install';
 import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
+import { KibanaSOReferenceError } from '../../../../errors';
 
 import { withPackageSpan } from '../../packages/utils';
 
@@ -140,15 +141,21 @@ export async function installKibanaAssets(options: {
     return [];
   }
 
-  // As we use `import` to create our saved objects, we have to install
-  // their references (the index patterns) at the same time
-  // to prevent a reference error
+  // Create index patterns separately with `overwrite: false` to prevent blowing away users' runtime fields.
+  // These don't get retried on conflict, because we expect that they exist once an integration has been installed.
   const indexPatternSavedObjects = getIndexPatternSavedObjects() as ArchiveAsset[];
+  await savedObjectsImporter.import({
+    overwrite: false,
+    readStream: createListStream(indexPatternSavedObjects),
+    createNewCopies: false,
+    refresh: false,
+    managed: true,
+  });
 
   const installedAssets = await installKibanaSavedObjects({
     logger,
     savedObjectsImporter,
-    kibanaAssets: [...indexPatternSavedObjects, ...assetsToInstall],
+    kibanaAssets: assetsToInstall,
   });
 
   return installedAssets;
@@ -334,7 +341,7 @@ export async function installKibanaSavedObjects({
     );
 
     if (otherErrors?.length) {
-      throw new Error(
+      throw new KibanaSOReferenceError(
         `Encountered ${
           otherErrors.length
         } errors creating saved objects: ${formatImportErrorsForLog(otherErrors)}`
@@ -377,7 +384,7 @@ export async function installKibanaSavedObjects({
         });
 
       if (resolveErrors?.length) {
-        throw new Error(
+        throw new KibanaSOReferenceError(
           `Encountered ${
             resolveErrors.length
           } errors resolving reference errors: ${formatImportErrorsForLog(resolveErrors)}`

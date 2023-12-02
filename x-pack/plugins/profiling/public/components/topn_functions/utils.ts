@@ -6,7 +6,10 @@
  */
 import { keyBy } from 'lodash';
 import type { StackFrameMetadata, TopNFunctions } from '@kbn/profiling-utils';
-import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
+import {
+  CalculateImpactEstimates,
+  ImpactEstimates,
+} from '../../hooks/use_calculate_impact_estimates';
 
 export function getColorLabel(percent: number) {
   if (percent === 0) {
@@ -30,6 +33,7 @@ export function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFac
 }
 
 export interface IFunctionRow {
+  id: string;
   rank: number;
   frame: StackFrameMetadata;
   samples: number;
@@ -37,7 +41,7 @@ export interface IFunctionRow {
   totalCPU: number;
   selfCPUPerc: number;
   totalCPUPerc: number;
-  impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
+  impactEstimates?: ImpactEstimates;
   diff?: {
     rank: number;
     samples: number;
@@ -45,7 +49,7 @@ export interface IFunctionRow {
     totalCPU: number;
     selfCPUPerc: number;
     totalCPUPerc: number;
-    impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
+    impactEstimates?: ImpactEstimates;
   };
 }
 
@@ -55,12 +59,14 @@ export function getFunctionsRows({
   comparisonTopNFunctions,
   topNFunctions,
   totalSeconds,
+  calculateImpactEstimates,
 }: {
   baselineScaleFactor?: number;
   comparisonScaleFactor?: number;
   comparisonTopNFunctions?: TopNFunctions;
   topNFunctions?: TopNFunctions;
   totalSeconds: number;
+  calculateImpactEstimates: CalculateImpactEstimates;
 }): IFunctionRow[] {
   if (!topNFunctions || !topNFunctions.TotalCount || topNFunctions.TotalCount === 0) {
     return [];
@@ -70,7 +76,7 @@ export function getFunctionsRows({
     ? keyBy(comparisonTopNFunctions.TopN, 'Id')
     : {};
 
-  return topNFunctions.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => {
+  return topNFunctions.TopN.filter((topN) => topN.CountExclusive >= 0).map((topN, i) => {
     const comparisonRow = comparisonDataById?.[topN.Id];
 
     const scaledSelfCPU = scaleValue({
@@ -101,6 +107,7 @@ export function getFunctionsRows({
         const scaledDiffSamples = scaledSelfCPU - comparisonScaledSelfCPU;
 
         return {
+          id: comparisonRow.Id,
           rank: topN.Rank - comparisonRow.Rank,
           samples: scaledDiffSamples,
           selfCPU: comparisonRow.CountExclusive,
@@ -115,6 +122,7 @@ export function getFunctionsRows({
     }
 
     return {
+      id: topN.Id,
       rank: topN.Rank,
       frame: topN.Frame,
       samples: scaledSelfCPU,

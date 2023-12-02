@@ -5,33 +5,19 @@
  * 2.0.
  */
 
-import {
-  Aggregators,
-  MetricExpressionParams,
-} from '../../../../../common/custom_threshold_rule/types';
+import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
 import { createConditionScript } from './create_condition_script';
 import { createLastPeriod } from './wrap_in_period';
 
 export const createBucketSelector = (
-  condition: MetricExpressionParams,
+  condition: CustomMetricExpressionParams,
   alertOnGroupDisappear: boolean = false,
   timeFieldName: string,
   groupBy?: string | string[],
   lastPeriodEnd?: number
 ) => {
-  const hasGroupBy = groupBy != null;
-  const isPercentile = [Aggregators.P95, Aggregators.P99].includes(condition.aggType);
-  const isCount = condition.aggType === Aggregators.COUNT;
-  const isRate = condition.aggType === Aggregators.RATE;
-  const bucketPath = isCount
-    ? "currentPeriod['all']>_count"
-    : isRate
-    ? `aggregatedValue`
-    : isPercentile
-    ? `currentPeriod[\'all\']>aggregatedValue[${
-        condition.aggType === Aggregators.P95 ? '95' : '99'
-      }]`
-    : "currentPeriod['all']>aggregatedValue";
+  const hasGroupBy = !!groupBy;
+  const bucketPath = "currentPeriod['all']>aggregatedValue";
 
   const shouldTrigger = {
     bucket_script: {

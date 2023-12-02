@@ -16,7 +16,7 @@ import { hostname } from 'os';
 import url from 'url';
 
 import type { Duration } from 'moment';
-import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
+import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
 import { CspConfigType, CspConfig } from './csp';
 import { ExternalUrlConfig } from './external_url';
@@ -24,6 +24,7 @@ import {
   securityResponseHeadersSchema,
   parseRawSecurityResponseHeadersConfig,
 } from './security_response_headers_config';
+import { CdnConfig } from './cdn';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
 
@@ -57,6 +58,9 @@ const configSchema = schema.object(
           return 'the value should be between 1 second and 2 minutes';
         }
       },
+    }),
+    cdn: schema.object({
+      url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     }),
     cors: schema.object(
       {
@@ -174,9 +178,10 @@ const configSchema = schema.object(
 
     versioned: schema.object({
       /**
-       * Which handler resolution algo to use: "newest" or "oldest".
+       * Which handler resolution algo to use for public routes: "newest" or "oldest".
        *
-       * @note in development we have an additional option "none" which is also the default.
+       * @note Internal routes always require a version to be specified.
+       * @note in development we have an additional option "none" which is also the default in dev.
        *       This prevents any fallbacks and requires that a version specified.
        *       Useful for ensuring that a given client always specifies a version.
        */
@@ -261,6 +266,7 @@ export class HttpConfig implements IHttpConfig {
   public basePath?: string;
   public publicBaseUrl?: string;
   public rewriteBasePath: boolean;
+  public cdn: CdnConfig;
   public ssl: SslConfig;
   public compression: {
     enabled: boolean;
@@ -314,7 +320,8 @@ export class HttpConfig implements IHttpConfig {
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
-    this.csp = new CspConfig({ ...rawCspConfig, disableEmbedding });
+    this.cdn = CdnConfig.from(rawHttpConfig.cdn);
+    this.csp = new CspConfig({ ...rawCspConfig, disableEmbedding }, this.cdn.getCspConfig());
     this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;

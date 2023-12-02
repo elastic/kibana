@@ -5,38 +5,36 @@
  * 2.0.
  */
 
-import { MetricsExplorerMetric } from '../../../../common/custom_threshold_rule/metrics_explorer';
+import {
+  Aggregators,
+  CustomThresholdExpressionMetric,
+} from '../../../../common/custom_threshold_rule/types';
 import { createFormatterForMetric } from './create_formatter_for_metric';
 
 describe('createFormatterForMetric()', () => {
   it('should just work for count', () => {
-    const metric: MetricsExplorerMetric = { aggregation: 'count' };
+    const metric: CustomThresholdExpressionMetric[] = [{ name: 'A', aggType: Aggregators.COUNT }];
     const format = createFormatterForMetric(metric);
     expect(format(1291929)).toBe('1,291,929');
   });
   it('should just work for numerics', () => {
-    const metric: MetricsExplorerMetric = { aggregation: 'avg', field: 'system.load.1' };
+    const metric: CustomThresholdExpressionMetric[] = [
+      { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.load.1' },
+    ];
     const format = createFormatterForMetric(metric);
     expect(format(1000.2)).toBe('1,000.2');
   });
   it('should just work for percents', () => {
-    const metric: MetricsExplorerMetric = { aggregation: 'avg', field: 'system.cpu.total.pct' };
+    const metric: CustomThresholdExpressionMetric[] = [
+      { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.cpu.total.pct' },
+    ];
     const format = createFormatterForMetric(metric);
     expect(format(0.349)).toBe('34.9%');
   });
-  it('should just work for rates', () => {
-    const metric: MetricsExplorerMetric = {
-      aggregation: 'rate',
-      field: 'host.network.egress.bytes',
-    };
-    const format = createFormatterForMetric(metric);
-    expect(format(103929292)).toBe('831.4 Mbit/s');
-  });
   it('should just work for bytes', () => {
-    const metric: MetricsExplorerMetric = {
-      aggregation: 'avg',
-      field: 'host.network.egress.bytes',
-    };
+    const metric: CustomThresholdExpressionMetric[] = [
+      { name: 'A', aggType: Aggregators.AVERAGE, field: 'host.network.egress.bytes' },
+    ];
     const format = createFormatterForMetric(metric);
     expect(format(103929292)).toBe('103.9 MB');
   });

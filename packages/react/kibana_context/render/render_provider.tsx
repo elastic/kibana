@@ -12,7 +12,7 @@ import {
   KibanaRootContextProvider,
   type KibanaRootContextProviderProps,
 } from '@kbn/react-kibana-context-root';
-import { EuiErrorBoundary } from '@elastic/eui';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 
 /** Props for the KibanaContextProvider */
 export type KibanaRenderContextProviderProps = Omit<KibanaRootContextProviderProps, 'globalStyles'>;
@@ -27,7 +27,9 @@ export const KibanaRenderContextProvider: FC<KibanaRenderContextProviderProps> =
 }) => {
   return (
     <KibanaRootContextProvider globalStyles={false} {...props}>
-      <EuiErrorBoundary>{children}</EuiErrorBoundary>
+      <KibanaErrorBoundaryProvider analytics={props.analytics}>
+        <KibanaErrorBoundary>{children}</KibanaErrorBoundary>
+      </KibanaErrorBoundaryProvider>
     </KibanaRootContextProvider>
   );
 };

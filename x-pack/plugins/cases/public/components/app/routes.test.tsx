@@ -11,8 +11,8 @@ import type { MemoryRouterProps } from 'react-router';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import {
+  noCasesSettingsPermission,
   noCreateCasesPermissions,
-  noUpdateCasesPermissions,
   readCasesPermissions,
   TestProviders,
 } from '../../common/mock';
@@ -28,7 +28,7 @@ jest.mock('../create', () => ({
 }));
 
 jest.mock('../configure_cases', () => ({
-  ConfigureCases: () => <div>{'Configure cases'}</div>,
+  ConfigureCases: () => <div>{'Settings'}</div>,
 }));
 
 const getCaseViewPaths = () => ['/cases/test-id', '/cases/test-id/comment-id'];
@@ -96,14 +96,14 @@ describe('Cases routes', () => {
     });
   });
 
-  describe('Configure cases', () => {
-    it('navigates to the configure cases page', () => {
+  describe('Cases settings', () => {
+    it('navigates to the cases settings page', () => {
       renderWithRouter(['/cases/configure']);
-      expect(screen.getByText('Configure cases')).toBeInTheDocument();
+      expect(screen.getByText('Settings')).toBeInTheDocument();
     });
 
-    it('shows the no privileges page if the user does not have update privileges', () => {
-      renderWithRouter(['/cases/configure'], noUpdateCasesPermissions());
+    it('shows the no privileges page if the user does not have settings privileges', () => {
+      renderWithRouter(['/cases/configure'], noCasesSettingsPermission());
       expect(screen.getByText('Privileges required')).toBeInTheDocument();
     });
   });

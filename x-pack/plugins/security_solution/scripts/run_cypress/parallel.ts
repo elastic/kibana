@@ -10,7 +10,6 @@ import yargs from 'yargs';
 import _ from 'lodash';
 import globby from 'globby';
 import pMap from 'p-map';
-import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
 import { findChangedFiles } from 'find-cypress-specs';
@@ -27,47 +26,18 @@ import {
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
+import { prefixedOutputLogger } from '../endpoint/common/utils';
+import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
+import { createKbnClient } from '../endpoint/common/stack_services';
+import type { StartedFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
+import { startFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
 import { renderSummaryTable } from './print_run';
-import { isSkipped, parseTestFileConfig } from './utils';
+import { parseTestFileConfig, retrieveIntegrations } from './utils';
 import { getFTRConfig } from './get_ftr_config';
-
-/**
- * Retrieve test files using a glob pattern.
- * If process.env.RUN_ALL_TESTS is true, returns all matching files, otherwise, return files that should be run by this job based on process.env.BUILDKITE_PARALLEL_JOB_COUNT and process.env.BUILDKITE_PARALLEL_JOB
- */
-const retrieveIntegrations = (integrationsPaths: string[]) => {
-  const nonSkippedSpecs = integrationsPaths.filter((filePath) => !isSkipped(filePath));
-
-  if (process.env.RUN_ALL_TESTS === 'true') {
-    return nonSkippedSpecs;
-  } else {
-    // The number of instances of this job were created
-    const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
-      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
-      : 1;
-    // An index which uniquely identifies this instance of the job
-    const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
-      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
-      : 0;
-
-    const nonSkippedSpecsForChunk: string[] = [];
-
-    for (let i = chunkIndex; i < nonSkippedSpecs.length; i += chunksTotal) {
-      nonSkippedSpecsForChunk.push(nonSkippedSpecs[i]);
-    }
-
-    return nonSkippedSpecsForChunk;
-  }
-};
 
 export const cli = () => {
   run(
-    async () => {
-      const log = new ToolingLog({
-        level: 'info',
-        writeTo: process.stdout,
-      });
-
+    async ({ log: _cliLogger }) => {
       const { argv } = yargs(process.argv.slice(2))
         .coerce('configFile', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('spec', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
@@ -81,9 +51,10 @@ export const cli = () => {
             }
             return acc;
           }, {} as Record<string, string | number>)
-        );
+        )
+        .boolean('inspect');
 
-      log.info(`
+      _cliLogger.info(`
 ----------------------------------------------
 Script arguments:
 ----------------------------------------------
@@ -94,9 +65,14 @@ ${JSON.stringify(argv, null, 2)}
 `);
 
       const isOpen = argv._.includes('open');
-
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
+
+      if (cypressConfigFile.env?.TOOLING_LOG_LEVEL) {
+        createToolingLogger.defaultLogLevel = cypressConfigFile.env.TOOLING_LOG_LEVEL;
+      }
+
+      const log = prefixedOutputLogger('cy.parallel()', createToolingLogger());
 
       log.info(`
 ----------------------------------------------
@@ -176,6 +152,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const fleetServerPorts: number[] = [8220];
 
       const getEsPort = <T>(): T | number => {
+        if (isOpen) {
+          return 9220;
+        }
+
         const esPort = parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
         if (esPorts.includes(esPort)) {
           return getEsPort();
@@ -258,6 +238,34 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               isOpen,
             });
 
+            const createUrlFromFtrConfig = (
+              type: 'elasticsearch' | 'kibana' | 'fleetserver',
+              withAuth: boolean = false
+            ): string => {
+              const getKeyPath = (keyPath: string = ''): string => {
+                return `servers.${type}${keyPath ? `.${keyPath}` : ''}`;
+              };
+
+              if (!config.get(getKeyPath())) {
+                throw new Error(`Unable to create URL for ${type}. Not found in FTR config at `);
+              }
+
+              const url = new URL('http://localhost');
+
+              url.port = config.get(getKeyPath('port'));
+              url.protocol = config.get(getKeyPath('protocol'));
+              url.hostname = config.get(getKeyPath('hostname'));
+
+              if (withAuth) {
+                url.username = config.get(getKeyPath('username'));
+                url.password = config.get(getKeyPath('password'));
+              }
+
+              return url.toString().replace(/\/$/, '');
+            };
+
+            const baseUrl = createUrlFromFtrConfig('kibana');
+
             log.info(`
 ----------------------------------------------
 Cypress FTR setup for file: ${filePath}:
@@ -315,7 +323,33 @@ ${JSON.stringify(
                   ? []
                   : ['--dev', '--no-dev-config', '--no-dev-credentials'],
               onEarlyExit,
+              inspect: argv.inspect,
             });
+
+            // Setup fleet if Cypress config requires it
+            let fleetServer: void | StartedFleetServer;
+            if (cypressConfigFile.env?.WITH_FLEET_SERVER) {
+              log.info(`Setting up fleet-server for this Cypress config`);
+
+              const kbnClient = createKbnClient({
+                url: baseUrl,
+                username: config.get('servers.kibana.username'),
+                password: config.get('servers.kibana.password'),
+                log,
+              });
+
+              fleetServer = await startFleetServer({
+                kbnClient,
+                logger: log,
+                port:
+                  fleetServerPort ?? config.has('servers.fleetserver.port')
+                    ? (config.get('servers.fleetserver.port') as number)
+                    : undefined,
+                // `force` is needed to ensure that any currently running fleet server (perhaps left
+                // over from an interrupted run) is killed and a new one restarted
+                force: true,
+              });
+            }
 
             await providers.loadAll();
 
@@ -324,34 +358,6 @@ ${JSON.stringify(
               config,
               EsVersion.getDefault()
             );
-
-            const createUrlFromFtrConfig = (
-              type: 'elasticsearch' | 'kibana' | 'fleetserver',
-              withAuth: boolean = false
-            ): string => {
-              const getKeyPath = (keyPath: string = ''): string => {
-                return `servers.${type}${keyPath ? `.${keyPath}` : ''}`;
-              };
-
-              if (!config.get(getKeyPath())) {
-                throw new Error(`Unable to create URL for ${type}. Not found in FTR config at `);
-              }
-
-              const url = new URL('http://localhost');
-
-              url.port = config.get(getKeyPath('port'));
-              url.protocol = config.get(getKeyPath('protocol'));
-              url.hostname = config.get(getKeyPath('hostname'));
-
-              if (withAuth) {
-                url.username = config.get(getKeyPath('username'));
-                url.password = config.get(getKeyPath('password'));
-              }
-
-              return url.toString().replace(/\/$/, '');
-            };
-
-            const baseUrl = createUrlFromFtrConfig('kibana');
 
             const ftrEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
               retries: 1,
@@ -431,6 +437,10 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
               }
             }
 
+            if (fleetServer) {
+              await fleetServer.stop();
+            }
+
             await procs.stop('kibana');
             await shutdownEs();
             cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
@@ -446,7 +456,9 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
         const hasFailedTests = _.some(
           results,
-          (result) => result?.status === 'finished' && result.totalFailed > 0
+          (result) =>
+            (result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
+            (result as CypressCommandLine.CypressRunResult)?.totalFailed
         );
         if (hasFailedTests) {
           throw createFailError('Not all tests passed');

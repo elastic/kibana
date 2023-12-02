@@ -1,4 +1,14 @@
 # https://buildkite.com/elastic/kibana-elasticsearch-serverless-verify-and-promote/
+
+### Parameters for this job:
+# PUBLISH_DOCKER_TAG: if set to 1/true, passing runs will promote the tested ES Serverless tag to latest-verified.
+# PUBLISH_MANIFEST: if set to 1/true, passing runs will upload the manifest attesting what (kibana + es) combination was used in the test
+# SKIP_VERIFICATION: if set to 1/true, it will skip running all tests
+# SKIP_CYPRESS: if set to 1/true, it will skip running the cypress tests
+# FTR_EXTRA_ARGS: a string argument, if passed, it will be forwarded verbatim to the FTR run script
+# ES_SERVERLESS_IMAGE: the tag for the docker image to test, in the form of docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:$TAG
+# BUILDKITE_COMMIT: the commit hash of the kibana branch to test
+
 agents:
   queue: kibana-default
 
@@ -24,7 +34,6 @@ steps:
           queue: n2-16-spot
         key: build
         depends_on: pre-build
-        if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
         timeout_in_minutes: 60
         retry:
           automatic:
@@ -35,10 +44,104 @@ steps:
         command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
         agents:
           queue: kibana-default
+        depends_on: build
+        timeout_in_minutes: 10
         env:
           FTR_CONFIGS_SCRIPT: 'TEST_ES_SERVERLESS_IMAGE=$ES_SERVERLESS_IMAGE .buildkite/scripts/steps/test/ftr_configs.sh'
           FTR_CONFIG_PATTERNS: '**/test_serverless/**'
+          FTR_EXTRA_ARGS: '$FTR_EXTRA_ARGS'
           LIMIT_CONFIG_TYPE: 'functional'
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+      - command: .buildkite/scripts/steps/functional/security_serverless.sh
+        label: 'Serverless Security Cypress Tests'
+        if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
+        agents:
+          queue: n2-4-spot
+        depends_on: build
+        timeout_in_minutes: 60
+        parallelism: 6
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+      - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
+        label: 'Serverless Explore - Security Solution Cypress Tests'
+        if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
+        agents:
+          queue: n2-4-spot
+        depends_on: build
+        timeout_in_minutes: 60
+        parallelism: 4
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+      - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
+        label: 'Serverless Investigations - Security Solution Cypress Tests'
+        if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
+        agents:
+          queue: n2-4-spot
+        depends_on: build
+        timeout_in_minutes: 60
+        parallelism: 8
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+      - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
+        label: 'Serverless Rule Management - Security Solution Cypress Tests'
+        if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
+        agents:
+          queue: n2-4-spot
+        depends_on: build
+        timeout_in_minutes: 60
+        parallelism: 8
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+      - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
+        label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
+        if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
+        agents:
+          queue: n2-4-spot
+        depends_on: build
+        timeout_in_minutes: 60
+        parallelism: 6
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+      - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
+        label: 'Defend Workflows Cypress Tests on Serverless'
+        if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
+        agents:
+          queue: n2-4-virt
+        depends_on: build
+        timeout_in_minutes: 60
+        parallelism: 6
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+      - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
+        label: 'Serverless Osquery Cypress Tests'
+        if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
+        agents:
+          queue: n2-4-spot
+        depends_on: build
+        timeout_in_minutes: 60
+        parallelism: 6
         retry:
           automatic:
             - exit_status: '*'

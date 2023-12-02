@@ -39,7 +39,7 @@ export function cylanceLogsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-cylance.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/cylance.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/cylance.svg'),
     artifacts: {
       dashboards: [],
       application: {

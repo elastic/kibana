@@ -24,10 +24,12 @@ import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
 import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
 import { PromptContextTemplate } from '../assistant/prompt_context/types';
 import { QuickPrompt } from '../assistant/quick_prompts/types';
-import { Prompt } from '../assistant/types';
+import type { KnowledgeBaseConfig, Prompt } from '../assistant/types';
 import { BASE_SYSTEM_PROMPTS } from '../content/prompts/system';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
+  DEFAULT_KNOWLEDGE_BASE_SETTINGS,
+  KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
   LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
   QUICK_PROMPT_LOCAL_STORAGE_KEY,
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
@@ -49,7 +51,6 @@ type ShowAssistantOverlay = ({
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   assistantAvailability: AssistantAvailability;
-  assistantLangChain: boolean;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   baseAllow: string[];
@@ -63,16 +64,27 @@ export interface AssistantProviderProps {
   docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
   getComments: ({
+    amendMessage,
     currentConversation,
-    lastCommentRef,
+    isFetchingResponse,
+    regenerateMessage,
     showAnonymizedValues,
   }: {
+    amendMessage: ({
+      conversationId,
+      content,
+    }: {
+      conversationId: string;
+      content: string;
+    }) => void;
     currentConversation: Conversation;
-    lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
+    isFetchingResponse: boolean;
+    regenerateMessage: (conversationId: string) => void;
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
   getInitialConversations: () => Record<string, Conversation>;
+  modelEvaluatorEnabled?: boolean;
   nameSpace?: string;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
@@ -87,7 +99,6 @@ export interface UseAssistantContext {
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];
   allSystemPrompts: Prompt[];
-  assistantLangChain: boolean;
   baseAllow: string[];
   baseAllowReplacement: string[];
   docLinks: Omit<DocLinksStart, 'links'>;
@@ -101,17 +112,27 @@ export interface UseAssistantContext {
   conversations: Record<string, Conversation>;
   getComments: ({
     currentConversation,
-    lastCommentRef,
     showAnonymizedValues,
+    amendMessage,
+    isFetchingResponse,
   }: {
     currentConversation: Conversation;
-    lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
-
+    isFetchingResponse: boolean;
+    amendMessage: ({
+      conversationId,
+      content,
+    }: {
+      conversationId: string;
+      content: string;
+    }) => void;
+    regenerateMessage: () => void;
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
+  knowledgeBase: KnowledgeBaseConfig;
   localStorageLastConversationId: string | undefined;
   promptContexts: Record<string, PromptContext>;
+  modelEvaluatorEnabled: boolean;
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: SettingsTabs;
@@ -120,6 +141,7 @@ export interface UseAssistantContext {
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
+  setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
@@ -133,7 +155,6 @@ const AssistantContext = React.createContext<UseAssistantContext | undefined>(un
 export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   actionTypeRegistry,
   assistantAvailability,
-  assistantLangChain,
   assistantTelemetry,
   augmentMessageCodeBlocks,
   baseAllow,
@@ -149,6 +170,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   getComments,
   http,
   getInitialConversations,
+  modelEvaluatorEnabled = false,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   setConversations,
   setDefaultAllow,
@@ -173,6 +195,14 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
 
   const [localStorageLastConversationId, setLocalStorageLastConversationId] =
     useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`);
+
+  /**
+   * Local storage for knowledge base configuration, prefixed by assistant nameSpace
+   */
+  const [localStorageKnowledgeBase, setLocalStorageKnowledgeBase] = useLocalStorage(
+    `${nameSpace}.${KNOWLEDGE_BASE_LOCAL_STORAGE_KEY}`,
+    DEFAULT_KNOWLEDGE_BASE_SETTINGS
+  );
 
   /**
    * Prompt contexts are used to provide components a way to register and make their data available to the assistant.
@@ -254,7 +284,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     () => ({
       actionTypeRegistry,
       assistantAvailability,
-      assistantLangChain,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       allQuickPrompts: localStorageQuickPrompts ?? [],
@@ -272,6 +301,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
+      knowledgeBase: localStorageKnowledgeBase ?? DEFAULT_KNOWLEDGE_BASE_SETTINGS,
+      modelEvaluatorEnabled,
       promptContexts,
       nameSpace,
       registerPromptContext,
@@ -281,6 +312,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setConversations: onConversationsUpdated,
       setDefaultAllow,
       setDefaultAllowReplacement,
+      setKnowledgeBase: setLocalStorageKnowledgeBase,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
       showAssistantOverlay,
@@ -292,7 +324,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     [
       actionTypeRegistry,
       assistantAvailability,
-      assistantLangChain,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       baseAllow,
@@ -308,9 +339,11 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
+      localStorageKnowledgeBase,
       localStorageLastConversationId,
       localStorageQuickPrompts,
       localStorageSystemPrompts,
+      modelEvaluatorEnabled,
       nameSpace,
       onConversationsUpdated,
       promptContexts,
@@ -318,6 +351,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       selectedSettingsTab,
       setDefaultAllow,
       setDefaultAllowReplacement,
+      setLocalStorageKnowledgeBase,
       setLocalStorageLastConversationId,
       setLocalStorageQuickPrompts,
       setLocalStorageSystemPrompts,

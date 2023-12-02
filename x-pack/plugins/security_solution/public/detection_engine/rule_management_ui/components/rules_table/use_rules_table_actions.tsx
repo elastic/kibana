@@ -9,7 +9,7 @@ import type { DefaultItemAction } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
-import { BulkActionType } from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -75,7 +75,7 @@ export const useRulesTableActions = ({
           return;
         }
         const result = await executeBulkAction({
-          type: BulkActionType.duplicate,
+          type: BulkActionTypeEnum.duplicate,
           ids: [rule.id],
           duplicatePayload: {
             include_exceptions:
@@ -123,7 +123,7 @@ export const useRulesTableActions = ({
 
         startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
         await executeBulkAction({
-          type: BulkActionType.delete,
+          type: BulkActionTypeEnum.delete,
           ids: [rule.id],
         });
       },

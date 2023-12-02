@@ -24,6 +24,7 @@ export const TEST_IDS = {
     EDIT: 'filter-group__context--edit',
     DISCARD: `filter-group__context--discard`,
   },
+  FILTER_BY_ASSIGNEES_BUTTON: 'filter-popover-button-assignees',
 };
 
 export const COMMON_OPTIONS_LIST_CONTROL_INPUTS: Partial<AddOptionsListControlProps> = {

@@ -2009,7 +2009,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              "<R>({ url, data, method, responseSchema, headers, ...config }: ",
+              "<R>({ url, data, method, responseSchema, headers, timeout, ...config }: ",
               "SubActionRequestParams",
               "<R>) => Promise<",
               "AxiosResponse",
@@ -2024,7 +2024,7 @@
                 "id": "def-server.SubActionConnector.request.$1",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "{\n    url,\n    data,\n    method = 'get',\n    responseSchema,\n    headers,\n    ...config\n  }",
+                "label": "{\n    url,\n    data,\n    method = 'get',\n    responseSchema,\n    headers,\n    timeout,\n    ...config\n  }",
                 "description": [],
                 "signature": [
                   "SubActionRequestParams",
@@ -2851,24 +2851,21 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-server.FindConnectorResult",
+        "id": "def-server.ConnectorWithExtraFindData",
         "type": "Interface",
         "tags": [],
-        "label": "FindConnectorResult",
+        "label": "ConnectorWithExtraFindData",
         "description": [],
         "signature": [
           {
             "pluginId": "actions",
             "scope": "server",
             "docId": "kibActionsPluginApi",
-            "section": "def-server.FindConnectorResult",
-            "text": "FindConnectorResult"
+            "section": "def-server.ConnectorWithExtraFindData",
+            "text": "ConnectorWithExtraFindData"
           },
           " extends ",
-          "Connector",
-          "<",
-          "ActionTypeConfig",
-          ">"
+          "Connector"
         ],
         "path": "x-pack/plugins/actions/server/application/connector/types/connector.ts",
         "deprecated": false,
@@ -2876,7 +2873,7 @@
         "children": [
           {
             "parentPluginId": "actions",
-            "id": "def-server.FindConnectorResult.referencedByCount",
+            "id": "def-server.ConnectorWithExtraFindData.referencedByCount",
             "type": "number",
             "tags": [],
             "label": "referencedByCount",
@@ -2904,14 +2901,7 @@
             "text": "InMemoryConnector"
           },
           "<Config, Secrets> extends ",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionResult",
-            "text": "ActionResult"
-          },
-          "<Config>"
+          "Connector"
         ],
         "path": "x-pack/plugins/actions/server/types.ts",
         "deprecated": false,
@@ -3156,8 +3146,7 @@
         "label": "ActionResult",
         "description": [],
         "signature": [
-          "Connector",
-          "<Config>"
+          "Connector"
         ],
         "path": "x-pack/plugins/actions/server/types.ts",
         "deprecated": false,
@@ -3190,56 +3179,24 @@
           "{ create: ({ action: { actionTypeId, name, config, secrets }, options, }: ",
           "CreateOptions",
           ") => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionResult",
-            "text": "ActionResult"
-          },
-          "<",
-          "ActionTypeConfig",
-          ">>; update: ({ id, action }: ",
+          "Connector",
+          ">; update: ({ id, action }: ",
           "UpdateOptions",
           ") => Promise<",
+          "Connector",
+          ">; get: ({ id, throwIfSystemAction, }: { id: string; throwIfSystemAction?: boolean | undefined; }) => Promise<",
+          "Connector",
+          ">; getAll: ({ includeSystemActions }?: { includeSystemActions?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
             "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionResult",
-            "text": "ActionResult"
-          },
-          "<",
-          "ActionTypeConfig",
-          ">>; get: ({ id, throwIfSystemAction, }: { id: string; throwIfSystemAction?: boolean | undefined; }) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionResult",
-            "text": "ActionResult"
-          },
-          "<",
-          "ActionTypeConfig",
-          ">>; getAll: ({ includeSystemActions }?: { includeSystemActions?: boolean | undefined; }) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.FindConnectorResult",
-            "text": "FindConnectorResult"
+            "section": "def-server.ConnectorWithExtraFindData",
+            "text": "ConnectorWithExtraFindData"
           },
           "[]>; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionResult",
-            "text": "ActionResult"
-          },
-          "<",
-          "ActionTypeConfig",
-          ">[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
+          "Connector",
+          "[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
           "ActionsConfigurationUtilities",
           ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; execute: ({ actionId, params, source, relatedSavedObjects, }: Omit<",
           "ExecuteOptions",
@@ -5279,7 +5236,7 @@
         "label": "GenerativeAIConnectorFeatureId",
         "description": [],
         "signature": [
-          "\"general\""
+          "\"generativeAI\""
         ],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,

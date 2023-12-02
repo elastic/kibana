@@ -134,12 +134,14 @@ exports[`ManageData render 1`] = `
           grow={false}
         >
           <RedirectAppLinks
-            application={
+            coreStart={
               Object {
-                "capabilities": Object {
-                  "navLinks": Object {
-                    "dev_tools": true,
-                    "management": true,
+                "application": Object {
+                  "capabilities": Object {
+                    "navLinks": Object {
+                      "dev_tools": true,
+                      "management": true,
+                    },
                   },
                 },
               }
@@ -164,12 +166,14 @@ exports[`ManageData render 1`] = `
           grow={false}
         >
           <RedirectAppLinks
-            application={
+            coreStart={
               Object {
-                "capabilities": Object {
-                  "navLinks": Object {
-                    "dev_tools": true,
-                    "management": true,
+                "application": Object {
+                  "capabilities": Object {
+                    "navLinks": Object {
+                      "dev_tools": true,
+                      "management": true,
+                    },
                   },
                 },
               }

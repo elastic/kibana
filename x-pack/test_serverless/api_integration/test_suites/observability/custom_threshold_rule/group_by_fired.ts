@@ -18,7 +18,7 @@ import {
   Aggregators,
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/custom_threshold_executor';
+import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -33,9 +33,11 @@ export default function ({ getService }: FtrProviderContext) {
   let alertId: string;
   let startedAt: string;
 
-  // Issue: https://github.com/elastic/kibana/issues/165138
-  describe.skip('Custom Threshold rule - GROUP_BY - FIRED', () => {
+  describe('Custom Threshold rule - GROUP_BY - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
+    // DATE_VIEW should match the index template:
+    // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
+    const DATE_VIEW = 'kbn-data-forge-fake_hosts';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW_ID = 'data-view-id';
     let infraDataIndex: string;
@@ -45,9 +47,9 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
       await dataViewApi.create({
-        name: 'metrics-fake_hosts',
+        name: DATE_VIEW,
         id: DATA_VIEW_ID,
-        title: 'metrics-fake_hosts',
+        title: DATE_VIEW,
       });
     });
 
@@ -63,10 +65,12 @@ export default function ({ getService }: FtrProviderContext) {
       await esClient.deleteByQuery({
         index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+        conflicts: 'proceed',
       });
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
-        query: { term: { 'kibana.alert.rule.consumer': 'logs' } },
+        query: { term: { 'rule.id': ruleId } },
+        conflicts: 'proceed',
       });
       await dataViewApi.delete({
         id: DATA_VIEW_ID,
@@ -84,13 +88,12 @@ export default function ({ getService }: FtrProviderContext) {
 
         const createdRule = await alertingApi.createRule({
           tags: ['observability'],
-          consumer: 'logs',
+          consumer: 'observability',
           name: 'Threshold rule',
           ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           params: {
             criteria: [
               {
-                aggType: Aggregators.CUSTOM,
                 comparator: Comparator.GT_OR_EQ,
                 threshold: [0.2],
                 timeSize: 1,
@@ -146,6 +149,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect(executionStatus).to.be('active');
       });
 
+      it('should find the created rule with correct information about the consumer', async () => {
+        const match = await alertingApi.findRule(ruleId);
+        expect(match).not.to.be(undefined);
+        expect(match.consumer).to.be('observability');
+      });
+
       it('should set correct information in the alert document', async () => {
         const resp = await alertingApi.waitForAlertInIndex({
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
@@ -156,9 +165,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (BETA)'
+          'Custom threshold (Technical Preview)'
         );
-        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
+        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.producer', 'observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.revision', 0);
@@ -194,7 +203,6 @@ export default function ({ getService }: FtrProviderContext) {
           .eql({
             criteria: [
               {
-                aggType: 'custom',
                 comparator: '>=',
                 threshold: [0.2],
                 timeSize: 1,
@@ -227,9 +235,9 @@ export default function ({ getService }: FtrProviderContext) {
           `${protocol}://${hostname}:${port}/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          'Custom equation is 0.8 in the last 1 min for host-0. Alert when >= 0.2.'
+          `Average system.cpu.total.norm.pct is 80%, above the threshold of 20%. (duration: 1 min, data view: ${DATE_VIEW}, group: host-0)`
         );
-        expect(resp.hits.hits[0]._source?.value).eql('0.8');
+        expect(resp.hits.hits[0]._source?.value).eql('80%');
         expect(resp.hits.hits[0]._source?.host).eql(
           '{"name":"host-0","mac":["00-00-5E-00-53-23","00-00-5E-00-53-24"]}'
         );

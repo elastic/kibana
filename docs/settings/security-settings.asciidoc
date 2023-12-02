@@ -195,7 +195,7 @@ Valid values are `Strict`, `Lax`, `None`.
 This is *not set* by default, which modern browsers will treat as `Lax`. If you use Kibana embedded in an iframe in modern browsers, you might need to set it to `None`. Setting this value to `None` requires cookies to be sent over a secure connection by setting <<xpack-security-secureCookies, `xpack.security.secureCookies`>>: `true`.
 
 [[xpack-session-idleTimeout]] xpack.security.session.idleTimeout {ess-icon}::
-Ensures that user sessions will expire after a period of inactivity. This and <<xpack-session-lifespan,`xpack.security.session.lifespan`>> are both highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is set to `0`, then sessions will never expire due to inactivity. By default, this value is 8 hours.
+Ensures that user sessions will expire after a period of inactivity. This and <<xpack-session-lifespan,`xpack.security.session.lifespan`>> are both highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is set to `0`, then sessions will never expire due to inactivity. By default, this value is 3 days.
 +
 NOTE: Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 

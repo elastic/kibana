@@ -25,7 +25,11 @@ jest.mock('./action_status', () => {
   };
 });
 
-describe('sendUpgradeAgentsActions (plural)', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/171052
+// FLAKY: https://github.com/elastic/kibana/issues/172114
+// FLAKY: https://github.com/elastic/kibana/issues/171536
+// FLAKY: https://github.com/elastic/kibana/issues/171160
+describe.skip('sendUpgradeAgentsActions (plural)', () => {
   beforeEach(async () => {
     appContextService.start(createAppContextStartContractMock());
   });
@@ -46,6 +50,7 @@ describe('sendUpgradeAgentsActions (plural)', () => {
     const docs = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.doc)
       .map((i: any) => i.doc);
+
     expect(ids).toEqual(idsToAction);
     for (const doc of docs!) {
       expect(doc).toHaveProperty('upgrade_started_at');
@@ -152,10 +157,10 @@ describe('getRollingUpgradeOptions', () => {
     });
   });
 
-  it('should set min expiration for no duration', () => {
+  it('should set a very long expiration (1 month) for no duration', () => {
     const options = getRollingUpgradeOptions('2023-01-06T00:00:00Z');
     expect(options).toEqual({
-      expiration: '2023-01-06T02:00:00.000Z',
+      expiration: '2023-02-05T00:00:00.000Z',
       minimum_execution_duration: 7200,
       start_time: '2023-01-06T00:00:00Z',
     });

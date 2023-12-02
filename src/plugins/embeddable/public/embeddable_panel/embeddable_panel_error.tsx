@@ -13,7 +13,9 @@ import { EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 
 import type { MaybePromise } from '@kbn/utility-types';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { getSearchErrorOverrideDisplay } from '@kbn/data-plugin/public';
 import { ErrorLike } from '@kbn/expressions-plugin/common';
+import { core } from '../kibana_services';
 
 import { EditPanelAction } from './panel_actions';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../lib/embeddables';
@@ -51,6 +53,20 @@ export function EmbeddablePanelError({
     [label, title]
   );
 
+  const overrideDisplay = getSearchErrorOverrideDisplay({
+    error,
+    application: core.application,
+  });
+
+  const actions = overrideDisplay?.actions ?? [];
+  if (isEditable) {
+    actions.push(
+      <EuiButtonEmpty aria-label={ariaLabel} onClick={handleErrorClick} size="s">
+        {label}
+      </EuiButtonEmpty>
+    );
+  }
+
   useEffect(() => {
     const subscription = merge(embeddable.getInput$(), embeddable.getOutput$())
       .pipe(
@@ -65,25 +81,21 @@ export function EmbeddablePanelError({
   return (
     <EuiEmptyPrompt
       body={
-        <EuiText size="s">
-          <Markdown
-            markdown={error.message}
-            openLinksInNewTab={true}
-            data-test-subj="errorMessageMarkdown"
-          />
-        </EuiText>
+        overrideDisplay?.body ?? (
+          <EuiText size="s">
+            <Markdown
+              markdown={error.message}
+              openLinksInNewTab={true}
+              data-test-subj="errorMessageMarkdown"
+            />
+          </EuiText>
+        )
       }
       data-test-subj="embeddableStackError"
       iconType="warning"
       iconColor="danger"
       layout="vertical"
-      actions={
-        isEditable && (
-          <EuiButtonEmpty aria-label={ariaLabel} onClick={handleErrorClick} size="s">
-            {label}
-          </EuiButtonEmpty>
-        )
-      }
+      actions={actions}
     />
   );
 }

@@ -15,7 +15,7 @@ import { EuiHealth } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
-import { RiskScore } from '.';
+import { RiskScoreLevel } from '.';
 import { SEVERITY_COLOR } from '../../../../../overview/components/detection_response/utils';
 
 jest.mock('@elastic/eui', () => {
@@ -31,7 +31,7 @@ describe('RiskScore', () => {
   it('renders critical severity risk score', () => {
     const { container } = render(
       <TestProviders>
-        <RiskScore severity={RiskSeverity.critical} />
+        <RiskScoreLevel severity={RiskSeverity.critical} />
       </TestProviders>
     );
 
@@ -46,7 +46,7 @@ describe('RiskScore', () => {
   it('renders hight severity risk score', () => {
     const { container } = render(
       <TestProviders>
-        <RiskScore severity={RiskSeverity.high} />
+        <RiskScoreLevel severity={RiskSeverity.high} />
       </TestProviders>
     );
 
@@ -61,7 +61,7 @@ describe('RiskScore', () => {
   it('renders moderate severity risk score', () => {
     const { container } = render(
       <TestProviders>
-        <RiskScore severity={RiskSeverity.moderate} />
+        <RiskScoreLevel severity={RiskSeverity.moderate} />
       </TestProviders>
     );
 
@@ -76,7 +76,7 @@ describe('RiskScore', () => {
   it('renders low severity risk score', () => {
     const { container } = render(
       <TestProviders>
-        <RiskScore severity={RiskSeverity.low} />
+        <RiskScoreLevel severity={RiskSeverity.low} />
       </TestProviders>
     );
 
@@ -91,7 +91,7 @@ describe('RiskScore', () => {
   it('renders unknown severity risk score', () => {
     const { container } = render(
       <TestProviders>
-        <RiskScore severity={RiskSeverity.unknown} />
+        <RiskScoreLevel severity={RiskSeverity.unknown} />
       </TestProviders>
     );
 
@@ -106,7 +106,7 @@ describe('RiskScore', () => {
   it("doesn't render background-color when hideBackgroundColor is true", () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskScore severity={RiskSeverity.critical} hideBackgroundColor />
+        <RiskScoreLevel severity={RiskSeverity.critical} hideBackgroundColor />
       </TestProviders>
     );
 

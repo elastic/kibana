@@ -14,6 +14,7 @@ import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/te
 import { MaintenanceWindowStatus } from '../../../../../common';
 import { transformUpdateBody } from './transforms';
 import { rewritePartialMaintenanceBodyRes } from '../../../lib';
+import { UpdateMaintenanceWindowRequestBody } from '../../../../../common/routes/maintenance_window/apis/update';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
@@ -29,7 +30,7 @@ const mockMaintenanceWindow = {
   id: 'test-id',
 };
 
-const updateParams = {
+const updateParams: UpdateMaintenanceWindowRequestBody = {
   title: 'new-title',
   duration: 5000,
   enabled: false,
@@ -39,6 +40,7 @@ const updateParams = {
     freq: 2 as const,
     count: 10,
   },
+  category_ids: ['observability'],
 };
 
 describe('updateMaintenanceWindowRoute', () => {

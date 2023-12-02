@@ -19,9 +19,6 @@ import {
   DiscoverActionName,
 } from './discover_action_name';
 
-const getDataViewTitleFromTargetIndex = (item: TransformListRow) =>
-  Array.isArray(item.config.dest.index) ? item.config.dest.index.join(',') : item.config.dest.index;
-
 export type DiscoverAction = ReturnType<typeof useDiscoverAction>;
 export const useDiscoverAction = (forceDisable: boolean) => {
   const {
@@ -48,8 +45,7 @@ export const useDiscoverAction = (forceDisable: boolean) => {
     (item: TransformListRow) => {
       const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
       if (!locator) return;
-      const dataViewTitle = getDataViewTitleFromTargetIndex(item);
-      const dataViewId = getDataViewIdByTitle(dataViewTitle);
+      const dataViewId = getDataViewIdByTitle(item.config.dest.index);
       locator.navigateSync({
         indexPatternId: dataViewId,
       });
@@ -59,8 +55,7 @@ export const useDiscoverAction = (forceDisable: boolean) => {
 
   const dataViewExists = useCallback(
     (item: TransformListRow) => {
-      const dataViewTitle = getDataViewTitleFromTargetIndex(item);
-      const dataViewId = getDataViewIdByTitle(dataViewTitle);
+      const dataViewId = getDataViewIdByTitle(item.config.dest.index);
       return dataViewId !== undefined;
     },
     [getDataViewIdByTitle]

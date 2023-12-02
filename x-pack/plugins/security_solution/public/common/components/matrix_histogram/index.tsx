@@ -43,6 +43,7 @@ import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/uti
 import { VisualizationEmbeddable } from '../visualization_actions/visualization_embeddable';
 import { MatrixHistogramChartContent } from './chart_content';
 import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
+import type { SourcererScopeName } from '../../store/sourcerer/model';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
@@ -65,6 +66,7 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     stackByOptions: MatrixHistogramOption[];
     subtitle?: string | GetSubTitle;
     scopeId?: string;
+    sourcererScopeId?: SourcererScopeName;
     title: string | GetTitle;
     hideQueryToggle?: boolean;
     applyGlobalQueriesAndFilters?: boolean;
@@ -114,6 +116,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   startDate,
   subtitle,
   scopeId,
+  sourcererScopeId,
   title,
   titleSize,
   yTickFormatter,
@@ -343,6 +346,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
           {toggleStatus ? (
             isChartEmbeddablesEnabled ? (
               <VisualizationEmbeddable
+                scopeId={sourcererScopeId}
                 applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
                 data-test-subj="embeddable-matrix-histogram"
                 extraOptions={extraVisualizationOptions}

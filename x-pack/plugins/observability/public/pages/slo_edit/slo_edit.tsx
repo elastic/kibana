@@ -33,7 +33,7 @@ export function SloEditPage() {
   const { sloId } = useParams<{ sloId: string | undefined }>();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
-  const { slo, isInitialLoading } = useFetchSloDetails({ sloId });
+  const { data: slo, isInitialLoading } = useFetchSloDetails({ sloId });
 
   useBreadcrumbs([
     {
@@ -41,6 +41,7 @@ export function SloEditPage() {
       text: i18n.translate('xpack.observability.breadcrumbs.sloLabel', {
         defaultMessage: 'SLOs',
       }),
+      deepLinkId: 'observability-overview:slos',
     },
     ...(!!slo
       ? [

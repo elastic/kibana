@@ -15,10 +15,11 @@ import {
   visitEndpointList,
 } from '../../screens';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/171643
+describe.skip(
   'When on the Endpoint List in Security Essentials PLI',
   {
-    tags: ['@serverless', '@brokenInServerless'],
+    tags: ['@serverless'],
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],

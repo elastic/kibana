@@ -6,11 +6,11 @@
  */
 
 import { useState } from 'react';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   SnapshotMetricInput,
   SnapshotCustomMetricInput,
 } from '../../../../common/http_api/snapshot_api';
-import { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export const useInventoryAlertPrefill = () => {
   const [nodeType, setNodeType] = useState<InventoryItemType>('host');

@@ -22,13 +22,13 @@ import {
   ALERT_CASE_IDS,
 } from '@kbn/rule-data-utils';
 
-import { set } from '@kbn/safer-lodash-set';
 import { zip, get } from 'lodash';
+import { sanitizeBulkErrorResponse } from '../..';
 
 // these fields are the one's we'll refresh from the fresh mget'd docs
 const REFRESH_FIELDS_ALWAYS = [ALERT_WORKFLOW_STATUS, ALERT_WORKFLOW_TAGS, ALERT_CASE_IDS];
 const REFRESH_FIELDS_CONDITIONAL = [ALERT_STATUS];
-const REFRESH_FIELDS_ALL = [...REFRESH_FIELDS_ALWAYS, ...REFRESH_FIELDS_CONDITIONAL];
+export const REFRESH_FIELDS_ALL = [...REFRESH_FIELDS_ALWAYS, ...REFRESH_FIELDS_CONDITIONAL];
 
 export interface ResolveAlertConflictsParams {
   esClient: ElasticsearchClient;
@@ -147,7 +147,7 @@ async function refreshFieldsInDocs(
 
     for (const refreshField of REFRESH_FIELDS_ALWAYS) {
       const val = get(freshDoc, refreshField);
-      set(conflictDoc, refreshField, val);
+      conflictDoc[refreshField] = val;
     }
 
     // structured this way to make sure all conditional refresh
@@ -160,7 +160,7 @@ async function refreshFieldsInDocs(
           const freshStatus = get(freshDoc, ALERT_STATUS);
 
           if (freshStatus !== ALERT_STATUS_ACTIVE && freshStatus !== ALERT_STATUS_RECOVERED) {
-            set(conflictDoc, ALERT_STATUS, freshStatus);
+            conflictDoc[ALERT_STATUS] = freshStatus;
           }
           break;
       }
@@ -270,8 +270,9 @@ interface ResponseStatsResult {
 
 // generate a summary of the original bulk request attempt, for logging
 function getResponseStats(bulkResponse: BulkResponse): ResponseStatsResult {
+  const sanitizedResponse = sanitizeBulkErrorResponse(bulkResponse) as BulkResponse;
   const stats: ResponseStatsResult = { success: 0, conflicts: 0, errors: 0, messages: [] };
-  for (const item of bulkResponse.items) {
+  for (const item of sanitizedResponse.items) {
     const op = item.create || item.index || item.update || item.delete;
     if (op?.error) {
       if (op?.status === 409 && op === item.index) {

@@ -44,7 +44,7 @@ describe('ValidateBurnRateRule', () => {
     expect(errors.windows[0].burnRateThreshold).toHaveLength(1);
   });
 
-  it('validates burnRateThreshold is between 1 and maxBurnRateThreshold', () => {
+  it('validates burnRateThreshold is between 0.01 and maxBurnRateThreshold', () => {
     expect(
       validateBurnRateRule(
         createTestParams({
@@ -55,7 +55,7 @@ describe('ValidateBurnRateRule', () => {
     ).toHaveLength(1);
 
     expect(
-      validateBurnRateRule(createTestParams({ burnRateThreshold: 0.99 })).errors.windows[0]
+      validateBurnRateRule(createTestParams({ burnRateThreshold: 0.001 })).errors.windows[0]
         .burnRateThreshold
     ).toHaveLength(1);
 

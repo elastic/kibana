@@ -178,9 +178,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
         isDisabled={false}
-        size="m"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -193,12 +191,10 @@ exports[`CalendarForm Renders calendar form 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="mlSaveCalendarButton"
         fill={true}
         isDisabled={true}
         onClick={[MockFunction]}
-        size="m"
       >
         <FormattedMessage
           defaultMessage="Save"

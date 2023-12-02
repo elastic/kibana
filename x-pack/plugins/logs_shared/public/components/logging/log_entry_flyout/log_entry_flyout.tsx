@@ -16,34 +16,21 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { OverlayRef } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { createKibanaReactContext, useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  ContextualInsight,
-  MessageRole,
-  ObservabilityAIAssistantPluginStart,
-  ObservabilityAIAssistantProvider,
-  useObservabilityAIAssistant,
-  type Message,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { TimeKey } from '@kbn/io-ts-utils';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { LogViewReference } from '../../../../common/log_views';
-import { TimeKey } from '../../../../common/time';
 import { useLogEntry } from '../../../containers/logs/log_entry';
 import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
 import { DataSearchErrorCallout } from '../../data_search_error_callout';
 import { DataSearchProgress } from '../../data_search_progress';
+import LogAIAssistant from '../../log_ai_assistant/log_ai_assistant';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
 import { LogEntryFieldsTable } from './log_entry_fields_table';
-
-const LOGS_SYSTEM_MESSAGE = {
-  content: `You are logs-gpt, a helpful assistant for logs-based observability. Answer as
-    concisely as possible.`,
-  role: MessageRole.System,
-};
 
 export interface LogEntryFlyoutProps {
   logEntryId: string | null | undefined;
@@ -57,10 +44,7 @@ export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
   const {
     services: { http, data, uiSettings, application, observabilityAIAssistant },
     overlays: { openFlyout },
-  } = useKibana<{
-    data: DataPublicPluginStart;
-    observabilityAIAssistant?: ObservabilityAIAssistantPluginStart;
-  }>();
+  } = useKibanaContextForPlugin();
 
   const closeLogEntryFlyout = useCallback(() => {
     flyoutRef.current?.close();
@@ -73,17 +57,16 @@ export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
         data,
         uiSettings,
         application,
+        observabilityAIAssistant,
       });
 
       flyoutRef.current = openFlyout(
         <KibanaReactContextProvider>
-          <ObservabilityAIAssistantProvider value={observabilityAIAssistant}>
-            <LogEntryFlyout
-              logEntryId={logEntryId}
-              onCloseFlyout={closeLogEntryFlyout}
-              logViewReference={logViewReference}
-            />
-          </ObservabilityAIAssistantProvider>
+          <LogEntryFlyout
+            logEntryId={logEntryId}
+            onCloseFlyout={closeLogEntryFlyout}
+            logViewReference={logViewReference}
+          />
         </KibanaReactContextProvider>
       );
     },
@@ -118,6 +101,10 @@ export const LogEntryFlyout = ({
   logViewReference,
 }: LogEntryFlyoutProps) => {
   const {
+    services: { observabilityAIAssistant },
+  } = useKibanaContextForPlugin();
+
+  const {
     cancelRequest: cancelLogEntryRequest,
     errors: logEntryErrors,
     fetchLogEntry,
@@ -135,56 +122,6 @@ export const LogEntryFlyout = ({
       fetchLogEntry();
     }
   }, [fetchLogEntry, logViewReference, logEntryId]);
-
-  const explainLogMessageMessages = useMemo<Message[] | undefined>(() => {
-    if (!logEntry) {
-      return undefined;
-    }
-
-    const now = new Date().toISOString();
-
-    return [
-      {
-        '@timestamp': now,
-        message: LOGS_SYSTEM_MESSAGE,
-      },
-      {
-        '@timestamp': now,
-        message: {
-          role: MessageRole.User,
-          content: `I'm looking at a log entry. Can you explain me what the log message means? Where it could be coming from, whether it is expected and whether it is an issue. Here's the context, serialized: ${JSON.stringify(
-            { logEntry: { fields: logEntry.fields } }
-          )} `,
-        },
-      },
-    ];
-  }, [logEntry]);
-
-  const similarLogMessageMessages = useMemo<Message[] | undefined>(() => {
-    if (!logEntry) {
-      return undefined;
-    }
-
-    const now = new Date().toISOString();
-
-    const message = logEntry.fields.find((field) => field.field === 'message')?.value[0];
-
-    return [
-      {
-        '@timestamp': now,
-        message: LOGS_SYSTEM_MESSAGE,
-      },
-      {
-        '@timestamp': now,
-        message: {
-          role: MessageRole.User,
-          content: `I'm looking at a log entry. Can you construct a Kibana KQL query that I can enter in the search bar that gives me similar log entries, based on the \`message\` field: ${message}`,
-        },
-      },
-    ];
-  }, [logEntry]);
-
-  const aiAssistant = useObservabilityAIAssistant();
 
   return (
     <EuiFlyout onClose={onCloseFlyout} size="m">
@@ -246,22 +183,9 @@ export const LogEntryFlyout = ({
           }
         >
           <EuiFlexGroup direction="column" gutterSize="m">
-            {aiAssistant.isEnabled() && explainLogMessageMessages ? (
-              <EuiFlexItem grow={false}>
-                <ContextualInsight
-                  title={explainLogMessageTitle}
-                  messages={explainLogMessageMessages}
-                />
-              </EuiFlexItem>
-            ) : null}
-            {aiAssistant.isEnabled() && similarLogMessageMessages ? (
-              <EuiFlexItem grow={false}>
-                <ContextualInsight
-                  title={similarLogMessagesTitle}
-                  messages={similarLogMessageMessages}
-                />
-              </EuiFlexItem>
-            ) : null}
+            <EuiFlexItem grow={false}>
+              <LogAIAssistant observabilityAIAssistant={observabilityAIAssistant} doc={logEntry} />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={onSetFieldFilter} />
             </EuiFlexItem>
@@ -281,17 +205,6 @@ export const LogEntryFlyout = ({
     </EuiFlyout>
   );
 };
-
-const explainLogMessageTitle = i18n.translate('xpack.logsShared.logFlyout.explainLogMessageTitle', {
-  defaultMessage: "What's this message?",
-});
-
-const similarLogMessagesTitle = i18n.translate(
-  'xpack.logsShared.logFlyout.similarLogMessagesTitle',
-  {
-    defaultMessage: 'How do I find similar log messages?',
-  }
-);
 
 const loadingProgressMessage = i18n.translate('xpack.logsShared.logFlyout.loadingMessage', {
   defaultMessage: 'Searching log entry in shards',

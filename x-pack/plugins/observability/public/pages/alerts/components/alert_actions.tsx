@@ -14,21 +14,25 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import { ALERT_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-
+import {
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
+import { useBulkUntrackAlerts } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
-import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { parseAlert } from '../helpers/parse_alert';
 import { paths } from '../../../../common/locators/paths';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
-import type { ObservabilityRuleTypeRegistry } from '../../..';
+import { observabilityFeatureId, ObservabilityRuleTypeRegistry } from '../../..';
 import type { ConfigSchema } from '../../../plugin';
 import type { TopAlert } from '../../../typings/alerts';
 
@@ -55,14 +59,16 @@ export function AlertActions({
 }: Props) {
   const {
     cases: {
-      helpers: { getRuleIdFromEvent },
+      helpers: { getRuleIdFromEvent, canUseCases },
       hooks: { useCasesAddToNewCaseFlyout, useCasesAddToExistingCaseModal },
     },
     http: {
       basePath: { prepend },
     },
   } = useKibana().services;
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+  const userCasesPermissions = canUseCases([observabilityFeatureId]);
+  const [viewInAppUrl, setViewInAppUrl] = useState<string>();
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -72,15 +78,23 @@ export function AlertActions({
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const alert = parseObservabilityAlert(dataFieldEs);
 
+  useEffect(() => {
+    if (!alert.hasBasePath) {
+      setViewInAppUrl(prepend(alert.link ?? ''));
+    } else {
+      setViewInAppUrl(alert.link);
+    }
+  }, [alert.hasBasePath, alert.link, prepend]);
+
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
+  const ruleId = alert.fields[ALERT_RULE_UUID] ?? null;
   const linkToRule =
     pageId !== RULE_DETAILS_PAGE_ID && ruleId
       ? prepend(paths.observability.ruleDetails(ruleId))
       : null;
 
-  const alertId = alert.fields['kibana.alert.uuid'] ?? null;
+  const alertId = alert.fields[ALERT_UUID] ?? null;
   const linkToAlert =
     pageId !== ALERT_DETAILS_PAGE_ID && alertId
       ? prepend(paths.observability.alertDetails(alertId))
@@ -98,6 +112,11 @@ export function AlertActions({
         ]
       : [];
   }, [ecsData, getRuleIdFromEvent, data]);
+
+  const isActiveAlert = useMemo(
+    () => alert.fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE,
+    [alert.fields]
+  );
 
   const onSuccess = useCallback(() => {
     refresh();
@@ -123,6 +142,14 @@ export function AlertActions({
     selectCaseModal.open({ getAttachments: () => caseAttachments });
     closeActionsPopover();
   };
+
+  const handleUntrackAlert = useCallback(async () => {
+    await untrackAlerts({
+      indices: [ecsData?._index ?? ''],
+      alertUuids: [alertId],
+    });
+    onSuccess();
+  }, [untrackAlerts, alertId, ecsData, onSuccess]);
 
   const actionsMenuItems = [
     ...(userCasesPermissions.create && userCasesPermissions.read
@@ -190,6 +217,19 @@ export function AlertActions({
         </EuiContextMenuItem>
       ),
     ],
+    ...(isActiveAlert
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="untrackAlert"
+            key="untrackAlert"
+            onClick={handleUntrackAlert}
+          >
+            {i18n.translate('xpack.observability.alerts.actions.untrack', {
+              defaultMessage: 'Mark as untracked',
+            })}
+          </EuiContextMenuItem>,
+        ]
+      : []),
   ];
 
   const actionsToolTip =
@@ -203,10 +243,7 @@ export function AlertActions({
 
   return (
     <>
-      {/* Hide the View In App for the Threshold alerts, temporarily https://github.com/elastic/kibana/pull/159915  */}
-      {alert.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID ? (
-        <EuiFlexItem style={{ width: 32 }} />
-      ) : (
+      {viewInAppUrl ? (
         <EuiFlexItem>
           <EuiToolTip
             content={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
@@ -219,12 +256,14 @@ export function AlertActions({
                 defaultMessage: 'View in app',
               })}
               color="text"
-              href={prepend(alert.link ?? '')}
+              href={viewInAppUrl}
               iconType="eye"
               size="s"
             />
           </EuiToolTip>
         </EuiFlexItem>
+      ) : (
+        <EuiFlexItem style={{ width: 32 }} />
       )}
 
       <EuiFlexItem>

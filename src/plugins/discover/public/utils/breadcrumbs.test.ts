@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { serverlessMock } from '@kbn/serverless/public/mocks';
 import { createDiscoverServicesMock } from '../__mocks__/services';
 import { setBreadcrumbs } from './breadcrumbs';
 import { createMemoryHistory } from 'history';
@@ -26,7 +25,7 @@ describe('Breadcrumbs', () => {
   test('should set breadcrumbs with title', () => {
     setBreadcrumbs({ services: discoverServiceMock, titleBreadcrumbText: 'Saved Search' });
     expect(discoverServiceMock.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Discover', href: '#/' },
+      { text: 'Discover', href: '#/', deepLinkId: 'discover' },
       { text: 'Saved Search' },
     ]);
   });
@@ -38,7 +37,7 @@ describe('Breadcrumbs', () => {
       rootBreadcrumbPath: '#/custom-path',
     });
     expect(discoverServiceMock.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Discover', href: '#/custom-path' },
+      { text: 'Discover', href: '#/custom-path', deepLinkId: 'discover' },
       { text: 'Saved Search' },
     ]);
   });
@@ -56,57 +55,7 @@ describe('Breadcrumbs', () => {
       titleBreadcrumbText: 'Saved Search',
     });
     expect(discoverServiceMock.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Discover', href: '#/p/my-profile/' },
-      { text: 'Saved Search' },
-    ]);
-  });
-});
-
-describe('Serverless Breadcrumbs', () => {
-  const discoverServiceMock = {
-    ...createDiscoverServicesMock(),
-    serverless: serverlessMock.createStart(),
-  };
-  beforeEach(() => {
-    (discoverServiceMock.serverless.setBreadcrumbs as jest.Mock).mockClear();
-  });
-
-  test('should not set any root', () => {
-    setBreadcrumbs({ services: discoverServiceMock });
-    expect(discoverServiceMock.serverless.setBreadcrumbs).toHaveBeenCalledWith([]);
-  });
-
-  test('should set title breadcrumb', () => {
-    setBreadcrumbs({ services: discoverServiceMock, titleBreadcrumbText: 'Saved Search' });
-    expect(discoverServiceMock.serverless.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Saved Search' },
-    ]);
-  });
-
-  test("shouldn't set root breadcrumbs, even when there is a custom root path", () => {
-    setBreadcrumbs({
-      services: discoverServiceMock,
-      titleBreadcrumbText: 'Saved Search',
-      rootBreadcrumbPath: '#/custom-path',
-    });
-    expect(discoverServiceMock.serverless.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Saved Search' },
-    ]);
-  });
-
-  test("shouldn't set root breadcrumbs, even when there is a custom profile", () => {
-    setBreadcrumbs({
-      services: {
-        ...discoverServiceMock,
-        history: () => {
-          const history = createMemoryHistory<HistoryLocationState>({});
-          history.push('/p/my-profile');
-          return history;
-        },
-      },
-      titleBreadcrumbText: 'Saved Search',
-    });
-    expect(discoverServiceMock.serverless.setBreadcrumbs).toHaveBeenCalledWith([
+      { text: 'Discover', href: '#/p/my-profile/', deepLinkId: 'discover' },
       { text: 'Saved Search' },
     ]);
   });

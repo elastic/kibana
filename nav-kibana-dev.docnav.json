@@ -194,8 +194,22 @@
       ]
     },
     {
+      "label": "Serverless",
+      "items": [
+        {
+          "id": "ktServerlessReleaseOverview"
+        },
+        {
+          "id": "ktCustomServerlessImage"
+        }
+      ]
+    },
+    {
       "label": "Contributors Newsletters",
       "items": [
+        {
+          "id": "kibSeptember2023ContributorNewsletter"
+        },
         {
           "id": "kibJuly2023ContributorNewsletter"
         },
@@ -410,6 +424,9 @@
         },
         {
           "id": "kibNewsfeedPluginApi"
+        },
+        {
+          "id": "kibNotificationsPluginApi"
         },
         {
           "id": "kibObservabilityPluginApi"

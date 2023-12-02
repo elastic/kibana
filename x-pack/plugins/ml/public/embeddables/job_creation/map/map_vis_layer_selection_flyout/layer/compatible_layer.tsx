@@ -25,7 +25,7 @@ import {
   QuickGeoJobCreator,
   redirectToGeoJobWizard,
 } from '../../../../../application/jobs/new_job/job_from_map';
-import { useMlFromLensKibanaContext } from '../../../lens/context';
+import { useMlFromLensKibanaContext } from '../../../common/context';
 import { JobDetails, CreateADJobParams } from '../../../common/job_details';
 
 interface DropDownLabel {
@@ -147,6 +147,7 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
         createADJob={createGeoJob}
         createADJobInWizard={createGeoJobInWizard}
         embeddable={embeddable}
+        timeRange={embeddable.getInput().timeRange}
         incomingCreateError={createError}
       >
         <>

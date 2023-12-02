@@ -21,7 +21,6 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { publicConfigKeys } from '../common/plugin_config_types';
-import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
 import { initInfraServer } from './infra_server';
 import { FrameworkFieldsAdapter } from './lib/adapters/fields/framework_fields_adapter';
@@ -81,13 +80,49 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
       })
     ),
     featureFlags: schema.object({
+      customThresholdAlertsEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      logsUIEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
       metricsExplorerEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
         serverless: schema.boolean({ defaultValue: false }),
       }),
+      osqueryEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      inventoryThresholdAlertRuleEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: true }),
+      }),
+      metricThresholdAlertRuleEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      logThresholdAlertRuleEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      alertsAndRulesDropdownEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: true }),
+      }),
+      /**
+       * This flag depends on profilingDataAccess optional plugin,
+       * make sure to enable it with `xpack.profiling.enabled: true`
+       * before enabling this flag.
+       */
+      profilingEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
     }),
   }),
-  deprecations: configDeprecations,
   exposeToBrowser: publicConfigKeys,
 };
 
@@ -214,17 +249,19 @@ export class InfraServerPlugin
       countLogs: () => UsageCollector.countLogs(),
     });
 
-    plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
-      {
-        sampleObject: null, // indicates that there is no sample object associated with this app link's path
-        getPath: () => `/app/logs`,
-        label: logsSampleDataLinkLabel,
-        icon: 'logsApp',
-      },
-    ]);
+    if (this.config.featureFlags.logsUIEnabled) {
+      plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
+        {
+          sampleObject: null, // indicates that there is no sample object associated with this app link's path
+          getPath: () => `/app/logs`,
+          label: logsSampleDataLinkLabel,
+          icon: 'logsApp',
+        },
+      ]);
+    }
 
     initInfraServer(this.libs);
-    registerRuleTypes(plugins.alerting, this.libs, plugins.ml);
+    registerRuleTypes(plugins.alerting, this.libs, this.config);
 
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',
@@ -245,13 +282,7 @@ export class InfraServerPlugin
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);
 
-    // register deprecated source configuration fields
-    core.deprecations.registerDeprecations({
-      getDeprecations: getInfraDeprecationsFactory(sources),
-    });
-
     return {
-      defineInternalSourceConfiguration: sources.defineInternalSourceConfiguration.bind(sources),
       inventoryViews,
       metricsExplorerViews,
     } as InfraPluginSetup;

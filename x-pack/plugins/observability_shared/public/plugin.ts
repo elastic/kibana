@@ -26,7 +26,7 @@ export interface ObservabilitySharedSetup {
 export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
   cases: CasesUiStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
   setIsSidebarEnabled: (isEnabled: boolean) => void;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
@@ -73,7 +73,7 @@ export class ObservabilitySharedPlugin implements Plugin {
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
-      guidedOnboardingApi: plugins.guidedOnboarding.guidedOnboardingApi,
+      guidedOnboardingApi: plugins.guidedOnboarding?.guidedOnboardingApi,
       getPageTemplateServices: () => ({ coreStart: core }),
       isSidebarEnabled$: this.isSidebarEnabled$,
     });

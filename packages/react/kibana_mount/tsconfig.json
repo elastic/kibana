@@ -20,5 +20,6 @@
     "@kbn/i18n",
     "@kbn/core-i18n-browser-mocks",
     "@kbn/react-kibana-context-render",
+    "@kbn/core-analytics-browser-mocks",
   ]
 }

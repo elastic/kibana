@@ -270,7 +270,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const [showingHistogram, setShowingHistogram] = useState(histogramDefault);
 
   if (isLoading) {
-    return <EuiLoadingSpinner />;
+    return <EuiLoadingSpinner data-test-subj={`${dataTestSubject}-statsLoading`} />;
   }
 
   if (!dataView) {
@@ -484,6 +484,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
             <Chart size={{ height: 200, width: 300 - 32 }}>
               <Tooltip type={TooltipType.None} />
               <Settings
+                locale={i18n.getLocale()}
                 theme={customChartTheme}
                 baseTheme={chartBaseTheme}
                 xDomain={
@@ -533,7 +534,12 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
             size={{ height: 200, width: '100%' }}
           >
             <Tooltip type={TooltipType.None} />
-            <Settings rotation={90} theme={customChartTheme} baseTheme={chartBaseTheme} />
+            <Settings
+              locale={i18n.getLocale()}
+              rotation={90}
+              theme={customChartTheme}
+              baseTheme={chartBaseTheme}
+            />
 
             <Axis
               id="key"

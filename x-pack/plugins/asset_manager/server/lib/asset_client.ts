@@ -5,53 +5,40 @@
  * 2.0.
  */
 
-import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
-import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { AssetManagerConfig } from '../../common/config';
 import { Asset } from '../../common/types_api';
-import { OptionsWithInjectedValues } from './accessors';
-import { GetHostsOptions } from './accessors/hosts';
-import { GetServicesOptions } from './accessors/services';
-import { getHostsByAssets } from './accessors/hosts/get_hosts_by_assets';
-import { getHostsBySignals } from './accessors/hosts/get_hosts_by_signals';
-import { getServicesByAssets } from './accessors/services/get_services_by_assets';
-import { getServicesBySignals } from './accessors/services/get_services_by_signals';
-
-interface AssetClientClassOptions {
-  sourceIndices: AssetManagerConfig['sourceIndices'];
-  source: AssetManagerConfig['lockedSource'];
-  getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMDataAccessConfig['indices']>;
-  metricsClient: MetricsDataClient;
-}
+import { getContainers, GetContainersOptions } from './accessors/containers/get_containers';
+import { getHosts, GetHostsOptions } from './accessors/hosts/get_hosts';
+import { getServices, GetServicesOptions } from './accessors/services/get_services';
+import { getPods, GetPodsOptions } from './accessors/pods/get_pods';
+import { AssetClientBaseOptions, AssetClientOptionsWithInjectedValues } from './asset_client_types';
 
 export class AssetClient {
-  constructor(private baseOptions: AssetClientClassOptions) {}
+  constructor(private baseOptions: AssetClientBaseOptions) {}
 
-  injectOptions<T extends object = {}>(options: T): OptionsWithInjectedValues<T> {
+  injectOptions<T extends object = {}>(options: T): AssetClientOptionsWithInjectedValues<T> {
     return {
       ...options,
-      sourceIndices: this.baseOptions.sourceIndices,
-      getApmIndices: this.baseOptions.getApmIndices,
-      metricsClient: this.baseOptions.metricsClient,
+      ...this.baseOptions,
     };
   }
 
   async getHosts(options: GetHostsOptions): Promise<{ hosts: Asset[] }> {
     const withInjected = this.injectOptions(options);
-    if (this.baseOptions.source === 'assets') {
-      return await getHostsByAssets(withInjected);
-    } else {
-      return await getHostsBySignals(withInjected);
-    }
+    return await getHosts(withInjected);
   }
 
   async getServices(options: GetServicesOptions): Promise<{ services: Asset[] }> {
     const withInjected = this.injectOptions(options);
-    if (this.baseOptions.source === 'assets') {
-      return await getServicesByAssets(withInjected);
-    } else {
-      return await getServicesBySignals(withInjected);
-    }
+    return await getServices(withInjected);
+  }
+
+  async getContainers(options: GetContainersOptions): Promise<{ containers: Asset[] }> {
+    const withInjected = this.injectOptions(options);
+    return await getContainers(withInjected);
+  }
+
+  async getPods(options: GetPodsOptions): Promise<{ pods: Asset[] }> {
+    const withInjected = this.injectOptions(options);
+    return await getPods(withInjected);
   }
 }

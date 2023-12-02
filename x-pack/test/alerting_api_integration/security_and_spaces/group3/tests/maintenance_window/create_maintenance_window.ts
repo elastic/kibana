@@ -25,6 +25,32 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
         tzid: 'UTC',
         freq: 2, // weekly
       },
+      scoped_query: {
+        kql: "_id: '1234'",
+        filters: [
+          {
+            meta: {
+              disabled: false,
+              negate: false,
+              alias: null,
+              key: 'kibana.alert.action_group',
+              field: 'kibana.alert.action_group',
+              params: {
+                query: 'test',
+              },
+              type: 'phrase',
+            },
+            $state: {
+              store: 'appState',
+            },
+            query: {
+              match_phrase: {
+                'kibana.alert.action_group': 'test',
+              },
+            },
+          },
+        ],
+      },
     };
     afterEach(() => objectRemover.removeAll());
 
@@ -69,6 +95,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
               expect(response.body.r_rule.dtstart).to.eql(createParams.r_rule.dtstart);
               expect(response.body.events.length).to.be.greaterThan(0);
               expect(response.body.status).to.eql('running');
+              expect(response.body.scoped_query.kql).to.eql("_id: '1234'");
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -76,5 +103,45 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
         });
       });
     }
+
+    it('should create maintenance window with category ids', async () => {
+      const response = await supertest
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...createParams,
+          category_ids: ['observability', 'securitySolution'],
+        })
+        .expect(200);
+
+      objectRemover.add('space1', response.body.id, 'rules/maintenance_window', 'alerting', true);
+
+      expect(response.body.category_ids).eql(['observability', 'securitySolution']);
+    });
+
+    it('should throw if creating maintenance window with invalid categories', async () => {
+      await supertest
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...createParams,
+          category_ids: ['something-else'],
+        })
+        .expect(400);
+    });
+
+    it('should throw if creating maintenance window with invalid scoped query', async () => {
+      await supertest
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...createParams,
+          scoped_query: {
+            kql: 'invalid_kql:',
+            filters: [],
+          },
+        })
+        .expect(400);
+    });
   });
 }

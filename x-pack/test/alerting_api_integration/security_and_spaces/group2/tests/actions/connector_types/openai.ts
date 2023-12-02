@@ -46,7 +46,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
     return body.id;
   };
 
-  describe('GenAi', () => {
+  describe('OpenAI', () => {
     after(() => {
       objectRemover.removeAll();
     });
@@ -313,7 +313,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               data: genAiSuccessResponse,
             });
           });
-          describe('OpenAI dashboard', () => {
+          describe('Token tracking dashboard', () => {
             const dashboardId = 'specific-dashboard-id-default';
 
             it('should not create a dashboard when user does not have kibana event log permissions', async () => {
@@ -461,6 +461,30 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               message:
                 'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
               retry: false,
+            });
+          });
+
+          it('should return a error when error happens', async () => {
+            const { body } = await supertest
+              .post(`/api/actions/connector/${genAiActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'test',
+                  subActionParams: {
+                    body: '{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Hello world"}]}',
+                  },
+                },
+              })
+              .expect(200);
+
+            expect(body).to.eql({
+              status: 'error',
+              connector_id: genAiActionId,
+              message: 'an error occurred while running the action',
+              retry: true,
+              service_message:
+                'Status code: 422. Message: API Error: Unprocessable Entity - The model `bad model` does not exist',
             });
           });
         });

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
+import { dataViewSpecSchema } from '@kbn/data-views-plugin/server/rest_api_routes/schema';
 import { i18n } from '@kbn/i18n';
 import { IRuleTypeAlerts, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
@@ -14,14 +16,8 @@ import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
-import { searchConfigurationSchema } from './types';
-import {
-  AlertsLocatorParams,
-  observabilityFeatureId,
-  observabilityPaths,
-} from '../../../../common';
+import { observabilityFeatureId, observabilityPaths } from '../../../../common';
 import { Comparator } from '../../../../common/custom_threshold_rule/types';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
@@ -37,15 +33,15 @@ import {
   tagsActionVariableDescription,
   timestampActionVariableDescription,
   valueActionVariableDescription,
-} from './messages';
+  viewInAppUrlActionVariableDescription,
+} from './translations';
 import { oneOfLiterals, validateKQLStringFilter } from './utils';
 import {
-  createMetricThresholdExecutor,
-  FIRED_ACTIONS,
-  NO_DATA_ACTIONS,
+  createCustomThresholdExecutor,
+  CustomThresholdLocators,
 } from './custom_threshold_executor';
+import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { ObservabilityConfig } from '../../..';
-import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/custom_threshold_rule/constants';
 
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
   context: THRESHOLD_RULE_REGISTRATION_CONTEXT,
@@ -53,6 +49,16 @@ export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
   useEcs: true,
   useLegacyAlerts: false,
 };
+
+export const searchConfigurationSchema = schema.object({
+  index: schema.oneOf([schema.string(), dataViewSpecSchema]),
+  query: schema.object({
+    language: schema.string({
+      validate: validateKQLStringFilter,
+    }),
+    query: schema.string(),
+  }),
+});
 
 type CreateLifecycleExecutor = ReturnType<typeof createLifecycleExecutor>;
 
@@ -62,7 +68,7 @@ export function thresholdRuleType(
   config: ObservabilityConfig,
   logger: Logger,
   ruleDataClient: IRuleDataClient,
-  alertsLocator?: LocatorPublic<AlertsLocatorParams>
+  locators: CustomThresholdLocators
 ) {
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
@@ -71,27 +77,9 @@ export function thresholdRuleType(
     timeSize: schema.number(),
   };
 
-  const nonCountCriterion = schema.object({
-    ...baseCriterion,
-    metric: schema.string(),
-    aggType: oneOfLiterals(METRIC_EXPLORER_AGGREGATIONS),
-    metrics: schema.never(),
-    equation: schema.never(),
-    label: schema.never(),
-  });
-
-  const countCriterion = schema.object({
-    ...baseCriterion,
-    aggType: schema.literal('count'),
-    metric: schema.never(),
-    metrics: schema.never(),
-    equation: schema.never(),
-    label: schema.never(),
-  });
-
   const customCriterion = schema.object({
     ...baseCriterion,
-    aggType: schema.literal('custom'),
+    aggType: schema.maybe(schema.literal('custom')),
     metric: schema.never(),
     metrics: schema.arrayOf(
       schema.oneOf([
@@ -120,14 +108,12 @@ export function thresholdRuleType(
   return {
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     name: i18n.translate('xpack.observability.threshold.ruleName', {
-      defaultMessage: 'Custom threshold (BETA)',
+      defaultMessage: 'Custom threshold (Technical Preview)',
     }),
     validate: {
       params: schema.object(
         {
-          criteria: schema.arrayOf(
-            schema.oneOf([countCriterion, nonCountCriterion, customCriterion])
-          ),
+          criteria: schema.arrayOf(customCriterion),
           groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           alertOnNoData: schema.maybe(schema.boolean()),
           alertOnGroupDisappear: schema.maybe(schema.boolean()),
@@ -136,17 +122,17 @@ export function thresholdRuleType(
         { unknowns: 'allow' }
       ),
     },
-    defaultActionGroupId: FIRED_ACTIONS.id,
-    actionGroups: [FIRED_ACTIONS, NO_DATA_ACTIONS],
+    defaultActionGroupId: FIRED_ACTION.id,
+    actionGroups: [FIRED_ACTION, NO_DATA_ACTION],
     minimumLicenseRequired: 'basic' as LicenseType,
     isExportable: true,
     executor: createLifecycleRuleExecutor(
-      createMetricThresholdExecutor({ alertsLocator, basePath, logger, config })
+      createCustomThresholdExecutor({ basePath, logger, config, locators })
     ),
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [
-        { name: 'groupings', description: groupByKeysActionVariableDescription },
+        { name: 'group', description: groupByKeysActionVariableDescription },
         {
           name: 'alertDetailsUrl',
           description: alertDetailUrlActionVariableDescription,
@@ -161,6 +147,7 @@ export function thresholdRuleType(
         { name: 'orchestrator', description: orchestratorActionVariableDescription },
         { name: 'labels', description: labelsActionVariableDescription },
         { name: 'tags', description: tagsActionVariableDescription },
+        { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
       ],
     },
     useSavedObjectReferences: {
@@ -178,6 +165,7 @@ export function thresholdRuleType(
         };
       },
     },
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: observabilityFeatureId,
     alerts: MetricsRulesTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>

@@ -16,6 +16,10 @@ export interface IndexManagementPluginSetup {
   extensionsService: ExtensionsSetup;
 }
 
+export interface IndexManagementPluginStart {
+  extensionsService: ExtensionsSetup;
+}
+
 export interface SetupDependencies {
   fleet?: unknown;
   usageCollection: UsageCollectionSetup;
@@ -35,4 +39,6 @@ export interface ClientConfigType {
   enableIndexActions?: boolean;
   enableLegacyTemplates?: boolean;
   enableIndexStats?: boolean;
+  editableIndexSettings?: 'all' | 'limited';
+  enableDataStreamsStorageColumn?: boolean;
 }

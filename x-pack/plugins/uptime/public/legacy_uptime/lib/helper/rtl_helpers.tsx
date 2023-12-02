@@ -12,6 +12,7 @@ import {
   render as reactTestLibRender,
   MatcherFunction,
   RenderOptions,
+  configure,
 } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
@@ -21,8 +22,6 @@ import { createMemoryHistory, History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { configure } from '@testing-library/dom';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';

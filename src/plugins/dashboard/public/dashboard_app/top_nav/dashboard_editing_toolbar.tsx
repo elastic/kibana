@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -21,7 +20,7 @@ import { EditorMenu } from './editor_menu';
 import { useDashboardAPI } from '../dashboard_app';
 import { pluginServices } from '../../services/plugin_services';
 import { ControlsToolbarButton } from './controls_toolbar_button';
-import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
+import { DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
@@ -55,12 +54,14 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
           trackUiMetric(METRIC_TYPE.CLICK, `${visType.name}:create`);
         }
 
-        if ('aliasPath' in visType) {
-          appId = visType.aliasApp;
-          path = visType.aliasPath;
-        } else {
+        if (!('alias' in visType)) {
+          // this visualization is not an alias
           appId = 'visualize';
           path = `#/create?type=${encodeURIComponent(visType.name)}`;
+        } else if (visType.alias && 'path' in visType.alias) {
+          // this visualization **is** an alias, and it has an app to redirect to for creation
+          appId = visType.alias.app;
+          path = visType.alias.path;
         }
       } else {
         appId = 'visualize';
@@ -70,12 +71,13 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
       stateTransferService.navigateToEditor(appId, {
         path,
         state: {
-          originatingApp: DASHBOARD_APP_ID,
+          originatingApp: dashboard.getAppContext()?.currentAppId,
+          originatingPath: dashboard.getAppContext()?.getCurrentPath?.(),
           searchSessionId: search.session.getSessionId(),
         },
       });
     },
-    [stateTransferService, search.session, trackUiMetric]
+    [stateTransferService, dashboard, search.session, trackUiMetric]
   );
 
   const createNewEmbeddable = useCallback(

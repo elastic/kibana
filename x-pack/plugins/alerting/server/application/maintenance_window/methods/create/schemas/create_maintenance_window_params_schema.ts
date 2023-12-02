@@ -6,12 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { maintenanceWindowCategoryIdsSchema } from '../../../schemas';
 import { rRuleRequestSchema } from '../../../../r_rule/schemas';
+import { alertsFilterQuerySchema } from '../../../../alerts_filter_query/schemas';
 
 export const createMaintenanceWindowParamsSchema = schema.object({
   data: schema.object({
     title: schema.string(),
     duration: schema.number(),
     rRule: rRuleRequestSchema,
+    categoryIds: maintenanceWindowCategoryIdsSchema,
+    scopedQuery: schema.maybe(schema.nullable(alertsFilterQuerySchema)),
   }),
 });

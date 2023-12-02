@@ -56,7 +56,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   useEffect(() => {
     if (dataViewExistsError !== null && items.length === 1) {
       const config = items[0].config;
-      const indexName = Array.isArray(config.dest.index) ? config.dest.index[0] : config.dest.index;
+      const indexName = config.dest.index;
 
       toastNotifications.addDanger(
         i18n.translate(
@@ -146,7 +146,7 @@ export const useDeleteTransforms = () => {
           }
 
           if (status.destDataViewDeleted?.error) {
-            const error = status.destDataViewDeleted.error.reason;
+            const error = extractErrorMessage(status.destDataViewDeleted.error);
             toastNotifications.addDanger({
               title: i18n.translate(
                 'xpack.transform.deleteTransform.deleteAnalyticsWithDataViewErrorMessage',

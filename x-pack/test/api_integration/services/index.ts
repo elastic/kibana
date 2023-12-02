@@ -21,6 +21,7 @@ import { MachineLearningProvider } from './ml';
 import { IngestManagerProvider } from '../../common/services/ingest_manager';
 import { TransformProvider } from './transform';
 import { IngestPipelinesProvider } from './ingest_pipelines';
+import { IndexManagementProvider } from './index_management';
 
 export const services = {
   ...commonServices,
@@ -37,4 +38,5 @@ export const services = {
   ingestManager: IngestManagerProvider,
   transform: TransformProvider,
   ingestPipelines: IngestPipelinesProvider,
+  indexManagement: IndexManagementProvider,
 };

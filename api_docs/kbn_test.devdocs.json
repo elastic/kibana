@@ -2556,7 +2556,7 @@
             "section": "def-common.Config",
             "text": "Config"
           },
-          "; installDir?: string | undefined; extraKbnOpts?: string[] | undefined; logsDir?: string | undefined; onEarlyExit?: ((msg: string) => void) | undefined; }) => Promise<void>"
+          "; installDir?: string | undefined; extraKbnOpts?: string[] | undefined; logsDir?: string | undefined; onEarlyExit?: ((msg: string) => void) | undefined; inspect?: boolean | undefined; }) => Promise<void>"
         ],
         "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
         "deprecated": false,
@@ -2686,6 +2686,20 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runKibanaServer.$1.inspect",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "inspect",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -3120,7 +3134,9 @@
             "label": "esServerlessOptions",
             "description": [],
             "signature": [
-              "{ image?: string | undefined; tag?: string | undefined; } | undefined"
+              "Pick<",
+              "ServerlessOptions",
+              ", \"host\" | \"tag\" | \"image\" | \"resources\" | \"kibanaUrl\"> | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,

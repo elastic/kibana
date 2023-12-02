@@ -12,7 +12,11 @@ import type {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
 } from '..';
-import type { CASES_CONNECTORS_CAPABILITY, PUSH_CASES_CAPABILITY } from '../constants';
+import type {
+  CASES_CONNECTORS_CAPABILITY,
+  CASES_SETTINGS_CAPABILITY,
+  PUSH_CASES_CAPABILITY,
+} from '../constants';
 import type { SnakeToCamelCase } from '../types';
 import type {
   CaseSeverity,
@@ -25,6 +29,7 @@ import type {
   Attachment,
   ExternalReferenceAttachment,
   PersistableStateAttachment,
+  Configuration,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -110,6 +115,7 @@ export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
 export type CaseConnectors = SnakeToCamelCase<GetCaseConnectorsResponse>;
 export type CaseUsers = GetCaseUsersResponse;
+export type CaseUICustomField = CaseUI['customFields'][number];
 
 export interface ResolvedCase {
   case: CaseUI;
@@ -117,6 +123,13 @@ export interface ResolvedCase {
   aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
   aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 }
+
+export type CasesConfigurationUI = Pick<
+  SnakeToCamelCase<Configuration>,
+  'closureType' | 'connector' | 'mappings' | 'customFields' | 'id' | 'version'
+>;
+
+export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
 
 export type SortOrder = 'asc' | 'desc';
 
@@ -205,6 +218,7 @@ export type UpdateKey = keyof Pick<
   | 'severity'
   | 'assignees'
   | 'category'
+  | 'customFields'
 >;
 
 export interface UpdateByKey {
@@ -289,6 +303,7 @@ export interface CasesPermissions {
   delete: boolean;
   push: boolean;
   connectors: boolean;
+  settings: boolean;
 }
 
 export interface CasesCapabilities {
@@ -298,4 +313,5 @@ export interface CasesCapabilities {
   [DELETE_CASES_CAPABILITY]: boolean;
   [PUSH_CASES_CAPABILITY]: boolean;
   [CASES_CONNECTORS_CAPABILITY]: boolean;
+  [CASES_SETTINGS_CAPABILITY]: boolean;
 }

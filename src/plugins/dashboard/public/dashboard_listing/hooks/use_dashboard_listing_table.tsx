@@ -87,7 +87,7 @@ export const useDashboardListingTable = ({
   showCreateDashboardButton?: boolean;
 }): UseDashboardListingTableReturnType => {
   const {
-    dashboardSessionStorage,
+    dashboardBackup,
     dashboardCapabilities: { showWriteControls },
     settings: { uiSettings },
     dashboardContentManagement: {
@@ -106,30 +106,30 @@ export const useDashboardListingTable = ({
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
-    dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
+    dashboardBackup.getDashboardIdsWithUnsavedChanges()
   );
 
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   const createItem = useCallback(() => {
-    if (useSessionStorageIntegration && dashboardSessionStorage.dashboardHasUnsavedEdits()) {
+    if (useSessionStorageIntegration && dashboardBackup.dashboardHasUnsavedEdits()) {
       confirmCreateWithUnsaved(() => {
-        dashboardSessionStorage.clearState();
+        dashboardBackup.clearState();
         goToDashboard();
       }, goToDashboard);
       return;
     }
     goToDashboard();
-  }, [dashboardSessionStorage, goToDashboard, useSessionStorageIntegration]);
+  }, [dashboardBackup, goToDashboard, useSessionStorageIntegration]);
 
   const updateItemMeta = useCallback(
     async (props: Pick<DashboardContainerInput, 'id' | 'title' | 'description' | 'tags'>) => {
       await updateDashboardMeta(props);
 
-      setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
+      setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardSessionStorage, updateDashboardMeta]
+    [dashboardBackup, updateDashboardMeta]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -232,7 +232,7 @@ export const useDashboardListingTable = ({
 
         await deleteDashboards(
           dashboardsToDelete.map(({ id }) => {
-            dashboardSessionStorage.clearState(id);
+            dashboardBackup.clearState(id);
             return id;
           })
         );
@@ -252,9 +252,9 @@ export const useDashboardListingTable = ({
         });
       }
 
-      setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
+      setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardSessionStorage, deleteDashboards, toasts]
+    [dashboardBackup, deleteDashboards, toasts]
   );
 
   const editItem = useCallback(
@@ -324,8 +324,8 @@ export const useDashboardListingTable = ({
   );
 
   const refreshUnsavedDashboards = useCallback(
-    () => setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()),
-    [dashboardSessionStorage]
+    () => setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges()),
+    [dashboardBackup]
   );
 
   return {

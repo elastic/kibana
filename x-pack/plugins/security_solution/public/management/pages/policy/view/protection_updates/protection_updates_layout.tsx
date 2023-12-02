@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIconTip,
+  EuiLink,
   EuiPanel,
   EuiShowFor,
   EuiSpacer,
@@ -25,18 +26,19 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { Moment } from 'moment';
 import moment from 'moment';
 import { cloneDeep } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ProtectionUpdatesBottomBar } from './components/protection_updates_bottom_bar';
 import { useCreateProtectionUpdatesNote } from './hooks/use_post_protection_updates_note';
 import { useGetProtectionUpdatesNote } from './hooks/use_get_protection_updates_note';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { useToasts } from '../../../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
 import type { PolicyData, MaybeImmutable } from '../../../../../../common/endpoint/types';
 import { ProtectionUpdatesWarningPanel } from './components/protection_updates_warning_panel';
+import { getControlledArtifactCutoffDate } from '../../../../../../common/endpoint/utils/controlled_artifact_rollout';
 
 interface ProtectionUpdatesLayoutProps {
   policy: MaybeImmutable<PolicyData>;
@@ -62,6 +64,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const dispatch = useDispatch();
     const { isLoading: isUpdating, mutateAsync: sendPolicyUpdate } = useUpdateEndpointPolicy();
     const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
+    const { docLinks } = useKibana().services;
 
     const paddingSize = useContext(ThemeContext).eui.euiPanelPaddingModifiers.paddingMedium;
 
@@ -70,7 +73,9 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const [manifestVersion, setManifestVersion] = useState(deployedVersion);
 
     const today = moment.utc();
-    const [selectedDate, setSelectedDate] = useState<Moment>(today);
+    const defaultDate = today.clone().subtract(1, 'days');
+
+    const [selectedDate, setSelectedDate] = useState<Moment>(defaultDate);
 
     const { data: fetchedNote, isLoading: getNoteInProgress } = useGetProtectionUpdatesNote({
       packagePolicyId: _policy.id,
@@ -90,7 +95,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const internalDateFormat = 'YYYY-MM-DD';
     const displayDateFormat = 'MMMM DD, YYYY';
     const formattedDate = moment.utc(deployedVersion, internalDateFormat).format(displayDateFormat);
-    const cutoffDate = moment.utc().subtract(18, 'months').add(1, 'day'); // Earliest selectable date
+    const cutoffDate = getControlledArtifactCutoffDate(); // Earliest selectable date
 
     const viewModeSwitchLabel = automaticUpdatesEnabled
       ? AUTOMATIC_UPDATES_CHECKBOX_LABEL
@@ -178,14 +183,24 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         if (checked && !automaticUpdatesEnabled) {
           setManifestVersion('latest');
           // Clear selected date on user enabling automatic updates
-          if (selectedDate !== today) {
-            setSelectedDate(today);
+          if (selectedDate !== defaultDate) {
+            setSelectedDate(defaultDate);
           }
         } else {
           setManifestVersion(selectedDate.format(internalDateFormat));
         }
       },
-      [automaticUpdatesEnabled, selectedDate, today]
+      [automaticUpdatesEnabled, selectedDate, defaultDate]
+    );
+
+    const updateDatepickerSelectedDate = useCallback(
+      (date: Moment | null) => {
+        if (date?.isAfter(cutoffDate) && date?.isSameOrBefore(defaultDate)) {
+          setSelectedDate(date || defaultDate);
+          setManifestVersion(date?.format(internalDateFormat) || 'latest');
+        }
+      },
+      [cutoffDate, defaultDate]
     );
 
     const renderVersionToDeployPicker = () => {
@@ -211,12 +226,9 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
                 popoverPlacement={'downCenter'}
                 dateFormat={displayDateFormat}
                 selected={selectedDate}
-                maxDate={today}
+                maxDate={defaultDate}
                 minDate={cutoffDate}
-                onChange={(date) => {
-                  setSelectedDate(date || today);
-                  setManifestVersion(date?.format(internalDateFormat) || 'latest');
-                }}
+                onChange={updateDatepickerSelectedDate}
               />
             </div>
           ) : (
@@ -254,10 +266,25 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
               }
             )}
           >
-            {i18n.translate('xpack.securitySolution.endpoint.protectionUpdates.manifestOutdated', {
-              defaultMessage:
-                'Manifest is older than 30 days. Recommended to update the manifest or enable "Update manifest automatically".',
-            })}
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.protectionUpdates.manifestOutdated"
+              defaultMessage="Your protection artifacts have not been updated in over 30 days. We strongly recommend keeping these up to date to ensure the highest level of security for your environment.{break}Note: After 18 months, protection artifacts will expire and cannot be rolled back. {learnMore}"
+              values={{
+                learnMore: (
+                  <EuiLink
+                    href={docLinks.links.securitySolution.artifactControl}
+                    target="_blank"
+                    external
+                  >
+                    <FormattedMessage
+                      id="xpack.securitySolution.endpoint.protectionUpdates.manifestOutdated.learnMore"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>
+                ),
+                break: <EuiSpacer size="m" />,
+              }}
+            />
           </EuiCallOut>
           <EuiSpacer size="m" />
         </>
@@ -279,13 +306,22 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
               }
             )}
           >
-            {i18n.translate(
-              'xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabled',
-              {
-                defaultMessage:
-                  'Manifest will always be updated to the latest available version. If you want to control updates manually, disable "Update manifest automatically".',
-              }
-            )}
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabled"
+              defaultMessage="Protection updates will always be updated to the latest available version. If you want to control updates manually, disable the {toggleName} toggle."
+              values={{
+                toggleName: (
+                  <strong>
+                    {i18n.translate(
+                      'xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabled.toggleName',
+                      {
+                        defaultMessage: 'Enable automatic updates',
+                      }
+                    )}
+                  </strong>
+                ),
+              }}
+            />
           </EuiCallOut>
         );
       }
@@ -312,46 +348,54 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
 
           <EuiSpacer size="l" />
           {renderVersionToDeployPicker()}
-
-          <EuiSpacer size="m" />
-          <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
-            <EuiTitle size="xxs" data-test-subj={'protection-updates-manifest-name-note-title'}>
-              <h5>
-                {i18n.translate('xpack.securitySolution.endpoint.protectionUpdates.note.label', {
-                  defaultMessage: 'Note',
-                })}
-              </h5>
-            </EuiTitle>
-            <EuiIconTip
-              position="right"
-              content={
-                <>
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.protectionUpdates.note.tooltip"
-                    defaultMessage="You can add an optional note to explain the reason for selecting a particular policy version."
-                  />
-                </>
-              }
-            />
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          {canWritePolicyManagement ? (
-            <EuiTextArea
-              value={note}
-              disabled={getNoteInProgress || createNoteInProgress}
-              onChange={(e) => setNote(e.target.value)}
-              fullWidth
-              rows={3}
-              placeholder={i18n.translate(
-                'xpack.securitySolution.endpoint.protectionUpdates.note.placeholder',
-                {
-                  defaultMessage: 'Add relevant information about update here',
-                }
+          {(canWritePolicyManagement || note) && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
+                <EuiTitle size="xxs" data-test-subj={'protection-updates-manifest-name-note-title'}>
+                  <h5>
+                    {i18n.translate(
+                      'xpack.securitySolution.endpoint.protectionUpdates.note.label',
+                      {
+                        defaultMessage: 'Note',
+                      }
+                    )}
+                  </h5>
+                </EuiTitle>
+                <EuiIconTip
+                  position="right"
+                  content={
+                    <>
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.protectionUpdates.note.tooltip"
+                        defaultMessage="You can add an optional note to explain the reason for selecting a particular policy version."
+                      />
+                    </>
+                  }
+                />
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+              {canWritePolicyManagement ? (
+                <EuiTextArea
+                  value={note}
+                  disabled={getNoteInProgress || createNoteInProgress}
+                  onChange={(e) => setNote(e.target.value)}
+                  fullWidth
+                  rows={3}
+                  placeholder={i18n.translate(
+                    'xpack.securitySolution.endpoint.protectionUpdates.note.placeholder',
+                    {
+                      defaultMessage: 'Add relevant information about update here',
+                    }
+                  )}
+                  data-test-subj={'protection-updates-manifest-note'}
+                />
+              ) : (
+                <EuiText data-test-subj={'protection-updates-manifest-note-view-mode'}>
+                  {note}
+                </EuiText>
               )}
-              data-test-subj={'protection-updates-manifest-note'}
-            />
-          ) : (
-            <EuiText data-test-subj={'protection-updates-manifest-note-view-mode'}>{note}</EuiText>
+            </>
           )}
         </>
       );

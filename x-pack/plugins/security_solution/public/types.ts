@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 
-import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
+import type { CoreStart, AppMountParameters, AppLeaveHandler } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
@@ -49,6 +49,7 @@ import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 import type { RouteProps } from 'react-router-dom';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
@@ -78,8 +79,10 @@ import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
-import type { DataQualityPanelConfig } from './overview/types';
-import type { SetComponents, GetComponent$ } from './contract_components';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import type { DeepLinksFormatter } from './common/links/deep_links';
+import type { SetComponents, GetComponents$ } from './contract_components';
+import type { ConfigSettings } from '../common/config_settings';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -108,7 +111,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
   kubernetesSecurity: KubernetesSecurityStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;
@@ -132,6 +135,7 @@ export interface StartPlugins {
   fieldFormats: FieldFormatsStartCommon;
   discover: DiscoverStart;
   navigation: NavigationPublicPluginStart;
+  expressions: ExpressionsStart;
   dataViewEditor: DataViewEditorStart;
   savedSearch: SavedSearchPublicPluginStart;
 }
@@ -143,19 +147,19 @@ export interface StartPluginsDependencies extends StartPlugins {
 
 export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
-  isSidebarEnabled$: Observable<boolean>;
-  getComponent$: GetComponent$;
+  getComponents$: GetComponents$;
   upselling: UpsellingService;
-  dataQualityPanelConfig: DataQualityPanelConfig | undefined;
 }
 
 export type StartServices = CoreStart &
   StartPlugins &
   ContractStartServices & {
+    configSettings: ConfigSettings;
     storage: Storage;
     sessionStorage: Storage;
     apm: ApmBase;
     savedObjectsTagging?: SavedObjectsTaggingApi;
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
     onAppLeave: (handler: AppLeaveHandler) => void;
 
     /**
@@ -173,14 +177,14 @@ export type StartServices = CoreStart &
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
+  experimentalFeatures: ExperimentalFeatures;
   setAppLinksSwitcher: (appLinksSwitcher: AppLinksSwitcher) => void;
-  setDataQualityPanelConfig: (dataQualityPanelConfig: DataQualityPanelConfig) => void;
+  setDeepLinksFormatter: (deepLinksFormatter: DeepLinksFormatter) => void;
 }
 
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setExtraRoutes: (extraRoutes: RouteProps[]) => void;
-  setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;

@@ -16,11 +16,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import { SEVERITY_UI_SORT_ORDER } from '../../../../entity_analytics/common/utils';
 import type { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
-import { SEVERITY_UI_SORT_ORDER } from '../../../../../common/search_strategy';
 import type { SeverityCount } from './types';
-import { RiskScore } from './common';
-import { ENTITY_RISK_CLASSIFICATION } from '../translations';
+import { RiskScoreLevel } from './common';
+import { ENTITY_RISK_LEVEL } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
 
 interface SeverityItems {
@@ -92,7 +92,7 @@ export const SeverityFilterGroup: React.FC<{
         numActiveFilters={totalActiveItem}
         onClick={onButtonClick}
       >
-        {ENTITY_RISK_CLASSIFICATION(riskEntity)}
+        {ENTITY_RISK_LEVEL(riskEntity)}
       </EuiFilterButton>
     ),
     [isPopoverOpen, items, onButtonClick, totalActiveItem, riskEntity]
@@ -118,7 +118,7 @@ export const SeverityFilterGroup: React.FC<{
               key={index + item.risk}
               onClick={() => updateSeverityFilter(item.risk)}
             >
-              <RiskScore severity={item.risk} />
+              <RiskScoreLevel severity={item.risk} />
             </EuiFilterSelectItem>
           ))}
         </div>

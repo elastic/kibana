@@ -27,7 +27,7 @@ import type {
 import type { DataViewBase } from '@kbn/es-query';
 import styled, { css } from 'styled-components';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { hasEqlSequenceQuery, isEqlRule } from '../../../../../../common/detection_engine/utils';
+import { hasEqlSequenceQuery } from '../../../../../../common/detection_engine/utils';
 import type { Rule } from '../../../../rule_management/logic/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -111,7 +111,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
   );
   const includesRuleWithEQLSequenceStatement = useMemo((): boolean => {
     return (
-      rules != null && rules.some((rule) => isEqlRule(rule.type) && hasEqlSequenceQuery(rule.query))
+      rules != null && rules.some((rule) => rule.type === 'eql' && hasEqlSequenceQuery(rule.query))
     );
   }, [rules]);
 

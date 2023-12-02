@@ -12,6 +12,7 @@ import {
   LogEntryTime,
 } from '@kbn/logs-shared-plugin/common';
 import { scaleLinear } from 'd3-scale';
+import moment from 'moment';
 import * as React from 'react';
 import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';
@@ -67,7 +68,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
 
     this.props.jumpToTarget({
       tiebreaker: 0,
-      time: clickedTime,
+      time: moment(clickedTime).toISOString(),
     });
   };
 
@@ -142,9 +143,9 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
 
         {highlightedInterval ? (
           <HighlightedInterval
-            end={highlightedInterval.end}
+            end={moment(highlightedInterval.end).valueOf()}
             getPositionOfTime={this.getPositionOfTime}
-            start={highlightedInterval.start}
+            start={moment(highlightedInterval.start).valueOf()}
             targetWidth={TIMERULER_WIDTH}
             width={width}
             target={target}

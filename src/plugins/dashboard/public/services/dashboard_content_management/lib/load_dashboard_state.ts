@@ -56,7 +56,9 @@ export const loadDashboardState = async ({
   /**
    * This is a newly created dashboard, so there is no saved object state to load.
    */
-  if (!savedObjectId) return { dashboardInput: newDashboardState, dashboardFound: true };
+  if (!savedObjectId) {
+    return { dashboardInput: newDashboardState, dashboardFound: true, newDashboardCreated: true };
+  }
 
   /**
    * Load the saved object from Content Management

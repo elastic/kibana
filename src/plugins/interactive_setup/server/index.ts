@@ -14,12 +14,14 @@ import type {
 } from '@kbn/core/server';
 
 import { ConfigSchema } from './config';
-import { InteractiveSetupPlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,
 };
 
-export const plugin: PluginInitializer<void, never> = (
+export const plugin: PluginInitializer<void, never> = async (
   initializerContext: PluginInitializerContext
-) => new InteractiveSetupPlugin(initializerContext);
+) => {
+  const { InteractiveSetupPlugin } = await import('./plugin');
+  return new InteractiveSetupPlugin(initializerContext);
+};

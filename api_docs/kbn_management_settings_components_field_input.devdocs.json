@@ -96,29 +96,43 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.FieldInputKibanaDependencies.toasts",
+            "id": "def-common.FieldInputKibanaDependencies.notifications",
             "type": "Object",
             "tags": [],
-            "label": "toasts",
+            "label": "notifications",
             "description": [
               "The portion of the {@link ToastsStart} contract used by this component."
             ],
             "signature": [
-              "{ addDanger: (toastOrTitle: ",
+              "{ toasts: Pick<",
               {
                 "pluginId": "@kbn/core-notifications-browser",
                 "scope": "common",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.ToastInput",
-                "text": "ToastInput"
+                "section": "def-common.IToasts",
+                "text": "IToasts"
               },
-              ", options?: any) => ",
+              ", \"addDanger\">; }"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.FieldInputKibanaDependencies.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              "{ client: ",
               {
-                "pluginId": "@kbn/core-notifications-browser",
+                "pluginId": "@kbn/core-ui-settings-browser",
                 "scope": "common",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.Toast",
-                "text": "Toast"
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
               },
               "; }"
             ],
@@ -311,6 +325,55 @@
                 ],
                 "signature": [
                   "string"
+                ],
+                "path": "packages/kbn-management/settings/components/field_input/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.FieldInputServices.validateChange",
+            "type": "Function",
+            "tags": [],
+            "label": "validateChange",
+            "description": [],
+            "signature": [
+              "(key: string, value: any) => Promise<",
+              "ValueValidation",
+              ">"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/management-settings-components-field-input",
+                "id": "def-common.FieldInputServices.validateChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-management/settings/components/field_input/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/management-settings-components-field-input",
+                "id": "def-common.FieldInputServices.validateChange.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "any"
                 ],
                 "path": "packages/kbn-management/settings/components/field_input/types.ts",
                 "deprecated": false,

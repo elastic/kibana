@@ -337,6 +337,7 @@ export enum RegistryDataStreamKeys {
   dataset_is_prefix = 'dataset_is_prefix',
   routing_rules = 'routing_rules',
   lifecycle = 'lifecycle',
+  agent = 'agent',
 }
 
 export interface RegistryDataStream {
@@ -355,6 +356,12 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
   [RegistryDataStreamKeys.routing_rules]?: RegistryDataStreamRoutingRules[];
   [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
+  [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
+  [RegistryDataStreamKeys.agent]?: RegistryAgent;
+}
+
+export interface RegistryAgent {
+  privileges?: { root?: boolean };
 }
 
 export interface RegistryElasticsearch {
@@ -523,6 +530,16 @@ export interface ExperimentalDataStreamFeature {
   features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
 }
 
+export interface InstallFailedAttempt {
+  created_at: string;
+  target_version: string;
+  error: {
+    name: string;
+    message: string;
+    stack?: string;
+  };
+}
+
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
@@ -542,6 +559,7 @@ export interface Installation {
   experimental_data_stream_features?: ExperimentalDataStreamFeature[];
   internal?: boolean;
   removable?: boolean;
+  latest_install_failed_attempts?: InstallFailedAttempt[];
 }
 
 export interface PackageUsageStats {
@@ -615,6 +633,7 @@ export interface IndexTemplate {
   };
   data_stream: { hidden?: boolean };
   composed_of: string[];
+  ignore_missing_component_templates?: string[];
   _meta: object;
 }
 

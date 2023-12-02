@@ -46,7 +46,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
     panelPaddingSize="none"
     repositionToCrossAxis={true}
   >
-    <EuiContextMenu
+    <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
       initialPanelId={0}
       panels={
@@ -111,7 +111,6 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
           },
         ]
       }
-      size="m"
     />
   </EuiPopover>
 </Fragment>
@@ -163,7 +162,7 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
     panelPaddingSize="none"
     repositionToCrossAxis={true}
   >
-    <EuiContextMenu
+    <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
       initialPanelId={0}
       panels={
@@ -228,7 +227,6 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
           },
         ]
       }
-      size="m"
     />
   </EuiPopover>
 </Fragment>
@@ -280,7 +278,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
     panelPaddingSize="none"
     repositionToCrossAxis={true}
   >
-    <EuiContextMenu
+    <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
       initialPanelId={0}
       panels={
@@ -345,7 +343,6 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
           },
         ]
       }
-      size="m"
     />
   </EuiPopover>
 </Fragment>
@@ -398,7 +395,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
     panelPaddingSize="none"
     repositionToCrossAxis={true}
   >
-    <EuiContextMenu
+    <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
       initialPanelId={0}
       panels={
@@ -463,7 +460,6 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
           },
         ]
       }
-      size="m"
     />
   </EuiPopover>
 </Fragment>
@@ -515,7 +511,7 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
     panelPaddingSize="none"
     repositionToCrossAxis={true}
   >
-    <EuiContextMenu
+    <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
       initialPanelId={0}
       panels={
@@ -549,7 +545,6 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
           },
         ]
       }
-      size="m"
     />
   </EuiPopover>
 </Fragment>
@@ -601,7 +596,7 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
     panelPaddingSize="none"
     repositionToCrossAxis={true}
   >
-    <EuiContextMenu
+    <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
       initialPanelId={0}
       panels={
@@ -676,7 +671,6 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
           },
         ]
       }
-      size="m"
     />
   </EuiPopover>
 </Fragment>

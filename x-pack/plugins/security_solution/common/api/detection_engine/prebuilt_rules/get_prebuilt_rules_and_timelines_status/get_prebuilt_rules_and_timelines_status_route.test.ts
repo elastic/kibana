@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { stringifyZodError } from '@kbn/securitysolution-es-utils';
-import { expectParseError, expectParseSuccess } from '../../../../test/zod_helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 import { GetPrebuiltRulesAndTimelinesStatusResponse } from './get_prebuilt_rules_and_timelines_status_route.gen';
 
 describe('Get prebuilt rules and timelines status response schema', () => {

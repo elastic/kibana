@@ -37,6 +37,7 @@ else
     --skip-generic-folders \
     --skip-platform-folders \
     --skip-archives \
+    --skip-cdn-assets \
     --docker-images \
     --docker-tag-qualifier="$GIT_COMMIT" \
     --docker-push \

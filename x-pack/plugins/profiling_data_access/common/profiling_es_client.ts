@@ -8,7 +8,11 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import type { ProfilingStatusResponse, StackTraceResponse } from '@kbn/profiling-utils';
+import type {
+  BaseFlameGraph,
+  ProfilingStatusResponse,
+  StackTraceResponse,
+} from '@kbn/profiling-utils';
 
 export interface ProfilingESClient {
   search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
@@ -19,6 +23,10 @@ export interface ProfilingESClient {
     query: QueryDslQueryContainer;
     sampleSize: number;
   }): Promise<StackTraceResponse>;
-  profilingStatus(): Promise<ProfilingStatusResponse>;
+  profilingStatus(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;
+  profilingFlamegraph({}: {
+    query: QueryDslQueryContainer;
+    sampleSize: number;
+  }): Promise<BaseFlameGraph>;
 }

@@ -7,31 +7,42 @@
 
 import React from 'react';
 import { AssetDetailsRenderPropsProvider } from './hooks/use_asset_details_render_props';
-import { DateRangeProvider } from './hooks/use_date_range';
+import { DatePickerProvider } from './hooks/use_date_picker';
+import { LoadingStateProvider } from './hooks/use_loading_state';
 import { MetadataStateProvider } from './hooks/use_metadata_state';
 import { AssetDetailsProps } from './types';
 
 export const ContextProviders = ({
-  props,
   children,
-}: { props: Omit<AssetDetailsProps, 'links' | 'tabs' | 'activeTabId' | 'metricAlias'> } & {
+  ...props
+}: Omit<AssetDetailsProps, 'links' | 'tabs' | 'activeTabId' | 'metricAlias'> & {
   children: React.ReactNode;
 }) => {
-  const { asset, dateRange, overrides, assetType = 'host', renderMode } = props;
+  const {
+    assetId,
+    assetName,
+    autoRefresh,
+    dateRange,
+    overrides,
+    assetType = 'host',
+    renderMode,
+  } = props;
+
   return (
-    <DateRangeProvider initialDateRange={dateRange}>
-      <MetadataStateProvider asset={asset} assetType={assetType}>
-        <AssetDetailsRenderPropsProvider
-          props={{
-            asset,
-            assetType,
-            overrides,
-            renderMode,
-          }}
-        >
-          {children}
-        </AssetDetailsRenderPropsProvider>
-      </MetadataStateProvider>
-    </DateRangeProvider>
+    <DatePickerProvider dateRange={dateRange} autoRefresh={autoRefresh}>
+      <LoadingStateProvider>
+        <MetadataStateProvider assetId={assetId} assetType={assetType}>
+          <AssetDetailsRenderPropsProvider
+            assetId={assetId}
+            assetName={assetName}
+            assetType={assetType}
+            overrides={overrides}
+            renderMode={renderMode}
+          >
+            {children}
+          </AssetDetailsRenderPropsProvider>
+        </MetadataStateProvider>
+      </LoadingStateProvider>
+    </DatePickerProvider>
   );
 };

@@ -23,8 +23,9 @@ import type {
 } from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
+import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
 
-import { BehaviorSubject, map, tap } from 'rxjs';
+import { BehaviorSubject, map, switchMap, tap } from 'rxjs';
 import type { TelemetryConfigLabels } from '../server/config';
 import { FetchTelemetryConfigRoute, INTERNAL_VERSION } from '../common/routes';
 import type { v2 } from '../common/types';
@@ -159,7 +160,7 @@ export class TelemetryPlugin
     const currentKibanaVersion = this.currentKibanaVersion;
     this.telemetryService = new TelemetryService({
       config,
-      isScreenshotMode: screenshotMode.isScreenshotMode(),
+      isScreenshotMode: this.shouldSkipTelemetry(screenshotMode),
       http,
       notifications,
       currentKibanaVersion,
@@ -200,7 +201,9 @@ export class TelemetryPlugin
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
       await this.refreshConfig(http);
       analytics.optIn({
-        global: { enabled: this.telemetryService!.isOptedIn && !screenshotMode.isScreenshotMode() },
+        global: {
+          enabled: this.telemetryService!.isOptedIn && !this.shouldSkipTelemetry(screenshotMode),
+        },
       });
     });
 
@@ -246,26 +249,38 @@ export class TelemetryPlugin
     });
     this.telemetryNotifications = telemetryNotifications;
 
-    application.currentAppId$.subscribe(async () => {
-      // Refresh and get telemetry config
-      const updatedConfig = await this.refreshConfig(http);
+    application.currentAppId$
+      .pipe(
+        switchMap(async () => {
+          // Disable telemetry and terminate early if Kibana is running in a special "skip" mode
+          if (this.shouldSkipTelemetry(screenshotMode)) {
+            analytics.optIn({ global: { enabled: false } });
+            return;
+          }
 
-      analytics.optIn({
-        global: { enabled: this.telemetryService!.isOptedIn && !screenshotMode.isScreenshotMode() },
-      });
+          // Refresh and get telemetry config
+          const updatedConfig = await this.refreshConfig(http);
 
-      const isUnauthenticated = this.getIsUnauthenticated(http);
-      if (isUnauthenticated) {
-        return;
-      }
+          analytics.optIn({
+            global: {
+              enabled: this.telemetryService!.isOptedIn,
+            },
+          });
 
-      const telemetryBanner = updatedConfig?.banner;
+          const isUnauthenticated = this.getIsUnauthenticated(http);
+          if (isUnauthenticated) {
+            return;
+          }
 
-      this.maybeStartTelemetryPoller();
-      if (telemetryBanner) {
-        this.maybeShowOptedInNotificationBanner();
-      }
-    });
+          const telemetryBanner = updatedConfig?.banner;
+
+          this.maybeStartTelemetryPoller();
+          if (telemetryBanner) {
+            this.maybeShowOptedInNotificationBanner();
+          }
+        })
+      )
+      .subscribe();
 
     return {
       telemetryService: this.getTelemetryServicePublicApis(),
@@ -278,6 +293,16 @@ export class TelemetryPlugin
 
   public stop() {
     this.telemetrySender?.stop();
+  }
+
+  /**
+   * Kibana should skip telemetry collection if reporting is taking a screenshot
+   * or Synthetics monitoring is navigating Kibana.
+   * @param screenshotMode {@link ScreenshotModePluginSetup}
+   * @private
+   */
+  private shouldSkipTelemetry(screenshotMode: ScreenshotModePluginSetup): boolean {
+    return screenshotMode.isScreenshotMode() || isSyntheticsMonitor();
   }
 
   private getTelemetryServicePublicApis(): TelemetryServicePublicApis {

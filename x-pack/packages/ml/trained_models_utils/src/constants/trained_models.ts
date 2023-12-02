@@ -46,8 +46,12 @@ export const BUILT_IN_MODEL_TAG = 'prepackaged';
 
 export const ELASTIC_MODEL_TAG = 'elastic';
 
+export const ELSER_ID_V1 = '.elser_model_1' as const;
+
 export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object.freeze({
   '.elser_model_1': {
+    modelName: 'elser',
+    hidden: true,
     version: 1,
     config: {
       input: {
@@ -57,8 +61,10 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
     description: i18n.translate('xpack.ml.trainedModels.modelsList.elserDescription', {
       defaultMessage: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
     }),
+    type: ['elastic', 'pytorch', 'text_expansion'],
   },
-  '.elser_model_2_SNAPSHOT': {
+  '.elser_model_2': {
+    modelName: 'elser',
     version: 2,
     default: true,
     config: {
@@ -67,10 +73,12 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
       },
     },
     description: i18n.translate('xpack.ml.trainedModels.modelsList.elserV2Description', {
-      defaultMessage: 'Elastic Learned Sparse EncodeR v2 (Tech Preview)',
+      defaultMessage: 'Elastic Learned Sparse EncodeR v2',
     }),
+    type: ['elastic', 'pytorch', 'text_expansion'],
   },
-  '.elser_model_2_linux-x86_64_SNAPSHOT': {
+  '.elser_model_2_linux-x86_64': {
+    modelName: 'elser',
     version: 2,
     os: 'Linux',
     arch: 'amd64',
@@ -80,24 +88,71 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
       },
     },
     description: i18n.translate('xpack.ml.trainedModels.modelsList.elserV2x86Description', {
-      defaultMessage:
-        'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64 (Tech Preview)',
+      defaultMessage: 'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64',
     }),
+    type: ['elastic', 'pytorch', 'text_expansion'],
+  },
+  '.multilingual-e5-small': {
+    modelName: 'e5',
+    version: 1,
+    default: true,
+    config: {
+      input: {
+        field_names: ['text_field'],
+      },
+    },
+    description: i18n.translate('xpack.ml.trainedModels.modelsList.e5v1Description', {
+      defaultMessage: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
+    }),
+    license: 'MIT',
+    type: ['pytorch', 'text_embedding'],
+  },
+  '.multilingual-e5-small_linux-x86_64': {
+    modelName: 'e5',
+    version: 1,
+    os: 'Linux',
+    arch: 'amd64',
+    config: {
+      input: {
+        field_names: ['text_field'],
+      },
+    },
+    description: i18n.translate('xpack.ml.trainedModels.modelsList.e5v1x86Description', {
+      defaultMessage:
+        'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
+    }),
+    license: 'MIT',
+    type: ['pytorch', 'text_embedding'],
   },
 } as const);
 
+export type ElasticCuratedModelName = 'elser' | 'e5';
+
 export interface ModelDefinition {
+  /**
+   * Model name, e.g. elser
+   */
+  modelName: ElasticCuratedModelName;
   version: number;
+  /**
+   * Default PUT model configuration
+   */
   config: object;
   description: string;
   os?: string;
   arch?: string;
   default?: boolean;
   recommended?: boolean;
+  hidden?: boolean;
+  license?: string;
+  type?: readonly string[];
 }
 
 export type ModelDefinitionResponse = ModelDefinition & {
-  name: string;
+  /**
+   * Complete model id, e.g. .elser_model_2_linux-x86_64
+   */
+  model_id: string;
 };
 
 export type ElasticModelId = keyof typeof ELASTIC_MODEL_DEFINITIONS;
@@ -106,12 +161,13 @@ export const MODEL_STATE = {
   ...DEPLOYMENT_STATE,
   DOWNLOADING: 'downloading',
   DOWNLOADED: 'downloaded',
+  NOT_DOWNLOADED: 'notDownloaded',
 } as const;
 
 export type ModelState = typeof MODEL_STATE[keyof typeof MODEL_STATE] | null;
 
 export type ElserVersion = 1 | 2;
 
-export interface GetElserOptions {
+export interface GetModelDownloadConfigOptions {
   version?: ElserVersion;
 }

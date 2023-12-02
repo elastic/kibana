@@ -33,7 +33,7 @@ export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.sev
 
 export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 
-export const ALERTS = '[data-test-subj="events-viewer-panel"][data-test-subj="event"]';
+export const ALERT_DATA_GRID_ROW = `${ALERT_DATA_GRID} .euiDataGridRow`;
 
 export const ALERTS_COUNT = '[data-test-subj="toolbar-alerts-count"]';
 
@@ -42,8 +42,6 @@ export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
 export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="closed-alert-status"]';
 
 export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
-
-export const DESTINATION_IP = '[data-test-subj^=formatted-field][data-test-subj$=destination\\.ip]';
 
 export const EMPTY_ALERT_TABLE = '[data-test-subj="alertsStateTableEmptyState"]';
 
@@ -55,41 +53,21 @@ export const TAKE_ACTION_MENU = '[data-test-subj="takeActionPanelMenu"]';
 
 export const CLOSE_FLYOUT = '[data-test-subj="euiFlyoutCloseButton"]';
 
-export const GROUP_BY_TOP_INPUT = '[data-test-subj="groupByTop"] [data-test-subj="comboBoxInput"]';
-
-export const HOST_NAME = '[data-test-subj^=formatted-field][data-test-subj$=host\\.name]';
-
-export const ACKNOWLEDGED_ALERTS_FILTER_BTN = '[data-test-subj="acknowledgedAlerts"]';
-
-export const LOADING_ALERTS_PANEL = '[data-test-subj="loading-alerts-panel"]';
-
-export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="manage-alert-detection-rules"]';
-
 export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
 
 export const ALERTS_REFRESH_BTN = `${GLOBAL_FILTERS_CONTAINER} [data-test-subj="querySubmitButton"]`;
 
 export const ALERTS_HISTOGRAM_PANEL_LOADER = '[data-test-subj="loadingPanelAlertsHistogram"]';
 
-export const ALERTS_CONTAINER_LOADING_BAR = '[data-test-subj="events-container-loading-true"]';
-
 export const OPEN_ALERT_BTN = '[data-test-subj="open-alert-status"]';
 
 export const OPENED_ALERTS_FILTER_BTN = '[data-test-subj="openAlerts"]';
 
-export const OPEN_ALERT_DETAILS_PAGE_CONTEXT_MENU_BTN =
-  '[data-test-subj="open-alert-details-page-menu-item"]';
+export const COLUMN_HEADER = '[data-test-subj="dataGridHeader"]';
 
-export const PROCESS_NAME_COLUMN = '[data-test-subj="dataGridHeaderCell-process.name"]';
-export const PROCESS_NAME = '[data-test-subj="formatted-field-process.name"]';
+export const TIMESTAMP_COLUMN = '[data-test-subj="dataGridHeaderCell-@timestamp"]';
+
 export const MESSAGE = '[data-test-subj="formatted-field-message"]';
-
-export const REASON =
-  '[data-test-subj="dataGridRowCell"][data-gridcell-column-id="kibana.alert.reason"]';
-
-export const RISK_SCORE = '[data-test-subj^=formatted-field][data-test-subj$=risk_score]';
-
-export const RULE_NAME = '[data-test-subj^=formatted-field][data-test-subj$=rule\\.name]';
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
 
@@ -101,17 +79,9 @@ export const OPEN_ANALYZER_BTN = '[data-test-subj="view-in-analyzer"]';
 
 export const ANALYZER_NODE = '[data-test-subj="resolver:node"';
 
-export const SEVERITY = '[data-test-subj^=formatted-field][data-test-subj$=severity]';
-
-export const SOURCE_IP = '[data-test-subj^=formatted-field][data-test-subj$=source\\.ip]';
-
 export const TAKE_ACTION_POPOVER_BTN = '[data-test-subj="selectedShowBulkActionsButton"]';
 
 export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu-button"]';
-
-export const TIMELINE_CONTEXT_MENU = '[data-test-subj="actions-context-menu"]';
-
-export const USER_NAME = '[data-test-subj^=formatted-field][data-test-subj$=user\\.name]';
 
 export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-to-existing-case-action"]';
 
@@ -119,12 +89,12 @@ export const ATTACH_TO_NEW_CASE_BUTTON = '[data-test-subj="add-to-new-case-actio
 
 export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
 
-export const HOST_RISK_HEADER_COLIMN =
+export const HOST_RISK_HEADER_COLUMN =
   '[data-test-subj="dataGridHeaderCell-host.risk.calculated_level"]';
 
 export const HOST_RISK_COLUMN = '[data-gridcell-column-id="host.risk.calculated_level"]';
 
-export const USER_RISK_HEADER_COLIMN =
+export const USER_RISK_HEADER_COLUMN =
   '[data-test-subj="dataGridHeaderCell-user.risk.calculated_level"]';
 
 export const USER_RISK_COLUMN = '[data-gridcell-column-id="user.risk.calculated_level"]';
@@ -162,8 +132,6 @@ export const ACTIONS_EXPAND_BUTTON = '[data-test-subj="euiDataGridCellExpandButt
 export const SHOW_TOP_N_HEADER =
   '[data-test-subj="topN-container"] [data-test-subj="header-section-title"]';
 
-export const SHOW_TOP_N_CLOSE_BUTTON = '[data-test-subj="close"]';
-
 export const ALERTS_HISTOGRAM_LEGEND =
   '[data-test-subj="alerts-histogram-panel"] .echLegendItem__action';
 
@@ -174,18 +142,14 @@ export const SELECT_HISTOGRAM = '[data-test-subj="chart-select-trend"]';
 export const LEGEND_ACTIONS = {
   ADD_TO_TIMELINE: (ruleName: string) =>
     `[data-test-subj="legend-${ruleName}-embeddable_addToTimeline"]`,
-  FILTER_FOR: (ruleName: string) => `[data-test-subj="legend-${ruleName}-filterIn"]`,
-  FILTER_OUT: (ruleName: string) => `[data-test-subj="legend-${ruleName}-filterOut"]`,
+  FILTER_FOR: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_filterIn"]`,
+  FILTER_OUT: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_filterOut"]`,
   COPY: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_copyToClipboard"]`,
 };
-
-export const TREND_CHART_LEGEND = '[data-test-subj="draggable-legend"]';
 
 export const SESSION_VIEWER_BUTTON = '[data-test-subj="session-view-button"]';
 
 export const OVERLAY_CONTAINER = '[data-test-subj="overlayContainer"]';
-
-export const CLOSE_OVERLAY = '[data-test-subj="close-overlay"]';
 
 export const ALERT_SUMMARY_SEVERITY_DONUT_CHART =
   getDataTestSubjectSelector('severity-level-donut');
@@ -214,11 +178,40 @@ export const EVENT_SUMMARY_ALERT_RENDERER_CONTENT = '[data-test-subj="alertRende
 
 export const ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION = '[data-test-subj="eventRenderedView"]';
 
-export const ALERT_TABLE_ADDITIONAL_CONTROLS = '[data-test-subj="additionalFilters-popover"]';
-
-export const ALERT_RENDERER_CONTENT = '[data-test-subj="alertRenderer"]';
-
 export const ALERT_RENDERER_HOST_NAME =
   '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
 
 export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hover-actions-container');
+
+export const ALERT_USERS_PROFILES_SELECTABLE_MENU_ITEM = '.euiSelectableListItem';
+export const ALERT_USERS_PROFILES_CLEAR_SEARCH_BUTTON = '[data-test-subj="clearSearchButton"]';
+
+export const ALERT_ASSIGN_CONTEXT_MENU_ITEM =
+  '[data-test-subj="alert-assignees-context-menu-item"]';
+
+export const ALERT_UNASSIGN_CONTEXT_MENU_ITEM =
+  '[data-test-subj="remove-alert-assignees-menu-item"]';
+
+export const ALERT_ASSIGNEES_SELECT_PANEL =
+  '[data-test-subj="securitySolutionAssigneesApplyPanel"]';
+
+export const ALERT_ASSIGNEES_UPDATE_BUTTON =
+  '[data-test-subj="securitySolutionAssigneesApplyButton"]';
+
+export const ALERT_USER_AVATAR = (assignee: string) =>
+  `[data-test-subj="securitySolutionUsersAvatar-${assignee}"][title='${assignee}']`;
+
+export const ALERT_AVATARS_PANEL = '[data-test-subj="securitySolutionUsersAvatarsPanel"]';
+
+export const ALERT_ASIGNEES_COLUMN =
+  '[data-test-subj="dataGridRowCell"][data-gridcell-column-id="kibana.alert.workflow_assignee_ids"]';
+
+export const ALERT_ASSIGNEES_COUNT_BADGE =
+  '[data-test-subj="securitySolutionUsersAvatarsCountBadge"]';
+
+export const FILTER_BY_ASSIGNEES_BUTTON = '[data-test-subj="filter-popover-button-assignees"]';
+
+export const ALERT_DETAILS_ASSIGN_BUTTON =
+  '[data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"]';
+
+export const ALERT_DETAILS_TAKE_ACTION_BUTTON = '[data-test-subj="take-action-dropdown-btn"]';

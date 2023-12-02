@@ -13,13 +13,16 @@ properties:
   action:
     $ref: 'actions.yaml'
   comment_id:
-    type: string
-    nullable: true
-    example: 578608d0-03b1-11ed-920c-974bfa104448
+    type:
+      - "string"
+      - "null"
+    examples:
+      - 578608d0-03b1-11ed-920c-974bfa104448
   created_at:
     type: string
     format: date-time
-    example: 2022-05-13T09:16:17.416Z
+    examples:
+      - 2022-05-13T09:16:17.416Z
   created_by:
     type: object
     properties:
@@ -30,7 +33,8 @@ properties:
       - username
   id:
     type: string
-    example: 22fd3e30-03b1-11ed-920c-974bfa104448
+    examples:
+      - 22fd3e30-03b1-11ed-920c-974bfa104448
   owner:
     $ref: 'owners.yaml'
   payload:
@@ -50,7 +54,8 @@ properties:
       - $ref: 'payload_user_comment.yaml'
   version:
     type: string
-    example: WzM1ODg4LDFd
+    examples:
+      - WzM1ODg4LDFd
   type:
     type: string
     description: The type of action.
@@ -66,4 +71,5 @@ properties:
       - status
       - settings
       - severity
-    example: create_case
+    examples:
+      - create_case

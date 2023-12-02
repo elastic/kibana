@@ -73,6 +73,7 @@ interface PolicyTemplateVarsFormProps {
   packageInfo: PackageInfo;
   onChange: PackagePolicyReplaceDefineStepExtensionComponentProps['onChange'];
   setIsValid: (isValid: boolean) => void;
+  disabled: boolean;
 }
 
 export const PolicyTemplateVarsForm = ({ input, ...props }: PolicyTemplateVarsFormProps) => {
@@ -113,6 +114,7 @@ export const PolicyTemplateInfo = ({ postureType }: PolicyTemplateInfoProps) => 
         <EuiCallOut
           iconType="iInCircle"
           color="primary"
+          data-test-subj="additionalChargeCalloutTestSubj"
           title={
             <FormattedMessage
               id="xpack.csp.fleetIntegration.cnvm.additionalChargesCalloutTitle"

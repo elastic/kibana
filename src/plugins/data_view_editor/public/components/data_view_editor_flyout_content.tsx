@@ -105,6 +105,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             title: editData.getIndexPattern(),
             id: editData.id,
             name: editData.name,
+            allowHidden: editData.getAllowHidden(),
             ...(editData.timeFieldName
               ? {
                   timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
@@ -124,6 +125,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         timeFieldName: formData.timestampField?.value,
         id: formData.id,
         name: formData.name,
+        allowHidden: formData.allowHidden,
       };
 
       if (type === INDEX_PATTERN_TYPE.ROLLUP && rollupIndex) {
@@ -293,6 +295,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             onAllowHiddenChange={() => {
               form.getFields().title.validate();
             }}
+            defaultVisible={editData?.getAllowHidden()}
           />
         </Form>
         <Footer

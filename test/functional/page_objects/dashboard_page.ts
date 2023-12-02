@@ -27,6 +27,7 @@ interface SaveDashboardOptions {
 }
 
 export class DashboardPageObject extends FtrService {
+  private readonly comboBox = this.ctx.getService('comboBox');
   private readonly config = this.ctx.getService('config');
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
@@ -43,6 +44,7 @@ export class DashboardPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly discover = this.ctx.getPageObject('discover');
+  private readonly appsMenu = this.ctx.getService('appsMenu');
 
   private readonly logstashIndex = this.config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
@@ -63,6 +65,17 @@ export class DashboardPageObject extends FtrService {
 
   public async navigateToApp() {
     await this.common.navigateToApp(this.APP_ID);
+  }
+
+  public async navigateToAppFromAppsMenu() {
+    await this.retry.try(async () => {
+      await this.appsMenu.clickLink('Dashboard', { category: 'kibana' });
+      await this.header.waitUntilLoadingHasFinished();
+      const currentUrl = await this.browser.getCurrentUrl();
+      if (!currentUrl.includes('app/dashboard')) {
+        throw new Error(`Not in dashboard application after clicking 'Dashboard' in apps menu`);
+      }
+    });
   }
 
   public async expectAppStateRemovedFromURL() {
@@ -182,11 +195,11 @@ export class DashboardPageObject extends FtrService {
 
   public async expectOnDashboard(expectedTitle: string) {
     await this.retry.waitFor(
-      `last breadcrumb to have dashboard title: ${expectedTitle}`,
+      `last breadcrumb to have dashboard title: ${expectedTitle} OR Editing ${expectedTitle}`,
       async () => {
         const actualTitle = await this.globalNav.getLastBreadcrumb();
         this.log.debug(`Expected dashboard title ${expectedTitle}, actual: ${actualTitle}`);
-        return actualTitle === expectedTitle;
+        return actualTitle === expectedTitle || actualTitle === `Editing ${expectedTitle}`;
       }
     );
   }
@@ -413,7 +426,7 @@ export class DashboardPageObject extends FtrService {
   public async clearSavedObjectsFromAppLinks() {
     await this.header.clickVisualize();
     await this.visualize.gotoLandingPage();
-    await this.header.clickDashboard();
+    await this.navigateToAppFromAppsMenu();
     await this.gotoDashboardLandingPage();
   }
 
@@ -543,9 +556,9 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async selectDashboardTags(tagNames: string[]) {
-    await this.testSubjects.click('savedObjectTagSelector');
+    const tagsComboBox = await this.testSubjects.find('savedObjectTagSelector');
     for (const tagName of tagNames) {
-      await this.testSubjects.click(`tagSelectorOption-${tagName.replace(' ', '_')}`);
+      await this.comboBox.setElement(tagsComboBox, tagName);
     }
     await this.testSubjects.click('savedObjectTitle');
   }
@@ -571,7 +584,7 @@ export class DashboardPageObject extends FtrService {
 
     await this.gotoDashboardLandingPage();
 
-    await this.listingTable.searchForItemWithName(dashboardName);
+    await this.listingTable.searchForItemWithName(dashboardName, { escape: false });
     await this.retry.try(async () => {
       await this.listingTable.clickItemLink('dashboard', dashboardName);
       await this.header.waitUntilLoadingHasFinished();

@@ -134,7 +134,7 @@ export function MobileLocationStats({
     },
     {
       color: euiTheme.eui.euiColorLightestShade,
-      title: i18n.translate('xpack.apm.mobile.location.metrics.crashes', {
+      title: i18n.translate('xpack.apm.mobile.location.metrics.mostCrashes', {
         defaultMessage: 'Most crashes',
       }),
       extra: getComparisonValueFormatter({
@@ -163,17 +163,18 @@ export function MobileLocationStats({
       trendShape: MetricTrendShape.Area,
     },
     {
-      color: euiTheme.eui.euiColorDisabled,
+      color: euiTheme.eui.euiColorLightestShade,
       title: i18n.translate('xpack.apm.mobile.location.metrics.launches', {
         defaultMessage: 'Most launches',
       }),
-      subtitle: i18n.translate('xpack.apm.mobile.coming.soon', {
-        defaultMessage: 'Coming Soon',
+      extra: getComparisonValueFormatter({
+        currentPeriodValue: currentPeriod?.mostLaunches.value,
+        previousPeriodValue: previousPeriod?.mostLaunches.value,
       }),
       icon: getIcon('launch'),
-      value: NOT_AVAILABLE_LABEL,
+      value: currentPeriod?.mostLaunches.location ?? NOT_AVAILABLE_LABEL,
       valueFormatter: (value) => `${value}`,
-      trend: [],
+      trend: currentPeriod?.mostLaunches.timeseries,
       trendShape: MetricTrendShape.Area,
     },
   ];

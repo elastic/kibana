@@ -4,7 +4,7 @@
   "exclude": ["target/**/*"],
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["cypress", "node", "cypress-react-selector"],
+    "types": ["cypress", "node"],
     "resolveJsonModule": true
   },
   "kbn_references": [

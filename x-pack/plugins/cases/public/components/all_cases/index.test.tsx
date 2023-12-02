@@ -138,46 +138,6 @@ describe('AllCases', () => {
     });
   });
 
-  it('should not allow the user to enter configuration page with basic license', async () => {
-    useGetActionLicenseMock.mockReturnValue({
-      ...defaultActionLicense,
-      data: {
-        id: '.jira',
-        name: 'Jira',
-        minimumLicenseRequired: 'gold',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: false,
-      },
-    });
-
-    const result = appMockRender.render(<AllCases />);
-
-    await waitFor(() => {
-      expect(result.getByTestId('configure-case-button')).toBeDisabled();
-    });
-  });
-
-  it('should allow the user to enter configuration page with gold license and above', async () => {
-    useGetActionLicenseMock.mockReturnValue({
-      ...defaultActionLicense,
-      data: {
-        id: '.jira',
-        name: 'Jira',
-        minimumLicenseRequired: 'gold',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-      },
-    });
-
-    const result = appMockRender.render(<AllCases />);
-
-    await waitFor(() => {
-      expect(result.getByTestId('configure-case-button')).not.toBeDisabled();
-    });
-  });
-
   it('should render the case callouts', async () => {
     const result = appMockRender.render(<AllCases />);
     await waitFor(() => {

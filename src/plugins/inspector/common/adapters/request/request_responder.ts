@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Request, RequestStatistics, RequestStatus, Response } from './types';
+import { moveRequestParamsToTopLevel } from './move_request_params_to_top_level';
 
 /**
  * An API to specify information about a specific request that will be logged.
@@ -53,7 +54,7 @@ export class RequestResponder {
   public finish(status: RequestStatus, response: Response): void {
     this.request.time = response.time ?? Date.now() - this.request.startTime;
     this.request.status = status;
-    this.request.response = response;
+    this.request.response = moveRequestParamsToTopLevel(response);
     this.onChange();
   }
 

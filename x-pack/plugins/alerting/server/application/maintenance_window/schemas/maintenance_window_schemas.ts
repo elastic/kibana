@@ -6,13 +6,26 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { maintenanceWindowStatus } from '../constants';
+import { maintenanceWindowStatus, maintenanceWindowCategoryIdTypes } from '../constants';
 import { rRuleSchema } from '../../r_rule/schemas';
+import { alertsFilterQuerySchema } from '../../alerts_filter_query/schemas';
 
 export const maintenanceWindowEventSchema = schema.object({
   gte: schema.string(),
   lte: schema.string(),
 });
+
+export const maintenanceWindowCategoryIdsSchema = schema.maybe(
+  schema.nullable(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal(maintenanceWindowCategoryIdTypes.OBSERVABILITY),
+        schema.literal(maintenanceWindowCategoryIdTypes.SECURITY_SOLUTION),
+        schema.literal(maintenanceWindowCategoryIdTypes.MANAGEMENT),
+      ])
+    )
+  )
+);
 
 export const maintenanceWindowSchema = schema.object({
   id: schema.string(),
@@ -34,4 +47,6 @@ export const maintenanceWindowSchema = schema.object({
     schema.literal(maintenanceWindowStatus.FINISHED),
     schema.literal(maintenanceWindowStatus.ARCHIVED),
   ]),
+  categoryIds: maintenanceWindowCategoryIdsSchema,
+  scopedQuery: schema.maybe(schema.nullable(alertsFilterQuerySchema)),
 });
