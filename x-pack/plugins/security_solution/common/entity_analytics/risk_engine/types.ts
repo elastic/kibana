@@ -38,9 +38,11 @@ export interface SimpleRiskInput {
 export interface EcsRiskScore {
   '@timestamp': string;
   host?: {
+    name: string;
     risk: Omit<RiskScore, '@timestamp'>;
   };
   user?: {
+    name: string;
     risk: Omit<RiskScore, '@timestamp'>;
   };
 }

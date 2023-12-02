@@ -551,7 +551,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe.only('with asset criticality data', () => {
+      describe('with asset criticality data', () => {
         const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
         beforeEach(async () => {

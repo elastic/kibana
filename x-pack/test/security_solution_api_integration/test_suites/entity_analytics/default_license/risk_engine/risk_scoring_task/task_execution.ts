@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { isNumber } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import {
   deleteAllAlerts,
@@ -24,9 +23,9 @@ import {
   getRiskEngineTask,
   waitForRiskEngineTaskToBeGone,
   cleanRiskEngine,
-  teardownAssetCriticality,
-  createAssetCriticality,
-  initAssetCriticality,
+  assetCriticalityRouteHelpersFactory,
+  cleanAssetCriticality,
+  waitForAssetCriticalityToBePresent,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -183,8 +182,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/171132
-      describe.skip('with some alerts containing hosts and others containing users', () => {
+      describe('with some alerts containing hosts and others containing users', () => {
         let hostId: string;
         let userId: string;
 
@@ -216,11 +214,11 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 20,
             riskScore: 40,
           });
-
-          await riskEngineRoutes.init();
         });
 
-        it('@skipInQA calculates and persists risk scores for both types of entities', async () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/171132
+        it.skip('@skipInQA calculates and persists risk scores for both types of entities', async () => {
+          await riskEngineRoutes.init();
           await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
           const riskScores = await readRiskScores(es);
 
@@ -233,35 +231,51 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         context('with asset criticality data', () => {
-          before(async () => {
-            await initAssetCriticality();
-          });
-
-          after(async () => {
-            await teardownAssetCriticality();
-          });
+          const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
           beforeEach(async () => {
-            await createAssetCriticality({
-              supertest,
-              criticality: { 'user.name': 'user-1', criticality_level: 'Critical' },
+            await assetCriticalityRoutes.upsert({
+              id_field: 'host.name',
+              id_value: 'host-1',
+              criticality_level: 'very_important',
             });
           });
 
+          afterEach(async () => {
+            await cleanAssetCriticality({ log, es });
+          });
+
           it('calculates risk scores with asset criticality data', async () => {
+            await waitForAssetCriticalityToBePresent({ es, log });
+            await riskEngineRoutes.init();
             await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
             const riskScores = await readRiskScores(es);
 
-            expect(riskScores.length).to.eql(20);
+            expect(riskScores.length).to.be.greaterThan(0);
             const assetCriticalityLevels = riskScores.map(
-              (riskScore) => riskScore.user?.risk.asset_criticality_level
+              (riskScore) => riskScore.host?.risk.asset_criticality_level
             );
             const assetCriticalityModifiers = riskScores.map(
-              (riskScore) => riskScore.user?.risk.asset_criticality_modifier
+              (riskScore) => riskScore.host?.risk.asset_criticality_modifier
             );
 
-            expect(assetCriticalityLevels).to.eql(Array(20).fill('Critical'));
-            expect(assetCriticalityModifiers.every((modifier) => isNumber(modifier))).to.be(true);
+            expect(assetCriticalityLevels).to.contain('very_important');
+            expect(assetCriticalityModifiers).to.contain(2);
+
+            const scoreWithCriticality = riskScores.find((score) => score.host?.name === 'host-1');
+            expect(normalizeScores([scoreWithCriticality!])).to.eql([
+              {
+                id_field: 'host.name',
+                id_value: 'host-1',
+                asset_criticality_level: 'very_important',
+                asset_criticality_modifier: 2,
+                calculated_level: 'Low',
+                calculated_score: 79.81345973382406,
+                calculated_score_norm: 46.809565696393314,
+                category_1_score: 76,
+                category_1_count: 10,
+              },
+            ]);
           });
         });
       });
