@@ -500,8 +500,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message:
-              '[request body]: type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "query", type: Invalid literal value, expected "saved_query", saved_id: Required, and 14 more',
+            message: '[request body]: threshold: Required',
             statusCode: 400,
           });
         });
