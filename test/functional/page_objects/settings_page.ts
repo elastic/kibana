@@ -491,6 +491,7 @@ export class SettingsPageObject extends FtrService {
       await this.testSubjects.click(`detail-link-${dataViewName}`);
     }
     await this.testSubjects.click('refreshDataViewButton');
+    // todo - await on refresh button being available again
   }
 
   async allowHiddenClick() {

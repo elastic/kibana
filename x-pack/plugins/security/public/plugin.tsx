@@ -166,16 +166,6 @@ export class SecurityPlugin
       this.anonymousAccessService.setup({ share });
     }
 
-    const userIdGetter = async () => {
-      const [, , security] = await core.getStartServices();
-      const { profile_uid: profileUid } = await (
-        security as SecurityPluginStart
-      ).authc.getCurrentUser();
-      return profileUid;
-    };
-
-    dataViews?.setUserIdGetter(userIdGetter);
-
     return {
       authc: this.authc,
       license,
