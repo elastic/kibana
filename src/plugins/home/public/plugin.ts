@@ -42,8 +42,8 @@ export interface HomePluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
-  cloudStart: CloudStart;
-  shareStart: SharePluginStart;
+  cloud: CloudStart;
+  share: SharePluginStart;
 }
 
 export interface HomePluginSetupDependencies {

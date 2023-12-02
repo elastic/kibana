@@ -58,7 +58,7 @@ export interface HomeKibanaServices {
   openModal: OverlayStart['openModal'];
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
-  shareStart: SharePluginStart;
+  share: SharePluginStart;
 }
 
 let services: HomeKibanaServices | null = null;
