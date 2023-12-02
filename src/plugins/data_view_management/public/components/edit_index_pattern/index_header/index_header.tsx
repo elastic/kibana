@@ -58,7 +58,7 @@ const refreshLabel = i18n.translate('indexPatternManagement.editDataView.refresh
   defaultMessage: 'Refresh',
 });
 
-const isLoadingLabel = i18n.translate('indexPatternManagement.editDataView.refreshLabel', {
+const isLoadingLabel = i18n.translate('indexPatternManagement.editDataView.refreshLoading', {
   defaultMessage: 'Loading...',
 });
 
