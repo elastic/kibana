@@ -175,4 +175,69 @@ steps:
       automatic:
         - exit_status: '1'
           limit: 2
-          
+
+  - label: Running rule_creation_essentials:qa:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_creation_essentials:qa:serverless
+    key: rule_creation_essentials:qa:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '1'
+          limit: 2
+
+  - label: Running rule_delete_essentials:qa:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_delete_essentials:qa:serverless
+    key: rule_delete_essentials:qa:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '1'
+          limit: 2
+
+  - label: Running rule_edit_essentials:qa:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_edit_essentials:qa:serverless
+    key: rule_edit_essentials:qa:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '1'
+          limit: 2
+
+  - label: Running rule_import_export_essentials:qa:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_import_export_essentials:qa:serverless
+    key: rule_import_export_essentials:qa:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '1'
+          limit: 2
+
+  - label: Running rule_management_essentials:qa:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_management_essentials:qa:serverless
+    key: rule_management_essentials:qa:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '1'
+          limit: 2        
+
+  - label: Running rule_read_essentials:qa:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_read_essentials:qa:serverless
+    key: rule_read_essentials:qa:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '1'
+          limit: 2  
