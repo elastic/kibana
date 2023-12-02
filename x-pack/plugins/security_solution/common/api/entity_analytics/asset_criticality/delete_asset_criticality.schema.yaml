@@ -1,0 +1,16 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Asset Criticality Delete Record Schema
+paths:
+  /internal/asset_criticality:
+    delete:
+      summary: Delete Criticality Record
+      parameters:
+        - $ref: '#/components/parameters/id_value'
+        - $ref: '#/components/parameters/id_field'
+      responses:
+        '200':
+          description: Successful response
+        '400':
+          description: Invalid request
