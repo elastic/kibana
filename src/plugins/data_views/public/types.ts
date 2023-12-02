@@ -113,6 +113,7 @@ export type UserIdGetter = () => Promise<string | undefined>;
  */
 export interface DataViewsPublicPluginSetup {
   enableRollups: () => void;
+  setUserIdGetter: (userIdGetter: UserIdGetter) => void;
 }
 
 export interface DataViewsServicePublic extends DataViewsServicePublicMethods {

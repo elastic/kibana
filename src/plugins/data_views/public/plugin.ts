@@ -8,7 +8,6 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 import { getIndexPatternLoad } from './expressions';
 import type { ClientConfigType } from '../common/types';
 import {
@@ -63,20 +62,11 @@ export class DataViewsPublicPlugin
       }),
     });
 
-    core.plugins.onStart<{ security: SecurityPluginStart }>('security').then(({ security }) => {
-      if (security.found) {
-        const getUserId = async function getUserId(): Promise<string | undefined> {
-          const currentUser = await security.contract.authc.getCurrentUser();
-          return currentUser?.profile_uid;
-        };
-        this.userIdGetter = getUserId;
-      } else {
-        throw new Error('Security plugin is not available, but is required for Data Views plugin');
-      }
-    });
-
     return {
       enableRollups: () => (this.rollupsEnabled = true),
+      setUserIdGetter: (userIdGetter: UserIdGetter) => {
+        this.userIdGetter = userIdGetter;
+      },
     };
   }
 
