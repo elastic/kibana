@@ -9,6 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { HttpError, Status } from '../../../../../../../common/types/api';
 import { MlModel } from '../../../../../../../common/types/ml';
+import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 import {
   CachedFetchModelsApiLogic,
   CachedFetchModlesApiLogicActions,
@@ -25,16 +26,18 @@ import {
 
 export interface ModelSelectActions {
   createModel: (modelId: string) => { modelId: string };
+  createModelError: CreateModelApiLogicActions['apiError'];
   createModelMakeRequest: CreateModelApiLogicActions['makeRequest'];
   createModelSuccess: CreateModelApiLogicActions['apiSuccess'];
 
   fetchModels: () => void;
-  fetchModelsMakeRequest: CachedFetchModlesApiLogicActions['makeRequest'];
   fetchModelsError: CachedFetchModlesApiLogicActions['apiError'];
+  fetchModelsMakeRequest: CachedFetchModlesApiLogicActions['makeRequest'];
   fetchModelsSuccess: CachedFetchModlesApiLogicActions['apiSuccess'];
   startPollingModels: CachedFetchModlesApiLogicActions['startPolling'];
 
   startModel: (modelId: string) => { modelId: string };
+  startModelError: CreateModelApiLogicActions['apiError'];
   startModelMakeRequest: StartModelApiLogicActions['makeRequest'];
   startModelSuccess: StartModelApiLogicActions['apiSuccess'];
 }
@@ -45,6 +48,7 @@ export interface ModelSelectValues {
   createModelStatus: Status;
   isLoading: boolean;
   isInitialLoading: boolean;
+  modelStateChangeError: string | undefined;
   modelsData: FetchModelsApiResponse | undefined;
   modelsStatus: Status;
   selectableModels: MlModel[];
@@ -117,6 +121,14 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
       () => [selectors.createModelStatus, selectors.startModelStatus],
       (createModelStatus: Status, startModelStatus: Status) =>
         createModelStatus === Status.LOADING || startModelStatus === Status.LOADING,
+    ],
+    modelStateChangeError: [
+      () => [selectors.createModelError, selectors.startModelError],
+      (createModelError?: HttpError, startModelError?: HttpError) => {
+        if (!createModelError && !startModelError) return undefined;
+
+        return getErrorsFromHttpResponse(createModelError ?? startModelError!)[0];
+      },
     ],
     selectableModels: [
       () => [selectors.modelsData],
