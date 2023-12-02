@@ -495,14 +495,15 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/default_license/lists_items/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_delete/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_delete/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_edit/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_edit/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_update/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_update/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_patch/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_patch/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_import_export/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_import_export/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_management/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_management/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_read/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_read/configs/ess.config.ts
-
-
-
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_bulk_actions/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_bulk_actions/configs/serverless.config.ts

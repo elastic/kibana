@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@ess @serverless import_export_rules_flow', () => {
+  describe('@ess import_export_rules_flow', () => {
     beforeEach(async () => {
       await createAlertsIndex(supertest, log);
       await createUserAndRole(getService, ROLES.soc_manager);

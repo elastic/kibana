@@ -36,7 +36,10 @@ export default ({ getService }: FtrProviderContext): void => {
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
-  describe('@ess @serverless delete_rules_bulk', () => {
+  // Marking as ESS and brokenInServerless as it's currently exposed in both, but if this is already
+  // deprecated, it should cease being exposed in Serverless prior to GA, in which case this
+  // test would be run for ESS only.
+  describe('@ess @brokenInServerless @skipInQA delete_rules_bulk', () => {
     describe('deprecations', () => {
       it('should return a warning header', async () => {
         await createRule(supertest, log, getSimpleRule());
@@ -322,7 +325,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('@brokenInServerless legacy investigation fields', () => {
+    describe('legacy investigation fields', () => {
       let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
       let ruleWithLegacyInvestigationFieldEmptyArray: Rule<BaseRuleParams>;
 

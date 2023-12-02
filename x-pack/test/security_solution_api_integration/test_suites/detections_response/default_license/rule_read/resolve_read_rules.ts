@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
 
-  describe('@ess @serverless resolve_read_rules', () => {
+  describe('@ess resolve_read_rules', () => {
     describe('reading rules', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);

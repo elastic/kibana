@@ -40,6 +40,7 @@ import {
   getActionsWithFrequencies,
   getActionsWithoutFrequencies,
   getSomeActionsWithFrequencies,
+  updateUsername,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -47,8 +48,14 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  // TODO: add a new service
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
-  describe('@ess @serverless update_rules_bulk', () => {
+  // Marking as ESS and brokenInServerless as it's currently exposed in both, but if this is already
+  // deprecated, it should cease being exposed in Serverless prior to GA, in which case this
+  // test would be run for ESS only.
+  describe('@ess @brokenInServerless @skipInQA update_rules_bulk', () => {
     describe('deprecations', () => {
       afterEach(async () => {
         await deleteAllRules(supertest, log);
@@ -95,7 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule])
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
         outputRule.name = 'some other name';
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -127,11 +134,11 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule1, updatedRule2])
           .expect(200);
 
-        const outputRule1 = getSimpleRuleOutput();
+        const outputRule1 = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
         outputRule1.name = 'some other name';
         outputRule1.revision = 1;
 
-        const outputRule2 = getSimpleRuleOutput('rule-2');
+        const outputRule2 = updateUsername(getSimpleRuleOutput('rule-2'), ELASTICSEARCH_USERNAME);
         outputRule2.name = 'some other name';
         outputRule2.revision = 1;
 
@@ -198,7 +205,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         body.forEach((response) => {
           const bodyToCompare = removeServerGeneratedProperties(response);
-          const outputRule = getSimpleRuleOutput(response.rule_id);
+          const outputRule = updateUsername(
+            getSimpleRuleOutput(response.rule_id),
+            ELASTICSEARCH_USERNAME
+          );
           outputRule.name = 'some other name';
           outputRule.revision = 1;
           outputRule.actions = [
@@ -261,7 +271,10 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         body.forEach((response) => {
-          const outputRule = getSimpleRuleOutput(response.rule_id);
+          const outputRule = updateUsername(
+            getSimpleRuleOutput(response.rule_id),
+            ELASTICSEARCH_USERNAME
+          );
           outputRule.name = 'some other name';
           outputRule.revision = 1;
           outputRule.actions = [];
@@ -286,7 +299,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule1])
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
         outputRule.name = 'some other name';
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -315,11 +328,11 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule1, updatedRule2])
           .expect(200);
 
-        const outputRule1 = getSimpleRuleOutput('rule-1');
+        const outputRule1 = updateUsername(getSimpleRuleOutput('rule-1'), ELASTICSEARCH_USERNAME);
         outputRule1.name = 'some other name';
         outputRule1.revision = 1;
 
-        const outputRule2 = getSimpleRuleOutput('rule-2');
+        const outputRule2 = updateUsername(getSimpleRuleOutput('rule-2'), ELASTICSEARCH_USERNAME);
         outputRule2.name = 'some other name';
         outputRule2.revision = 1;
 
@@ -345,7 +358,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule1])
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
         outputRule.name = 'some other name';
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -367,7 +380,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule1])
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
         outputRule.enabled = false;
         outputRule.severity = 'low';
         outputRule.revision = 1;
@@ -402,7 +415,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send([ruleUpdate2])
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
         outputRule.name = 'some other name';
         outputRule.revision = 2;
 
@@ -472,7 +485,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send([ruleUpdate, ruleUpdate2])
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
         outputRule.name = 'some other name';
         outputRule.revision = 1;
 
@@ -510,7 +523,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send([rule1, rule2])
           .expect(200);
 
-        const outputRule = getSimpleRuleOutput();
+        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
         outputRule.name = 'some other name';
         outputRule.revision = 1;
 
@@ -674,7 +687,10 @@ export default ({ getService }: FtrProviderContext) => {
                 actionsWithoutFrequencies
               );
 
-              const expectedRule = getSimpleRuleOutputWithoutRuleId();
+              const expectedRule = updateUsername(
+                getSimpleRuleOutputWithoutRuleId(),
+                ELASTICSEARCH_USERNAME
+              );
               expectedRule.revision = 1;
               expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
                 ...action,
@@ -702,7 +718,10 @@ export default ({ getService }: FtrProviderContext) => {
               actionsWithoutFrequencies
             );
 
-            const expectedRule = getSimpleRuleOutputWithoutRuleId();
+            const expectedRule = updateUsername(
+              getSimpleRuleOutputWithoutRuleId(),
+              ELASTICSEARCH_USERNAME
+            );
             expectedRule.revision = 1;
             expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
               ...action,
@@ -737,7 +756,10 @@ export default ({ getService }: FtrProviderContext) => {
               actionsWithFrequencies
             );
 
-            const expectedRule = getSimpleRuleOutputWithoutRuleId();
+            const expectedRule = updateUsername(
+              getSimpleRuleOutputWithoutRuleId(),
+              ELASTICSEARCH_USERNAME
+            );
             expectedRule.revision = 1;
             expectedRule.actions = actionsWithFrequencies;
 
@@ -762,7 +784,10 @@ export default ({ getService }: FtrProviderContext) => {
                 someActionsWithFrequencies
               );
 
-              const expectedRule = getSimpleRuleOutputWithoutRuleId();
+              const expectedRule = updateUsername(
+                getSimpleRuleOutputWithoutRuleId(),
+                ELASTICSEARCH_USERNAME
+              );
               expectedRule.revision = 1;
               expectedRule.actions = someActionsWithFrequencies.map((action) => ({
                 ...action,
@@ -789,7 +814,10 @@ export default ({ getService }: FtrProviderContext) => {
               someActionsWithFrequencies
             );
 
-            const expectedRule = getSimpleRuleOutputWithoutRuleId();
+            const expectedRule = updateUsername(
+              getSimpleRuleOutputWithoutRuleId(),
+              ELASTICSEARCH_USERNAME
+            );
             expectedRule.revision = 1;
             expectedRule.actions = someActionsWithFrequencies.map((action) => ({
               ...action,
@@ -806,7 +834,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@brokenInServerless legacy investigation fields', () => {
+    describe('legacy investigation fields', () => {
       let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
       let ruleWithLegacyInvestigationFieldEmptyArray: Rule<BaseRuleParams>;
       let ruleWithInvestigationFields: RuleResponse;

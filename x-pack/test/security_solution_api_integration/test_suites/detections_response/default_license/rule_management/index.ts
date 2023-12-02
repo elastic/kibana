@@ -11,7 +11,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Rule Management API', function () {
     loadTestFile(require.resolve('./get_rule_execution_results'));
     loadTestFile(require.resolve('./get_rule_management_filters'));
-    loadTestFile(require.resolve('./perform_bulk_action_dry_run'));
-    loadTestFile(require.resolve('./perform_bulk_action'));
   });
 }
