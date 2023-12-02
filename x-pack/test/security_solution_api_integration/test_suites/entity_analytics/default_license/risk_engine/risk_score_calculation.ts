@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isNumber } from 'lodash';
 import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 
@@ -26,6 +25,7 @@ import {
   waitForRiskScoresToBePresent,
   assetCriticalityRouteHelpersFactory,
   cleanAssetCriticality,
+  waitForAssetCriticalityToBePresent,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -274,42 +274,49 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('with asset criticality data', () => {
-        before(async () => {
-          await initAssetCriticality();
-        });
-
-        after(async () => {
-          await teardownAssetCriticality();
-        });
+        const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
         beforeEach(async () => {
-          await createAssetCriticality({
-            supertest,
-            criticality: { 'host.name': 'host-1', criticality_level: 'Critical' },
+          await assetCriticalityRoutes.upsert({
+            id_field: 'host.name',
+            id_value: 'host-1',
+            criticality_level: 'important',
           });
+        });
+
+        afterEach(async () => {
+          await cleanAssetCriticality({ log, es });
         });
 
         it('calculates and persists risk scores with additional criticality metadata and modifiers', async () => {
-          await calculateRiskScores({
-            body: {
-              data_view_id: '.alerts-security.alerts-default',
-              range: { start: 'now-30d', end: 'now' },
-            },
+          const documentId = uuidv4();
+          await indexListOfDocuments([buildDocument({ host: { name: 'host-1' } }, documentId)]);
+          await waitForAssetCriticalityToBePresent({ es, log });
+
+          const results = await calculateRiskScoreAfterRuleCreationAndExecution(documentId);
+          expect(results).to.eql({
+            after_keys: { host: { 'host.name': 'host-1' } },
+            errors: [],
+            scores_written: 1,
           });
 
-          await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
+          await waitForRiskScoresToBePresent({ es, log });
           const scores = await readRiskScores(es);
+          expect(scores.length).to.eql(1);
 
-          const scoresContainAssetCriticalityLevels = scores.some(
-            (score) => !!score.host?.risk.asset_criticality_level
-          );
-          expect(scoresContainAssetCriticalityLevels).to.be(true);
-
-          const scoresContainAssetCriticalityModifiers = scores.some((score) =>
-            isNumber(score.host?.risk.asset_criticality_modifier)
-          );
-
-          expect(scoresContainAssetCriticalityModifiers).to.be(true);
+          expect(normalizeScores(scores)).to.eql([
+            {
+              asset_criticality_level: 'important',
+              asset_criticality_modifier: 1.5,
+              calculated_level: 'Unknown',
+              calculated_score: 21,
+              calculated_score_norm: 11.59366948840633,
+              category_1_score: 21,
+              category_1_count: 1,
+              id_field: 'host.name',
+              id_value: 'host-1',
+            },
+          ]);
         });
       });
     });
