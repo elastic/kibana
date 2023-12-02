@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer, EuiText, EuiTitle, HorizontalAlignment } from '@elastic/eui';
 import { SLOResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +50,7 @@ export function AlertTimeTable({ windows, slo }: AlertTimeTableProps) {
       };
     }, {});
     return { rate, ...windowTimes };
-  });
+  }) as Array<{ rate: number } & WindowSchema>;
 
   const columns = [
     {
@@ -63,7 +63,7 @@ export function AlertTimeTable({ windows, slo }: AlertTimeTableProps) {
     ...windows.map((windowDef, index) => ({
       field: `column_${index + 1}`,
       name: `${windowDef.longWindow.value}h @ ${windowDef.burnRateThreshold}x`,
-      align: 'right',
+      align: 'right' as HorizontalAlignment,
       render: (time: number | null) => (time ? formatTime(time) : '-'),
     })),
   ];
@@ -86,7 +86,7 @@ export function AlertTimeTable({ windows, slo }: AlertTimeTableProps) {
         </p>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiBasicTable
+      <EuiBasicTable<{ rate: number } & WindowSchema>
         tableCaption={i18n.translate('xpack.observability.slo.rules.tableCaption', {
           defaultMessage: 'Alerting time table',
         })}
