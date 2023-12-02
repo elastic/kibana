@@ -42,7 +42,6 @@ import {
 } from '../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Add exception using data views from rule details',
   { tags: ['@ess', '@serverless'] },
@@ -68,6 +67,7 @@ describe(
           query: 'agent.name:*',
           data_view_id: 'exceptions-*',
           rule_id: 'rule_testing',
+          enabled: true,
         })
       ).then((rule) => visitRuleDetailsPage(rule.body.id));
       waitForAlertsToPopulate();

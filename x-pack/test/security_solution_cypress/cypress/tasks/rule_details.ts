@@ -72,7 +72,7 @@ export const clickDisableRuleSwitch = () => {
   cy.get(RULE_SWITCH).click();
   cy.wait('@bulk_action').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
-    cy.wrap(response?.body.attributes.results.updated[0].enabled).should('eql', true);
+    cy.wrap(response?.body.attributes.results.updated[0].enabled).should('eql', false);
   });
 };
 
