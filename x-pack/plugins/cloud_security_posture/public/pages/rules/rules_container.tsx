@@ -91,13 +91,13 @@ export const RulesContainer = () => {
     params.benchmarkId,
     params.benchmarkVersion
   );
-console.log(allRules)
+
   const sectionList = useMemo(
     () => allRules.data?.items.map((rule) => rule.metadata.section),
     [allRules.data]
   );
   const ruleNumberList = useMemo(
-    () => allRules.data?.items.map((rule) => rule.metadata.benchmark.rule_number),
+    () => allRules.data?.items.map((rule) => rule.metadata.benchmark.rule_number || ''),
     [allRules.data]
   );
   const cleanedSectionList = [...new Set(sectionList)];

@@ -19,16 +19,19 @@ export type RulesQueryResult = ReturnType<typeof useFindCspRuleTemplates>;
 
 export const useFindCspRuleTemplates = (
   { search, page, perPage, section }: RulesQuery,
-  packagePolicyId: string,
-  policyId?: string
+  benchmarkId: string,
+  benchmarkVersion?: string
 ) => {
   const { http } = useKibana().services;
 
   return useQuery(
-    [CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE, { section, search, page, perPage, packagePolicyId, policyId }],
+    [
+      CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+      { section, search, page, perPage, benchmarkId, benchmarkVersion },
+    ],
     () => {
       return http.get<GetCspRuleTemplateResponse>(FIND_CSP_RULE_TEMPLATE_ROUTE_PATH, {
-        query: { packagePolicyId, page, perPage, search, section, policyId },
+        query: { benchmarkId, page, perPage, search, section, benchmarkVersion },
         version: FIND_CSP_RULE_TEMPLATE_API_CURRENT_VERSION,
       });
     }

@@ -72,10 +72,21 @@ export const findCspRuleTemplateRequest = schema.object({
    * benchmark id
    */
   benchmarkId: schema.maybe(
-    schema.oneOf([schema.literal('cis_k8s'), schema.literal('cis_eks'), schema.literal('cis_aws')])
+    schema.oneOf([
+      schema.literal('cis_k8s'),
+      schema.literal('cis_eks'),
+      schema.literal('cis_aws'),
+      schema.literal('cis_gcp'),
+      schema.literal('cis_azure'),
+    ])
   ),
 
-   /**
+  /**
+   * policy_id
+   */
+  benchmarkVersion: schema.maybe(schema.string()),
+
+  /**
    * policy_id
    */
   policyId: schema.maybe(schema.string()),
@@ -84,7 +95,6 @@ export const findCspRuleTemplateRequest = schema.object({
    * package_policy_id
    */
   packagePolicyId: schema.maybe(schema.string()),
-  
 
   /**
    * rule section

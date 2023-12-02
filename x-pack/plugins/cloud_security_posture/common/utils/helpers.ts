@@ -56,6 +56,9 @@ export const getBenchmarkFilter = (type: BenchmarkId, section?: RuleSection): st
       : ''
   }`;
 
+export const getBenchmarkFilterQuery = (id: BenchmarkId, version?: string): string =>
+  `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${id} AND ${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${version}"`;
+
 export const isEnabledBenchmarkInputType = (input: PackagePolicyInput | NewPackagePolicyInput) =>
   input.enabled;
 
