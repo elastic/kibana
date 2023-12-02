@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { PropsWithChildren } from 'react';
-import { type UserContentCommonSchema } from '@kbn/content-management-table-list-view-table';
+import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { DashboardApplicationService } from '../services/application/types';
 
