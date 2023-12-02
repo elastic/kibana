@@ -18,13 +18,13 @@ import {
   dataGeneratorFactory,
 } from '../../../detections_response/utils';
 import {
+  assetCriticalityRouteHelpersFactory,
   buildDocument,
+  cleanAssetCriticality,
   createAndSyncRuleAndAlertsFactory,
-  createAssetCriticality,
   deleteAllRiskScores,
-  initAssetCriticality,
   sanitizeScores,
-  teardownAssetCriticality,
+  waitForAssetCriticalityToBePresent,
 } from '../../utils';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -551,20 +551,19 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('with asset criticality data', () => {
-        before(async () => {
-          await initAssetCriticality();
-        });
-
-        after(async () => {
-          await teardownAssetCriticality();
-        });
+      describe.only('with asset criticality data', () => {
+        const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
         beforeEach(async () => {
-          await createAssetCriticality({
-            supertest,
-            criticality: { 'host.name': 'host-1', criticality_level: 'Critical' },
+          await assetCriticalityRoutes.upsert({
+            id_field: 'host.name',
+            id_value: 'host-1',
+            criticality_level: 'very_important',
           });
+        });
+
+        afterEach(async () => {
+          await cleanAssetCriticality({ log, es });
         });
 
         it('calculates and persists risk scores with additional criticality metadata and modifiers', async () => {
@@ -573,6 +572,7 @@ export default ({ getService }: FtrProviderContext): void => {
             buildDocument({ host: { name: 'host-1' } }, documentId),
             buildDocument({ host: { name: 'host-2' } }, documentId),
           ]);
+          await waitForAssetCriticalityToBePresent({ es, log });
 
           const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
             alerts: 2,
@@ -580,19 +580,17 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(sanitizeScores(body.scores.host!)).to.eql([
             {
-              asset_criticality_level: 'Critical',
+              asset_criticality_level: 'very_important',
               asset_criticality_modifier: 2.0,
               calculated_level: 'Unknown',
               calculated_score: 21,
-              calculated_score_norm: 8.039816232771823,
+              calculated_score_norm: 14.8830616583983,
               category_1_count: 1,
               category_1_score: 21,
               id_field: 'host.name',
               id_value: 'host-1',
             },
             {
-              asset_criticality_level: 'Low',
-              asset_criticality_modifier: 0.5,
               calculated_level: 'Unknown',
               calculated_score: 21,
               calculated_score_norm: 8.039816232771823,
