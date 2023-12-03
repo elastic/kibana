@@ -30,7 +30,7 @@
     "cypress:rule_management:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/detection_response/rule_management/!(prebuilt_rules)/**/*.cy.ts'",
     "cypress:rule_management:prebuilt_rules:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/detection_response/rule_management/prebuilt_rules/**/*.cy.ts'",
     "cypress:detection_engine:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/detection_response/detection_engine/!(exceptions)/**/*.cy.ts'",
-    "cypress:detection_engine:prebuilt_rules:run:exceptions": "yarn cypress:serverless --spec './cypress/e2e/detection_response/detection_engine/exceptions/**/*.cy.ts'",
+    "cypress:detection_engine:exceptions:run:exceptions": "yarn cypress:serverless --spec './cypress/e2e/detection_response/detection_engine/exceptions/**/*.cy.ts'",
     "cypress:investigations:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/investigations/**/*.cy.ts'",
     "cypress:explore:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/explore/**/*.cy.ts'",
     "cypress:changed-specs-only:serverless": "yarn cypress:serverless --changed-specs-only --env burn=5",
