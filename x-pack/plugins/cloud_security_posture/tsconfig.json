@@ -60,7 +60,8 @@
     "@kbn/ui-actions-plugin",
     "@kbn/core-http-server-mocks",
     "@kbn/field-formats-plugin",
-    "@kbn/data-view-field-editor-plugin"
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/server-http-tools"
   ],
   "exclude": ["target/**/*"]
 }
