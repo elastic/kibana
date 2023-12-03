@@ -319,6 +319,9 @@ describe('API tests', () => {
         evalParams: {
           agents: ['not', 'alphabetical'],
           dataset: '{}',
+          datasetName: 'Test Dataset',
+          projectName: 'Test Project Name',
+          runName: 'Test Run Name',
           evalModel: ['not', 'alphabetical'],
           evalPrompt: 'evalPrompt',
           evaluationType: ['not', 'alphabetical'],
@@ -336,9 +339,12 @@ describe('API tests', () => {
         query: {
           models: 'alphabetical,not',
           agents: 'alphabetical,not',
+          datasetName: 'Test Dataset',
           evaluationType: 'alphabetical,not',
           evalModel: 'alphabetical,not',
           outputIndex: 'outputIndex',
+          projectName: 'Test Project Name',
+          runName: 'Test Run Name',
         },
         signal: undefined,
       });

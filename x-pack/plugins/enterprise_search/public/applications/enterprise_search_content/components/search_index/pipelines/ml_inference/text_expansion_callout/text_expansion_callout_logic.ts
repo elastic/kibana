@@ -97,7 +97,7 @@ export const getTextExpansionError = (
         title: i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCreateError.title',
           {
-            defaultMessage: 'Error with ELSER v2 deployment',
+            defaultMessage: 'Error with ELSER deployment',
           }
         ),
         message: getErrorsFromHttpResponse(createError)[0],
@@ -107,7 +107,7 @@ export const getTextExpansionError = (
         title: i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.textExpansionStartError.title',
           {
-            defaultMessage: 'Error starting ELSER v2 deployment',
+            defaultMessage: 'Error starting ELSER deployment',
           }
         ),
         message: getErrorsFromHttpResponse(startError)[0],
@@ -117,7 +117,7 @@ export const getTextExpansionError = (
         title: i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.textExpansionFetchError.title',
           {
-            defaultMessage: 'Error fetching ELSER v2 model',
+            defaultMessage: 'Error fetching ELSER model',
           }
         ),
         message: getErrorsFromHttpResponse(fetchError)[0],
@@ -179,7 +179,7 @@ export const TextExpansionCalloutLogic = kea<
     afterMount: async () => {
       const elserModel = await KibanaLogic.values.ml.elasticModels?.getELSER({ version: 2 });
       if (elserModel != null) {
-        actions.setElserModelId(elserModel.name);
+        actions.setElserModelId(elserModel.model_id);
         actions.fetchTextExpansionModel();
       }
     },

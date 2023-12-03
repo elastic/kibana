@@ -19,6 +19,7 @@ export const getFilteredMetrics = (
     .map((data) => data && data.name);
   return requiredMetrics.filter((metric) => {
     const metricModelCreator = metrics.tsvb[metric];
+
     // We just need to get a dummy version of the model so we can filter
     // using the `requires` attribute.
     const metricModel = metricModelCreator(TIMESTAMP_FIELD, 'test', '>=1m');

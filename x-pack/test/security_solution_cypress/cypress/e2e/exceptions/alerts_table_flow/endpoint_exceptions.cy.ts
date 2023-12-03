@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   expandFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
