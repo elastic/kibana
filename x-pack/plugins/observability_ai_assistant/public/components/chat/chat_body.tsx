@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { flatten, last } from 'lodash';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -16,21 +15,26 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import type { Message } from '../../../common/types';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React, { useEffect, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { Conversation, Message, MessageRole } from '../../../common/types';
+import { ChatState } from '../../hooks/use_chat';
+import { useConversation } from '../../hooks/use_conversation';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
-import { useTimeline } from '../../hooks/use_timeline';
 import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
-import { ExperimentalFeatureBanner } from './experimental_feature_banner';
-import { InitialSetupPanel } from './initial_setup_panel';
-import { IncorrectLicensePanel } from './incorrect_license_panel';
+import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { ChatTimeline } from './chat_timeline';
-import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+import { ExperimentalFeatureBanner } from './experimental_feature_banner';
+import { IncorrectLicensePanel } from './incorrect_license_panel';
+import { InitialSetupPanel } from './initial_setup_panel';
+import { ChatActionClickType } from './types';
+import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 
 const timelineClassName = css`
   overflow-y: auto;
@@ -45,48 +49,45 @@ const incorrectLicenseContainer = css`
   padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingMedium};
 `;
 
+const chatBodyContainerClassNameWithError = css`
+  align-self: center;
+`;
+
 export function ChatBody({
-  title,
-  loading,
-  messages,
+  initialTitle,
+  initialMessages,
+  initialConversationId,
   connectors,
   knowledgeBase,
   connectorsManagementHref,
   modelsManagementHref,
-  conversationId,
   currentUser,
   startedFrom,
-  onChatUpdate,
-  onChatComplete,
-  onSaveTitle,
+  onConversationUpdate,
 }: {
-  title: string;
-  loading: boolean;
-  messages: Message[];
+  initialTitle?: string;
+  initialMessages?: Message[];
+  initialConversationId?: string;
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
   connectorsManagementHref: string;
   modelsManagementHref: string;
-  conversationId?: string;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   startedFrom?: StartedFrom;
-  onChatUpdate: (messages: Message[]) => void;
-  onChatComplete: (messages: Message[]) => void;
-  onSaveTitle: (title: string) => void;
+  onConversationUpdate: (conversation: Conversation) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
 
   const chatService = useObservabilityAIAssistantChatService();
 
-  const timeline = useTimeline({
+  const { conversation, messages, next, state, stop, saveTitle } = useConversation({
+    initialConversationId,
+    initialMessages,
+    initialTitle,
     chatService,
-    connectors,
-    currentUser,
-    messages,
-    startedFrom,
-    onChatUpdate,
-    onChatComplete,
+    connectorId: connectors.selectedConnector,
+    onConversationUpdate,
   });
 
   const timelineContainerRef = useRef<HTMLDivElement | null>(null);
@@ -94,7 +95,10 @@ export function ChatBody({
   let footer: React.ReactNode;
 
   const isLoading = Boolean(
-    connectors.loading || knowledgeBase.status.loading || last(flatten(timeline.items))?.loading
+    connectors.loading ||
+      knowledgeBase.status.loading ||
+      state === ChatState.Loading ||
+      conversation.loading
   );
 
   const containerClassName = css`
@@ -139,12 +143,12 @@ export function ChatBody({
   });
 
   const handleCopyConversation = () => {
-    const content = JSON.stringify({ title, messages });
+    const content = JSON.stringify({ title: initialTitle, messages });
 
     navigator.clipboard?.writeText(content || '');
   };
 
-  if (!hasCorrectLicense && !conversationId) {
+  if (!hasCorrectLicense && !initialConversationId) {
     footer = (
       <>
         <EuiFlexItem grow className={incorrectLicenseContainer}>
@@ -155,19 +159,29 @@ export function ChatBody({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-            <ChatPromptEditor loading={isLoading} disabled onSubmit={timeline.onSubmit} />
+            <ChatPromptEditor
+              loading={isLoading}
+              disabled
+              onSubmit={(message) => {
+                next(messages.concat(message));
+              }}
+            />
             <EuiSpacer size="s" />
           </EuiPanel>
         </EuiFlexItem>
       </>
     );
-  } else if (connectors.loading || knowledgeBase.status.loading) {
+  } else if (
+    connectors.loading ||
+    knowledgeBase.status.loading ||
+    (!conversation.value && conversation.loading)
+  ) {
     footer = (
       <EuiFlexItem className={loadingSpinnerContainerClassName}>
         <EuiLoadingSpinner />
       </EuiFlexItem>
     );
-  } else if (connectors.connectors?.length === 0 && !conversationId) {
+  } else if (connectors.connectors?.length === 0 && !initialConversationId) {
     footer = (
       <InitialSetupPanel
         connectors={connectors}
@@ -183,15 +197,47 @@ export function ChatBody({
           <div ref={timelineContainerRef}>
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
               <ChatTimeline
-                items={timeline.items}
+                startedFrom={startedFrom}
+                messages={messages}
                 knowledgeBase={knowledgeBase}
-                onEdit={timeline.onEdit}
-                onFeedback={timeline.onFeedback}
-                onRegenerate={timeline.onRegenerate}
-                onStopGenerating={timeline.onStopGenerating}
+                chatService={chatService}
+                currentUser={currentUser}
+                chatState={state}
+                hasConnector={!!connectors.connectors?.length}
+                onEdit={(editedMessage, newMessage) => {
+                  const indexOf = messages.indexOf(editedMessage);
+                  next(messages.slice(0, indexOf).concat(newMessage));
+                }}
+                onFeedback={(message, feedback) => {}}
+                onRegenerate={(message) => {
+                  const indexOf = messages.indexOf(message);
+                  next(messages.slice(0, indexOf));
+                }}
+                onStopGenerating={() => {
+                  stop();
+                }}
                 onActionClick={(payload) => {
                   setStickToBottom(true);
-                  return timeline.onActionClick(payload);
+                  switch (payload.type) {
+                    case ChatActionClickType.executeEsqlQuery:
+                      next(
+                        messages.concat({
+                          '@timestamp': new Date().toISOString(),
+                          message: {
+                            role: MessageRole.Assistant,
+                            content: '',
+                            function_call: {
+                              name: 'execute_query',
+                              arguments: JSON.stringify({
+                                query: payload.query,
+                              }),
+                              trigger: MessageRole.User,
+                            },
+                          },
+                        })
+                      );
+                      break;
+                  }
                 }}
               />
             </EuiPanel>
@@ -207,13 +253,40 @@ export function ChatBody({
               disabled={!connectors.selectedConnector || !hasCorrectLicense}
               onSubmit={(message) => {
                 setStickToBottom(true);
-                return timeline.onSubmit(message);
+                return next(messages.concat(message));
               }}
             />
             <EuiSpacer size="s" />
           </EuiPanel>
         </EuiFlexItem>
       </>
+    );
+  }
+
+  if (conversation.error) {
+    return (
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        className={containerClassName}
+        justifyContent="center"
+      >
+        <EuiFlexItem grow={false} className={chatBodyContainerClassNameWithError}>
+          <EuiCallOut
+            color="danger"
+            title={i18n.translate('xpack.observabilityAiAssistant.couldNotFindConversationTitle', {
+              defaultMessage: 'Conversation not found',
+            })}
+            iconType="warning"
+          >
+            {i18n.translate('xpack.observabilityAiAssistant.couldNotFindConversationContent', {
+              defaultMessage:
+                'Could not find a conversation with id {conversationId}. Make sure the conversation exists and you have access to it.',
+              values: { conversationId: initialConversationId },
+            })}
+          </EuiCallOut>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -224,20 +297,45 @@ export function ChatBody({
           <ExperimentalFeatureBanner />
         </EuiFlexItem>
       ) : null}
-
+      <EuiFlexItem
+        grow={false}
+        className={conversation.error ? chatBodyContainerClassNameWithError : undefined}
+      >
+        {conversation.error ? (
+          <EuiCallOut
+            color="danger"
+            title={i18n.translate('xpack.observabilityAiAssistant.couldNotFindConversationTitle', {
+              defaultMessage: 'Conversation not found',
+            })}
+            iconType="warning"
+          >
+            {i18n.translate('xpack.observabilityAiAssistant.couldNotFindConversationContent', {
+              defaultMessage:
+                'Could not find a conversation with id {conversationId}. Make sure the conversation exists and you have access to it.',
+              values: { conversationId: initialConversationId },
+            })}
+          </EuiCallOut>
+        ) : null}
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ChatHeader
           connectors={connectors}
-          conversationId={conversationId}
+          conversationId={
+            conversation.value?.conversation && 'id' in conversation.value.conversation
+              ? conversation.value.conversation.id
+              : undefined
+          }
           connectorsManagementHref={connectorsManagementHref}
           modelsManagementHref={modelsManagementHref}
           knowledgeBase={knowledgeBase}
-          licenseInvalid={!hasCorrectLicense && !conversationId}
-          loading={loading}
+          licenseInvalid={!hasCorrectLicense && !initialConversationId}
+          loading={isLoading}
           startedFrom={startedFrom}
-          title={title}
+          title={conversation.value?.conversation.title || initialTitle || EMPTY_CONVERSATION_TITLE}
           onCopyConversation={handleCopyConversation}
-          onSaveTitle={onSaveTitle}
+          onSaveTitle={(newTitle) => {
+            saveTitle(newTitle);
+          }}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

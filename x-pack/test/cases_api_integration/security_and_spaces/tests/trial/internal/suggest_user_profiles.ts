@@ -58,6 +58,30 @@ export default function ({ getService }: FtrProviderContext) {
       `);
     });
 
+    it('find a user who only has read privilege for cases', async () => {
+      const profiles = await suggestUserProfiles({
+        supertest: supertestWithoutAuth,
+        req: {
+          name: 'read',
+          owners: ['securitySolutionFixture'],
+        },
+        auth: { user: superUser, space: 'space1' },
+      });
+
+      expectSnapshot(profiles.map(({ user, data }) => ({ user, data }))).toMatchInline(`
+        Array [
+          Object {
+            "data": Object {},
+            "user": Object {
+              "email": "sec_only_read@elastic.co",
+              "full_name": "sec only_read",
+              "username": "sec_only_read",
+            },
+          },
+        ]
+      `);
+    });
+
     it('does not find a user who does not have access to the default space', async () => {
       const profiles = await suggestUserProfiles({
         supertest: supertestWithoutAuth,
@@ -88,6 +112,14 @@ export default function ({ getService }: FtrProviderContext) {
           Object {
             "data": Object {},
             "user": Object {
+              "email": "sec_only_read@elastic.co",
+              "full_name": "sec only_read",
+              "username": "sec_only_read",
+            },
+          },
+          Object {
+            "data": Object {},
+            "user": Object {
               "email": "sec_only_no_delete@elastic.co",
               "full_name": "sec only_no_delete",
               "username": "sec_only_no_delete",
@@ -103,19 +135,6 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ]
       `);
-    });
-
-    it('does not find a user who does not have update privileges to cases', async () => {
-      const profiles = await suggestUserProfiles({
-        supertest: supertestWithoutAuth,
-        req: {
-          name: 'read',
-          owners: ['securitySolutionFixture'],
-        },
-        auth: { user: superUser, space: 'space1' },
-      });
-
-      expect(profiles).to.be.empty();
     });
 
     it('fails with a 403 because the user making the request does not have the appropriate api kibana endpoint privileges', async () => {
@@ -186,9 +205,9 @@ export default function ({ getService }: FtrProviderContext) {
           Object {
             "data": Object {},
             "user": Object {
-              "email": "sec_only_no_delete@elastic.co",
-              "full_name": "sec only_no_delete",
-              "username": "sec_only_no_delete",
+              "email": "sec_only_read@elastic.co",
+              "full_name": "sec only_read",
+              "username": "sec_only_read",
             },
           },
         ]
@@ -242,7 +261,7 @@ export default function ({ getService }: FtrProviderContext) {
         await deleteUsersAndRoles(getService, users, roles);
       });
 
-      it('finds 3 profiles when searching for the name sec when a user has both security and observability privileges', async () => {
+      it('finds 4 profiles when searching for the name sec when a user has both security and observability privileges', async () => {
         const profiles = await suggestUserProfiles({
           supertest: supertestWithoutAuth,
           req: {
@@ -254,6 +273,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         expectSnapshot(profiles.map(({ user, data }) => ({ user, data }))).toMatchInline(`
           Array [
+            Object {
+              "data": Object {},
+              "user": Object {
+                "email": "sec_only_read@elastic.co",
+                "full_name": "sec only_read",
+                "username": "sec_only_read",
+              },
+            },
             Object {
               "data": Object {},
               "user": Object {

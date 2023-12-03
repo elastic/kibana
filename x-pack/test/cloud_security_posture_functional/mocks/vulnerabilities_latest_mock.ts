@@ -83,7 +83,7 @@ export const vulnerabilitiesLatestMock = [
         id: '704479110758',
       },
     },
-    '@timestamp': '2023-06-29T02:08:44.993Z',
+    '@timestamp': (Date.now() - 249200000).toString(),
     cloudbeat: {
       commit_sha: '4d990caa0c9c1594441da6bf24a685599aeb2bd5',
       commit_time: '2023-05-15T14:48:10Z',
@@ -189,7 +189,7 @@ export const vulnerabilitiesLatestMock = [
         id: '704479110758',
       },
     },
-    '@timestamp': '2023-06-29T02:08:16.535Z',
+    '@timestamp': (Date.now() - 249200000).toString(),
     ecs: {
       version: '8.6.0',
     },

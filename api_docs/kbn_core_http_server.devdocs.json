@@ -1831,6 +1831,28 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.HttpServiceSetup.staticAssets",
+            "type": "Object",
+            "tags": [],
+            "label": "staticAssets",
+            "description": [
+              "\nAPIs for creating hrefs to static assets.\nSee {@link IStaticAssets}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IStaticAssets",
+                "text": "IStaticAssets"
+              }
+            ],
+            "path": "packages/core/http/core-http-server/src/http_contract.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.HttpServiceSetup.csp",
             "type": "Object",
             "tags": [],
@@ -2003,6 +2025,28 @@
                 "docId": "kibKbnCoreHttpServerPluginApi",
                 "section": "def-common.IBasePath",
                 "text": "IBasePath"
+              }
+            ],
+            "path": "packages/core/http/core-http-server/src/http_contract.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.HttpServiceStart.staticAssets",
+            "type": "Object",
+            "tags": [],
+            "label": "staticAssets",
+            "description": [
+              "\nAPIs for creating hrefs to static assets.\nSee {@link IStaticAssets}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IStaticAssets",
+                "text": "IStaticAssets"
               }
             ],
             "path": "packages/core/http/core-http-server/src/http_contract.ts",
@@ -3689,6 +3733,10 @@
                 "path": "x-pack/plugins/asset_manager/server/routes/assets/containers.ts"
               },
               {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/asset_manager/server/routes/assets/pods.ts"
+              },
+              {
                 "plugin": "banners",
                 "path": "x-pack/plugins/banners/server/routes/info.ts"
               },
@@ -3947,6 +3995,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/documents.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -5805,6 +5857,10 @@
               {
                 "plugin": "@kbn/core-ui-settings-server-internal",
                 "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/set.ts"
+              },
+              {
+                "plugin": "@kbn/core-ui-settings-server-internal",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/validate.ts"
               },
               {
                 "plugin": "@kbn/core-capabilities-server-internal",
@@ -9635,6 +9691,56 @@
             "path": "packages/core/http/core-http-server/src/router/router.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.IStaticAssets",
+        "type": "Interface",
+        "tags": [],
+        "label": "IStaticAssets",
+        "description": [
+          "\nAPIs for creating hrefs to static assets.\n"
+        ],
+        "path": "packages/core/http/core-http-server/src/static_assets.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.IStaticAssets.getPluginAssetHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getPluginAssetHref",
+            "description": [
+              "\nGets the full href to the current plugin's asset,\ngiven its path relative to the plugin's `public/assets` folder.\n"
+            ],
+            "signature": [
+              "(assetPath: string) => string"
+            ],
+            "path": "packages/core/http/core-http-server/src/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-common.IStaticAssets.getPluginAssetHref.$1",
+                "type": "string",
+                "tags": [],
+                "label": "assetPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server/src/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -13505,22 +13611,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/get_timeline/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/get_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/resolve_timeline/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/draft_timelines/get_draft_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route.ts"
               },
               {
@@ -13541,7 +13631,39 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/risk_engine_status_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/users/suggest_user_profiles_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/status.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/privileges.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/get_timeline/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/get_timelines/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/resolve_timeline/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/draft_timelines/get_draft_timelines/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/status.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/get.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -13621,27 +13743,27 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms_audit_messages.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/audit_messages/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms_nodes.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_nodes/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_all/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_single/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_stats_all/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_stats_single/register_route.ts"
               },
               {
                 "plugin": "uptime",
@@ -14016,7 +14138,7 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_create/register_route.ts"
               },
               {
                 "plugin": "uptime",
@@ -14763,14 +14885,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/export_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/draft_timelines/clean_draft_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/indices/delete_indices_route.ts"
               },
               {
@@ -14799,27 +14913,47 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/risk_score_preview_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/set_alert_assignees_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/risk_engine_init_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/init.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/risk_engine_enable_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/enable.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/risk_engine_disable_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/disable.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/risk_score_calculation_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/export_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_upload_handler.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/copy_timeline/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/draft_timelines/clean_draft_timelines/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/routes/calculation.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/routes/preview.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upsert.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14871,39 +15005,39 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/field_histograms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/field_histograms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_update/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/reauthorize_transforms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/reset_transforms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_preview/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/start_transforms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/stop_transforms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/delete_transforms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/schedule_now_transforms/register_route.ts"
               },
               {
                 "plugin": "controls",
@@ -15301,6 +15435,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/stored_scripts/delete_script_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/delete_timelines/index.ts"
               },
               {
@@ -15309,7 +15447,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/stored_scripts/delete_script_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/delete.ts"
               },
               {
                 "plugin": "synthetics",

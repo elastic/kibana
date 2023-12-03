@@ -11,10 +11,19 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/server-route-repository",
     "@kbn/core-plugins-server",
     "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/deeplinks-observability",
+    "@kbn/fleet-plugin",
+    "@kbn/observability-shared-plugin",
+    "@kbn/server-route-repository",
+    "@kbn/share-plugin",
     "@kbn/std",
+    "@kbn/i18n",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
+    "@kbn/field-formats-plugin",
+    "@kbn/field-types"
   ],
   "exclude": [
     "target/**/*",

@@ -57,6 +57,7 @@ const deploymentAgnosticFunctionalServices = _.pick(functionalServices, [
   'queryBar',
   'random',
   'renderable',
+  'reporting',
   'retryOnStale',
   'rules',
   'sampleData',

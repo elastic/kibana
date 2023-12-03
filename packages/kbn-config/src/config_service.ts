@@ -10,7 +10,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SchemaTypeError, Type, ValidationError } from '@kbn/config-schema';
 import { cloneDeep, isEqual, merge } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import { BehaviorSubject, combineLatest, firstValueFrom, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, firstValueFrom, Observable, identity } from 'rxjs';
 import { distinctUntilChanged, first, map, shareReplay, tap } from 'rxjs/operators';
 import { Logger, LoggerFactory } from '@kbn/logging';
 import { getDocLinks, DocLinks } from '@kbn/doc-links';
@@ -159,9 +159,13 @@ export class ConfigService {
    * against its registered schema.
    *
    * @param path - The path to the desired subset of the config.
+   * @param ignoreUnchanged - If true (default), will not emit if the config at path did not change.
    */
-  public atPath<TSchema>(path: ConfigPath) {
-    return this.getValidatedConfigAtPath$(path) as Observable<TSchema>;
+  public atPath<TSchema>(
+    path: ConfigPath,
+    { ignoreUnchanged = true }: { ignoreUnchanged?: boolean } = {}
+  ) {
+    return this.getValidatedConfigAtPath$(path, { ignoreUnchanged }) as Observable<TSchema>;
   }
 
   /**
@@ -310,10 +314,13 @@ export class ConfigService {
     );
   }
 
-  private getValidatedConfigAtPath$(path: ConfigPath) {
+  private getValidatedConfigAtPath$(
+    path: ConfigPath,
+    { ignoreUnchanged = true }: { ignoreUnchanged?: boolean } = {}
+  ) {
     return this.config$.pipe(
       map((config) => config.get(path)),
-      distinctUntilChanged(isEqual),
+      ignoreUnchanged ? distinctUntilChanged(isEqual) : identity,
       map((config) => this.validateAtPath(path, config))
     );
   }

@@ -15,6 +15,7 @@ import {
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   SPACE_IDS,
   VERSION,
 } from '@kbn/rule-data-utils';
@@ -31,7 +32,7 @@ import {
   deleteAllExceptions,
   deleteListsIndex,
   importFile,
-} from '../../../../../../lists_api_integration/utils';
+} from '../../../../lists_and_exception_lists/utils';
 import {
   createRule,
   deleteAllRules,
@@ -71,7 +72,8 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
-  describe('@ess @serverless Machine learning type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/171426
+  describe.skip('@ess @serverless Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
@@ -124,6 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_ANCESTORS]: expect.any(Array),
           [ALERT_WORKFLOW_STATUS]: 'open',
           [ALERT_WORKFLOW_TAGS]: [],
+          [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
           [ALERT_STATUS]: 'active',
           [SPACE_IDS]: ['default'],
           [ALERT_SEVERITY]: 'critical',

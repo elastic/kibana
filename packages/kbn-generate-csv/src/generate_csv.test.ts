@@ -395,6 +395,8 @@ describe('CsvGenerator', () => {
         })
       );
 
+    const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+
     const generateCsv = new CsvGenerator(
       createMockJob({ searchSource: {}, columns: [] }),
       mockConfig,
@@ -412,6 +414,8 @@ describe('CsvGenerator', () => {
       stream
     );
     await generateCsv.generateData();
+
+    expect(debugLogSpy.mock.calls).toMatchSnapshot();
 
     expect(content).toMatchSnapshot();
   });
@@ -898,6 +902,82 @@ describe('CsvGenerator', () => {
         ],
       }
     `);
+  });
+
+  describe('debug logging', () => {
+    it('logs the the total hits relation if relation is provided', async () => {
+      mockDataClient.search = jest.fn().mockImplementation(() =>
+        Rx.of({
+          rawResponse: {
+            took: 1,
+            timed_out: false,
+            pit_id: mockPitId,
+            _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+            hits: { hits: [], total: { relation: 'eq', value: 12345 }, max_score: 0 },
+          },
+        })
+      );
+
+      const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+
+      const generateCsv = new CsvGenerator(
+        createMockJob({ columns: ['date', 'ip', 'message'] }),
+        mockConfig,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
+
+      await generateCsv.generateData();
+
+      expect(debugLogSpy).toHaveBeenCalledWith('Received total hits: 12345. Accuracy: eq.');
+    });
+
+    it('logs the the total hits relation as "unknown" if relation is not provided', async () => {
+      mockDataClient.search = jest.fn().mockImplementation(() =>
+        Rx.of({
+          rawResponse: {
+            took: 1,
+            timed_out: false,
+            pit_id: mockPitId,
+            _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+            hits: { hits: [], total: 12345, max_score: 0 },
+          },
+        })
+      );
+
+      const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+
+      const generateCsv = new CsvGenerator(
+        createMockJob({ columns: ['date', 'ip', 'message'] }),
+        mockConfig,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
+
+      await generateCsv.generateData();
+
+      expect(debugLogSpy).toHaveBeenCalledWith('Received total hits: 12345. Accuracy: unknown.');
+    });
   });
 
   it('will return partial data if the scroll or search fails', async () => {

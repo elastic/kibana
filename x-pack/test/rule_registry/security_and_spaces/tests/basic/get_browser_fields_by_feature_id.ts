@@ -45,9 +45,14 @@ export default ({ getService }: FtrProviderContext) => {
           'logs',
           'uptime',
         ]);
-        expect(Object.keys(resp.browserFields)).toEqual(
-          expect.arrayContaining(['base', 'event', 'kibana'])
-        );
+        expect(Object.keys(resp.browserFields)).toEqual([
+          'base',
+          'cloud',
+          'container',
+          'host',
+          'kibana',
+          'orchestrator',
+        ]);
       });
 
       it(`${superUser.username} should be able to get browser fields for o11y featureIds`, async () => {
@@ -57,21 +62,14 @@ export default ({ getService }: FtrProviderContext) => {
           'logs',
           'uptime',
         ]);
-        expect(Object.keys(resp.browserFields)).toEqual(
-          expect.arrayContaining([
-            'base',
-            'agent',
-            'anomaly',
-            'ecs',
-            'error',
-            'event',
-            'kibana',
-            'monitor',
-            'observer',
-            'tls',
-            'url',
-          ])
-        );
+        expect(Object.keys(resp.browserFields)).toEqual([
+          'base',
+          'cloud',
+          'container',
+          'host',
+          'kibana',
+          'orchestrator',
+        ]);
       });
 
       it(`${superUser.username} should NOT be able to get browser fields for siem featureId`, async () => {
