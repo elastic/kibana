@@ -153,7 +153,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 16
     retry:
       automatic:
         - exit_status: '*'
@@ -209,74 +209,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-      env:
-        TARGET: cypress:detection_engine:run:serverless
-        ROOT_DIR: x-pack/test/security_solution_cypress
-        JOB_TITLE: kibana-security-solution-chrome
-        MSG: "--- Serverless Detection Engine - Security Cypress Tests "
-      label: 'Serverless Detection Engine - Security Cypress Tests'
-      agents:
-        queue: n2-4-spot
-      depends_on: build
-      timeout_in_minutes: 60
-      parallelism: 8
-      retry:
-        automatic:
-          - exit_status: '*'
-            limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-    env:
-      TARGET: cypress:detection_engine:exceptions:run:serverless
-      ROOT_DIR: x-pack/test/security_solution_cypress
-      JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Detection Engine - Exceptions - Security Cypress Tests"
-    label: 'Detection Engine - Exceptions - Security Cypress Tests'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 60
-    parallelism: 6
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-    env:
-      TARGET: cypress:detection_engine:run:ess
-      ROOT_DIR: x-pack/test/security_solution_cypress
-      JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Detection Engine - Security Solution Cypress Tests"
-    label: 'Detection Engine - Security Solution Cypress Tests'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 60
-    parallelism: 8
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-    env:
-      TARGET: cypress:detection_engine:exceptions:run:ess
-      ROOT_DIR: x-pack/test/security_solution_cypress
-      JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Detection Engine - Exceptions - Security Solution Cypress Tests"
-    label: 'Detection Engine - Exceptions_ - Security Solution Cypress Tests'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 60
-    parallelism: 6
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1         
 
   - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
     env:
