@@ -449,8 +449,10 @@ export default function (ctx: FtrProviderContext) {
         await globalNav.badgeExistsOrFail('Read only');
 
         // can't access logstash index directly
-        await PageObjects.settings.refreshDataViewFieldList('logstash-*');
-        await PageObjects.common.navigateToApp('discover');
+        // swapping index patterns so we get an updated field list
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await PageObjects.discover.selectIndexPattern('alias-logstash-discover');
+        //
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('discoverNoResultsCheckIndices');
