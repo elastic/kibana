@@ -31,6 +31,7 @@ export default function (ctx: FtrProviderContext) {
     'spaceSelector',
     'header',
     'unifiedFieldList',
+    'settings',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -448,6 +449,8 @@ export default function (ctx: FtrProviderContext) {
         await globalNav.badgeExistsOrFail('Read only');
 
         // can't access logstash index directly
+        await PageObjects.settings.refreshDataViewFieldList('logstash-*');
+        await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('discoverNoResultsCheckIndices');

@@ -210,6 +210,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.discover.clickNewSearchButton(); // reset params
 
+    // todo this didn't work
     await PageObjects.settings.refreshDataViewFieldList(OUTPUT_DATA_VIEW);
     await PageObjects.common.navigateToApp('discover');
 
