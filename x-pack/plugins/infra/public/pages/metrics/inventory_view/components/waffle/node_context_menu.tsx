@@ -23,7 +23,7 @@ import {
 } from '@kbn/observability-shared-plugin/public';
 import { findInventoryModel, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common/locators';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';

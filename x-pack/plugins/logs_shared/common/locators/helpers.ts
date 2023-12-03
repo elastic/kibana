@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment, { DurationInputObject } from 'moment/moment';
+import moment, { DurationInputObject } from 'moment';
 
 export type NodeType = 'host' | 'pod' | 'container' | 'awsEC2' | 'awsS3' | 'awsSQS' | 'awsRDS';
 
