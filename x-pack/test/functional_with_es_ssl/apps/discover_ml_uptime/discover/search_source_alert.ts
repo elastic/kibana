@@ -209,11 +209,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.common.navigateToApp('discover');
     await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.discover.clickNewSearchButton(); // reset params
-
-    // todo this didn't work
-    await PageObjects.settings.refreshDataViewFieldList(OUTPUT_DATA_VIEW);
-    await PageObjects.common.navigateToApp('discover');
-
     await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_VIEW);
 
     let ruleId: string;
@@ -404,7 +399,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should navigate to alert results via link provided in notification', async () => {
       // todo did this work?
+      log.debug('DATA VIEW REFRESH');
       await PageObjects.settings.refreshDataViewFieldList(OUTPUT_DATA_VIEW);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await PageObjects.settings.refreshDataViewFieldList(OUTPUT_DATA_VIEW);
+      log.debug('DATA VIEW REFRESH COMPLETE');
       await openAlertResults(RULE_NAME);
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
     });
