@@ -110,6 +110,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,
       forceRefresh
     ).then((response) => {
+      console.log('DEBUG: api_client', pattern, JSON.stringify(response?.body, null, 2));
       return {
         indices: response?.body?.indices || [],
         fields: response?.body?.fields || [],

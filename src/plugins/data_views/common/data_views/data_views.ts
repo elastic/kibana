@@ -923,6 +923,7 @@ export class DataViewsService {
     displayErrors: boolean = true,
     refreshFields = false
   ): Promise<DataView> => {
+    console.log('DEBUG: get data view', id);
     const dataViewFromCache = this.dataViewCache.get(id)?.then(async (dataView) => {
       if (dataView && refreshFields) {
         await this.refreshFields(dataView, displayErrors);
@@ -937,6 +938,10 @@ export class DataViewsService {
     // don't cache failed requests
     indexPatternPromise.catch(() => {
       this.dataViewCache.clear(id);
+    });
+
+    indexPatternPromise.then((indexPattern) => {
+      console.log('DEBUG: get data view resolved', id, indexPattern.getIndexPattern());
     });
 
     return indexPatternPromise;
