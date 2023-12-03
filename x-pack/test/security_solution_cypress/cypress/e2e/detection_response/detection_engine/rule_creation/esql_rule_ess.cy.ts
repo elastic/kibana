@@ -38,8 +38,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
   const rule = getEsqlRule();
   const expectedNumberOfRules = 1;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172251
-  describe.skip('creation', () => {
+  describe('creation', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
       login();
