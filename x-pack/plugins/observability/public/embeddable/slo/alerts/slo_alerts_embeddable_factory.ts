@@ -52,31 +52,10 @@ export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDe
 
   public async create(initialInput: SloAlertsEmbeddableInput, parent?: IContainer) {
     try {
-      const [
-        { uiSettings, application, http, i18n: i18nService, notifications, settings },
-        { triggersActionsUi, cases, data, security, charts, uiActions, serverless },
-      ] = await this.getStartServices();
+      const [coreStart, pluginsStart] = await this.getStartServices();
+      const deps = { ...coreStart, ...pluginsStart };
       const kibanaVersion = this.kibanaVersion;
-      return new SLOAlertsEmbeddable(
-        {
-          uiSettings,
-          application,
-          http,
-          i18n: i18nService,
-          triggersActionsUi,
-          notifications,
-          cases,
-          data,
-          settings,
-          security,
-          charts,
-          uiActions,
-          serverless,
-        },
-        initialInput,
-        kibanaVersion,
-        parent
-      );
+      return new SLOAlertsEmbeddable(deps, initialInput, kibanaVersion, parent);
     } catch (e) {
       return new ErrorEmbeddable(e, initialInput, parent);
     }
