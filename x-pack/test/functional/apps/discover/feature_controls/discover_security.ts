@@ -452,6 +452,10 @@ export default function (ctx: FtrProviderContext) {
         // swapping index patterns so we get an updated field list
         await new Promise((resolve) => setTimeout(resolve, 5000));
         await PageObjects.discover.selectIndexPattern('alias-logstash-discover');
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await PageObjects.discover.selectIndexPattern('alias-logstash-discover');
         //
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.header.waitUntilLoadingHasFinished();
