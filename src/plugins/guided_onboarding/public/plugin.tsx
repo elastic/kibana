@@ -45,7 +45,7 @@ export class GuidedOnboardingPlugin
 
   public start(
     core: CoreStart,
-    { cloud, sharePluginStart }: AppPluginStartDependencies
+    { cloud }: AppPluginStartDependencies
   ): GuidedOnboardingPluginStart {
     const { chrome, http, theme, application, notifications } = core;
 
