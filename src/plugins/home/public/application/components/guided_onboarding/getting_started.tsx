@@ -257,7 +257,7 @@ export const GettingStarted = () => {
       theme={theme}
       docLinks={docLinks}
       cloud={cloud!}
-      share={share}
+      url={share.url}
       navigateToUrl={application.navigateToUrl}
     />
   ) : (

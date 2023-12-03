@@ -24,10 +24,10 @@ const defaultProps: GuideCardsProps = {
   openModal: jest.fn(),
   theme: themeServiceMock.createStartContract(),
   i18nStart: {} as unknown as I18nStart,
-  share: sharePluginMock.createSetupContract(),
   cloud: cloudMock.createSetup(),
   docLinks: docLinksServiceMock.createStartContract(),
   navigateToUrl: jest.fn(),
+  url: sharePluginMock.createSetupContract().url,
 };
 
 describe('guide cards', () => {

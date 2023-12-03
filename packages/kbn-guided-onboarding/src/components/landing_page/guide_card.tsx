@@ -53,7 +53,7 @@ export const GuideCard = ({
   openModal,
   i18nStart,
   theme,
-  share,
+  url,
   cloud,
   docLinks,
   navigateToUrl,
@@ -65,7 +65,7 @@ export const GuideCard = ({
     guideState = guidesState.find((state) => state.guideId === card.guideId);
   }
 
-  const managementUrl = share.url.locators
+  const managementUrl = url.locators
     .get('MANAGEMENT_APP_LOCATOR')
     ?.useUrl({ sectionId: 'security', appId: 'api_keys' });
 
