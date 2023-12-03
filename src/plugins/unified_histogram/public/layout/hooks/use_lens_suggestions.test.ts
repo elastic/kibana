@@ -38,6 +38,7 @@ describe('useLensSuggestions', () => {
       allSuggestions: [],
       currentSuggestion: undefined,
       isOnHistogramMode: false,
+      histogramQuery: undefined,
       suggestionUnsupported: false,
     });
   });
@@ -66,6 +67,7 @@ describe('useLensSuggestions', () => {
       allSuggestions: allSuggestionsMock,
       currentSuggestion: allSuggestionsMock[0],
       isOnHistogramMode: false,
+      histogramQuery: undefined,
       suggestionUnsupported: false,
     });
   });
@@ -94,6 +96,7 @@ describe('useLensSuggestions', () => {
       allSuggestions: [],
       currentSuggestion: undefined,
       isOnHistogramMode: false,
+      histogramQuery: undefined,
       suggestionUnsupported: true,
     });
   });
@@ -133,8 +136,50 @@ describe('useLensSuggestions', () => {
       allSuggestions: [],
       currentSuggestion: allSuggestionsMock[0],
       isOnHistogramMode: true,
+      histogramQuery: {
+        esql: 'from the-data-view | limit 100 | EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats rows = count(*) by timestamp | rename timestamp as `@timestamp every 30 minute`',
+      },
       suggestionUnsupported: false,
     });
+  });
+
+  test('should return histogramSuggestion even if the ESQL query contains a DROP @timestamp statement', async () => {
+    const firstMockReturn = undefined;
+    const secondMockReturn = allSuggestionsMock;
+    const lensSuggestionsApi = jest
+      .fn()
+      .mockReturnValueOnce(firstMockReturn) // will return to firstMockReturn object firstly
+      .mockReturnValueOnce(secondMockReturn); // will return to secondMockReturn object secondly
+
+    renderHook(() => {
+      return useLensSuggestions({
+        dataView: dataViewMock,
+        query: { esql: 'from the-data-view | DROP @timestamp | limit 100' },
+        isPlainRecord: true,
+        columns: [
+          {
+            id: 'var0',
+            name: 'var0',
+            meta: {
+              type: 'number',
+            },
+          },
+        ],
+        data: dataMock,
+        lensSuggestionsApi,
+        timeRange: {
+          from: '2023-09-03T08:00:00.000Z',
+          to: '2023-09-04T08:56:28.274Z',
+        },
+      });
+    });
+    expect(lensSuggestionsApi).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        query: { esql: expect.stringMatching('from the-data-view | limit 100 ') },
+      }),
+      expect.anything(),
+      ['lnsDatatable']
+    );
   });
 
   test('should not return histogramSuggestion if no suggestions returned by the api and transformational commands', async () => {
@@ -172,6 +217,7 @@ describe('useLensSuggestions', () => {
       allSuggestions: [],
       currentSuggestion: undefined,
       isOnHistogramMode: false,
+      histogramQuery: undefined,
       suggestionUnsupported: true,
     });
   });

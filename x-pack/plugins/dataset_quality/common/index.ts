@@ -7,3 +7,4 @@
 
 export type { DatasetQualityConfig } from './plugin_config';
 export type { FetchOptions } from './fetch_options';
+export type { APIClientRequestParamsOf, APIReturnType } from './rest';

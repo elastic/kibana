@@ -79,6 +79,13 @@ it('matches snapshot', () => {
       },
       "kibana.alert.reason": Object {
         "array": false,
+        "multi_fields": Array [
+          Object {
+            "flat_name": "kibana.alert.reason.text",
+            "name": "text",
+            "type": "match_only_text",
+          },
+        ],
         "required": false,
         "type": "keyword",
       },
@@ -284,6 +291,11 @@ it('matches snapshot', () => {
       "kibana.alert.uuid": Object {
         "array": false,
         "required": true,
+        "type": "keyword",
+      },
+      "kibana.alert.workflow_assignee_ids": Object {
+        "array": true,
+        "required": false,
         "type": "keyword",
       },
       "kibana.alert.workflow_reason": Object {
