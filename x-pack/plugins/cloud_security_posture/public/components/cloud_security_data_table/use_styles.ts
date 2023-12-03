@@ -73,7 +73,6 @@ export const useStyles = () => {
   `;
 
   const groupBySelector = css`
-    width: 188px;
     margin-left: auto;
   `;
 
