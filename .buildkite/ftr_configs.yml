@@ -488,8 +488,6 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/user_roles/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/telemetry/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/telemetry/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/detection_engine/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/detection_engine/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/value_lists_and_exception_lists/default_license/exception_lists/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/value_lists_and_exception_lists/default_license/exception_lists/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/value_lists_and_exception_lists/default_license/value_lists/configs/serverless.config.ts
