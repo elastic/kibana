@@ -46,7 +46,7 @@ export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: Http
         start,
         end,
         indexPatternName: indexPattern,
-        prefix: getJobIdPrefix(spaceId, sourceId),
+        prefix: getJobIdPrefix(spaceId, sourceId, 'hashed'),
         startDatafeed: true,
         jobOverrides,
         datafeedOverrides,

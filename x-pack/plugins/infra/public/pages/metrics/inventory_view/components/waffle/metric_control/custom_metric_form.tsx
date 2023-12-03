@@ -181,11 +181,7 @@ export const CustomMetricForm = withTheme(
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText color="subdued">
-                    <span>
-                      {i18n.translate('xpack.infra.customMetricForm.span.ofLabel', {
-                        defaultMessage: 'of',
-                      })}
-                    </span>
+                    <span>of</span>
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem>
