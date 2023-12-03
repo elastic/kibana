@@ -12,6 +12,8 @@ import { useLocation, useParams } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { ConnectorMode } from '@kbn/search-connectors';
+
 import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
 import { parseQueryParams } from '../../../shared/query_params';
 
@@ -83,7 +85,9 @@ function getDescription(method: string): string {
   }
 }
 
-const parseConnectorTypeParam = (queryString: string | string[] | null) => {
+const parseConnectorTypeParam = (
+  queryString: string | string[] | null
+): ConnectorMode | undefined => {
   const parsedStr = Array.isArray(queryString) ? queryString[0] : queryString;
   if (parsedStr === 'native') return 'native';
   if (parsedStr === 'connector_client') return 'connector_client';
@@ -103,7 +107,12 @@ export const NewSearchIndexPage: React.FC = () => {
 
   return (
     <EnterpriseSearchContentPageTemplate
-      pageChrome={[...baseBreadcrumbs, 'New search index']}
+      pageChrome={[
+        ...baseBreadcrumbs,
+        i18n.translate('xpack.enterpriseSearch.content.new_index.breadcrumbs', {
+          defaultMessage: 'New search index',
+        }),
+      ]}
       pageViewTelemetry="New Index"
       isLoading={false}
       pageHeader={{

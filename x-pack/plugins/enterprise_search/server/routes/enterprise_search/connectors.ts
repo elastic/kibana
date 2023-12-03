@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   fetchConnectors,
   fetchSyncJobsByConnectorId,
+  isConnectorType,
   putUpdateNative,
   updateConnectorConfiguration,
   updateConnectorNameAndDescription,
@@ -487,6 +488,10 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { connector_type, from, size, searchQuery } = request.query;
+      let connectorType;
+      if (isConnectorType(connector_type)) {
+        connectorType = connector_type;
+      }
 
       let connectorResult;
       let connectorCountResult;
@@ -494,7 +499,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         connectorResult = await fetchConnectors(
           client.asCurrentUser,
           undefined,
-          connector_type as 'connector' | 'crawler' | undefined,
+          connectorType,
           searchQuery
         );
 

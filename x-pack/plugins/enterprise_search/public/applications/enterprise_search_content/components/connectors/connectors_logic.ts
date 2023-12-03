@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Connector } from '@kbn/search-connectors/types';
+import { Connector, ConnectorType } from '@kbn/search-connectors/types';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -27,12 +27,12 @@ export interface ConnectorsActions {
     size,
     searchQuery,
   }: {
-    connectorType: 'connector' | 'crawler';
+    connectorType: ConnectorType;
     from: number;
     searchQuery?: string;
     size: number;
   }): {
-    connectorType: 'connector' | 'crawler';
+    connectorType: ConnectorType;
     from: number;
     searchQuery?: string;
     size: number;
@@ -50,7 +50,7 @@ export interface ConnectorsValues {
   isLoading: boolean;
   meta: Meta;
   searchParams: {
-    connectorType: 'connector' | 'crawler';
+    connectorType: ConnectorType;
     from: number;
     searchQuery?: string;
     size: number;

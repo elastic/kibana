@@ -13,6 +13,8 @@ import { EuiConfirmModal, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { ConnectorMode } from '@kbn/search-connectors';
+
 import { Status } from '../../../../../../common/types/api';
 import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
@@ -33,7 +35,7 @@ import { errorToText } from '../utils/error_to_text';
 import { AddConnectorLogic } from './add_connector_logic';
 
 interface MethodConnectorProps {
-  connectorType?: 'native' | 'connector_client';
+  connectorType?: ConnectorMode;
   serviceType: string;
 }
 

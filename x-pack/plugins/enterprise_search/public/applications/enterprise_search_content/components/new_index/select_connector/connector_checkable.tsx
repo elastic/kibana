@@ -167,8 +167,6 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
           )}
         </EuiFlexGroup>
       }
-      // description={name}
-      // value={serviceType}
     >
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="column" gutterSize="m">

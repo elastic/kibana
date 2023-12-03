@@ -10,7 +10,7 @@ import { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/ap
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import { OptimisticConcurrency } from '../types/optimistic_concurrency';
-import { Connector, ConnectorDocument } from '../types/connectors';
+import { Connector, ConnectorDocument, ConnectorType } from '../types/connectors';
 
 import { isIndexNotFoundException } from '../utils/identify_exceptions';
 import { CONNECTORS_INDEX } from '..';
@@ -66,7 +66,7 @@ export const fetchConnectorByIndexName = async (
 export const fetchConnectors = async (
   client: ElasticsearchClient,
   indexNames?: string[],
-  connectorType?: 'connector' | 'crawler',
+  connectorType?: ConnectorType,
   searchQuery?: string
 ): Promise<Connector[]> => {
   const q = searchQuery && searchQuery.length > 0 ? searchQuery : undefined;

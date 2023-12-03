@@ -59,7 +59,9 @@ export const Connectors: React.FC = () => {
           pageViewTelemetry="Connectors"
           isLoading={isLoading}
           pageHeader={{
-            pageTitle: 'Elasticsearch connectors',
+            pageTitle: i18n.translate('xpack.enterpriseSearch.connectors.title', {
+              defaultMessage: 'Elasticsearch connectors',
+            }),
             rightSideGroupProps: {
               gutterSize: 's',
             },

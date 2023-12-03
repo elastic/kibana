@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Connector } from '@kbn/search-connectors';
+
+import { Connector, ConnectorType } from '@kbn/search-connectors';
 
 import { Meta } from '../../../../../common/types/pagination';
 
@@ -12,7 +13,7 @@ import { createApiLogic, Actions } from '../../../shared/api_logic/create_api_lo
 import { HttpLogic } from '../../../shared/http';
 
 export interface FetchConnectorsApiLogicArgs {
-  connectorType: 'crawler' | 'connector';
+  connectorType: ConnectorType;
   from: number;
   searchQuery?: string;
   size: number;

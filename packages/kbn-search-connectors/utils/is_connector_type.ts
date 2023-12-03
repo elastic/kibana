@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-export * from './filtering_rule_helpers';
-export * from './is_category_entry';
-export * from './page_to_pagination';
-export * from './sync_status_to_text';
-export * from './is_connector_type';
+import { ConnectorType } from '../types';
+
+export const isConnectorType = (value: string | null | undefined): value is ConnectorType => {
+  return (
+    value !== null &&
+    value !== undefined &&
+    (value === 'connector' || value === 'elastic-connector')
+  );
+};
