@@ -20,7 +20,6 @@ import useObservable from 'react-use/lib/useObservable';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
 import { useTimeBuckets } from '../../common/hooks/use_time_buckets';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../embeddables/grid_embeddable/constants';
 import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
@@ -30,8 +29,11 @@ import { useDataVisualizerKibana } from '../../kibana_context';
 import { getEsQueryFromSavedSearch } from '../utils/saved_search_utils';
 import type { MetricFieldsStats } from '../../common/components/stats_table/components/field_count_stats';
 import type { FieldVisConfig } from '../../common/components/stats_table/types';
-import { NON_AGGREGATABLE_FIELD_TYPES, SUPPORTED_FIELD_TYPES } from '../../../../common/constants';
-
+import {
+  NON_AGGREGATABLE_FIELD_TYPES,
+  OMIT_FIELDS,
+  SUPPORTED_FIELD_TYPES,
+} from '../../../../common/constants';
 import type { FieldRequestConfig, SupportedFieldType } from '../../../../common/types';
 import { kbnTypeToSupportedType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';

@@ -51,6 +51,8 @@ export const SUPPORTED_FIELD_TYPES = {
   UNKNOWN: 'unknown',
 } as const;
 
+export const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
+
 export const NON_AGGREGATABLE_FIELD_TYPES = new Set<string>([
   KBN_FIELD_TYPES.GEO_SHAPE,
   KBN_FIELD_TYPES.HISTOGRAM,
