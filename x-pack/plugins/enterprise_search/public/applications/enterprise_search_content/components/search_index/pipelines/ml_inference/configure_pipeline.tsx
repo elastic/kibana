@@ -10,6 +10,7 @@ import React from 'react';
 import { useValues, useActions } from 'kea';
 
 import {
+  EuiCallOut,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -26,6 +27,7 @@ import { IndexViewLogic } from '../../index_view_logic';
 
 import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
 import { ModelSelect } from './model_select';
+import { ModelSelectLogic } from './model_select_logic';
 import { PipelineSelect } from './pipeline_select';
 
 const CREATE_NEW_TAB_NAME = i18n.translate(
@@ -50,6 +52,7 @@ export const ConfigurePipeline: React.FC = () => {
   } = useValues(MLInferenceLogic);
   const { setInferencePipelineConfiguration } = useActions(MLInferenceLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
+  const { modelStateChangeError } = useValues(ModelSelectLogic);
 
   const { existingPipeline, pipelineName } = configuration;
 
@@ -111,6 +114,22 @@ export const ConfigurePipeline: React.FC = () => {
                 }
               />
             </EuiFormRow>
+            {modelStateChangeError && (
+              <>
+                <EuiSpacer />
+                <EuiCallOut
+                  title={i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.modelStateChangeError.title',
+                    { defaultMessage: 'Error changing model state' }
+                  )}
+                  color="danger"
+                  iconType="error"
+                >
+                  {modelStateChangeError}
+                </EuiCallOut>
+                <EuiSpacer />
+              </>
+            )}
             <EuiFormRow
               fullWidth
               label={i18n.translate(
