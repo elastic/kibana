@@ -7,10 +7,14 @@
 import React from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { TimeRange } from '@kbn/es-query';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { SloEmbeddableDeps } from '../slo_alerts_embeddable';
 import type { SloItem } from '../types';
 
 type SloIdAndInstanceId = [string, string];
+interface FilterQuery {
+  [key: string]: any;
+}
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.sloAlertsEmbeddable.alert.table';
 
@@ -50,14 +54,17 @@ export function SloAlertsTable({ slos, deps, timeRange, onLoaded }: Props) {
             },
             {
               bool: {
-                should: sloIdsAndInstanceIds.map(([sloId, instanceId]) => ({
-                  bool: {
-                    filter: [
-                      { term: { 'slo.id': sloId } },
-                      { term: { 'slo.instanceId': instanceId } },
-                    ],
-                  },
-                })),
+                should: sloIdsAndInstanceIds.map(([sloId, instanceId]) => {
+                  const filterQuery = [{ term: { 'slo.id': sloId } } as FilterQuery];
+                  if (instanceId !== ALL_VALUE) {
+                    filterQuery.push({ term: { 'slo.instanceId': instanceId } });
+                  }
+                  return {
+                    bool: {
+                      filter: filterQuery,
+                    },
+                  };
+                }),
               },
             },
           ],
