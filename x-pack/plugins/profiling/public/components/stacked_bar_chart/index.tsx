@@ -132,6 +132,7 @@ export function StackedBarChart({
           color={chart.Color}
           xAccessor={'Timestamp'}
           yAccessors={['Count']}
+          stackAccessors={['true']}
           stackMode={asPercentages ? StackMode.Percentage : undefined}
           xScaleType={ScaleType.Time}
           timeZone={timeZone}
