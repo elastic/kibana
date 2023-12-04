@@ -31,7 +31,8 @@ export const RelatedDetectionRulesCallout = memo<{ 'data-test-subj'?: string }>(
               <EuiLink
                 data-test-subj={getTestId('link')}
                 target="_blank"
-                href={`${securitySolution.detectionEngineOverview}`}>
+                href={`${securitySolution.detectionEngineOverview}`}
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policy.details.detectionRulesMessageDocsLink"
                   defaultMessage="Learn More"
