@@ -18,6 +18,7 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPopover,
   EuiRadio,
   EuiText,
@@ -142,11 +143,41 @@ export const ModelMenuPopover: React.FC<{
   );
 };
 
+export interface LicenseBadgeProps {
+  licenseType: string;
+  licensePageUrl?: string;
+}
+
+export const LicenseBadge: React.FC<LicenseBadgeProps> = ({ licenseType, licensePageUrl }) => {
+  const licenseLabel = i18n.translate(
+    'xpack.enterpriseSearch.content.indices.pipelines.modelSelectOption.licenseBadge.label',
+    {
+      defaultMessage: 'License: {licenseType}',
+      values: {
+        licenseType,
+      },
+    }
+  );
+
+  return (
+    <EuiBadge color="hollow">
+      {licensePageUrl ? (
+        <EuiLink target="_blank" href={licensePageUrl}>
+          {licenseLabel}
+        </EuiLink>
+      ) : (
+        <p>{licenseLabel}</p>
+      )}
+    </EuiBadge>
+  );
+};
+
 export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
   modelId,
   title,
   description,
-  license,
+  licenseType,
+  licensePageUrl,
   deploymentState,
   deploymentStateReason,
   modelDetailsPageUrl,
@@ -184,24 +215,14 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
           <EuiFlexItem>
             <EuiTextColor color="subdued">{modelId}</EuiTextColor>
           </EuiFlexItem>
-          {(license || description) && (
+          {(licenseType || description) && (
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="xs" alignItems="center">
-                {license && (
+                {licenseType && (
                   <EuiFlexItem grow={false}>
                     {/* Wrap in a div to prevent the badge from growing to a whole row on mobile */}
                     <div>
-                      <EuiBadge color="hollow">
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.content.indices.pipelines.modelSelectOption.licenseBadge.label',
-                          {
-                            defaultMessage: 'License: {license}',
-                            values: {
-                              license,
-                            },
-                          }
-                        )}
-                      </EuiBadge>
+                      <LicenseBadge licenseType={licenseType} licensePageUrl={licensePageUrl} />
                     </div>
                   </EuiFlexItem>
                 )}
