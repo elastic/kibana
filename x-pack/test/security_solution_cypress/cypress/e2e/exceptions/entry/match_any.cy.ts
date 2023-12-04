@@ -14,7 +14,7 @@ import { login } from '../../../tasks/login';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,
   visitRuleDetailsPage,
-  enablesRule,
+  clickEnableRuleSwitch,
   waitForTheRuleToBeExecuted,
   goToAlertsTab,
 } from '../../../tasks/rule_details';
@@ -73,7 +73,7 @@ describe('Exceptions match_any', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(CONFIRM_BTN).should('be.enabled');
     submitNewExceptionItem();
 
-    enablesRule();
+    clickEnableRuleSwitch();
 
     goToAlertsTab();
 
