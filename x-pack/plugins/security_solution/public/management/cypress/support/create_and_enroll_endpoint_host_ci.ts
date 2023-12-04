@@ -122,7 +122,13 @@ export const createAndEnrollEndpointHostCI = async ({
 
   await hostVm.exec(agentEnrollCommand);
 
-  const { id: agentId } = await waitForHostToEnroll(kbnClient, log, hostVm.name, 240000, true);
+  const { id: agentId } = await waitForHostToEnroll(
+    kbnClient,
+    log,
+    hostVm.name,
+    10 * 60 * 1000,
+    true
+  );
 
   return {
     hostname: hostVm.name,
