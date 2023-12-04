@@ -34,7 +34,7 @@ export class EsError extends Error {
       }`
     );
     this.attributes = err.attributes;
-    Object.setPrototypeOf(this, new.target.prototype);
+    Object.setPrototypeOf(this, EsError.prototype);
   }
 
   public getErrorMessage() {
