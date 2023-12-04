@@ -9,12 +9,10 @@ import { promisify } from 'util';
 import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
 import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { InternalManifestSchemaResponseType } from './mocks';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -22,6 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
+  const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const retry = getService('retry');
   const esClient = getService('es');
   const supertest = getService('supertest');
@@ -98,19 +97,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     const checkArtifact = (expectedArtifact: object) => {
       return retry.tryForTime(120_000, async () => {
-        // Get endpoint manifest
-        const {
-          hits: { hits: manifestResults },
-        } = await esClient.search({
-          index: '.kibana*',
-          query: { bool: { filter: [{ term: { type: ManifestConstants.SAVED_OBJECT_TYPE } }] } },
-          size: 1,
-        });
+        const artifacts = await endpointArtifactTestResources.getArtifacts();
 
-        const manifestResult = manifestResults[0] as InternalManifestSchemaResponseType;
-        const manifestArtifact = manifestResult._source[
-          'endpoint:user-artifact-manifest'
-        ].artifacts.find((artifact) =>
+        const manifestArtifact = artifacts.find((artifact) =>
           artifact.artifactId.startsWith('endpoint-exceptionlist-macos-v1')
         );
 
