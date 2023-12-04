@@ -58,12 +58,11 @@ async function getCoreWebVitalsResponse({
 const CORE_WEB_VITALS_DEFAULTS: UXMetrics = {
   coreVitalPages: 0,
   cls: 0,
-  fid: 0,
   lcp: 0,
   tbt: 0,
   fcp: 0,
   lcpRanks: DEFAULT_RANKS,
-  fidRanks: DEFAULT_RANKS,
+  inpRanks: DEFAULT_RANKS,
   clsRanks: DEFAULT_RANKS,
 };
 
