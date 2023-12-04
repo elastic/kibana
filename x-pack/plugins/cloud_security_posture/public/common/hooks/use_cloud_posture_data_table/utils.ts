@@ -5,32 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useCallback, useMemo } from 'react';
-import { buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import type { EuiBasicTableProps, Pagination } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { type Query } from '@kbn/es-query';
-import { useKibana } from '../use_kibana';
-import type {
-  FindingsBaseESQueryConfig,
-  FindingsBaseProps,
-  FindingsBaseURLQuery,
-} from '../../types';
-
-const getBaseQuery = ({
-  dataView,
-  query,
-  filters,
-  config,
-}: FindingsBaseURLQuery & FindingsBaseProps & FindingsBaseESQueryConfig) => {
-  try {
-    return {
-      query: buildEsQuery(dataView, query, filters, config), // will throw for malformed query
-    };
-  } catch (error) {
-    throw new Error(error);
-  }
-};
 
 type TablePagination = NonNullable<EuiBasicTableProps<unknown>['pagination']>;
 
@@ -51,74 +26,6 @@ export const getPaginationQuery = ({
   from: pageIndex * pageSize,
   size: pageSize,
 });
-
-export const useBaseEsQuery = ({
-  dataView,
-  filters = [],
-  query,
-  nonPersistedFilters,
-}: FindingsBaseURLQuery & FindingsBaseProps) => {
-  const {
-    notifications: { toasts },
-    data: {
-      query: { filterManager, queryString },
-    },
-    uiSettings,
-  } = useKibana().services;
-  const allowLeadingWildcards = uiSettings.get('query:allowLeadingWildcards');
-  const config: EsQueryConfig = useMemo(() => ({ allowLeadingWildcards }), [allowLeadingWildcards]);
-  const baseEsQuery = useMemo(
-    () =>
-      getBaseQuery({
-        dataView,
-        filters: filters.concat(nonPersistedFilters ?? []).flat(),
-        query,
-        config,
-      }),
-    [dataView, filters, nonPersistedFilters, query, config]
-  );
-
-  /**
-   * Sync filters with the URL query
-   */
-  useEffect(() => {
-    filterManager.setAppFilters(filters);
-    queryString.setQuery(query);
-  }, [filters, filterManager, queryString, query]);
-
-  const handleMalformedQueryError = () => {
-    const error = baseEsQuery instanceof Error ? baseEsQuery : undefined;
-    if (error) {
-      toasts.addError(error, {
-        title: i18n.translate('xpack.csp.findings.search.queryErrorToastMessage', {
-          defaultMessage: 'Query Error',
-        }),
-        toastLifeTimeMs: 1000 * 5,
-      });
-    }
-  };
-
-  useEffect(handleMalformedQueryError, [baseEsQuery, toasts]);
-
-  return baseEsQuery;
-};
-
-export const usePersistedQuery = <T>(getter: ({ filters, query }: FindingsBaseURLQuery) => T) => {
-  const {
-    data: {
-      query: { filterManager, queryString },
-    },
-  } = useKibana().services;
-
-  return useCallback(
-    () =>
-      getter({
-        filters: filterManager.getAppFilters(),
-        query: queryString.getQuery() as Query,
-      }),
-    [getter, filterManager, queryString]
-  );
-};
 
 export const getDefaultQuery = ({ query, filters }: any): any => ({
   query,

@@ -8,10 +8,12 @@
 import { SvlReportingServiceProvider } from './svl_reporting';
 import { SupertestProvider, SupertestWithoutAuthProvider } from './supertest';
 import { SvlCommonApiServiceProvider } from './svl_common_api';
+import { SvlUserManagerProvider } from './user_manager/svl_user_manager';
 
 export const services = {
   supertest: SupertestProvider,
   supertestWithoutAuth: SupertestWithoutAuthProvider,
   svlCommonApi: SvlCommonApiServiceProvider,
   svlReportingApi: SvlReportingServiceProvider,
+  svlUserManager: SvlUserManagerProvider,
 };
