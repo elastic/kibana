@@ -397,6 +397,10 @@ describe('AlertsTable.BulkActions', () => {
               field: 'kibana.alert.workflow_tags',
               value: [],
             },
+            {
+              field: 'kibana.alert.workflow_assignee_ids',
+              value: [],
+            },
           ],
           ecs: {
             _id: 'alert0',
@@ -644,6 +648,10 @@ describe('AlertsTable.BulkActions', () => {
                   field: 'kibana.alert.workflow_tags',
                   value: [],
                 },
+                {
+                  field: 'kibana.alert.workflow_assignee_ids',
+                  value: [],
+                },
               ],
               ecs: {
                 _id: 'alert1',
@@ -872,6 +880,10 @@ describe('AlertsTable.BulkActions', () => {
                     field: 'kibana.alert.workflow_tags',
                     value: [],
                   },
+                  {
+                    field: 'kibana.alert.workflow_assignee_ids',
+                    value: [],
+                  },
                 ],
                 ecs: {
                   _id: 'alert0',
@@ -896,6 +908,10 @@ describe('AlertsTable.BulkActions', () => {
                   },
                   {
                     field: 'kibana.alert.workflow_tags',
+                    value: [],
+                  },
+                  {
+                    field: 'kibana.alert.workflow_assignee_ids',
                     value: [],
                   },
                 ],
