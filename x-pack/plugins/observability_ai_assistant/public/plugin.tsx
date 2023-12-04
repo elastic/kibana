@@ -98,11 +98,12 @@ export class ObservabilityAIAssistantPlugin
     pluginsStart: ObservabilityAIAssistantPluginStartDependencies
   ): ObservabilityAIAssistantPluginStart {
     const service = (this.service = createService({
+      analytics: coreStart.analytics,
       coreStart,
-      securityStart: pluginsStart.security,
-      licenseStart: pluginsStart.licensing,
-      shareStart: pluginsStart.share,
       enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
+      licenseStart: pluginsStart.licensing,
+      securityStart: pluginsStart.security,
+      shareStart: pluginsStart.share,
     }));
 
     service.register(async ({ signal, registerContext, registerFunction }) => {

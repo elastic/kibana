@@ -36,7 +36,6 @@ import { InitialSetupPanel } from './initial_setup_panel';
 import { ChatActionClickType } from './types';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { Feedback } from '../feedback_buttons';
-import { useKibana } from '../../hooks/use_kibana';
 import { MESSAGE_FEEDBACK } from '../../analytics/schema';
 
 const timelineClassName = css`
@@ -79,8 +78,6 @@ export function ChatBody({
   startedFrom?: StartedFrom;
   onConversationUpdate: (conversation: Conversation) => void;
 }) {
-  const { analytics } = useKibana().services;
-
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
 
@@ -120,7 +117,7 @@ export function ChatBody({
 
   const handleFeedback = (message: Message, feedback: Feedback) => {
     const feedbackEvent = { ...message, feedback };
-    analytics.reportEvent(MESSAGE_FEEDBACK, feedbackEvent);
+    chatService.analytics.reportEvent(MESSAGE_FEEDBACK, feedbackEvent);
   };
 
   useEffect(() => {
