@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import { css } from '@emotion/css';
 import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -16,6 +16,12 @@ import type { Feedback } from '../feedback_buttons';
 import { type Message } from '../../../common';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import type { ChatActionClickHandler } from './types';
+import {
+  getTimelineItemsfromConversation,
+  StartedFrom,
+} from '../../utils/get_timeline_items_from_conversation';
+import { ObservabilityAIAssistantChatService } from '../../types';
+import { ChatState } from '../../hooks/use_chat';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
@@ -35,27 +41,70 @@ export interface ChatTimelineItem
   element?: React.ReactNode;
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   error?: any;
+  message: Message;
 }
 
 export interface ChatTimelineProps {
-  items: Array<ChatTimelineItem | ChatTimelineItem[]>;
+  messages: Message[];
   knowledgeBase: UseKnowledgeBaseResult;
-  onEdit: (item: ChatTimelineItem, message: Message) => Promise<void>;
-  onFeedback: (item: ChatTimelineItem, feedback: Feedback) => void;
-  onRegenerate: (item: ChatTimelineItem) => void;
+  chatService: ObservabilityAIAssistantChatService;
+  hasConnector: boolean;
+  chatState: ChatState;
+  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
+  startedFrom?: StartedFrom;
+  onEdit: (message: Message, messageAfterEdit: Message) => void;
+  onFeedback: (message: Message, feedback: Feedback) => void;
+  onRegenerate: (message: Message) => void;
   onStopGenerating: () => void;
   onActionClick: ChatActionClickHandler;
 }
 
 export function ChatTimeline({
-  items = [],
+  messages,
   knowledgeBase,
+  chatService,
+  hasConnector,
+  currentUser,
+  startedFrom,
   onEdit,
   onFeedback,
   onRegenerate,
   onStopGenerating,
   onActionClick,
+  chatState,
 }: ChatTimelineProps) {
+  const items = useMemo(() => {
+    const timelineItems = getTimelineItemsfromConversation({
+      chatService,
+      hasConnector,
+      messages,
+      currentUser,
+      startedFrom,
+      chatState,
+    });
+
+    const consolidatedChatItems: Array<ChatTimelineItem | ChatTimelineItem[]> = [];
+    let currentGroup: ChatTimelineItem[] | null = null;
+
+    for (const item of timelineItems) {
+      if (item.display.hide || !item) continue;
+
+      if (item.display.collapsed) {
+        if (currentGroup) {
+          currentGroup.push(item);
+        } else {
+          currentGroup = [item];
+          consolidatedChatItems.push(currentGroup);
+        }
+      } else {
+        consolidatedChatItems.push(item);
+        currentGroup = null;
+      }
+    }
+
+    return consolidatedChatItems;
+  }, [chatService, hasConnector, messages, currentUser, startedFrom, chatState]);
+
   return (
     <EuiCommentList
       css={css`
@@ -65,8 +114,8 @@ export function ChatTimeline({
       {items.length <= 1 ? (
         <ChatWelcomePanel knowledgeBase={knowledgeBase} />
       ) : (
-        items.map((item, index) =>
-          Array.isArray(item) ? (
+        items.map((item, index) => {
+          return Array.isArray(item) ? (
             <ChatConsolidatedItems
               key={index}
               consolidatedItem={item}
@@ -82,17 +131,19 @@ export function ChatTimeline({
               key={index}
               {...item}
               onFeedbackClick={(feedback) => {
-                onFeedback(item, feedback);
+                onFeedback(item.message, feedback);
               }}
               onRegenerateClick={() => {
-                onRegenerate(item);
+                onRegenerate(item.message);
               }}
-              onEditSubmit={(message) => onEdit(item, message)}
+              onEditSubmit={(message) => {
+                onEdit(item.message, message);
+              }}
               onStopGeneratingClick={onStopGenerating}
               onActionClick={onActionClick}
             />
-          )
-        )
+          );
+        })
       )}
     </EuiCommentList>
   );

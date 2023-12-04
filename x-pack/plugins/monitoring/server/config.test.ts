@@ -22,6 +22,7 @@ describe('config schema', () => {
           },
           "enabled": true,
         },
+        "enabled": true,
         "kibana": Object {
           "collection": Object {
             "enabled": true,
@@ -66,7 +67,7 @@ describe('config schema', () => {
             "logFetchCount": 10,
             "logQueries": false,
             "maxIdleSockets": 256,
-            "maxSockets": Infinity,
+            "maxSockets": 800,
             "pingTimeout": "PT30S",
             "requestHeadersWhitelist": Array [
               "authorization",

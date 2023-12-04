@@ -55,7 +55,7 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
       );
     },
 
-    async navigateToIndexPatternSelection() {
+    async navigateToDataViewSelection() {
       await testSubjects.click('mlDataVisualizerSelectIndexButton');
       await testSubjects.existOrFail('mlPageSourceSelection');
     },

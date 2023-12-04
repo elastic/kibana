@@ -11,32 +11,22 @@ import { useStream } from './use_stream';
 const amendMessage = jest.fn();
 const reader = jest.fn();
 const cancel = jest.fn();
-const exampleChunk = {
-  id: '1',
-  object: 'chunk',
-  created: 1635633600000,
-  model: 'model-1',
-  choices: [
-    {
-      index: 0,
-      delta: { role: 'role-1', content: 'content-1' },
-      finish_reason: null,
-    },
-  ],
-};
+const chunk1 = `data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}`;
+const chunk2 = `\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" message"}}]}\ndata: [DONE]`;
+
 const readerComplete = {
   read: reader
     .mockResolvedValueOnce({
       done: false,
-      value: new Uint8Array(new TextEncoder().encode(`data: ${JSON.stringify(exampleChunk)}`)),
+      value: new Uint8Array(new TextEncoder().encode(chunk1)),
     })
     .mockResolvedValueOnce({
       done: false,
-      value: new Uint8Array(new TextEncoder().encode(``)),
+      value: new Uint8Array(new TextEncoder().encode(chunk2)),
     })
     .mockResolvedValueOnce({
       done: false,
-      value: new Uint8Array(new TextEncoder().encode('data: [DONE]\n')),
+      value: new Uint8Array(new TextEncoder().encode('')),
     })
     .mockResolvedValue({
       done: true,
@@ -46,7 +36,12 @@ const readerComplete = {
   closed: jest.fn().mockResolvedValue(true),
 } as unknown as ReadableStreamDefaultReader<Uint8Array>;
 
-const defaultProps = { amendMessage, reader: readerComplete };
+const defaultProps = {
+  amendMessage,
+  reader: readerComplete,
+  isError: false,
+  connectorTypeTitle: 'OpenAI',
+};
 describe('useStream', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -69,7 +64,7 @@ describe('useStream', () => {
         error: undefined,
         isLoading: true,
         isStreaming: true,
-        pendingMessage: 'content-1',
+        pendingMessage: 'My',
         setComplete: expect.any(Function),
       });
     });
@@ -79,7 +74,7 @@ describe('useStream', () => {
         error: undefined,
         isLoading: false,
         isStreaming: false,
-        pendingMessage: 'content-1',
+        pendingMessage: 'My new message',
         setComplete: expect.any(Function),
       });
     });
@@ -104,7 +99,7 @@ describe('useStream', () => {
         .fn()
         .mockResolvedValueOnce({
           done: false,
-          value: new Uint8Array(new TextEncoder().encode(`data: ${JSON.stringify(exampleChunk)}`)),
+          value: new Uint8Array(new TextEncoder().encode(`one chunk`)),
         })
         .mockRejectedValue(new Error(errorMessage)),
       cancel,
@@ -113,7 +108,7 @@ describe('useStream', () => {
     } as unknown as ReadableStreamDefaultReader<Uint8Array>;
     const { result, waitForNextUpdate } = renderHook(() =>
       useStream({
-        amendMessage,
+        ...defaultProps,
         reader: errorReader,
       })
     );

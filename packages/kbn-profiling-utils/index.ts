@@ -7,8 +7,7 @@
  */
 
 export { decodeStackTraceResponse } from './common/stack_traces';
-export { createBaseFlameGraph, createFlameGraph } from './common/flamegraph';
-export { createCalleeTree } from './common/callee';
+export { createFlameGraph } from './common/flamegraph';
 export { ProfilingESField } from './common/elasticsearch';
 export {
   groupStackFrameMetadataByStackTrace,
@@ -30,9 +29,11 @@ export {
   createTopNFunctions,
   TopNFunctionSortField,
   topNFunctionSortFieldRt,
+  TopNComparisonFunctionSortField,
+  topNComparisonFunctionSortFieldRt,
 } from './common/functions';
+export { convertTonsToKgs } from './common/utils';
 
-export type { CalleeTree } from './common/callee';
 export type {
   ProfilingStatusResponse,
   StackTraceResponse,

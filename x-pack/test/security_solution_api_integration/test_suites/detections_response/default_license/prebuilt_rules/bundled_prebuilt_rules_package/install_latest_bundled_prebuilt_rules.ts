@@ -23,12 +23,13 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
+  // FLAKY: https://github.com/elastic/kibana/issues/171380
   /* This test simulates an air-gapped environment in which the user doesn't have access to EPR.
   /* We first download the package from the registry as done during build time, and then
   /* attempt to install it from the local file system. The API response from EPM provides
   /* us with the information of whether the package was installed from the registry or
   /* from a package that was bundled with Kibana */
-  describe('@ess @serverless @skipInQA install_bundled_prebuilt_rules', () => {
+  describe.skip('@ess @serverless @skipInQA install_bundled_prebuilt_rules', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es);
@@ -66,7 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(bundledInstallResponse._meta.install_source).toBe('bundled');
 
       // Refresh ES indices to avoid race conditions between write and reading of indeces
-      // See implementation utility function at x-pack/test/detection_engine_api_integration/utils/prebuilt_rules/install_prebuilt_rules_fleet_package.ts
+      // See implementation utility function at x-pack/test/security_solution_api_integration/test_suites/detections_response/utils/rules/prebuilt_rules/install_prebuilt_rules_fleet_package.ts
       await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 
       // Verify that status is updated after package installation

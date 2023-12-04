@@ -77,7 +77,8 @@ export function MobileFilters() {
   } = useAnyOfApmParams(
     '/mobile-services/{serviceName}/overview',
     '/mobile-services/{serviceName}/transactions',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/errors-and-crashes'
   );
 
   const filters = { netConnectionType, device, osVersion, appVersion };

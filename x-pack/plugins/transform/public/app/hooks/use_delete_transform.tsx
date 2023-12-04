@@ -146,7 +146,7 @@ export const useDeleteTransforms = () => {
           }
 
           if (status.destDataViewDeleted?.error) {
-            const error = status.destDataViewDeleted.error.reason;
+            const error = extractErrorMessage(status.destDataViewDeleted.error);
             toastNotifications.addDanger({
               title: i18n.translate(
                 'xpack.transform.deleteTransform.deleteAnalyticsWithDataViewErrorMessage',

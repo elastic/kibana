@@ -5,48 +5,12 @@
  * 2.0.
  */
 
-import { SLO_RESOURCES_VERSION, SLO_SUMMARY_ENRICH_POLICY_NAME } from '../constants';
+import { SLO_RESOURCES_VERSION } from '../constants';
 
 export const getSLOPipelineTemplate = (id: string, indexNamePrefix: string) => ({
   id,
   description: 'Monthly date-time index naming for SLO data',
   processors: [
-    {
-      enrich: {
-        field: 'slo.id',
-        policy_name: SLO_SUMMARY_ENRICH_POLICY_NAME,
-        target_field: '_enrich',
-      },
-    },
-    {
-      set: {
-        field: 'slo.timeWindow',
-        copy_from: '_enrich.slo.timeWindow',
-      },
-    },
-    {
-      set: {
-        field: 'slo.budgetingMethod',
-        copy_from: '_enrich.slo.budgetingMethod',
-      },
-    },
-    {
-      set: {
-        field: 'slo.objective.target',
-        copy_from: '_enrich.slo.objective.target',
-      },
-    },
-    {
-      remove: {
-        field: '_enrich',
-      },
-    },
-    {
-      set: {
-        field: 'event.ingested',
-        value: '{{{_ingest.timestamp}}}',
-      },
-    },
     {
       date_index_name: {
         field: '@timestamp',

@@ -26,6 +26,7 @@ const configSchema = schema.object({
       'Host Flyout Filter Added', // Worst-case scenario once per second - AT RISK,
     ],
   }),
+  pageVarsDebounceTime: schema.duration({ defaultValue: '500ms' }),
 });
 
 export type CloudFullStoryConfigType = TypeOf<typeof configSchema>;
@@ -34,6 +35,7 @@ export const config: PluginConfigDescriptor<CloudFullStoryConfigType> = {
   exposeToBrowser: {
     org_id: true,
     eventTypesAllowlist: true,
+    pageVarsDebounceTime: true,
   },
   schema: configSchema,
   deprecations: () => [

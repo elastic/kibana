@@ -8,10 +8,6 @@
 import type { Filter } from '@kbn/es-query';
 
 import { SecurityPageName } from '../../../../common/constants';
-import { HISTOGRAM_LEGEND_ACTION_FILTER_IN } from '../../../actions/filter/lens/filter_in';
-import { TIMELINE_HISTOGRAM_LEGEND_ACTION_FILTER_IN } from '../../../actions/filter/lens/filter_in_timeline';
-import { HISTOGRAM_LEGEND_ACTION_FILTER_OUT } from '../../../actions/filter/lens/filter_out';
-import { TIMELINE_HISTOGRAM_LEGEND_ACTION_FILTER_OUT } from '../../../actions/filter/lens/filter_out_timeline';
 import type { Request } from './types';
 
 export const VISUALIZATION_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
@@ -199,28 +195,3 @@ export const parseVisualizationData = <T>(data: string[]): T[] =>
       return acc;
     }
   }, [] as T[]);
-
-export const showLegendActionsByActionId = ({
-  actionId,
-  scopeId,
-}: {
-  actionId: string;
-  scopeId: string;
-}) => {
-  switch (actionId) {
-    /** We no longer use Lens' default filter in / out actions
-     * as extra custom actions needed after filters applied.
-     * For example: hide the topN panel after filters applied */
-    case FILTER_IN_LEGEND_ACTION:
-    case FILTER_OUT_LEGEND_ACTION:
-      return false;
-    case HISTOGRAM_LEGEND_ACTION_FILTER_IN:
-    case HISTOGRAM_LEGEND_ACTION_FILTER_OUT:
-      return scopeId !== 'timeline';
-    case TIMELINE_HISTOGRAM_LEGEND_ACTION_FILTER_IN:
-    case TIMELINE_HISTOGRAM_LEGEND_ACTION_FILTER_OUT:
-      return scopeId === 'timeline';
-    default:
-      return true;
-  }
-};

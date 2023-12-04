@@ -10,7 +10,11 @@ import { getSimpleCustomQueryRule } from '../../../objects/rule';
 
 import { goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { deleteIndex, waitForNewDocumentToBeIndexed } from '../../../tasks/api_calls/elasticsearch';
-import { deleteAlertsAndRules, deleteConnectors, deleteDataView } from '../../../tasks/common';
+import {
+  deleteAlertsAndRules,
+  deleteConnectors,
+  deleteDataView,
+} from '../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,

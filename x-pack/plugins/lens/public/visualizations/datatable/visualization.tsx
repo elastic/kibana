@@ -165,11 +165,14 @@ export const getDatatableVisualization = ({
         ? 0.5
         : 1;
 
+    // forcing datatable as a suggestion when there are no metrics (number fields)
+    const forceSuggestion = Boolean(table?.notAssignedMetrics);
+
     return [
       {
         title,
         // table with >= 10 columns will have a score of 0.4, fewer columns reduce score
-        score: (Math.min(table.columns.length, 10) / 10) * 0.4 * changeFactor,
+        score: forceSuggestion ? 1 : (Math.min(table.columns.length, 10) / 10) * 0.4 * changeFactor,
         state: {
           ...(state || {}),
           layerId: table.layerId,
@@ -187,6 +190,13 @@ export const getDatatableVisualization = ({
     ];
   },
 
+  /*
+  Datatable works differently on text based datasource and form based
+  - Form based: It relies on the isBucketed flag to identify groups. It allows only numeric fields
+  on the Metrics dimension
+  - Text based: It relies on the isMetric flag to identify groups. It allows all type of fields
+  on the Metric dimension in cases where there are no numeric columns
+  **/
   getConfiguration({ state, frame, layerId }) {
     const { sortedColumns, datasource } =
       getDataSourceAndSortedColumns(state, frame.datasourceLayers, layerId) || {};
@@ -199,9 +209,11 @@ export const getDatatableVisualization = ({
     if (!sortedColumns) {
       return { groups: [] };
     }
+    const isTextBasedLanguage = datasource?.isTextBasedLanguage();
 
     return {
       groups: [
+        // In this group we get columns that are not transposed and are not on the metric dimension
         {
           groupId: 'rows',
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownRows', {
@@ -216,11 +228,17 @@ export const getDatatableVisualization = ({
           }),
           layerId: state.layerId,
           accessors: sortedColumns
-            .filter(
-              (c) =>
-                datasource!.getOperationForColumnId(c)?.isBucketed &&
-                !state.columns.find((col) => col.columnId === c)?.isTransposed
-            )
+            .filter((c) => {
+              const column = state.columns.find((col) => col.columnId === c);
+              if (isTextBasedLanguage) {
+                return (
+                  !datasource!.getOperationForColumnId(c)?.inMetricDimension &&
+                  !column?.isMetric &&
+                  !column?.isTransposed
+                );
+              }
+              return datasource!.getOperationForColumnId(c)?.isBucketed && !column?.isTransposed;
+            })
             .map((accessor) => ({
               columnId: accessor,
               triggerIconType: columnMap[accessor].hidden
@@ -236,6 +254,7 @@ export const getDatatableVisualization = ({
           hideGrouping: true,
           nestingOrder: 1,
         },
+        // In this group we get columns that are transposed and are not on the metric dimension
         {
           groupId: 'columns',
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
@@ -250,11 +269,15 @@ export const getDatatableVisualization = ({
           }),
           layerId: state.layerId,
           accessors: sortedColumns
-            .filter(
-              (c) =>
+            .filter((c) => {
+              if (isTextBasedLanguage) {
+                return state.columns.find((col) => col.columnId === c)?.isTransposed;
+              }
+              return (
                 datasource!.getOperationForColumnId(c)?.isBucketed &&
                 state.columns.find((col) => col.columnId === c)?.isTransposed
-            )
+              );
+            })
             .map((accessor) => ({ columnId: accessor })),
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
@@ -263,6 +286,7 @@ export const getDatatableVisualization = ({
           hideGrouping: true,
           nestingOrder: 0,
         },
+        // In this group we get columns are on the metric dimension
         {
           groupId: 'metrics',
           groupLabel: i18n.translate('xpack.lens.datatable.metrics', {
@@ -278,7 +302,16 @@ export const getDatatableVisualization = ({
           },
           layerId: state.layerId,
           accessors: sortedColumns
-            .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
+            .filter((c) => {
+              const operation = datasource!.getOperationForColumnId(c);
+              if (isTextBasedLanguage) {
+                return (
+                  operation?.inMetricDimension ||
+                  state.columns.find((col) => col.columnId === c)?.isMetric
+                );
+              }
+              return !operation?.isBucketed;
+            })
             .map((accessor) => {
               const columnConfig = columnMap[accessor];
               const stops = columnConfig?.palette?.params?.stops;
@@ -316,7 +349,12 @@ export const getDatatableVisualization = ({
         ...prevState,
         columns: prevState.columns.map((column) => {
           if (column.columnId === columnId || column.columnId === previousColumn) {
-            return { ...column, columnId, isTransposed: groupId === 'columns' };
+            return {
+              ...column,
+              columnId,
+              isTransposed: groupId === 'columns',
+              isMetric: groupId === 'metrics',
+            };
           }
           return column;
         }),
@@ -324,7 +362,10 @@ export const getDatatableVisualization = ({
     }
     return {
       ...prevState,
-      columns: [...prevState.columns, { columnId, isTransposed: groupId === 'columns' }],
+      columns: [
+        ...prevState.columns,
+        { columnId, isTransposed: groupId === 'columns', isMetric: groupId === 'metrics' },
+      ],
     };
   },
   removeDimension({ prevState, columnId }) {
@@ -371,9 +412,11 @@ export const getDatatableVisualization = ({
   ): Ast | null {
     const { sortedColumns, datasource } =
       getDataSourceAndSortedColumns(state, datasourceLayers, state.layerId) || {};
+    const isTextBasedLanguage = datasource?.isTextBasedLanguage();
 
     if (
       sortedColumns?.length &&
+      !isTextBasedLanguage &&
       sortedColumns.filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed).length === 0
     ) {
       return null;
@@ -435,6 +478,15 @@ export const getDatatableVisualization = ({
           const canColor =
             datasource!.getOperationForColumnId(column.columnId)?.dataType === 'number';
 
+          let isTransposable =
+            !isTextBasedLanguage &&
+            !datasource!.getOperationForColumnId(column.columnId)?.isBucketed;
+
+          if (isTextBasedLanguage) {
+            const operation = datasource!.getOperationForColumnId(column.columnId);
+            isTransposable = Boolean(column?.isMetric || operation?.inMetricDimension);
+          }
+
           const datatableColumnFn = buildExpressionFunction<DatatableColumnFunction>(
             'lens_datatable_column',
             {
@@ -443,8 +495,7 @@ export const getDatatableVisualization = ({
               oneClickFilter: column.oneClickFilter,
               width: column.width,
               isTransposed: column.isTransposed,
-              transposable: !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
-              alignment: column.alignment,
+              transposable: isTransposable,
               colorMode: canColor && column.colorMode ? column.colorMode : 'none',
               palette: paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams),
               summaryRow: hasNoSummaryRow ? undefined : column.summaryRow!,
