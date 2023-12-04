@@ -5,28 +5,27 @@
  * 2.0.
  */
 
-import { find, merge } from 'lodash';
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { MalformedDocsStat } from '../../../common/data_streams_stats/malformed_docs_stat';
-import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
+import { find, merge } from 'lodash';
+import {
+  getDataStreamsMalformedDocsStatsResponseRt,
+  getDataStreamsStatsResponseRt,
+} from '../../../common/api_types';
 import {
   DATA_STREAMS_MALFORMED_STATS_URL,
   DATA_STREAMS_STATS_URL,
 } from '../../../common/constants';
 import {
-  GetDataStreamsStatsError,
-  GetDataStreamsStatsResponse,
-  GetDataStreamsStatsQuery,
   DataStreamStatServiceResponse,
-  GetDataStreamsMalformedDocsStatsResponse,
   GetDataStreamsMalformedDocsStatsQuery,
+  GetDataStreamsMalformedDocsStatsResponse,
+  GetDataStreamsStatsError,
+  GetDataStreamsStatsQuery,
+  GetDataStreamsStatsResponse,
 } from '../../../common/data_streams_stats';
+import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { IDataStreamsStatsClient } from './types';
-import {
-  getDataStreamsMalformedDocsStatsResponseRt,
-  getDataStreamsStatsResponseRt,
-} from '../../../common/api_types';
 
 export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   constructor(private readonly http: HttpStart) {}
@@ -79,6 +78,6 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         )
     )(response);
 
-    return malformedDocs.map(MalformedDocsStat.create);
+    return malformedDocs;
   }
 }

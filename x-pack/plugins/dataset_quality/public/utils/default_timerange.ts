@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-const DEFAULT_FROM_IN_MILLISECONDS = 24 * 3600000;
+const ONE_DAY_IN_MILLISECONDS = 24 * 3600000;
 
 export const getDefaultTimeRange = () => {
   const now = Date.now();
 
   return {
-    from: new Date(now - DEFAULT_FROM_IN_MILLISECONDS).toISOString(),
+    from: new Date(now - ONE_DAY_IN_MILLISECONDS).toISOString(),
     to: new Date(now).toISOString(),
   };
 };
