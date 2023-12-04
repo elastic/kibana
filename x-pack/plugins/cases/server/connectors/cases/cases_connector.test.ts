@@ -164,6 +164,7 @@ describe('CasesConnector', () => {
 
       casesClientMock.cases.bulkGet.mockResolvedValue({ cases, errors: [] });
       casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [] });
+      casesClientMock.cases.bulkUpdate.mockResolvedValue([]);
 
       getCasesClient.mockReturnValue(casesClientMock);
 

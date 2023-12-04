@@ -319,8 +319,8 @@ export class CasesConnector extends SubActionConnector<
     groupedAlertsWithCaseId: Map<string, GroupedAlertsWithCaseId>
   ): Promise<Map<string, GroupedAlertsWithCases>> {
     const bulkCreateReq: BulkCreateCasesRequest['cases'] = [];
-    const bulkUpdateCasesResponse: Cases = [];
     const casesMap = new Map<string, GroupedAlertsWithCases>();
+    let bulkUpdateCasesResponse: Cases = [];
 
     const ids = Array.from(groupedAlertsWithCaseId.values()).map(({ caseId }) => caseId);
     const { cases, errors } = await casesClient.cases.bulkGet({ ids });
@@ -350,7 +350,7 @@ export class CasesConnector extends SubActionConnector<
       /**
        * TODO: bulkUpdate throws an error. Retry on errors.
        */
-      bulkUpdateCasesResponse.concat(await casesClient.cases.bulkUpdate({ cases: bulkUpdateReq }));
+      bulkUpdateCasesResponse = [...(await casesClient.cases.bulkUpdate({ cases: bulkUpdateReq }))];
     }
 
     /**
