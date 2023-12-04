@@ -258,12 +258,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           const nonAggregatableFieldsUniqueCount = nonAggregatableFields.map(
             () => new Set<string>()
           );
-
-          // @TODO: remove
-          console.log(
-            `--@@sampledNonAggregatableFieldsExamples`,
-            sampledNonAggregatableFieldsExamples
-          );
           if (sampledNonAggregatableFieldsExamples) {
             sampledNonAggregatableFieldsExamples.forEach((doc) => {
               nonAggregatableFields.forEach((field, fieldIdx) => {
