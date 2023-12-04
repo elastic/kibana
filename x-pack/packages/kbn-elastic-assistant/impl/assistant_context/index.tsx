@@ -51,7 +51,7 @@ type ShowAssistantOverlay = ({
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   assistantAvailability: AssistantAvailability;
-  assistantStreamingEnabled: boolean;
+  assistantStreamingEnabled?: boolean;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   baseAllow: string[];
@@ -157,7 +157,7 @@ const AssistantContext = React.createContext<UseAssistantContext | undefined>(un
 export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   actionTypeRegistry,
   assistantAvailability,
-  assistantStreamingEnabled,
+  assistantStreamingEnabled = false,
   assistantTelemetry,
   augmentMessageCodeBlocks,
   baseAllow,

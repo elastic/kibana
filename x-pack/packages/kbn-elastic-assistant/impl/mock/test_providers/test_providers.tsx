@@ -72,7 +72,6 @@ export const TestProvidersComponent: React.FC<Props> = ({
           <AssistantProvider
             actionTypeRegistry={actionTypeRegistry}
             assistantAvailability={assistantAvailability}
-            assistantStreamingEnabled
             augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}
             baseAllow={[]}
             baseAllowReplacement={[]}
