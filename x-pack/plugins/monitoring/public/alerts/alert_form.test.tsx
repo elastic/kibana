@@ -44,11 +44,11 @@ const { loadActionTypes } = jest.requireMock(
   '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
 );
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/rule_api/rule_types', () => ({
-  loadRuleTypes: jest.fn(),
-}));
-const { loadRuleTypes } = jest.requireMock(
-  '@kbn/triggers-actions-ui-plugin/public/application/lib/rule_api/rule_types'
+jest.mock(
+  '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_load_rule_types_query',
+  () => ({
+    useLoadRuleTypesQuery: jest.fn(),
+  })
 );
 
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -113,7 +113,14 @@ describe('alert_form', () => {
     let wrapper: ReactWrapper<any>;
 
     beforeEach(async () => {
-      loadRuleTypes.mockResolvedValue([]);
+      const { useLoadRuleTypesQuery } = jest.requireMock(
+        '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_load_rule_types_query'
+      );
+      useLoadRuleTypesQuery.mockReturnValue({
+        ruleTypesState: {
+          data: new Map(),
+        },
+      });
       ruleTypeRegistry.list.mockReturnValue([ruleType]);
       ruleTypeRegistry.get.mockReturnValue(ruleType);
       ruleTypeRegistry.has.mockReturnValue(true);
