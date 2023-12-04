@@ -17,9 +17,9 @@ import { ApiService } from '@kbn/guided-onboarding-plugin/public/services/api.se
 
 import { GettingStarted } from './getting_started';
 import { KEY_ENABLE_WELCOME } from '../home';
-import { GuideFiltersProps } from '@kbn/guided-onboarding/src/components/landing_page/guide_filters';
 import { ReactWrapper } from '@kbn/test-jest-helpers/src/testbed/types';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { GuideFiltersProps } from '@kbn/guided-onboarding/src/components/landing_page/guide/guide_filters';
 
 const mockCloud = cloudMock.createSetup();
 const mockChrome = chromeServiceMock.createStartContract();
