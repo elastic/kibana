@@ -7,15 +7,16 @@
 
 import expect from '@kbn/expect';
 
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { indicesHelpers } from './lib/indices.helpers';
-import { registerHelpers } from './stats.helpers';
+import { API_BASE_PATH } from './constants';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const { createIndex, deleteAllIndices } = indicesHelpers(getService);
 
-  const { getIndexStats } = registerHelpers({ supertest });
+  const getIndexStats = (indexName: string) => supertest.get(`${API_BASE_PATH}/stats/${indexName}`);
 
   describe('stats', () => {
     after(async () => await deleteAllIndices());
