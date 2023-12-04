@@ -26,6 +26,7 @@ import {
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import {
   useLensSelector,
   selectFramePublicAPI,
@@ -62,6 +63,7 @@ export function LensEditConfigurationFlyout({
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
+  const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
   const [errors, setErrors] = useState<Error[] | undefined>();
@@ -75,12 +77,16 @@ export function LensEditConfigurationFlyout({
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
   const suggestsLimitedColumns = activeDatasource?.suggestsLimitedColumns?.(datasourceState);
 
+  const layers = useMemo(
+    () => activeDatasource.getLayers(datasourceState),
+    [activeDatasource, datasourceState]
+  );
+
   const dispatch = useLensDispatch();
   useEffect(() => {
     const s = output$?.subscribe(() => {
       const activeData: Record<string, Datatable> = {};
-      const adaptersTables = lensAdapters?.tables?.tables as Record<string, Datatable>;
-      const layers = activeDatasource.getLayers(datasourceState);
+      const adaptersTables = previousAdapters.current?.tables?.tables as Record<string, Datatable>;
       layers.forEach((layerId) => {
         activeData[layerId] = adaptersTables[layerId] || {};
       });
@@ -90,7 +96,7 @@ export function LensEditConfigurationFlyout({
       }
     });
     return () => s?.unsubscribe();
-  }, [dispatch, output$, lensAdapters?.tables?.tables, activeDatasource, datasourceState]);
+  }, [dispatch, output$, layers]);
 
   const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;
