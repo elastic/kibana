@@ -62,7 +62,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ type }) => {
   ) : (
     <EnterpriseSearchContentPageTemplate
       pageChrome={baseBreadcrumbs}
-      pageViewTelemetry={type === 'connector' ? 'Connectors' : 'Crawlers'}
+      pageViewTelemetry={type === 'connector' ? 'Connectors' : 'Web Crawlers'}
       isLoading={isLoading}
       pageHeader={{
         pageTitle:
@@ -71,7 +71,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ type }) => {
                 defaultMessage: 'Elasticsearch connectors',
               })
             : i18n.translate('xpack.enterpriseSearch.crawlers.title', {
-                defaultMessage: 'Elasticsearch crawlers',
+                defaultMessage: 'Elasticsearch web crawlers',
               }),
         rightSideGroupProps: {
           gutterSize: 's',
@@ -110,7 +110,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ type }) => {
                 key="newConnectorClient"
                 onClick={() => {
                   KibanaLogic.values.navigateToUrl(
-                    NEW_INDEX_SELECT_CONNECTOR_PATH + '?filter=connector_client'
+                    NEW_INDEX_SELECT_CONNECTOR_PATH + '?filter=connector_clients'
                   );
                 }}
               >
@@ -134,7 +134,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ type }) => {
                 }}
               >
                 {i18n.translate('xpack.enterpriseSearch.connectors.newCrawlerButtonLabel', {
-                  defaultMessage: 'New Crawler',
+                  defaultMessage: 'New web crawler',
                 })}
               </EuiButton>,
             ]
@@ -151,12 +151,12 @@ export const Connectors: React.FC<ConnectorsProps> = ({ type }) => {
               {type !== 'elastic-crawler' ? (
                 <FormattedMessage
                   id="xpack.enterpriseSearch.connectorsTable.h2.availableConnectorsLabel"
-                  defaultMessage="Available Connectors"
+                  defaultMessage="Available connectors"
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.enterpriseSearch.connectorsTable.h2.availableCrawlersLabel"
-                  defaultMessage="Available Crawlers"
+                  defaultMessage="Available web crawlers"
                 />
               )}
             </h2>
@@ -171,22 +171,22 @@ export const Connectors: React.FC<ConnectorsProps> = ({ type }) => {
                 type === 'connector'
                   ? i18n.translate(
                       'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterConnectorsPlaceholder',
-                      { defaultMessage: 'Filter Connectors' }
+                      { defaultMessage: 'Filter connectors' }
                     )
                   : i18n.translate(
                       'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterCrawlersPlaceholder',
-                      { defaultMessage: 'Filter Crawlers' }
+                      { defaultMessage: 'Filter web crawlers' }
                     ),
             }}
             aria-label={
               type === 'connector'
                 ? i18n.translate(
                     'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterConnectorsLabel',
-                    { defaultMessage: 'Filter Connectors' }
+                    { defaultMessage: 'Filter connectors' }
                   )
                 : i18n.translate(
                     'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterCrawlersLabel',
-                    { defaultMessage: 'Filter Crawlers' }
+                    { defaultMessage: 'Filter web crawlers' }
                   )
             }
             onChange={(event) => setSearchValue(event.queryText)}

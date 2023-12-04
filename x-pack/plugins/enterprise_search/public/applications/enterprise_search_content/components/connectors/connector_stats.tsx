@@ -52,7 +52,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connectorType })
                         )
                       : i18n.translate(
                           'xpack.enterpriseSearch.connectorStats.h4.crawlerSummaryLabel',
-                          { defaultMessage: 'Crawler summary' }
+                          { defaultMessage: 'Web crawler summary' }
                         )}
                   </h4>
                 </EuiTitle>
@@ -67,7 +67,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connectorType })
                         },
                       })
                     : i18n.translate('xpack.enterpriseSearch.connectorStats.crawlersTextLabel', {
-                        defaultMessage: '{count} crawlers',
+                        defaultMessage: '{count} web crawlers',
                         values: {
                           count: (data?.connected || 0) + (data?.incomplete || 0),
                         },

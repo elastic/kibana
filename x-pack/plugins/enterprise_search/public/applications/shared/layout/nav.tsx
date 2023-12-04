@@ -82,7 +82,7 @@ export const useEnterpriseSearchNav = () => {
         {
           id: 'crawlers',
           name: i18n.translate('xpack.enterpriseSearch.nav.crawlersTitle', {
-            defaultMessage: 'Crawlers',
+            defaultMessage: 'Web crawlers',
           }),
           ...generateNavLink({
             shouldNotCreateHref: true,
