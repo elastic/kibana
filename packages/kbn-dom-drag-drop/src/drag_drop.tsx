@@ -118,11 +118,6 @@ interface BaseProps {
    * Extra drop targets by dropType
    */
   getCustomDropTarget?: (dropType: DropType) => ReactElement | null;
-
-  /**
-   * Pass `true` to disable default hover styles for draggable element
-   */
-  disableDraggableHoverStyles?: boolean;
 }
 
 /**
@@ -233,7 +228,6 @@ const DragInner = memo(function DragInner({
   onDragEnd,
   extraKeyboardHandler,
   ariaDescribedBy,
-  disableDraggableHoverStyles,
 }: DragInnerProps) {
   const { keyboardMode, activeDropTarget, dropTargetsByOrder } = activeDraggingProps || {};
 
@@ -472,9 +466,7 @@ const DragInner = memo(function DragInner({
 
       {React.cloneElement(children, {
         'data-test-subj': dataTestSubj || dataTestSubjPrefix,
-        className: classNames(children.props.className, 'domDragDrop', 'domDragDrop-isDraggable', {
-          'domDragDrop-isDraggableWithHover': !disableDraggableHoverStyles,
-        }),
+        className: classNames(children.props.className, 'domDragDrop', 'domDragDrop-isDraggable'),
         draggable: true,
         onDragEnd: dragEnd,
         onDragStart: dragStart,
@@ -497,7 +489,6 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
     isNotDroppable,
     dropTypes,
     order,
-    disableDraggableHoverStyles,
     getAdditionalClassesOnEnter,
     getAdditionalClassesOnDroppable,
     getCustomDropTarget,
@@ -637,7 +628,6 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
       'domDragDrop',
       {
         'domDragDrop-isDraggable': draggable,
-        'domDragDrop-isDraggableWithHover': draggable && !disableDraggableHoverStyles,
         'domDragDrop-isDroppable': !draggable,
         'domDragDrop-isDropTarget': dropType,
         'domDragDrop-isActiveDropTarget': dropType && isActiveDropTarget,

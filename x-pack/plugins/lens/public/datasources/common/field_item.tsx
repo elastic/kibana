@@ -209,7 +209,6 @@ export function InnerFieldItem(props: FieldItemProps) {
         button={
           <DragDrop
             draggable
-            disableDraggableHoverStyles
             order={order}
             value={value}
             dataTestSubj={`lnsFieldListPanelField-${field.name}`}

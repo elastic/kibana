@@ -25,10 +25,7 @@
 // Draggable item
 .domDragDrop-isDraggable {
   @include mixinDomDraggable;
-
-  &.domDragDrop-isDraggableWithHover {
-    @include mixinDomDragDropHover;
-  }
+  @include mixinDomDragDropHover;
 
   // Include a possible nested button like when using FieldButton
   & .kbnFieldButton__button,
