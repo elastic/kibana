@@ -835,6 +835,7 @@ test('successfully authorize system actions', async () => {
   await actionExecutor.execute({ ...executeParams, actionId: 'system-connector-.cases' });
 
   expect(authorizationMock.ensureAuthorized).toBeCalledWith({
+    actionTypeId: '.cases',
     operation: 'execute',
     additionalPrivileges: ['test/create'],
   });
@@ -875,7 +876,11 @@ test('Execute of SentinelOne sub-actions require create privilege', async () => 
 
   await actionExecutor.execute({ ...executeParams, actionId: 'sentinel-one-connector-authz' });
 
-  expect(authorizationMock.ensureAuthorized).toHaveBeenCalledWith({ operation: 'create' });
+  expect(authorizationMock.ensureAuthorized).toHaveBeenCalledWith({
+    actionTypeId: '.sentinelone',
+    additionalPrivileges: [],
+    operation: 'execute',
+  });
 });
 
 test('pass the params to the actionTypeRegistry when authorizing system actions', async () => {
@@ -909,12 +914,13 @@ test('pass the params to the actionTypeRegistry when authorizing system actions'
   });
 
   expect(authorizationMock.ensureAuthorized).toBeCalledWith({
+    actionTypeId: '.cases',
     operation: 'execute',
     additionalPrivileges: ['test/create'],
   });
 });
 
-test('does not authorize non system actions', async () => {
+test('Authorizes all actions for execute', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
@@ -933,7 +939,11 @@ test('does not authorize non system actions', async () => {
 
   await actionExecutor.execute({ ...executeParams, actionId: 'preconfigured' });
 
-  expect(authorizationMock.ensureAuthorized).not.toBeCalled();
+  expect(authorizationMock.ensureAuthorized).toBeCalledWith({
+    actionTypeId: 'test',
+    additionalPrivileges: [],
+    operation: 'execute',
+  });
 });
 
 test('successfully executes as a task', async () => {
