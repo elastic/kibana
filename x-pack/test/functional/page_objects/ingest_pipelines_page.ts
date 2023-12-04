@@ -18,8 +18,13 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       return await testSubjects.getVisibleText('appTitle');
     },
 
-    async emptyStateHeaderText() {
-      return await testSubjects.getVisibleText('title');
+    async navigateToCreateNewPipeline() {
+      await testSubjects.click('createPipelineDropdown');
+      await testSubjects.click('createNewPipeline');
+    },
+
+    async createPipelineFormExists() {
+      return await testSubjects.exists('pipelineForm');
     },
 
     async createNewPipeline({
@@ -35,10 +40,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       processors?: string;
       onFailureProcessors?: string;
     }) {
-      await testSubjects.click('createPipelineDropdown');
-      await testSubjects.click('createNewPipeline');
-
-      await testSubjects.exists('pipelineForm');
+      await this.navigateToCreateNewPipeline();
 
       await testSubjects.setValue('nameField > input', name);
       await testSubjects.setValue('descriptionField > input', description);
@@ -72,11 +74,18 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       return await Promise.all(pipelines.map((pipeline) => getPipelineName(pipeline)));
     },
 
+    async clickPipelineLink(index: number) {
+      const links = await testSubjects.findAll('pipelineDetailsLink');
+      await links.at(index).click();
+    },
+
     async navigateToCreateFromCsv() {
       await testSubjects.click('createPipelineDropdown');
       await testSubjects.click('createPipelineFromCsv');
+    },
 
-      await testSubjects.exists('createFromCsvInstructions');
+    async createPipelineFromCsvExists() {
+      return await testSubjects.exists('createFromCsvInstructions');
     },
 
     async createPipelineFromCsv({ name }: { name: string }) {
@@ -99,6 +108,10 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
 
     async closePipelineDetailsFlyout() {
       await testSubjects.click('euiFlyoutCloseButton');
+    },
+
+    async detailsFlyoutExists() {
+      return await testSubjects.exists('pipelineDetails');
     },
 
     async increasePipelineListPageSize() {
