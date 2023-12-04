@@ -24,7 +24,8 @@ import { getSyntheticsMonitor } from '../../legacy_uptime/lib/requests/get_monit
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR,
-  validate: {
+  validate: {},
+  validation: {
     params: schema.object({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
