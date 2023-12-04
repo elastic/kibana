@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSkeletonText } from '@elastic/eui';
+import {
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSkeletonText,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
 import { SLOWithSummaryResponse, ALL_VALUE } from '@kbn/slo-schema';
 import { EuiFlexGridProps } from '@elastic/eui/src/components/flex/flex_grid';
 import { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
@@ -23,6 +29,25 @@ export interface Props {
   rulesBySlo?: UseFetchRulesForSloResponse['data'];
 }
 
+const useColumns = (cardsPerRow: string | undefined) => {
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
+  const isMedium = useIsWithinBreakpoints(['m']);
+  const isLarge = useIsWithinBreakpoints(['l']);
+
+  const columns = (Number(cardsPerRow) as EuiFlexGridProps['columns']) ?? 3;
+
+  switch (true) {
+    case isMobile:
+      return 1;
+    case isMedium:
+      return columns > 2 ? 2 : columns;
+    case isLarge:
+      return columns > 3 ? 3 : columns;
+    default:
+      return columns;
+  }
+};
+
 export function SloListCardView({
   sloList,
   loading,
@@ -36,12 +61,14 @@ export function SloListCardView({
       list: sloList.map((slo) => ({ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE })),
     });
 
+  const columns = useColumns(cardsPerRow);
+
   if (loading && sloList.length === 0) {
     return <LoadingSloGrid gridSize={Number(cardsPerRow)} />;
   }
 
   return (
-    <EuiFlexGrid columns={Number(cardsPerRow) as EuiFlexGridProps['columns']}>
+    <EuiFlexGrid columns={columns}>
       {sloList.map((slo) => (
         <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? 'ALL_VALUE'}`}>
           <SloCardItem

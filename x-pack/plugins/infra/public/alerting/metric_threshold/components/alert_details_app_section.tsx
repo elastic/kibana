@@ -22,11 +22,8 @@ import {
 import { AlertSummaryField, TopAlert } from '@kbn/observability-plugin/public';
 import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES } from '@kbn/rule-data-utils';
 import { Rule } from '@kbn/alerting-plugin/common';
-import {
-  AlertAnnotation,
-  getPaddedAlertTimeRange,
-  AlertActiveTimeRangeAnnotation,
-} from '@kbn/observability-alert-details';
+import { AlertAnnotation, AlertActiveTimeRangeAnnotation } from '@kbn/observability-alert-details';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { metricValueFormatter } from '../../../../common/alerting/metrics/metric_value_formatter';
 import { TIME_LABELS } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from '../../common/components/threshold';
