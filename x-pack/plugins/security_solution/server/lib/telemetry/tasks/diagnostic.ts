@@ -60,6 +60,10 @@ export function createTelemetryDiagnosticsTaskConfig() {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_ALERTS, processedAlerts);
         }
 
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, true, startTime),
+        ]);
+
         return alertCount;
       } catch (err) {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
