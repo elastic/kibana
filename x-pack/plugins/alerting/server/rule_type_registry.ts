@@ -315,6 +315,7 @@ export class RuleTypeRegistry {
           consumer: schema.maybe(schema.string()),
         }),
         indirectParamsSchema: ruleType.validate.params,
+        latestTypeVersion: this.getLatestRuleVersion(),
       },
     });
 
