@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
+
+import type { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import type {
   ALERT_HOST_CRITICALITY,
   ALERT_USER_CRITICALITY,
 } from '../../../../../field_maps/field_names';
+import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 import type {
   Ancestor890,
   BaseFields890,
-  EqlShellFields890,
   EqlBuildingBlockFields890,
+  EqlShellFields890,
   NewTermsFields890,
 } from '../8.9.0';
 
-/* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.9.0.
-Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.9.0.
+/* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.12.0.
+Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.12.0.
 If you are adding new fields for a new release of Kibana, create a new sibling folder to this one
 for the version to be released and add the field(s) to the schema in that folder.
 Then, update `../index.ts` to import from the new folder that has the latest schemas, add the
@@ -31,6 +33,7 @@ export type { Ancestor890 as Ancestor8120 };
 export interface BaseFields8120 extends BaseFields890 {
   [ALERT_HOST_CRITICALITY]: string;
   [ALERT_USER_CRITICALITY]: string;
+  [ALERT_WORKFLOW_ASSIGNEE_IDS]: string[] | undefined;
 }
 
 export interface WrappedFields8120<T extends BaseFields8120> {
