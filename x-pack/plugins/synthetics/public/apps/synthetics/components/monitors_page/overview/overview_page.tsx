@@ -46,6 +46,8 @@ export const OverviewPage: React.FC = () => {
 
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
 
+  console.log('locations loading', locationsLoading);
+  console.log('locations loaded', locationsLoaded);
   useEffect(() => {
     if (!locationsLoading && !locationsLoaded) {
       dispatch(getServiceLocations());

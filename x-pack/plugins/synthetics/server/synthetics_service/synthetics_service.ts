@@ -80,6 +80,10 @@ export class SyntheticsService {
     this.isAllowed = false;
     this.signupUrl = null;
 
+    // console.log('server.config.service', server.config.service);
+    console.log('has key', !!server.config.service?.tls?.key);
+    console.log('has cert', !!server.config.service?.tls?.certificate);
+    console.log('has manifest url', server.config.service?.manifestUrl);
     this.apiClient = new ServiceAPIClient(server.logger, this.config, this.server);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
@@ -146,6 +150,7 @@ export class SyntheticsService {
 
     try {
       const result = await getServiceLocations(service.server);
+      console.log('get service locations result', result);
       service.throttling = result.throttling;
       service.locations = result.locations;
       service.apiClient.locations = result.locations;

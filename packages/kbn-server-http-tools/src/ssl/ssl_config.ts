@@ -121,8 +121,10 @@ export class SslConfig {
       addCAs(ca);
     } else if (config.key && config.certificate) {
       this.key = readFile(config.key);
+      console.log('key file exists', !!this.key);
       this.keyPassphrase = config.keyPassphrase;
       this.certificate = readFile(config.certificate);
+      console.log('cert file exists', !!this.certificate);
     }
 
     if (config.truststore?.path) {

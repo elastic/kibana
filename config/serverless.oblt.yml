@@ -37,6 +37,10 @@ xpack.observability.createO11yGenericFeatureId: true
 xpack.apm.serverlessOnboarding: true
 
 # Synthetics mTLS cert locations
+xpack.uptime.service.tls.certificate: /mnt/elastic-internal/http-certs/tls.crt
+xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
+xpack.uptime.service.showExperimentalLocations: true
+xpack.uptime.service.manifestUrl: https://manifest.synthetics.foundit.no/v1/manifest.json
 
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['apm', 'observability']

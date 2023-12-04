@@ -28,6 +28,7 @@ export async function getAllLocations({
       getPrivateLocationsAndAgentPolicies(savedObjectsClient, syntheticsMonitorClient),
       getServicePublicLocations(server, syntheticsMonitorClient),
     ]);
+    console.log('internal location state', privateLocations, publicLocations);
     return {
       publicLocations,
       privateLocations,
@@ -47,6 +48,8 @@ const getServicePublicLocations = async (
   server: SyntheticsServerSetup,
   syntheticsMonitorClient: SyntheticsMonitorClient
 ) => {
+  console.log('is allowed', syntheticsMonitorClient.syntheticsService.isAllowed);
+  console.log('synthetics service locations', syntheticsMonitorClient.syntheticsService.locations);
   if (!syntheticsMonitorClient.syntheticsService.isAllowed) {
     return {
       locations: [],
