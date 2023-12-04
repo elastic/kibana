@@ -124,6 +124,34 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
       });
+      it('should return has_all_required false for user without asset criticality index read', async () => {
+        const { body } = await getPrivilegesForUsername('no_asset_criticality_index_read');
+        expect(body.has_all_required).to.eql(false);
+        expect(body.privileges).to.eql({
+          elasticsearch: {
+            index: {
+              '.asset-criticality.asset-criticality-*': {
+                read: false,
+                write: true,
+              },
+            },
+          },
+        });
+      });
+      it('should return has_all_required false for user without asset criticality index write', async () => {
+        const { body } = await getPrivilegesForUsername('no_asset_criticality_index_write');
+        expect(body.has_all_required).to.eql(false);
+        expect(body.privileges).to.eql({
+          elasticsearch: {
+            index: {
+              '.asset-criticality.asset-criticality-*': {
+                read: true,
+                write: false,
+              },
+            },
+          },
+        });
+      });
     });
   });
 };
