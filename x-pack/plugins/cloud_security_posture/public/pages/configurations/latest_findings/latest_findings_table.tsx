@@ -123,7 +123,7 @@ export const LatestFindingsTable = ({
                 passed={passed}
                 failed={failed}
               />
-              <EuiSpacer size="xs" />
+              <EuiSpacer size="m" />
             </>
           )}
           <CloudSecurityDataTable

@@ -9,7 +9,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import _ from 'lodash';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { SLOId, Status, Summary } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
 import { getElastichsearchQueryOrThrow } from './transform_generators';
