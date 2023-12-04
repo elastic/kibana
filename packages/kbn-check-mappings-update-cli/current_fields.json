@@ -966,5 +966,9 @@
     "kuery",
     "serviceEnvironmentFilterEnabled",
     "serviceNameFilterEnabled"
+  ],
+  "cloud-security-posture-settings": [
+    "rules_states",
+    "rules_states.muted"
   ]
 }
