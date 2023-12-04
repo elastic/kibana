@@ -25,25 +25,15 @@ interface Props {
   handleCreateRule: () => void;
 }
 
-const Container = styled.div<{ hasGroupBy: boolean }>`
-  position: absolute;
+const Container = styled.div`
   display: inline-block;
-  top: ${({ hasGroupBy }) => (hasGroupBy ? '55px' : '35px')};
-  left: 7px;
-  z-index: 1;
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
+  margin-top: 5px;
 `;
 
-export function SloCardItemBadges({
-  slo,
-  activeAlerts,
-  rules,
-  handleCreateRule,
-  hasGroupBy,
-}: Props) {
+export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }: Props) {
   return (
-    <Container hasGroupBy={hasGroupBy}>
-      <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center" wrap>
+    <Container>
+      <EuiFlexGroup direction="row" responsive={false} gutterSize="xs" alignItems="center" wrap>
         {!slo.summary ? (
           <LoadingBadges />
         ) : (
