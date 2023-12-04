@@ -33,6 +33,8 @@ export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.sev
 
 export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 
+export const ALERT_DATA_GRID_ROW = `${ALERT_DATA_GRID} .euiDataGridRow`;
+
 export const ALERTS_COUNT = '[data-test-subj="toolbar-alerts-count"]';
 
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
@@ -180,3 +182,36 @@ export const ALERT_RENDERER_HOST_NAME =
   '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
 
 export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hover-actions-container');
+
+export const ALERT_USERS_PROFILES_SELECTABLE_MENU_ITEM = '.euiSelectableListItem';
+export const ALERT_USERS_PROFILES_CLEAR_SEARCH_BUTTON = '[data-test-subj="clearSearchButton"]';
+
+export const ALERT_ASSIGN_CONTEXT_MENU_ITEM =
+  '[data-test-subj="alert-assignees-context-menu-item"]';
+
+export const ALERT_UNASSIGN_CONTEXT_MENU_ITEM =
+  '[data-test-subj="remove-alert-assignees-menu-item"]';
+
+export const ALERT_ASSIGNEES_SELECT_PANEL =
+  '[data-test-subj="securitySolutionAssigneesApplyPanel"]';
+
+export const ALERT_ASSIGNEES_UPDATE_BUTTON =
+  '[data-test-subj="securitySolutionAssigneesApplyButton"]';
+
+export const ALERT_USER_AVATAR = (assignee: string) =>
+  `[data-test-subj="securitySolutionUsersAvatar-${assignee}"][title='${assignee}']`;
+
+export const ALERT_AVATARS_PANEL = '[data-test-subj="securitySolutionUsersAvatarsPanel"]';
+
+export const ALERT_ASIGNEES_COLUMN =
+  '[data-test-subj="dataGridRowCell"][data-gridcell-column-id="kibana.alert.workflow_assignee_ids"]';
+
+export const ALERT_ASSIGNEES_COUNT_BADGE =
+  '[data-test-subj="securitySolutionUsersAvatarsCountBadge"]';
+
+export const FILTER_BY_ASSIGNEES_BUTTON = '[data-test-subj="filter-popover-button-assignees"]';
+
+export const ALERT_DETAILS_ASSIGN_BUTTON =
+  '[data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"]';
+
+export const ALERT_DETAILS_TAKE_ACTION_BUTTON = '[data-test-subj="take-action-dropdown-btn"]';
