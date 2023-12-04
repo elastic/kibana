@@ -14,10 +14,10 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
 import {
+  LogsLocatorParams,
   NodeLogsLocatorParams,
   TraceLogsLocatorParams,
-} from '@kbn/deeplinks-observability';
-import { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+} from '@kbn/logs-shared-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableComparisonByDefault } from '@kbn/observability-plugin/public';
