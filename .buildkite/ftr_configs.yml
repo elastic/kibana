@@ -191,6 +191,7 @@ enabled:
   - x-pack/test/api_integration/apis/es/config.ts
   - x-pack/test/api_integration/apis/features/config.ts
   - x-pack/test/api_integration/apis/file_upload/config.ts
+  - x-pack/test/api_integration/apis/grok_debugger/config.ts
   - x-pack/test/api_integration/apis/kibana/config.ts
   - x-pack/test/api_integration/apis/lists/config.ts
   - x-pack/test/api_integration/apis/logs_ui/config.ts
@@ -362,6 +363,7 @@ enabled:
   - x-pack/test/search_sessions_integration/config.ts
   - x-pack/test/security_api_integration/anonymous_es_anonymous.config.ts
   - x-pack/test/security_api_integration/anonymous.config.ts
+  - x-pack/test/security_api_integration/api_keys.config.ts
   - x-pack/test/security_api_integration/audit.config.ts
   - x-pack/test/security_api_integration/http_bearer.config.ts
   - x-pack/test/security_api_integration/http_no_auth_providers.config.ts
