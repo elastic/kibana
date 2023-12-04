@@ -477,7 +477,8 @@ components:
     apiKeyAuth:
       type: apiKey
       in: header
-      name: ApiKey
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   examples:
     get_data_views_response:
       summary: The get all data views API returns a list of data views.

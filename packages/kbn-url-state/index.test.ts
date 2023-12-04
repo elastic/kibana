@@ -7,8 +7,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useSyncToUrl } from '.';
-import { encode } from '@kbn/rison';
+import { useUrlState } from '.';
 
 describe('useSyncToUrl', () => {
   let originalLocation: Location;
@@ -28,95 +27,70 @@ describe('useSyncToUrl', () => {
     window.history = {
       ...originalHistory,
       replaceState: jest.fn(),
+      pushState: jest.fn(),
     };
+
+    jest.useFakeTimers();
   });
 
   afterEach(() => {
     window.location = originalLocation;
     window.history = originalHistory;
+    jest.useRealTimers();
+  });
+
+  it('should update the URL when the state changes', () => {
+    window.location.hash = '#should_be_there';
+
+    const { result } = renderHook(() => useUrlState('namespace', 'test'));
+
+    act(() => {
+      result.current[1]('foo');
+      jest.runAllTimers();
+    });
+
+    expect(window.history.pushState).toHaveBeenCalledWith(
+      {},
+      '',
+      '#should_be_there?namespace=(test:foo)'
+    );
+  });
+
+  it('should remove the key from the namespace after undefined is passed (state clear mechanism)', () => {
+    window.location.hash = '#should_be_there';
+
+    const { result } = renderHook(() => useUrlState('namespace', 'test'));
+
+    act(() => {
+      result.current[1](undefined);
+      jest.runAllTimers();
+    });
+
+    expect(window.history.pushState).toHaveBeenCalledWith({}, '', '#should_be_there?namespace=()');
   });
 
   it('should restore the value from the query string on mount', () => {
-    const key = 'testKey';
-    const restoredValue = { test: 'value' };
-    const encodedValue = encode(restoredValue);
-    const restore = jest.fn();
+    window.location.search = `?namespace=(test:foo)`;
 
-    window.location.search = `?${key}=${encodedValue}`;
+    const {
+      result: { current: state },
+    } = renderHook(() => useUrlState('namespace', 'test'));
 
-    renderHook(() => useSyncToUrl(key, restore));
-
-    expect(restore).toHaveBeenCalledWith(restoredValue);
+    expect(state[0]).toEqual('foo');
   });
 
-  it('should sync the value to the query string', () => {
-    const key = 'testKey';
-    const valueToSerialize = { test: 'value' };
+  it('should return updated state on browser navigation', () => {
+    window.location.search = '?namespace=(test:foo)';
 
-    const { result } = renderHook(() => useSyncToUrl(key, jest.fn()));
+    const { result } = renderHook(() => useUrlState('namespace', 'test'));
 
-    act(() => {
-      result.current(valueToSerialize);
-    });
-
-    expect(window.history.replaceState).toHaveBeenCalledWith(
-      { path: expect.any(String) },
-      '',
-      '/?testKey=%28test%3Avalue%29'
-    );
-  });
-
-  it('should should not alter the location hash', () => {
-    const key = 'testKey';
-    const valueToSerialize = { test: 'value' };
-    window.location.hash = '#should_be_there';
-
-    const { result } = renderHook(() => useSyncToUrl(key, jest.fn()));
+    expect(result.current[0]).toEqual('foo');
 
     act(() => {
-      result.current(valueToSerialize);
+      window.location.search = '?namespace=(test:bar)';
+      window.dispatchEvent(new CustomEvent('popstate'));
     });
 
-    expect(window.history.replaceState).toHaveBeenCalledWith(
-      { path: expect.any(String) },
-      '',
-      '/#should_be_there?testKey=%28test%3Avalue%29'
-    );
-  });
-
-  it('should clear the value from the query string on unmount', () => {
-    const key = 'testKey';
-
-    // Location should have a key to clear
-    window.location.search = `?${key}=${encode({ test: 'value' })}`;
-
-    const { unmount } = renderHook(() => useSyncToUrl(key, jest.fn()));
-
-    act(() => {
-      unmount();
-    });
-
-    expect(window.history.replaceState).toHaveBeenCalledWith(
-      { path: expect.any(String) },
-      '',
-      expect.any(String)
-    );
-  });
-
-  it('should clear the value from the query string when history back or forward is pressed', () => {
-    const key = 'testKey';
-    const restore = jest.fn();
-
-    // Location should have a key to clear
-    window.location.search = `?${key}=${encode({ test: 'value' })}`;
-
-    renderHook(() => useSyncToUrl(key, restore, true));
-
-    act(() => {
-      window.dispatchEvent(new Event('popstate'));
-    });
-
-    expect(window.history.replaceState).toHaveBeenCalledTimes(1);
-    expect(window.history.replaceState).toHaveBeenCalledWith({ path: expect.any(String) }, '', '/');
+    expect(result.current[0]).toEqual('bar');
   });
 });

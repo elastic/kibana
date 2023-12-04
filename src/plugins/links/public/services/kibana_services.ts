@@ -8,12 +8,13 @@
 
 import { BehaviorSubject } from 'rxjs';
 
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
+import { CONTENT_ID } from '../../common';
 import { LinksStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
@@ -21,6 +22,11 @@ export let dashboardServices: DashboardStart;
 export let embeddableService: EmbeddableStart;
 export let presentationUtil: PresentationUtilPluginStart;
 export let contentManagement: ContentManagementPublicStart;
+export let trackUiMetric: (
+  type: string,
+  eventNames: string | string[],
+  count?: number
+) => void | undefined;
 
 const servicesReady$ = new BehaviorSubject(false);
 
@@ -42,6 +48,8 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: LinksStartDepende
   embeddableService = deps.embeddable;
   presentationUtil = deps.presentationUtil;
   contentManagement = deps.contentManagement;
+  if (deps.usageCollection)
+    trackUiMetric = deps.usageCollection.reportUiCounter.bind(deps.usageCollection, CONTENT_ID);
 
   servicesReady$.next(true);
 };

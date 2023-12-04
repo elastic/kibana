@@ -9,7 +9,7 @@ import moment from 'moment';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TelemetryEventsSender } from '../sender';
-import type { TelemetryReceiver } from '../receiver';
+import type { ITelemetryReceiver, TelemetryReceiver } from '../receiver';
 import type { SecurityTelemetryTaskConfig } from '../task';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } from './timeline';
@@ -71,7 +71,7 @@ export const stubLicenseInfo: ESLicense = {
 export const createMockTelemetryReceiver = (
   diagnosticsAlert?: unknown,
   emptyTimelineTree?: boolean
-): jest.Mocked<TelemetryReceiver> => {
+): jest.Mocked<ITelemetryReceiver> => {
   const processTreeResponse = emptyTimelineTree
     ? Promise.resolve([])
     : Promise.resolve(Promise.resolve(stubProcessTree()));
@@ -82,18 +82,18 @@ export const createMockTelemetryReceiver = (
     fetchLicenseInfo: jest.fn().mockReturnValue(stubLicenseInfo),
     copyLicenseFields: jest.fn(),
     fetchFleetAgents: jest.fn(),
-    fetchDiagnosticAlerts: jest.fn().mockReturnValue(diagnosticsAlert ?? jest.fn()),
+    openPointInTime: jest.fn().mockReturnValue(Promise.resolve('test-pit-id')),
+    getAlertsIndex: jest.fn().mockReturnValue('alerts-*'),
+    fetchDiagnosticAlertsBatch: jest.fn().mockReturnValue(diagnosticsAlert ?? jest.fn()),
     fetchEndpointMetrics: jest.fn().mockReturnValue(stubEndpointMetricsResponse),
     fetchEndpointPolicyResponses: jest.fn(),
-    fetchPrebuiltRuleAlerts: jest.fn().mockReturnValue(prebuiltRuleAlertsResponse),
+    fetchPrebuiltRuleAlertsBatch: jest.fn().mockReturnValue(prebuiltRuleAlertsResponse),
     fetchDetectionRulesPackageVersion: jest.fn(),
     fetchTrustedApplications: jest.fn(),
     fetchEndpointList: jest.fn(),
     fetchDetectionRules: jest.fn().mockReturnValue({ body: null }),
     fetchEndpointMetadata: jest.fn(),
-    fetchTimelineEndpointAlerts: jest
-      .fn()
-      .mockReturnValue(Promise.resolve(stubEndpointAlertResponse())),
+    fetchTimelineAlerts: jest.fn().mockReturnValue(Promise.resolve(stubEndpointAlertResponse())),
     buildProcessTree: jest.fn().mockReturnValue(processTreeResponse),
     fetchTimelineEvents: jest.fn().mockReturnValue(Promise.resolve(stubFetchTimelineEvents())),
     fetchValueListMetaData: jest.fn(),

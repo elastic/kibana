@@ -15,7 +15,7 @@ import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
-} from '../../../assets/constants';
+} from '../../../../common/slo/constants';
 import { KQLCustomIndicator, SLO } from '../../../domain/models';
 
 export class KQLCustomTransformGenerator extends TransformGenerator {

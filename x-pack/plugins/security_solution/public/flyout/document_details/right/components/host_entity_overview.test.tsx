@@ -21,8 +21,9 @@ import {
 import { RightPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
-import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 
 const hostName = 'host';
@@ -42,7 +43,7 @@ const panelContextValue = {
 
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
-} as unknown as ExpandableFlyoutContext;
+} as unknown as ExpandableFlyoutContextValue;
 
 const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../../common/containers/use_global_time', () => {
@@ -160,7 +161,7 @@ describe('<HostEntityContent />', () => {
 
       getByTestId(ENTITIES_HOST_OVERVIEW_LINK_TEST_ID).click();
       expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
-        id: LeftPanelKey,
+        id: DocumentDetailsLeftPanelKey,
         path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
         params: {
           id: panelContextValue.eventId,

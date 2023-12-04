@@ -10,11 +10,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { AgentIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ValuesType } from 'utility-types';
-import { AgentIcon } from '../../../shared/agent_icon';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
@@ -93,7 +93,7 @@ export function ServiceListPreview({ items, isLoading }: Props) {
           content={
             <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
-                <AgentIcon agentName={agentName} />
+                <AgentIcon agentName={agentName} size="l" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>{serviceName}</EuiFlexItem>
             </EuiFlexGroup>
