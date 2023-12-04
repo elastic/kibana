@@ -7,25 +7,21 @@
 
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import {
-  GetServiceAssetsQueryOptions,
-  getServiceAssetsQueryOptionsRT,
-} from '../../../common/types_api';
+import { GetAssetsQueryOptions, getAssetsQueryOptionsRT } from '../../../common/types_api';
 import { debug } from '../../../common/debug_log';
 import { SetupRouteOptions } from '../types';
 import * as routePaths from '../../../common/constants_routes';
 import { getClientsFromContext, validateStringAssetFilters } from '../utils';
 import { AssetsValidationError } from '../../lib/validators/validation_error';
 
-export function servicesRoutes<T extends RequestHandlerContext>({
+export function assetsRoutes<T extends RequestHandlerContext>({
   router,
   assetClient,
 }: SetupRouteOptions<T>) {
-  const validate = createRouteValidationFunction(getServiceAssetsQueryOptionsRT);
-  // GET /assets/services
-  router.get<unknown, GetServiceAssetsQueryOptions, unknown>(
+  const validate = createRouteValidationFunction(getAssetsQueryOptionsRT);
+  router.get<unknown, GetAssetsQueryOptions, unknown>(
     {
-      path: routePaths.GET_SERVICES,
+      path: routePaths.GET_ASSETS,
       validate: {
         query: (q, res) => {
           const [invalidResponse, validatedFilters] = validateStringAssetFilters(q, res);
@@ -42,8 +38,9 @@ export function servicesRoutes<T extends RequestHandlerContext>({
     async (context, req, res) => {
       const { from = 'now-24h', to = 'now', filters } = req.query || {};
       const { elasticsearchClient, savedObjectsClient } = await getClientsFromContext(context);
+
       try {
-        const response = await assetClient.getServices({
+        const response = await assetClient.getAssets({
           from,
           to,
           filters,
@@ -53,20 +50,19 @@ export function servicesRoutes<T extends RequestHandlerContext>({
 
         return res.ok({ body: response });
       } catch (error: unknown) {
-        debug('Error while looking up SERVICE asset records', error);
+        debug('Error while looking up asset records', error);
 
         if (error instanceof AssetsValidationError) {
           return res.customError({
             statusCode: error.statusCode,
             body: {
-              message: `Error while looking up service asset records - ${error.message}`,
+              message: `Error while looking up asset records - ${error.message}`,
             },
           });
         }
-
         return res.customError({
           statusCode: 500,
-          body: { message: 'Error while looking up service asset records - ' + `${error}` },
+          body: { message: 'Error while looking up asset records - ' + `${error}` },
         });
       }
     }
