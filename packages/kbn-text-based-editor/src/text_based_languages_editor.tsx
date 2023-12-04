@@ -381,7 +381,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       if (code === codeWhenSubmitted) {
         if (serverErrors || serverWarning) {
           const parsedErrors = parseErrors(serverErrors || [], code);
-          const parsedWarning = parseWarning(serverWarning || '');
+          const parsedWarning = serverWarning ? parseWarning(serverWarning) : [];
           setEditorMessages({
             errors: parsedErrors,
             warnings: parsedErrors.length ? [] : parsedWarning,
