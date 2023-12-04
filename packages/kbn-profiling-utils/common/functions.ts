@@ -30,11 +30,21 @@ interface TopNFunctionAndFrameGroup {
   FrameGroupID: FrameGroupID;
   CountExclusive: number;
   CountInclusive: number;
+  selfAnnualCO2kgs: number;
+  selfAnnualCostUSD: number;
+  totalAnnualCO2kgs: number;
+  totalAnnualCostUSD: number;
 }
 
 type TopNFunction = Pick<
   TopNFunctionAndFrameGroup,
-  'Frame' | 'CountExclusive' | 'CountInclusive'
+  | 'Frame'
+  | 'CountExclusive'
+  | 'CountInclusive'
+  | 'selfAnnualCO2kgs'
+  | 'selfAnnualCostUSD'
+  | 'totalAnnualCO2kgs'
+  | 'totalAnnualCostUSD'
 > & {
   Id: string;
   Rank: number;
@@ -46,6 +56,8 @@ export interface TopNFunctions {
   SamplingRate: number;
   selfCPU: number;
   totalCPU: number;
+  totalAnnualCO2Kgs: number;
+  totalAnnualCostUSD: number;
 }
 
 export function createTopNFunctions({
@@ -84,6 +96,9 @@ export function createTopNFunctions({
     // It is possible that we do not have a stacktrace for an event,
     // e.g. when stopping the host agent or on network errors.
     const stackTrace = stackTraces.get(stackTraceID) ?? emptyStackTrace;
+    const selfAnnualCO2kgs = stackTrace.selfAnnualCO2Kgs;
+    const selfAnnualCostUSD = stackTrace.selfAnnualCostUSD;
+
     const lenStackTrace = stackTrace.FrameIDs.length;
 
     for (let i = 0; i < lenStackTrace; i++) {
@@ -122,6 +137,10 @@ export function createTopNFunctions({
           FrameGroupID: frameGroupID,
           CountExclusive: 0,
           CountInclusive: 0,
+          selfAnnualCO2kgs: 0,
+          totalAnnualCO2kgs: 0,
+          selfAnnualCostUSD: 0,
+          totalAnnualCostUSD: 0,
         };
 
         topNFunctions.set(frameGroupID, topNFunction);
@@ -130,11 +149,15 @@ export function createTopNFunctions({
       if (!uniqueFrameGroupsPerEvent.has(frameGroupID)) {
         uniqueFrameGroupsPerEvent.add(frameGroupID);
         topNFunction.CountInclusive += scaledCount;
+        topNFunction.totalAnnualCO2kgs += selfAnnualCO2kgs;
+        topNFunction.totalAnnualCostUSD += selfAnnualCostUSD;
       }
 
       if (i === lenStackTrace - 1) {
         // Leaf frame: sum up counts for exclusive CPU.
         topNFunction.CountExclusive += scaledCount;
+        topNFunction.selfAnnualCO2kgs += selfAnnualCO2kgs;
+        topNFunction.selfAnnualCostUSD += selfAnnualCostUSD;
       }
     }
   }
@@ -161,21 +184,29 @@ export function createTopNFunctions({
     endIndex = topN.length;
   }
 
-  const framesAndCountsAndIds = topN.slice(startIndex, endIndex).map((frameAndCount, i) => {
-    const countExclusive = frameAndCount.CountExclusive;
-    const countInclusive = frameAndCount.CountInclusive;
+  const framesAndCountsAndIds = topN
+    .slice(startIndex, endIndex)
+    .map((frameAndCount, i): TopNFunction => {
+      const countExclusive = frameAndCount.CountExclusive;
+      const countInclusive = frameAndCount.CountInclusive;
 
-    return {
-      Rank: i + 1,
-      Frame: frameAndCount.Frame,
-      CountExclusive: countExclusive,
-      CountInclusive: countInclusive,
-      Id: frameAndCount.FrameGroupID,
-    };
-  });
+      return {
+        Rank: i + 1,
+        Frame: frameAndCount.Frame,
+        CountExclusive: countExclusive,
+        CountInclusive: countInclusive,
+        Id: frameAndCount.FrameGroupID,
+        selfAnnualCO2kgs: frameAndCount.selfAnnualCO2kgs,
+        selfAnnualCostUSD: frameAndCount.selfAnnualCostUSD,
+        totalAnnualCO2kgs: frameAndCount.totalAnnualCO2kgs,
+        totalAnnualCostUSD: frameAndCount.totalAnnualCostUSD,
+      };
+    });
 
   const sumSelfCPU = sumBy(framesAndCountsAndIds, 'CountExclusive');
   const sumTotalCPU = sumBy(framesAndCountsAndIds, 'CountInclusive');
+  const totalAnnualCO2Kgs = sumBy(framesAndCountsAndIds, 'totalAnnualCO2kgs');
+  const totalAnnualCostUSD = sumBy(framesAndCountsAndIds, 'totalAnnualCostUSD');
 
   return {
     TotalCount: totalCount,
@@ -183,6 +214,8 @@ export function createTopNFunctions({
     SamplingRate: samplingRate,
     selfCPU: sumSelfCPU,
     totalCPU: sumTotalCPU,
+    totalAnnualCO2Kgs,
+    totalAnnualCostUSD,
   };
 }
 
