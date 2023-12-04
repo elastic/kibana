@@ -879,13 +879,11 @@ describe('CasesTableFilters ', () => {
 
     appMockRender.render(<CasesTableFilters {...overrideProps} />);
 
-    const loadStatusButton = screen.findByRole('button', { name: 'Status' });
-    const statusButton = await loadStatusButton;
+    const statusButton = await screen.findByRole('button', { name: 'Status' });
     expect(statusButton).toBeInTheDocument();
     expect(within(statusButton).getByLabelText('2 active filters')).toBeInTheDocument();
 
-    const loadSeverityButton = screen.findByRole('button', { name: 'Severity' });
-    const severityButton = await loadSeverityButton;
+    const severityButton = await screen.findByRole('button', { name: 'Severity' });
     expect(severityButton).toBeInTheDocument();
     expect(within(severityButton).getByLabelText('1 active filters')).toBeInTheDocument();
   });
