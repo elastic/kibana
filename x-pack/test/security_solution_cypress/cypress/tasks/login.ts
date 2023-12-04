@@ -21,31 +21,27 @@ export interface User {
   password: string;
 }
 
-export const defaultUser: User = {
-  username: Cypress.env(ELASTICSEARCH_USERNAME),
-  password: Cypress.env(ELASTICSEARCH_PASSWORD),
-};
-
-export const getEnvAuth = (role: SecurityRoleName): User => {
-  if (
-    (Cypress.env(IS_SERVERLESS) || Cypress.env(CLOUD_SERVERLESS)) &&
-    !(role in KNOWN_SERVERLESS_ROLE_DEFINITIONS)
-  ) {
-    throw new Error(`An attempt to log in with unsupported by Serverless role "${role}".`);
-  }
+export const getEnvAuth = (role?: SecurityRoleName): User => {
   const user: User = {
-    username: role,
-    password: 'changeme',
+    username: Cypress.env(ELASTICSEARCH_USERNAME),
+    password: Cypress.env(ELASTICSEARCH_PASSWORD),
   };
+
+  if (role) {
+    if (
+      (Cypress.env(IS_SERVERLESS) || Cypress.env(CLOUD_SERVERLESS)) &&
+      !(role in KNOWN_SERVERLESS_ROLE_DEFINITIONS)
+    ) {
+      throw new Error(`An attempt to log in with unsupported by Serverless role "${role}".`);
+    }
+    user.username = role;
+    user.password = 'changeme';
+  }
   return user;
 };
 
-export const login = (user: User = defaultUser, role?: SecurityRoleName): void => {
-  let testUser = user;
-
-  if (role) {
-    testUser = getEnvAuth(role);
-  }
+export const login = (role?: SecurityRoleName, testUser?: User): void => {
+  const user = testUser ? testUser : getEnvAuth(role);
 
   const baseUrl = Cypress.config().baseUrl;
   if (!baseUrl) {
@@ -67,7 +63,7 @@ export const login = (user: User = defaultUser, role?: SecurityRoleName): void =
         providerType: basicProvider?.type,
         providerName: basicProvider?.name,
         currentURL: '/',
-        params: { username: testUser.username, password: testUser.password },
+        params: { username: user.username, password: user.password },
       },
       headers: API_HEADERS,
     });

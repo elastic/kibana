@@ -65,8 +65,6 @@ describe('Cases privileges', { tags: ['@ess'] }, () => {
 
   for (const user of [secAllUser, secReadCasesAllUser, secAllCasesNoDeleteUser]) {
     it(`User ${user.username} with role(s) ${user.roles.join()} can create a case`, () => {
-      cy.log('asdfasdfasdf');
-      cy.log(user);
       login(user);
       visit(CASES_URL);
       goToCreateNewCase();
