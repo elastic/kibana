@@ -8,6 +8,8 @@
 import expect from '@kbn/expect';
 import semver from 'semver';
 import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import moment from 'moment';
+
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry, generateAgent, makeSnapshotVersion } from '../../helpers';
@@ -1500,8 +1502,10 @@ export default function (providerContext: FtrProviderContext) {
         );
         // calculate 1 month from now
         const today = new Date();
-        const nextMonthUnixTime = today.setMonth(today.getMonth() + 1);
-        const nextMonth = new Date(nextMonthUnixTime).toISOString().slice(0, 10);
+        const todayMoment = moment(today).startOf('day');
+
+        const ONE_MONTH_IN_MS = 2592000000;
+        const nextMonth = todayMoment.clone().add(ONE_MONTH_IN_MS, 'ms').format('YYYY-MM-DD');
 
         expect(action.expiration).contain(`${nextMonth}`);
         expect(action.agents).contain('agent1');

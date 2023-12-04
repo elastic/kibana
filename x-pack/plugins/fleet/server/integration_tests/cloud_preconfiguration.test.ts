@@ -61,7 +61,6 @@ describe('Fleet cloud preconfiguration', () => {
               ...kbnConfig.xpack.fleet,
               registryUrl,
             },
-            c,
           },
           logging: {
             appenders: {

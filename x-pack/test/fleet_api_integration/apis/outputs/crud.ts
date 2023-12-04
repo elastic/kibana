@@ -582,6 +582,7 @@ export default function (providerContext: FtrProviderContext) {
           hosts: ['https://test.fr:443'],
           is_default: true,
           is_default_monitoring: false,
+          preset: 'balanced',
         });
       });
 
