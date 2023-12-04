@@ -40,6 +40,7 @@
     "@kbn/share-plugin",
     "@kbn/safer-lodash-set",
     "@kbn/alerting-state-types",
+    "@kbn/alerting-types",
     "@kbn/alerts-as-data-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/rrule",
@@ -60,7 +61,9 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-application-common",
-    "@kbn/core-saved-objects-api-server"
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/alerts-ui-shared",
+    "@kbn/core-http-browser"
   ],
   "exclude": ["target/**/*"]
 }

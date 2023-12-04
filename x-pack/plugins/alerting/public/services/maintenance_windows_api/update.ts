@@ -13,21 +13,25 @@ import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../common';
 const rewriteBodyRequest: RewriteResponseCase<MaintenanceWindow> = ({
   rRule,
   categoryIds,
+  scopedQuery,
   ...res
 }) => ({
   ...res,
   r_rule: rRule,
   category_ids: categoryIds,
+  scoped_query: scopedQuery,
 });
 
 const rewriteBodyRes: RewriteRequestCase<MaintenanceWindow> = ({
   r_rule: rRule,
   category_ids: categoryIds,
+  scoped_query: scopedQuery,
   ...rest
 }) => ({
   ...rest,
   rRule,
   categoryIds,
+  scopedQuery,
 });
 
 export async function updateMaintenanceWindow({

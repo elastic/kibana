@@ -22,7 +22,7 @@ import {
   EuiToolTip,
   EuiSelectableOption,
 } from '@elastic/eui';
-import { ActionVariable } from '@kbn/alerting-plugin/common';
+import type { ActionVariable } from '@kbn/alerting-types';
 import './add_message_variables.scss';
 import { TruncatedText } from './truncated_text';
 import * as i18n from './translations';
