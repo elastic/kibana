@@ -126,7 +126,7 @@ describe.skip(
 
         cy.getByTestSubj('euiFlyoutCloseButton').click();
 
-        recurse(
+        recurse<string>(
           () => {
             openAlertDetailsView();
             return cy.getByTestSubj('isolate-host-action-item').invoke('text');
