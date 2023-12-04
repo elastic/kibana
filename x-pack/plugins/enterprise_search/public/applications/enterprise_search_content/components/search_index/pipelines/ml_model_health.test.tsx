@@ -13,6 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiHealth } from '@elastic/eui';
 
+import { MlModelDeploymentState } from '../../../../../../common/types/ml';
 import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 
 import { TrainedModelHealth } from './ml_model_health';
@@ -30,6 +31,18 @@ describe('TrainedModelHealth', () => {
     pipelineReferences: [],
     types: ['pytorch'],
   };
+  it('renders model downloading', () => {
+    const wrapper = shallow(<TrainedModelHealth modelState={MlModelDeploymentState.Downloading} />);
+    const health = wrapper.find(EuiHealth);
+    expect(health.prop('children')).toEqual('Downloading');
+    expect(health.prop('color')).toEqual('warning');
+  });
+  it('renders model downloaded', () => {
+    const wrapper = shallow(<TrainedModelHealth modelState={MlModelDeploymentState.Downloaded} />);
+    const health = wrapper.find(EuiHealth);
+    expect(health.prop('children')).toEqual('Downloaded');
+    expect(health.prop('color')).toEqual('subdued');
+  });
   it('renders model started', () => {
     const pipeline: InferencePipeline = {
       ...commonModelData,

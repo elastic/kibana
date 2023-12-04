@@ -26,9 +26,6 @@ describe(
   'Entity analytics management page - Risk Engine Privileges Callout',
   {
     tags: ['@ess'],
-    env: {
-      ftrConfig: { enableExperimental: ['riskEnginePrivilegesRouteEnabled'] },
-    },
   },
   () => {
     it('should not show the callout for superuser', () => {

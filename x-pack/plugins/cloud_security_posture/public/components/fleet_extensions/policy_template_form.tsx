@@ -48,6 +48,7 @@ import {
   type NewPackagePolicyPostureInput,
   isPostureInput,
   getMaxPackageName,
+  isBelowMinVersion,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -138,19 +139,23 @@ const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps
   },
 ];
 
-const getAzureAccountTypeOptions = (): CspRadioGroupProps['options'] => [
+const getAzureAccountTypeOptions = (
+  isAzureOrganizationDisabled: boolean
+): CspRadioGroupProps['options'] => [
   {
     id: AZURE_ORGANIZATION_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.azureAccountType.azureOrganizationLabel', {
       defaultMessage: 'Azure Organization',
     }),
-    disabled: true,
-    tooltip: i18n.translate(
-      'xpack.csp.fleetIntegration.azureAccountType.azureOrganizationDisabledTooltip',
-      {
-        defaultMessage: 'Coming Soon',
-      }
-    ),
+    disabled: isAzureOrganizationDisabled,
+    tooltip: isAzureOrganizationDisabled
+      ? i18n.translate(
+          'xpack.csp.fleetIntegration.azureAccountType.azureOrganizationDisabledTooltip',
+          {
+            defaultMessage: 'Coming Soon',
+          }
+        )
+      : undefined,
   },
   {
     id: AZURE_SINGLE_ACCOUNT,
@@ -409,18 +414,26 @@ const getAzureAccountType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>
 ): AzureAccountType | undefined => input.streams[0].vars?.['azure.account_type']?.value;
 
+const AZURE_ORG_MINIMUM_PACKAGE_VERSION = '1.7.0';
+
 const AzureAccountTypeSelect = ({
   input,
   newPolicy,
   updatePolicy,
   disabled,
+  packageInfo,
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   disabled: boolean;
+  packageInfo: PackageInfo;
 }) => {
-  const azureAccountTypeOptions = getAzureAccountTypeOptions();
+  const isAzureOrganizationDisabled = isBelowMinVersion(
+    packageInfo.version,
+    AZURE_ORG_MINIMUM_PACKAGE_VERSION
+  );
+  const azureAccountTypeOptions = getAzureAccountTypeOptions(isAzureOrganizationDisabled);
 
   useEffect(() => {
     if (!getAzureAccountType(input)) {
@@ -697,6 +710,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             input={input}
             newPolicy={newPolicy}
             updatePolicy={updatePolicy}
+            packageInfo={packageInfo}
             disabled={isEditPage}
           />
         )}

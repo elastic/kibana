@@ -33,7 +33,9 @@ const defaultConfig = {
 export default function bedrockTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const configService = getService('config');
+  const retry = getService('retry');
   const createConnector = async (apiUrl: string, spaceId?: string) => {
     const result = await supertest
       .post(`${getUrlPrefix(spaceId ?? 'default')}/api/actions/connector`)
@@ -443,6 +445,68 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 const parsed = parseBedrockBuffer(responseBuffer);
                 expect(parsed).to.eql('Hello world, what a unique string!');
                 resolve();
+              });
+            });
+          });
+
+          describe('Token tracking dashboard', () => {
+            const dashboardId = 'specific-dashboard-id-default';
+
+            it('should not create a dashboard when user does not have kibana event log permissions', async () => {
+              const { body } = await supertestWithoutAuth
+                .post(`/api/actions/connector/${bedrockActionId}/_execute`)
+                .auth('global_read', 'global_read-password')
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'getDashboard',
+                    subActionParams: {
+                      dashboardId,
+                    },
+                  },
+                })
+                .expect(200);
+
+              // check dashboard has not been created
+              await supertest
+                .get(`/api/saved_objects/dashboard/${dashboardId}`)
+                .set('kbn-xsrf', 'foo')
+                .expect(404);
+              expect(body).to.eql({
+                status: 'ok',
+                connector_id: bedrockActionId,
+                data: { available: false },
+              });
+            });
+
+            it('should create a dashboard when user has correct permissions', async () => {
+              const { body } = await supertest
+                .post(`/api/actions/connector/${bedrockActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'getDashboard',
+                    subActionParams: {
+                      dashboardId,
+                    },
+                  },
+                })
+                .expect(200);
+
+              // check dashboard has been created
+              await retry.try(async () =>
+                supertest
+                  .get(`/api/saved_objects/dashboard/${dashboardId}`)
+                  .set('kbn-xsrf', 'foo')
+                  .expect(200)
+              );
+
+              objectRemover.add('default', dashboardId, 'dashboard', 'saved_objects');
+
+              expect(body).to.eql({
+                status: 'ok',
+                connector_id: bedrockActionId,
+                data: { available: true },
               });
             });
           });

@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { profilingUseLegacyFlamegraphAPI } from '@kbn/observability-plugin/common';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
@@ -34,18 +33,17 @@ export function registerFlameChartSearchRoute({
     },
     async (context, request, response) => {
       const { timeFrom, timeTo, kuery } = request.query;
-      const useLegacyFlamegraphAPI = await (
-        await context.core
-      ).uiSettings.client.get<boolean>(profilingUseLegacyFlamegraphAPI);
+
+      const core = await context.core;
 
       try {
         const esClient = await getClient(context);
         const flamegraph = await profilingDataAccess.services.fetchFlamechartData({
+          core,
           esClient,
           rangeFromMs: timeFrom,
           rangeToMs: timeTo,
           kuery,
-          useLegacyFlamegraphAPI,
         });
 
         return response.ok({ body: flamegraph });
