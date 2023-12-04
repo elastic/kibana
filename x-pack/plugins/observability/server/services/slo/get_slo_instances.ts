@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ALL_VALUE, GetSLOInstancesResponse } from '@kbn/slo-schema';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { SLORepository } from './slo_repository';
 
 export class GetSLOInstances {
