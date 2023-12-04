@@ -501,6 +501,28 @@ describe('<IndexDetailsPage />', () => {
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
       });
     });
+
+    it('renders the content set via the extensions service', async () => {
+      const mappingsContent = 'test mappings extension';
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: {
+              extensionsService: {
+                _indexMappingsContent: {
+                  renderContent: () => mappingsContent,
+                },
+              },
+            },
+          },
+        });
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      const content = testBed.actions.getActiveTabContent();
+      expect(content).toContain(mappingsContent);
+    });
   });
 
   describe('Settings tab', () => {

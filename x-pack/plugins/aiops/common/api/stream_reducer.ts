@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
+import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 import { API_ACTION_NAME, AiopsLogRateAnalysisApiAction } from './log_rate_analysis/actions';
 
 interface StreamState {
   ccsWarning: boolean;
-  significantItems: SignificantTerm[];
-  significantItemsGroups: SignificantTermGroup[];
+  significantItems: SignificantItem[];
+  significantItemsGroups: SignificantItemGroup[];
   errors: string[];
   loaded: number;
   loadingState: string;
   remainingFieldCandidates?: string[];
   groupsMissing?: boolean;
+  zeroDocsFallback: boolean;
 }
 
 export const initialState: StreamState = {
@@ -27,6 +28,7 @@ export const initialState: StreamState = {
   errors: [],
   loaded: 0,
   loadingState: '',
+  zeroDocsFallback: false,
 };
 
 export function streamReducer(
@@ -72,6 +74,8 @@ export function streamReducer(
       return initialState;
     case API_ACTION_NAME.UPDATE_LOADING_STATE:
       return { ...state, ...action.payload };
+    case API_ACTION_NAME.SET_ZERO_DOCS_FALLBACK:
+      return { ...state, zeroDocsFallback: action.payload };
     default:
       return state;
   }

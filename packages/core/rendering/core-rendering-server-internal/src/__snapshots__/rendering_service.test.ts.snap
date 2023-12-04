@@ -3,6 +3,7 @@
 exports[`RenderingService preboot() render() renders "core" CDN url injected 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "http://foo.bar:1773",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -70,6 +71,7 @@ Object {
 exports[`RenderingService preboot() render() renders "core" page 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -133,6 +135,7 @@ Object {
 exports[`RenderingService preboot() render() renders "core" page driven by settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -200,6 +203,7 @@ Object {
 exports[`RenderingService preboot() render() renders "core" page for blank basepath 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "/mock-server-basepath",
   "basePath": "",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -263,6 +267,7 @@ Object {
 exports[`RenderingService preboot() render() renders "core" page for unauthenticated requests 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -326,6 +331,7 @@ Object {
 exports[`RenderingService preboot() render() renders "core" page with global settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -393,6 +399,7 @@ Object {
 exports[`RenderingService preboot() render() renders "core" with excluded global user settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -456,6 +463,7 @@ Object {
 exports[`RenderingService preboot() render() renders "core" with excluded user settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -519,6 +527,7 @@ Object {
 exports[`RenderingService setup() render() renders "core" CDN url injected 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -591,6 +600,7 @@ Object {
 exports[`RenderingService setup() render() renders "core" page 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -654,6 +664,7 @@ Object {
 exports[`RenderingService setup() render() renders "core" page driven by settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -726,6 +737,7 @@ Object {
 exports[`RenderingService setup() render() renders "core" page for blank basepath 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "/mock-server-basepath",
   "basePath": "",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -794,6 +806,7 @@ Object {
 exports[`RenderingService setup() render() renders "core" page for unauthenticated requests 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -857,6 +870,7 @@ Object {
 exports[`RenderingService setup() render() renders "core" page with global settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -929,6 +943,7 @@ Object {
 exports[`RenderingService setup() render() renders "core" with excluded global user settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -997,6 +1012,7 @@ Object {
 exports[`RenderingService setup() render() renders "core" with excluded user settings 1`] = `
 Object {
   "anonymousStatusPage": false,
+  "assetsHrefBase": "/mock-server-basepath",
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,

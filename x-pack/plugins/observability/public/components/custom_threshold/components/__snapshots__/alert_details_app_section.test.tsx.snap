@@ -22,8 +22,13 @@ Array [
       "title": "unknown-index",
     },
     "expression": Object {
-      "aggType": "count",
       "comparator": ">",
+      "metrics": Array [
+        Object {
+          "aggType": "count",
+          "name": "A",
+        },
+      ],
       "threshold": Array [
         2000,
       ],

@@ -10,14 +10,14 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic
 import { localizedDate } from '../../../../common/formatters/datetime';
 
 interface LogDateRowProps {
-  timestamp: number;
+  time: string;
 }
 
 /**
  * Show a row with the date in the log stream
  */
-export const LogDateRow: React.FC<LogDateRowProps> = ({ timestamp }) => {
-  const formattedDate = localizedDate(timestamp);
+export const LogDateRow: React.FC<LogDateRowProps> = ({ time }) => {
+  const formattedDate = localizedDate(new Date(time));
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">

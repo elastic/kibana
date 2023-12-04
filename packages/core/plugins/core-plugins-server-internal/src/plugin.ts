@@ -87,6 +87,10 @@ export class PluginWrapper<
     this.includesUiPlugin = params.manifest.ui;
   }
 
+  public async init() {
+    this.instance = await this.createPluginInstance();
+  }
+
   /**
    * Instantiates plugin and calls `setup` function exposed by the plugin initializer.
    * @param setupContext Context that consists of various core services tailored specifically
@@ -98,7 +102,9 @@ export class PluginWrapper<
     setupContext: CoreSetup<TPluginsStart> | CorePreboot,
     plugins: TPluginsSetup
   ): TSetup | Promise<TSetup> {
-    this.instance = this.createPluginInstance();
+    if (!this.instance) {
+      throw new Error('The plugin is not initialized. Call the init method first.');
+    }
 
     if (this.isPrebootPluginInstance(this.instance)) {
       return this.instance.setup(setupContext as CorePreboot, plugins);
@@ -170,7 +176,7 @@ export class PluginWrapper<
     return configDescriptor;
   }
 
-  private createPluginInstance() {
+  private async createPluginInstance() {
     this.log.debug('Initializing plugin');
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -186,7 +192,7 @@ export class PluginWrapper<
       throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
     }
 
-    const instance = initializer(this.initializerContext);
+    const instance = await initializer(this.initializerContext);
     if (!instance || typeof instance !== 'object') {
       throw new Error(
         `Initializer for plugin "${

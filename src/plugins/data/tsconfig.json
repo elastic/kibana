@@ -48,7 +48,8 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/data-service",
     "@kbn/react-kibana-context-render",
-    "@kbn/search-response-warnings"
+    "@kbn/search-response-warnings",
+    "@kbn/shared-ux-link-redirect-app"
   ],
   "exclude": [
     "target/**/*",

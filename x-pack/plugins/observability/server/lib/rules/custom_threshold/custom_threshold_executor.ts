@@ -6,6 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
+import { LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import {
   ALERT_ACTION_GROUP,
   ALERT_EVALUATION_VALUES,
@@ -17,6 +18,7 @@ import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
+import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { ObservabilityConfig } from '../../..';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
 import {
@@ -43,21 +45,26 @@ import {
   getFormattedGroupBy,
 } from './utils';
 
-import { formatAlertResult } from './lib/format_alert_result';
+import { formatAlertResult, getLabel } from './lib/format_alert_result';
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
 
+export interface CustomThresholdLocators {
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
+  logExplorerLocator?: LocatorPublic<LogExplorerLocatorParams>;
+}
+
 export const createCustomThresholdExecutor = ({
-  alertsLocator,
   basePath,
   logger,
   config,
+  locators: { alertsLocator, logExplorerLocator },
 }: {
   basePath: IBasePath;
   logger: Logger;
   config: ObservabilityConfig;
-  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
+  locators: CustomThresholdLocators;
 }): LifecycleRuleExecutor<
   CustomThresholdRuleParams,
   CustomThresholdRuleTypeState,
@@ -86,7 +93,6 @@ export const createCustomThresholdExecutor = ({
       executionId,
     });
 
-    // TODO: check if we need to use "savedObjectsClient"=> https://github.com/elastic/kibana/issues/159340
     const {
       alertWithLifecycle,
       getAlertUuid,
@@ -133,21 +139,22 @@ export const createCustomThresholdExecutor = ({
         : [];
 
     const initialSearchSource = await searchSourceClient.create(params.searchConfiguration!);
-    const dataView = initialSearchSource.getField('index')!.getIndexPattern();
-    const dataViewName = initialSearchSource.getField('index')!.name;
-    const timeFieldName = initialSearchSource.getField('index')?.timeFieldName;
-    if (!dataView) {
+    const dataView = initialSearchSource.getField('index')!;
+    const { id: dataViewId, timeFieldName } = dataView;
+    const dataViewIndexPattern = dataView.getIndexPattern();
+    const dataViewName = dataView.getName();
+    if (!dataViewIndexPattern) {
       throw new Error('No matched data view');
     } else if (!timeFieldName) {
       throw new Error('The selected data view does not have a timestamp field');
     }
 
-    // Calculate initial start and end date with no time window, as each criteria has it's own time window
+    // Calculate initial start and end date with no time window, as each criterion has its own time window
     const { dateStart, dateEnd } = getTimeRange();
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
-      dataView,
+      dataViewIndexPattern,
       timeFieldName,
       compositeSize,
       alertOnGroupDisappear,
@@ -215,7 +222,9 @@ export const createCustomThresholdExecutor = ({
         if (nextState === AlertStates.NO_DATA) {
           reason = alertResults
             .filter((result) => result[group]?.isNoData)
-            .map((result) => buildNoDataAlertReason({ ...result[group], group }))
+            .map((result) =>
+              buildNoDataAlertReason({ ...result[group], label: getLabel(result[group]), group })
+            )
             .join('\n');
         }
       }
@@ -269,15 +278,20 @@ export const createCustomThresholdExecutor = ({
           group: groupByKeysObjectMapping[group],
           reason,
           timestamp,
-          value: alertResults.map((result, index) => {
+          value: alertResults.map((result) => {
             const evaluation = result[group];
-            if (!evaluation && criteria[index].aggType === 'count') {
-              return 0;
-            } else if (!evaluation) {
+            if (!evaluation) {
               return null;
             }
             return formatAlertResult(evaluation).currentValue;
           }),
+          viewInAppUrl: getViewInAppUrl(
+            alertResults.length === 1 ? alertResults[0][group].metrics : [],
+            indexedStartedAt,
+            logExplorerLocator,
+            params.searchConfiguration.query.query,
+            params.searchConfiguration?.index?.title ?? dataViewId
+          ),
           ...additionalContext,
         });
       }

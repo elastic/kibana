@@ -31,7 +31,7 @@ import {
 } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
+import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
@@ -46,6 +46,7 @@ import {
 import { useLogRateAnalysisResultsTableRowContext } from '../log_rate_analysis_results_table/log_rate_analysis_results_table_row_provider';
 
 import { FieldFilterPopover } from './field_filter_popover';
+import { LogRateAnalysisTypeCallOut } from './log_rate_analysis_type_callout';
 
 const groupResultsMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.groupedSwitchLabel.groupResults',
@@ -81,9 +82,9 @@ export interface LogRateAnalysisResultsData {
   /** The type of analysis, whether it's a spike or dip */
   analysisType: LogRateAnalysisType;
   /** Statistically significant field/value items. */
-  significantTerms: SignificantTerm[];
+  significantItems: SignificantItem[];
   /** Statistically significant groups of field/value items. */
-  significantTermsGroups: SignificantTermGroup[];
+  significantItemsGroups: SignificantItemGroup[];
 }
 
 /**
@@ -209,7 +210,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin }
   );
 
-  const { significantItems } = data;
+  const { significantItems, zeroDocsFallback } = data;
+
   useEffect(
     () => setUniqueFieldNames(uniq(significantItems.map((d) => d.fieldName)).sort()),
     [significantItems]
@@ -234,8 +236,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         if (onAnalysisCompleted) {
           onAnalysisCompleted({
             analysisType,
-            significantTerms: data.significantItems,
-            significantTermsGroups: data.significantItemsGroups,
+            significantItems: data.significantItems,
+            significantItemsGroups: data.significantItemsGroups,
           });
         }
       }
@@ -246,7 +248,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const errors = useMemo(() => [...streamErrors, ...data.errors], [streamErrors, data.errors]);
 
   // Start handler clears possibly hovered or pinned
-  // significant terms on analysis refresh.
+  // significant items on analysis refresh.
   function startHandler(continueAnalysis = false, resetGroupButton = true) {
     if (!continueAnalysis) {
       setOverrides(undefined);
@@ -362,37 +364,13 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           />
         </EuiFlexItem>
       </ProgressControls>
-      {showLogRateAnalysisResultsTable && (
+      {showLogRateAnalysisResultsTable && currentAnalysisType !== undefined && (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
-            title={
-              <span data-test-subj="aiopsAnalysisTypeCalloutTitle">
-                {currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
-                  ? i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutTitle', {
-                      defaultMessage: 'Analysis type: Log rate spike',
-                    })
-                  : i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutTitle', {
-                      defaultMessage: 'Analysis type: Log rate dip',
-                    })}
-              </span>
-            }
-            color="primary"
-            iconType="pin"
-            size="s"
-          >
-            <EuiText size="s">
-              {currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
-                ? i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutContent', {
-                    defaultMessage:
-                      'The median log rate in the selected deviation time range is higher than the baseline. Therefore, the analysis results table shows statistically significant items within the deviation time range that are contributors to the spike. The "doc count" column refers to the amount of documents in the deviation time range.',
-                  })
-                : i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutContent', {
-                    defaultMessage:
-                      'The median log rate in the selected deviation time range is lower than the baseline. Therefore, the analysis results table shows statistically significant items within the baseline time range that are less in number or missing within the deviation time range. The "doc count" column refers to the amount of documents in the baseline time range.',
-                  })}
-            </EuiText>
-          </EuiCallOut>
+          <LogRateAnalysisTypeCallOut
+            analysisType={currentAnalysisType}
+            zeroDocsFallback={zeroDocsFallback}
+          />
           <EuiSpacer size="xs" />
         </>
       )}
@@ -482,7 +460,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       >
         {showLogRateAnalysisResultsTable && groupResults ? (
           <LogRateAnalysisResultsGroupsTable
-            significantTerms={data.significantItems}
+            significantItems={data.significantItems}
             groupTableItems={groupTableItems}
             loading={isRunning}
             dataView={dataView}
@@ -490,17 +468,19 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            zeroDocsFallback={zeroDocsFallback}
           />
         ) : null}
         {showLogRateAnalysisResultsTable && !groupResults ? (
           <LogRateAnalysisResultsTable
-            significantTerms={data.significantItems}
+            significantItems={data.significantItems}
             loading={isRunning}
             dataView={dataView}
             timeRangeMs={timeRangeMs}
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            zeroDocsFallback={zeroDocsFallback}
           />
         ) : null}
       </div>

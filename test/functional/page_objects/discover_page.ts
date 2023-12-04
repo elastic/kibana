@@ -168,10 +168,30 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('discoverOpenButton');
   }
 
-  public async clickResetSavedSearchButton() {
-    await this.testSubjects.moveMouseTo('resetSavedSearch');
-    await this.testSubjects.click('resetSavedSearch');
+  public async revertUnsavedChanges() {
+    await this.testSubjects.moveMouseTo('unsavedChangesBadge');
+    await this.testSubjects.click('unsavedChangesBadge');
+    await this.retry.waitFor('popover is open', async () => {
+      return Boolean(await this.testSubjects.find('unsavedChangesBadgeMenuPanel'));
+    });
+    await this.testSubjects.click('revertUnsavedChangesButton');
     await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  public async saveUnsavedChanges() {
+    await this.testSubjects.moveMouseTo('unsavedChangesBadge');
+    await this.testSubjects.click('unsavedChangesBadge');
+    await this.retry.waitFor('popover is open', async () => {
+      return Boolean(await this.testSubjects.find('unsavedChangesBadgeMenuPanel'));
+    });
+    await this.testSubjects.click('saveUnsavedChangesButton');
+    await this.retry.waitFor('modal is open', async () => {
+      return Boolean(await this.testSubjects.find('confirmSaveSavedObjectButton'));
+    });
+    await this.testSubjects.click('confirmSaveSavedObjectButton');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
   }
 
   public async closeLoadSavedSearchPanel() {
@@ -197,6 +217,10 @@ export class DiscoverPageObject extends FtrService {
 
   public async chooseBreakdownField(field: string) {
     await this.comboBox.set('unifiedHistogramBreakdownFieldSelector', field);
+  }
+
+  public async clearBreakdownField() {
+    await this.comboBox.clear('unifiedHistogramBreakdownFieldSelector');
   }
 
   public async chooseLensChart(chart: string) {

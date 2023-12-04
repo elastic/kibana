@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticationProvider } from './model';
+import type { AuthenticationProvider } from '@kbn/security-plugin-types-common';
 
 export interface SessionInfo {
   expiresInMs: number | null;

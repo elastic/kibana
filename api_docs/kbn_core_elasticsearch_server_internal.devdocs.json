@@ -1567,6 +1567,9 @@
             "tags": [],
             "label": "cluster_build_flavor",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/get_cluster_info.ts",
             "deprecated": false,
             "trackAdoption": false

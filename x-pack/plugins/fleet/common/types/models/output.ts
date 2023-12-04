@@ -23,7 +23,12 @@ export type KafkaPartitionType = typeof kafkaPartitionType;
 export type KafkaTopicWhenType = typeof kafkaTopicWhenType;
 export type KafkaAcknowledgeReliabilityLevel = typeof kafkaAcknowledgeReliabilityLevel;
 export type KafkaVerificationMode = typeof kafkaVerificationModes;
-
+export type OutputSecret =
+  | string
+  | {
+      id: string;
+      hash?: string;
+    };
 interface NewBaseOutput {
   is_default: boolean;
   is_default_monitoring: boolean;
@@ -43,15 +48,7 @@ interface NewBaseOutput {
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
-  secrets?: {
-    ssl?: {
-      key?:
-        | string
-        | {
-            id: string;
-          };
-    };
-  };
+  secrets?: {};
 }
 
 export interface NewElasticsearchOutput extends NewBaseOutput {
@@ -61,10 +58,18 @@ export interface NewElasticsearchOutput extends NewBaseOutput {
 export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   type: OutputType['RemoteElasticsearch'];
   service_token?: string;
+  secrets?: {
+    service_token?: OutputSecret;
+  };
 }
 
 export interface NewLogstashOutput extends NewBaseOutput {
   type: OutputType['Logstash'];
+  secrets?: {
+    ssl?: {
+      key?: OutputSecret;
+    };
+  };
 }
 
 export type NewOutput =
@@ -131,17 +136,9 @@ export interface KafkaOutput extends NewBaseOutput {
   broker_timeout?: number;
   required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
   secrets?: {
-    password?:
-      | string
-      | {
-          id: string;
-        };
+    password?: OutputSecret;
     ssl?: {
-      key?:
-        | string
-        | {
-            id: string;
-          };
+      key?: OutputSecret;
     };
   };
 }

@@ -99,7 +99,7 @@ describe('ALL - Live Query run custom and saved', { tags: ['@ess', '@serverless'
     navigateTo('/app/osquery');
     cy.get('[aria-label="Run query"]').first().should('be.visible').click();
 
-    cy.get(LIVE_QUERY_EDITOR).contains('select * from users;');
+    cy.getBySel(LIVE_QUERY_EDITOR).contains('select * from users;');
   });
 
   it('should open query details by clicking the details icon', () => {

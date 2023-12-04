@@ -6,9 +6,10 @@
  */
 
 import type { KibanaFeature } from '@kbn/features-plugin/server';
+import type { KibanaPrivilegesType } from '@kbn/security-plugin-types-server';
+import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
-import type { KibanaPrivilegesType } from './role_schema';
-import { ALL_SPACES_ID, GLOBAL_RESOURCE } from '../../common/constants';
+import { ALL_SPACES_ID } from '../../common/constants';
 import { PrivilegeSerializer } from '../authorization/privilege_serializer';
 import { ResourceSerializer } from '../authorization/resource_serializer';
 

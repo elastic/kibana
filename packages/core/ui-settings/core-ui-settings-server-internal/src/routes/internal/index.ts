@@ -11,10 +11,12 @@ import { registerInternalDeleteRoute } from './delete';
 import { registerInternalGetRoute } from './get';
 import { registerInternalSetManyRoute } from './set_many';
 import { registerInternalSetRoute } from './set';
+import { registerInternalValidateRoute } from './validate';
 
 export function registerInternalRoutes(router: InternalUiSettingsRouter) {
   registerInternalGetRoute(router);
   registerInternalDeleteRoute(router);
   registerInternalSetRoute(router);
   registerInternalSetManyRoute(router);
+  registerInternalValidateRoute(router);
 }

@@ -24,9 +24,7 @@ import {
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
-  createSignalsIndex,
   deleteAllRules,
-  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleAsNdjson,
   getRulesAsNdjson,
@@ -40,8 +38,8 @@ import {
   createRule,
   getRule,
   getRuleSOById,
+  deleteAllExceptions,
 } from '../../utils';
-import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 const getImportRuleBuffer = (connectorId: string) => {
@@ -204,6 +202,9 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   describe('import_rules', () => {
+    beforeEach(async () => {
+      await deleteAllRules(supertest, log);
+    });
     describe('importing rules with different roles', () => {
       before(async () => {
         await createUserAndRole(getService, ROLES.hunter_no_actions);
@@ -212,14 +213,6 @@ export default ({ getService }: FtrProviderContext): void => {
       after(async () => {
         await deleteUserAndRole(getService, ROLES.hunter_no_actions);
         await deleteUserAndRole(getService, ROLES.hunter);
-      });
-      beforeEach(async () => {
-        await createSignalsIndex(supertest, log);
-      });
-
-      afterEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
-        await deleteAllRules(supertest, log);
       });
       it('should successfully import rules without actions when user has no actions privileges', async () => {
         const { body } = await supertestWithoutAuth
@@ -418,10 +411,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.errors[0]).to.eql({
           rule_id: '(unknown id)',
-          error: {
-            message: 'Invalid value "undefined" supplied to "threshold"',
-            status_code: 400,
-          },
+          error: { status_code: 400, message: 'threshold: Required' },
         });
       });
 
@@ -469,7 +459,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.errors[0]).to.eql({
           rule_id: '(unknown id)',
           error: {
-            message: 'Invalid value "0" supplied to "threshold,value"',
+            message: 'threshold.value: Number must be greater than or equal to 1',
             status_code: 400,
           },
         });
@@ -506,16 +496,75 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    describe('forward compatibility', () => {
+      it('should remove any extra rule fields when importing', async () => {
+        const rule: QueryRuleCreateProps = {
+          ...getSimpleRule('rule-1'),
+          extraField: true,
+          risk_score_mapping: [
+            {
+              field: 'host.name',
+              value: 'host.name',
+              operator: 'equals',
+              risk_score: 50,
+              // @ts-expect-error
+              extraField: true,
+            },
+          ],
+          severity_mapping: [
+            {
+              field: 'host.name',
+              value: 'host.name',
+              operator: 'equals',
+              severity: 'low',
+              // @ts-expect-error
+              extraField: true,
+            },
+          ],
+          threat: [
+            {
+              framework: 'MITRE ATT&CK',
+              extraField: true,
+              tactic: {
+                id: 'TA0001',
+                name: 'Initial Access',
+                reference: 'https://attack.mitre.org/tactics/TA0001',
+                // @ts-expect-error
+                extraField: true,
+              },
+              technique: [],
+            },
+          ],
+          investigation_fields: {
+            field_names: ['host.name'],
+            // @ts-expect-error
+            extraField: true,
+          },
+        };
+        const payload = Buffer.from(JSON.stringify(rule));
+        await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach('file', payload, 'rules.ndjson')
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
+          .set('elastic-api-version', '2023-10-31')
+          .send()
+          .expect(200);
+
+        expect(Object.hasOwn(body, 'extraField')).to.eql(false);
+        expect(Object.hasOwn(body.risk_score_mapping[0], 'extraField')).to.eql(false);
+        expect(Object.hasOwn(body.severity_mapping[0], 'extraField')).to.eql(false);
+        expect(Object.hasOwn(body.threat[0], 'extraField')).to.eql(false);
+        expect(Object.hasOwn(body.threat[0].tactic, 'extraField')).to.eql(false);
+        expect(Object.hasOwn(body.investigation_fields, 'extraField')).to.eql(false);
+      });
+    });
+
     describe('importing rules with an index', () => {
-      beforeEach(async () => {
-        await createSignalsIndex(supertest, log);
-      });
-
-      afterEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
-        await deleteAllRules(supertest, log);
-      });
-
       it('should set the response content types to be expected', async () => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
@@ -1905,17 +1954,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('legacy investigation fields', () => {
-      beforeEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
-        await deleteAllRules(supertest, log);
-        await createSignalsIndex(supertest, log);
-      });
-
-      afterEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
-        await deleteAllRules(supertest, log);
-      });
-
       it('imports rule with investigation fields as array', async () => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)

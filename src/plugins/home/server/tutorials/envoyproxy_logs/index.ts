@@ -39,7 +39,7 @@ export function envoyproxyLogsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-envoyproxy.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/envoyproxy.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/envoyproxy.svg'),
     artifacts: {
       dashboards: [
         {
@@ -58,7 +58,7 @@ export function envoyproxyLogsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/envoyproxy_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/envoyproxy_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),

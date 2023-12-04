@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 
@@ -21,7 +21,7 @@ export const MISSING_CONFIG_STORAGE_KEY = `core.warnings.publicBaseUrlMissingDis
 
 interface Deps {
   docLinks: DocLinksStart;
-  http: HttpStart;
+  http: InternalHttpStart;
   notifications: NotificationsStart;
   // Exposed for easier testing
   storage?: Storage;

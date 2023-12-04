@@ -6,11 +6,11 @@
  */
 
 import { significantTerms } from '../__mocks__/artificial_logs/significant_terms';
-import { finalSignificantTermGroups } from '../__mocks__/artificial_logs/final_significant_term_groups';
+import { finalSignificantItemGroups } from '../__mocks__/artificial_logs/final_significant_item_groups';
 
 import {
-  addSignificantTermsAction,
-  addSignificantTermsGroupAction,
+  addSignificantItemsAction,
+  addSignificantItemsGroupAction,
   resetAllAction,
   resetGroupsAction,
   updateLoadingStateAction,
@@ -31,13 +31,14 @@ describe('streamReducer', () => {
       significantItems: [],
       significantItemsGroups: [],
       errors: [],
+      zeroDocsFallback: false,
     });
   });
 
   it('adds significant item, then resets all state again', () => {
     const state1 = streamReducer(
       initialState,
-      addSignificantTermsAction(
+      addSignificantItemsAction(
         [
           {
             key: 'the-field-name:the-field-value',
@@ -65,14 +66,14 @@ describe('streamReducer', () => {
   });
 
   it('adds significant items and groups, then resets groups only', () => {
-    const state1 = streamReducer(initialState, addSignificantTermsAction(significantTerms, '2'));
+    const state1 = streamReducer(initialState, addSignificantItemsAction(significantTerms, '2'));
 
     expect(state1.significantItems).toHaveLength(4);
     expect(state1.significantItemsGroups).toHaveLength(0);
 
     const state2 = streamReducer(
       state1,
-      addSignificantTermsGroupAction(finalSignificantTermGroups, '2')
+      addSignificantItemsGroupAction(finalSignificantItemGroups, '2')
     );
 
     expect(state2.significantItems).toHaveLength(4);

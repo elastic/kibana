@@ -23,6 +23,7 @@ import {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { LOG_EXPLORER_LOCATOR_ID, LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
@@ -59,6 +60,8 @@ import {
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { firstValueFrom } from 'rxjs';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -102,9 +105,7 @@ export interface ConfigSchema {
     };
   };
 }
-
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
-
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
@@ -114,8 +115,8 @@ export interface ObservabilityPublicPluginsSetup {
   home?: HomePublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   embeddable: EmbeddableSetup;
+  licensing: LicensingPluginSetup;
 }
-
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
   cases: CasesUiStart;
@@ -144,7 +145,6 @@ export interface ObservabilityPublicPluginsStart {
   aiops: AiopsPluginStart;
   serverless?: ServerlessPluginStart;
 }
-
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
 export class Plugin
@@ -237,6 +237,9 @@ export class Plugin
     const sloEditLocator = pluginsSetup.share.url.locators.create(new SloEditLocatorDefinition());
     const sloListLocator = pluginsSetup.share.url.locators.create(new SloListLocatorDefinition());
 
+    const logExplorerLocator =
+      pluginsSetup.share.url.locators.get<LogExplorerLocatorParams>(LOG_EXPLORER_LOCATOR_ID);
+
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
       const { renderApp } = await import('./application');
@@ -290,15 +293,26 @@ export class Plugin
 
     coreSetup.application.register(app);
 
-    registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
-    const registerSloEmbeddableFactory = async () => {
-      const { SloOverviewEmbeddableFactoryDefinition } = await import(
-        './embeddable/slo/overview/slo_embeddable_factory'
-      );
-      const factory = new SloOverviewEmbeddableFactoryDefinition(coreSetup.getStartServices);
-      pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
+    registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry, logExplorerLocator);
+
+    const assertPlatinumLicense = async () => {
+      const licensing = await pluginsSetup.licensing;
+      const license = await firstValueFrom(licensing.license$);
+
+      const hasPlatinumLicense = license.hasAtLeast('platinum');
+      if (hasPlatinumLicense) {
+        const registerSloOverviewEmbeddableFactory = async () => {
+          const { SloOverviewEmbeddableFactoryDefinition } = await import(
+            './embeddable/slo/overview/slo_embeddable_factory'
+          );
+          const factory = new SloOverviewEmbeddableFactoryDefinition(coreSetup.getStartServices);
+          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
+        };
+        registerSloOverviewEmbeddableFactory();
+      }
     };
-    registerSloEmbeddableFactory();
+
+    assertPlatinumLicense();
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
