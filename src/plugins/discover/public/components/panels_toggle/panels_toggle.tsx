@@ -63,7 +63,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
                   defaultMessage: 'Hide chart',
                 }),
             iconType: isChartHidden ? 'transitionTopIn' : 'transitionTopOut',
-            'data-test-subj': 'dscToggleHistogramButton',
+            'data-test-subj': isChartHidden ? 'dscShowHistogramButton' : 'dscHideHistogramButton',
             onClick: onToggleChart,
           },
         ]
@@ -76,6 +76,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
 
   return (
     <IconButtonGroup
+      data-test-subj={`dscPanelsToggle${isInsideHistogram ? 'InHistogram' : 'InTabs'}`}
       legend={i18n.translate('discover.panelsToggle.panelsVisibilityLegend', {
         defaultMessage: 'Panels visibility',
       })}
