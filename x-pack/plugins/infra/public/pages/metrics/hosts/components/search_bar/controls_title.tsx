@@ -7,24 +7,11 @@
 
 import React from 'react';
 import { EuiFormLabel, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { availableControlsPanels } from '../../hooks/use_control_panels_url_state';
 import { Popover } from '../table/popover';
 
 const helpMessages = {
-  [availableControlsPanels.SERVICE_NAME]: {
-    text: `${i18n.translate('xpack.infra.hostsViewPage.serviceNameControl.popoverHelpLabel', {
-      defaultMessage: 'Services detected via',
-    })}`,
-    link: {
-      text: `${i18n.translate('xpack.infra.hostsViewPage.serviceNameControl.popoverHelpLink', {
-        defaultMessage: 'APM',
-      })}`,
-      href: 'https://ela.st/docs-infra-apm',
-      ['data-test-subj']: 'hostsViewServiceNameControlPopoverHelpLink',
-    },
-  },
   [availableControlsPanels.SERVICE_NAME]: (
     <FormattedMessage
       id="xpack.infra.hostsViewPage.serviceNameControl.popoverHelpLabel"
