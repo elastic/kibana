@@ -30,7 +30,7 @@ const PROTECTIONS_SECTION_TITLE = i18n.translate(
 
 const SETTINGS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.settings',
-  { defaultMessage: 'Settingssss' }
+  { defaultMessage: 'Settings' }
 );
 
 export type PolicySettingsFormProps = PolicyFormComponentCommonProps;
