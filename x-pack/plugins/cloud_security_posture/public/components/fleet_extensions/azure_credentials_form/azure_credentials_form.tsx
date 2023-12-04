@@ -5,7 +5,18 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
-import { EuiLink, EuiSpacer, EuiText, EuiTitle, EuiCallOut, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiCallOut,
+  EuiHorizontalRule,
+  EuiFormRow,
+  EuiSelect,
+  EuiFieldPassword,
+  EuiFieldText,
+} from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,8 +25,13 @@ import { i18n } from '@kbn/i18n';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
+import {
+  AzureOptions,
+  getAzureCredentialsFormManualOptions,
+} from './get_azure_credentials_form_options';
+import { AzureCredentialsType } from '../../../../common/types';
 import { SetupFormat, useAzureCredentialsForm } from './hooks';
-import { NewPackagePolicyPostureInput } from '../utils';
+import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 
 interface AzureSetupInfoContentProps {
@@ -161,7 +177,31 @@ const ArmTemplateSetup = ({
   );
 };
 
-const ManualSetup = ({ integrationLink }: { integrationLink: string }) => {
+const AzureCredentialTypeSelector = ({
+  type,
+  onChange,
+}: {
+  onChange(type: AzureCredentialsType): void;
+  type: AzureCredentialsType;
+}) => (
+  <EuiFormRow
+    fullWidth
+    label={i18n.translate('xpack.csp.azureIntegration.azureCredentialTypeSelectorLabel', {
+      defaultMessage: 'Preferred manual method',
+    })}
+  >
+    <EuiSelect
+      fullWidth
+      options={getAzureCredentialsFormManualOptions()}
+      value={type}
+      onChange={(optionElem) => {
+        onChange(optionElem.target.value as AzureCredentialsType);
+      }}
+    />
+  </EuiFormRow>
+);
+
+const TemporaryManualSetup = ({ integrationLink }: { integrationLink: string }) => {
   return (
     <>
       <EuiText color="subdued" size="s">
@@ -206,6 +246,53 @@ const ManualSetup = ({ integrationLink }: { integrationLink: string }) => {
 };
 
 const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0';
+const AZURE_MANUAL_FIELDS_PACKAGE_VERSION = '1.7.0';
+
+export const getDefaultAzureManualCredentialType = (packageInfo: PackageInfo) => {
+  const packageSemanticVersion = semverValid(packageInfo.version);
+  const cleanPackageVersion = semverCoerce(packageSemanticVersion) || '';
+
+  const isPackageVersionValidForManualFields = !semverLt(
+    cleanPackageVersion,
+    AZURE_MANUAL_FIELDS_PACKAGE_VERSION
+  );
+
+  return isPackageVersionValidForManualFields ? 'managed_identity' : 'manual';
+};
+
+const AzureInputVarFields = ({
+  fields,
+  onChange,
+}: {
+  fields: Array<AzureOptions[keyof AzureOptions]['fields'][number] & { value: string; id: string }>;
+  onChange: (key: string, value: string) => void;
+}) => (
+  <div>
+    {fields.map((field) => (
+      <EuiFormRow key={field.id} label={field.label} fullWidth hasChildLabel={true} id={field.id}>
+        <>
+          {field.type === 'password' && (
+            <EuiFieldPassword
+              id={field.id}
+              type="dual"
+              fullWidth
+              value={field.value || ''}
+              onChange={(event) => onChange(field.id, event.target.value)}
+            />
+          )}
+          {field.type === 'text' && (
+            <EuiFieldText
+              id={field.id}
+              fullWidth
+              value={field.value || ''}
+              onChange={(event) => onChange(field.id, event.target.value)}
+            />
+          )}
+        </>
+      </EuiFormRow>
+    ))}
+  </div>
+);
 
 export const AzureCredentialsForm = ({
   input,
@@ -216,15 +303,22 @@ export const AzureCredentialsForm = ({
   setIsValid,
   disabled,
 }: Props) => {
-  const { setupFormat, onSetupFormatChange, integrationLink, hasArmTemplateUrl } =
-    useAzureCredentialsForm({
-      newPolicy,
-      input,
-      packageInfo,
-      onChange,
-      setIsValid,
-      updatePolicy,
-    });
+  const {
+    group,
+    fields,
+    azureCredentialsType,
+    setupFormat,
+    onSetupFormatChange,
+    integrationLink,
+    hasArmTemplateUrl,
+  } = useAzureCredentialsForm({
+    newPolicy,
+    input,
+    packageInfo,
+    onChange,
+    setIsValid,
+    updatePolicy,
+  });
 
   useEffect(() => {
     if (!setupFormat) {
@@ -237,6 +331,10 @@ export const AzureCredentialsForm = ({
   const isPackageVersionValidForAzure = !semverLt(
     cleanPackageVersion,
     AZURE_MINIMUM_PACKAGE_VERSION
+  );
+  const isPackageVersionValidForManualFields = !semverLt(
+    cleanPackageVersion,
+    AZURE_MANUAL_FIELDS_PACKAGE_VERSION
   );
 
   useEffect(() => {
@@ -280,8 +378,52 @@ export const AzureCredentialsForm = ({
       {setupFormat === AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE && (
         <ArmTemplateSetup hasArmTemplateUrl={hasArmTemplateUrl} input={input} />
       )}
-      {setupFormat === AZURE_MANUAL_CREDENTIAL_TYPE && (
-        <ManualSetup integrationLink={integrationLink} />
+      {setupFormat === AZURE_MANUAL_CREDENTIAL_TYPE && !isPackageVersionValidForManualFields && (
+        <TemporaryManualSetup integrationLink={integrationLink} />
+      )}
+      {setupFormat === AZURE_MANUAL_CREDENTIAL_TYPE && isPackageVersionValidForManualFields && (
+        <>
+          <AzureCredentialTypeSelector
+            type={azureCredentialsType}
+            onChange={(optionId) => {
+              updatePolicy(
+                getPosturePolicy(newPolicy, input.type, {
+                  'azure.credentials.type': { value: optionId },
+                })
+              );
+            }}
+          />
+          <EuiSpacer size="m" />
+          <AzureInputVarFields
+            fields={fields}
+            onChange={(key, value) => {
+              updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
+            }}
+          />
+          <EuiSpacer size="m" />
+          {group.info}
+          <EuiSpacer size="m" />
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.csp.azureIntegration.manualCredentialType.documentaion"
+              defaultMessage="Read the {documentation} for more details"
+              values={{
+                documentation: (
+                  <EuiLink
+                    href={ARM_TEMPLATE_EXTERNAL_DOC_URL}
+                    target="_blank"
+                    rel="noopener nofollow noreferrer"
+                    data-test-subj="externalLink"
+                  >
+                    {i18n.translate('xpack.csp.azureIntegration.documentationLinkText', {
+                      defaultMessage: 'documentation',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+        </>
       )}
       <EuiSpacer />
     </>

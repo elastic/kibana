@@ -460,6 +460,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       createEsqlRuleType: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#create-esql-rule`,
       entityAnalytics: {
         riskScorePrerequisites: `${SECURITY_SOLUTION_DOCS}ers-requirements.html`,
+        hostRiskScore: `${SECURITY_SOLUTION_DOCS}host-risk-score.html`,
+        userRiskScore: `${SECURITY_SOLUTION_DOCS}user-risk-score.html`,
+        entityRiskScoring: `${SECURITY_SOLUTION_DOCS}advanced-entity-analytics-overview.html#entity-risk-scoring`,
       },
     },
     query: {
@@ -520,6 +523,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       trainedModels: `${MACHINE_LEARNING_DOCS}ml-trained-models.html`,
       startTrainedModelsDeployment: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-model.html`,
       nlpElser: `${MACHINE_LEARNING_DOCS}ml-nlp-elser.html`,
+      nlpE5: `${MACHINE_LEARNING_DOCS}ml-nlp-e5.html`,
       nlpImportModel: `${MACHINE_LEARNING_DOCS}ml-nlp-import-model.html`,
     },
     transforms: {
