@@ -24,7 +24,7 @@ import { DeploymentDetailsModal, DeploymentDetailsProvider } from '@kbn/cloud/de
 import type { ToMountPointParams } from '@kbn/react-kibana-mount';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
 import ReactDOM from 'react-dom';
-import { GuideState } from '../../types';
+import { GuideState } from '../../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
 

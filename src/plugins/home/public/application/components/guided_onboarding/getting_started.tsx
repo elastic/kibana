@@ -24,15 +24,11 @@ import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
   GuideFilterValues,
-  GuideId,
-  GuideState,
   GuideCards,
   GuideFilters,
-} from '@kbn/guided-onboarding';
-import {
   GuideCardConstants,
   guideCards,
-} from '@kbn/guided-onboarding/src/components/landing_page/guide_cards.constants';
+} from '@kbn/guided-onboarding/guide';
 import {
   GuideCardsClassic,
   GuideFiltersClassic,
@@ -40,6 +36,7 @@ import {
   type GuideCardConstantsClassic,
   type GuideFilterValuesClassic,
 } from '@kbn/guided-onboarding/classic';
+import { GuideId, GuideState } from '@kbn/guided-onboarding/src/types';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
@@ -161,14 +158,14 @@ export const GettingStarted = () => {
 
   // filter cards for solution and based on classic or new format
   useEffect(() => {
-    if (!classicGuide) {
-      const tempFiltered = guideCards.filter(
-        (card: GuideCardConstants) => card.solution === filter
+    if (classicGuide) {
+      const tempFiltered = guideCardsClassic.filter(
+        (card: GuideCardConstantsClassic) => card.solution === filter
       );
       setFilteredCards(tempFiltered);
     } else {
-      const tempFiltered = guideCardsClassic.filter(
-        (card: GuideCardConstantsClassic) => card.solution === filter
+      const tempFiltered = guideCards.filter(
+        (card: GuideCardConstants) => card.solution === filter
       );
       setFilteredCards(tempFiltered);
     }
@@ -227,7 +224,14 @@ export const GettingStarted = () => {
     );
   }
 
-  const setGuideFilters = !classicGuide ? (
+  const setGuideFilters = classicGuide ? (
+    <GuideFiltersClassic
+      application={application}
+      activeFilter={filter}
+      setActiveFilter={setFilter}
+      data-test-subj="onboarding--guideFilters"
+    />
+  ) : (
     <GuideFilters
       application={application}
       activeFilter={filter as GuideFilterValues}
@@ -236,16 +240,16 @@ export const GettingStarted = () => {
       data-test-subj="onboarding--guideFilters"
       trackUiMetric={trackUiMetric}
     />
-  ) : (
-    <GuideFiltersClassic
-      application={application}
-      activeFilter={filter}
-      setActiveFilter={setFilter}
-      data-test-subj="onboarding--guideFilters"
-    />
   );
 
-  const setGuideCards = !classicGuide ? (
+  const setGuideCards = classicGuide ? (
+    <GuideCardsClassic
+      activateGuide={activateGuide}
+      navigateToApp={application.navigateToApp}
+      activeFilter={filter as GuideFilterValues}
+      guidesState={guidesState}
+    />
+  ) : (
     <GuideCards
       activateGuide={activateGuide}
       navigateToApp={application.navigateToApp}
@@ -260,14 +264,8 @@ export const GettingStarted = () => {
       url={share.url}
       navigateToUrl={application.navigateToUrl}
     />
-  ) : (
-    <GuideCardsClassic
-      activateGuide={activateGuide}
-      navigateToApp={application.navigateToApp}
-      activeFilter={filter as GuideFilterValues}
-      guidesState={guidesState}
-    />
   );
+
   return (
     <KibanaPageTemplate panelled={false}>
       <EuiPageTemplate.Section data-test-subj="guided-onboarding--landing-page">
