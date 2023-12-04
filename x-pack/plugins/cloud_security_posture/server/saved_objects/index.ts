@@ -6,3 +6,5 @@
  */
 
 export { setupSavedObjects } from './saved_objects';
+export { cspRuleTemplate } from './csp_rule_template';
+export { cspSettings } from './csp_settings';
