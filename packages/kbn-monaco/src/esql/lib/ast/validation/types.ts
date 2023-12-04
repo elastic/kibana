@@ -112,6 +112,10 @@ export interface ValidationErrors {
     message: string;
     type: { value: string };
   };
+  unsupportedFieldType: {
+    message: string;
+    type: { field: string };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

@@ -329,13 +329,19 @@ describe('autocomplete', () => {
       ),
       '|',
     ]);
-    testSuggestions('from a | where stringField >= stringField and ', [
-      ...getFieldNamesByType('boolean'),
-      ...getFunctionSignaturesByReturnType('where', 'boolean', { evalMath: true }),
-    ]);
-    testSuggestions('from a | where stringField >= stringField and numberField ', [
-      ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['number']),
-    ]);
+    for (const op of ['and', 'or']) {
+      testSuggestions(`from a | where stringField >= stringField ${op} `, [
+        ...getFieldNamesByType('any'),
+        ...getFunctionSignaturesByReturnType('where', 'any', { evalMath: true }),
+      ]);
+      testSuggestions(`from a | where stringField >= stringField ${op} numberField `, [
+        ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['number']),
+      ]);
+      testSuggestions(`from a | where stringField >= stringField ${op} numberField == `, [
+        ...getFieldNamesByType('number'),
+        ...getFunctionSignaturesByReturnType('where', 'number', { evalMath: true }),
+      ]);
+    }
     testSuggestions('from a | stats a=avg(numberField) | where a ', [
       ...getFunctionSignaturesByReturnType('where', 'any', { builtin: true }, ['number']),
     ]);
@@ -349,10 +355,6 @@ describe('autocomplete', () => {
       // make the fields suggest aware of the previous STATS, leave the other callbacks untouched
       [[{ name: 'a', type: 'number' }], undefined, undefined]
     );
-    testSuggestions('from a | where stringField >= stringField and numberField == ', [
-      ...getFieldNamesByType('number'),
-      ...getFunctionSignaturesByReturnType('where', 'number', { evalMath: true }),
-    ]);
     // The editor automatically inject the final bracket, so it is not useful to test with just open bracket
     testSuggestions(
       'from a | where log10()',
@@ -381,7 +383,7 @@ describe('autocomplete', () => {
   });
 
   describe('sort', () => {
-    testSuggestions('from a | sort ', [...fields.map(({ name }) => name)]);
+    testSuggestions('from a | sort ', getFieldNamesByType('any'));
     testSuggestions('from a | sort stringField ', ['asc', 'desc', '|', ',']);
     testSuggestions('from a | sort stringField desc ', ['nulls first', 'nulls last', '|', ',']);
     // @TODO: improve here
@@ -399,10 +401,20 @@ describe('autocomplete', () => {
   });
 
   describe('rename', () => {
-    testSuggestions('from a | rename ', [...getFieldNamesByType('any')]);
+    testSuggestions('from a | rename ', getFieldNamesByType('any'));
     testSuggestions('from a | rename stringField ', ['as']);
     testSuggestions('from a | rename stringField as ', ['var0']);
   });
+
+  for (const command of ['keep', 'drop', 'project']) {
+    describe(command, () => {
+      testSuggestions(`from a | ${command} `, getFieldNamesByType('any'));
+      testSuggestions(
+        `from a | ${command} stringField, `,
+        getFieldNamesByType('any').filter((name) => name !== 'stringField')
+      );
+    });
+  }
 
   describe('stats', () => {
     const allAggFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
@@ -411,23 +423,24 @@ describe('autocomplete', () => {
     testSuggestions('from a | stats ', ['var0 =', ...allAggFunctions]);
     testSuggestions('from a | stats a ', ['= $0']);
     testSuggestions('from a | stats a=', [...allAggFunctions]);
-    testSuggestions('from a | stats a=max(b) by ', [...fields.map(({ name }) => name)]);
-    testSuggestions('from a | stats a=max(b) BY ', [...fields.map(({ name }) => name)]);
+    testSuggestions('from a | stats a=max(b) by ', getFieldNamesByType('any'));
+    testSuggestions('from a | stats a=max(b) BY ', getFieldNamesByType('any'));
     testSuggestions('from a | stats a=c by d ', ['|', ',']);
-    testSuggestions('from a | stats a=c by d, ', [...fields.map(({ name }) => name)]);
+    testSuggestions('from a | stats a=c by d, ', getFieldNamesByType('any'));
     testSuggestions('from a | stats a=max(b), ', ['var0 =', ...allAggFunctions]);
     testSuggestions(
       'from a | stats a=min()',
-      [...fields.filter(({ type }) => type === 'number').map(({ name }) => name)],
+      fields.filter(({ type }) => type === 'number').map(({ name }) => name),
       '('
     );
     testSuggestions('from a | stats a=min(b) ', ['by', '|', ',']);
-    testSuggestions('from a | stats a=min(b) by ', [...fields.map(({ name }) => name)]);
+    testSuggestions('from a | stats a=min(b) by ', getFieldNamesByType('any'));
     testSuggestions('from a | stats a=min(b),', ['var0 =', ...allAggFunctions]);
     testSuggestions('from a | stats var0=min(b),var1=c,', ['var2 =', ...allAggFunctions]);
-    testSuggestions('from a | stats a=min(b), b=max()', [
-      ...fields.filter(({ type }) => type === 'number').map(({ name }) => name),
-    ]);
+    testSuggestions(
+      'from a | stats a=min(b), b=max()',
+      fields.filter(({ type }) => type === 'number').map(({ name }) => name)
+    );
     // @TODO: remove last 2 suggestions if possible
     testSuggestions('from a | eval var0=round(b), var1=round(c) | stats ', [
       'var2 =',
@@ -437,8 +450,16 @@ describe('autocomplete', () => {
     ]);
 
     // smoke testing with suggestions not at the end of the string
-    // but more the cursor back after the min(b) function
-    testSuggestions('from a | stats a = min(b) | sort b', ['by', '|', ','], 27);
+    testSuggestions(
+      'from a | stats a = min(b) | sort b',
+      ['by', '|', ','],
+      27 /* " " after min(b) */
+    );
+    testSuggestions(
+      'from a | stats avg(b) by stringField',
+      getFieldNamesByType('number'),
+      21 /* b column in avg */
+    );
   });
 
   describe('enrich', () => {
@@ -497,7 +518,7 @@ describe('autocomplete', () => {
   describe('eval', () => {
     testSuggestions('from a | eval ', [
       'var0 =',
-      ...fields.map(({ name }) => name),
+      ...getFieldNamesByType('any'),
       ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
     ]);
     testSuggestions('from a | eval numberField ', [
@@ -513,7 +534,9 @@ describe('autocomplete', () => {
     ]);
     testSuggestions('from a | eval a=numberField, ', [
       'var0 =',
+      ...getFieldNamesByType('any'),
       ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'a',
     ]);
     testSuggestions(
       'from a | eval a=round()',
@@ -532,7 +555,9 @@ describe('autocomplete', () => {
     ]);
     testSuggestions('from a | eval a=round(numberField),', [
       'var0 =',
+      ...getFieldNamesByType('any'),
       ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'a',
     ]);
     testSuggestions('from a | eval a=round(numberField) + ', [
       ...getFieldNamesByType('number'),
@@ -619,6 +644,28 @@ describe('autocomplete', () => {
         '('
       );
     }
+
+    // Smoke testing for suggestions in previous position than the end of the statement
+    testSuggestions(
+      'from a | eval var0 = abs(numberField) | eval abs(var0)',
+      [
+        ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true }, ['number']),
+        '|',
+        ',',
+      ],
+      38 /* " " after abs(b) */
+    );
+    testSuggestions(
+      'from a | eval var0 = abs(b) | eval abs(var0)',
+      [
+        ...getFieldNamesByType('number'),
+        ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+          'abs',
+        ]),
+      ],
+      26 /* b column in abs */
+    );
+
     // Test suggestions for each possible param, within each signature variation, for each function
     for (const fn of evalFunctionsDefinitions) {
       // skip this fn for the moment as it's quite hard to test

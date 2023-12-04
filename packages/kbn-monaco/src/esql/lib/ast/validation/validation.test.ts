@@ -25,8 +25,14 @@ import { EditorError } from '../../../../types';
 function getCallbackMocks() {
   return {
     getFieldsFor: jest.fn(async ({ query }) =>
-      !/enrich/.test(query)
+      /enrich/.test(query)
         ? [
+            { name: 'otherField', type: 'string' },
+            { name: 'yetAnotherField', type: 'number' },
+          ]
+        : /unsupported_index/.test(query)
+        ? [{ name: 'unsupported_field', type: 'unsupported' }]
+        : [
             ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
               name: `${type}Field`,
               type,
@@ -39,13 +45,9 @@ function getCallbackMocks() {
             },
             { name: '@timestamp', type: 'date' },
           ]
-        : [
-            { name: 'otherField', type: 'string' },
-            { name: 'yetAnotherField', type: 'number' },
-          ]
     ),
     getSources: jest.fn(async () =>
-      ['a', 'index', 'otherIndex', '.secretIndex', 'my-index'].map((name) => ({
+      ['a', 'index', 'otherIndex', '.secretIndex', 'my-index', 'unsupported_index'].map((name) => ({
         name,
         hidden: name.startsWith('.'),
       }))
@@ -565,6 +567,13 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from index | keep m*', ['Unknown column [m*]']);
     testErrorsAndWarnings('from index | keep *m', ['Unknown column [*m]']);
     testErrorsAndWarnings('from index | keep d*m', ['Unknown column [d*m]']);
+    testErrorsAndWarnings(
+      'from unsupported_index | keep unsupported_field',
+      [],
+      [
+        'Field [unsupported_field] cannot be retrieved, it is unsupported or not indexed; returning null',
+      ]
+    );
   });
 
   describe('drop', () => {
@@ -1394,14 +1403,14 @@ describe('validation logic', () => {
   });
 
   describe('callbacks', () => {
-    it(`it should not fetch source and fields list when a row command is set`, async () => {
+    it(`should not fetch source and fields list when a row command is set`, async () => {
       const callbackMocks = getCallbackMocks();
       await validateAst(`row a = 1 | eval a`, getAstAndErrors, callbackMocks);
       expect(callbackMocks.getFieldsFor).not.toHaveBeenCalled();
       expect(callbackMocks.getSources).not.toHaveBeenCalled();
     });
 
-    it(`it should fetch policies if no enrich command is found`, async () => {
+    it(`should fetch policies if no enrich command is found`, async () => {
       const callbackMocks = getCallbackMocks();
       await validateAst(`row a = 1 | eval a`, getAstAndErrors, callbackMocks);
       expect(callbackMocks.getPolicies).not.toHaveBeenCalled();

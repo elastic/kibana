@@ -712,6 +712,24 @@ function validateFieldsShadowing(
   return messages;
 }
 
+function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>) {
+  const messages: ESQLMessage[] = [];
+  for (const field of fields.values()) {
+    if (field.type === 'unsupported') {
+      messages.push(
+        getMessageFromId({
+          messageId: 'unsupportedFieldType',
+          values: {
+            field: field.name,
+          },
+          locations: { min: 1, max: 1 },
+        })
+      );
+    }
+  }
+  return messages;
+}
+
 /**
  * This function will perform an high level validation of the
  * query AST. An initial syntax validation is already performed by the parser
@@ -744,6 +762,7 @@ export async function validateAst(
   const variables = collectVariables(ast, availableFields);
   // notify if the user is rewriting a column as variable with another type
   messages.push(...validateFieldsShadowing(availableFields, variables));
+  messages.push(...validateUnsupportedTypeFields(availableFields));
 
   for (const command of ast) {
     const commandMessages = validateCommand(command, {
