@@ -18,7 +18,7 @@ import {
 } from '../schemas/post_actions_connector_execute';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import { ESQL_RESOURCE } from './knowledge_base/constants';
-import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
+import { callChainExecutor } from '../lib/langchain/execute_retrieval_chain';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -64,7 +64,7 @@ export const postActionsConnectorExecuteRoute = (
 
         const elserId = await getElser(request, (await context.core).savedObjects.getClient());
 
-        const langChainResponseBody = await callAgentExecutor({
+        const langChainResponseBody = await callChainExecutor({
           actions,
           connectorId,
           esClient,

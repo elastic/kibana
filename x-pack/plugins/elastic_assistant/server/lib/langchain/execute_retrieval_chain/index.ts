@@ -82,7 +82,7 @@ export const callChainExecutor = async ({
       span.addLabels({ evaluationId: traceOptions?.evaluationId });
     }
 
-    return chain.call(
+    return chain.invoke(
       { question: latestMessage.content, chat_history: pastMessages },
       {
         callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
@@ -91,7 +91,12 @@ export const callChainExecutor = async ({
       }
     );
   });
-
+  console.log('what do we return here', {
+    connector_id: connectorId,
+    data: llm.getActionResultData(), // the response from the actions framework
+    trace_data: traceData,
+    status: 'ok',
+  });
   return {
     connector_id: connectorId,
     data: llm.getActionResultData(), // the response from the actions framework
