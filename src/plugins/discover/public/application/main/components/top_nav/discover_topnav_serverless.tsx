@@ -18,8 +18,10 @@ import type { DiscoverStateContainer } from '../../services/discover_state';
 
 export const DiscoverTopNavServerless = ({
   stateContainer,
+  hideNavMenuItems,
 }: {
   stateContainer: DiscoverStateContainer;
+  hideNavMenuItems?: boolean;
 }) => {
   const { customizationContext } = stateContainer;
   const services = useDiscoverServices();
@@ -45,14 +47,16 @@ export const DiscoverTopNavServerless = ({
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
       )}
-      <EuiHeaderSection side="right">
-        <EuiHeaderSectionItem>
-          <TopNavMenuBadges badges={topNavBadges} />
-        </EuiHeaderSectionItem>
-        <EuiHeaderSectionItem>
-          <TopNavMenuItems config={topNavMenu} />
-        </EuiHeaderSectionItem>
-      </EuiHeaderSection>
+      {!hideNavMenuItems && (
+        <EuiHeaderSection side="right" data-test-subj="topNavMenuItems">
+          <EuiHeaderSectionItem>
+            <TopNavMenuBadges badges={topNavBadges} />
+          </EuiHeaderSectionItem>
+          <EuiHeaderSectionItem>
+            <TopNavMenuItems config={topNavMenu} />
+          </EuiHeaderSectionItem>
+        </EuiHeaderSection>
+      )}
     </EuiHeader>
   );
 };

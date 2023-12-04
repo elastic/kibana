@@ -20,12 +20,13 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
 
-function getProps() {
+function getProps({ hideNavMenuItems }: { hideNavMenuItems?: boolean } = {}) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.internalState.transitions.setDataView(dataViewMock);
 
   return {
     stateContainer,
+    hideNavMenuItems,
   };
 }
 
@@ -83,6 +84,50 @@ describe('DiscoverTopNavServerless', () => {
     );
     const topNav = screen.queryByTestId('discoverTopNavServerless');
     expect(topNav).toBeNull();
+  });
+
+  describe('nav menu items', () => {
+    it('should show nav menu items when hideNavMenuItems is false', async () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          ...mockDiscoverService,
+          serverless: true,
+        },
+      });
+      const props = getProps();
+      render(
+        <DiscoverMainProvider value={props.stateContainer}>
+          <DiscoverTopNavServerless {...props} />
+        </DiscoverMainProvider>
+      );
+      const topNav = screen.queryByTestId('discoverTopNavServerless');
+      expect(topNav).not.toBeNull();
+      await waitFor(() => {
+        const topNavMenuItems = screen.queryByTestId('topNavMenuItems');
+        expect(topNavMenuItems).not.toBeNull();
+      });
+    });
+
+    it('should hide nav menu items when hideNavMenuItems is true', async () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          ...mockDiscoverService,
+          serverless: true,
+        },
+      });
+      const props = getProps({ hideNavMenuItems: true });
+      render(
+        <DiscoverMainProvider value={props.stateContainer}>
+          <DiscoverTopNavServerless {...props} />
+        </DiscoverMainProvider>
+      );
+      const topNav = screen.queryByTestId('discoverTopNavServerless');
+      expect(topNav).not.toBeNull();
+      await waitFor(() => {
+        const topNavMenuItems = screen.queryByTestId('topNavMenuItems');
+        expect(topNavMenuItems).toBeNull();
+      });
+    });
   });
 
   describe('LogExplorerTabs', () => {
