@@ -142,7 +142,7 @@ export const ManagedUser = ({
                         isDraggable={isDraggable}
                         contextID={contextID}
                         managedUser={oktaManagedUser.fields}
-                        tableType={UserAssetTableType.assetEntra}
+                        tableType={UserAssetTableType.assetOkta}
                       />
                     </ManagedUserAccordion>
                   )}
