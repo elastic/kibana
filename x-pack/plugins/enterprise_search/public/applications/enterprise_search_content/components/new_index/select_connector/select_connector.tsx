@@ -262,10 +262,16 @@ export const SelectConnector: React.FC = () => {
                   iconType={connector.icon}
                   isBeta={connector.isBeta}
                   isTechPreview={Boolean(connector.isTechPreview)}
-                  showNativeBadge={connector.isNative && hasNativeAccess}
+                  showNativeBadge={connector.isNative && !useClientsFilter}
                   name={connector.name}
                   serviceType={connector.serviceType}
-                  onConnectorSelect={(queryParams?: string) => {
+                  onConnectorSelect={(
+                    queryParams: string = `${
+                      connector.isNative && !useClientsFilter
+                        ? 'connector_type=native'
+                        : 'connector_type=connector_client'
+                    }`
+                  ) => {
                     KibanaLogic.values.navigateToUrl(
                       `${generateEncodedPath(NEW_INDEX_METHOD_PATH, {
                         type: INGESTION_METHOD_IDS.CONNECTOR,
