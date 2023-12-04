@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.assets.length).to.equal(10);
     });
 
-    it('supports hosts and services', async () => {
+    it('supports only hosts and services', async () => {
       await supertest
         .get(ASSETS_ENDPOINT)
         .query({
