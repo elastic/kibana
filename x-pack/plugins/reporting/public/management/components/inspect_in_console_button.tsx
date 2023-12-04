@@ -134,7 +134,7 @@ const getTextForConsole = (
 #
 # For reference about the Elasticsearch Point-In-Time
 # API, see
-# https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html.
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
 
 # The first query opens a Point-In-Time (PIT) context
 # and receive back the ID reference. The "keep_alive"
@@ -166,8 +166,8 @@ const getTextForConsole = (
 # The reponse will include new a PIT ID, which might
 # not be the same as the ID returned from the first
 # query.
-${queryRequest}
-${queryAsString}`,
+{queryRequest}
+{queryAsString}`,
       values: { queryRequest, queryAsString },
     }
   );
