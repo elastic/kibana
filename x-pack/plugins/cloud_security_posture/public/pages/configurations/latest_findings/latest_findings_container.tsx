@@ -6,13 +6,17 @@
  */
 import React, { useCallback } from 'react';
 import { Filter } from '@kbn/es-query';
-import { defaultLoadingRenderer } from '../../../components/cloud_posture_page';
+import { EuiSpacer } from '@elastic/eui';
+import { EmptyState } from '../../../components/empty_state';
 import { CloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import type { FindingsBaseProps } from '../../../common/types';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import { DEFAULT_TABLE_HEIGHT } from './constants';
 import { useLatestFindingsGrouping } from './use_latest_findings_grouping';
 import { LatestFindingsTable } from './latest_findings_table';
+import { groupPanelRenderer, groupStatsRenderer } from './latest_findings_group_renderer';
+import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
+import { ErrorCallout } from '../layout/error_callout';
 
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const renderChildComponent = useCallback(
@@ -30,7 +34,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   );
 
   const {
-    isGroupSelect,
+    isGroupSelected,
     groupData,
     grouping,
     isFetching,
@@ -41,26 +45,49 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     onChangeGroupsPage,
     setUrlQuery,
     isGroupLoading,
-  } = useLatestFindingsGrouping({ dataView });
+    onResetFilters,
+    error,
+    totalPassedFindings,
+    onDistributionBarClick,
+    totalFailedFindings,
+    isEmptyResults,
+  } = useLatestFindingsGrouping({ dataView, groupPanelRenderer, groupStatsRenderer });
 
-  if (isGroupSelect) {
-    return isGroupLoading ? (
-      defaultLoadingRenderer()
-    ) : (
-      <div>
+  if (error || isEmptyResults) {
+    return (
+      <>
         <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
-        <CloudSecurityGrouping
-          data={groupData}
-          grouping={grouping}
-          renderChildComponent={renderChildComponent}
-          onChangeGroupsItemsPerPage={onChangeGroupsItemsPerPage}
-          onChangeGroupsPage={onChangeGroupsPage}
-          activePageIndex={activePageIndex}
-          isFetching={isFetching}
-          pageSize={pageSize}
-          selectedGroup={selectedGroup}
-        />
-      </div>
+        <EuiSpacer size="m" />
+        {error && <ErrorCallout error={error} />}
+        {isEmptyResults && <EmptyState onResetFilters={onResetFilters} />}
+      </>
+    );
+  }
+  if (isGroupSelected) {
+    return (
+      <>
+        <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
+        <div>
+          <EuiSpacer size="m" />
+          <FindingsDistributionBar
+            distributionOnClick={onDistributionBarClick}
+            passed={totalPassedFindings}
+            failed={totalFailedFindings}
+          />
+          <CloudSecurityGrouping
+            data={groupData}
+            grouping={grouping}
+            renderChildComponent={renderChildComponent}
+            onChangeGroupsItemsPerPage={onChangeGroupsItemsPerPage}
+            onChangeGroupsPage={onChangeGroupsPage}
+            activePageIndex={activePageIndex}
+            isFetching={isFetching}
+            pageSize={pageSize}
+            selectedGroup={selectedGroup}
+            isGroupLoading={isGroupLoading}
+          />
+        </div>
+      </>
     );
   }
 
