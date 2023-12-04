@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionLegacyMetricPlugin } from './plugin';
-
-export function plugin() {
+export async function plugin() {
+  const { ExpressionLegacyMetricPlugin } = await import('./plugin');
   return new ExpressionLegacyMetricPlugin();
 }

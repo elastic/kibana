@@ -5,11 +5,10 @@
  * 2.0.
  */
 import React from 'react';
+import { EuiIcon } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom';
 import { TriggerButton } from './trigger';
-import { EuiIcon } from '@elastic/eui';
 
 describe('TriggerButton', () => {
   describe('base version (no icons)', () => {

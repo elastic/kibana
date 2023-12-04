@@ -41,7 +41,7 @@ import {
 export interface HomePluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   urlForwarding: UrlForwardingStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -104,7 +104,7 @@ export class HomePublicPlugin
           addDataService: this.addDataService,
           featureCatalogue: this.featuresCatalogueRegistry,
           welcomeService: this.welcomeService,
-          guidedOnboardingService: guidedOnboarding.guidedOnboardingApi,
+          guidedOnboardingService: guidedOnboarding?.guidedOnboardingApi,
           cloud,
         });
         coreStart.chrome.docTitle.change(

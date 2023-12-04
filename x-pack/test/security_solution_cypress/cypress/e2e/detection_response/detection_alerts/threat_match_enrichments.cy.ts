@@ -7,7 +7,6 @@
 
 import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../../objects/rule';
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import {
   JSON_TEXT,
@@ -31,7 +30,6 @@ describe(
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     before(() => {
-      cleanKibana();
       // illegal_argument_exception: unknown setting [index.lifecycle.rollover_alias]
       cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
       cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });

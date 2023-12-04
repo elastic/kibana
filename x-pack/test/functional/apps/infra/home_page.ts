@@ -114,7 +114,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.infraHome.clickDismissKubernetesTourButton();
 
-        await pageObjects.infraHome.ensureKubernetesTourIsClosed();
+        await retry.try(async () => {
+          await pageObjects.infraHome.ensureKubernetesTourIsClosed();
+        });
       });
 
       it('renders an empty data prompt for dates with no data', async () => {
@@ -144,7 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'cpuUsage', value: '0.8%' },
             { metric: 'normalizedLoad1m', value: '1.4%' },
             { metric: 'memoryUsage', value: '18.0%' },
-            { metric: 'diskSpaceUsage', value: '17.5%' },
+            { metric: 'diskUsage', value: '17.5%' },
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(3 * 1000, async () => {
@@ -197,6 +199,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           before(async () => {
             await pageObjects.infraHome.clickOnNode();
             await pageObjects.assetDetails.clickApmTabLink();
+            await pageObjects.infraHome.waitForLoading();
           });
 
           it('should navigate to APM traces', async () => {
@@ -204,9 +207,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const query = decodeURIComponent(url.query ?? '');
             const kuery = 'kuery=host.hostname:"demo-stack-nginx-01"';
 
-            expect(url.pathname).to.eql('/app/apm/traces');
-            expect(query).to.contain(kuery);
-
+            await retry.try(async () => {
+              expect(url.pathname).to.eql('/app/apm/traces');
+              expect(query).to.contain(kuery);
+            });
             await returnTo(INVENTORY_PATH);
           });
         });
@@ -234,12 +238,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
-            { name: 'demo-stack-mysql-01', value: 1.2, color: '#82a7cd' },
-            { name: 'demo-stack-nginx-01', value: 1.1, color: '#93b1d3' },
-            { name: 'demo-stack-redis-01', value: 1, color: '#a2bcd9' },
+            { name: 'demo-stack-apache-01', value: 1.2, color: '#6092c0' },
+            { name: 'demo-stack-mysql-01', value: 1, color: '#93b1d3' },
+            { name: 'demo-stack-nginx-01', value: 0.9, color: '#b2c7df' },
+            { name: 'demo-stack-redis-01', value: 0.8, color: '#b2c7df' },
             { name: 'demo-stack-haproxy-01', value: 0.8, color: '#c2d2e6' },
-            { name: 'demo-stack-client-01', value: 0.6, color: '#f0f4f9' },
+            { name: 'demo-stack-client-01', value: 0.5, color: '#f0f4f9' },
           ]);
         });
       });
@@ -252,12 +256,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-client-01', value: 0.6, color: '#f0f4f9' },
+            { name: 'demo-stack-client-01', value: 0.5, color: '#f0f4f9' },
             { name: 'demo-stack-haproxy-01', value: 0.8, color: '#c2d2e6' },
-            { name: 'demo-stack-redis-01', value: 1, color: '#a2bcd9' },
-            { name: 'demo-stack-nginx-01', value: 1.1, color: '#93b1d3' },
-            { name: 'demo-stack-mysql-01', value: 1.2, color: '#82a7cd' },
-            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
+            { name: 'demo-stack-redis-01', value: 0.8, color: '#b2c7df' },
+            { name: 'demo-stack-nginx-01', value: 0.9, color: '#b2c7df' },
+            { name: 'demo-stack-mysql-01', value: 1, color: '#93b1d3' },
+            { name: 'demo-stack-apache-01', value: 1.2, color: '#6092c0' },
           ]);
         });
       });
@@ -278,7 +282,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
+            { name: 'demo-stack-apache-01', value: 1.2, color: '#6092c0' },
           ]);
         });
         await pageObjects.infraHome.clearSearchTerm();
@@ -291,12 +295,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-client-01', value: 0.6, color: '#6092c0' },
+            { name: 'demo-stack-client-01', value: 0.5, color: '#6092c0' },
             { name: 'demo-stack-haproxy-01', value: 0.8, color: '#b5c9df' },
-            { name: 'demo-stack-redis-01', value: 1, color: '#f1d9b9' },
-            { name: 'demo-stack-nginx-01', value: 1.1, color: '#eec096' },
-            { name: 'demo-stack-mysql-01', value: 1.2, color: '#eba47a' },
-            { name: 'demo-stack-apache-01', value: 1.4, color: '#e7664c' },
+            { name: 'demo-stack-redis-01', value: 0.8, color: '#d0dcea' },
+            { name: 'demo-stack-nginx-01', value: 0.9, color: '#d0dcea' },
+            { name: 'demo-stack-mysql-01', value: 1, color: '#eec096' },
+            { name: 'demo-stack-apache-01', value: 1.2, color: '#e7664c' },
           ]);
         });
       });

@@ -30,11 +30,9 @@ export function isAgentUpgradeable(
   if (!agent.local_metadata.elastic.agent.upgradeable) {
     return false;
   }
-  // check that the agent is not already in the process of updating
-  if (agent.upgrade_started_at && !agent.upgraded_at) {
+  if (isAgentUpgrading(agent)) {
     return false;
   }
-  // check that the agent has not been upgraded more recently than the monitoring period
   if (getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) {
     return false;
   }
@@ -79,4 +77,11 @@ export function getRecentUpgradeInfoForAgent(agent: Agent): {
   const hasBeenUpgradedRecently = elaspedSinceUpgradeInMillis / 6e4 < AGENT_UPGRADE_COOLDOWN_IN_MIN;
 
   return { hasBeenUpgradedRecently, timeToWaitMs };
+}
+
+export function isAgentUpgrading(agent: Agent) {
+  if (agent.upgrade_details) {
+    return agent.upgrade_details.state !== 'UPG_FAILED';
+  }
+  return agent.upgrade_started_at && !agent.upgraded_at;
 }

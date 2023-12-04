@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
 import { ExpandableSection } from './expandable_section';
-import { VISUALIZATIONS_SECTION_TEST_ID } from './test_ids';
+import { VISUALIZATIONS_TEST_ID } from './test_ids';
 
 export interface VisualizationsSectionProps {
   /**
@@ -35,7 +35,7 @@ export const VisualizationsSection: React.FC<VisualizationsSectionProps> = ({
           defaultMessage="Visualizations"
         />
       }
-      data-test-subj={VISUALIZATIONS_SECTION_TEST_ID}
+      data-test-subj={VISUALIZATIONS_TEST_ID}
     >
       <SessionPreviewContainer />
 

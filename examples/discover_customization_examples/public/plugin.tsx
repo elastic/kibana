@@ -163,6 +163,17 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
               order: 300,
             },
           ],
+          getBadges: () => {
+            return [
+              {
+                data: {
+                  badgeText: 'Example badge',
+                  color: 'warning',
+                },
+                order: 10,
+              },
+            ];
+          },
         });
 
         customizations.set({

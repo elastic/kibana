@@ -71,6 +71,7 @@ const createStartContractMock = () => {
     project: {
       setHome: jest.fn(),
       setProjectsUrl: jest.fn(),
+      setProjectUrl: jest.fn(),
       setProjectName: jest.fn(),
       setNavigation: jest.fn(),
       setSideNavComponent: jest.fn(),

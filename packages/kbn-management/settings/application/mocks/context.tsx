@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { I18nStart } from '@kbn/core-i18n-browser';
 
 import { createFormServicesMock } from '@kbn/management-settings-components-form/mocks';
@@ -19,11 +20,13 @@ import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settin
 import { SettingsApplicationProvider, SettingsApplicationServices } from '../services';
 
 const createRootMock = () => {
+  const analytics = analyticsServiceMock.createAnalyticsServiceStart();
   const i18n: I18nStart = {
     Context: ({ children }) => <I18nProvider>{children}</I18nProvider>,
   };
   const theme = themeServiceMock.createStartContract();
   return {
+    analytics,
     i18n,
     theme,
   };

@@ -8,7 +8,6 @@
 
 import type { ReactNode } from 'react';
 
-import type { EuiAccordionProps } from '@elastic/eui';
 import type {
   AppDeepLinkId,
   ChromeProjectNavigationNode,
@@ -31,26 +30,15 @@ export interface NodeProps<
    * Children of the node. For Navigation.Item (only) it allows a function to be set.
    * This function will receive the ChromeProjectNavigationNode object
    */
-  children?: ((navNode: ChromeProjectNavigationNode) => ReactNode) | ReactNode;
-}
-
-/**
- * @internal
- *
- * Internally we enhance the Props passed to the Navigation.Item component.
- */
-export interface NodePropsEnhanced<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = string,
-  ChildrenId extends string = Id
-> extends NodeProps<LinkId, Id, ChildrenId> {
-  /**
-   * Forces the node to be active. This is used to force a collapisble nav group to be open
-   * even if the URL does not match any of the nodes in the group.
-   */
-  isActive?: boolean;
-  /** Flag to indicate if the navigation node is a group or not */
-  isGroup: boolean;
+  children?: ReactNode;
+  /** @internal - Prop internally controlled, don't use it. */
+  parentNodePath?: string;
+  /** @internal - Prop internally controlled, don't use it. */
+  rootIndex?: number;
+  /** @internal - Prop internally controlled, don't use it. */
+  treeDepth?: number;
+  /** @internal - Prop internally controlled, don't use it. */
+  index?: number;
 }
 
 /** The preset that can be pass to the NavigationBucket component */
@@ -76,20 +64,6 @@ export interface GroupDefinition<
   ChildrenId extends string = Id
 > extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
   type: 'navGroup';
-  /**
-   * Flag to indicate if the group is initially collapsed or not.
-   *
-   * `undefined`: (Recommended) the group will be opened if any of its children nodes matches the current URL.
-   *
-   * `false`: the group will be opened event if none of its children nodes matches the current URL.
-   *
-   * `true`: the group will be collapsed event if any of its children nodes matches the current URL.
-   */
-  defaultIsCollapsed?: boolean;
-  /*
-   * Pass props to the EUI accordion component used to represent a nav group
-   */
-  accordionProps?: Partial<EuiAccordionProps>;
   children: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
 }
 
@@ -196,16 +170,14 @@ export interface ProjectNavigationDefinition<
  *
  * Function to unregister a navigation node from its parent.
  */
-export type UnRegisterFunction = (id: string) => void;
+export type UnRegisterFunction = () => void;
 
 /**
  * @internal
  *
  * A function to register a navigation node on its parent.
  */
-export type RegisterFunction = (navNode: ChromeProjectNavigationNode) => {
-  /** The function to unregister the node. */
-  unregister: UnRegisterFunction;
-  /** The full path of the node in the navigation tree. */
-  path: string[];
-};
+export type RegisterFunction = (
+  navNode: ChromeProjectNavigationNode,
+  order?: number
+) => UnRegisterFunction;

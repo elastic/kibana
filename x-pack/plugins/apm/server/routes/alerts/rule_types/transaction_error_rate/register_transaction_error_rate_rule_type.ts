@@ -23,6 +23,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
@@ -39,7 +40,6 @@ import {
 } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
 import {
-  ApmRuleType,
   APM_SERVER_FEATURE_ID,
   formatTransactionErrorRateReason,
   RULE_TYPES_CONFIG,
@@ -83,9 +83,9 @@ export const transactionErrorRateActionVariables = [
 export function registerTransactionErrorRateRuleType({
   alerting,
   alertsLocator,
+  apmConfig,
   basePath,
   getApmIndices,
-  apmConfig,
   logger,
   ruleDataClient,
 }: RegisterRuleDependencies) {

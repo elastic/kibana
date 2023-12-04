@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { JsonObject } from '@kbn/utility-types';
+import { subtractMillisecondsFromDate } from '../../../../common/utils';
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
@@ -147,7 +148,7 @@ export class LogsSharedLogEntriesDomain implements ILogsSharedLogEntriesDomain {
     const cursorAfter =
       entriesBefore.length > 0
         ? entriesBefore[entriesBefore.length - 1].cursor
-        : { time: center.time - 1, tiebreaker: 0 };
+        : { time: subtractMillisecondsFromDate(center.time, 1), tiebreaker: 0 };
 
     const { entries: entriesAfter, hasMoreAfter } = await this.getLogEntries(
       requestContext,
@@ -200,7 +201,7 @@ export class LogsSharedLogEntriesDomain implements ILogsSharedLogEntriesDomain {
           if ('timestampColumn' in column) {
             return {
               columnId: column.timestampColumn.id,
-              timestamp: doc.cursor.time,
+              time: doc.cursor.time,
             };
           } else if ('messageColumn' in column) {
             return {

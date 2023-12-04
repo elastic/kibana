@@ -9,4 +9,6 @@ export { REFRESH_RATE_INDEX_LIST } from './refresh_intervals';
 
 export const REACT_ROOT_ID = 'indexManagementReactRoot';
 
+export const ENRICH_POLICIES_REQUIRED_PRIVILEGES = ['manage_enrich'];
+
 export * from './ilm_locator';

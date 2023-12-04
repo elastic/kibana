@@ -96,8 +96,11 @@ Array [
     "get_has_transactions",
     Object {
       "apm": Object {
-        "events": Array [
-          "transaction",
+        "sources": Array [
+          Object {
+            "documentType": "transactionEvent",
+            "rollupInterval": "none",
+          },
         ],
       },
       "body": Object {

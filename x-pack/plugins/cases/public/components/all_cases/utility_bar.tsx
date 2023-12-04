@@ -19,10 +19,12 @@ import {
 } from '@elastic/eui';
 import * as i18n from './translations';
 import type { CasesUI } from '../../../common/ui/types';
+import type { CasesColumnSelection } from './types';
 import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import { useRefreshCases } from './use_on_refresh_cases';
 import { useBulkActions } from './use_bulk_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { ColumnsPopover } from './columns_popover';
 import { MaxCasesWarning } from './max_cases_warning';
 
 interface Props {
@@ -31,10 +33,20 @@ interface Props {
   selectedCases: CasesUI;
   deselectCases: () => void;
   pagination: Pagination;
+  selectedColumns: CasesColumnSelection[];
+  onSelectedColumnsChange: (columns: CasesColumnSelection[]) => void;
 }
 
 export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
-  ({ isSelectorView, totalCases, selectedCases, deselectCases, pagination }) => {
+  ({
+    isSelectorView,
+    totalCases,
+    selectedCases,
+    deselectCases,
+    pagination,
+    selectedColumns,
+    onSelectedColumnsChange,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const refreshCases = useRefreshCases();
     const { permissions } = useCasesContext();
@@ -64,15 +76,15 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
 
     const visibleCases =
       pagination?.pageSize && totalCases > pagination.pageSize ? pagination.pageSize : totalCases;
-    
+
     const totalCasesDisplayed = totalCases > MAX_DOCS_PER_PAGE ? MAX_DOCS_PER_PAGE : totalCases;
 
-    console.log({visibleCases, totalCases, pagination})
+    console.log({ visibleCases, totalCases, pagination });
     return (
       <>
         <EuiFlexGroup
+          justifyContent="spaceBetween"
           alignItems="center"
-          justifyContent="flexStart"
           gutterSize="s"
           css={{
             borderBottom: euiTheme.border.thin,
@@ -82,69 +94,81 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
             paddingBottom: euiTheme.size.s,
           }}
         >
-          <EuiFlexItem
-            data-test-subj="case-table-case-count"
-            grow={false}
-            css={{
-              borderRight: euiTheme.border.thin,
-              paddingRight: euiTheme.size.s,
-            }}
-          >
-            <EuiText size="xs" color="subdued">
-              {i18n.SHOWING_CASES(totalCasesDisplayed, visibleCases)}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem data-test-subj="case-table-utility-bar-actions" grow={false}>
-            <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
-              {!isSelectorView && showBulkActions && (
-                <>
-                  <EuiFlexItem data-test-subj="case-table-selected-case-count" grow={false}>
-                    <EuiText size="xs" color="subdued">
-                      {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiPopover
-                      isOpen={isPopoverOpen}
-                      closePopover={closePopover}
-                      panelPaddingSize="none"
-                      data-test-subj="case-table-bulk-actions-popover"
-                      button={
-                        <EuiButtonEmpty
-                          onClick={togglePopover}
-                          size="xs"
-                          iconSide="right"
-                          iconType="arrowDown"
-                          flush="left"
-                          data-test-subj="case-table-bulk-actions-link-icon"
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
+              <EuiFlexItem
+                data-test-subj="case-table-case-count"
+                grow={false}
+                css={{
+                  borderRight: euiTheme.border.thin,
+                  paddingRight: euiTheme.size.s,
+                }}
+              >
+                <EuiText size="xs" color="subdued">
+                  {i18n.SHOWING_CASES(totalCasesDisplayed, visibleCases)}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem data-test-subj="case-table-utility-bar-actions" grow={false}>
+                <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+                  {!isSelectorView && showBulkActions && (
+                    <>
+                      <EuiFlexItem data-test-subj="case-table-selected-case-count" grow={false}>
+                        <EuiText size="xs" color="subdued">
+                          {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiPopover
+                          isOpen={isPopoverOpen}
+                          closePopover={closePopover}
+                          panelPaddingSize="none"
+                          data-test-subj="case-table-bulk-actions-popover"
+                          button={
+                            <EuiButtonEmpty
+                              onClick={togglePopover}
+                              size="xs"
+                              iconSide="right"
+                              iconType="arrowDown"
+                              flush="left"
+                              data-test-subj="case-table-bulk-actions-link-icon"
+                            >
+                              {i18n.BULK_ACTIONS}
+                            </EuiButtonEmpty>
+                          }
                         >
-                          {i18n.BULK_ACTIONS}
-                        </EuiButtonEmpty>
-                      }
+                          <EuiContextMenu
+                            panels={panels}
+                            initialPanelId={0}
+                            data-test-subj="case-table-bulk-actions-context-menu"
+                          />
+                        </EuiPopover>
+                      </EuiFlexItem>
+                    </>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      onClick={onRefresh}
+                      size="xs"
+                      iconSide="left"
+                      iconType="refresh"
+                      flush="left"
+                      data-test-subj="all-cases-refresh-link-icon"
                     >
-                      <EuiContextMenu
-                        panels={panels}
-                        initialPanelId={0}
-                        data-test-subj="case-table-bulk-actions-context-menu"
-                      />
-                    </EuiPopover>
+                      {i18n.REFRESH}
+                    </EuiButtonEmpty>
                   </EuiFlexItem>
-                </>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={onRefresh}
-                  size="xs"
-                  iconSide="left"
-                  iconType="refresh"
-                  flush="left"
-                  data-test-subj="all-cases-refresh-link-icon"
-                >
-                  {i18n.REFRESH}
-                </EuiButtonEmpty>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
+          {!isSelectorView && (
+            <EuiFlexItem grow={false}>
+              <ColumnsPopover
+                selectedColumns={selectedColumns}
+                onSelectedColumnsChange={onSelectedColumnsChange}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         {modals}
         {flyouts}

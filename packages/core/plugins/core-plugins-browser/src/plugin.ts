@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { MaybePromise } from '@kbn/utility-types';
 import type { CoreStart, CoreSetup } from '@kbn/core-lifecycle-browser';
 
 /**
@@ -23,5 +24,5 @@ export interface Plugin<
 
   start(core: CoreStart, plugins: TPluginsStart): TStart;
 
-  stop?(): void;
+  stop?(): MaybePromise<void>;
 }

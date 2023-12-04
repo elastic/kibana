@@ -7,26 +7,22 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { useState as useStateStorybook } from '@storybook/addons';
 import { ComponentMeta } from '@storybook/react';
 import React, { EventHandler, FC, MouseEvent, useState, useEffect } from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 
 import {
   EuiButton,
   EuiCollapsibleNavBeta,
   EuiCollapsibleNavBetaProps,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHeader,
   EuiHeaderSection,
   EuiLink,
   EuiPageTemplate,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 
-import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 import { NavigationStorybookMock, navLinksMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import type { NavigationServices } from '../../types';
@@ -34,7 +30,7 @@ import { NavigationProvider } from '../services';
 import { Navigation } from './components';
 import { DefaultNavigation } from './default_navigation';
 import { getPresets } from './nav_tree_presets';
-import type { GroupDefinition, ProjectNavigationDefinition } from './types';
+import type { ProjectNavigationDefinition } from './types';
 import { ContentProvider } from './components/panel';
 
 const storybookMock = new NavigationStorybookMock();
@@ -127,6 +123,13 @@ const deepLinks: ChromeNavLink[] = [
   createDeepLink('group:settings.tracing'),
 ];
 
+const deepLinks$ = of({
+  ...[...navLinksMock, ...deepLinks].reduce<Record<string, ChromeNavLink>>((acc, navLink) => {
+    acc[navLink.id] = navLink;
+    return acc;
+  }, {}),
+});
+
 const simpleNavigationDefinition: ProjectNavigationDefinition<any> = {
   projectNavigationTree: [
     {
@@ -182,7 +185,7 @@ const simpleNavigationDefinition: ProjectNavigationDefinition<any> = {
 export const SimpleObjectDefinition = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
+    deepLinks$,
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -197,6 +200,156 @@ export const SimpleObjectDefinition = (args: NavigationServices) => {
       <NavigationProvider {...services}>
         <DefaultNavigation {...simpleNavigationDefinition} />
       </NavigationProvider>
+    </NavigationWrapper>
+  );
+};
+
+const groupExamplesDefinition: ProjectNavigationDefinition<any> = {
+  navigationTree: {
+    body: [
+      // My custom project
+      {
+        type: 'navGroup',
+        id: 'example_projet',
+        title: 'Example project',
+        icon: 'logoObservability',
+        defaultIsCollapsed: false,
+        children: [
+          {
+            title: 'Block group',
+            children: [
+              {
+                id: 'item1',
+                link: 'item1',
+                title: 'Item 1',
+              },
+              {
+                id: 'item2',
+                link: 'item1',
+                title: 'Item 2',
+              },
+              {
+                id: 'item3',
+                link: 'item1',
+                title: 'Item 3',
+              },
+            ],
+          },
+          {
+            title: 'Accordion group',
+            renderAs: 'accordion',
+            children: [
+              {
+                id: 'item1',
+                link: 'item1',
+                title: 'Item 1',
+              },
+              {
+                id: 'item2',
+                link: 'item1',
+                title: 'Item 2',
+              },
+              {
+                id: 'item3',
+                link: 'item1',
+                title: 'Item 3',
+              },
+            ],
+          },
+          {
+            children: [
+              {
+                id: 'item1',
+                link: 'item1',
+                title: 'Block group',
+              },
+              {
+                id: 'item2',
+                link: 'item1',
+                title: 'without',
+              },
+              {
+                id: 'item3',
+                link: 'item1',
+                title: 'title',
+              },
+            ],
+          },
+          {
+            id: 'group:settings',
+            link: 'item1',
+            title: 'Panel group',
+            renderAs: 'panelOpener',
+            children: [
+              {
+                title: 'Group 1',
+                children: [
+                  {
+                    link: 'group:settings.logs',
+                    title: 'Logs',
+                  },
+                  {
+                    link: 'group:settings.signals',
+                    title: 'Signals',
+                  },
+                  {
+                    id: 'group:settings.signals-2',
+                    link: 'group:settings.signals',
+                    title: 'Signals - should NOT appear',
+                    sideNavStatus: 'hidden', // Should not appear
+                  },
+                  {
+                    link: 'group:settings.tracing',
+                    title: 'Tracing',
+                  },
+                ],
+              },
+              {
+                id: 'group.nestedGroup',
+                link: 'group:settings.tracing',
+                title: 'Group 2',
+                children: [
+                  {
+                    id: 'item1',
+                    link: 'group:settings.signals',
+                    title: 'Some link title',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    footer: [
+      {
+        type: 'navGroup',
+        ...getPresets('devtools'),
+      },
+    ],
+  },
+};
+
+export const GroupsExamples = (args: NavigationServices) => {
+  const services = storybookMock.getServices({
+    ...args,
+    deepLinks$,
+    onProjectNavigationChange: (updated) => {
+      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
+    },
+    recentlyAccessed$: of([
+      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+      { label: 'Another example', link: '/app/example/5235', id: '5235' },
+    ]),
+  });
+
+  return (
+    <NavigationWrapper>
+      {({ isCollapsed }) => (
+        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+          <DefaultNavigation {...groupExamplesDefinition} />
+        </NavigationProvider>
+      )}
     </NavigationWrapper>
   );
 };
@@ -217,6 +370,26 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
             title: 'Get started',
           },
           {
+            title: 'Group 1',
+            children: [
+              {
+                id: 'item1',
+                link: 'item1',
+                title: 'Item 1',
+              },
+              {
+                id: 'item2',
+                link: 'item1',
+                title: 'Item 2',
+              },
+              {
+                id: 'item3',
+                link: 'item1',
+                title: 'Item 3',
+              },
+            ],
+          },
+          {
             link: 'item2',
             title: 'Alerts',
           },
@@ -233,6 +406,7 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
           {
             id: 'group:settings-2',
             title: 'Settings as nav Item',
+            link: 'item1',
             renderAs: 'item', // Render just like any other item, even if it has children
             children: [
               {
@@ -352,6 +526,7 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
         id: 'test_all_hidden',
         title: 'Test group render as Item',
         renderAs: 'item',
+        link: 'item1',
         children: [
           {
             id: 'test.item1',
@@ -408,7 +583,7 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
 export const ComplexObjectDefinition = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
+    deepLinks$,
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -463,9 +638,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
         title: 'Example project',
         icon: 'logoObservability',
         defaultIsCollapsed: false,
-        accordionProps: {
-          arrowProps: { css: { display: 'none' } },
-        },
+        isCollapsible: false,
         children: [
           {
             link: 'item1',
@@ -683,7 +856,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                 id: 'root',
                 children: [
                   {
-                    title: 'Should act as item 1',
+                    title: 'Group renders as "item" (1)',
                     link: 'item1',
                     renderAs: 'item',
                     children: [
@@ -699,7 +872,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                   },
                   {
                     link: 'group:settings.logs',
-                    title: 'Normal item',
+                    title: 'Item 2',
                   },
                   {
                     link: 'group:settings.logs2',
@@ -723,26 +896,9 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                     ],
                   },
                   {
-                    title: 'Should act as item 2',
-                    renderAs: 'item', // This group renders as a normal item
-                    children: [
-                      {
-                        link: 'group:settings.logs',
-                        title: 'Logs',
-                      },
-                      {
-                        link: 'group:settings.signals',
-                        title: 'Signals',
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                children: [
-                  {
-                    title: 'Another group as Item',
+                    title: 'Group renders as "item" (2)',
                     id: 'group2.renderAsItem',
+                    link: 'item1',
                     renderAs: 'item',
                     children: [
                       {
@@ -797,7 +953,8 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                     children: [
                       {
                         id: 'group2-B',
-                        title: 'Group 2 (render as Item)',
+                        link: 'item1',
+                        title: 'Group renders as "item" (3)',
                         renderAs: 'item', // This group renders as a normal item
                         children: [
                           {
@@ -830,6 +987,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                       },
                       {
                         title: 'Yet another group as item',
+                        link: 'item1',
                         renderAs: 'item',
                         children: [
                           {
@@ -928,7 +1086,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
 export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
+    deepLinks$,
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -952,10 +1110,69 @@ export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
   );
 };
 
+export const WithUIComponentsTiny = (args: NavigationServices) => {
+  const services = storybookMock.getServices({
+    ...args,
+    deepLinks$,
+    onProjectNavigationChange: (updated) => {
+      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
+    },
+    recentlyAccessed$: of([
+      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+      { label: 'Another example', link: '/app/example/5235', id: '5235' },
+    ]),
+  });
+
+  return (
+    <NavigationWrapper>
+      {({ isCollapsed }) => (
+        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+          <Navigation>
+            <Navigation.Group
+              // id="example_projet"
+              title="Example project"
+              icon="logoObservability"
+              defaultIsCollapsed={false}
+              isCollapsible={false}
+            >
+              <Navigation.Group
+                // id="hello"
+                title="Hello"
+                renderAs="accordion"
+                defaultIsCollapsed={false}
+              >
+                <Navigation.Item<any> id="item1" link="item1" />
+              </Navigation.Group>
+            </Navigation.Group>
+            <Navigation.Item<any> id="item2" link="item1" title="YEAH!!" icon="launch" />
+            <Navigation.Footer>
+              <Navigation.Item link="dev_tools" icon="editorCodeBlock" title="Developer tools" />
+              <Navigation.Group
+                // id="project_settings_project_nav"
+                title="Project settings"
+                breadcrumbStatus="hidden"
+                icon="gear"
+              >
+                <Navigation.Item link="management" title="Management" />
+                <Navigation.Group title="Sub group" icon="gear">
+                  <Navigation.Item link="management" title="Management" />
+                  <Navigation.Group title="Sub group" icon="gear">
+                    <Navigation.Item link="management" title="Management" />
+                  </Navigation.Group>
+                </Navigation.Group>
+              </Navigation.Group>
+            </Navigation.Footer>
+          </Navigation>
+        </NavigationProvider>
+      )}
+    </NavigationWrapper>
+  );
+};
+
 export const WithUIComponents = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
+    deepLinks$,
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -979,7 +1196,7 @@ export const WithUIComponents = (args: NavigationServices) => {
               defaultIsCollapsed={false}
             >
               <Navigation.Item<any> id="item1" link="item1" />
-              <Navigation.Item id="item2" title="Alerts">
+              {/* <Navigation.Item id="item2" title="Alerts">
                 {(navNode) => {
                   return (
                     <div className="euiSideNavItemButton">
@@ -987,13 +1204,26 @@ export const WithUIComponents = (args: NavigationServices) => {
                     </div>
                   );
                 }}
-              </Navigation.Item>
+              </Navigation.Item> */}
               <Navigation.Item id="item3" title="Title in ReactNode">
                 <div className="euiSideNavItemButton">
                   <EuiLink>Title in ReactNode</EuiLink>
                 </div>
               </Navigation.Item>
               <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
+
+              <Navigation.Group<any> id="group:block" title="This is a block group">
+                <Navigation.Group id="group1">
+                  <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                  <Navigation.Item<any> link="group:settings.signals" title="Signals" withBadge />
+                  <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                </Navigation.Group>
+                <Navigation.Group id="group2" title="Nested group" renderAs="accordion">
+                  <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                  <Navigation.Item<any> link="group:settings.signals" title="Signals" />
+                  <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                </Navigation.Group>
+              </Navigation.Group>
 
               <Navigation.Group<any>
                 id="group:openPanel"
@@ -1063,7 +1293,7 @@ export const WithUIComponents = (args: NavigationServices) => {
 export const MinimalUI = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
+    deepLinks$,
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -1106,230 +1336,6 @@ export const MinimalUI = (args: NavigationServices) => {
             </Navigation.Group>
           </Navigation.Group>
         </Navigation>
-      </NavigationProvider>
-    </NavigationWrapper>
-  );
-};
-
-export const CreativeUI = (args: NavigationServices) => {
-  const services = storybookMock.getServices({
-    ...args,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
-    onProjectNavigationChange: (updated) => {
-      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
-    },
-    recentlyAccessed$: of([
-      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
-      { label: 'Another example', link: '/app/example/5235', id: '5235' },
-    ]),
-  });
-
-  return (
-    <NavigationWrapper>
-      <NavigationProvider {...services}>
-        <Navigation unstyled>
-          <EuiFlexGroup direction="column" css={{ backgroundColor: 'pink', height: '100%' }}>
-            <EuiFlexItem grow>
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="none"
-                style={{ overflowY: 'auto' }}
-                justifyContent="spaceBetween"
-              >
-                <EuiFlexItem grow={false} css={{ padding: '12px' }}>
-                  <EuiTitle>
-                    <h3>Hello!</h3>
-                  </EuiTitle>
-
-                  <Navigation.Group id="myProject" title="My project" icon="logoObservability">
-                    <ul css={{ margin: '1em' }}>
-                      <Navigation.Item id="item1" title="Star wars movies">
-                        <li
-                          css={{
-                            marginLeft: '20px',
-                            listStyle: 'disc outside none',
-                            marginBottom: '8px',
-                          }}
-                        >
-                          <a href="/">Star wars movies</a>
-                        </li>
-                      </Navigation.Item>
-
-                      <Navigation.Item id="item2" title="My library">
-                        {(navNode) => {
-                          return (
-                            <li
-                              css={{
-                                marginLeft: '20px',
-                                listStyle: 'disc outside none',
-                                marginBottom: '8px',
-                              }}
-                            >
-                              <a href="/">From prop -- {navNode.title}</a>
-                            </li>
-                          );
-                        }}
-                      </Navigation.Item>
-
-                      <Navigation.Item id="item3" title="You must see this">
-                        <li
-                          css={{
-                            marginLeft: '20px',
-                            listStyle: 'disc outside none',
-                            marginBottom: '8px',
-                            color: 'yellow',
-                            fontWeight: 700,
-                          }}
-                        >
-                          You must see this
-                        </li>
-                      </Navigation.Item>
-                    </ul>
-                  </Navigation.Group>
-                  <p>
-                    <em>As you can see there is really no limit in what UI you can create!</em>
-                    <br />
-                  </p>
-                  <p css={{ marginTop: '24px', textAlign: 'center' }}>
-                    <EuiButton>Have fun!</EuiButton>
-                  </p>
-                </EuiFlexItem>
-
-                <EuiFlexItem
-                  grow={false}
-                  css={{
-                    borderTop: '2px solid yellow',
-                    padding: '20px',
-                    height: '160px',
-                    backgroundImage: `url('https://images.unsplash.com/photo-1606041008023-472dfb5e530f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2333&q=80')`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    color: 'white',
-                  }}
-                />
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Navigation>
-      </NavigationProvider>
-    </NavigationWrapper>
-  );
-};
-
-export const UpdatingState = (args: NavigationServices) => {
-  const simpleGroupDef: GroupDefinition = {
-    type: 'navGroup',
-    id: 'observability_project_nav',
-    title: 'Observability',
-    icon: 'logoObservability',
-    children: [
-      {
-        id: 'aiops',
-        title: 'AIOps',
-        icon: 'branch',
-        children: [
-          {
-            title: 'Anomaly detection',
-            id: 'ml:anomalyDetection',
-            link: 'ml:anomalyDetection',
-          },
-          {
-            title: 'Log Rate Analysis',
-            id: 'ml:logRateAnalysis',
-            link: 'ml:logRateAnalysis',
-          },
-          {
-            title: 'Change Point Detections',
-            link: 'ml:changePointDetections',
-            id: 'ml:changePointDetections',
-          },
-          {
-            title: 'Job Notifications',
-            link: 'ml:notifications',
-            id: 'ml:notifications',
-          },
-        ],
-      },
-      {
-        id: 'project_settings_project_nav',
-        title: 'Project settings',
-        icon: 'gear',
-        children: [
-          { id: 'management', link: 'management' },
-          { id: 'integrations', link: 'integrations' },
-          { id: 'fleet', link: 'fleet' },
-        ],
-      },
-    ],
-  };
-  const firstSection = simpleGroupDef.children![0];
-  const firstSectionFirstChild = firstSection.children![0];
-  const secondSection = simpleGroupDef.children![1];
-  const secondSectionFirstChild = secondSection.children![0];
-
-  const activeNodeSets: ChromeProjectNavigationNode[][][] = [
-    [
-      [
-        {
-          ...simpleGroupDef,
-          path: [simpleGroupDef.id],
-        } as unknown as ChromeProjectNavigationNode,
-        {
-          ...firstSection,
-          path: [simpleGroupDef.id, firstSection.id],
-        } as unknown as ChromeProjectNavigationNode,
-        {
-          ...firstSectionFirstChild,
-          path: [simpleGroupDef.id, firstSection.id, firstSectionFirstChild.id],
-        } as unknown as ChromeProjectNavigationNode,
-      ],
-    ],
-    [
-      [
-        {
-          ...simpleGroupDef,
-          path: [simpleGroupDef.id],
-        } as unknown as ChromeProjectNavigationNode,
-        {
-          ...secondSection,
-          path: [simpleGroupDef.id, secondSection.id],
-        } as unknown as ChromeProjectNavigationNode,
-        {
-          ...secondSectionFirstChild,
-          path: [simpleGroupDef.id, secondSection.id, secondSectionFirstChild.id],
-        } as unknown as ChromeProjectNavigationNode,
-      ],
-    ],
-  ];
-
-  // use state to track which element of activeNodeSets is active
-  const [activeNodeIndex, setActiveNodeIndex] = useStateStorybook<number>(0);
-  const changeActiveNode = () => {
-    const value = (activeNodeIndex + 1) % 2; // toggle between 0 and 1
-    setActiveNodeIndex(value);
-  };
-
-  const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
-  activeNodes$.next(activeNodeSets[activeNodeIndex]);
-
-  const services = storybookMock.getServices({
-    ...args,
-    activeNodes$,
-    navLinks$: of([...navLinksMock, ...deepLinks]),
-    onProjectNavigationChange: (updated) => {
-      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
-    },
-  });
-
-  return (
-    <NavigationWrapper clickAction={changeActiveNode} clickActionText="Change active node">
-      <NavigationProvider {...services}>
-        <DefaultNavigation
-          navigationTree={{
-            body: [simpleGroupDef],
-          }}
-        />
       </NavigationProvider>
     </NavigationWrapper>
   );

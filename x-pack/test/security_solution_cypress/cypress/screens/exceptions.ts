@@ -243,7 +243,7 @@ export const EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU =
   '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuEmptyButton"]';
 
 export const EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM =
-  '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuMenuPanel"] div button';
+  '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuMenuPanel"] .euiContextMenuItem';
 
 export const EXCEPTION_LIST_DETAIL_MENU_ITEMS =
   '[data-test-subj="exceptionListManagementRightSideMenuItemsMenuActionsButtonIcon"]';
@@ -270,3 +270,8 @@ export const EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE =
 export const EXECPTION_ITEM_CARD_HEADER_TITLE = '[data-test-subj="exceptionItemCardHeaderTitle"]';
 
 export const EMPTY_EXCEPTIONS_VIEWER = '[data-test-subj="emptyViewerState"]';
+
+export const EXCEPTIONS_ITEM_ERROR_CALLOUT = '[data-test-subj="addExceptionErrorCallOut"]';
+
+export const EXCEPTIONS_ITEM_ERROR_DISMISS_BUTTON =
+  '[data-test-subj="addExceptionErrorDismissButton"]';

@@ -59,7 +59,7 @@ export const RISK_SCORE_MODULE_STATUS_OFF = i18n.translate(
 export const ENTITY_RISK_SCORING = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.entityRiskScoring',
   {
-    defaultMessage: 'Entity risk scoring',
+    defaultMessage: 'Entity risk score',
   }
 );
 
@@ -70,10 +70,10 @@ export const USEFUL_LINKS = i18n.translate(
   }
 );
 
-export const EA_DOCS_DASHBOARD = i18n.translate(
+export const EA_DASHBOARD_LINK = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.eaDocsDashboard',
   {
-    defaultMessage: 'Entity Analytics documentation',
+    defaultMessage: 'Entity Analytics dashboard',
   }
 );
 
@@ -88,6 +88,13 @@ export const EA_DOCS_RISK_USERS = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.eaDocsUsers',
   {
     defaultMessage: 'User risk score',
+  }
+);
+
+export const EA_DOCS_ENTITY_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.eaDocsEntities',
+  {
+    defaultMessage: 'How is the risk score calculated?',
   }
 );
 
@@ -249,14 +256,15 @@ export const UPDATE_PANEL_GO_TO_DISMISS = i18n.translate(
 export const getMaxSpaceTitle = (maxSpaces: number) =>
   i18n.translate('xpack.securitySolution.riskScore.maxSpacePanel.title', {
     defaultMessage:
-      'Entity Risk Scoring in the current version can run in {maxSpaces, plural, =1 {# Kibana space} other {# Kibana spaces}}',
+      'You cannot enable entity risk scoring in more than {maxSpaces, plural, =1 {# Kibana space} other {# Kibana spaces}}.',
     values: { maxSpaces },
   });
 
 export const MAX_SPACE_PANEL_MESSAGE = i18n.translate(
   'xpack.securitySolution.riskScore.maxSpacePanel.message',
   {
-    defaultMessage: 'Please disable a currently running engine before enabling it here.',
+    defaultMessage:
+      'You can disable entity risk scoring in the space it is currently enabled before enabling it in this space',
   }
 );
 

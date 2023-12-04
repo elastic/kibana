@@ -33,6 +33,7 @@ import { FilterGroup } from '../../../common/components/filter_group';
 import type { AlertsTableComponentProps } from '../../components/alerts_table/alerts_grouping';
 import { getMockedFilterGroupWithCustomFilters } from '../../../common/components/filter_group/mocks';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { useUpsellingMessage } from '../../../common/hooks/use_upselling';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -219,6 +220,7 @@ jest.mock('../../components/alerts_table/timeline_actions/use_add_bulk_to_timeli
 
 jest.mock('../../../common/components/visualization_actions/lens_embeddable');
 jest.mock('../../../common/components/page/use_refetch_by_session');
+jest.mock('../../../common/hooks/use_upselling');
 
 describe('DetectionEnginePageComponent', () => {
   beforeAll(() => {
@@ -239,6 +241,7 @@ describe('DetectionEnginePageComponent', () => {
     (FilterGroup as jest.Mock).mockImplementation(() => {
       return <span />;
     });
+    (useUpsellingMessage as jest.Mock).mockReturnValue('Go for Platinum!');
   });
   beforeEach(() => {
     jest.clearAllMocks();

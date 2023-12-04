@@ -18,7 +18,7 @@ import { ESQL_TYPE, ESQL_QUERY_BAR } from '../../../screens/create_new_rule';
 
 import { getDetails, goBackToRulesTable } from '../../../tasks/rule_details';
 import { expectNumberOfRules } from '../../../tasks/alerts_detection_rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   fillAboutRuleAndContinue,
   fillDefineEsqlRuleAndContinue,
@@ -35,11 +35,6 @@ import { visit } from '../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
-  before(() => {
-    cleanKibana();
-    login();
-  });
-
   const rule = getEsqlRule();
   const expectedNumberOfRules = 1;
 
@@ -90,7 +85,8 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     });
   });
 
-  describe('ES|QL query validation', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172074
+  describe.skip('ES|QL query validation', () => {
     beforeEach(() => {
       login();
       visit(CREATE_RULE_URL);

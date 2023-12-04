@@ -54,6 +54,7 @@ import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
+import { ESQLTechPreviewCallout } from './esql_tech_preview_callout';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -73,6 +74,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     history,
     spaces,
     inspector,
+    docLinks,
   } = useDiscoverServices();
   const { euiTheme } = useEuiTheme();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
@@ -112,8 +114,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const resultState = useMemo(
-    () => getResultState(dataState.fetchStatus, dataState.foundDocuments!, isPlainRecord),
-    [dataState.fetchStatus, dataState.foundDocuments, isPlainRecord]
+    () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false),
+    [dataState.fetchStatus, dataState.foundDocuments]
   );
 
   const onOpenInspector = useInspector({
@@ -206,6 +208,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
     return (
       <>
+        {/* Temporarily display a tech preview callout for ES|QL*/}
+        {isPlainRecord && <ESQLTechPreviewCallout docLinks={docLinks} />}
         <DiscoverHistogramLayout
           isPlainRecord={isPlainRecord}
           dataView={dataView}
@@ -223,6 +227,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [
     currentColumns,
     dataView,
+    docLinks,
     isPlainRecord,
     mainContainer,
     onAddFilter,
@@ -333,7 +338,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                         }
                       )}
                       error={dataState.error}
-                      data-test-subj="discoverNoResultsError"
                     />
                   ) : (
                     <DiscoverNoResults

@@ -5,28 +5,36 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
-// import { ES_RESOURCES } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/serverless';
-
 export interface CreateTestConfigOptions {
   testFiles: string[];
   junit: { reportName: string };
+  kbnTestServerArgs?: string[];
+  kbnTestServerEnv?: Record<string, string>;
 }
+import { services } from '../../../../test_serverless/api_integration/services';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(
       require.resolve('../../../../test_serverless/shared/config.base.ts')
     );
-
     return {
       ...svlSharedConfig.getAll(),
+      services: {
+        ...services,
+      },
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
-        serverArgs: [...svlSharedConfig.get('kbnTestServer.serverArgs'), '--serverless=security'],
+        serverArgs: [
+          ...svlSharedConfig.get('kbnTestServer.serverArgs'),
+          '--serverless=security',
+          ...(options.kbnTestServerArgs || []),
+        ],
+        env: {
+          ...svlSharedConfig.get('kbnTestServer.env'),
+          ...options.kbnTestServerEnv,
+        },
       },
-      // esServerlessOptions: {
-      //   resources: Object.values(ES_RESOURCES),
-      // },
       testFiles: options.testFiles,
       junit: options.junit,
 

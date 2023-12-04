@@ -12,6 +12,9 @@ import {
   bedrockSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
 import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
+import { PassThrough } from 'stream';
+import { EventStreamCodec } from '@smithy/eventstream-codec';
+import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -30,7 +33,9 @@ const defaultConfig = {
 export default function bedrockTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const configService = getService('config');
+  const retry = getService('retry');
   const createConnector = async (apiUrl: string, spaceId?: string) => {
     const result = await supertest
       .post(`${getUrlPrefix(spaceId ?? 'default')}/api/actions/connector`)
@@ -407,6 +412,104 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               data: { message: bedrockSuccessResponse.completion },
             });
           });
+
+          it('should invoke stream with assistant AI body argument formatted to bedrock expectations', async () => {
+            await new Promise<void>((resolve, reject) => {
+              const passThrough = new PassThrough();
+
+              supertest
+                .post(`/internal/elastic_assistant/actions/connector/${bedrockActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .on('error', reject)
+                .send({
+                  params: {
+                    subAction: 'invokeStream',
+                    subActionParams: {
+                      messages: [
+                        {
+                          role: 'user',
+                          content: 'Hello world',
+                        },
+                      ],
+                    },
+                  },
+                  assistantLangChain: false,
+                })
+                .pipe(passThrough);
+              const responseBuffer: Uint8Array[] = [];
+              passThrough.on('data', (chunk) => {
+                responseBuffer.push(chunk);
+              });
+
+              passThrough.on('end', () => {
+                const parsed = parseBedrockBuffer(responseBuffer);
+                expect(parsed).to.eql('Hello world, what a unique string!');
+                resolve();
+              });
+            });
+          });
+
+          describe('Token tracking dashboard', () => {
+            const dashboardId = 'specific-dashboard-id-default';
+
+            it('should not create a dashboard when user does not have kibana event log permissions', async () => {
+              const { body } = await supertestWithoutAuth
+                .post(`/api/actions/connector/${bedrockActionId}/_execute`)
+                .auth('global_read', 'global_read-password')
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'getDashboard',
+                    subActionParams: {
+                      dashboardId,
+                    },
+                  },
+                })
+                .expect(200);
+
+              // check dashboard has not been created
+              await supertest
+                .get(`/api/saved_objects/dashboard/${dashboardId}`)
+                .set('kbn-xsrf', 'foo')
+                .expect(404);
+              expect(body).to.eql({
+                status: 'ok',
+                connector_id: bedrockActionId,
+                data: { available: false },
+              });
+            });
+
+            it('should create a dashboard when user has correct permissions', async () => {
+              const { body } = await supertest
+                .post(`/api/actions/connector/${bedrockActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'getDashboard',
+                    subActionParams: {
+                      dashboardId,
+                    },
+                  },
+                })
+                .expect(200);
+
+              // check dashboard has been created
+              await retry.try(async () =>
+                supertest
+                  .get(`/api/saved_objects/dashboard/${dashboardId}`)
+                  .set('kbn-xsrf', 'foo')
+                  .expect(200)
+              );
+
+              objectRemover.add('default', dashboardId, 'dashboard', 'saved_objects');
+
+              expect(body).to.eql({
+                status: 'ok',
+                connector_id: bedrockActionId,
+                data: { available: true },
+              });
+            });
+          });
         });
       });
 
@@ -478,4 +581,47 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
       });
     });
   });
+}
+
+const parseBedrockBuffer = (chunks: Uint8Array[]): string => {
+  let bedrockBuffer: Uint8Array = new Uint8Array(0);
+
+  return chunks
+    .map((chunk) => {
+      bedrockBuffer = concatChunks(bedrockBuffer, chunk);
+      let messageLength = getMessageLength(bedrockBuffer);
+      const buildChunks = [];
+      while (bedrockBuffer.byteLength > 0 && bedrockBuffer.byteLength >= messageLength) {
+        const extractedChunk = bedrockBuffer.slice(0, messageLength);
+        buildChunks.push(extractedChunk);
+        bedrockBuffer = bedrockBuffer.slice(messageLength);
+        messageLength = getMessageLength(bedrockBuffer);
+      }
+
+      const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
+
+      return buildChunks
+        .map((bChunk) => {
+          const event = awsDecoder.decode(bChunk);
+          const body = JSON.parse(
+            Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
+          );
+          return body.completion;
+        })
+        .join('');
+    })
+    .join('');
+};
+
+function concatChunks(a: Uint8Array, b: Uint8Array): Uint8Array {
+  const newBuffer = new Uint8Array(a.length + b.length);
+  newBuffer.set(a);
+  newBuffer.set(b, a.length);
+  return newBuffer;
+}
+
+function getMessageLength(buffer: Uint8Array): number {
+  if (buffer.byteLength === 0) return 0;
+  const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+  return view.getUint32(0, false);
 }

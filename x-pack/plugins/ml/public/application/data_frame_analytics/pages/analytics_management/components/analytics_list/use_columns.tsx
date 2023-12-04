@@ -37,6 +37,8 @@ import { useActions } from './use_actions';
 import { useMlLink } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
+const TRUNCATE_TEXT_LINES = 3;
+
 enum TASK_STATE_COLOR {
   analyzing = 'primary',
   failed = 'danger',
@@ -212,9 +214,12 @@ export const useColumns = (
         defaultMessage: 'ID',
       }),
       sortable: (item: DataFrameAnalyticsListRow) => item.id,
-      truncateText: true,
+      truncateText: { lines: TRUNCATE_TEXT_LINES },
       'data-test-subj': 'mlAnalyticsTableColumnId',
       scope: 'row',
+      render: (id: string) => {
+        return <span title={id}>{id}</span>;
+      },
     },
     {
       field: DataFrameAnalyticsListColumn.description,
@@ -222,8 +227,11 @@ export const useColumns = (
         defaultMessage: 'Description',
       }),
       sortable: true,
-      truncateText: true,
+      truncateText: { lines: TRUNCATE_TEXT_LINES },
       'data-test-subj': 'mlAnalyticsTableColumnJobDescription',
+      render: (description: string) => {
+        return <span title={description}>{description}</span>;
+      },
     },
     {
       field: DataFrameAnalyticsListColumn.memoryStatus,

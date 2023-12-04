@@ -45,11 +45,8 @@ import {
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
-import type {
-  SourceProviderProps,
-  UseNodeMetricsTableOptions,
-} from './components/infrastructure_node_metrics_tables/shared';
 import { InventoryViewsServiceStart } from './services/inventory_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
 import { ITelemetryClient } from './services/telemetry';
@@ -65,15 +62,6 @@ export interface InfraClientStartExports {
   metricsExplorerViews?: MetricsExplorerViewsServiceStart;
   telemetry: ITelemetryClient;
   locators: InfraLocators;
-  ContainerMetricsTable: (
-    props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
-  ) => JSX.Element;
-  HostMetricsTable: (
-    props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
-  ) => JSX.Element;
-  PodMetricsTable: (
-    props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
-  ) => JSX.Element;
 }
 
 export interface InfraClientSetupDeps {
@@ -90,6 +78,7 @@ export interface InfraClientSetupDeps {
   lens: LensPublicStart;
   fieldFormats: FieldFormatsSetup;
   licensing: LicensingPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface InfraClientStartDeps {
@@ -100,6 +89,8 @@ export interface InfraClientStartDeps {
   discover: DiscoverStart;
   embeddable?: EmbeddableStart;
   kibanaVersion?: string;
+  isCloudEnv: boolean;
+  isServerlessEnv: boolean;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;
   ml: MlPluginStart;

@@ -49,6 +49,13 @@ export const validateKafkaHost = (input: string): string | undefined => {
   return undefined;
 };
 
+const secretRefSchema = schema.oneOf([
+  schema.object({
+    id: schema.string(),
+  }),
+  schema.string(),
+]);
+
 /**
  * Base schemas
  */
@@ -117,6 +124,32 @@ const ElasticSearchUpdateSchema = {
 };
 
 /**
+ * Remote Elasticsearch schemas
+ */
+
+export const RemoteElasticSearchSchema = {
+  ...ElasticSearchSchema,
+  type: schema.literal(outputType.RemoteElasticsearch),
+  service_token: schema.maybe(schema.string()),
+  secrets: schema.maybe(
+    schema.object({
+      service_token: schema.maybe(secretRefSchema),
+    })
+  ),
+};
+
+const RemoteElasticSearchUpdateSchema = {
+  ...ElasticSearchUpdateSchema,
+  type: schema.maybe(schema.literal(outputType.RemoteElasticsearch)),
+  service_token: schema.maybe(schema.string()),
+  secrets: schema.maybe(
+    schema.object({
+      service_token: schema.maybe(secretRefSchema),
+    })
+  ),
+};
+
+/**
  * Logstash schemas
  */
 
@@ -124,6 +157,11 @@ export const LogstashSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Logstash),
   hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1 }),
+  secrets: schema.maybe(
+    schema.object({
+      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+    })
+  ),
 };
 
 const LogstashUpdateSchema = {
@@ -131,6 +169,11 @@ const LogstashUpdateSchema = {
   type: schema.maybe(schema.literal(outputType.Logstash)),
   hosts: schema.maybe(
     schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1 })
+  ),
+  secrets: schema.maybe(
+    schema.object({
+      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+    })
   ),
 };
 
@@ -200,10 +243,15 @@ export const KafkaSchema = {
     schema.never()
   ),
   password: schema.conditional(
-    schema.siblingRef('username'),
-    schema.string(),
-    schema.string(),
-    schema.never()
+    schema.siblingRef('secrets.password'),
+    secretRefSchema,
+    schema.never(),
+    schema.conditional(
+      schema.siblingRef('username'),
+      schema.string(),
+      schema.string(),
+      schema.never()
+    )
   ),
   sasl: schema.maybe(
     schema.object({
@@ -237,6 +285,12 @@ export const KafkaSchema = {
   required_acks: schema.maybe(
     schema.oneOf([schema.literal(1), schema.literal(0), schema.literal(-1)])
   ),
+  secrets: schema.maybe(
+    schema.object({
+      password: schema.maybe(secretRefSchema),
+      ssl: schema.maybe(schema.object({ key: secretRefSchema })),
+    })
+  ),
 };
 
 const KafkaUpdateSchema = {
@@ -259,12 +313,14 @@ const KafkaUpdateSchema = {
 
 export const OutputSchema = schema.oneOf([
   schema.object({ ...ElasticSearchSchema }),
+  schema.object({ ...RemoteElasticSearchSchema }),
   schema.object({ ...LogstashSchema }),
   schema.object({ ...KafkaSchema }),
 ]);
 
 export const UpdateOutputSchema = schema.oneOf([
   schema.object({ ...ElasticSearchUpdateSchema }),
+  schema.object({ ...RemoteElasticSearchUpdateSchema }),
   schema.object({ ...LogstashUpdateSchema }),
   schema.object({ ...KafkaUpdateSchema }),
 ]);

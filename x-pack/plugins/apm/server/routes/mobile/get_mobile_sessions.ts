@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   kqlQuery,
   rangeQuery,
@@ -23,6 +22,8 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { Coordinate } from '../../../typings/timeseries';
 import { Maybe } from '../../../typings/common';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 
 export interface SessionsTimeseries {
   currentPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
@@ -70,7 +71,12 @@ async function getSessionTimeseries({
 
   const response = await apmEventClient.search('get_mobile_sessions', {
     apm: {
-      events: [ProcessorEvent.transaction],
+      sources: [
+        {
+          documentType: ApmDocumentType.TransactionEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: false,

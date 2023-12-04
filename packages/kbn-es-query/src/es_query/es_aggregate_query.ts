@@ -59,10 +59,15 @@ export function getIndexPatternFromESQLQuery(esql?: string): string {
   }
   const parsedString = esql?.replaceAll('`', '');
   // case insensitive match for the index pattern
-  const regex = new RegExp(/FROM\s+([\w*-.!@$^()~;]+)/, 'i');
+  const regex = new RegExp(/FROM\s+([\w*-.!@$^()~;\s]+)/, 'i');
   const matches = parsedString?.match(regex);
   if (matches) {
-    return matches[1];
+    return matches[1]?.trim();
   }
   return '';
+}
+
+export function cleanupESQLQueryForLensSuggestions(esql?: string): string {
+  const pipes = (esql || '').split('|');
+  return pipes.filter((statement) => !/DROP\s/i.test(statement)).join('|');
 }

@@ -308,10 +308,6 @@ export const mockGlobalState: State = {
   dragAndDrop: { dataProviders: {} },
   timeline: {
     showCallOutUnauthorizedMsg: false,
-    autoSavedWarningMsg: {
-      timelineId: null,
-      newTimelineModel: null,
-    },
     timelineById: {
       [TimelineId.test]: {
         activeTab: TimelineTabs.query,
@@ -376,6 +372,8 @@ export const mockGlobalState: State = {
         itemsPerPageOptions: [10, 25, 50, 100],
         savedSearchId: null,
         isDiscoverSavedSearchLoaded: false,
+        savedSearch: null,
+        isDataProviderVisible: true,
       },
     },
     insertTimeline: null,

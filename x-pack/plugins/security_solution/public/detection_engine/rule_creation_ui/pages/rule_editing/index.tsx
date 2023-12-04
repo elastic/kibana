@@ -26,8 +26,10 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
 import { getIsRulePreviewDisabled } from '../../../../detections/components/rules/rule_preview/helpers';
-import type { RuleUpdateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { Rule } from '../../../rule_management/logic';
+import type {
+  RuleResponse,
+  RuleUpdateProps,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { useRule, useUpdateRule } from '../../../rule_management/logic';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
@@ -69,7 +71,7 @@ import { useRuleForms, useRuleIndexPattern } from '../form';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
 
-const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
+const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const [, dispatchToaster] = useStateToaster();
   const [
     {
@@ -176,7 +178,7 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
 
   const loading = userInfoLoading || listsConfigLoading;
   const { isSavedQueryLoading, savedQuery } = useGetSavedQuery({
-    savedQueryId: rule?.saved_id,
+    savedQueryId: 'saved_id' in rule ? rule.saved_id : undefined,
     ruleType: rule?.type,
   });
 
@@ -259,6 +261,8 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                   shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
                   queryBarTitle={defineStepData.queryBar.title}
                   queryBarSavedId={defineStepData.queryBar.saved_id}
+                  thresholdFields={defineStepData.threshold.field}
+                  enableThresholdSuppression={defineStepData.enableThresholdSuppression}
                 />
               )}
               <EuiSpacer />

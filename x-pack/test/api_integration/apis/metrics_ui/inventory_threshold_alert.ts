@@ -7,10 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Comparator, InventoryMetricConditions } from '@kbn/infra-plugin/common/alerting/metrics';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-} from '@kbn/infra-plugin/common/inventory_models/types';
+import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { evaluateCondition } from '@kbn/infra-plugin/server/lib/alerting/inventory_metric_threshold/evaluate_condition';
 import { InfraSource } from '@kbn/infra-plugin/server/lib/sources';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -46,9 +43,6 @@ export default function ({ getService }: FtrProviderContext) {
       inventoryDefaultView: 'default',
       metricsExplorerDefaultView: 'default',
       anomalyThreshold: 70,
-      fields: {
-        message: ['message'],
-      },
       logColumns: [
         {
           timestampColumn: {

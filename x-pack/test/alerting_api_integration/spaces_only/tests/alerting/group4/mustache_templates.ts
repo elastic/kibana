@@ -84,7 +84,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts,
         // const EscapableStrings
         const template =
-          '{{context.escapableBacktic}} -- {{context.escapableBold}} -- {{context.escapableBackticBold}} -- {{context.escapableHtml}}';
+          '{{context.escapableBacktic}} -- {{context.escapableBold}} -- {{context.escapableBackticBold}} -- {{context.escapableHtml}} -- {{context.escapableLink}}';
 
         const rule = await createRule({
           id: slackConnector.id,
@@ -95,7 +95,9 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         });
 
         const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
-        expect(body).to.be("back'tic -- `*bold*` -- `'*bold*'` -- &lt;&amp;&gt;");
+        expect(body).to.be(
+          "back'tic -- `*bold*` -- `'*bold*'` -- &lt;&amp;&gt; -- https://te_st.com/"
+        );
       });
 
       it('should handle context variable object expansion', async () => {

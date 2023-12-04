@@ -25,18 +25,22 @@ import React from 'react';
 import styled from 'styled-components';
 import { FieldIcon } from '@kbn/react-field';
 
-import type { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping, Type, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
-import type { RequiredFieldArray } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes';
+import type {
+  RequiredFieldArray,
+  Threshold,
+  AlertSuppressionMissingFieldsStrategy,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
-import type { Threshold } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import * as i18n from './translations';
-import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
+import type { BuildQueryBarDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
 import type {
   AboutStepRiskScore,
@@ -49,7 +53,6 @@ import { ThreatEuiFlexGroup } from './threat_description';
 import { AlertSuppressionTechnicalPreviewBadge } from './alert_suppression_technical_preview_badge';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import type { LicenseService } from '../../../../../common/license';
-import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/api/detection_engine/model/rule_schema';
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
   overflow-y: hidden;
@@ -160,12 +163,20 @@ export const buildEqlOptionsDescription = (eqlOptions: EqlOptionsSelected): List
   return items;
 };
 
-export const buildThreatDescription = ({ label, threat }: BuildThreatDescription): ListItems[] => {
+interface BuildThreatDescriptionProps {
+  label: string;
+  threat: Threats;
+}
+
+export const buildThreatDescription = ({
+  threat,
+  label,
+}: BuildThreatDescriptionProps): ListItems[] => {
   if (threat.length > 0) {
     return [
       {
         title: label,
-        description: <ThreatEuiFlexGroup label={label} threat={threat} />,
+        description: <ThreatEuiFlexGroup threat={threat} />,
       },
     ];
   }
@@ -619,7 +630,7 @@ export const buildAlertSuppressionMissingFieldsDescription = (
   }
 
   const description =
-    value === AlertSuppressionMissingFieldsStrategy.Suppress
+    value === AlertSuppressionMissingFieldsStrategyEnum.suppress
       ? i18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
       : i18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 

@@ -41,13 +41,22 @@ import {
   TAGS_DETAILS,
   THRESHOLD_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
+  SUPPRESS_FOR_DETAILS,
 } from '../../../screens/rule_details';
 
-import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
+import {
+  getDetails,
+  waitForTheRuleToBeExecuted,
+  assertDetailsNotExist,
+} from '../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
+  createRuleWithoutEnabling,
+  fillAboutRuleMinimumAndContinue,
+  enablesAndPopulatesThresholdSuppression,
+  skipScheduleRuleAction,
   fillAboutRuleAndContinue,
   fillDefineThresholdRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -59,79 +68,107 @@ import { visit } from '../../../tasks/navigation';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-describe('Threshold rules', { tags: ['@ess', '@serverless'] }, () => {
-  const rule = getNewThresholdRule();
-  const expectedUrls = rule.references?.join('');
-  const expectedFalsePositives = rule.false_positives?.join('');
-  const expectedTags = rule.tags?.join('');
-  const mitreAttack = rule.threat;
-  const expectedMitre = formatMitreAttackDescription(mitreAttack ?? []);
+describe(
+  'Threshold rules',
+  {
+    tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        enableExperimental: ['alertSuppressionForThresholdRuleEnabled'],
+      },
+    },
+  },
+  () => {
+    const rule = getNewThresholdRule();
+    const expectedUrls = rule.references?.join('');
+    const expectedFalsePositives = rule.false_positives?.join('');
+    const expectedTags = rule.tags?.join('');
+    const mitreAttack = rule.threat;
+    const expectedMitre = formatMitreAttackDescription(mitreAttack ?? []);
 
-  before(() => {
-    cleanKibana();
-  });
+    beforeEach(() => {
+      deleteAlertsAndRules();
+      login();
+      visit(CREATE_RULE_URL);
+    });
 
-  beforeEach(() => {
-    deleteAlertsAndRules();
-    login();
-    visit(CREATE_RULE_URL);
-  });
+    it('Creates and enables a new threshold rule', () => {
+      selectThresholdRuleType();
+      fillDefineThresholdRuleAndContinue(rule);
+      fillAboutRuleAndContinue(rule);
+      fillScheduleRuleAndContinue(rule);
+      createAndEnableRule();
+      openRuleManagementPageViaBreadcrumbs();
 
-  it('Creates and enables a new threshold rule', () => {
-    selectThresholdRuleType();
-    fillDefineThresholdRuleAndContinue(rule);
-    fillAboutRuleAndContinue(rule);
-    fillScheduleRuleAndContinue(rule);
-    createAndEnableRule();
-    openRuleManagementPageViaBreadcrumbs();
+      cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
+      expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
 
-    expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
+      cy.get(RULE_NAME).should('have.text', rule.name);
+      cy.get(RISK_SCORE).should('have.text', rule.risk_score);
+      cy.get(SEVERITY).should('have.text', 'High');
+      cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-    cy.get(RULE_NAME).should('have.text', rule.name);
-    cy.get(RISK_SCORE).should('have.text', rule.risk_score);
-    cy.get(SEVERITY).should('have.text', 'High');
-    cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
+      goToRuleDetailsOf(rule.name);
 
-    goToRuleDetailsOf(rule.name);
-
-    cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
-    cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
-    cy.get(ABOUT_DETAILS).within(() => {
-      getDetails(SEVERITY_DETAILS).should('have.text', 'High');
-      getDetails(RISK_SCORE_DETAILS).should('have.text', rule.risk_score);
-      getDetails(REFERENCE_URLS_DETAILS).should((details) => {
-        expect(removeExternalLinkText(details.text())).equal(expectedUrls);
+      cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
+      cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
+      cy.get(ABOUT_DETAILS).within(() => {
+        getDetails(SEVERITY_DETAILS).should('have.text', 'High');
+        getDetails(RISK_SCORE_DETAILS).should('have.text', rule.risk_score);
+        getDetails(REFERENCE_URLS_DETAILS).should((details) => {
+          expect(removeExternalLinkText(details.text())).equal(expectedUrls);
+        });
+        getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
+        getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
+          expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
+        });
+        getDetails(TAGS_DETAILS).should('have.text', expectedTags);
       });
-      getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
-      getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
-        expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
+      cy.get(INVESTIGATION_NOTES_TOGGLE).click();
+      cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
+      cy.get(DEFINITION_DETAILS).within(() => {
+        getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
+        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.query);
+        getDetails(RULE_TYPE_DETAILS).should('have.text', 'Threshold');
+        getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
+        getDetails(THRESHOLD_DETAILS).should(
+          'have.text',
+          `Results aggregated by ${rule.threshold.field} >= ${rule.threshold.value}`
+        );
+        assertDetailsNotExist(SUPPRESS_FOR_DETAILS);
       });
-      getDetails(TAGS_DETAILS).should('have.text', expectedTags);
-    });
-    cy.get(INVESTIGATION_NOTES_TOGGLE).click();
-    cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
-    cy.get(DEFINITION_DETAILS).within(() => {
-      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
-      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.query);
-      getDetails(RULE_TYPE_DETAILS).should('have.text', 'Threshold');
-      getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
-      getDetails(THRESHOLD_DETAILS).should(
-        'have.text',
-        `Results aggregated by ${rule.threshold.field} >= ${rule.threshold.value}`
-      );
-    });
-    cy.get(SCHEDULE_DETAILS).within(() => {
-      getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
-      const humanizedDuration = getHumanizedDuration(rule.from ?? 'now-6m', rule.interval ?? '5m');
-      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
+      cy.get(SCHEDULE_DETAILS).within(() => {
+        getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+        const humanizedDuration = getHumanizedDuration(
+          rule.from ?? 'now-6m',
+          rule.interval ?? '5m'
+        );
+        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
+      });
+
+      waitForTheRuleToBeExecuted();
+      waitForAlertsToPopulate();
+
+      cy.get(ALERTS_COUNT).should(($count) => expect(+$count.text().split(' ')[0]).to.be.lt(100));
+      cy.get(ALERT_GRID_CELL).contains(rule.name);
     });
 
-    waitForTheRuleToBeExecuted();
-    waitForAlertsToPopulate();
+    it('Creates a new threshold rule with suppression enabled', () => {
+      selectThresholdRuleType();
 
-    cy.get(ALERTS_COUNT).should(($count) => expect(+$count.text().split(' ')[0]).to.be.lt(100));
-    cy.get(ALERT_GRID_CELL).contains(rule.name);
-  });
-});
+      enablesAndPopulatesThresholdSuppression(5, 'h');
+      fillDefineThresholdRuleAndContinue(rule);
+
+      fillAboutRuleMinimumAndContinue(rule);
+      skipScheduleRuleAction();
+      createRuleWithoutEnabling();
+      openRuleManagementPageViaBreadcrumbs();
+      goToRuleDetailsOf(rule.name);
+
+      cy.get(DEFINITION_DETAILS).within(() => {
+        getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '5h');
+      });
+    });
+  }
+);

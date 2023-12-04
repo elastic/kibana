@@ -29,7 +29,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
-import { ResetSearchButton } from './reset_search_button';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { act } from 'react-dom/test-utils';
@@ -160,27 +159,6 @@ describe('Discover histogram layout component', () => {
     it('should not render null if there is no search session, but isPlainRecord is true', async () => {
       const { component } = await mountComponent({ isPlainRecord: true });
       expect(component.isEmptyRender()).toBe(false);
-    });
-  });
-
-  describe('reset search button', () => {
-    it('renders the button when there is a saved search', async () => {
-      const { component } = await mountComponent();
-      expect(component.find(ResetSearchButton).exists()).toBe(true);
-    });
-
-    it('does not render the button when there is no saved search', async () => {
-      const { component } = await mountComponent({
-        savedSearch: { ...savedSearchMock, id: undefined },
-      });
-      expect(component.find(ResetSearchButton).exists()).toBe(false);
-    });
-
-    it('should call resetSavedSearch when clicked', async () => {
-      const { component, stateContainer } = await mountComponent();
-      expect(component.find(ResetSearchButton).exists()).toBe(true);
-      component.find(ResetSearchButton).find('button').simulate('click');
-      expect(stateContainer.actions.undoSavedSearchChanges).toHaveBeenCalled();
     });
   });
 });

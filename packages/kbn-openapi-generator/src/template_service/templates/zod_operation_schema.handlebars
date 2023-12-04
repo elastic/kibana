@@ -6,6 +6,7 @@
  */
 
 import { z } from "zod";
+import { requiredOptional, isValidDateMath, ArrayFromString, BooleanFromString } from "@kbn/zod-helpers"
 
 {{> disclaimer}}
 
@@ -24,8 +25,10 @@ import {
 export type {{@key}} = z.infer<typeof {{@key}}>;
 export const {{@key}} = {{> zod_schema_item}};
 {{#if enum}}
-export const {{@key}}Enum = {{@key}}.enum;
+{{#unless (isSingle enum)}}
 export type {{@key}}Enum = typeof {{@key}}.enum;
+export const {{@key}}Enum = {{@key}}.enum;
+{{/unless}}
 {{/if}}
 
 {{/each}}

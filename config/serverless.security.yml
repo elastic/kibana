@@ -6,8 +6,9 @@ xpack.apm.enabled: false
 xpack.infra.enabled: false
 xpack.observabilityLogExplorer.enabled: false
 xpack.observability.enabled: false
-xpack.uptime.enabled: false
-xpack.legacy_uptime.enabled: false
+
+## Cloud settings
+xpack.cloud.serverless.project_type: security
 
 ## Enable the Security Solution Serverless plugin
 xpack.securitySolutionServerless.enabled: true
@@ -44,17 +45,23 @@ xpack.fleet.internal.registry.excludePackages: [
     # Oblt integrations
     'apm',
     'synthetics',
+    'synthetics_dashboards',
+
     # Removed in 8.11 integrations
     'cisco',
     'microsoft',
     'symantec',
     'cyberark',
+
+    # ML integrations
+    'dga',
   ]
 # fleet_server package installed to publish agent metrics
 xpack.fleet.packages:
   - name: fleet_server
-    version: latest  
+    version: latest
 
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: true
 xpack.ml.nlp.enabled: false
+xpack.ml.compatibleModuleType: 'security'

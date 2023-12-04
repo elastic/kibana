@@ -37,17 +37,9 @@
         "label": "ProfilingDataAccessPluginStart",
         "description": [],
         "signature": [
-          "{ services: { fetchFlamechartData: ({ esClient, rangeFromMs, rangeToMs, kuery, useLegacyFlamegraphAPI, }: ",
+          "{ services: { fetchFlamechartData: ({ core, esClient, rangeFromMs, rangeToMs, kuery }: ",
           "FetchFlamechartParams",
-          ") => Promise<",
-          {
-            "pluginId": "@kbn/profiling-utils",
-            "scope": "common",
-            "docId": "kibKbnProfilingUtilsPluginApi",
-            "section": "def-common.BaseFlameGraph",
-            "text": "BaseFlameGraph"
-          },
-          ">; getStatus: ({ esClient, soClient, spaceId }: ",
+          ") => Promise<{ TotalSeconds: number; Size: number; Edges: number[][]; FileID: string[]; FrameType: number[]; Inline: boolean[]; ExeFilename: string[]; AddressOrLine: number[]; FunctionName: string[]; FunctionOffset: number[]; SourceFilename: string[]; SourceLine: number[]; CountInclusive: number[]; CountExclusive: number[]; SamplingRate: number; TotalSamples: number; TotalCPU: number; SelfCPU: number; AnnualCO2TonsExclusive: number[]; AnnualCO2TonsInclusive: number[]; AnnualCostsUSDInclusive: number[]; AnnualCostsUSDExclusive: number[]; SelfAnnualCO2Tons: number; TotalAnnualCO2Tons: number; SelfAnnualCostsUSD: number; TotalAnnualCostsUSD: number; }>; getStatus: ({ esClient, soClient, spaceId }: ",
           "HasSetupParams",
           ") => Promise<",
           {
@@ -57,13 +49,13 @@
             "section": "def-common.ProfilingStatus",
             "text": "ProfilingStatus"
           },
-          ">; getSetupState: (options: ",
-          "ProfilingSetupOptions",
-          ", clientWithProfilingAuth: ",
-          "ProfilingESClient",
+          ">; getSetupState: ({ esClient, soClient, spaceId }: ",
+          "SetupStateParams",
           ") => Promise<",
-          "SetupState",
-          ">; fetchFunction: ({ esClient, rangeFromMs, rangeToMs, kuery, startIndex, endIndex, }: ",
+          "CloudSetupStateType",
+          " | ",
+          "SetupStateType",
+          ">; fetchFunction: ({ core, esClient, rangeFromMs, rangeToMs, kuery, startIndex, endIndex, }: ",
           "FetchFunctionsParams",
           ") => Promise<",
           {
@@ -388,7 +380,64 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "profilingDataAccess",
+        "id": "def-common.ProfilingCloudSetupOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProfilingCloudSetupOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "profilingDataAccess",
+            "scope": "common",
+            "docId": "kibProfilingDataAccessPluginApi",
+            "section": "def-common.ProfilingCloudSetupOptions",
+            "text": "ProfilingCloudSetupOptions"
+          },
+          " extends ",
+          "ProfilingSetupOptions"
+        ],
+        "path": "x-pack/plugins/profiling_data_access/common/cloud_setup.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "profilingDataAccess",
+            "id": "def-common.ProfilingCloudSetupOptions.packagePolicyClient",
+            "type": "Object",
+            "tags": [],
+            "label": "packagePolicyClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "server",
+                "docId": "kibFleetPluginApi",
+                "section": "def-server.PackagePolicyClient",
+                "text": "PackagePolicyClient"
+              }
+            ],
+            "path": "x-pack/plugins/profiling_data_access/common/cloud_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "profilingDataAccess",
+            "id": "def-common.ProfilingCloudSetupOptions.isCloudEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudEnabled",
+            "description": [],
+            "path": "x-pack/plugins/profiling_data_access/common/cloud_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -432,36 +481,6 @@
           "150000"
         ],
         "path": "x-pack/plugins/profiling_data_access/common/cluster_settings.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "profilingDataAccess",
-        "id": "def-common.METADATA_VERSION",
-        "type": "number",
-        "tags": [],
-        "label": "METADATA_VERSION",
-        "description": [],
-        "signature": [
-          "1"
-        ],
-        "path": "x-pack/plugins/profiling_data_access/common/security_role.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "profilingDataAccess",
-        "id": "def-common.PROFILING_READER_ROLE_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "PROFILING_READER_ROLE_NAME",
-        "description": [],
-        "signature": [
-          "\"profiling-reader\""
-        ],
-        "path": "x-pack/plugins/profiling_data_access/common/security_role.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

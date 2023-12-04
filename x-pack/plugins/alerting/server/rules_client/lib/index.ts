@@ -6,9 +6,13 @@
  */
 
 export { createRuleSavedObject } from './create_rule_saved_object';
+export { resolveRuleSavedObject } from './resolve_rule_saved_object';
+export { getRuleSavedObject } from './get_rule_saved_object';
+
 export { extractReferences } from './extract_references';
 export { validateActions } from './validate_actions';
 export { updateMeta } from './update_meta';
+export { updateMetaAttributes } from './update_meta_attributes';
 export * from './get_alert_from_raw';
 export { getAuthorizationFilter } from './get_authorization_filter';
 export { checkAuthorizationAndGetTotal } from './check_authorization_and_get_total';

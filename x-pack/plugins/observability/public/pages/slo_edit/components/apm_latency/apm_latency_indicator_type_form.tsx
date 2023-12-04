@@ -7,6 +7,7 @@
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
 import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
@@ -179,6 +180,7 @@ export function ApmLatencyIndicatorTypeForm() {
       <IndexFieldSelector
         indexFields={partitionByFields}
         name="groupBy"
+        defaultValue={ALL_VALUE}
         label={
           <span>
             {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {

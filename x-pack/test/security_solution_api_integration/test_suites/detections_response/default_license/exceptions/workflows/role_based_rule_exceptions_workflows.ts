@@ -31,7 +31,7 @@ import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 import {
   createAlertsIndex,
-  getRule,
+  fetchRule,
   createRule,
   getSimpleRule,
   deleteAllRules,
@@ -60,7 +60,7 @@ import {
   deleteAllExceptions,
   deleteListsIndex,
   importFile,
-} from '../../../../../../lists_api_integration/utils';
+} from '../../../../lists_and_exception_lists/utils';
 import {
   createUserAndRole,
   deleteUserAndRole,
@@ -180,11 +180,13 @@ export default ({ getService }: FtrProviderContext) => {
           expect(bodyToCompare).toEqual(expected);
         });
 
-        it('should allow removing an exception list from an immutable rule through patch', async () => {
+        it('@skipInQA should allow removing an exception list from an immutable rule through patch', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           // This rule has an existing exceptions_list that we are going to use
-          const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+          const immutableRule = await fetchRule(supertest, {
+            ruleId: ELASTIC_SECURITY_RULE_ID,
+          });
           expect(immutableRule.exceptions_list.length).toBeGreaterThan(0); // make sure we have at least one exceptions_list
 
           // remove the exceptions list as a user is allowed to remove it from an immutable rule
@@ -195,11 +197,13 @@ export default ({ getService }: FtrProviderContext) => {
             .send({ rule_id: ELASTIC_SECURITY_RULE_ID, exceptions_list: [] })
             .expect(200);
 
-          const immutableRuleSecondTime = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+          const immutableRuleSecondTime = await fetchRule(supertest, {
+            ruleId: ELASTIC_SECURITY_RULE_ID,
+          });
           expect(immutableRuleSecondTime.exceptions_list.length).toEqual(0);
         });
 
-        it('should allow adding a second exception list to an immutable rule through patch', async () => {
+        it('@skipInQA should allow adding a second exception list to an immutable rule through patch', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
@@ -209,7 +213,9 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // This rule has an existing exceptions_list that we are going to use
-          const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+          const immutableRule = await fetchRule(supertest, {
+            ruleId: ELASTIC_SECURITY_RULE_ID,
+          });
           expect(immutableRule.exceptions_list.length).toBeGreaterThan(0); // make sure we have at least one
 
           // add a second exceptions list as a user is allowed to add a second list to an immutable rule
@@ -231,16 +237,20 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          const immutableRuleSecondTime = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+          const immutableRuleSecondTime = await fetchRule(supertest, {
+            ruleId: ELASTIC_SECURITY_RULE_ID,
+          });
 
           expect(immutableRuleSecondTime.exceptions_list.length).toEqual(2);
         });
 
-        it('should override any updates to pre-packaged rules if the user removes the exception list through the API but the new version of a rule has an exception list again', async () => {
+        it('@skipInQA should override any updates to pre-packaged rules if the user removes the exception list through the API but the new version of a rule has an exception list again', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           // This rule has an existing exceptions_list that we are going to use
-          const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+          const immutableRule = await fetchRule(supertest, {
+            ruleId: ELASTIC_SECURITY_RULE_ID,
+          });
           expect(immutableRule.exceptions_list.length).toBeGreaterThan(0); // make sure we have at least one
 
           await supertest
@@ -252,14 +262,16 @@ export default ({ getService }: FtrProviderContext) => {
 
           await downgradeImmutableRule(es, log, ELASTIC_SECURITY_RULE_ID);
           await installMockPrebuiltRules(supertest, es);
-          const immutableRuleSecondTime = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+          const immutableRuleSecondTime = await fetchRule(supertest, {
+            ruleId: ELASTIC_SECURITY_RULE_ID,
+          });
 
           // We should have a length of 1 and it should be the same as our original before we tried to remove it using patch
           expect(immutableRuleSecondTime.exceptions_list.length).toEqual(1);
           expect(immutableRuleSecondTime.exceptions_list).toEqual(immutableRule.exceptions_list);
         });
 
-        it('should merge back an exceptions_list if it was removed from the immutable rule through PATCH', async () => {
+        it('@skipInQA should merge back an exceptions_list if it was removed from the immutable rule through PATCH', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
@@ -269,7 +281,9 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
-          const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+          const immutableRule = await fetchRule(supertest, {
+            ruleId: ELASTIC_SECURITY_RULE_ID,
+          });
           expect(immutableRule.exceptions_list.length).toBeGreaterThan(0); // make sure we have at least one
 
           // remove the exception list and only have a single list that is not an endpoint_list
@@ -292,7 +306,9 @@ export default ({ getService }: FtrProviderContext) => {
 
           await downgradeImmutableRule(es, log, ELASTIC_SECURITY_RULE_ID);
           await installMockPrebuiltRules(supertest, es);
-          const immutableRuleSecondTime = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+          const immutableRuleSecondTime = await fetchRule(supertest, {
+            ruleId: ELASTIC_SECURITY_RULE_ID,
+          });
 
           expect(immutableRuleSecondTime.exceptions_list).toEqual([
             ...immutableRule.exceptions_list,
@@ -305,17 +321,21 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
         });
 
-        it('should NOT add an extra exceptions_list that already exists on a rule during an upgrade', async () => {
+        it('@skipInQA should NOT add an extra exceptions_list that already exists on a rule during an upgrade', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
-          const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+          const immutableRule = await fetchRule(supertest, {
+            ruleId: ELASTIC_SECURITY_RULE_ID,
+          });
           expect(immutableRule.exceptions_list.length).toBeGreaterThan(0); // make sure we have at least one
 
           await downgradeImmutableRule(es, log, ELASTIC_SECURITY_RULE_ID);
           await installMockPrebuiltRules(supertest, es);
 
-          const immutableRuleSecondTime = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+          const immutableRuleSecondTime = await fetchRule(supertest, {
+            ruleId: ELASTIC_SECURITY_RULE_ID,
+          });
 
           // The installed rule should have both the original immutable exceptions list back and the
           // new list the user added.
@@ -324,7 +344,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
         });
 
-        it('should NOT allow updates to pre-packaged rules to overwrite existing exception based rules when the user adds an additional exception list', async () => {
+        it('@skipInQA should NOT allow updates to pre-packaged rules to overwrite existing exception based rules when the user adds an additional exception list', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
@@ -334,7 +354,9 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
-          const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+          const immutableRule = await fetchRule(supertest, {
+            ruleId: ELASTIC_SECURITY_RULE_ID,
+          });
 
           // add a second exceptions list as a user is allowed to add a second list to an immutable rule
           await supertest
@@ -357,7 +379,9 @@ export default ({ getService }: FtrProviderContext) => {
 
           await downgradeImmutableRule(es, log, ELASTIC_SECURITY_RULE_ID);
           await installMockPrebuiltRules(supertest, es);
-          const immutableRuleSecondTime = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+          const immutableRuleSecondTime = await fetchRule(supertest, {
+            ruleId: ELASTIC_SECURITY_RULE_ID,
+          });
 
           // It should be the same as what the user added originally
           expect(immutableRuleSecondTime.exceptions_list).toEqual([
@@ -371,7 +395,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
         });
 
-        it('should not remove any exceptions added to a pre-packaged/immutable rule during an update if that rule has no existing exception lists', async () => {
+        it('@skipInQA should not remove any exceptions added to a pre-packaged/immutable rule during an update if that rule has no existing exception lists', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           // Create a new exception list
@@ -390,7 +414,7 @@ export default ({ getService }: FtrProviderContext) => {
             throw new Error('Cannot find a rule without exceptions_list in the sample data');
           }
 
-          const immutableRule = await getRule(supertest, log, ruleId);
+          const immutableRule = await fetchRule(supertest, { ruleId });
           expect(immutableRule.exceptions_list.length).toEqual(0); // make sure we have no exceptions_list
 
           // add a second exceptions list as a user is allowed to add a second list to an immutable rule
@@ -413,7 +437,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           await downgradeImmutableRule(es, log, ruleId);
           await installMockPrebuiltRules(supertest, es);
-          const immutableRuleSecondTime = await getRule(supertest, log, ruleId);
+          const immutableRuleSecondTime = await fetchRule(supertest, { ruleId });
 
           expect(immutableRuleSecondTime.exceptions_list).toEqual([
             {
@@ -425,7 +449,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
         });
 
-        it('should not change the immutable tags when adding a second exception list to an immutable rule through patch', async () => {
+        it('@skipInQA should not change the immutable tags when adding a second exception list to an immutable rule through patch', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
@@ -435,7 +459,9 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // This rule has an existing exceptions_list that we are going to use
-          const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+          const immutableRule = await fetchRule(supertest, {
+            ruleId: ELASTIC_SECURITY_RULE_ID,
+          });
           expect(immutableRule.exceptions_list.length).toBeGreaterThan(0); // make sure we have at least one
 
           // add a second exceptions list as a user is allowed to add a second list to an immutable rule
@@ -466,7 +492,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(bodyToCompare.version).toEqual(immutableRule.version); // The version should never update on a patch
         });
 
-        it('should not change count of prepacked rules when adding a second exception list to an immutable rule through patch. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
+        it('@skipInQA should not change count of prepacked rules when adding a second exception list to an immutable rule through patch. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
@@ -476,7 +502,9 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           // This rule has an existing exceptions_list that we are going to use
-          const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+          const immutableRule = await fetchRule(supertest, {
+            ruleId: ELASTIC_SECURITY_RULE_ID,
+          });
           expect(immutableRule.exceptions_list.length).toBeGreaterThan(0); // make sure we have at least one
 
           // add a second exceptions list as a user is allowed to add a second list to an immutable rule
@@ -533,7 +561,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('tests with auditbeat data', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/169664
+      describe.skip('tests with auditbeat data', () => {
         before(async () => {
           await esArchiver.load(path);
         });

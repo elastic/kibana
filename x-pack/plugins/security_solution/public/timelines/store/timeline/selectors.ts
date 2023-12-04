@@ -9,11 +9,9 @@ import { createSelector } from 'reselect';
 import type { State } from '../../../common/store/types';
 
 import type { TimelineModel } from './model';
-import type { AutoSavedWarningMsg, InsertTimeline, TimelineById } from './types';
+import type { InsertTimeline, TimelineById } from './types';
 
 const selectTimelineById = (state: State): TimelineById => state.timeline.timelineById;
-
-const selectAutoSaveMsg = (state: State): AutoSavedWarningMsg => state.timeline.autoSavedWarningMsg;
 
 const selectCallOutUnauthorizedMsg = (state: State): boolean =>
   state.timeline.showCallOutUnauthorizedMsg;
@@ -23,8 +21,6 @@ export const selectTimeline = (state: State, timelineId: string): TimelineModel 
 
 export const selectInsertTimeline = (state: State): InsertTimeline | null =>
   state.timeline.insertTimeline;
-
-export const autoSaveMsgSelector = createSelector(selectAutoSaveMsg, (autoSaveMsg) => autoSaveMsg);
 
 export const timelineByIdSelector = createSelector(
   selectTimelineById,
@@ -58,3 +54,6 @@ export const getKqlFilterKuerySelector = () =>
       ? timeline.kqlQuery.filterQuery.kuery
       : null
   );
+
+export const dataProviderVisibilitySelector = () =>
+  createSelector(selectTimeline, (timeline) => timeline.isDataProviderVisible);

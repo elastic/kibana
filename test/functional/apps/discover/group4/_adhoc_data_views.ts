@@ -41,9 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.dashboard.waitForRenderComplete();
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/169434
-  // FLAKY: https://github.com/elastic/kibana/issues/169454
-  describe.skip('adhoc data views', function () {
+  describe('adhoc data views', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
@@ -78,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await surrDocs.click();
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await testSubjects.click('~breadcrumb & ~first');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be('logstash*');
@@ -89,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await singleView.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await testSubjects.click('~breadcrumb & ~first');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be('logstash*');
@@ -203,7 +201,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
       // open saved search
-      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await testSubjects.click('~breadcrumb & ~first');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const savedSearch = await find.byCssSelector(`[data-test-subj="breadcrumb last"]`);

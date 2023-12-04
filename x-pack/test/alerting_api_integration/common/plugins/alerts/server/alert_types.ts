@@ -28,6 +28,7 @@ export const EscapableStrings = {
   escapableHtml: '<&>',
   escapableDoubleQuote: '"double quote"',
   escapableLineFeed: 'line\x0afeed',
+  escapableLink: 'https://te_st.com/',
 };
 
 export const DeepContextVariables = {

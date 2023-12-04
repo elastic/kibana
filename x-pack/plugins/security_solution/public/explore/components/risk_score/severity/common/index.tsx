@@ -12,17 +12,9 @@ import { EuiHealth, transparentize } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
 
+import { RISK_SEVERITY_COLOUR } from '../../../../../entity_analytics/common/utils';
 import { WithHoverActions } from '../../../../../common/components/with_hover_actions';
-import { RiskSeverity } from '../../../../../../common/search_strategy';
-import { SEVERITY_COLOR } from '../../../../../overview/components/detection_response/utils';
-
-export const RISK_SEVERITY_COLOUR: { [k in RiskSeverity]: string } = {
-  [RiskSeverity.unknown]: euiLightVars.euiColorMediumShade,
-  [RiskSeverity.low]: SEVERITY_COLOR.low,
-  [RiskSeverity.moderate]: SEVERITY_COLOR.medium,
-  [RiskSeverity.high]: SEVERITY_COLOR.high,
-  [RiskSeverity.critical]: SEVERITY_COLOR.critical,
-};
+import type { RiskSeverity } from '../../../../../../common/search_strategy';
 
 const RiskBadge = styled.div<{ $severity: RiskSeverity; $hideBackgroundColor: boolean }>`
   ${({ theme, $severity, $hideBackgroundColor }) => css`

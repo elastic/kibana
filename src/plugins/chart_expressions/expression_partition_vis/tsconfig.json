@@ -29,6 +29,7 @@
     "@kbn/analytics",
     "@kbn/chart-icons",
     "@kbn/chart-expressions-common",
+    "@kbn/cell-actions",
   ],
   "exclude": [
     "target/**/*",

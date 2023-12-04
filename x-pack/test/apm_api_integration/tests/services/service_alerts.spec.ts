@@ -5,18 +5,14 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  createApmRule,
-  deleteApmAlerts,
-  runRuleSoon,
-  deleteRuleById,
-  ApmAlertFields,
-} from '../alerts/helpers/alerting_api_helper';
-import { waitForRuleStatus } from '../alerts/helpers/wait_for_rule_status';
+import { createApmRule, runRuleSoon, ApmAlertFields } from '../alerts/helpers/alerting_api_helper';
+import { waitForActiveRule } from '../alerts/helpers/wait_for_active_rule';
 import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
+import { cleanupRuleAndAlertState } from '../alerts/helpers/cleanup_rule_and_alert_state';
 
 export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -28,6 +24,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const start = Date.now() - dayInMs;
   const end = Date.now() + dayInMs;
   const goService = 'synth-go';
+  const logger = getService('log');
 
   async function getServiceAlerts({
     serviceName,
@@ -130,24 +127,16 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await deleteRuleById({ supertest, ruleId });
-        await deleteApmAlerts(es);
+        await cleanupRuleAndAlertState({ es, supertest, logger });
       });
 
       it('checks if rule is active', async () => {
-        const ruleStatus = await waitForRuleStatus({
-          ruleId,
-          expectedStatus: 'active',
-          supertest,
-        });
+        const ruleStatus = await waitForActiveRule({ ruleId, supertest });
         expect(ruleStatus).to.be('active');
       });
 
       it('should successfully run the rule', async () => {
-        const response = await runRuleSoon({
-          ruleId,
-          supertest,
-        });
+        const response = await runRuleSoon({ ruleId, supertest });
         expect(response.status).to.be(204);
       });
 

@@ -77,15 +77,15 @@ EOF
 {
   CI_STATS_BUILD_ID="$(buildkite-agent meta-data get ci_stats_build_id --default '')"
   export CI_STATS_BUILD_ID
+  
+  CI_STATS_TOKEN="$(retry 5 5 vault read -field=api_token secret/kibana-issues/dev/kibana_ci_stats)"
+  export CI_STATS_TOKEN
+  
+  CI_STATS_HOST="$(retry 5 5 vault read -field=api_host secret/kibana-issues/dev/kibana_ci_stats)"
+  export CI_STATS_HOST
 
   if [[ "$CI_STATS_BUILD_ID" ]]; then
     echo "CI Stats Build ID: $CI_STATS_BUILD_ID"
-
-    CI_STATS_TOKEN="$(retry 5 5 vault read -field=api_token secret/kibana-issues/dev/kibana_ci_stats)"
-    export CI_STATS_TOKEN
-
-    CI_STATS_HOST="$(retry 5 5 vault read -field=api_host secret/kibana-issues/dev/kibana_ci_stats)"
-    export CI_STATS_HOST
 
     KIBANA_CI_STATS_CONFIG=$(jq -n \
       --arg buildId "$CI_STATS_BUILD_ID" \
@@ -115,6 +115,12 @@ export KIBANA_DOCKER_PASSWORD
 EC_API_KEY="$(retry 5 5 vault read -field=pr_deploy_api_key secret/kibana-issues/dev/kibana-ci-cloud-deploy)"
 export EC_API_KEY
 
+PROJECT_API_KEY="$(retry 5 5 vault read -field=pr_deploy_api_key secret/kibana-issues/dev/kibana-ci-project-deploy)"
+export PROJECT_API_KEY
+
+PROJECT_API_DOMAIN="$(retry 5 5 vault read -field=pr_deploy_domain secret/kibana-issues/dev/kibana-ci-project-deploy)"
+export PROJECT_API_DOMAIN
+
 SYNTHETICS_SERVICE_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/kibana-ci-synthetics-credentials)"
 export SYNTHETICS_SERVICE_USERNAME
 
@@ -132,6 +138,9 @@ export SYNTHETICS_REMOTE_KIBANA_PASSWORD
 
 SYNTHETICS_REMOTE_KIBANA_URL=${SYNTHETICS_REMOTE_KIBANA_URL-"$(retry 5 5 vault read -field=url secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials)"}
 export SYNTHETICS_REMOTE_KIBANA_URL
+
+DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(retry 5 5 vault read -field=DEPLOY_TAGGER_SLACK_WEBHOOK_URL secret/kibana-issues/dev/kibana-serverless-release-tools)"}
+export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
 
 # Setup Failed Test Reporter Elasticsearch credentials
 {

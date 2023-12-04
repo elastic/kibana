@@ -65,3 +65,6 @@ export const categorizationFieldValidationSchema = schema.object({
   indicesOptions: indicesOptionsSchema,
   includeExamples: schema.boolean(),
 });
+export type CategorizationFieldValidationSchema = TypeOf<
+  typeof categorizationFieldValidationSchema
+>;

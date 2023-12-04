@@ -7,8 +7,8 @@
 
 import { getNewRule } from '../../objects/rule';
 import {
-  HOST_RISK_HEADER_COLIMN,
-  USER_RISK_HEADER_COLIMN,
+  HOST_RISK_HEADER_COLUMN,
+  USER_RISK_HEADER_COLUMN,
   HOST_RISK_COLUMN,
   USER_RISK_COLUMN,
   ACTION_COLUMN,
@@ -17,7 +17,7 @@ import {
 import { ENRICHED_DATA_ROW } from '../../screens/alerts_details';
 
 import { createRule } from '../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { deleteAlertsAndRules } from '../../tasks/api_calls/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import {
   expandFirstAlert,
@@ -36,11 +36,9 @@ import { enableRiskEngine } from '../../tasks/entity_analytics';
 const CURRENT_HOST_RISK_LEVEL = 'Current host risk level';
 const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/169154
-describe.skip('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe.skip('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     cy.task('esArchiverUnload', 'risk_scores_new');
     cy.task('esArchiverUnload', 'risk_scores_new_updated');
     cy.task('esArchiverLoad', { archiveName: 'risk_users' });
@@ -72,8 +70,8 @@ describe.skip('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless
         cy.get(ALERTS_COUNT)
           .invoke('text')
           .should('match', /^[1-9].+$/); // Any number of alerts
-        cy.get(HOST_RISK_HEADER_COLIMN).contains('host.risk.calculated_level');
-        cy.get(USER_RISK_HEADER_COLIMN).contains('user.risk.calculated_level');
+        cy.get(HOST_RISK_HEADER_COLUMN).contains('host.risk.calculated_level');
+        cy.get(USER_RISK_HEADER_COLUMN).contains('user.risk.calculated_level');
         scrollAlertTableColumnIntoView(HOST_RISK_COLUMN);
         cy.get(HOST_RISK_COLUMN).contains('Low');
         scrollAlertTableColumnIntoView(USER_RISK_COLUMN);
@@ -116,8 +114,8 @@ describe.skip('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless
         cy.get(ALERTS_COUNT)
           .invoke('text')
           .should('match', /^[1-9].+$/); // Any number of alerts
-        cy.get(HOST_RISK_HEADER_COLIMN).contains('host.risk.calculated_level');
-        cy.get(USER_RISK_HEADER_COLIMN).contains('user.risk.calculated_level');
+        cy.get(HOST_RISK_HEADER_COLUMN).contains('host.risk.calculated_level');
+        cy.get(USER_RISK_HEADER_COLUMN).contains('user.risk.calculated_level');
         scrollAlertTableColumnIntoView(HOST_RISK_COLUMN);
         cy.get(HOST_RISK_COLUMN).contains('Critical');
         scrollAlertTableColumnIntoView(USER_RISK_COLUMN);

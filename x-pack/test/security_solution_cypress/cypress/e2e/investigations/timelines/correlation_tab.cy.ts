@@ -17,11 +17,11 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { addEqlToTimeline } from '../../../tasks/timeline';
+import { addEqlToTimeline, saveTimeline } from '../../../tasks/timeline';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 import { EQL_QUERY_VALIDATION_ERROR } from '../../../screens/create_new_rule';
-import { deleteTimelines } from '../../../tasks/common';
+import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
   const eql = 'any where process.name == "zsh"';
@@ -34,6 +34,7 @@ describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
       visit(TIMELINES_URL);
       openTimeline(response.body.data.persistTimeline.timeline.savedObjectId);
       addEqlToTimeline(eql);
+      saveTimeline();
       cy.wait('@updateTimeline');
     });
   });
@@ -48,6 +49,7 @@ describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
   it('should update timeline after removing eql', () => {
     cy.get(TIMELINE_CORRELATION_INPUT).type('{selectAll} {del}');
     cy.get(TIMELINE_CORRELATION_INPUT).clear();
+    saveTimeline();
     cy.wait('@updateTimeline');
     cy.reload();
     cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
@@ -59,6 +61,7 @@ describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
     addEqlToTimeline(nonFunctionalEql);
     cy.get(EQL_QUERY_VALIDATION_ERROR).should('be.visible');
     cy.get(EQL_QUERY_VALIDATION_ERROR).should('have.text', '1');
+    saveTimeline();
     cy.reload();
     cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
     cy.get(TIMELINE_CORRELATION_INPUT).should('have.text', eql);

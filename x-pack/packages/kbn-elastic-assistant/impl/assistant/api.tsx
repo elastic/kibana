@@ -8,7 +8,6 @@
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
 import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
@@ -24,8 +23,13 @@ export interface FetchConnectorExecuteAction {
 }
 
 export interface FetchConnectorExecuteResponse {
-  response: string;
+  response: string | ReadableStreamDefaultReader<Uint8Array>;
   isError: boolean;
+  isStream: boolean;
+  traceData?: {
+    transactionId: string;
+    traceId: string;
+  };
 }
 
 export const fetchConnectorExecuteAction = async ({
@@ -54,26 +58,72 @@ export const fetchConnectorExecuteAction = async ({
           messages: outboundMessages,
         };
 
-  const requestBody = {
-    params: {
-      subActionParams: body,
-      subAction: 'invokeAI',
-    },
-    assistantLangChain,
-  };
+  // TODO: Remove in part 3 of streaming work for security solution
+  // tracked here: https://github.com/elastic/security-team/issues/7363
+  // In part 3 I will make enhancements to langchain to introduce streaming
+  // Once implemented, invokeAI can be removed
+  const isStream = !assistantLangChain;
+  const requestBody = isStream
+    ? {
+        params: {
+          subActionParams: body,
+          subAction: 'invokeStream',
+        },
+        assistantLangChain,
+      }
+    : {
+        params: {
+          subActionParams: body,
+          subAction: 'invokeAI',
+        },
+        assistantLangChain,
+      };
 
   try {
+    if (isStream) {
+      const response = await http.fetch(
+        `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`,
+        {
+          method: 'POST',
+          body: JSON.stringify(requestBody),
+          signal,
+          asResponse: isStream,
+          rawResponse: isStream,
+        }
+      );
+
+      const reader = response?.response?.body?.getReader();
+
+      if (!reader) {
+        return {
+          response: `${API_ERROR}\n\nCould not get reader from response`,
+          isError: true,
+          isStream: false,
+        };
+      }
+      return {
+        response: reader,
+        isStream: true,
+        isError: false,
+      };
+    }
+
+    // TODO: Remove in part 3 of streaming work for security solution
+    // tracked here: https://github.com/elastic/security-team/issues/7363
+    // This is a temporary code to support the non-streaming API
     const response = await http.fetch<{
       connector_id: string;
       status: string;
       data: string;
       service_message?: string;
+      trace_data?: {
+        transaction_id: string;
+        trace_id: string;
+      };
     }>(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(requestBody),
+      headers: { 'Content-Type': 'application/json' },
       signal,
     });
 
@@ -82,20 +132,44 @@ export const fetchConnectorExecuteAction = async ({
         return {
           response: `${API_ERROR}\n\n${response.service_message}`,
           isError: true,
+          isStream: false,
         };
       }
       return {
         response: API_ERROR,
         isError: true,
+        isStream: false,
       };
     }
+
+    // Only add traceData if it exists in the response
+    const traceData =
+      response.trace_data?.trace_id != null && response.trace_data?.transaction_id != null
+        ? {
+            traceId: response.trace_data?.trace_id,
+            transactionId: response.trace_data?.transaction_id,
+          }
+        : undefined;
+
     return {
       response: assistantLangChain ? getFormattedMessageContent(response.data) : response.data,
       isError: false,
+      isStream: false,
+      traceData,
     };
   } catch (error) {
+    const reader = error?.response?.body?.getReader();
+
+    if (!reader) {
+      return {
+        response: `${API_ERROR}\n\n${error?.body?.message ?? error?.message}`,
+        isError: true,
+        isStream: false,
+      };
+    }
     return {
-      response: `${API_ERROR}\n\n${error?.body?.message ?? error?.message}`,
+      response: reader,
+      isStream: true,
       isError: true,
     };
   }
@@ -226,6 +300,7 @@ export interface PostEvaluationParams {
 }
 
 export interface PostEvaluationResponse {
+  evaluationId: string;
   success: boolean;
 }
 
@@ -247,11 +322,14 @@ export const postEvaluation = async ({
   try {
     const path = `/internal/elastic_assistant/evaluate`;
     const query = {
-      models: evalParams?.models.sort()?.join(','),
       agents: evalParams?.agents.sort()?.join(','),
+      datasetName: evalParams?.datasetName,
       evaluationType: evalParams?.evaluationType.sort()?.join(','),
       evalModel: evalParams?.evalModel.sort()?.join(','),
       outputIndex: evalParams?.outputIndex,
+      models: evalParams?.models.sort()?.join(','),
+      projectName: evalParams?.projectName,
+      runName: evalParams?.runName,
     };
 
     const response = await http.fetch(path, {
