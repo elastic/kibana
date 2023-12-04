@@ -7,6 +7,8 @@ The following APIs are available for Synthetics.
 
 * <<update-monitor-api, Update a monitor>> - Update an existing monitor in Synthetics app.
 
+* <<delete-monitors-api, Delete a monitor>> - Delete an existing monitor from Synthetics app.
+
 * <<get-parameters-api, Get Parameters API>> to get a parameter(s).
 
 * <<add-parameters-api, Create Parameter API>> to create a parameter.
@@ -23,6 +25,7 @@ The following APIs are available for Synthetics.
 
 include::monitors/add-monitor-api.asciidoc[leveloffset=+1]
 include::monitors/update-monitor-api.asciidoc[leveloffset=+1]
+include::monitors/delete-monitor-api.asciidoc[leveloffset=+1]
 include::params/add-param.asciidoc[leveloffset=+1]
 include::params/get-params.asciidoc[leveloffset=+1]
 include::params/edit-param.asciidoc[leveloffset=+1]
