@@ -13,7 +13,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ConnectorMode, ConnectorType } from '@kbn/search-connectors';
+import { ConnectorMode } from '@kbn/search-connectors';
 
 import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
 import { parseQueryParams } from '../../../shared/query_params';
