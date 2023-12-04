@@ -125,7 +125,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
-          return Array(100)
+          return Array(200)
             .fill(0)
             .flatMap((_, index) => [
               datasetSynth1Logs(timestamp),
