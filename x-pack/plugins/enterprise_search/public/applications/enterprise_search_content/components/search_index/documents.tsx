@@ -11,7 +11,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiCallOut, EuiFlexItem } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '@kbn/search-connectors';
@@ -89,61 +89,55 @@ export const SearchIndexDocuments: React.FC = () => {
     getMappings({ indexName: indexToShow });
   }, [indexToShow]);
   return (
-    <>
-      <DocumentsOverview
-        dataTelemetryIdPrefix={`entSearchContent-${ingestionMethod}`}
-        searchQueryCallback={searchQueryCallback}
-        documentComponent={
-          <>
-            {isAccessControlIndexNotFound && (
-              <EuiCallOut
-                size="m"
-                title={i18n.translate(
-                  'xpack.enterpriseSearch.content.searchIndex.documents.noIndex.title',
-                  { defaultMessage: 'Access Control Index not found' }
-                )}
-                iconType="iInCircle"
-              >
-                <p>
-                  {i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noIndex', {
-                    defaultMessage:
-                      "An Access Control Index won't be created until you enable document-level security and run your first access control sync.",
-                  })}
-                </p>
-              </EuiCallOut>
-            )}
-            {!isAccessControlIndexNotFound &&
-              docs.length === 0 &&
-              i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noMappings', {
-                defaultMessage: 'No documents found for index',
-              })}
-            {!isAccessControlIndexNotFound && docs.length > 0 && (
-              <DocumentList
-                dataTelemetryIdPrefix={`entSearchContent-${ingestionMethod}`}
-                docs={docs}
-                docsPerPage={pagination.pageSize ?? 10}
-                isLoading={status !== Status.SUCCESS && mappingStatus !== Status.SUCCESS}
-                mappings={mappingData?.mappings?.properties ?? {}}
-                meta={data?.meta ?? DEFAULT_PAGINATION}
-                onPaginate={(pageIndex) => setPagination({ ...pagination, pageIndex })}
-                setDocsPerPage={(pageSize) => setPagination({ ...pagination, pageSize })}
-              />
-            )}
-          </>
-        }
-        accessControlSwitch={
-          <>
-            {shouldShowAccessControlSwitcher && (
-              <EuiFlexItem grow={false}>
-                <AccessControlIndexSelector
-                  onChange={setSelectedIndexType}
-                  valueOfSelected={selectedIndexType}
-                />
-              </EuiFlexItem>
-            )}
-          </>
-        }
-      />
-    </>
+    <DocumentsOverview
+      dataTelemetryIdPrefix={`entSearchContent-${ingestionMethod}`}
+      searchQueryCallback={searchQueryCallback}
+      documentComponent={
+        <>
+          {isAccessControlIndexNotFound && (
+            <EuiCallOut
+              size="m"
+              title={i18n.translate(
+                'xpack.enterpriseSearch.content.searchIndex.documents.noIndex.title',
+                { defaultMessage: 'Access Control Index not found' }
+              )}
+              iconType="iInCircle"
+            >
+              <p>
+                {i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noIndex', {
+                  defaultMessage:
+                    "An Access Control Index won't be created until you enable document-level security and run your first access control sync.",
+                })}
+              </p>
+            </EuiCallOut>
+          )}
+          {!isAccessControlIndexNotFound &&
+            docs.length === 0 &&
+            i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noMappings', {
+              defaultMessage: 'No documents found for index',
+            })}
+          {!isAccessControlIndexNotFound && docs.length > 0 && (
+            <DocumentList
+              dataTelemetryIdPrefix={`entSearchContent-${ingestionMethod}`}
+              docs={docs}
+              docsPerPage={pagination.pageSize ?? 10}
+              isLoading={status !== Status.SUCCESS && mappingStatus !== Status.SUCCESS}
+              mappings={mappingData?.mappings?.properties ?? {}}
+              meta={data?.meta ?? DEFAULT_PAGINATION}
+              onPaginate={(pageIndex) => setPagination({ ...pagination, pageIndex })}
+              setDocsPerPage={(pageSize) => setPagination({ ...pagination, pageSize })}
+            />
+          )}
+        </>
+      }
+      accessControlSwitch={
+        shouldShowAccessControlSwitcher ? (
+          <AccessControlIndexSelector
+            onChange={setSelectedIndexType}
+            valueOfSelected={selectedIndexType}
+          />
+        ) : undefined
+      }
+    />
   );
 };

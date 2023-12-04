@@ -44,7 +44,7 @@ export const DocumentsOverview: React.FC<DocumentsProps> = ({
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
-            {accessControlSwitch}
+            {accessControlSwitch && <EuiFlexItem grow={false}>{accessControlSwitch}</EuiFlexItem>}
             <EuiFlexItem>
               <EuiFieldSearch
                 data-telemetry-id={`${dataTelemetryIdPrefix}-documents-searchDocuments`}
