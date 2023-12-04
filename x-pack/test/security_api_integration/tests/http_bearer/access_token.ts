@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
   }
 
-  describe('header', () => {
+  describe('access token', () => {
     it('accepts valid access token via authorization Bearer header', async () => {
       const { accessToken, expectedUser } = await createToken();
 
