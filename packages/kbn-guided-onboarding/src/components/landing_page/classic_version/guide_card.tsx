@@ -102,11 +102,11 @@ export const GuideCard = ({
       icon={<EuiIcon size="l" type={card.icon} />}
       description={
         <>
-          {progress && (
+          {progress ? (
             <EuiTextColor color="subdued">
               <small>{progress}</small>
             </EuiTextColor>
-          )}
+          ) : null}
           {isComplete && (
             <EuiFlexGroup
               gutterSize="s"
