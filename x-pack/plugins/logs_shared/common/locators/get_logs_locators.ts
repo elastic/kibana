@@ -7,7 +7,7 @@
 
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 
-import { LogsLocatorParams } from './types';
+import { LogsLocatorParams, NodeLogsLocatorParams, TraceLogsLocatorParams } from './types';
 import { LOGS_LOCATOR_ID } from './logs_locator';
 import { NODE_LOGS_LOCATOR_ID } from './node_logs_locator';
 import { TRACE_LOGS_LOCATOR_ID } from './trace_logs_locator';
