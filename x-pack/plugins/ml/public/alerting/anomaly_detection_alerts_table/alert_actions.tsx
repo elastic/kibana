@@ -16,7 +16,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import { AttachmentType, APP_ID as CASE_APP_ID } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   ALERT_RULE_NAME,
@@ -55,7 +55,7 @@ export function AlertActions({
       basePath: { prepend },
     },
   } = useMlKibana().services;
-  const casesPrivileges = cases?.helpers?.canUseCases() ?? false;
+  const casesPrivileges = cases?.helpers?.canUseCases([CASE_APP_ID]) ?? false;
 
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
 

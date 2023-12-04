@@ -7,13 +7,32 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { isValidFeatureId } from '@kbn/rule-data-utils';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';
 import * as i18n from './translations';
 import type { FeatureIdsResponse } from './api';
 import { getFeatureIds } from './api';
 import { casesQueriesKeys } from './constants';
+
+const featureIdsToMap = (data: FeatureIdsResponse): string[] => {
+  const localFeatureIds = new Set<string>();
+  data?.aggregations?.consumer?.buckets?.forEach(
+    ({ key, doc_count: docCount }: { key: string; doc_count: number }) => {
+      if (docCount > 0 && isValidFeatureId(key)) {
+        localFeatureIds.add(key);
+      }
+    }
+  );
+  data?.aggregations?.producer?.buckets?.forEach(
+    ({ key, doc_count: docCount }: { key: string; doc_count: number }) => {
+      if (docCount > 0 && isValidFeatureId(key)) {
+        localFeatureIds.add(key);
+      }
+    }
+  );
+  return [...localFeatureIds];
+};
 
 export const useGetFeatureIds = (
   alertIds: string[],
@@ -25,16 +44,14 @@ export const useGetFeatureIds = (
   enabled: boolean
 ) => {
   const { showErrorToast } = useCasesToast();
-  const [featureIds, setFeatureIds] = useState<string[]>([]);
-  const { data, isSuccess, isInitialLoading, isLoading } = useQuery<
-    FeatureIdsResponse,
-    ServerError
-  >(
+  const { data, isInitialLoading, isLoading } = useQuery<FeatureIdsResponse, ServerError, string[]>(
     casesQueriesKeys.alertFeatureIds(alertIds),
     ({ signal }) => {
       return getFeatureIds({ query: alertIdsQuery, signal });
     },
     {
+      select: featureIdsToMap,
+      retry: false,
       enabled,
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });
@@ -42,29 +59,9 @@ export const useGetFeatureIds = (
     }
   );
 
-  useEffect(() => {
-    if (isSuccess && data) {
-      const localFeatureIds = new Set<string>();
-      data?.aggregations?.consumer?.buckets?.forEach(
-        ({ key, doc_count: docCount }: { key: string; doc_count: number }) => {
-          if (docCount > 0 && isValidFeatureId(key)) {
-            localFeatureIds.add(key);
-          }
-        }
-      );
-      data?.aggregations?.producer?.buckets?.forEach(
-        ({ key, doc_count: docCount }: { key: string; doc_count: number }) => {
-          if (docCount > 0 && isValidFeatureId(key)) {
-            localFeatureIds.add(key);
-          }
-        }
-      );
-      setFeatureIds([...localFeatureIds]);
-    }
-  }, [data, isSuccess]);
   return useMemo(
-    () => ({ data: featureIds, isLoading: (isInitialLoading || isLoading) && enabled }),
-    [enabled, featureIds, isInitialLoading, isLoading]
+    () => ({ data, isLoading: (isInitialLoading || isLoading) && enabled }),
+    [data, enabled, isInitialLoading, isLoading]
   );
 };
 
