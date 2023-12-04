@@ -22,6 +22,7 @@ import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield
 import { dataViewMock } from '../__mocks__/data_view';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { SuggestionSelector } from './suggestion_selector';
+import { checkChartAvailability } from './check_chart_availability';
 
 import { currentSuggestionMock, allSuggestionsMock } from '../__mocks__/suggestions';
 
@@ -32,7 +33,7 @@ jest.mock('./hooks/use_edit_visualization', () => ({
 }));
 
 async function mountComponent({
-  hiddenPanel,
+  customToggle,
   noChart,
   noHits,
   noBreakdown,
@@ -45,7 +46,7 @@ async function mountComponent({
   hasDashboardPermissions,
   isChartLoading,
 }: {
-  hiddenPanel?: boolean;
+  customToggle?: ReactElement;
   noChart?: boolean;
   noHits?: boolean;
   noBreakdown?: boolean;
@@ -71,8 +72,20 @@ async function mountComponent({
     } as unknown as Capabilities,
   };
 
+  const chart = noChart
+    ? undefined
+    : {
+        status: 'complete' as UnifiedHistogramFetchStatus,
+        hidden: chartHidden,
+        timeInterval: 'auto',
+        bucketInterval: {
+          scaled: true,
+          description: 'test',
+          scale: 2,
+        },
+      };
+
   const props = {
-    hiddenPanel,
     dataView,
     query: {
       language: 'kuery',
@@ -87,18 +100,7 @@ async function mountComponent({
           status: 'complete' as UnifiedHistogramFetchStatus,
           number: 2,
         },
-    chart: noChart
-      ? undefined
-      : {
-          status: 'complete' as UnifiedHistogramFetchStatus,
-          hidden: chartHidden,
-          timeInterval: 'auto',
-          bucketInterval: {
-            scaled: true,
-            description: 'test',
-            scale: 2,
-          },
-        },
+    chart,
     breakdown: noBreakdown ? undefined : { field: undefined },
     currentSuggestion,
     allSuggestions,
@@ -108,6 +110,8 @@ async function mountComponent({
     onChartHiddenChange: jest.fn(),
     onTimeIntervalChange: jest.fn(),
     withDefaultActions: undefined,
+    isChartAvailable: checkChartAvailability({ chart, dataView, isPlainRecord }),
+    renderCustomChartToggleActions: customToggle ? () => customToggle : undefined,
   };
 
   let instance: ReactWrapper = {} as ReactWrapper;
@@ -132,9 +136,21 @@ describe('Chart', () => {
     );
   });
 
-  test('should not render when chart panel is hidden', async () => {
-    const component = await mountComponent({ hiddenPanel: true });
-    expect(component.find('[data-test-subj="unifiedHistogramPanelHidden"]').exists()).toBe(true);
+  test('should render a custom toggle when provided', async () => {
+    const component = await mountComponent({
+      customToggle: <span data-test-subj="custom-toggle" />,
+    });
+    expect(component.find('[data-test-subj="custom-toggle"]').exists()).toBe(true);
+    expect(component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()).toBe(
+      false
+    );
+  });
+
+  test('should not render when custom toggle is provided and chart is hidden', async () => {
+    const component = await mountComponent({ customToggle: <span />, chartHidden: true });
+    expect(component.find('[data-test-subj="unifiedHistogramChartPanelHidden"]').exists()).toBe(
+      true
+    );
   });
 
   test('render when chart is defined and onEditVisualization is undefined', async () => {

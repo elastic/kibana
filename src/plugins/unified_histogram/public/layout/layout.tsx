@@ -13,7 +13,6 @@ import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal'
 import { css } from '@emotion/css';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { DataViewType } from '@kbn/data-views-plugin/public';
 import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
@@ -27,7 +26,7 @@ import {
   ResizableLayoutMode,
   ResizableLayoutDirection,
 } from '@kbn/resizable-layout';
-import { Chart } from '../chart';
+import { Chart, checkChartAvailability } from '../chart';
 import type {
   UnifiedHistogramChartContext,
   UnifiedHistogramServices,
@@ -235,12 +234,7 @@ export const UnifiedHistogramLayout = ({
   });
 
   const chart = suggestionUnsupported ? undefined : originalChart;
-  const isChartAvailable = Boolean(
-    chart &&
-      dataView.id &&
-      dataView.type !== DataViewType.ROLLUP &&
-      (isPlainRecord || (!isPlainRecord && dataView.isTimeBased()))
-  );
+  const isChartAvailable = checkChartAvailability({ chart, dataView, isPlainRecord });
 
   const [topPanelNode] = useState(() =>
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
