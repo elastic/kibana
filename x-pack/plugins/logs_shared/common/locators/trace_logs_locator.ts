@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import {
-  ALL_DATASETS_LOCATOR_ID,
-  AllDatasetsLocatorParams,
-  TRACE_LOGS_LOCATOR_ID,
-  TraceLogsLocatorParams,
-} from '@kbn/deeplinks-observability';
+import { ALL_DATASETS_LOCATOR_ID, AllDatasetsLocatorParams } from '@kbn/deeplinks-observability';
 import { LocatorDefinition } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import { INFRA_LOGS_LOCATOR_ID } from './infra';
-import { LogsLocatorParams } from './types';
+import { LogsLocatorParams, TraceLogsLocatorParams } from './types';
 
 import { getTraceQuery, getTimeRangeEndFromTime, getTimeRangeStartFromTime } from './helpers';
+
+export const TRACE_LOGS_LOCATOR_ID = 'TRACE_LOGS_LOCATOR';
 
 export class TraceLogsLocatorDefinition implements LocatorDefinition<TraceLogsLocatorParams> {
   public readonly id = TRACE_LOGS_LOCATOR_ID;
@@ -29,8 +26,8 @@ export class TraceLogsLocatorDefinition implements LocatorDefinition<TraceLogsLo
     const infraLogsLocator = this.locators.get<LogsLocatorParams>(INFRA_LOGS_LOCATOR_ID);
     if (infraLogsLocator) {
       return infraLogsLocator.getLocation({
+        ...params,
         filter: getTraceQuery(traceId).query,
-        time,
       });
     }
 

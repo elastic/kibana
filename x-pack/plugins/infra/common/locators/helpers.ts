@@ -13,7 +13,7 @@ import {
   LogViewReference,
   ResolvedLogView,
   LogsLocatorParams,
-  InfraNodeLogsLocatorParams,
+  NodeLogsLocatorParams,
 } from '@kbn/logs-shared-plugin/common';
 import { flowRight } from 'lodash';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
@@ -33,7 +33,7 @@ interface LocationToDiscoverParams {
   logView?: LogViewReference;
 }
 
-export const createNodeLogsQuery = (params: InfraNodeLogsLocatorParams) => {
+export const createNodeLogsQuery = (params: NodeLogsLocatorParams) => {
   const { nodeType, nodeId, filter } = params;
 
   const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;

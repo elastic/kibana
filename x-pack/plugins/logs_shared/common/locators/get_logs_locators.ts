@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import {
-  NODE_LOGS_LOCATOR_ID,
-  NodeLogsLocatorParams,
-  TRACE_LOGS_LOCATOR_ID,
-  TraceLogsLocatorParams,
-} from '@kbn/deeplinks-observability';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
-import { LOGS_LOCATOR_ID } from './logs_locator';
+
 import { LogsLocatorParams } from './types';
+import { LOGS_LOCATOR_ID } from './logs_locator';
+import { NODE_LOGS_LOCATOR_ID } from './node_logs_locator';
+import { TRACE_LOGS_LOCATOR_ID } from './trace_logs_locator';
 
 export const getLogsLocatorsFromUrlService = (urlService: UrlService) => {
   const logsLocator = urlService.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)!;

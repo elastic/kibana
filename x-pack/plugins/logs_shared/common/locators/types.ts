@@ -8,7 +8,6 @@
 import * as rt from 'io-ts';
 import { SerializableRecord } from '@kbn/utility-types';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { NodeLogsLocatorParams, TraceLogsLocatorParams } from '@kbn/deeplinks-observability';
 import { LogViewReference } from '../log_views/types';
 import { TimeRange } from './time_range';
 
@@ -23,6 +22,10 @@ export interface LogsLocatorParams extends SerializableRecord {
   logView?: LogViewReference;
 }
 
+export interface TraceLogsLocatorParams extends LogsLocatorParams {
+  traceId: string;
+}
+
 export const ItemTypeRT = rt.keyof({
   host: null,
   pod: null,
@@ -34,6 +37,11 @@ export const ItemTypeRT = rt.keyof({
 });
 
 export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
+
+export interface NodeLogsLocatorParams extends LogsLocatorParams {
+  nodeId: string;
+  nodeType: InventoryItemType;
+}
 
 export interface LogsSharedLocators {
   logsLocator: LocatorPublic<LogsLocatorParams>;

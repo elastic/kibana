@@ -15,7 +15,7 @@ import {
   DEFAULT_LOG_VIEW,
   LogViewReference,
   LogsLocatorParams,
-  InfraNodeLogsLocatorParams,
+  NodeLogsLocatorParams,
 } from '@kbn/logs-shared-plugin/common';
 
 const setupLogsLocator = async () => {
@@ -122,7 +122,7 @@ describe('Infra Locators', () => {
 
   describe('Node Logs Locator', () => {
     it('should create a link to Node Logs with no state', async () => {
-      const params: InfraNodeLogsLocatorParams = {
+      const params: NodeLogsLocatorParams = {
         nodeId,
         nodeType,
         time,
@@ -137,7 +137,7 @@ describe('Infra Locators', () => {
     });
 
     it('should allow specifying specific logPosition', async () => {
-      const params: InfraNodeLogsLocatorParams = {
+      const params: NodeLogsLocatorParams = {
         nodeId,
         nodeType,
         time,
@@ -150,7 +150,7 @@ describe('Infra Locators', () => {
     });
 
     it('should allow specifying specific filter', async () => {
-      const params: InfraNodeLogsLocatorParams = {
+      const params: NodeLogsLocatorParams = {
         nodeId,
         nodeType,
         time,
@@ -164,7 +164,7 @@ describe('Infra Locators', () => {
     });
 
     it('should allow specifying specific view id', async () => {
-      const params: InfraNodeLogsLocatorParams = {
+      const params: NodeLogsLocatorParams = {
         nodeId,
         nodeType,
         time,
@@ -178,7 +178,7 @@ describe('Infra Locators', () => {
     });
 
     it('should allow specifying specific time range', async () => {
-      const params: InfraNodeLogsLocatorParams = {
+      const params: NodeLogsLocatorParams = {
         nodeId,
         nodeType,
         time,
@@ -194,7 +194,7 @@ describe('Infra Locators', () => {
     });
 
     it('should return correct structured url', async () => {
-      const params: InfraNodeLogsLocatorParams = {
+      const params: NodeLogsLocatorParams = {
         nodeId,
         nodeType,
         time,
@@ -217,7 +217,7 @@ describe('Infra Locators', () => {
  * Helpers
  */
 
-export const constructUrlSearchString = (params: Partial<InfraNodeLogsLocatorParams>) => {
+export const constructUrlSearchString = (params: Partial<NodeLogsLocatorParams>) => {
   const { time = 1550671089404, logView } = params;
 
   return `/stream?logView=${constructLogView(logView)}&logPosition=${constructLogPosition(
@@ -242,7 +242,7 @@ const constructLogFilter = ({
   filter,
   timeRange,
   time,
-}: Partial<InfraNodeLogsLocatorParams>) => {
+}: Partial<NodeLogsLocatorParams>) => {
   let finalFilter = filter || '';
 
   if (nodeId) {

@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import { InventoryItemType, LogsLocatorParams } from './types';
-
 export const INFRA_LOGS_LOCATOR_ID = 'INFRA_LOGS_LOCATOR';
 
 export const INFRA_NODE_LOGS_LOCATOR_ID = 'INFRA_NODE_LOGS_LOCATOR';
-
-export interface InfraNodeLogsLocatorParams extends LogsLocatorParams {
-  nodeId: string;
-  nodeType: InventoryItemType;
-}

@@ -6,24 +6,19 @@
  */
 
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import {
-  INFRA_NODE_LOGS_LOCATOR_ID,
-  InfraNodeLogsLocatorParams,
-} from '@kbn/logs-shared-plugin/common';
+import { INFRA_NODE_LOGS_LOCATOR_ID, NodeLogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import type { InfraLogsLocatorDependencies } from './logs_locator';
 
-export type InfraNodeLogsLocator = LocatorPublic<InfraNodeLogsLocatorParams>;
+export type InfraNodeLogsLocator = LocatorPublic<NodeLogsLocatorParams>;
 
 export type InfraNodeLogsLocatorDependencies = InfraLogsLocatorDependencies;
 
-export class InfraNodeLogsLocatorDefinition
-  implements LocatorDefinition<InfraNodeLogsLocatorParams>
-{
+export class InfraNodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLocatorParams> {
   public readonly id = INFRA_NODE_LOGS_LOCATOR_ID;
 
   constructor(protected readonly deps: InfraNodeLogsLocatorDependencies) {}
 
-  public readonly getLocation = async (params: InfraNodeLogsLocatorParams) => {
+  public readonly getLocation = async (params: NodeLogsLocatorParams) => {
     const { createNodeLogsQuery, createSearchString } = await import('./helpers');
 
     const query = createNodeLogsQuery(params);

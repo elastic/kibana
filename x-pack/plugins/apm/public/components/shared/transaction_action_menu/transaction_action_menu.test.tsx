@@ -11,10 +11,10 @@ import { MemoryRouter } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { License } from '@kbn/licensing-plugin/common/license';
 import {
+  LOGS_LOCATOR_ID,
   NODE_LOGS_LOCATOR_ID,
   TRACE_LOGS_LOCATOR_ID,
-} from '@kbn/deeplinks-observability';
-import { LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
+} from '@kbn/logs-shared-plugin/common';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
