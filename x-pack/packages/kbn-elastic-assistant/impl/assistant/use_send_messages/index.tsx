@@ -29,7 +29,7 @@ interface UseSendMessages {
 }
 
 export const useSendMessages = (): UseSendMessages => {
-  const { isStreamingEnabled, knowledgeBase } = useAssistantContext();
+  const { assistantStreamingEnabled, knowledgeBase } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
 
   const sendMessages = useCallback(
@@ -41,13 +41,13 @@ export const useSendMessages = (): UseSendMessages => {
           http,
           messages,
           apiConfig,
-          isStreamingEnabled,
+          assistantStreamingEnabled,
         });
       } finally {
         setIsLoading(false);
       }
     },
-    [isStreamingEnabled, knowledgeBase.assistantLangChain]
+    [assistantStreamingEnabled, knowledgeBase.assistantLangChain]
   );
 
   return { isLoading, sendMessages };

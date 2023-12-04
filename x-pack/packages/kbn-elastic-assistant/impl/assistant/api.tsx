@@ -20,7 +20,7 @@ export interface FetchConnectorExecuteAction {
   http: HttpSetup;
   messages: Message[];
   signal?: AbortSignal | undefined;
-  isStreamingEnabled: boolean;
+  assistantStreamingEnabled: boolean;
 }
 
 export interface FetchConnectorExecuteResponse {
@@ -39,7 +39,7 @@ export const fetchConnectorExecuteAction = async ({
   messages,
   apiConfig,
   signal,
-  isStreamingEnabled,
+  assistantStreamingEnabled,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
   const outboundMessages = messages.map((msg) => ({
     role: msg.role,
@@ -64,7 +64,7 @@ export const fetchConnectorExecuteAction = async ({
   // tracked here: https://github.com/elastic/security-team/issues/7363
   // In part 3 I will make enhancements to langchain to introduce streaming
   // Once implemented, invokeAI can be removed
-  const isStream = isStreamingEnabled && !assistantLangChain;
+  const isStream = assistantStreamingEnabled && !assistantLangChain;
   const requestBody = isStream
     ? {
         params: {

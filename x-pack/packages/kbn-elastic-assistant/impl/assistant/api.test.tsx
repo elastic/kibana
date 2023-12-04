@@ -39,7 +39,7 @@ const fetchConnectorArgs: FetchConnectorExecuteAction = {
   http: mockHttp,
   messages,
   apiConfig,
-  isStreamingEnabled: true,
+  assistantStreamingEnabled: true,
 };
 describe('API tests', () => {
   beforeEach(() => {
@@ -61,7 +61,7 @@ describe('API tests', () => {
       );
     });
 
-    it('calls the actions connector api with streaming when isStreamingEnabled is true when assistantLangChain is false', async () => {
+    it('calls the actions connector api with streaming when assistantStreamingEnabled is true when assistantLangChain is false', async () => {
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
         assistantLangChain: false,
@@ -81,11 +81,11 @@ describe('API tests', () => {
       );
     });
 
-    it('calls the actions connector api with invoke when isStreamingEnabled is false when assistantLangChain is false', async () => {
+    it('calls the actions connector api with invoke when assistantStreamingEnabled is false when assistantLangChain is false', async () => {
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
         assistantLangChain: false,
-        isStreamingEnabled: false,
+        assistantStreamingEnabled: false,
       };
 
       await fetchConnectorExecuteAction(testProps);
@@ -119,7 +119,7 @@ describe('API tests', () => {
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
         assistantLangChain: false,
-        isStreamingEnabled: false,
+        assistantStreamingEnabled: false,
       };
 
       const result = await fetchConnectorExecuteAction(testProps);
