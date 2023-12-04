@@ -126,7 +126,7 @@ export const createAndEnrollEndpointHostCI = async ({
     kbnClient,
     log,
     hostVm.name,
-    10 * 60 * 1000,
+    15 * 60 * 1000,
     true
   );
 
