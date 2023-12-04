@@ -47,10 +47,10 @@ export default function ({ getService }: FtrProviderContext) {
       return res.body;
     };
 
-    const deleteMonitor = async (monitorId?: string, statusCode = 200) => {
+    const deleteMonitor = async (monitorId?: string | string[], statusCode = 200) => {
       const deleteResponse = await supertest
         .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-        .send({ ids: [monitorId] })
+        .send({ ids: Array.isArray(monitorId) ? monitorId : [monitorId] })
         .set('kbn-xsrf', 'true');
       expect(deleteResponse.status).to.eql(statusCode);
       return deleteResponse;
@@ -74,6 +74,17 @@ export default function ({ getService }: FtrProviderContext) {
       const { id: monitorId } = await saveMonitor(httpMonitorJson as MonitorFields);
 
       const deleteResponse = await deleteMonitor(monitorId);
+
+      expect(deleteResponse.body).eql(monitorId);
+
+      // Hit get endpoint and expect 404 as well
+      await supertest.get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId).expect(404);
+    });
+    it('deletes multiple monitors by id', async () => {
+      const { id: monitorId } = await saveMonitor(httpMonitorJson as MonitorFields);
+      const { id: monitorId2 } = await saveMonitor(httpMonitorJson as MonitorFields);
+
+      const deleteResponse = await deleteMonitor([monitorId2, monitorId]);
 
       expect(deleteResponse.body).eql(monitorId);
 
