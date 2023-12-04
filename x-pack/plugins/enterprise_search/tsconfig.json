@@ -63,6 +63,7 @@
     "@kbn/logs-shared-plugin",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-application-browser",
-    "@kbn/core-capabilities-common"
+    "@kbn/core-capabilities-common",
+    "@kbn/code-editor"
   ]
 }
