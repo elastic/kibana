@@ -6,7 +6,7 @@
  */
 
 import { ALL_VALUE, Paginated } from '@kbn/slo-schema';
-import { SLO_MODEL_VERSION } from '../../assets/constants';
+import { SLO_MODEL_VERSION } from '../../../common/slo/constants';
 import { SLO } from '../../domain/models';
 import { FindSLO } from './find_slo';
 import { createSLO } from './fixtures/slo';

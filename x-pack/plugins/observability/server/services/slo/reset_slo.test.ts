@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 
-import { SLO_MODEL_VERSION } from '../../assets/constants';
+import { SLO_MODEL_VERSION } from '../../../common/slo/constants';
 import { createSLO } from './fixtures/slo';
 import {
   createSLORepositoryMock,

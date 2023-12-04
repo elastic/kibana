@@ -11,7 +11,7 @@ import { Paginated, Pagination, sloSchema } from '@kbn/slo-schema';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
-import { SLO_MODEL_VERSION } from '../../assets/constants';
+import { SLO_MODEL_VERSION } from '../../../common/slo/constants';
 import { SLO, StoredSLO } from '../../domain/models';
 import { SLOIdConflict, SLONotFound } from '../../errors';
 import { SO_SLO_TYPE } from '../../saved_objects';

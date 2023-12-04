@@ -6,7 +6,7 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { SLO_MODEL_VERSION } from '../../assets/constants';
+import { SLO_MODEL_VERSION } from '../../../common/slo/constants';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { GetSLO } from './get_slo';
 import { createSummaryClientMock, createSLORepositoryMock } from './mocks';

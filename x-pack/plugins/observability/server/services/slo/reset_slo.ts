@@ -15,7 +15,7 @@ import {
   SLO_MODEL_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_TEMP_INDEX_NAME,
-} from '../../assets/constants';
+} from '../../../common/slo/constants';
 import { getSLOSummaryPipelineTemplate } from '../../assets/ingest_templates/slo_summary_pipeline_template';
 import { retryTransientEsErrors } from '../../utils/retry';
 import { SLORepository } from './slo_repository';

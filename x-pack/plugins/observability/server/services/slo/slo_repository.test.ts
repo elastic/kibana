@@ -8,7 +8,7 @@
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { sloSchema } from '@kbn/slo-schema';
-import { SLO_MODEL_VERSION } from '../../assets/constants';
+import { SLO_MODEL_VERSION } from '../../../common/slo/constants';
 import { SLO, StoredSLO } from '../../domain/models';
 import { SLOIdConflict, SLONotFound } from '../../errors';
 import { SO_SLO_TYPE } from '../../saved_objects';

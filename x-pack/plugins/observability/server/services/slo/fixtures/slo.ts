@@ -15,7 +15,7 @@ import {
 } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { SLO_MODEL_VERSION } from '../../../assets/constants';
+import { SLO_MODEL_VERSION } from '../../../common/slo/constants';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,

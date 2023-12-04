@@ -13,7 +13,7 @@ import {
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
-} from '../../../../assets/constants';
+} from '../../../../../common/slo/constants';
 import { getGroupBy } from './common';
 
 export function generateTransformForTimeslicesAndRolling(slo: SLO): TransformPutTransformRequest {
