@@ -156,7 +156,12 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
       ? convertHistoryStartToSize(rule.history_window_start)
       : '7d',
   shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
-  groupByFields: ('alert_suppression' in rule && rule.alert_suppression?.group_by) || [],
+  groupByFields:
+    ('alert_suppression' in rule &&
+      rule.alert_suppression &&
+      'group_by' in rule.alert_suppression &&
+      rule.alert_suppression.group_by) ||
+    [],
   groupByRadioSelection:
     'alert_suppression' in rule && rule.alert_suppression?.duration
       ? GroupByOptions.PerTimePeriod
@@ -166,8 +171,14 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
     unit: 'm',
   },
   suppressionMissingFields:
-    ('alert_suppression' in rule && rule.alert_suppression?.missing_fields_strategy) ||
+    ('alert_suppression' in rule &&
+      rule.alert_suppression &&
+      'missing_fields_strategy' in rule.alert_suppression &&
+      rule.alert_suppression.missing_fields_strategy) ||
     DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  enableThresholdSuppression: Boolean(
+    'alert_suppression' in rule && rule.alert_suppression?.duration
+  ),
 });
 
 export const convertHistoryStartToSize = (relativeTime: string) => {
