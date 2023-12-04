@@ -28,6 +28,7 @@ export const useGetCases = (
   params: {
     queryParams?: Partial<QueryParams>;
     filterOptions?: Partial<FilterOptions>;
+    initialOptions?: Partial<FilterOptions>;
   } = {}
 ): UseQueryResult<CasesFindResponseUI> => {
   const toasts = useToasts();
@@ -43,6 +44,7 @@ export const useGetCases = (
           ...DEFAULT_QUERY_PARAMS,
           ...(params.queryParams ?? {}),
         },
+        initialOptions: params.initialOptions,
         signal,
       });
     },

@@ -58,21 +58,11 @@ export const SolutionFilterComponent = ({
     filterId: string;
     selectedOptionKeys: string[];
   }) => {
-    if (hasOwner) {
-      onChange({
-        filterId,
-        selectedOptionKeys: newOptions.length === 0 ? owner : newOptions,
-      });
-    } else {
-      onChange({
-        filterId,
-        selectedOptionKeys: newOptions.length === 0 ? availableSolutions : newOptions,
-      });
-    }
+    onChange({
+      filterId,
+      selectedOptionKeys: newOptions,
+    });
   };
-
-  const selectedOptionsInFilter =
-    selectedOptionKeys.length === availableSolutions.length ? [] : selectedOptionKeys;
 
   const renderOption = (option: EuiSelectableOption) => {
     const solution = solutions.find((solutionData) => solutionData.id === option.label) as Solution;
@@ -93,7 +83,7 @@ export const SolutionFilterComponent = ({
       onChange={_onChange}
       options={options}
       renderOption={renderOption}
-      selectedOptionKeys={selectedOptionsInFilter}
+      selectedOptionKeys={selectedOptionKeys}
     />
   );
 };

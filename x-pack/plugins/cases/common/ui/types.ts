@@ -191,6 +191,7 @@ export type CaseUser = SnakeToCamelCase<User>;
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
+  initialOptions?: Partial<FilterOptions>;
 }
 
 export interface ApiProps {

@@ -91,7 +91,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          status: initialFilterOptions.status || [],
+          status: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -133,7 +133,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          tags: initialFilterOptions.tags || [],
+          tags: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -155,7 +155,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          category: initialFilterOptions.category || [],
+          category: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -177,7 +177,7 @@ export const getSystemFilterConfig = ({
       isAvailable: availableSolutions.length > 1,
       getEmptyOptions: () => {
         return {
-          owner: initialFilterOptions.owner || [],
+          owner: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
