@@ -21,29 +21,30 @@ describe('RuleFormConsumerSelectionModal', () => {
 
   it('renders correctly', async () => {
     render(
-      <RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} errors={{}} />
+      <RuleFormConsumerSelection
+        selectedConsumer={null}
+        consumers={mockConsumers}
+        onChange={mockOnChange}
+        errors={{}}
+      />
     );
 
     expect(screen.getByTestId('ruleFormConsumerSelect')).toBeInTheDocument();
+    expect(screen.getByText('Select a scope')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('comboBoxToggleListButton'));
     expect(screen.getByText('Logs')).toBeInTheDocument();
     expect(screen.getByText('Metrics')).toBeInTheDocument();
     expect(screen.getByText('Stack Rules')).toBeInTheDocument();
   });
 
-  it('should initialize dropdown to null', () => {
-    render(
-      <RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} errors={{}} />
-    );
-
-    // Selects first option if no initial value is provided
-    expect(mockOnChange).toHaveBeenLastCalledWith(null);
-    mockOnChange.mockClear();
-  });
-
   it('should be able to select infrastructure and call onChange', () => {
     render(
-      <RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} errors={{}} />
+      <RuleFormConsumerSelection
+        selectedConsumer={null}
+        consumers={mockConsumers}
+        onChange={mockOnChange}
+        errors={{}}
+      />
     );
 
     fireEvent.click(screen.getByTestId('comboBoxToggleListButton'));
@@ -53,7 +54,12 @@ describe('RuleFormConsumerSelectionModal', () => {
 
   it('should be able to select logs and call onChange', () => {
     render(
-      <RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} errors={{}} />
+      <RuleFormConsumerSelection
+        selectedConsumer={null}
+        consumers={mockConsumers}
+        onChange={mockOnChange}
+        errors={{}}
+      />
     );
 
     fireEvent.click(screen.getByTestId('comboBoxToggleListButton'));
@@ -64,6 +70,7 @@ describe('RuleFormConsumerSelectionModal', () => {
   it('should be able to show errors when there is one', () => {
     render(
       <RuleFormConsumerSelection
+        selectedConsumer={null}
         consumers={mockConsumers}
         onChange={mockOnChange}
         errors={{ consumer: ['Scope is required'] }}
@@ -74,23 +81,55 @@ describe('RuleFormConsumerSelectionModal', () => {
 
   it('should display nothing if there is only 1 consumer to select', () => {
     render(
-      <RuleFormConsumerSelection consumers={['stackAlerts']} onChange={mockOnChange} errors={{}} />
+      <RuleFormConsumerSelection
+        selectedConsumer={null}
+        consumers={['stackAlerts']}
+        onChange={mockOnChange}
+        errors={{}}
+      />
     );
 
     expect(mockOnChange).toHaveBeenLastCalledWith('stackAlerts');
     expect(screen.queryByTestId('ruleFormConsumerSelect')).not.toBeInTheDocument();
   });
 
-  it('should display nothing if observability is one of the consumer', () => {
+  it('should display nothing if observability is one of the consumers', () => {
     render(
       <RuleFormConsumerSelection
+        selectedConsumer={null}
         consumers={['logs', 'observability']}
         onChange={mockOnChange}
         errors={{}}
       />
     );
 
-    expect(mockOnChange).toHaveBeenLastCalledWith('observability');
     expect(screen.queryByTestId('ruleFormConsumerSelect')).not.toBeInTheDocument();
+  });
+
+  it('should display the initial selected consumer', () => {
+    render(
+      <RuleFormConsumerSelection
+        selectedConsumer={'logs'}
+        consumers={mockConsumers}
+        onChange={mockOnChange}
+        errors={{}}
+      />
+    );
+
+    expect(screen.getByText('Logs')).toBeInTheDocument();
+    expect(() => screen.getByText('Select a scope')).toThrow();
+  });
+
+  it('should not display the initial selected consumer if it is not a selectable option', () => {
+    render(
+      <RuleFormConsumerSelection
+        selectedConsumer={'logs'}
+        consumers={['stackAlerts', 'infrastructure']}
+        onChange={mockOnChange}
+        errors={{}}
+      />
+    );
+    expect(() => screen.getByText('Logs')).toThrow();
+    expect(screen.getByText('Select a scope')).toBeInTheDocument();
   });
 });
