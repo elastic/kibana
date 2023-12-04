@@ -6,7 +6,7 @@
  */
 
 /**
- * ATTENTION: New mappings for Fleet are defined in the ElasticSearch repo.
+ * ATTENTION: Mappings for Fleet are defined in the ElasticSearch repo.
  *
  * The following mappings declared here closely mirror them
  * But they are only used to perform validation on the endpoints using ListWithKuery
@@ -305,7 +305,6 @@ export const AGENT_MAPPINGS = {
           fields: {
             keyword: {
               type: 'keyword',
-              ignore_above: 16,
             },
           },
         },
@@ -331,7 +330,6 @@ export const AGENT_MAPPINGS = {
               fields: {
                 keyword: {
                   type: 'keyword',
-                  ignore_above: 1024,
                 },
               },
             },
