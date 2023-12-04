@@ -27,7 +27,8 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/170751
+describe.skip(
   'Alert details expandable flyout left panel prevalence',
   { tags: ['@ess', '@serverless'] },
   () => {

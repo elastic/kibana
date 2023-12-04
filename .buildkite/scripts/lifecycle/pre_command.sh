@@ -139,6 +139,9 @@ export SYNTHETICS_REMOTE_KIBANA_PASSWORD
 SYNTHETICS_REMOTE_KIBANA_URL=${SYNTHETICS_REMOTE_KIBANA_URL-"$(retry 5 5 vault read -field=url secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials)"}
 export SYNTHETICS_REMOTE_KIBANA_URL
 
+DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(retry 5 5 vault read -field=DEPLOY_TAGGER_SLACK_WEBHOOK_URL secret/kibana-issues/dev/kibana-serverless-release-tools)"}
+export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
+
 # Setup Failed Test Reporter Elasticsearch credentials
 {
   TEST_FAILURES_ES_CLOUD_ID=$(retry 5 5 vault read -field=cloud_id secret/kibana-issues/dev/failed_tests_reporter_es)
