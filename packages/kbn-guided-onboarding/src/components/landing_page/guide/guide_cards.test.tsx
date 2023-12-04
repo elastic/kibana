@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 
 import { GuideCards, GuideCardsProps } from './guide_cards';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
@@ -15,12 +15,12 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { I18nStart } from '@kbn/core-i18n-browser';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { GuideCardSolutions } from '../classic_version/guide_cards';
 
-const defaultProps: GuideCardsProps = {
+const defaultProps: Partial<GuideCardsProps> = {
   activateGuide: jest.fn(),
   navigateToApp: jest.fn(),
   guidesState: [],
-  activeFilter: 'search',
   openModal: jest.fn(),
   theme: themeServiceMock.createStartContract(),
   i18nStart: {} as unknown as I18nStart,
@@ -32,8 +32,22 @@ const defaultProps: GuideCardsProps = {
 
 describe('guide cards', () => {
   describe('snapshots', () => {
-    test('should render all cards', async () => {
-      const component = await shallow(<GuideCards {...defaultProps} />);
+    test('should render search cards', async () => {
+      const component = mount(
+        <GuideCards {...defaultProps} activeFilter={'search' as GuideCardSolutions} />
+      );
+      expect(component).toMatchSnapshot();
+    });
+    test('should render security cards', async () => {
+      const component = mount(
+        <GuideCards {...defaultProps} activeFilter={'security' as GuideCardSolutions} />
+      );
+      expect(component).toMatchSnapshot();
+    });
+    test('should render observability cards', async () => {
+      const component = mount(
+        <GuideCards {...defaultProps} activeFilter={'observability' as GuideCardSolutions} />
+      );
       expect(component).toMatchSnapshot();
     });
   });
