@@ -8,8 +8,9 @@
 import { renderHook } from '@testing-library/react-hooks';
 import type { InstalledIntegration } from '../../../../../../common/api/detection_engine/fleet_integrations';
 import { TestProviders } from '../../../../../common/mock';
-import { ENTRA_ID_PACKAGE_NAME, OKTA_PACKAGE_NAME } from '../constants';
+import { ENTRA_ID_PACKAGE_NAME } from '../constants';
 import { useManagedUser } from './use_managed_user';
+import type { ObserverUser } from './use_observed_user';
 
 const makeInstalledIntegration = (
   pkgName = 'testPkg',
@@ -34,52 +35,98 @@ jest.mock(
   })
 );
 
+jest.mock('../../../../../common/hooks/use_space_id', () => ({
+  useSpaceId: () => 'test-space-id',
+}));
+
+const mockSearch = jest.fn().mockReturnValue({
+  data: [],
+});
+
+jest.mock('../../../../../common/containers/use_search_strategy', () => ({
+  useSearchStrategy: () => ({
+    loading: false,
+    result: { users: [] },
+    search: (...params: unknown[]) => mockSearch(...params),
+    refetch: () => {},
+    inspect: {},
+  }),
+}));
+
+const observedUser: ObserverUser = {
+  isLoading: false,
+  details: {},
+  firstSeen: {
+    date: undefined,
+    isLoading: false,
+  },
+  lastSeen: {
+    date: undefined,
+    isLoading: false,
+  },
+};
+
 describe('useManagedUser', () => {
-  it('returns isIntegrationEnabled:true when it finds Entra ID integration', () => {
+  beforeEach(() => {
+    mockSearch.mockClear();
+  });
+  it('returns isIntegrationEnabled:true when it finds an enabled integration with the given name', () => {
     mockUseInstalledIntegrations.mockReturnValue({
       data: [makeInstalledIntegration(ENTRA_ID_PACKAGE_NAME, true)],
     });
 
-    const { result } = renderHook(() => useManagedUser('test-userName'), {
+    const { result } = renderHook(() => useManagedUser('test-userName', observedUser), {
       wrapper: TestProviders,
     });
 
     expect(result.current.isIntegrationEnabled).toBeTruthy();
   });
 
-  it('returns isIntegrationEnabled:true when it finds Okta integration', () => {
-    mockUseInstalledIntegrations.mockReturnValue({
-      data: [makeInstalledIntegration(OKTA_PACKAGE_NAME, true)],
-    });
-
-    const { result } = renderHook(() => useManagedUser('test-userName'), {
-      wrapper: TestProviders,
-    });
-
-    expect(result.current.isIntegrationEnabled).toBeTruthy();
-  });
-
-  it('returns isIntegrationEnabled:false when all integrations are disabled', () => {
-    mockUseInstalledIntegrations.mockReturnValue({
-      data: [makeInstalledIntegration(OKTA_PACKAGE_NAME, false)],
-    });
-
-    const { result } = renderHook(() => useManagedUser('test-userName'), {
-      wrapper: TestProviders,
-    });
-
-    expect(result.current.isIntegrationEnabled).toBeFalsy();
-  });
-
-  it('returns isIntegrationEnabled:false when it does not find Azure and Okta integrations', () => {
+  it('returns isIntegrationEnabled:false when it does not find an enabled integration with the given name', () => {
     mockUseInstalledIntegrations.mockReturnValue({
       data: [makeInstalledIntegration('fake-name', true)],
     });
 
-    const { result } = renderHook(() => useManagedUser('test-userName'), {
+    const { result } = renderHook(() => useManagedUser('test-userName', observedUser), {
       wrapper: TestProviders,
     });
 
     expect(result.current.isIntegrationEnabled).toBeFalsy();
+  });
+
+  it('should search', () => {
+    renderHook(() => useManagedUser('test-userName', observedUser), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockSearch).toHaveBeenCalled();
+  });
+
+  it('should not search while observed user is loading', () => {
+    renderHook(() => useManagedUser('test-userName', { ...observedUser, isLoading: true }), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockSearch).not.toHaveBeenCalled();
+  });
+
+  it('should search by email if the field is available', () => {
+    const email = ['test@email.com'];
+    renderHook(
+      () =>
+        useManagedUser('test-userName', {
+          ...observedUser,
+          details: { user: { email } },
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    expect(mockSearch).toBeCalledWith(
+      expect.objectContaining({
+        userEmail: email,
+      })
+    );
   });
 });

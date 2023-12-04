@@ -60,7 +60,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
 
   const observedUser = useObservedUser(userName);
-  const managedUser = useManagedUser(userName);
+  const managedUser = useManagedUser(userName, observedUser);
 
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;

@@ -15,6 +15,7 @@ import { UsersQueries } from '../../../../../../common/api/search_strategy';
 export const mockOptions: ManagedUserDetailsRequestOptionsInput = {
   defaultIndex: ['logs-*'],
   userName: 'test-user-name',
+  userEmail: ['test-user-name@mail.com'],
   factoryQueryType: UsersQueries.managedDetails,
 };
 

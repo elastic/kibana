@@ -6,16 +6,24 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ManagedUserDatasetKey } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import type { ManagedUserDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy';
 
 export const buildManagedUserDetailsQuery = ({
+  userEmail,
   userName,
   defaultIndex,
 }: ManagedUserDetailsRequestOptions): ISearchRequestParams => {
+  const should: QueryDslQueryContainer[] = [{ term: { 'user.name': userName } }];
+
+  if (userEmail) {
+    const emailQuery = { terms: { 'user.email': userEmail } };
+    should.push(emailQuery);
+  }
+
   const filter = [
-    { term: { 'user.name': userName } },
     {
       terms: { 'event.dataset': [ManagedUserDatasetKey.OKTA, ManagedUserDatasetKey.ENTRA] },
     },
@@ -28,7 +36,7 @@ export const buildManagedUserDetailsQuery = ({
     ignore_unavailable: true,
     track_total_hits: false,
     body: {
-      query: { bool: { filter } },
+      query: { bool: { filter, should, minimum_should_match: 1 } },
       size: 0,
       aggs: {
         datasets: {

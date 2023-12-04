@@ -16,11 +16,6 @@ Object {
       \\"bool\\": {
         \\"filter\\": [
           {
-            \\"term\\": {
-              \\"user.name\\": \\"test-user-name\\"
-            }
-          },
-          {
             \\"terms\\": {
               \\"event.dataset\\": [
                 \\"entityanalytics_okta.user\\",
@@ -33,7 +28,22 @@ Object {
               \\"event.kind\\": \\"asset\\"
             }
           }
-        ]
+        ],
+        \\"should\\": [
+          {
+            \\"term\\": {
+              \\"user.name\\": \\"test-user-name\\"
+            }
+          },
+          {
+            \\"terms\\": {
+              \\"user.email\\": [
+                \\"test-user-name@mail.com\\"
+              ]
+            }
+          }
+        ],
+        \\"minimum_should_match\\": 1
       }
     },
     \\"size\\": 0,

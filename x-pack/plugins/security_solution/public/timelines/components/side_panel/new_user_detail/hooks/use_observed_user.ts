@@ -7,13 +7,27 @@
 
 import { useMemo } from 'react';
 import { useObservedUserDetails } from '../../../../../explore/users/containers/users/observed_details';
+import type { UserItem } from '../../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useFirstLastSeen } from '../../../../../common/containers/use_first_last_seen';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 
-export const useObservedUser = (userName: string) => {
+export interface ObserverUser {
+  details: UserItem;
+  isLoading: boolean;
+  firstSeen: {
+    date: string | null | undefined;
+    isLoading: boolean;
+  };
+  lastSeen: {
+    date: string | null | undefined;
+    isLoading: boolean;
+  };
+}
+
+export const useObservedUser = (userName: string): ObserverUser => {
   const { selectedPatterns } = useSourcererDataView();
   const { to, from, isInitializing, deleteQuery, setQuery } = useGlobalTime();
 

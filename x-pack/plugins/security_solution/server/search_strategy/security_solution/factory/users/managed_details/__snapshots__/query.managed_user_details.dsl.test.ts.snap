@@ -35,11 +35,6 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "term": Object {
-              "user.name": "test-user-name",
-            },
-          },
-          Object {
             "terms": Object {
               "event.dataset": Array [
                 "entityanalytics_okta.user",
@@ -50,6 +45,21 @@ Object {
           Object {
             "term": Object {
               "event.kind": "asset",
+            },
+          },
+        ],
+        "minimum_should_match": 1,
+        "should": Array [
+          Object {
+            "term": Object {
+              "user.name": "test-user-name",
+            },
+          },
+          Object {
+            "terms": Object {
+              "user.email": Array [
+                "test-user-name@mail.com",
+              ],
             },
           },
         ],

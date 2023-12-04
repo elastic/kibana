@@ -21,8 +21,9 @@ import {
   MANAGED_USER_QUERY_ID,
 } from '../constants';
 import * as i18n from '../translations';
+import type { ObserverUser } from './use_observed_user';
 
-export const useManagedUser = (userName: string) => {
+export const useManagedUser = (userName: string, observedUser: ObserverUser) => {
   const { to, from, isInitializing, deleteQuery, setQuery } = useGlobalTime();
   const spaceId = useSpaceId();
   const {
@@ -48,13 +49,23 @@ export const useManagedUser = (userName: string) => {
   );
 
   useEffect(() => {
-    if (!isInitializing && defaultIndex.length > 0) {
+    if (!isInitializing && defaultIndex.length > 0 && !observedUser.isLoading && userName) {
       search({
         defaultIndex,
+        userEmail: observedUser.details.user?.email,
         userName,
       });
     }
-  }, [from, search, to, userName, isInitializing, defaultIndex]);
+  }, [
+    from,
+    search,
+    to,
+    isInitializing,
+    defaultIndex,
+    userName,
+    observedUser.isLoading,
+    observedUser.details.user?.email,
+  ]);
 
   const { data: installedIntegrations, isLoading: loadingIntegrations } = useInstalledIntegrations({
     packages: [ENTRA_ID_PACKAGE_NAME, OKTA_PACKAGE_NAME],
