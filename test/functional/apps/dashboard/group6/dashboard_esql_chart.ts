@@ -13,7 +13,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker', 'header']);
+  const testSubjects = getService('testSubjects');
+  const monacoEditor = getService('monacoEditor');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard add ES|QL chart', function () {
@@ -27,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('should add an ES|QL chart', async () => {
+    it('should add an ES|QL datatable chart when the ES|QL panel action is clicked', async () => {
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setDefaultDataRange();
@@ -41,6 +43,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
       });
+
+      expect(await testSubjects.exists('lnsDataTable')).to.be(true);
+    });
+
+    it('should remove the panel if cancel button is clicked', async () => {
+      await testSubjects.click('cancelFlyoutButton');
+      await PageObjects.dashboard.waitForRenderComplete();
+      await retry.try(async () => {
+        const panelCount = await PageObjects.dashboard.getPanelCount();
+        expect(panelCount).to.eql(0);
+      });
+    });
+
+    it('should be able to edit the query and render another chart', async () => {
+      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+      await dashboardAddPanel.expectEditorMenuClosed();
+      await PageObjects.dashboard.waitForRenderComplete();
+
+      await monacoEditor.setCodeEditorValue('from logstash-* | stats maxB = max(bytes)');
+      await testSubjects.click('TextBasedLangEditor-run-query-button');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.click('applyFlyoutButton');
+      expect(await testSubjects.exists('mtrVis')).to.be(true);
     });
   });
 }
