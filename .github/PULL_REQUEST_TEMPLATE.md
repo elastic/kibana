@@ -2,6 +2,9 @@
 
 Summarize your PR. If it involves visual changes include a screenshot or gif.
 
+### How to verify
+
+If applicable, provide instructions for how to verify your PR.
 
 ### Checklist
 
