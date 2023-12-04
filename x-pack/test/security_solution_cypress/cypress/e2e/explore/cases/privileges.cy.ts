@@ -17,7 +17,7 @@ import {
   fillCasesMandatoryfields,
   filterStatusOpen,
 } from '../../../tasks/create_new_case';
-import { login } from '../../../tasks/login';
+import { login, loginWithUser } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
   createUsersAndRoles,
@@ -65,7 +65,7 @@ describe('Cases privileges', { tags: ['@ess'] }, () => {
 
   for (const user of [secAllUser, secReadCasesAllUser, secAllCasesNoDeleteUser]) {
     it(`User ${user.username} with role(s) ${user.roles.join()} can create a case`, () => {
-      login(user);
+      loginWithUser(user);
       visit(CASES_URL);
       goToCreateNewCase();
       fillCasesMandatoryfields(testCase);
@@ -79,7 +79,7 @@ describe('Cases privileges', { tags: ['@ess'] }, () => {
 
   for (const user of [secAllCasesOnlyReadDeleteUser]) {
     it(`User ${user.username} with role(s) ${user.roles.join()} cannot create a case`, () => {
-      login(user);
+      loginWithUser(user);
       visit(CASES_URL);
       cy.get(ALL_CASES_CREATE_NEW_CASE_BTN).should('not.exist');
     });
