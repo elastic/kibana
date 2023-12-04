@@ -281,6 +281,18 @@ class BrowserService extends FtrService {
   }
 
   /**
+   * Returns a ‘successful serialized cookie data’ for current browsing context.
+   * If browser is no longer available it returns error.
+   * https://www.selenium.dev/documentation/webdriver/interactions/cookies/#get-all-cookies
+   *
+   * @param {string} cookieName
+   * @return {Promise<IWebDriverCookie>}
+   */
+  public async getCookies() {
+    return await this.driver.manage().getCookies();
+  }
+
+  /**
    * Pauses the execution in the browser, similar to setting a breakpoint for debugging.
    * @return {Promise<void>}
    */
