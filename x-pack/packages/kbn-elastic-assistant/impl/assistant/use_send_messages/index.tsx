@@ -47,7 +47,7 @@ export const useSendMessages = (): UseSendMessages => {
         setIsLoading(false);
       }
     },
-    [knowledgeBase.assistantLangChain]
+    [isStreamingEnabled, knowledgeBase.assistantLangChain]
   );
 
   return { isLoading, sendMessages };
