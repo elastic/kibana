@@ -40,7 +40,7 @@ export const getEnvAuth = (role?: SecurityRoleName): User => {
   return user;
 };
 
-export const login = (role?: SecurityRoleNam, testUser?: User): void => {
+export const login = (role?: SecurityRoleName, testUser?: User): void => {
   const user = testUser ? testUser : getEnvAuth(role);
 
   const baseUrl = Cypress.config().baseUrl;
