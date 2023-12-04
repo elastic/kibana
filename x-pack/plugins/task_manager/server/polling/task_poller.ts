@@ -89,7 +89,9 @@ export function createTaskPoller<T, H>({
         // TODO: Investigate why we sometimes get null, causing the setTimeout logic to always schedule
         // the next polling cycle to run immediately
         logger.error(
-          new Error(`Expected the new interval to be a number > 0, received: ${interval}`)
+          new Error(
+            `Expected the new interval to be a number > 0, received: ${interval} but poller will keep using: ${pollInterval}`
+          )
         );
         return;
       }

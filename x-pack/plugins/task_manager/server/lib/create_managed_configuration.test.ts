@@ -184,6 +184,23 @@ describe('createManagedConfiguration()', () => {
       );
     });
 
+    test('should log a warning when an issue occurred in the calculating of the increased poll interval', async () => {
+      const { errors$ } = setupScenario(NaN);
+      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Poll interval configuration had an issue calculating the new poll interval: Math.min(Math.ceil(NaN * 1.2), Math.max(60000, NaN)) = NaN'
+      );
+    });
+
+    test('should log a warning when an issue occurred in the calculating of the decreased poll interval', async () => {
+      setupScenario(NaN);
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Poll interval configuration had an issue calculating the new poll interval: Math.max(NaN, Math.floor(NaN * 0.95)) = NaN'
+      );
+    });
+
     test('should decrease configuration back to normal incrementally after an error is emitted', async () => {
       const { subscription, errors$ } = setupScenario(100);
       errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));

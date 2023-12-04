@@ -106,6 +106,11 @@ function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
         Math.ceil(previousPollInterval * POLL_INTERVAL_INCREASE_PERCENTAGE),
         Math.max(PREFERRED_MAX_POLL_INTERVAL, startingPollInterval)
       );
+      if (Number.isNaN(newPollInterval) || newPollInterval == null || newPollInterval < 0) {
+        logger.error(
+          `Poll interval configuration had an issue calculating the new poll interval: Math.min(Math.ceil(${previousPollInterval} * ${POLL_INTERVAL_INCREASE_PERCENTAGE}), Math.max(${PREFERRED_MAX_POLL_INTERVAL}, ${startingPollInterval})) = ${newPollInterval}`
+        );
+      }
     } else {
       // Decrease poll interval by POLL_INTERVAL_DECREASE_PERCENTAGE and use Math.floor to
       // make sure the number is different than previous while not being a decimal value.
@@ -113,6 +118,11 @@ function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
         startingPollInterval,
         Math.floor(previousPollInterval * POLL_INTERVAL_DECREASE_PERCENTAGE)
       );
+      if (Number.isNaN(newPollInterval) || newPollInterval == null || newPollInterval < 0) {
+        logger.error(
+          `Poll interval configuration had an issue calculating the new poll interval: Math.max(${startingPollInterval}, Math.floor(${previousPollInterval} * ${POLL_INTERVAL_DECREASE_PERCENTAGE})) = ${newPollInterval}`
+        );
+      }
     }
     if (newPollInterval !== previousPollInterval) {
       logger.debug(

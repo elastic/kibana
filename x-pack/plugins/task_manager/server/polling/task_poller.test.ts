@@ -135,7 +135,9 @@ describe('TaskPoller', () => {
     expect(work).toHaveBeenCalledTimes(4);
 
     expect(logger.error).toHaveBeenCalledWith(
-      new Error('Expected the new interval to be a number > 0, received: null')
+      new Error(
+        'Expected the new interval to be a number > 0, received: null but poller will keep using: 200'
+      )
     );
   });
 
