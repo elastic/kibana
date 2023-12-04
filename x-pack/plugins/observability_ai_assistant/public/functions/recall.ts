@@ -80,9 +80,7 @@ export function registerRecallFunction({
       const systemMessage = messages.find((message) => message.message.role === MessageRole.System);
 
       if (!systemMessage) {
-        return {
-          content: [] as unknown as Serializable,
-        };
+        throw new Error('No system message found');
       }
 
       const userMessage = last(
