@@ -9,7 +9,6 @@ import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public'
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { casesFeatureId, observabilityFeatureId } from '../../../../common';
 import { getRenderCellValue } from './render_cell_value';
 import { columns } from './default_columns';
@@ -17,12 +16,13 @@ import { useGetAlertFlyoutComponents } from '../../alerts_flyout/use_get_alert_f
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 import type { ConfigSchema } from '../../../plugin';
 import type { TopAlert } from '../../../typings/alerts';
+import { SLO_ALERTS_TABLE_CONFID } from '../../../embeddable/slo/constants';
 
 export const getSloAlertsTableConfiguration = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
   config: ConfigSchema
 ): AlertsTableConfigurationRegistry => ({
-  id: AlertConsumers.SLO,
+  id: SLO_ALERTS_TABLE_CONFID,
   cases: { featureId: casesFeatureId, owner: [observabilityFeatureId] },
   columns,
   getRenderCellValue: (({ setFlyoutAlert }: { setFlyoutAlert: (data: TopAlert) => void }) => {

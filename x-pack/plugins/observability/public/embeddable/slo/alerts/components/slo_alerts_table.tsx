@@ -10,6 +10,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SloEmbeddableDeps } from '../slo_alerts_embeddable';
 import type { SloItem } from '../types';
+import { SLO_ALERTS_TABLE_CONFID } from '../../constants';
 
 type SloIdAndInstanceId = [string, string];
 interface FilterQuery {
@@ -71,7 +72,7 @@ export function SloAlertsTable({ slos, deps, timeRange, onLoaded }: Props) {
         },
       }}
       alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-      configurationId={AlertConsumers.SLO}
+      configurationId={SLO_ALERTS_TABLE_CONFID}
       featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
       hideLazyLoader
       id={ALERTS_TABLE_ID}
