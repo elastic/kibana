@@ -91,7 +91,7 @@ active in case of failure from the currently used instance.
 [[high-availability]]
 === High availability across multiple {es} nodes
 {kib} can be configured to connect to multiple {es} nodes in the same cluster.  In situations where a node becomes unavailable,
-{kib} will transparently connect to an available node and continue operating.  Requests to available hosts will be routed in a round robin fashion.
+{kib} will transparently connect to an available node and continue operating.  Requests to available hosts will be routed in a round robin fashion (except for Dev Tools which will connect only to the first node available).
 
 In kibana.yml:
 [source,js]
