@@ -150,7 +150,7 @@ export function MobileLocationStats({
     },
     {
       color: euiTheme.eui.euiColorLightestShade,
-      title: i18n.translate('xpack.apm.mobile.location.metrics.crashes', {
+      title: i18n.translate('xpack.apm.mobile.location.metrics.mostCrashes', {
         defaultMessage: 'Most crashes',
       }),
       extra: getComparisonValueFormatter({

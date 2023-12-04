@@ -56,6 +56,8 @@ import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_r
 import { registerDashboardsRoutes } from '../lib/dashboards/routes';
 import { registerTagsRoutes } from '../lib/tags/routes';
 import { setAlertTagsRoute } from '../lib/detection_engine/routes/signals/set_alert_tags_route';
+import { setAlertAssigneesRoute } from '../lib/detection_engine/routes/signals/set_alert_assignees_route';
+import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/suggest_user_profiles_route';
 import {
   riskEngineDisableRoute,
   riskEngineInitRoute,
@@ -72,6 +74,7 @@ import {
   assetCriticalityGetRoute,
   assetCriticalityDeleteRoute,
 } from '../lib/entity_analytics/asset_criticality/routes';
+
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
@@ -116,11 +119,13 @@ export const initRoutes = (
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
   setSignalsStatusRoute(router, logger, security, telemetrySender);
   setAlertTagsRoute(router);
+  setAlertAssigneesRoute(router);
   querySignalsRoute(router, ruleDataClient);
   getSignalsMigrationStatusRoute(router);
   createSignalsMigrationRoute(router, security);
   finalizeSignalsMigrationRoute(router, ruleDataService, security);
   deleteSignalsMigrationRoute(router, security);
+  suggestUserProfilesRoute(router, getStartServices);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
