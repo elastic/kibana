@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../common/mock';
@@ -99,6 +99,14 @@ describe('FileActionsPopoverButton', () => {
     expect(await screen.findByTestId('cases-files-copy-md5-hash-button')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-copy-sha1-hash-button')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-copy-sha256-hash-button')).toBeInTheDocument();
+
+    expect(
+      (
+        await within(await screen.findByTestId('cases-files-popover-context-menu')).findAllByRole(
+          'button'
+        )
+      ).length
+    ).toBe(7);
   });
 
   describe('copy file hashes', () => {
@@ -257,9 +265,6 @@ describe('FileActionsPopoverButton', () => {
 
       await waitFor(() => {
         expect(appMockRender.getFilesClient().getDownloadHref).toBeCalled();
-      });
-
-      await waitFor(() => {
         expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
           fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
           id: basicFileMock.id,

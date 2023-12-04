@@ -63,7 +63,6 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
       },
       {
         id: 1,
-        initialFocusedItemIndex: 1,
         title: i18n.COPY_FILE_HASH,
         items: [
           {
@@ -167,7 +166,11 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={panels}
+          data-test-subj={'cases-files-popover-context-menu'}
+        />
       </EuiPopover>
       {showDeletionModal && (
         <DeleteAttachmentConfirmationModal
