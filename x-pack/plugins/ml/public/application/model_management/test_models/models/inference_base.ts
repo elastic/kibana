@@ -75,7 +75,7 @@ export abstract class InferenceBase<TInferResponse> {
   private selectedDataViewId: string | undefined;
 
   protected readonly info: string[] = [];
-  public switchToCreationMode?: (value: any) => void;
+  public switchToCreationMode?: () => void;
 
   private subscriptions$: Subscription = new Subscription();
 
@@ -89,12 +89,13 @@ export abstract class InferenceBase<TInferResponse> {
     this.inputField$.next(this.modelInputField);
   }
 
-  public setSwitchtoCreationMode(callback: (value: any) => void) {
+  public setSwitchtoCreationMode(callback: () => void) {
     this.switchToCreationMode = callback;
   }
 
   public destroy() {
     this.subscriptions$.unsubscribe();
+    this.pipeline$.unsubscribe();
   }
 
   protected initialize(

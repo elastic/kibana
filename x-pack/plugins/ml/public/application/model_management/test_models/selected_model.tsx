@@ -7,10 +7,8 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, useMemo, useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
 
 import { TRAINED_MODEL_TYPE, SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
-import useObservable from 'react-use/lib/useObservable';
 import { NerInference } from './models/ner';
 import { QuestionAnsweringInference } from './models/question_answering';
 
@@ -24,7 +22,7 @@ import {
 import { TextEmbeddingInference } from './models/text_embedding';
 
 import { useMlApiContext } from '../../contexts/kibana';
-import { useTestTrainedModelsContext } from './test_trained_models_context';
+import { type TestTrainedModelsContextType } from './test_trained_models_context';
 import { InferenceInputForm } from './models/inference_input_form';
 import { InferrerType } from './models';
 import { INPUT_TYPE } from './models/inference_base';
@@ -38,9 +36,8 @@ interface Props {
   deploymentId: string;
   handlePipelineConfigUpdate?: (configUpdate: Partial<InferecePipelineCreationState>) => void;
   externalPipelineConfig?: estypes.IngestPipeline;
+  setCurrentContext?: React.Dispatch<TestTrainedModelsContextType>;
 }
-
-const DEFAULT_PIPELINE_OBS = new BehaviorSubject({});
 
 export const SelectedModel: FC<Props> = ({
   model,
@@ -48,17 +45,16 @@ export const SelectedModel: FC<Props> = ({
   deploymentId,
   handlePipelineConfigUpdate,
   externalPipelineConfig,
+  setCurrentContext,
 }) => {
   const { trainedModels } = useMlApiContext();
-  const {
-    currentContext: { createPipelineFlyoutOpen, pipelineConfig },
-    setCurrentContext,
-  } = useTestTrainedModelsContext();
-  const pipeline = (createPipelineFlyoutOpen && pipelineConfig) || undefined;
 
   const inferrer = useMemo<InferrerType | undefined>(() => {
     const taskType = Object.keys(model.inference_config ?? {})[0];
-    let tempInferrer;
+    let tempInferrer: InferrerType | undefined;
+    const pipelineConfigValues = externalPipelineConfig
+      ? getInferencePropertiesFromPipelineConfig(taskType, externalPipelineConfig)
+      : null;
 
     if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
       switch (taskType) {
@@ -80,6 +76,11 @@ export const SelectedModel: FC<Props> = ({
             inputType,
             deploymentId
           );
+          if (pipelineConfigValues) {
+            const { labels, multi_label: multiLabel } = pipelineConfigValues;
+            tempInferrer.setLabelsText(Array.isArray(labels) ? labels.join(',') : labels);
+            tempInferrer.setMultiLabel(Boolean(multiLabel));
+          }
           break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING:
           tempInferrer = new TextEmbeddingInference(trainedModels, model, inputType, deploymentId);
@@ -94,6 +95,9 @@ export const SelectedModel: FC<Props> = ({
             inputType,
             deploymentId
           );
+          if (pipelineConfigValues) {
+            tempInferrer.setQuestionText(pipelineConfigValues.question);
+          }
           break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION:
           tempInferrer = new TextExpansionInference(trainedModels, model, inputType, deploymentId);
@@ -105,52 +109,37 @@ export const SelectedModel: FC<Props> = ({
       tempInferrer = new LangIdentInference(trainedModels, model, inputType, deploymentId);
     }
     if (tempInferrer) {
-      tempInferrer.setSwitchtoCreationMode(setCurrentContext);
-    }
-    return tempInferrer;
-  }, [inputType, model, trainedModels, deploymentId, setCurrentContext]);
-
-  const updatedPipeline = useObservable(
-    inferrer?.getPipeline$() ?? DEFAULT_PIPELINE_OBS,
-    inferrer?.getPipeline() ?? {}
-  );
-
-  useEffect(() => {
-    if (handlePipelineConfigUpdate && updatedPipeline && pipeline) {
-      handlePipelineConfigUpdate({ initialPipelineConfig: { ...pipeline, ...updatedPipeline } });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [updatedPipeline]);
-
-  useEffect(() => {
-    const type = Object.keys(model.inference_config ?? {})[0];
-    if (inferrer && externalPipelineConfig) {
-      const {
-        inputField,
-        labels,
-        multi_label: multiLabel,
-        question,
-      } = getInferencePropertiesFromPipelineConfig(type, externalPipelineConfig);
-
-      inferrer.setInputField(inputField);
-      if (
-        type === SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION &&
-        inferrer instanceof ZeroShotClassificationInference
-      ) {
-        inferrer.setLabelsText(Array.isArray(labels) ? labels.join(',') : labels);
-        inferrer.setMultiLabel(Boolean(multiLabel));
-      } else if (
-        type === SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING &&
-        inferrer instanceof QuestionAnsweringInference
-      ) {
-        inferrer.setQuestionText(question);
+      if (pipelineConfigValues) {
+        tempInferrer.setInputField(pipelineConfigValues.inputField);
+      }
+      if (externalPipelineConfig === undefined) {
+        tempInferrer.setSwitchtoCreationMode(() => {
+          if (tempInferrer && setCurrentContext) {
+            setCurrentContext({
+              pipelineConfig: tempInferrer.getPipeline(),
+              defaultSelectedDataViewId: tempInferrer.getSelectedDataViewId(),
+              createPipelineFlyoutOpen: true,
+            });
+          }
+        });
+      } else {
+        tempInferrer?.getPipeline$().subscribe((pipeline) => {
+          if (handlePipelineConfigUpdate && pipeline && externalPipelineConfig) {
+            handlePipelineConfigUpdate({
+              initialPipelineConfig: { ...externalPipelineConfig, ...pipeline },
+            });
+          }
+        });
       }
     }
+    return tempInferrer;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputType, model, trainedModels, deploymentId, setCurrentContext]);
 
+  useEffect(() => {
     return () => {
       inferrer?.destroy();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inferrer, model.model_id]);
 
   if (inferrer !== undefined) {

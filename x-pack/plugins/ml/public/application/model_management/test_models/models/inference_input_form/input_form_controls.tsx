@@ -47,11 +47,7 @@ export const InputFormControls: FC<Props> = ({
             data-test-subj={'mlTestModelCreatePipelineButton'}
             onClick={() => {
               if (inferrer.switchToCreationMode) {
-                inferrer.switchToCreationMode({
-                  pipelineConfig: inferrer.getPipeline(),
-                  defaultSelectedDataViewId: inferrer.getSelectedDataViewId(),
-                  createPipelineFlyoutOpen: true,
-                });
+                inferrer.switchToCreationMode();
               }
             }}
           >

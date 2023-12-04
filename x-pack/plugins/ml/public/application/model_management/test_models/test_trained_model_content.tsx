@@ -34,6 +34,7 @@ export const TestTrainedModelContent: FC<ContentProps> = ({
   const [inputType, setInputType] = useState<INPUT_TYPE>(INPUT_TYPE.TEXT);
   const {
     currentContext: { createPipelineFlyoutOpen },
+    setCurrentContext,
   } = useTestTrainedModelsContext();
 
   const onlyShowTab: INPUT_TYPE | undefined = useMemo(() => {
@@ -107,6 +108,7 @@ export const TestTrainedModelContent: FC<ContentProps> = ({
         deploymentId={deploymentId ?? model.model_id}
         handlePipelineConfigUpdate={handlePipelineConfigUpdate}
         externalPipelineConfig={externalPipelineConfig}
+        setCurrentContext={setCurrentContext}
       />
     </>
   );
