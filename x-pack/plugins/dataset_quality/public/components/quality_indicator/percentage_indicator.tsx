@@ -7,6 +7,10 @@
 
 import { isNil } from 'lodash';
 import React from 'react';
+import {
+  DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
+  POOR_QUALITY_MINIMUM_PERCENTAGE,
+} from '../../../common/constants';
 import { QualityIndicator } from './indicator';
 
 export function QualityPercentageIndicator({ percentage }: { percentage?: number }) {
@@ -14,7 +18,12 @@ export function QualityPercentageIndicator({ percentage }: { percentage?: number
     return <></>;
   }
 
-  const quality = percentage > 3 ? 'poor' : percentage > 0 ? 'degraded' : 'good';
+  const quality =
+    percentage > POOR_QUALITY_MINIMUM_PERCENTAGE
+      ? 'poor'
+      : percentage > DEGRADED_QUALITY_MINIMUM_PERCENTAGE
+      ? 'degraded'
+      : 'good';
 
   return <QualityIndicator quality={quality} />;
 }

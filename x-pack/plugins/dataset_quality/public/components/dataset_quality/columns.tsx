@@ -20,6 +20,10 @@ import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
+  POOR_QUALITY_MINIMUM_PERCENTAGE,
+} from '../../../common/constants';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import loggingIcon from '../../icons/logging.svg';
 import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicator';
@@ -36,19 +40,11 @@ const malformedDocsColumnName = i18n.translate('xpack.datasetQuality.malformedDo
   defaultMessage: 'Malformed Docs',
 });
 
-const malformedDocsPoorDescription = i18n.translate(
-  'xpack.datasetQuality.malformedDocsPoorDescription',
-  {
-    defaultMessage: 'greater than 3%',
-  }
-);
-
-const malformedDocsDegradedDescription = i18n.translate(
-  'xpack.datasetQuality.malformedDocsDegradedDescription',
-  {
-    defaultMessage: 'greater than 0%',
-  }
-);
+const malformedDocsDescription = (minimimPercentage: number) =>
+  i18n.translate('xpack.datasetQuality.malformedDocsQualityDescription', {
+    defaultMessage: 'greater than {minimimPercentage}%',
+    values: { minimimPercentage },
+  });
 
 const malformedDocsColumnTooltip = (
   <FormattedMessage
@@ -66,13 +62,15 @@ const malformedDocsColumnTooltip = (
             <EuiFlexItem grow={false}>
               <QualityIndicator quality="poor" />
             </EuiFlexItem>
-            <EuiFlexItem>{malformedDocsPoorDescription}</EuiFlexItem>
+            <EuiFlexItem>{malformedDocsDescription(POOR_QUALITY_MINIMUM_PERCENTAGE)}</EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <QualityIndicator quality="degraded" />
             </EuiFlexItem>
-            <EuiFlexItem>{malformedDocsDegradedDescription}</EuiFlexItem>
+            <EuiFlexItem>
+              {malformedDocsDescription(DEGRADED_QUALITY_MINIMUM_PERCENTAGE)}
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
