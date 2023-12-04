@@ -9,16 +9,17 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Chart,
+  DARK_THEME,
   isMetricElementEvent,
   Metric,
-  Settings,
-  DARK_THEME,
   MetricTrendShape,
+  Settings,
 } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
-import { SLOWithSummaryResponse, HistoricalSummaryResponse, ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { SloCardBadgesPortal } from './badges_portal';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
@@ -52,18 +53,15 @@ const useCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
 };
 
 const getSubTitle = (slo: SLOWithSummaryResponse, cardsPerRow: number) => {
-  const subTitle =
-    slo.groupBy && slo.groupBy !== ALL_VALUE ? `${slo.groupBy}: ${slo.instanceId}` : '';
-  if (cardsPerRow === 4) {
-    return subTitle.substring(0, 30) + (subTitle.length > 30 ? '..' : '');
-  }
-  return subTitle.substring(0, 40) + (subTitle.length > 40 ? '..' : '');
+  return slo.groupBy && slo.groupBy !== ALL_VALUE ? `${slo.groupBy}: ${slo.instanceId}` : '';
 };
 
 export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cardsPerRow }: Props) {
   const {
     application: { navigateToUrl },
   } = useKibana().services;
+
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
@@ -88,6 +86,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
   return (
     <>
       <EuiPanel
+        panelRef={containerRef as React.Ref<HTMLDivElement>}
         onMouseOver={() => {
           if (!isMouseOver) {
             setIsMouseOver(true);
@@ -145,13 +144,6 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
             ]}
           />
         </Chart>
-        <SloCardItemBadges
-          slo={slo}
-          rules={rules}
-          activeAlerts={activeAlerts}
-          handleCreateRule={handleCreateRule}
-          hasGroupBy={Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE)}
-        />
         {(isMouseOver || isActionsPopoverOpen) && (
           <SloCardItemActions
             slo={slo}
@@ -162,6 +154,15 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
           />
         )}
       </EuiPanel>
+      <SloCardBadgesPortal containerRef={containerRef}>
+        <SloCardItemBadges
+          slo={slo}
+          rules={rules}
+          activeAlerts={activeAlerts}
+          handleCreateRule={handleCreateRule}
+          hasGroupBy={Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE)}
+        />
+      </SloCardBadgesPortal>
 
       <BurnRateRuleFlyout
         slo={slo}
