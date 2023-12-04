@@ -260,16 +260,11 @@ const AlertsTableStateWithQueryProvider = ({
     query,
     pagination,
     onPageChange,
+    onLoaded,
     runtimeMappings,
     sort,
     skip: false,
   });
-
-  useEffect(() => {
-    if (!isLoading && onLoaded) {
-      onLoaded();
-    }
-  }, [isLoading, onLoaded]);
 
   useEffect(() => {
     alertsTableConfigurationRegistry.update(configurationId, {
