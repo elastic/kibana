@@ -9,14 +9,14 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSwitch } from '@elastic/eui';
 
-export const SLO_LIST_VIEW_MODE = 'slo-list-view-mode';
+export const SLO_LIST_IS_COMPACT = 'slo-list-is-compact';
 
 export function SLOViewSettings({
   toggleCompactView,
-  listViewMode,
+  isCompact,
 }: {
   toggleCompactView: () => void;
-  listViewMode: 'compact' | 'default';
+  isCompact: boolean;
 }) {
   return (
     <EuiSwitch
@@ -27,7 +27,7 @@ export function SLOViewSettings({
         />
       }
       id="sloListCompactToggle"
-      checked={listViewMode === 'compact'}
+      checked={isCompact}
       onChange={toggleCompactView}
       compressed
     />

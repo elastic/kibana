@@ -10,7 +10,7 @@ import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { SlosView } from './slos_view';
-import { SLO_LIST_VIEW_MODE } from './slo_view_settings';
+import { SLO_LIST_IS_COMPACT } from './slo_view_settings';
 import { SLOViewType, ToggleSLOView } from './toggle_slo_view';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
@@ -47,10 +47,8 @@ export function SloList({ autoRefresh }: Props) {
   const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
   const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
-  const [listViewMode, setListViewMode] = useLocalStorage<'compact' | 'default'>(
-    SLO_LIST_VIEW_MODE,
-    'compact'
-  );
+  const [isCompact, setIsCompact] = useLocalStorage<'true' | 'false'>(SLO_LIST_IS_COMPACT, 'true');
+  const isCompactView = isCompact === 'true';
 
   const handlePageClick = (pageNumber: number) => {
     setPage(pageNumber);
@@ -83,17 +81,17 @@ export function SloList({ autoRefresh }: Props) {
         <ToggleSLOView
           sloView={sloView}
           setSLOView={setSLOView}
-          toggleListViewMode={() =>
-            listViewMode === 'default' ? setListViewMode('compact') : setListViewMode('default')
+          toggleCompactView={() =>
+            isCompact === 'true' ? setIsCompact('false') : setIsCompact('true')
           }
-          listViewMode={listViewMode}
+          isCompact={isCompactView}
         />
       </EuiFlexItem>
       <SlosView
         sloList={results}
         loading={isLoading || isRefetching}
         error={isError}
-        viewMode={listViewMode}
+        isCompact={isCompactView}
         sloView={sloView}
       />
 

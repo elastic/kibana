@@ -19,7 +19,7 @@ export interface Props {
   rulesBySlo?: UseFetchRulesForSloResponse['data'];
   loading: boolean;
   error: boolean;
-  viewMode?: 'compact' | 'default';
+  isCompact?: boolean;
 }
 
 export function SloListItems({
@@ -28,7 +28,7 @@ export function SloListItems({
   rulesBySlo,
   loading,
   error,
-  viewMode = 'compact',
+  isCompact = true,
 }: Props) {
   const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
     useFetchHistoricalSummary({
@@ -37,10 +37,8 @@ export function SloListItems({
 
   return (
     <EuiFlexItem>
-      {viewMode === 'compact' && (
-        <SloListCompactView sloList={sloList} loading={loading} error={error} />
-      )}
-      {viewMode === 'default' && (
+      {isCompact && <SloListCompactView sloList={sloList} loading={loading} error={error} />}
+      {!isCompact && (
         <EuiFlexGroup direction="column" gutterSize="s">
           {sloList.map((slo) => (
             <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? ALL_VALUE}`}>
