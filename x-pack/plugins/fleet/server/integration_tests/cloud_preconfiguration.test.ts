@@ -61,6 +61,7 @@ describe('Fleet cloud preconfiguration', () => {
               ...kbnConfig.xpack.fleet,
               registryUrl,
             },
+            c,
           },
           logging: {
             appenders: {
@@ -333,6 +334,7 @@ describe('Fleet cloud preconfiguration', () => {
               'es-containerhost': {
                 hosts: ['https://cloudinternales:9200'],
                 type: 'elasticsearch',
+                preset: 'balanced',
               },
             },
             revision: 5,
