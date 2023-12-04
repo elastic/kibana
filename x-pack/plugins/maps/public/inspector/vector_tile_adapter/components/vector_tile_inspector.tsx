@@ -117,25 +117,14 @@ class VectorTileInspector extends Component<Props, State> {
     });
   };
 
-  renderTabs() {
-    return this.state.tileRequests.map((tileRequest) => {
-      const tileLabel = `${tileRequest.z}/${tileRequest.x}/${tileRequest.y}`;
-      return (
-        <EuiTab
-          key={`${tileRequest.layerId}${tileLabel}`}
-          onClick={() => {
-            this.setState({ selectedTileRequest: tileRequest });
-          }}
-          isSelected={
-            tileRequest.layerId === this.state.selectedTileRequest?.layerId &&
-            tileRequest.x === this.state.selectedTileRequest?.x &&
-            tileRequest.y === this.state.selectedTileRequest?.y &&
-            tileRequest.z === this.state.selectedTileRequest?.z
-          }
-        >
-          {tileLabel}
-        </EuiTab>
-      );
+  _onTileSelect = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    if (selectedOptions.length === 0) {
+      this.setState({ selectedTileRequest: null });
+      return;
+    }
+
+    this.setState({
+      selectedTileRequest: selectedOptions[0].value,
     });
   }
 
@@ -160,7 +149,26 @@ class VectorTileInspector extends Component<Props, State> {
           })}
         />
         <EuiSpacer />
-        <EuiTabs size="s">{this.renderTabs()}</EuiTabs>
+        <EuiComboBox
+          singleSelection={true}
+          options={this.state.tileRequests.map(tileRequest => {
+            return {
+              label: `${tileRequest.z}/${tileRequest.x}/${tileRequest.y}`,
+              value: tileRequest
+            }
+          })}
+          selectedOptions={this.state.selectedTileRequest
+            ? [{ 
+                label: `${this.state.selectedTileRequest.z}/${this.state.selectedTileRequest.x}/${this.state.selectedTileRequest.y}`,
+                value: this.state.selectedTileRequest
+              }] 
+            : []}
+          onChange={this._onTileSelect}
+          isClearable={false}
+          prepend={i18n.translate('xpack.maps.inspector.vectorTile.layerSelectPrepend', {
+            defaultMessage: 'Tile',
+          })}
+        />
         <EuiSpacer size="s" />
         {this.state.selectedTileRequest && (
           <TileRequestTab
