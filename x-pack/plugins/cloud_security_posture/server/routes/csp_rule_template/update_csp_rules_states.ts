@@ -63,6 +63,15 @@ export const createCspSettingObject = async (soClient: SavedObjectsClientContrac
   );
 };
 
+export const createCspSettingObjectSafe = async (
+  soClient: SavedObjectsClientContract,
+  logger: Logger
+) => {
+  const cspSettings = await getCspSettings(soClient, logger);
+
+  if (!cspSettings) return (await createCspSettingObject(soClient)).attributes;
+};
+
 export const getCspSettings = async (
   soClient: SavedObjectsClientContract,
   logger: Logger
@@ -83,7 +92,7 @@ export const getCspSettings = async (
   }
 };
 
-export const getCspSettingObjectSafe = async (
+export const getCspSettingsSafe = async (
   soClient: SavedObjectsClientContract,
   logger: Logger
 ): Promise<CspSettings> => {
@@ -122,7 +131,11 @@ export const defineUpdateCspRuleStateRoute = (router: CspRouter) =>
         try {
           const requestBody: CspRuleBulkActionRequest = request.body;
 
-          const cspSettings = await getCspSettingObjectSafe(cspContext.soClient, cspContext.logger);
+          const cspSettings = await getCspSettings(cspContext.soClient, cspContext.logger);
+
+          if (!cspSettings) {
+            throw cspContext.logger.error(`Failed to read csp settings`);
+          }
 
           const currentRulesStates = cspSettings.rules_states;
 

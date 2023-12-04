@@ -10,7 +10,8 @@ import { coreMock } from '@kbn/core/server/mocks';
 import {
   setRulesStates,
   createCspSettingObject,
-  getCspSettingObjectSafe,
+  createCspSettingObjectSafe,
+  getCspSettings,
 } from './update_csp_rules_states';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
@@ -75,14 +76,14 @@ describe('CSP Rule State Management', () => {
 
     mockSoClient.get.mockResolvedValueOnce(mockExistingCspSettings);
 
-    const result = await getCspSettingObjectSafe(mockSoClient, mockLogger);
+    const result = await getCspSettings(mockSoClient, mockLogger);
 
     expect(result).toEqual({
       rules_states: { rule1: { muted: false } },
     });
   });
 
-  it('should handle error when fetching CSP settings safely', async () => {
+  it('should handle error when creating CSP settings safely', async () => {
     const mockError = { message: 'Not Found', statsCode: 404 };
 
     mockSoClient.get.mockRejectedValueOnce(mockError);
@@ -96,7 +97,7 @@ describe('CSP Rule State Management', () => {
       },
     });
 
-    const result = await getCspSettingObjectSafe(mockSoClient, mockLogger);
+    const result = await createCspSettingObjectSafe(mockSoClient, mockLogger);
 
     expect(mockSoClient.get).toHaveBeenCalledWith(
       INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,

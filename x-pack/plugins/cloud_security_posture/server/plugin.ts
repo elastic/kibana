@@ -50,7 +50,7 @@ import {
 } from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
 import { CloudSecurityPostureConfig } from './config';
-import { getCspSettingObjectSafe } from './routes/csp_rule_template/update_csp_rules_states';
+import { createCspSettingObjectSafe } from './routes/csp_rule_template/update_csp_rules_states';
 
 export class CspPlugin
   implements
@@ -213,7 +213,7 @@ export class CspPlugin
     await initializeCspIndices(esClient, this.config, this.logger);
     await initializeCspTransforms(esClient, this.logger);
     await scheduleFindingsStatsTask(taskManager, this.logger);
-    await getCspSettingObjectSafe(core.savedObjects.createInternalRepository(), this.logger);
+    await createCspSettingObjectSafe(core.savedObjects.createInternalRepository(), this.logger);
     this.#isInitialized = true;
   }
 

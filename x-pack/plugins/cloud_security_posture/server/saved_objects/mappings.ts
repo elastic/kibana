@@ -65,10 +65,8 @@ export const cspSettingsSavedObjectMapping: SavedObjectsTypeMappingDefinition = 
   dynamic: false,
   properties: {
     rules_states: {
+      type: 'object',
       properties: {
-        key: {
-          type: 'keyword',
-        },
         muted: {
           type: 'boolean',
         },
