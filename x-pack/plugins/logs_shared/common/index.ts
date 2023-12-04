@@ -68,4 +68,4 @@ export {
   INFRA_NODE_LOGS_LOCATOR_ID,
   getLogsLocatorsFromUrlService,
 } from './locators';
-export type { LogsLocatorParams, NodeLogsLocatorParams } from './locators';
+export type { LogsLocatorParams, NodeLogsLocatorParams, TraceLogsLocatorParams } from './locators';
