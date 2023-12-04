@@ -5,26 +5,18 @@
  * 2.0.
  */
 
+import path from 'path';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['header']);
+  const pageObjects = getPageObjects(['header', 'common']);
   const aceEditor = getService('aceEditor');
 
   return {
     async sectionHeadingText() {
       return await testSubjects.getVisibleText('appTitle');
-    },
-
-    async navigateToCreateNewPipeline() {
-      await testSubjects.click('createPipelineDropdown');
-      await testSubjects.click('createNewPipeline');
-    },
-
-    async createPipelineFormExists() {
-      return await testSubjects.exists('pipelineForm');
     },
 
     async createNewPipeline({
@@ -40,7 +32,8 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       processors?: string;
       onFailureProcessors?: string;
     }) {
-      await this.navigateToCreateNewPipeline();
+      await testSubjects.click('createPipelineDropdown');
+      await testSubjects.click('createNewPipeline');
 
       await testSubjects.setValue('nameField > input', name);
       await testSubjects.setValue('descriptionField > input', description);
@@ -76,29 +69,20 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
 
     async clickPipelineLink(index: number) {
       const links = await testSubjects.findAll('pipelineDetailsLink');
-      await links.at(index).click();
-    },
-
-    async navigateToCreateFromCsv() {
-      await testSubjects.click('createPipelineDropdown');
-      await testSubjects.click('createPipelineFromCsv');
-    },
-
-    async createPipelineFromCsvExists() {
-      return await testSubjects.exists('createFromCsvInstructions');
+      await links.at(index)?.click();
     },
 
     async createPipelineFromCsv({ name }: { name: string }) {
+      await testSubjects.click('createPipelineDropdown');
+      await testSubjects.click('createPipelineFromCsv');
+
+      await pageObjects.common.setFileInputPath(
+        path.join(__dirname, '..', 'fixtures', 'ingest_pipeline_example_mapping.csv')
+      );
+
       await testSubjects.click('processFileButton');
 
-      await testSubjects.exists('pipelineMappingsJSONEditor');
-
-      await testSubjects.exists('copyToClipboard');
-      await testSubjects.exists('downloadJson');
-
       await testSubjects.click('continueToCreate');
-
-      await testSubjects.exists('pipelineForm');
 
       await testSubjects.setValue('nameField > input', name);
       await testSubjects.click('submitButton');
