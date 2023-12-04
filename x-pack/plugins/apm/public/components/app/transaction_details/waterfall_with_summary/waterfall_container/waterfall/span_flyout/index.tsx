@@ -25,6 +25,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
+import { OtelHeadingRenderer } from '../../../../../../shared/stacktrace/frame_heading_renderers/otel_heading_renderer';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
@@ -205,6 +206,7 @@ function SpanFlyoutBody({
 }) {
   const stackframes = span.span.stacktrace;
   const codeLanguage = parentTransaction?.service.language?.name;
+  const otelStacktrace = span.code?.stacktrace;
   const spanDb = span.span.db;
   const spanTypes = getSpanTypes(span);
   const spanHttpStatusCode =
@@ -232,7 +234,7 @@ function SpanFlyoutBody({
         </Fragment>
       ),
     },
-    ...(!isEmpty(stackframes)
+    ...(!isEmpty(stackframes) || !isEmpty(otelStacktrace)
       ? [
           {
             id: 'stack-trace',
@@ -245,10 +247,15 @@ function SpanFlyoutBody({
             content: (
               <Fragment>
                 <EuiSpacer size="l" />
-                <Stacktrace
-                  stackframes={stackframes}
-                  codeLanguage={codeLanguage}
-                />
+                {stackframes && (
+                  <Stacktrace
+                    stackframes={stackframes}
+                    codeLanguage={codeLanguage}
+                  />
+                )}
+                {otelStacktrace && (
+                  <OtelHeadingRenderer codeStackTrace={otelStacktrace} />
+                )}
               </Fragment>
             ),
           },

@@ -17,9 +17,14 @@ import { Stackframe as StackframeComponent } from './stackframe';
 interface Props {
   stackframes?: Stackframe[];
   codeLanguage?: string;
+  stackTrace?: string;
 }
 
-export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
+export function Stacktrace({
+  stackframes = [],
+  codeLanguage,
+  stackTrace,
+}: Props) {
   if (isEmpty(stackframes)) {
     return (
       <EmptyMessage

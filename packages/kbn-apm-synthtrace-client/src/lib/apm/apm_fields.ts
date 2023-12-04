@@ -80,6 +80,8 @@ export type ApmFields = Fields<{
     'cloud.provider': string;
     'cloud.region': string;
     'cloud.service.name': string;
+    // otel
+    'code.stacktrace': string;
     'container.id': string;
     'destination.address': string;
     'destination.port': number;
@@ -169,6 +171,32 @@ export type ApmFields = Fields<{
     'span.duration.us': number;
     'span.id': string;
     'span.name': string;
+    'span.stacktrace': Array<{
+      abs_path?: string;
+      classname?: string;
+      context?: {
+        post?: string[];
+        pre?: string[];
+      };
+      exclude_from_grouping?: boolean;
+      filename?: string;
+      function?: string;
+      module?: string;
+      library_frame?: boolean;
+      line?: {
+        column?: number;
+        number: number;
+      } & {
+        context?: string;
+      };
+      sourcemap?: {
+        error?: string;
+        updated?: boolean;
+      };
+      vars?: {
+        [key: string]: unknown;
+      };
+    }>;
     'span.self_time.count': number;
     'span.self_time.sum.us': number;
     'span.subtype': string;
