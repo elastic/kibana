@@ -20,11 +20,7 @@ interface Props {
   stackTrace?: string;
 }
 
-export function Stacktrace({
-  stackframes = [],
-  codeLanguage,
-  stackTrace,
-}: Props) {
+export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
   if (isEmpty(stackframes)) {
     return (
       <EmptyMessage
