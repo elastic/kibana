@@ -98,31 +98,33 @@ export class esql_parser extends Parser {
 	public static readonly EXPR_WS = 69;
 	public static readonly METADATA = 70;
 	public static readonly FROM_UNQUOTED_IDENTIFIER = 71;
-	public static readonly FROM_QUOTED_IDENTIFIER = 72;
-	public static readonly SRC_LINE_COMMENT = 73;
-	public static readonly SRC_MULTILINE_COMMENT = 74;
-	public static readonly SRC_WS = 75;
-	public static readonly PROJECT_UNQUOTED_IDENTIFIER = 76;
-	public static readonly PROJECT_LINE_COMMENT = 77;
-	public static readonly PROJECT_MULTILINE_COMMENT = 78;
-	public static readonly PROJECT_WS = 79;
-	public static readonly AS = 80;
-	public static readonly RENAME_LINE_COMMENT = 81;
-	public static readonly RENAME_MULTILINE_COMMENT = 82;
-	public static readonly RENAME_WS = 83;
-	public static readonly ON = 84;
-	public static readonly WITH = 85;
-	public static readonly ENRICH_LINE_COMMENT = 86;
-	public static readonly ENRICH_MULTILINE_COMMENT = 87;
-	public static readonly ENRICH_WS = 88;
-	public static readonly MVEXPAND_LINE_COMMENT = 89;
-	public static readonly MVEXPAND_MULTILINE_COMMENT = 90;
-	public static readonly MVEXPAND_WS = 91;
-	public static readonly INFO = 92;
-	public static readonly FUNCTIONS = 93;
-	public static readonly SHOW_LINE_COMMENT = 94;
-	public static readonly SHOW_MULTILINE_COMMENT = 95;
-	public static readonly SHOW_WS = 96;
+	public static readonly FROM_LINE_COMMENT = 72;
+	public static readonly FROM_MULTILINE_COMMENT = 73;
+	public static readonly FROM_WS = 74;
+	public static readonly PROJECT_UNQUOTED_IDENTIFIER = 75;
+	public static readonly PROJECT_LINE_COMMENT = 76;
+	public static readonly PROJECT_MULTILINE_COMMENT = 77;
+	public static readonly PROJECT_WS = 78;
+	public static readonly AS = 79;
+	public static readonly RENAME_LINE_COMMENT = 80;
+	public static readonly RENAME_MULTILINE_COMMENT = 81;
+	public static readonly RENAME_WS = 82;
+	public static readonly ON = 83;
+	public static readonly WITH = 84;
+	public static readonly ENRICH_LINE_COMMENT = 85;
+	public static readonly ENRICH_MULTILINE_COMMENT = 86;
+	public static readonly ENRICH_WS = 87;
+	public static readonly ENRICH_FIELD_LINE_COMMENT = 88;
+	public static readonly ENRICH_FIELD_MULTILINE_COMMENT = 89;
+	public static readonly ENRICH_FIELD_WS = 90;
+	public static readonly MVEXPAND_LINE_COMMENT = 91;
+	public static readonly MVEXPAND_MULTILINE_COMMENT = 92;
+	public static readonly MVEXPAND_WS = 93;
+	public static readonly INFO = 94;
+	public static readonly FUNCTIONS = 95;
+	public static readonly SHOW_LINE_COMMENT = 96;
+	public static readonly SHOW_MULTILINE_COMMENT = 97;
+	public static readonly SHOW_WS = 98;
 	public static readonly RULE_singleStatement = 0;
 	public static readonly RULE_query = 1;
 	public static readonly RULE_sourceCommand = 2;
@@ -209,11 +211,12 @@ export class esql_parser extends Parser {
 		"EQ", "NEQ", "LT", "LTE", "GT", "GTE", "PLUS", "MINUS", "ASTERISK", "SLASH", 
 		"PERCENT", "OPENING_BRACKET", "CLOSING_BRACKET", "UNQUOTED_IDENTIFIER", 
 		"QUOTED_IDENTIFIER", "EXPR_LINE_COMMENT", "EXPR_MULTILINE_COMMENT", "EXPR_WS", 
-		"METADATA", "FROM_UNQUOTED_IDENTIFIER", "FROM_QUOTED_IDENTIFIER", "SRC_LINE_COMMENT", 
-		"SRC_MULTILINE_COMMENT", "SRC_WS", "PROJECT_UNQUOTED_IDENTIFIER", "PROJECT_LINE_COMMENT", 
-		"PROJECT_MULTILINE_COMMENT", "PROJECT_WS", "AS", "RENAME_LINE_COMMENT", 
-		"RENAME_MULTILINE_COMMENT", "RENAME_WS", "ON", "WITH", "ENRICH_LINE_COMMENT", 
-		"ENRICH_MULTILINE_COMMENT", "ENRICH_WS", "MVEXPAND_LINE_COMMENT", "MVEXPAND_MULTILINE_COMMENT", 
+		"METADATA", "FROM_UNQUOTED_IDENTIFIER", "FROM_LINE_COMMENT", "FROM_MULTILINE_COMMENT", 
+		"FROM_WS", "PROJECT_UNQUOTED_IDENTIFIER", "PROJECT_LINE_COMMENT", "PROJECT_MULTILINE_COMMENT", 
+		"PROJECT_WS", "AS", "RENAME_LINE_COMMENT", "RENAME_MULTILINE_COMMENT", 
+		"RENAME_WS", "ON", "WITH", "ENRICH_LINE_COMMENT", "ENRICH_MULTILINE_COMMENT", 
+		"ENRICH_WS", "ENRICH_FIELD_LINE_COMMENT", "ENRICH_FIELD_MULTILINE_COMMENT", 
+		"ENRICH_FIELD_WS", "MVEXPAND_LINE_COMMENT", "MVEXPAND_MULTILINE_COMMENT", 
 		"MVEXPAND_WS", "INFO", "FUNCTIONS", "SHOW_LINE_COMMENT", "SHOW_MULTILINE_COMMENT", 
 		"SHOW_WS",
 	];
@@ -1518,7 +1521,7 @@ export class esql_parser extends Parser {
 			{
 			this.state = 308;
 			_la = this._input.LA(1);
-			if (!(_la === esql_parser.FROM_UNQUOTED_IDENTIFIER || _la === esql_parser.FROM_QUOTED_IDENTIFIER)) {
+			if (!(_la === esql_parser.QUOTED_IDENTIFIER || _la === esql_parser.FROM_UNQUOTED_IDENTIFIER)) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -2733,7 +2736,7 @@ export class esql_parser extends Parser {
 			this.state = 494;
 			this.match(esql_parser.ENRICH);
 			this.state = 495;
-			_localctx._policyName = this.qualifiedNamePattern();
+			_localctx._policyName = this.fromIdentifier();
 			this.state = 498;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 48, this._ctx) ) {
@@ -2872,7 +2875,7 @@ export class esql_parser extends Parser {
 	}
 
 	public static readonly _serializedATN: string =
-		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03b\u0209\x04\x02" +
+		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03d\u0209\x04\x02" +
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07" +
 		"\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x04\f\t\f\x04\r\t\r\x04" +
 		"\x0E\t\x0E\x04\x0F\t\x0F\x04\x10\t\x10\x04\x11\t\x11\x04\x12\t\x12\x04" +
@@ -2929,8 +2932,8 @@ export class esql_parser extends Parser {
 		"\x02\x14\x02\x16\x02\x18\x02\x1A\x02\x1C\x02\x1E\x02 \x02\"\x02$\x02&" +
 		"\x02(\x02*\x02,\x02.\x020\x022\x024\x026\x028\x02:\x02<\x02>\x02@\x02" +
 		"B\x02D\x02F\x02H\x02J\x02L\x02N\x02P\x02R\x02T\x02V\x02X\x02Z\x02\\\x02" +
-		"^\x02`\x02b\x02\x02\v\x03\x02<=\x03\x02>@\x03\x02IJ\x03\x02CD\x04\x02" +
-		"DDNN\x04\x02\"\"%%\x03\x02()\x04\x02\'\'55\x03\x026;\x02\u0226\x02d\x03" +
+		"^\x02`\x02b\x02\x02\v\x03\x02<=\x03\x02>@\x04\x02DDII\x03\x02CD\x04\x02" +
+		"DDMM\x04\x02\"\"%%\x03\x02()\x04\x02\'\'55\x03\x026;\x02\u0226\x02d\x03" +
 		"\x02\x02\x02\x04g\x03\x02\x02\x02\x06v\x03\x02\x02\x02\b\x85\x03\x02\x02" +
 		"\x02\n\x87\x03\x02\x02\x02\f\xA6\x03\x02\x02\x02\x0E\xC1\x03\x02\x02\x02" +
 		"\x10\xC8\x03\x02\x02\x02\x12\xCE\x03\x02\x02\x02\x14\xE2\x03\x02\x02\x02" +
@@ -3084,7 +3087,7 @@ export class esql_parser extends Parser {
 		"\u01AF\x05B\"\x02\u01AB\u01AC\x07$\x02\x02\u01AC\u01AE\x05B\"\x02\u01AD" +
 		"\u01AB\x03\x02\x02\x02\u01AE\u01B1\x03\x02\x02\x02\u01AF\u01AD\x03\x02" +
 		"\x02\x02\u01AF\u01B0\x03\x02\x02\x02\u01B0A\x03\x02\x02\x02\u01B1\u01AF" +
-		"\x03\x02\x02\x02\u01B2\u01B3\x05.\x18\x02\u01B3\u01B4\x07R\x02\x02\u01B4" +
+		"\x03\x02\x02\x02\u01B2\u01B3\x05.\x18\x02\u01B3\u01B4\x07Q\x02\x02\u01B4" +
 		"\u01B5\x05.\x18\x02\u01B5C\x03\x02\x02\x02\u01B6\u01B7\x07\x03\x02\x02" +
 		"\u01B7\u01B8\x05\x14\v\x02\u01B8\u01BA\x05V,\x02\u01B9\u01BB\x05J&\x02" +
 		"\u01BA\u01B9\x03\x02\x02\x02\u01BA\u01BB\x03\x02\x02\x02\u01BBE\x03\x02" +
@@ -3106,12 +3109,12 @@ export class esql_parser extends Parser {
 		"\u01E2\t\n\x02\x02\u01E2Y\x03\x02\x02\x02\u01E3\u01E4\x07\x07\x02\x02" +
 		"\u01E4\u01E5\x05\\/\x02\u01E5[\x03\x02\x02\x02\u01E6\u01E7\x07A\x02\x02" +
 		"\u01E7\u01E8\x05\x04\x03\x02\u01E8\u01E9\x07B\x02\x02\u01E9]\x03\x02\x02" +
-		"\x02\u01EA\u01EB\x07\x11\x02\x02\u01EB\u01EF\x07^\x02\x02\u01EC\u01ED" +
-		"\x07\x11\x02\x02\u01ED\u01EF\x07_\x02\x02\u01EE\u01EA\x03\x02\x02\x02" +
+		"\x02\u01EA\u01EB\x07\x11\x02\x02\u01EB\u01EF\x07`\x02\x02\u01EC\u01ED" +
+		"\x07\x11\x02\x02\u01ED\u01EF\x07a\x02\x02\u01EE\u01EA\x03\x02\x02\x02" +
 		"\u01EE\u01EC\x03\x02\x02\x02\u01EF_\x03\x02\x02\x02\u01F0\u01F1\x07\x05" +
-		"\x02\x02\u01F1\u01F4\x05.\x18\x02\u01F2\u01F3\x07V\x02\x02\u01F3\u01F5" +
+		"\x02\x02\u01F1\u01F4\x05*\x16\x02\u01F2\u01F3\x07U\x02\x02\u01F3\u01F5" +
 		"\x05.\x18\x02\u01F4\u01F2\x03\x02\x02\x02\u01F4\u01F5\x03\x02\x02\x02" +
-		"\u01F5\u01FF\x03\x02\x02\x02\u01F6\u01F7\x07W\x02\x02\u01F7\u01FC\x05" +
+		"\u01F5\u01FF\x03\x02\x02\x02\u01F6\u01F7\x07V\x02\x02\u01F7\u01FC\x05" +
 		"b2\x02\u01F8\u01F9\x07$\x02\x02\u01F9\u01FB\x05b2\x02\u01FA\u01F8\x03" +
 		"\x02\x02\x02\u01FB\u01FE\x03\x02\x02\x02\u01FC\u01FA\x03\x02\x02\x02\u01FC" +
 		"\u01FD\x03\x02\x02\x02\u01FD\u0200\x03\x02\x02\x02\u01FE\u01FC\x03\x02" +
@@ -4140,7 +4143,7 @@ export class GroupingContext extends ParserRuleContext {
 
 export class FromIdentifierContext extends ParserRuleContext {
 	public FROM_UNQUOTED_IDENTIFIER(): TerminalNode | undefined { return this.tryGetToken(esql_parser.FROM_UNQUOTED_IDENTIFIER, 0); }
-	public FROM_QUOTED_IDENTIFIER(): TerminalNode | undefined { return this.tryGetToken(esql_parser.FROM_QUOTED_IDENTIFIER, 0); }
+	public QUOTED_IDENTIFIER(): TerminalNode | undefined { return this.tryGetToken(esql_parser.QUOTED_IDENTIFIER, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
@@ -5205,17 +5208,11 @@ export class ShowFunctionsContext extends ShowCommandContext {
 
 
 export class EnrichCommandContext extends ParserRuleContext {
-	public _policyName: QualifiedNamePatternContext;
+	public _policyName: FromIdentifierContext;
 	public _matchField: QualifiedNamePatternContext;
 	public ENRICH(): TerminalNode { return this.getToken(esql_parser.ENRICH, 0); }
-	public qualifiedNamePattern(): QualifiedNamePatternContext[];
-	public qualifiedNamePattern(i: number): QualifiedNamePatternContext;
-	public qualifiedNamePattern(i?: number): QualifiedNamePatternContext | QualifiedNamePatternContext[] {
-		if (i === undefined) {
-			return this.getRuleContexts(QualifiedNamePatternContext);
-		} else {
-			return this.getRuleContext(i, QualifiedNamePatternContext);
-		}
+	public fromIdentifier(): FromIdentifierContext {
+		return this.getRuleContext(0, FromIdentifierContext);
 	}
 	public ON(): TerminalNode | undefined { return this.tryGetToken(esql_parser.ON, 0); }
 	public WITH(): TerminalNode | undefined { return this.tryGetToken(esql_parser.WITH, 0); }
@@ -5227,6 +5224,9 @@ export class EnrichCommandContext extends ParserRuleContext {
 		} else {
 			return this.getRuleContext(i, EnrichWithClauseContext);
 		}
+	}
+	public qualifiedNamePattern(): QualifiedNamePatternContext | undefined {
+		return this.tryGetRuleContext(0, QualifiedNamePatternContext);
 	}
 	public COMMA(): TerminalNode[];
 	public COMMA(i: number): TerminalNode;

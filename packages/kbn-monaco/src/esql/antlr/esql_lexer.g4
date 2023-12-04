@@ -192,28 +192,28 @@ FROM_ASSIGN : ASSIGN -> type(ASSIGN);
 
 METADATA: M E T A D A T A;
 
-fragment SRC_UNQUOTED_IDENTIFIER_PART
-    : ~[=`|,[\]/ \t\r\n]+
+fragment FROM_UNQUOTED_IDENTIFIER_PART
+    : ~[=`|,[\]/ \t\r\n]
     | '/' ~[*/] // allow single / but not followed by another / or * which would start a comment
     ;
 
 FROM_UNQUOTED_IDENTIFIER
-    : SRC_UNQUOTED_IDENTIFIER_PART+
+    : FROM_UNQUOTED_IDENTIFIER_PART+
     ;
 
 FROM_QUOTED_IDENTIFIER
-    : QUOTED_IDENTIFIER
+    : QUOTED_IDENTIFIER -> type(QUOTED_IDENTIFIER)
     ;
 
-SRC_LINE_COMMENT
+FROM_LINE_COMMENT
     : LINE_COMMENT -> channel(HIDDEN)
     ;
 
-SRC_MULTILINE_COMMENT
+FROM_MULTILINE_COMMENT
     : MULTILINE_COMMENT -> channel(HIDDEN)
     ;
 
-SRC_WS
+FROM_WS
     : WS -> channel(HIDDEN)
     ;
 //
@@ -283,20 +283,17 @@ RENAME_WS
 // | ENRICH ON key WITH fields
 mode ENRICH_MODE;
 ENRICH_PIPE : PIPE -> type(PIPE), popMode;
-ENRICH_ASSIGN : ASSIGN -> type(ASSIGN);
-ENRICH_COMMA : COMMA -> type(COMMA);
-ENRICH_DOT: DOT -> type(DOT);
 
-ON : O N;
-WITH : W I T H;
+ON : O N        -> pushMode(ENRICH_FIELD_MODE);
+WITH : W I T H  -> pushMode(ENRICH_FIELD_MODE);
+
+// use the unquoted pattern to let the parser invalidate fields with *
+ENRICH_POLICY_UNQUOTED_IDENTIFIER
+    : FROM_UNQUOTED_IDENTIFIER -> type(FROM_UNQUOTED_IDENTIFIER)
+    ;
 
 ENRICH_QUOTED_IDENTIFIER
     : QUOTED_IDENTIFIER -> type(QUOTED_IDENTIFIER)
-    ;
-
-// use the unquoted pattern to let the parser invalidate fields with *
-ENRICH_UNQUOTED_IDENTIFIER
-    : PROJECT_UNQUOTED_IDENTIFIER -> type(PROJECT_UNQUOTED_IDENTIFIER)
     ;
 
 ENRICH_LINE_COMMENT
@@ -308,6 +305,35 @@ ENRICH_MULTILINE_COMMENT
     ;
 
 ENRICH_WS
+    : WS -> channel(HIDDEN)
+    ;
+
+// submode for Enrich to allow different lexing between policy identifier (loose) and field identifiers
+mode ENRICH_FIELD_MODE;
+ENRICH_FIELD_PIPE : PIPE -> type(PIPE), popMode, popMode;
+ENRICH_FIELD_ASSIGN : ASSIGN -> type(ASSIGN);
+ENRICH_FIELD_COMMA : COMMA -> type(COMMA);
+ENRICH_FIELD_DOT: DOT -> type(DOT);
+
+ENRICH_FIELD_WITH : WITH -> type(WITH) ;
+
+ENRICH_FIELD_UNQUOTED_IDENTIFIER
+    : PROJECT_UNQUOTED_IDENTIFIER -> type(PROJECT_UNQUOTED_IDENTIFIER)
+    ;
+
+ENRICH_FIELD_QUOTED_IDENTIFIER
+    : QUOTED_IDENTIFIER -> type(QUOTED_IDENTIFIER)
+    ;
+
+ENRICH_FIELD_LINE_COMMENT
+    : LINE_COMMENT -> channel(HIDDEN)
+    ;
+
+ENRICH_FIELD_MULTILINE_COMMENT
+    : MULTILINE_COMMENT -> channel(HIDDEN)
+    ;
+
+ENRICH_FIELD_WS
     : WS -> channel(HIDDEN)
     ;
 
