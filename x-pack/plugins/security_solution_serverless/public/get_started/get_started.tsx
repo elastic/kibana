@@ -88,7 +88,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes, i
         restrictWidth={CONTENT_WIDTH}
         paddingSize="none"
         css={css`
-          padding: 0 ${euiTheme.size.xxl};
+          padding: 0 ${euiTheme.size.xxl} ${euiTheme.base * 3.5}px;
           background-color: ${euiTheme.colors.lightestShade};
         `}
       >
