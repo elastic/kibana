@@ -50,7 +50,7 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
   pageViewTelemetry?: string;
   setPageChrome?: React.ReactNode;
   solutionNavIcon?: string;
-  useEndpointHeaderActions: boolean;
+  useEndpointHeaderActions?: boolean;
 };
 
 export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({
