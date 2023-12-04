@@ -14,7 +14,7 @@ import {
   SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
 } from '../../../../assets/constants';
-import { groupBy } from './common';
+import { getGroupBy } from './common';
 
 export function generateTransformForOccurrences(slo: SLO): TransformPutTransformRequest {
   return {
@@ -51,7 +51,7 @@ export function generateTransformForOccurrences(slo: SLO): TransformPutTransform
       },
     },
     pivot: {
-      group_by: groupBy,
+      group_by: getGroupBy(slo),
       aggregations: {
         goodEvents: {
           sum: {

@@ -5,45 +5,65 @@
  * 2.0.
  */
 
-export const groupBy = {
-  'slo.id': {
-    terms: {
-      field: 'slo.id',
+import { ALL_VALUE } from '@kbn/slo-schema';
+import { SLO } from '../../../../domain/models/slo';
+
+export const getGroupBy = (slo: SLO) => {
+  const groupings =
+    slo.groupBy !== '' && slo.groupBy !== ALL_VALUE
+      ? [slo.groupBy].flat().reduce((acc, field) => {
+          return {
+            ...acc,
+            [`slo.groupings.${field}`]: {
+              terms: {
+                field: `slo.groupings.${field}`,
+              },
+            },
+          };
+        }, {})
+      : {};
+
+  return {
+    'slo.id': {
+      terms: {
+        field: 'slo.id',
+      },
     },
-  },
-  'slo.revision': {
-    terms: {
-      field: 'slo.revision',
+    'slo.revision': {
+      terms: {
+        field: 'slo.revision',
+      },
     },
-  },
-  'slo.instanceId': {
-    terms: {
-      field: 'slo.instanceId',
+    'slo.instanceId': {
+      terms: {
+        field: 'slo.instanceId',
+      },
     },
-  },
-  // optional fields: only specified for APM indicators. Must include missing_bucket:true
-  'service.name': {
-    terms: {
-      field: 'service.name',
-      missing_bucket: true,
+    ...groupings,
+    // optional fields: only specified for APM indicators. Must include missing_bucket:true
+    'service.name': {
+      terms: {
+        field: 'service.name',
+        missing_bucket: true,
+      },
     },
-  },
-  'service.environment': {
-    terms: {
-      field: 'service.environment',
-      missing_bucket: true,
+    'service.environment': {
+      terms: {
+        field: 'service.environment',
+        missing_bucket: true,
+      },
     },
-  },
-  'transaction.name': {
-    terms: {
-      field: 'transaction.name',
-      missing_bucket: true,
+    'transaction.name': {
+      terms: {
+        field: 'transaction.name',
+        missing_bucket: true,
+      },
     },
-  },
-  'transaction.type': {
-    terms: {
-      field: 'transaction.type',
-      missing_bucket: true,
+    'transaction.type': {
+      terms: {
+        field: 'transaction.type',
+        missing_bucket: true,
+      },
     },
-  },
+  };
 };

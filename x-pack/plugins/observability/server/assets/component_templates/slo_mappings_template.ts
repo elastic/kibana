@@ -66,6 +66,9 @@ export const getSLOMappingsTemplate = (name: string) => ({
             isGoodSlice: {
               type: 'byte',
             },
+            groupings: {
+              type: 'flattened',
+            },
           },
         },
       },

@@ -45,6 +45,9 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
             groupBy: {
               type: 'keyword',
             },
+            groupings: {
+              type: 'flattened',
+            },
             instanceId: {
               type: 'keyword',
             },

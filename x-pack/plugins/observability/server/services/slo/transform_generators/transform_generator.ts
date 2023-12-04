@@ -57,13 +57,27 @@ export abstract class TransformGenerator {
       fixedInterval = slo.objective.timesliceWindow!.format();
     }
 
-    const instanceIdField =
-      slo.groupBy !== '' && slo.groupBy !== ALL_VALUE ? slo.groupBy : 'slo.instanceId';
+    const groupings =
+      slo.groupBy !== '' && slo.groupBy !== ALL_VALUE
+        ? [slo.groupBy].flat().reduce(
+            (acc, field) => {
+              return {
+                ...acc,
+                [`slo.groupings.${field}`]: {
+                  terms: {
+                    field,
+                  },
+                },
+              };
+            },
+            { 'slo.instanceId': { terms: { field: slo.groupBy } } }
+          )
+        : { 'slo.instanceId': { terms: { field: 'slo.instanceId' } } };
 
     return {
       'slo.id': { terms: { field: 'slo.id' } },
       'slo.revision': { terms: { field: 'slo.revision' } },
-      'slo.instanceId': { terms: { field: instanceIdField } },
+      ...groupings,
       ...extraGroupByFields,
       // @timestamp field defined in the destination index
       '@timestamp': {

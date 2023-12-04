@@ -14,7 +14,7 @@ import {
   SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
 } from '../../../../assets/constants';
-import { groupBy } from './common';
+import { getGroupBy } from './common';
 
 export function generateTransformForTimeslicesAndCalendarAligned(
   slo: SLO
@@ -56,7 +56,7 @@ export function generateTransformForTimeslicesAndCalendarAligned(
       },
     },
     pivot: {
-      group_by: groupBy,
+      group_by: getGroupBy(slo),
       aggregations: {
         _totalSlicesInPeriod: {
           bucket_script: {
