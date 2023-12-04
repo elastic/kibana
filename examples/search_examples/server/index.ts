@@ -7,9 +7,9 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { SearchExamplesPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { SearchExamplesPlugin } = await import('./plugin');
   return new SearchExamplesPlugin(initializerContext);
 }
 

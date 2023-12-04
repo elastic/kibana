@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import { runFleetServerIfNeeded } from './fleet_server';
-import { startRuntimeServices, stopRuntimeServices } from './runtime';
+import { getRuntimeServices, startRuntimeServices, stopRuntimeServices } from './runtime';
 import { checkDependencies } from './pre_check';
 import { enrollEndpointHost } from './elastic_endpoint';
 import type { StartRuntimeServicesOptions } from './types';
+import { startFleetServerIfNecessary } from '../common/fleet_server/fleet_server_services';
 
 export const setupAll = async (options: StartRuntimeServicesOptions) => {
   await startRuntimeServices(options);
 
+  const { kbnClient, log } = getRuntimeServices();
+
   await checkDependencies();
 
-  await runFleetServerIfNeeded();
+  await startFleetServerIfNecessary({
+    kbnClient,
+    logger: log,
+  });
 
   await enrollEndpointHost();
 

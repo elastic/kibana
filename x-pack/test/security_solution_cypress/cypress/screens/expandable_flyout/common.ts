@@ -11,6 +11,8 @@ import {
 } from '../../helpers/common';
 
 export const VIEW_CASE_TOASTER_LINK = getDataTestSubjectSelector('toaster-content-case-view-link');
+export const VIEW_CASE_TOASTER_CLOSE_BUTTON = getDataTestSubjectSelector('toastCloseButton');
+export const CREATE_CASE_BUTTON = `[data-test-subj="createNewCaseBtn"]`;
 export const NEW_CASE_NAME_INPUT = `[data-test-subj="input"][aria-describedby="caseTitle"]`;
 export const NEW_CASE_DESCRIPTION_INPUT = getDataTestSubjectSelector('euiMarkdownEditorTextArea');
 export const EXISTING_CASE_SELECT_BUTTON =

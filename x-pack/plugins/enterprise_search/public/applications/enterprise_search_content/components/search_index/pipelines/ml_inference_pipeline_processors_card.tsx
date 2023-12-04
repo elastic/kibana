@@ -18,7 +18,8 @@ import { IndexNameLogic } from '../index_name_logic';
 
 import { InferencePipelineCard } from './inference_pipeline_card';
 import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';
-import { TextExpansionCallOut } from './ml_inference/text_expansion_callout';
+import { E5MultilingualCallOut } from './ml_inference/e5_multilingual_callout/e5_multilingual_callout';
+import { TextExpansionCallOut } from './ml_inference/text_expansion_callout/text_expansion_callout';
 import { PipelinesLogic } from './pipelines_logic';
 
 export const MlInferencePipelineProcessorsCard: React.FC = () => {
@@ -38,6 +39,7 @@ export const MlInferencePipelineProcessorsCard: React.FC = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {hasMLPermissions && !isGated && <TextExpansionCallOut isDismissable />}
+      {hasMLPermissions && !isGated && <E5MultilingualCallOut isDismissable />}
       <EuiFlexItem>
         <AddMLInferencePipelineButton onClick={() => openAddMlInferencePipelineModal()} />
       </EuiFlexItem>

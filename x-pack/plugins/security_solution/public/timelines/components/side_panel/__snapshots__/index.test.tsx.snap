@@ -50,7 +50,7 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
+        class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-column"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -74,6 +74,63 @@ Array [
           <div
             class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
           />
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-row"
+            data-test-subj="securitySolutionFlyoutHeaderAssigneesHeader"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <h3
+                class="euiTitle emotion-euiTitle-xxs"
+                data-test-subj="securitySolutionFlyoutHeaderAssigneesTitle"
+              >
+                Assignees:
+              </h3>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
+                data-test-subj="securitySolutionUsersAvatarsPanel"
+              />
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiPopover emotion-euiPopover"
+              >
+                <div
+                  class="euiPopover__anchor css-16vtueo-render"
+                >
+                  <span
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                  >
+                    <button
+                      aria-label="Update assignees"
+                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
+                      data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"
+                      disabled=""
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="plusInCircle"
+                      />
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -122,16 +179,24 @@ Array [
       />
     </span>
   </div>,
-  <div
-    class="euiFlyoutFooter emotion-euiFlyoutFooter"
-    data-test-subj="side-panel-flyout-footer"
+  .c0 .side-panel-flyout-footer {
+  background-color: transparent;
+}
+
+<div
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium c0 emotion-euiPanel-grow-none-m-plain"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      class="euiFlyoutFooter side-panel-flyout-footer emotion-euiFlyoutFooter"
+      data-test-subj="side-panel-flyout-footer"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
-      />
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        />
+      </div>
     </div>
   </div>,
 ]
@@ -164,6 +229,10 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
   padding: 0 12px 12px;
 }
 
+.c2 .side-panel-flyout-footer {
+  background-color: transparent;
+}
+
 <div
   data-eui="EuiFlyout"
   data-test-subj="timeline:details-panel:flyout"
@@ -187,7 +256,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
+          class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-column"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -195,6 +264,63 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
             <div
               class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
             />
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <div
+              class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-row"
+              data-test-subj="securitySolutionFlyoutHeaderAssigneesHeader"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <h3
+                  class="euiTitle emotion-euiTitle-xxs"
+                  data-test-subj="securitySolutionFlyoutHeaderAssigneesTitle"
+                >
+                  Assignees:
+                </h3>
+              </div>
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
+                  data-test-subj="securitySolutionUsersAvatarsPanel"
+                />
+              </div>
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  class="euiPopover emotion-euiPopover"
+                >
+                  <div
+                    class="euiPopover__anchor css-16vtueo-render"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      <button
+                        aria-label="Update assignees"
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
+                        data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"
+                        disabled=""
+                        type="button"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="plusInCircle"
+                        />
+                      </button>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -255,15 +381,19 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
     </div>
   </div>
   <div
-    class="euiFlyoutFooter emotion-euiFlyoutFooter"
-    data-test-subj="side-panel-flyout-footer"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium c2 emotion-euiPanel-grow-none-m-plain"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      class="euiFlyoutFooter side-panel-flyout-footer emotion-euiFlyoutFooter"
+      data-test-subj="side-panel-flyout-footer"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
-      />
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        />
+      </div>
     </div>
   </div>
 </div>

@@ -11,6 +11,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_DESCRIPTION_INPUT,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_NAME_INPUT,
+  VIEW_CASE_TOASTER_CLOSE_BUTTON,
   VIEW_CASE_TOASTER_LINK,
 } from '../../screens/expandable_flyout/common';
 import { openTakeActionButtonAndSelectItem } from './alert_details_right_panel';
@@ -33,4 +34,7 @@ export const createNewCaseFromExpandableFlyout = () => {
 
   // NOTE: wait for case link (case created)
   cy.get(VIEW_CASE_TOASTER_LINK).should('be.visible');
+
+  // NOTE: close pop up to limit interaction with flyout behind
+  cy.get(VIEW_CASE_TOASTER_CLOSE_BUTTON).should('be.visible').click();
 };

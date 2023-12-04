@@ -10,7 +10,7 @@ import path from 'path';
 import { i18n } from '@kbn/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
-import { SampleDatasetSchema } from '../../lib/sample_dataset_registry_types';
+import { SampleDatasetProvider } from '../../lib/sample_dataset_registry_types';
 
 const flightsName = i18n.translate('home.sampleData.flightsSpecTitle', {
   defaultMessage: 'Sample flight data',
@@ -19,13 +19,17 @@ const flightsDescription = i18n.translate('home.sampleData.flightsSpecDescriptio
   defaultMessage: 'Sample data, visualizations, and dashboards for monitoring flight routes.',
 });
 
-export const flightsSpecProvider = function (): SampleDatasetSchema {
+export const flightsSpecProvider: SampleDatasetProvider = ({ staticAssets }) => {
   return {
     id: 'flights',
     name: flightsName,
     description: flightsDescription,
-    previewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard.webp',
-    darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard_dark.webp',
+    previewImagePath: staticAssets.getPluginAssetHref(
+      '/sample_data_resources/flights/dashboard.webp'
+    ),
+    darkPreviewImagePath: staticAssets.getPluginAssetHref(
+      '/sample_data_resources/flights/dashboard_dark.webp'
+    ),
     overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
     defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
     savedObjects: getSavedObjects(),
@@ -40,6 +44,6 @@ export const flightsSpecProvider = function (): SampleDatasetSchema {
       },
     ],
     status: 'not_installed',
-    iconPath: '/plugins/home/assets/sample_data_resources/flights/icon.svg',
+    iconPath: staticAssets.getPluginAssetHref('/sample_data_resources/flights/icon.svg'),
   };
 };

@@ -32,6 +32,7 @@ export const ErrorCallout = ({ title, error }: Props) => {
       iconType="error"
       color="danger"
       title={<h2 data-test-subj="discoverErrorCalloutTitle">{overrideDisplay?.title ?? title}</h2>}
+      actions={overrideDisplay?.actions ?? []}
       body={
         <div
           css={css`

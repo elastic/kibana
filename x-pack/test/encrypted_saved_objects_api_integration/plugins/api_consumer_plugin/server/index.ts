@@ -51,7 +51,7 @@ export interface PluginsStart {
   spaces: never;
 }
 
-export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> = () => ({
+export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> = async () => ({
   setup(core: CoreSetup<PluginsStart>, deps: PluginsSetup) {
     for (const [name, namespaceType, hidden] of [
       [SAVED_OBJECT_WITH_SECRET_TYPE, 'single', false],

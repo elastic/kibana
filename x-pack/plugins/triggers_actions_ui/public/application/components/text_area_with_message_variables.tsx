@@ -9,6 +9,8 @@ import React, { useState } from 'react';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
+import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
+import { TextAreaWithAutocomplete } from './text_area_with_autocomplete';
 import { templateActionVariable } from '../lib';
 
 interface Props {
@@ -23,7 +25,7 @@ interface Props {
   errors?: string[];
 }
 
-export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
+const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
   messageVariables,
   paramsProperty,
   index,
@@ -86,4 +88,16 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
       />
     </EuiFormRow>
   );
+};
+
+export const TextAreaWithMessageVariables = (props: Props) => {
+  let isMustacheAutocompleteOn;
+  try {
+    isMustacheAutocompleteOn = getIsExperimentalFeatureEnabled('isMustacheAutocompleteOn');
+  } catch (e) {
+    isMustacheAutocompleteOn = false;
+  }
+
+  if (isMustacheAutocompleteOn) return TextAreaWithAutocomplete(props);
+  return TextAreaWithMessageVariablesLegacy(props);
 };

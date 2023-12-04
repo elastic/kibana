@@ -120,16 +120,6 @@ describe('UuidService', () => {
     });
 
     describe('process warnings', () => {
-      it('logs warnings coming from the process', async () => {
-        await service.preboot({ analytics });
-
-        const warning = new Error('something went wrong');
-        process.emit('warning', warning);
-
-        expect(logger.get('process').warn).toHaveBeenCalledTimes(1);
-        expect(logger.get('process').warn).toHaveBeenCalledWith(warning);
-      });
-
       it('does not log deprecation warnings', async () => {
         await service.preboot({ analytics });
 

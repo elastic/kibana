@@ -196,7 +196,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
 
   const relatedHostsCount = useMemo(
     () => (
-      <EuiFlexGroup alignItems="center" gutterSize="m">
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="storage" />
         </EuiFlexItem>

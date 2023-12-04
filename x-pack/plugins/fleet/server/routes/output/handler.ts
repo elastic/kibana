@@ -10,6 +10,8 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import Boom from '@hapi/boom';
 
+import type { ValueOf } from '@elastic/eui';
+
 import { outputType } from '../../../common/constants';
 
 import type {
@@ -23,19 +25,31 @@ import type {
   GetOneOutputResponse,
   GetOutputsResponse,
   Output,
+  OutputType,
   PostLogstashApiKeyResponse,
 } from '../../../common/types';
 import { outputService } from '../../services/output';
 import { defaultFleetErrorHandler, FleetUnauthorizedError } from '../../errors';
-import { agentPolicyService } from '../../services';
+import { agentPolicyService, appContextService } from '../../services';
 import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
 
 function ensureNoDuplicateSecrets(output: Partial<Output>) {
   if (output.type === outputType.Kafka && output?.password && output?.secrets?.password) {
     throw Boom.badRequest('Cannot specify both password and secrets.password');
   }
-  if (output.ssl?.key && output.secrets?.ssl?.key) {
+  if (
+    (output.type === outputType.Kafka || output.type === outputType.Logstash) &&
+    output.ssl?.key &&
+    output.secrets?.ssl?.key
+  ) {
     throw Boom.badRequest('Cannot specify both ssl.key and secrets.ssl.key');
+  }
+  if (
+    output.type === outputType.RemoteElasticsearch &&
+    output.service_token &&
+    output.secrets?.service_token
+  ) {
+    throw Boom.badRequest('Cannot specify both service_token and secrets.service_token');
   }
 }
 
@@ -89,8 +103,9 @@ export const putOutputHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const outputUpdate = request.body;
-  ensureNoDuplicateSecrets(outputUpdate);
   try {
+    validateOutputServerless(outputUpdate.type);
+    ensureNoDuplicateSecrets(outputUpdate);
     await outputService.update(soClient, esClient, request.params.outputId, outputUpdate);
     const output = await outputService.get(soClient, request.params.outputId);
     if (output.is_default || output.is_default_monitoring) {
@@ -125,6 +140,7 @@ export const postOutputHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
     const { id, ...newOutput } = request.body;
+    validateOutputServerless(newOutput.type);
     ensureNoDuplicateSecrets(newOutput);
     const output = await outputService.create(soClient, esClient, newOutput, { id });
     if (output.is_default || output.is_default_monitoring) {
@@ -140,6 +156,13 @@ export const postOutputHandler: RequestHandler<
     return defaultFleetErrorHandler({ error, response });
   }
 };
+
+function validateOutputServerless(type?: ValueOf<OutputType>): void {
+  const cloudSetup = appContextService.getCloud();
+  if (cloudSetup?.isServerlessEnabled && type === outputType.RemoteElasticsearch) {
+    throw Boom.badRequest('Output type remote_elasticsearch not supported in serverless');
+  }
+}
 
 export const deleteOutputHandler: RequestHandler<
   TypeOf<typeof DeleteOutputRequestSchema.params>

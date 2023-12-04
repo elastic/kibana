@@ -28,7 +28,7 @@ export function SloRulesBadge({ rules, onClick }: Props) {
       display="block"
     >
       <span onClick={onClick} onKeyDown={onClick}>
-        <EuiBadge isDisabled color="default" iconType="alert" css={{ cursor: 'pointer' }} />
+        <EuiBadge color="text" iconType="alert" css={{ cursor: 'pointer' }} />
       </span>
     </EuiToolTip>
   );

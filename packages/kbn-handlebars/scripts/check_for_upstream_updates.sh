@@ -34,7 +34,7 @@ else
   echo "     our local versions of these files (located in"
   echo "     'packages/kbn-handlebars/src/spec')."
   echo
-  echo "     https://github.com/handlebars-lang/handlebars.js/compare/$hash...4.x"
+  echo "     https://github.com/handlebars-lang/handlebars.js/compare/$expected_hash...4.x"
   echo
   echo "  2. Execute the following script and commit the updated '$HASH_FILE'"
   echo "     file including any changes you made to our own spec files."

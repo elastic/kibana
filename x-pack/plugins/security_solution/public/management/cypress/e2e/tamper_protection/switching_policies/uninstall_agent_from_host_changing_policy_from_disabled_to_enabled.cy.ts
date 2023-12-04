@@ -14,7 +14,7 @@ import {
   createAgentPolicyTask,
   enableAgentTamperProtectionFeatureFlagInPolicy,
   getUninstallToken,
-  changeAgentPolicy,
+  reAssignFleetAgentToPolicy,
   isAgentAndEndpointUninstalledFromHost,
   uninstallAgentFromHost,
 } from '../../../tasks/fleet';
@@ -82,10 +82,9 @@ describe(
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
 
       // Change agent policy and wait for action to be completed
-      changeAgentPolicy(
+      reAssignFleetAgentToPolicy(
         createdHost.agentId,
-        policyWithAgentTamperProtectionEnabled.policy_id,
-        3
+        policyWithAgentTamperProtectionEnabled.policy_id
       ).then((hasChanged) => {
         expect(hasChanged).to.eql(true);
 

@@ -6,19 +6,17 @@
  */
 
 import * as yaml from 'js-yaml';
-import type { UrlObject } from 'url';
-import Url from 'url';
 import { LoginState } from '@kbn/security-plugin/common/login_state';
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { KNOWN_SERVERLESS_ROLE_DEFINITIONS } from '@kbn/security-solution-plugin/common/test';
 import { LOGOUT_URL } from '../urls/navigation';
-import { rootRequest } from './common';
 import {
   CLOUD_SERVERLESS,
   ELASTICSEARCH_PASSWORD,
   ELASTICSEARCH_USERNAME,
   IS_SERVERLESS,
 } from '../env_var_names_constants';
+import { API_HEADERS, rootRequest } from './api_calls/common';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -63,29 +61,6 @@ export interface User {
 
 export const loginWithUser = (user: User): void => {
   loginWithUsernameAndPassword(user.username, user.password);
-};
-
-/**
- * cy.visit will default to the baseUrl which uses the default kibana test user
- * This function will override that functionality in cy.visit by building the baseUrl
- * directly from the environment variables set up in x-pack/test/security_solution_cypress/runner.ts
- *
- * @param role string role/user to log in with
- * @param route string route to visit
- */
-export const getUrlWithRoute = (role: SecurityRoleName, route: string): string => {
-  const url = Cypress.config().baseUrl;
-  const kibana = new URL(String(url));
-  const theUrl = `${Url.format({
-    auth: `${role}:changeme`,
-    username: role,
-    password: 'changeme',
-    protocol: kibana.protocol.replace(':', ''),
-    hostname: kibana.hostname,
-    port: kibana.port,
-  } as UrlObject)}${route.startsWith('/') ? '' : '/'}${route}`;
-  cy.log(`origin: ${theUrl}`);
-  return theUrl;
 };
 
 /**
@@ -210,7 +185,7 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
       (provider) => provider.type === 'basic'
     );
 
-    return rootRequest({
+    cy.request({
       url: `${baseUrl}/internal/security/login`,
       method: 'POST',
       body: {
@@ -219,6 +194,7 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
         currentURL: '/',
         params: { username, password },
       },
+      headers: API_HEADERS,
     });
   });
 };

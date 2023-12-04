@@ -25,49 +25,38 @@ export class AiopsPlugin
     core: AiopsCoreSetup,
     { embeddable, cases, licensing, uiActions }: AiopsPluginSetupDeps
   ) {
-    firstValueFrom(licensing.license$).then(async (license) => {
-      if (license.hasAtLeast('platinum')) {
-        if (embeddable) {
-          const { registerEmbeddable } = await import('./embeddable/register_embeddable');
-          registerEmbeddable(core, embeddable);
-        }
+    Promise.all([
+      firstValueFrom(licensing.license$),
+      import('./embeddable/register_embeddable'),
+      import('./ui_actions'),
+      import('./cases/register_change_point_charts_attachment'),
+      core.getStartServices(),
+    ]).then(
+      ([
+        license,
+        { registerEmbeddable },
+        { registerAiopsUiActions },
+        { registerChangePointChartsAttachment },
+        [coreStart, pluginStart],
+      ]) => {
+        if (license.hasAtLeast('platinum')) {
+          if (embeddable) {
+            registerEmbeddable(core, embeddable);
+          }
 
-        if (uiActions) {
-          const { registerAiopsUiActions } = await import('./ui_actions');
-          registerAiopsUiActions(uiActions, core);
-        }
+          if (uiActions) {
+            registerAiopsUiActions(uiActions, coreStart, pluginStart);
+          }
 
-        if (cases) {
-          const [coreStart, pluginStart] = await core.getStartServices();
-          const { registerChangePointChartsAttachment } = await import(
-            './cases/register_change_point_charts_attachment'
-          );
-          registerChangePointChartsAttachment(cases, coreStart, pluginStart);
+          if (cases) {
+            registerChangePointChartsAttachment(cases, coreStart, pluginStart);
+          }
         }
       }
-    });
+    );
   }
 
   public start(core: CoreStart, plugins: AiopsPluginStartDeps): AiopsPluginStart {
-    // importing async to keep the aiops plugin size to a minimum
-    Promise.all([
-      import('@kbn/ui-actions-plugin/public'),
-      import('./components/log_categorization'),
-      firstValueFrom(plugins.licensing.license$),
-    ]).then(([uiActionsImports, { categorizeFieldAction }, license]) => {
-      if (license.hasAtLeast('platinum')) {
-        const { ACTION_CATEGORIZE_FIELD, CATEGORIZE_FIELD_TRIGGER } = uiActionsImports;
-        if (plugins.uiActions.hasAction(ACTION_CATEGORIZE_FIELD)) {
-          plugins.uiActions.unregisterAction(ACTION_CATEGORIZE_FIELD);
-        }
-
-        plugins.uiActions.addTriggerAction(
-          CATEGORIZE_FIELD_TRIGGER,
-          categorizeFieldAction(core, plugins)
-        );
-      }
-    });
-
     return {
       EmbeddableChangePointChart: getEmbeddableChangePointChart(core, plugins),
     };

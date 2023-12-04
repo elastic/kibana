@@ -6,9 +6,11 @@
  */
 import React from 'react';
 import { FlyoutContentActions } from '@kbn/discover-plugin/public';
-import { DataTableRecord } from '@kbn/discover-utils/src/types';
+import { AgentIcon, CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
 import { useMeasure } from 'react-use/lib';
-import { FlyoutDoc } from './types';
+import { AgentName } from '@kbn/elastic-agent-utils';
+import { first } from 'lodash';
+import { FlyoutDoc, LogDocument } from './types';
 import * as constants from '../../../common/constants';
 import { HighlightField } from './sub_components/highlight_field';
 import {
@@ -42,7 +44,7 @@ export function FlyoutHighlights({
   actions,
 }: {
   formattedDoc: FlyoutDoc;
-  flattenedDoc: DataTableRecord['flattened'];
+  flattenedDoc: LogDocument['flattened'];
   actions: FlyoutContentActions;
 }) {
   const [ref, dimensions] = useMeasure<HTMLDivElement>();
@@ -50,153 +52,166 @@ export function FlyoutHighlights({
   return (
     <DiscoverActionsProvider value={actions}>
       <HighlightContainer ref={ref}>
+        {/* Service highlight */}
         <HighlightSection title={serviceAccordionTitle} columns={columns}>
           {formattedDoc[constants.SERVICE_NAME_FIELD] && (
             <HighlightField
-              label={flyoutServiceLabel}
+              data-test-subj="logExplorerFlyoutService"
               field={constants.SERVICE_NAME_FIELD}
-              value={flattenedDoc[constants.SERVICE_NAME_FIELD]}
               formattedValue={formattedDoc[constants.SERVICE_NAME_FIELD]}
-              dataTestSubj="logExplorerFlyoutService"
+              icon={
+                <AgentIcon
+                  agentName={first((flattenedDoc[constants.AGENT_NAME_FIELD] ?? []) as AgentName[])}
+                />
+              }
+              label={flyoutServiceLabel}
+              value={flattenedDoc[constants.SERVICE_NAME_FIELD]}
               width={fieldWidth}
             />
           )}
           {formattedDoc[constants.TRACE_ID_FIELD] && (
             <HighlightField
-              label={flyoutTraceLabel}
+              data-test-subj="logExplorerFlyoutTrace"
               field={constants.TRACE_ID_FIELD}
-              value={flattenedDoc[constants.TRACE_ID_FIELD]}
               formattedValue={formattedDoc[constants.TRACE_ID_FIELD]}
-              dataTestSubj="logExplorerFlyoutTrace"
+              label={flyoutTraceLabel}
+              value={flattenedDoc[constants.TRACE_ID_FIELD]}
               width={fieldWidth}
             />
           )}
         </HighlightSection>
-
+        {/* Infrastructure highlight */}
         <HighlightSection title={infraAccordionTitle} columns={columns}>
           {formattedDoc[constants.HOST_NAME_FIELD] && (
             <HighlightField
-              label={flyoutHostNameLabel}
+              data-test-subj="logExplorerFlyoutHostName"
               field={constants.HOST_NAME_FIELD}
-              value={flattenedDoc[constants.HOST_NAME_FIELD]}
               formattedValue={formattedDoc[constants.HOST_NAME_FIELD]}
-              dataTestSubj="logExplorerFlyoutHostName"
+              label={flyoutHostNameLabel}
+              value={flattenedDoc[constants.HOST_NAME_FIELD]}
               width={fieldWidth}
             />
           )}
           {formattedDoc[constants.ORCHESTRATOR_CLUSTER_NAME_FIELD] && (
             <HighlightField
-              label={flyoutOrchestratorClusterNameLabel}
+              data-test-subj="logExplorerFlyoutClusterName"
               field={constants.ORCHESTRATOR_CLUSTER_NAME_FIELD}
-              value={flattenedDoc[constants.ORCHESTRATOR_CLUSTER_NAME_FIELD]}
               formattedValue={formattedDoc[constants.ORCHESTRATOR_CLUSTER_NAME_FIELD]}
-              dataTestSubj="logExplorerFlyoutClusterName"
+              label={flyoutOrchestratorClusterNameLabel}
+              value={flattenedDoc[constants.ORCHESTRATOR_CLUSTER_NAME_FIELD]}
               width={fieldWidth}
             />
           )}
           {formattedDoc[constants.ORCHESTRATOR_RESOURCE_ID_FIELD] && (
             <HighlightField
-              label={flyoutOrchestratorResourceIdLabel}
+              data-test-subj="logExplorerFlyoutResourceId"
               field={constants.ORCHESTRATOR_RESOURCE_ID_FIELD}
-              value={flattenedDoc[constants.ORCHESTRATOR_RESOURCE_ID_FIELD]}
               formattedValue={formattedDoc[constants.ORCHESTRATOR_RESOURCE_ID_FIELD]}
-              dataTestSubj="logExplorerFlyoutResourceId"
+              label={flyoutOrchestratorResourceIdLabel}
+              value={flattenedDoc[constants.ORCHESTRATOR_RESOURCE_ID_FIELD]}
               width={fieldWidth}
             />
           )}
         </HighlightSection>
-
+        {/* Cloud highlight */}
         <HighlightSection title={cloudAccordionTitle} columns={columns}>
           {formattedDoc[constants.CLOUD_PROVIDER_FIELD] && (
             <HighlightField
-              label={flyoutCloudProviderLabel}
+              data-test-subj="logExplorerFlyoutCloudProvider"
               field={constants.CLOUD_PROVIDER_FIELD}
-              value={flattenedDoc[constants.CLOUD_PROVIDER_FIELD]}
               formattedValue={formattedDoc[constants.CLOUD_PROVIDER_FIELD]}
-              dataTestSubj="logExplorerFlyoutCloudProvider"
+              icon={
+                <CloudProviderIcon
+                  cloudProvider={first(
+                    (flattenedDoc[constants.CLOUD_PROVIDER_FIELD] ?? []) as CloudProvider[]
+                  )}
+                />
+              }
+              label={flyoutCloudProviderLabel}
+              value={flattenedDoc[constants.CLOUD_PROVIDER_FIELD]}
               width={fieldWidth}
             />
           )}
           {formattedDoc[constants.CLOUD_REGION_FIELD] && (
             <HighlightField
-              label={flyoutCloudRegionLabel}
+              data-test-subj="logExplorerFlyoutCloudRegion"
               field={constants.CLOUD_REGION_FIELD}
-              value={flattenedDoc[constants.CLOUD_REGION_FIELD]}
               formattedValue={formattedDoc[constants.CLOUD_REGION_FIELD]}
-              dataTestSubj="logExplorerFlyoutCloudRegion"
+              label={flyoutCloudRegionLabel}
+              value={flattenedDoc[constants.CLOUD_REGION_FIELD]}
               width={fieldWidth}
             />
           )}
           {formattedDoc[constants.CLOUD_AVAILABILITY_ZONE_FIELD] && (
             <HighlightField
-              label={flyoutCloudAvailabilityZoneLabel}
+              data-test-subj="logExplorerFlyoutCloudAz"
               field={constants.CLOUD_AVAILABILITY_ZONE_FIELD}
-              value={flattenedDoc[constants.CLOUD_AVAILABILITY_ZONE_FIELD]}
               formattedValue={formattedDoc[constants.CLOUD_AVAILABILITY_ZONE_FIELD]}
-              dataTestSubj="logExplorerFlyoutCloudAz"
+              label={flyoutCloudAvailabilityZoneLabel}
+              value={flattenedDoc[constants.CLOUD_AVAILABILITY_ZONE_FIELD]}
               width={fieldWidth}
             />
           )}
           {formattedDoc[constants.CLOUD_PROJECT_ID_FIELD] && (
             <HighlightField
-              label={flyoutCloudProjectIdLabel}
+              data-test-subj="logExplorerFlyoutCloudProjectId"
               field={constants.CLOUD_PROJECT_ID_FIELD}
-              value={flattenedDoc[constants.CLOUD_PROJECT_ID_FIELD]}
               formattedValue={formattedDoc[constants.CLOUD_PROJECT_ID_FIELD]}
-              dataTestSubj="logExplorerFlyoutCloudProjectId"
+              label={flyoutCloudProjectIdLabel}
+              value={flattenedDoc[constants.CLOUD_PROJECT_ID_FIELD]}
               width={fieldWidth}
             />
           )}
           {formattedDoc[constants.CLOUD_INSTANCE_ID_FIELD] && (
             <HighlightField
-              label={flyoutCloudInstanceIdLabel}
+              data-test-subj="logExplorerFlyoutCloudInstanceId"
               field={constants.CLOUD_INSTANCE_ID_FIELD}
-              value={flattenedDoc[constants.CLOUD_INSTANCE_ID_FIELD]}
               formattedValue={formattedDoc[constants.CLOUD_INSTANCE_ID_FIELD]}
-              dataTestSubj="logExplorerFlyoutCloudInstanceId"
+              label={flyoutCloudInstanceIdLabel}
+              value={flattenedDoc[constants.CLOUD_INSTANCE_ID_FIELD]}
               width={fieldWidth}
             />
           )}
         </HighlightSection>
-
-        <HighlightSection title={otherAccordionTitle} showBottomRule={false} columns={columns}>
+        {/* Other highlights */}
+        <HighlightSection title={otherAccordionTitle} columns={columns}>
           {formattedDoc[constants.LOG_FILE_PATH_FIELD] && (
             <HighlightField
-              label={flyoutLogPathFileLabel}
+              data-test-subj="logExplorerFlyoutLogPathFile"
               field={constants.LOG_FILE_PATH_FIELD}
-              value={flattenedDoc[constants.LOG_FILE_PATH_FIELD]}
               formattedValue={formattedDoc[constants.LOG_FILE_PATH_FIELD]}
-              dataTestSubj="logExplorerFlyoutLogPathFile"
+              label={flyoutLogPathFileLabel}
+              value={flattenedDoc[constants.LOG_FILE_PATH_FIELD]}
               width={fieldWidth}
             />
           )}
           {formattedDoc[constants.DATASTREAM_NAMESPACE_FIELD] && (
             <HighlightField
-              label={flyoutNamespaceLabel}
+              data-test-subj="logExplorerFlyoutNamespace"
               field={constants.DATASTREAM_NAMESPACE_FIELD}
-              value={flattenedDoc[constants.DATASTREAM_NAMESPACE_FIELD]}
               formattedValue={formattedDoc[constants.DATASTREAM_NAMESPACE_FIELD]}
-              dataTestSubj="logExplorerFlyoutNamespace"
+              label={flyoutNamespaceLabel}
+              value={flattenedDoc[constants.DATASTREAM_NAMESPACE_FIELD]}
               width={fieldWidth}
             />
           )}
           {formattedDoc[constants.DATASTREAM_DATASET_FIELD] && (
             <HighlightField
-              label={flyoutDatasetLabel}
+              data-test-subj="logExplorerFlyoutDataset"
               field={constants.DATASTREAM_DATASET_FIELD}
-              value={flattenedDoc[constants.DATASTREAM_DATASET_FIELD]}
               formattedValue={formattedDoc[constants.DATASTREAM_DATASET_FIELD]}
-              dataTestSubj="logExplorerFlyoutDataset"
+              label={flyoutDatasetLabel}
+              value={flattenedDoc[constants.DATASTREAM_DATASET_FIELD]}
               width={fieldWidth}
             />
           )}
           {formattedDoc[constants.AGENT_NAME_FIELD] && (
             <HighlightField
-              label={flyoutShipperLabel}
+              data-test-subj="logExplorerFlyoutLogShipper"
               field={constants.AGENT_NAME_FIELD}
-              value={flattenedDoc[constants.AGENT_NAME_FIELD]}
               formattedValue={formattedDoc[constants.AGENT_NAME_FIELD]}
-              dataTestSubj="logExplorerFlyoutLogShipper"
+              label={flyoutShipperLabel}
+              value={flattenedDoc[constants.AGENT_NAME_FIELD]}
               width={fieldWidth}
             />
           )}
