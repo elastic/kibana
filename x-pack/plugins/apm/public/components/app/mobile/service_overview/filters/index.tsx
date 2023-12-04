@@ -135,7 +135,7 @@ export function MobileFilters() {
           >
             <EuiSelect
               data-test-subj="apmMobileFiltersSelect"
-              fullWidth={true}
+              fullWidth
               isLoading={status === FETCH_STATUS.LOADING}
               prepend={label}
               options={toSelectOptions(selectOptions)}
