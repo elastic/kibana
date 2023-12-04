@@ -368,9 +368,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       })),
     [ACTION_BUTTON_COUNT]
   );
-  const isDatePickerDisabled = useMemo(() => {
-    return (combinedQueries && combinedQueries.kqlError != null) || false;
-  }, [combinedQueries]);
 
   const header = useMemo(
     () => (
