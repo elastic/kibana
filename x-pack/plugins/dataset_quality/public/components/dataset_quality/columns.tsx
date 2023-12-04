@@ -8,18 +8,21 @@
 import React from 'react';
 import {
   EuiBasicTableColumn,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiSkeletonRectangle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import loggingIcon from '../../icons/logging.svg';
-import { QualityPercentageIndicator } from '../quality_indicator';
+import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicator';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Dataset Name',
@@ -32,6 +35,56 @@ const sizeColumnName = i18n.translate('xpack.datasetQuality.sizeColumnName', {
 const malformedDocsColumnName = i18n.translate('xpack.datasetQuality.malformedDocsColumnName', {
   defaultMessage: 'Malformed Docs',
 });
+
+const malformedDocsPoorDescription = i18n.translate(
+  'xpack.datasetQuality.malformedDocsPoorDescription',
+  {
+    defaultMessage: 'greater than 3%',
+  }
+);
+
+const malformedDocsDegradedDescription = i18n.translate(
+  'xpack.datasetQuality.malformedDocsDegradedDescription',
+  {
+    defaultMessage: 'greater than 0%',
+  }
+);
+
+const malformedDocsColumnTooltip = (
+  <FormattedMessage
+    id="xpack.datasetQuality.malformedDocsColumnTooltip"
+    defaultMessage="The percentage of malformed documents -documents with the {ignoredProperty} property- in your dataset. {visualQueue}"
+    values={{
+      ignoredProperty: (
+        <EuiCode language="json" transparentBackground>
+          _ignored
+        </EuiCode>
+      ),
+      visualQueue: (
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <QualityIndicator quality="poor" />
+            </EuiFlexItem>
+            <EuiFlexItem>{malformedDocsPoorDescription}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <QualityIndicator quality="degraded" />
+            </EuiFlexItem>
+            <EuiFlexItem>{malformedDocsDegradedDescription}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <QualityIndicator quality="good" />
+            </EuiFlexItem>
+            <EuiFlexItem>0%</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexGroup>
+      ),
+    }}
+  />
+);
 
 const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivityColumnName', {
   defaultMessage: 'Last Activity',
@@ -78,7 +131,14 @@ export const getDatasetQualitTableColumns = ({
       sortable: true,
     },
     {
-      name: malformedDocsColumnName,
+      name: (
+        <EuiToolTip content={malformedDocsColumnTooltip}>
+          <span>
+            {`${malformedDocsColumnName} `}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       field: 'malformedDocs',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
@@ -89,8 +149,12 @@ export const getDatasetQualitTableColumns = ({
           isLoading={loadingMalformedStats}
           contentAriaLabel="Example description"
         >
-          <QualityPercentageIndicator percentage={dataStreamStat.malformedDocs} />
-          {`${dataStreamStat.malformedDocs}%`}
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <QualityPercentageIndicator percentage={dataStreamStat.malformedDocs} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{`${dataStreamStat.malformedDocs}%`}</EuiFlexItem>
+          </EuiFlexGroup>
         </EuiSkeletonRectangle>
       ),
     },
