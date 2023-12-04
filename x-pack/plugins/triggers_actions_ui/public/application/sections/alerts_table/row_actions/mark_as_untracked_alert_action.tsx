@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
-import { AlertActionsProps } from './types';
+import type { AlertActionsProps } from '../../../../types';
 import { useBulkUntrackAlerts } from '../../../..';
 
 /**

@@ -49,7 +49,7 @@ import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
-import { AlertActionsProps } from './application/sections/alerts_table/row_actions/types';
+import { AlertActionsProps } from './types';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();

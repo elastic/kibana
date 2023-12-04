@@ -20,7 +20,7 @@ import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/row_actions/types';
+import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import { paths } from '../../../../common/locators/paths';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';

@@ -9,8 +9,8 @@ import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { AlertActionsProps } from './types';
 import { useKibana } from '../../../../common/lib/kibana';
+import type { AlertActionsProps } from '../../../../types';
 
 /**
  * Alerts table row action to open the selected alert detail page
@@ -32,10 +32,6 @@ export const ViewAlertDetailsAlertAction = memo(
     const alertId = alert[ALERT_UUID]?.[0] ?? null;
     const pagePath = alertId && pageId && resolveAlertPagePath?.(alertId, pageId);
     const linkToAlert = pagePath ? prepend(pagePath) : null;
-
-    if (!linkToAlert) {
-      return null;
-    }
 
     if (isAlertDetailsEnabled && linkToAlert) {
       return (

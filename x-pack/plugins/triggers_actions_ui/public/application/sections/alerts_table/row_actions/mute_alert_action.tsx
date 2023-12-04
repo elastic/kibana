@@ -10,7 +10,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { useMuteAlert } from '../hooks/alert_mute/use_mute_alert';
-import { AlertActionsProps } from './types';
+import type { AlertActionsProps } from '../../../../types';
 import { MUTE, UNMUTE } from '../hooks/translations';
 import { useUnmuteAlert } from '../hooks/alert_mute/use_unmute_alert';
 import { useAlertMutedState } from '../hooks/alert_mute/use_alert_muted_state';
