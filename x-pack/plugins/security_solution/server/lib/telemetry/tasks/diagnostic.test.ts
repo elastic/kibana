@@ -37,10 +37,10 @@ describe('diagnostics telemetry task test', () => {
       mockTelemetryEventsSender,
       testTaskExecutionPeriod
     );
-    expect(mockTelemetryReceiver.fetchDiagnosticAlerts).toHaveBeenCalledWith(
+    expect(mockTelemetryReceiver.fetchDiagnosticAlertsBatch).toHaveBeenCalledWith(
       testTaskExecutionPeriod.last,
       testTaskExecutionPeriod.current
     );
-    expect(mockTelemetryEventsSender.sendOnDemand).toBeCalledTimes(2);
+    expect(mockTelemetryEventsSender.sendOnDemand).toBeCalledTimes(1);
   });
 });
