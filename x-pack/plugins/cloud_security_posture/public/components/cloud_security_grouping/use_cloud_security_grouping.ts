@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
 import * as uuid from 'uuid';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { useUrlQuery } from '../../common/hooks/use_url_query';
 import {
-  useBaseEsQuery,
-  usePersistedQuery,
-} from '../../common/hooks/use_cloud_posture_data_table/utils';
+  GroupOption,
+  GroupPanelRenderer,
+  GroupStatsRenderer,
+} from '@kbn/securitysolution-grouping/src';
+import { useUrlQuery } from '../../common/hooks/use_url_query';
+
 import { FindingsBaseURLQuery } from '../../common/types';
+import { useBaseEsQuery, usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
 
 const DEFAULT_PAGE_SIZE = 10;
 const GROUPING_ID = 'cspLatestFindings';
@@ -28,19 +31,23 @@ export const useCloudSecurityGrouping = ({
   defaultGroupingOptions,
   getDefaultQuery,
   unit,
+  groupPanelRenderer,
+  groupStatsRenderer,
 }: {
   dataView: DataView;
   groupingTitle: string;
-  defaultGroupingOptions: Array<{ label: string; key: string }>;
+  defaultGroupingOptions: GroupOption[];
   getDefaultQuery: (params: FindingsBaseURLQuery) => FindingsBaseURLQuery;
   unit: (count: number) => string;
+  groupPanelRenderer?: GroupPanelRenderer<any>;
+  groupStatsRenderer?: GroupStatsRenderer<any>;
 }) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
   const [activePageIndex, setActivePageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
-  const { query } = useBaseEsQuery({
+  const { query, error } = useBaseEsQuery({
     dataView,
     filters: urlQuery.filters,
     query: urlQuery.query,
@@ -57,6 +64,8 @@ export const useCloudSecurityGrouping = ({
   const grouping = useGrouping({
     componentProps: {
       unit,
+      groupPanelRenderer,
+      groupStatsRenderer,
     },
     defaultGroupingOptions,
     fields: dataView.fields,
@@ -81,6 +90,16 @@ export const useCloudSecurityGrouping = ({
     setPageSize(size);
   };
 
+  const onResetFilters = useCallback(() => {
+    setUrlQuery({
+      filters: [],
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+    });
+  }, [setUrlQuery]);
+
   const onChangeGroupsPage = (index: number) => setActivePageIndex(index);
 
   return {
@@ -88,11 +107,14 @@ export const useCloudSecurityGrouping = ({
     grouping,
     pageSize,
     query,
+    error,
     selectedGroup,
     setUrlQuery,
     uniqueValue,
     isNoneSelected,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
+    onResetFilters,
+    filters: urlQuery.filters,
   };
 };
