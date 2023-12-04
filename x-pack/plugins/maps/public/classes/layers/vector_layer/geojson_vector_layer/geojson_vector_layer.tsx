@@ -313,7 +313,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
         syncContext.setJoinError
       );
     } catch (error) {
-      // Error used to stop execution flow. error already handled by data requests
+      // Error used to stop execution flow. Error state stored in data request and displayed to user in layer legend.
     }
   }
 
