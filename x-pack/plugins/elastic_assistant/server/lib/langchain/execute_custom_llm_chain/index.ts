@@ -108,12 +108,16 @@ export const callAgentExecutor = async ({
     });
 
     async function* generate() {
-      for await (const chunk of stream) {
-        console.log('WE ARE HERE CHUNK: ', chunk);
-        yield chunk;
+      try {
+        for await (const chunk of stream) {
+          console.log('WE ARE HERE CHUNK', chunk);
+          yield chunk;
+        }
+      } catch (e) {
+        console.log('WE ARE HERE ERROR generate?????', e);
+        throw e;
       }
     }
-
     const readable = Readable.from(generate());
 
     console.log('WE ARE HERE after Readable.from', stream);

@@ -142,26 +142,6 @@ export class ActionsClientLlm extends LLM {
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): Promise<string> {
-    console.log('WE ARE HERE at start of _call');
-    if (this.streaming) {
-      try {
-        const stream = this._streamResponseChunks(prompt, options, runManager);
-        console.log('THIS SHOULD BE stream', stream);
-        let finalResult: GenerationChunk | undefined;
-        for await (const chunk of stream) {
-          if (finalResult === undefined) {
-            finalResult = chunk;
-          } else {
-            finalResult = finalResult.concat(chunk);
-          }
-        }
-        console.log('finalResult', finalResult);
-        return finalResult?.text ?? '';
-      } catch (err) {
-        console.log('WE ARE HERE ERROR _call??????', err);
-        return err;
-      }
-    }
     // convert the Langchain prompt to an assistant message:
     const assistantMessage = getMessageContentAndRole(prompt);
     this.#logger.debug(
