@@ -972,7 +972,7 @@ class OutputService {
     const outputs = await this.list(soClient);
 
     await pMap(
-      outputs.items,
+      outputs.items.filter((output) => output.type === outputType.Elasticsearch && !output.preset),
       async (output) => {
         const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '');
 

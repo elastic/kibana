@@ -90,7 +90,10 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const { kafkaOutput: isKafkaOutputEnabled, remoteESOutput: isRemoteESOutputEnabled } =
     ExperimentalFeaturesService.get();
+
   const isRemoteESOutput = inputs.typeInput.value === outputType.RemoteElasticsearch;
+  const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
+
   // Remote ES output not yet supported in serverless
   const isStateful = !cloud?.isServerlessEnabled;
 
@@ -315,7 +318,6 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   };
 
   const renderTypeSpecificWarning = () => {
-    const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
     const isKafkaOutput = inputs.typeInput.value === outputType.Kafka;
     if (!isKafkaOutput && !isESOutput && !isRemoteESOutput) {
       return null;
@@ -553,65 +555,72 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               }
             />
           </EuiFormRow>
-          <EuiSpacer size="l" />
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.fleet.settings.editOutputFlyout.performanceTuningLabel"
-                defaultMessage="Performance tuning"
-              />
-            }
-          >
+          {isESOutput && (
             <>
-              <EuiSelect
-                value={inputs.presetInput.value}
-                onChange={(e) => inputs.presetInput.setValue(e.target.value)}
-                disabled={
-                  inputs.presetInput.props.disabled ||
-                  outputYmlIncludesReservedPerformanceKey(inputs.additionalYamlConfigInput.value)
-                }
-                options={[
-                  { value: 'balanced', text: 'Balanced' },
-                  { value: 'custom', text: 'Custom' },
-                ]}
-              />
-            </>
-          </EuiFormRow>
-
-          {outputYmlIncludesReservedPerformanceKey(inputs.additionalYamlConfigInput.value) && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiCallOut
-                color="warning"
-                iconType="alert"
-                size="s"
-                title={
+              <EuiSpacer size="l" />
+              <EuiFormRow
+                label={
                   <FormattedMessage
-                    id="xpack.fleet.settings.editOutputFlyout.performanceTuningMustBeCustomWarning"
-                    defaultMessage='Performance tuning preset must be "Custom" due to presence of reserved key in advanced YAML configuration'
+                    id="xpack.fleet.settings.editOutputFlyout.performanceTuningLabel"
+                    defaultMessage="Performance tuning"
                   />
                 }
               >
-                <EuiAccordion
-                  id="performanceTuningMustBeCustomWarningDetails"
-                  buttonContent={
+                <>
+                  <EuiSelect
+                    value={inputs.presetInput.value}
+                    onChange={(e) => inputs.presetInput.setValue(e.target.value)}
+                    disabled={
+                      inputs.presetInput.props.disabled ||
+                      outputYmlIncludesReservedPerformanceKey(
+                        inputs.additionalYamlConfigInput.value
+                      )
+                    }
+                    options={[
+                      { value: 'balanced', text: 'Balanced' },
+                      { value: 'custom', text: 'Custom' },
+                    ]}
+                  />
+                </>
+              </EuiFormRow>
+            </>
+          )}
+
+          {isESOutput &&
+            outputYmlIncludesReservedPerformanceKey(inputs.additionalYamlConfigInput.value) && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut
+                  color="warning"
+                  iconType="alert"
+                  size="s"
+                  title={
                     <FormattedMessage
-                      id="xpack.fleet.settings.editOutputFlyout.performanceTuningMustBeCustomWarningDetails"
-                      defaultMessage="Show reserved keys"
+                      id="xpack.fleet.settings.editOutputFlyout.performanceTuningMustBeCustomWarning"
+                      defaultMessage='Performance tuning preset must be "Custom" due to presence of reserved key in advanced YAML configuration'
                     />
                   }
                 >
-                  <ul>
-                    {RESERVED_CONFIG_YML_KEYS.map((key) => (
-                      <li key={key}>
-                        <EuiCode>{key}</EuiCode>
-                      </li>
-                    ))}
-                  </ul>
-                </EuiAccordion>
-              </EuiCallOut>
-            </>
-          )}
+                  <EuiAccordion
+                    id="performanceTuningMustBeCustomWarningDetails"
+                    buttonContent={
+                      <FormattedMessage
+                        id="xpack.fleet.settings.editOutputFlyout.performanceTuningMustBeCustomWarningDetails"
+                        defaultMessage="Show reserved keys"
+                      />
+                    }
+                  >
+                    <ul>
+                      {RESERVED_CONFIG_YML_KEYS.map((key) => (
+                        <li key={key}>
+                          <EuiCode>{key}</EuiCode>
+                        </li>
+                      ))}
+                    </ul>
+                  </EuiAccordion>
+                </EuiCallOut>
+              </>
+            )}
 
           <EuiSpacer size="l" />
           <EuiFormRow
