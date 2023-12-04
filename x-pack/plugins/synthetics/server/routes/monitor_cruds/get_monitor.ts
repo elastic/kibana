@@ -26,12 +26,14 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   path: SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR,
   validate: {},
   validation: {
-    params: schema.object({
-      monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
-    }),
-    query: schema.object({
-      decrypted: schema.maybe(schema.boolean()),
-    }),
+    request: {
+      params: schema.object({
+        monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
+      }),
+      query: schema.object({
+        decrypted: schema.maybe(schema.boolean()),
+      }),
+    },
   },
   handler: async ({
     request,

@@ -161,4 +161,13 @@ describe('parseMonitorLocations', () => {
       privateLocations: [],
     });
   });
+
+  it('should handle on empty payload', function () {
+    const result = parseMonitorLocations({} as any, [localLoc], true);
+
+    expect(result).toEqual({
+      locations: ['local'],
+      privateLocations: [],
+    });
+  });
 });

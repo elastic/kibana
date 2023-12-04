@@ -37,37 +37,42 @@ export const parseMonitorLocations = (
   let pvtLocs = [...(privateLocations ?? []), ...extractPvtLocs]?.map((loc) =>
     typeof loc === 'string' ? loc : loc.id
   );
-  if (prevLocations && !ui) {
-    if (!locations && !privateLocations) {
-      locs = prevLocations.filter((loc) => loc.isServiceManaged).map((loc) => loc.id);
-      pvtLocs = prevLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id);
-    } else {
-      if (!privateLocations) {
-        pvtLocs = [
-          ...(pvtLocs ?? []),
-          ...prevLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id),
-        ];
-        if (locations?.length === 0) {
-          locs = [];
-        } else {
-          locs = [
-            ...(locs ?? []),
-            ...prevLocations.filter((loc) => loc.isServiceManaged).map((loc) => loc.id),
-          ];
-        }
-      }
-      if (!locations) {
-        locs = [
-          ...(locs ?? []),
-          ...prevLocations.filter((loc) => loc.isServiceManaged).map((loc) => loc.id),
-        ];
-        if (privateLocations?.length === 0) {
-          pvtLocs = [];
-        } else {
+  if (ui && !privateLocations && !locations && prevLocations) {
+    locs = prevLocations.filter((loc) => loc.isServiceManaged).map((loc) => loc.id);
+    pvtLocs = prevLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id);
+  } else {
+    if (prevLocations && !ui) {
+      if (!locations && !privateLocations) {
+        locs = prevLocations.filter((loc) => loc.isServiceManaged).map((loc) => loc.id);
+        pvtLocs = prevLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id);
+      } else {
+        if (!privateLocations) {
           pvtLocs = [
             ...(pvtLocs ?? []),
             ...prevLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id),
           ];
+          if (locations?.length === 0) {
+            locs = [];
+          } else {
+            locs = [
+              ...(locs ?? []),
+              ...prevLocations.filter((loc) => loc.isServiceManaged).map((loc) => loc.id),
+            ];
+          }
+        }
+        if (!locations) {
+          locs = [
+            ...(locs ?? []),
+            ...prevLocations.filter((loc) => loc.isServiceManaged).map((loc) => loc.id),
+          ];
+          if (privateLocations?.length === 0) {
+            pvtLocs = [];
+          } else {
+            pvtLocs = [
+              ...(pvtLocs ?? []),
+              ...prevLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id),
+            ];
+          }
         }
       }
     }

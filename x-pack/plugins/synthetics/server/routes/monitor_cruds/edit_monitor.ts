@@ -40,13 +40,15 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
   validate: {},
   validation: {
-    params: schema.object({
-      monitorId: schema.string(),
-    }),
-    query: schema.object({
-      ui: schema.maybe(schema.boolean()),
-    }),
-    body: schema.any(),
+    request: {
+      params: schema.object({
+        monitorId: schema.string(),
+      }),
+      query: schema.object({
+        ui: schema.maybe(schema.boolean()),
+      }),
+      body: schema.any(),
+    },
   },
   writeAccess: true,
   handler: async (routeContext): Promise<any> => {
