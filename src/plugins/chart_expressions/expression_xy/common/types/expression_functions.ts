@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  type AxisProps,
-  HorizontalAlignment,
-  Position,
-  VerticalAlignment,
-} from '@elastic/charts';
+import { type AxisProps, HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import type { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
 import type {
