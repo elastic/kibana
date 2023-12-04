@@ -20,14 +20,20 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { ConnectorType } from '@kbn/search-connectors';
+
 import { FetchSyncJobsStatsApiLogic } from '../../api/stats/fetch_sync_jobs_stats_api_logic';
 
-export const ConnectorStats: React.FC = () => {
+export interface ConnectorStatsProps {
+  connectorType: ConnectorType;
+}
+
+export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connectorType }) => {
   const { makeRequest } = useActions(FetchSyncJobsStatsApiLogic);
   const { data } = useValues(FetchSyncJobsStatsApiLogic);
 
   useEffect(() => {
-    makeRequest({});
+    makeRequest({ connectorType });
   }, []);
 
   return (

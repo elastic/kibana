@@ -10,8 +10,6 @@ import { ConnectorType } from '../types';
 
 export const isConnectorType = (value: string | null | undefined): value is ConnectorType => {
   return (
-    value !== null &&
-    value !== undefined &&
-    (value === 'connector' || value === 'elastic-connector')
+    value !== null && value !== undefined && (value === 'connector' || value === 'elastic-crawler')
   );
 };

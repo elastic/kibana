@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ConnectorType } from '@kbn/search-connectors';
+
 import { SyncJobsStats } from '../../../../../common/stats';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
@@ -12,9 +14,14 @@ import { HttpLogic } from '../../../shared/http';
 
 export type FetchSyncJobsStatsResponse = SyncJobsStats;
 
-export const fetchSyncJobsStats = async () => {
+export interface FetchSyncJobsStatsApiLogicArgs {
+  connectorType?: ConnectorType;
+}
+
+export const fetchSyncJobsStats = async ({ connectorType }: FetchSyncJobsStatsApiLogicArgs) => {
   const route = '/internal/enterprise_search/stats/sync_jobs';
-  return await HttpLogic.values.http.get<FetchSyncJobsStatsResponse>(route);
+  const options = connectorType ? { query: { connector_type: connectorType } } : undefined;
+  return await HttpLogic.values.http.get<FetchSyncJobsStatsResponse>(route, options);
 };
 
 export const FetchSyncJobsStatsApiLogic = createApiLogic(
