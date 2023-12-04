@@ -33,7 +33,7 @@ export const FieldItemDragHandle: React.FC = () => {
           flex-shrink: 0;
         `}
       >
-        <EuiIcon type="grabOmnidirectional" size="s" />
+        <EuiIcon type="grabOmnidirectional" size="m" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
