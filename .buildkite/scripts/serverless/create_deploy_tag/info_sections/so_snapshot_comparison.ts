@@ -52,7 +52,7 @@ export function makeSOComparisonBlockHtml(comparisonResult: {
   if (comparisonResult.hasChanges) {
     return `<div>
 <h4>Plugin Saved Object migration changes: *yes, ${comparisonResult.changed.length} plugin(s)*</h4>
-<div>Changed plugins: ${comparisonResult.changed.join(', ')}</div>
+<div>Changed plugins: <strong>${comparisonResult.changed.join(', ')}</strong></div>
 <i>Find detailed info in the archived artifacts, or run the command yourself: </i>
 <div><pre>${comparisonResult.command}</pre></div>
 </div>`;
