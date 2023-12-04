@@ -14,7 +14,7 @@ const toArray = <T>(input: T | T[]) => ([] as T[]).concat(input);
 
 export function resolverEntity(
   hits: Array<estypes.SearchHit<unknown>>,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures | undefined
 ) {
   const responseBody: ResolverEntityIndex = [];
   const supportedSchemas = getSupportedSchemas(experimentalFeatures);

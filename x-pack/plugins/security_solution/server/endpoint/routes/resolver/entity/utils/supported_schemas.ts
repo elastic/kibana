@@ -32,9 +32,9 @@ interface SupportedSchema {
  */
 
 export const getSupportedSchemas = (
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures | undefined
 ): SupportedSchema[] => {
-  const sentinelOneDataInAnalyzerEnabled = experimentalFeatures.sentinelOneDataInAnalyzerEnabled;
+  const sentinelOneDataInAnalyzerEnabled = experimentalFeatures?.sentinelOneDataInAnalyzerEnabled;
 
   const supportedFileBeatDataSets = [
     ...(sentinelOneDataInAnalyzerEnabled
