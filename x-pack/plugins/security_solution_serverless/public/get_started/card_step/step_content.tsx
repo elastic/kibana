@@ -64,14 +64,14 @@ const StepContentComponent = ({
         <EuiFlexItem grow={false} css={leftContentStyles} className="left-panel">
           <EuiText size="s">
             {step.description.map((desc, index) => (
-              <p
+              <div
                 data-test-subj={`${stepId}-description-${index}`}
                 key={`${stepId}-description-${index}`}
                 className="eui-displayBlock step-content-description"
                 css={descriptionStyles}
               >
                 {desc}
-              </p>
+              </div>
             ))}
           </EuiText>
         </EuiFlexItem>

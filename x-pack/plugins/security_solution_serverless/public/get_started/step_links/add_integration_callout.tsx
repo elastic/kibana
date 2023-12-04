@@ -39,47 +39,45 @@ const AddIntegrationsCalloutComponent = ({ stepName }: { stepName?: string }) =>
   }, [navigateTo, onStepClicked]);
 
   return (
-    <div>
-      <EuiCallOut
-        className="eui-displayInlineBlock"
-        title={
-          <>
-            <EuiIcon
-              size="m"
-              type="iInCircle"
-              color={euiTheme.colors.title}
-              className="eui-alignMiddle"
+    <EuiCallOut
+      className="eui-displayInlineBlock"
+      title={
+        <>
+          <EuiIcon
+            size="m"
+            type="iInCircle"
+            color={euiTheme.colors.title}
+            className="eui-alignMiddle"
+          />
+          <span css={calloutTitleStyles}>
+            <FormattedMessage
+              id="xpack.securitySolutionServerless.getStarted.addIntegrationCallout.description"
+              defaultMessage="To {stepName} add integrations first {addIntegration}"
+              values={{
+                addIntegration: (
+                  <LinkAnchor
+                    id={SecurityPageName.landing}
+                    onClick={toggleStep}
+                    css={calloutAnchorStyles}
+                  >
+                    {ADD_INTEGRATIONS_STEP}
+                    <EuiIcon type="arrowRight" size="s" css={calloutAnchorStyles} />
+                  </LinkAnchor>
+                ),
+                stepName: stepName ?? (
+                  <FormattedMessage
+                    id="xpack.securitySolutionServerless.getStarted.addIntegrationCallout.link.action"
+                    defaultMessage="enable this step"
+                  />
+                ),
+              }}
             />
-            <span css={calloutTitleStyles}>
-              <FormattedMessage
-                id="xpack.securitySolutionServerless.getStarted.addIntegrationCallout.description"
-                defaultMessage="To {stepName} add integrations first {addIntegration}"
-                values={{
-                  addIntegration: (
-                    <LinkAnchor
-                      id={SecurityPageName.landing}
-                      onClick={toggleStep}
-                      css={calloutAnchorStyles}
-                    >
-                      {ADD_INTEGRATIONS_STEP}
-                      <EuiIcon type="arrowRight" size="s" css={calloutAnchorStyles} />
-                    </LinkAnchor>
-                  ),
-                  stepName: stepName ?? (
-                    <FormattedMessage
-                      id="xpack.securitySolutionServerless.getStarted.addIntegrationCallout.link.action"
-                      defaultMessage="enable this step"
-                    />
-                  ),
-                }}
-              />
-            </span>
-          </>
-        }
-        size="s"
-        css={calloutWrapperStyles}
-      />
-    </div>
+          </span>
+        </>
+      }
+      size="s"
+      css={calloutWrapperStyles}
+    />
   );
 };
 
