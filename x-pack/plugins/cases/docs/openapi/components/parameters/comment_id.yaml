@@ -6,4 +6,5 @@ description: >
 required: true 
 schema:
   type: string
-  example: '71ec1870-725b-11ea-a0b2-c51ea50a58e2'
+  examples:
+    - '71ec1870-725b-11ea-a0b2-c51ea50a58e2'

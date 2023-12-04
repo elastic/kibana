@@ -55,3 +55,5 @@ export const FLEET_SERVER_INDICES = [
 export const DATA_TIERS = ['data_hot'];
 
 export const FLEET_ENROLLMENT_API_PREFIX = 'fleet-enrollment-api-keys';
+
+export * from './mappings';

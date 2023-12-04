@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import type { SuperTest, Test } from 'supertest';
+import expect from '@kbn/expect';
+import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 
 export async function createIndexConnector({
   supertest,
@@ -64,5 +65,8 @@ export async function createRule<Params = ThresholdParams>({
       rule_type_id: ruleTypeId,
       actions,
     });
+  if (body.statusCode) {
+    expect(body.statusCode).eql(200, body.message);
+  }
   return body;
 }

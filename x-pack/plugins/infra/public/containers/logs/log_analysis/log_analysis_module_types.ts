@@ -7,6 +7,7 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IdFormat, JobType } from '../../../../common/http_api/latest';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
@@ -19,16 +20,17 @@ import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 
 export type { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';
 
-export interface ModuleDescriptor<JobType extends string> {
+export interface ModuleDescriptor<T extends JobType> {
   moduleId: string;
   moduleName: string;
   moduleDescription: string;
-  jobTypes: JobType[];
+  jobTypes: T[];
   bucketSpan: number;
-  getJobIds: (spaceId: string, logViewId: string) => Record<JobType, string>;
+  getJobIds: (spaceId: string, logViewId: string, idFormat: IdFormat) => Record<T, string>;
   getJobSummary: (
     spaceId: string,
     logViewId: string,
+    idFormat: IdFormat,
     fetch: HttpHandler
   ) => Promise<FetchJobStatusResponsePayload>;
   getModuleDefinition: (fetch: HttpHandler) => Promise<GetMlModuleResponsePayload>;
@@ -42,6 +44,7 @@ export interface ModuleDescriptor<JobType extends string> {
   cleanUpModule: (
     spaceId: string,
     logViewId: string,
+    idFormat: IdFormat,
     fetch: HttpHandler
   ) => Promise<DeleteJobsResponsePayload>;
   validateSetupIndices: (

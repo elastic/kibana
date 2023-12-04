@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { CUSTOM_AGGREGATOR } from '../../../../common/custom_threshold_rule/constants';
 import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 
 import { CustomThresholdAlert, CustomThresholdRule } from '../components/alert_details_app_section';
@@ -60,7 +59,6 @@ export const buildCustomThresholdRule = (
     params: {
       criteria: [
         {
-          aggType: CUSTOM_AGGREGATOR,
           comparator: Comparator.GT,
           metrics: [
             {
@@ -73,7 +71,6 @@ export const buildCustomThresholdRule = (
           timeUnit: 'm',
         },
         {
-          aggType: CUSTOM_AGGREGATOR,
           comparator: Comparator.GT,
           metrics: [
             {
@@ -89,7 +86,6 @@ export const buildCustomThresholdRule = (
           warningThreshold: [2.2],
         },
         {
-          aggType: CUSTOM_AGGREGATOR,
           comparator: Comparator.GT,
           metrics: [
             {
@@ -155,7 +151,6 @@ export const buildCustomThresholdAlert = (
       'kibana.alert.rule.parameters': {
         criteria: [
           {
-            aggType: CUSTOM_AGGREGATOR,
             comparator: Comparator.GT,
             metrics: [
               {
@@ -169,7 +164,6 @@ export const buildCustomThresholdAlert = (
             timeUnit: 'm',
           },
           {
-            aggType: CUSTOM_AGGREGATOR,
             comparator: Comparator.GT,
             metrics: [
               {
@@ -190,7 +184,7 @@ export const buildCustomThresholdAlert = (
         alertOnGroupDisappear: true,
       },
       'kibana.alert.evaluation.values': [2500, 5],
-      'kibana.alert.rule.category': 'Custom threshold (Technical Preview)',
+      'kibana.alert.rule.category': 'Custom threshold (Beta)',
       'kibana.alert.rule.consumer': 'alerts',
       'kibana.alert.rule.execution.uuid': '62dd07ef-ead9-4b1f-a415-7c83d03925f7',
       'kibana.alert.rule.name': 'One condition',

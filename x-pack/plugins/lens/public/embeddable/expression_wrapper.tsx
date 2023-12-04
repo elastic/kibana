@@ -47,7 +47,6 @@ export interface ExpressionWrapperProps {
   lensInspector: LensInspector;
   noPadding?: boolean;
   docLinks: CoreStart['docLinks'];
-  shouldShowLegendAction?: (actionId: string) => boolean;
 }
 
 export function ExpressionWrapper({
@@ -74,7 +73,6 @@ export function ExpressionWrapper({
   lensInspector,
   noPadding,
   docLinks,
-  shouldShowLegendAction,
 }: ExpressionWrapperProps) {
   if (!expression) return null;
   return (
@@ -106,7 +104,6 @@ export function ExpressionWrapper({
           onEvent={handleEvent}
           hasCompatibleActions={hasCompatibleActions}
           getCompatibleCellValueActions={getCompatibleCellValueActions}
-          shouldShowLegendAction={shouldShowLegendAction}
         />
       </div>
     </I18nProvider>

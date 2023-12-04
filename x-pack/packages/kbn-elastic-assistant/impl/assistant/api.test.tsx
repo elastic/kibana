@@ -75,15 +75,31 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"assistantLangChain":false}',
-          headers: { 'Content-Type': 'application/json' },
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeStream"},"assistantLangChain":false}',
           method: 'POST',
+          asResponse: true,
+          rawResponse: true,
           signal: undefined,
         }
       );
     });
 
-    it('returns API_ERROR when the response status is not ok', async () => {
+    it('returns API_ERROR when the response status is error and langchain is on', async () => {
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
+
+      const testProps: FetchConnectorExecuteAction = {
+        assistantLangChain: true,
+        http: mockHttp,
+        messages,
+        apiConfig,
+      };
+
+      const result = await fetchConnectorExecuteAction(testProps);
+
+      expect(result).toEqual({ response: API_ERROR, isStream: false, isError: true });
+    });
+
+    it('returns API_ERROR when the response status is error, langchain is off, and response is not a reader', async () => {
       (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
 
       const testProps: FetchConnectorExecuteAction = {
@@ -95,13 +111,38 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-      expect(result).toEqual({ response: API_ERROR, isStream: false, isError: true });
+      expect(result).toEqual({
+        response: `${API_ERROR}\n\nCould not get reader from response`,
+        isStream: false,
+        isError: true,
+      });
+    });
+
+    it('returns API_ERROR when the response is error, langchain is off, and response is a reader', async () => {
+      const mockReader = jest.fn();
+      (mockHttp.fetch as jest.Mock).mockRejectedValue({
+        response: { body: { getReader: jest.fn().mockImplementation(() => mockReader) } },
+      });
+      const testProps: FetchConnectorExecuteAction = {
+        assistantLangChain: false,
+        http: mockHttp,
+        messages,
+        apiConfig,
+      };
+
+      const result = await fetchConnectorExecuteAction(testProps);
+
+      expect(result).toEqual({
+        response: mockReader,
+        isStream: true,
+        isError: true,
+      });
     });
 
     it('returns API_ERROR when there are no choices', async () => {
       (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'ok', data: '' });
       const testProps: FetchConnectorExecuteAction = {
-        assistantLangChain: false,
+        assistantLangChain: true,
         http: mockHttp,
         messages,
         apiConfig,
@@ -278,6 +319,9 @@ describe('API tests', () => {
         evalParams: {
           agents: ['not', 'alphabetical'],
           dataset: '{}',
+          datasetName: 'Test Dataset',
+          projectName: 'Test Project Name',
+          runName: 'Test Run Name',
           evalModel: ['not', 'alphabetical'],
           evalPrompt: 'evalPrompt',
           evaluationType: ['not', 'alphabetical'],
@@ -295,9 +339,12 @@ describe('API tests', () => {
         query: {
           models: 'alphabetical,not',
           agents: 'alphabetical,not',
+          datasetName: 'Test Dataset',
           evaluationType: 'alphabetical,not',
           evalModel: 'alphabetical,not',
           outputIndex: 'outputIndex',
+          projectName: 'Test Project Name',
+          runName: 'Test Run Name',
         },
         signal: undefined,
       });
