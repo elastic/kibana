@@ -11,6 +11,7 @@ import type { monaco } from '../../../../monaco_imports';
 import type { AutocompleteCommandDefinition } from './types';
 import { nonNullable } from '../ast_helpers';
 import {
+  columnExists,
   getColumnHit,
   getCommandDefinition,
   getCommandOption,
@@ -156,19 +157,20 @@ export async function suggest(
   const innerText = fullText.substring(0, offset);
 
   let finalText = innerText;
+
+  // check if all brackets are closed, otherwise close them
+  const unclosedBrackets = countBracketsUnclosed('(', finalText);
   // if it's a comma by the user or a forced trigger by a function argument suggestion
   // add a marker to make the expression still valid
   if (
     context.triggerCharacter === ',' ||
-    context.triggerKind === 0 ||
+    (context.triggerKind === 0 && unclosedBrackets === 0) ||
     (context.triggerCharacter === ' ' &&
       // make this more robust
       (isMathFunction(innerText[offset - 2]) || isComma(innerText[offset - 2])))
   ) {
     finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
   }
-  // check if all brackets are closed, otherwise close them
-  const unclosedBrackets = countBracketsUnclosed('(', finalText);
   if (unclosedBrackets > 0) {
     // inject the closing brackets
     finalText += Array(unclosedBrackets).fill(')').join('');
@@ -882,7 +884,13 @@ async function getFunctionArgsSuggestions(
       ).length > argIndex;
 
     const suggestions = [];
-    if (!arg) {
+    const noArgDefined = !arg;
+    const isUnknownColumn =
+      arg &&
+      isColumnItem(arg) &&
+      !columnExists(arg, { fields: fieldsMap, variables: variablesExcludingCurrentCommandOnes })
+        .hit;
+    if (noArgDefined || isUnknownColumn) {
       // ... | EVAL fn( <suggest>)
       // ... | EVAL fn( field, <suggest>)
       suggestions.push(

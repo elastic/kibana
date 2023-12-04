@@ -450,8 +450,16 @@ describe('autocomplete', () => {
     ]);
 
     // smoke testing with suggestions not at the end of the string
-    // but more the cursor back after the min(b) function
-    testSuggestions('from a | stats a = min(b) | sort b', ['by', '|', ','], 27);
+    testSuggestions(
+      'from a | stats a = min(b) | sort b',
+      ['by', '|', ','],
+      27 /* " " after min(b) */
+    );
+    testSuggestions(
+      'from a | stats avg(b) by stringField',
+      getFieldNamesByType('number'),
+      21 /* b column in avg */
+    );
   });
 
   describe('enrich', () => {
@@ -636,6 +644,28 @@ describe('autocomplete', () => {
         '('
       );
     }
+
+    // Smoke testing for suggestions in previous position than the end of the statement
+    testSuggestions(
+      'from a | eval var0 = abs(numberField) | eval abs(var0)',
+      [
+        ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true }, ['number']),
+        '|',
+        ',',
+      ],
+      38 /* " " after abs(b) */
+    );
+    testSuggestions(
+      'from a | eval var0 = abs(b) | eval abs(var0)',
+      [
+        ...getFieldNamesByType('number'),
+        ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }, undefined, [
+          'abs',
+        ]),
+      ],
+      26 /* b column in abs */
+    );
+
     // Test suggestions for each possible param, within each signature variation, for each function
     for (const fn of evalFunctionsDefinitions) {
       // skip this fn for the moment as it's quite hard to test
