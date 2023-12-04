@@ -43,7 +43,7 @@ const DEFAULT_SELECTED_COLUMNS = [
 describe('useCasesColumns ', () => {
   let appMockRender: AppMockRenderer;
   const useCasesColumnsProps: GetCasesColumn = {
-    filterStatus: CaseStatuses.open,
+    filterStatus: [CaseStatuses.open],
     userProfiles: userProfilesMap,
     isSelectorView: false,
     selectedColumns: DEFAULT_SELECTED_COLUMNS,
