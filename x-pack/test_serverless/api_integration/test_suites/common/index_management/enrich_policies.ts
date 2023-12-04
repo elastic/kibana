@@ -51,9 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should list all policies', async () => {
-      const { body } = await indexManagementService.enrichPolicies.api
-        .getAllEnrichPolicies()
-        .expect(200);
+      const { body } = await getAllEnrichPolicies().expect(200);
 
       expect(body).toEqual([
         {
