@@ -12,6 +12,7 @@ import {
   EuiSkeletonRectangle,
   EuiText,
   EuiToolTip,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -215,13 +216,16 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
             borderRadius="s"
           />
         ) : (
-          <SloStatusBadge slo={slo} />
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <SloStatusBadge slo={slo} />
+          </EuiFlexGroup>
         ),
     },
     {
       field: 'alerts',
       name: 'Alerts',
       truncateText: true,
+      width: '5%',
       render: (_, slo: SLOWithSummaryResponse) => (
         <>
           <SloRulesBadge rules={rulesBySlo?.[slo.id]} onClick={() => setSloToAddRule(slo)} />
@@ -363,6 +367,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       name: 'Actions',
       actions,
+      width: '5%',
     },
   ];
 
