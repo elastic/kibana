@@ -83,7 +83,7 @@ export const FID_LABEL = i18n.translate('xpack.exploratoryView.expView.fieldLabe
 });
 
 export const INP_LABEL = i18n.translate('xpack.exploratoryView.expView.fieldLabels.inp', {
-  defaultMessage: 'Interaction to Next Paint',
+  defaultMessage: 'Interaction to next paint',
 });
 
 export const CLS_LABEL = i18n.translate('xpack.exploratoryView.expView.fieldLabels.cls', {
