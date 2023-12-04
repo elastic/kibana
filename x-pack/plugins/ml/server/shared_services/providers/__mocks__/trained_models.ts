@@ -16,7 +16,8 @@ const trainedModelsServiceMock = {
   deleteTrainedModel: jest.fn(),
   updateTrainedModelDeployment: jest.fn(),
   putTrainedModel: jest.fn(),
-  getELSER: jest.fn().mockResolvedValue({ name: '' }),
+  getELSER: jest.fn().mockResolvedValue({ model_id: '.elser_model_2' }),
+  getCuratedModelConfig: jest.fn().mockResolvedValue({ model_id: '.elser_model_2' }),
 } as jest.Mocked<TrainedModels>;
 
 export const createTrainedModelsProviderMock = () =>

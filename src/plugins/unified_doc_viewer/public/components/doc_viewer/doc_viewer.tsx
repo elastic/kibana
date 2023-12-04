@@ -7,26 +7,21 @@
  */
 
 import React, { useMemo } from 'react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { DocViewer } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
 export function UnifiedDocViewer({ docViewsRegistry, ...props }: DocViewRenderProps) {
-  const services = getUnifiedDocViewerServices();
+  const { unifiedDocViewer } = getUnifiedDocViewerServices();
 
   const registry = useMemo(() => {
     if (docViewsRegistry) {
       return typeof docViewsRegistry === 'function'
-        ? docViewsRegistry(services.unifiedDocViewer.registry.clone())
+        ? docViewsRegistry(unifiedDocViewer.registry.clone())
         : docViewsRegistry;
     }
-    return services.unifiedDocViewer.registry;
-  }, [docViewsRegistry, services.unifiedDocViewer.registry]);
+    return unifiedDocViewer.registry;
+  }, [docViewsRegistry, unifiedDocViewer.registry]);
 
-  return (
-    <KibanaContextProvider services={services}>
-      <DocViewer docViews={registry.getAll()} {...props} />
-    </KibanaContextProvider>
-  );
+  return <DocViewer docViews={registry.getAll()} {...props} />
 }
