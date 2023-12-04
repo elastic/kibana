@@ -6,7 +6,7 @@
  */
 
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { HIDE_ANNOUNCEMENTS } from '@kbn/discover-utils';
+import { HIDE_ANNOUNCEMENTS, MODIFY_COLUMNS_ON_SWITCH } from '@kbn/discover-utils';
 import { createPropertyGetProxy } from '../utils/proxies';
 
 /**
@@ -16,6 +16,7 @@ import { createPropertyGetProxy } from '../utils/proxies';
 export const createUiSettingsServiceProxy = (uiSettings: IUiSettingsClient) => {
   const overrides: Record<string, any> = {
     [HIDE_ANNOUNCEMENTS]: true,
+    [MODIFY_COLUMNS_ON_SWITCH]: false,
   };
 
   return createPropertyGetProxy(uiSettings, {
