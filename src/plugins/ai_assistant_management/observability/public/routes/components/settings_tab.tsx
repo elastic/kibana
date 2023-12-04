@@ -23,7 +23,10 @@ export const SELECTED_CONNECTOR_LOCAL_STORAGE_KEY =
   'xpack.observabilityAiAssistant.lastUsedConnector';
 
 export function SettingsTab() {
-  const { navigateToApp, observabilityAIAssistant } = useAppContext();
+  const {
+    application: { navigateToApp },
+    observabilityAIAssistant,
+  } = useAppContext();
 
   const {
     connectors = [],
@@ -127,7 +130,7 @@ export function SettingsTab() {
                   {i18n.translate(
                     'aiAssistantManagementObservability.settingsPage.goToConnectorsButtonLabel',
                     {
-                      defaultMessage: 'Go to connectors',
+                      defaultMessage: 'Manage connectors',
                     }
                   )}
                 </EuiButton>
@@ -163,7 +166,7 @@ export function SettingsTab() {
               )}
             >
               <EuiSelect
-                data-test-subj="settingsTabSelect"
+                data-test-subj="settingsTabGenAIConnectorSelect"
                 id="generativeAIProvider"
                 options={selectorOptions}
                 value={selectedConnector}

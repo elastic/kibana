@@ -25,17 +25,17 @@ describe('Settings Page', () => {
         useGenAIConnectors: () => ({ connectors: [] }),
       },
       setBreadcrumbs,
-      navigateToApp,
+      application: { navigateToApp },
     });
   });
 
   it('should navigate to home when not authorized', () => {
-    render(<SettingsPage />, false);
+    render(<SettingsPage />, { show: false });
 
     expect(coreStart.application.navigateToApp).toBeCalledWith('home');
   });
 
-  it('should render tabs', () => {
+  it('should render settings and knowledge base tabs', () => {
     const { getByTestId } = render(<SettingsPage />);
 
     expect(getByTestId('settingsPageTab-settings')).toBeInTheDocument();

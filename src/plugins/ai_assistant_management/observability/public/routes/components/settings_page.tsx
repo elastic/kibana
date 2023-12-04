@@ -16,7 +16,11 @@ import { useObservabilityAIAssistantManagementRouterParams } from '../../hooks/u
 import { useObservabilityAIAssistantManagementRouter } from '../../hooks/use_observability_management_router';
 import type { TabsRt } from '../config';
 export function SettingsPage() {
-  const { navigateToApp, serverless, setBreadcrumbs } = useAppContext();
+  const {
+    application: { navigateToApp },
+    serverless,
+    setBreadcrumbs,
+  } = useAppContext();
 
   const router = useObservabilityAIAssistantManagementRouter();
 

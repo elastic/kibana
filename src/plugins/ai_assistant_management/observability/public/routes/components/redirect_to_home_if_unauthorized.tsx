@@ -23,7 +23,6 @@ export function RedirectToHomeIfUnauthorized({
     (capabilities?.management && capabilities?.observabilityAIAssistant?.show) ?? false;
 
   if (!allowed) {
-    console.log('coreStart', coreStart);
     navigateToApp('home');
     return null;
   }

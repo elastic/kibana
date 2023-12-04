@@ -43,8 +43,8 @@ export {
   useObservabilityAIAssistantOptional,
 } from './hooks/use_observability_ai_assistant';
 
-export type { Conversation, Message, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../common';
-export { MessageRole } from '../common';
+export type { Conversation, Message, KnowledgeBaseEntry } from '../common';
+export { MessageRole, KnowledgeBaseEntryRole } from '../common';
 
 export type {
   ObservabilityAIAssistantAPIClientRequestParamsOf,

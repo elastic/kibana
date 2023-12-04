@@ -37,7 +37,7 @@ const queryClient = new QueryClient({
   },
 });
 
-export const render = (component: React.ReactNode, show = true) => {
+export const render = (component: React.ReactNode, params?: { show: boolean }) => {
   const history = createMemoryHistory();
 
   return testLibRender(
@@ -47,15 +47,20 @@ export const render = (component: React.ReactNode, show = true) => {
         coreStart={{
           application: {
             ...coreStart.application,
-            // @ts-ignore
-            capabilities: { management: { show: true }, observabilityAIAssistant: { show } },
+            capabilities: {
+              // @ts-ignore
+              management: { show: true },
+              observabilityAIAssistant: {
+                show: params?.show ?? true,
+              },
+            },
           },
         }}
       >
         <AppContextProvider
           value={{
             http: coreStart.http,
-            navigateToApp: coreStart.application.navigateToApp,
+            application: coreStart.application,
             notifications: coreStart.notifications,
             observabilityAIAssistant: {
               service: mockObservabilityAIAssistantService,

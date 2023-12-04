@@ -29,8 +29,8 @@ export interface SetupDependencies {
 }
 
 export interface StartDependencies {
-  serverless?: ServerlessPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPluginStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export class AiAssistantManagementObservabilityPlugin

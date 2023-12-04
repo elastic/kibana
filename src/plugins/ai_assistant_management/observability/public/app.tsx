@@ -47,8 +47,8 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
         <I18nProvider>
           <AppContextProvider
             value={{
+              application: coreStart.application,
               http: coreStart.http,
-              navigateToApp: coreStart.application.navigateToApp,
               notifications: coreStart.notifications,
               observabilityAIAssistant: startDeps.observabilityAIAssistant,
               uiSettings: coreStart.uiSettings,
