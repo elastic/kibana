@@ -40,17 +40,12 @@ export function ProfilingLinks({ hostname, profilingPath }: Props) {
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
-        <EuiLink data-test-subj="infraFlamegraphTestLink" href={profilingLinkURL} target="_blank">
+        <EuiLink data-test-subj="infraFlamegraphTestLink" href={profilingLinkURL}>
           {profilingLinkLabel}
         </EuiLink>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink
-          data-test-subj="infraFlamegraphTestLink"
-          href={PROFILING_FEEDBACK_URL}
-          target="_blank"
-          external
-        >
+        <EuiLink data-test-subj="infraFlamegraphTestLink" href={PROFILING_FEEDBACK_URL} external>
           {i18n.translate('xpack.infra.flamegraph.profilingFeedbackLink', {
             defaultMessage: 'Give feedback about profiling',
           })}
