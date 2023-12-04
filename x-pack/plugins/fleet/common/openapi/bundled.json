@@ -7904,6 +7904,12 @@
           "config": {
             "type": "object"
           },
+          "preset": {
+            "enum": [
+              "balanced",
+              "custom"
+            ]
+          },
           "config_yaml": {
             "type": "string"
           },
@@ -8393,6 +8399,12 @@
           },
           "config": {
             "type": "object"
+          },
+          "preset": {
+            "enum": [
+              "balanced",
+              "custom"
+            ]
           },
           "config_yaml": {
             "type": "string"
