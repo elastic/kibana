@@ -58,13 +58,8 @@ test('generates metric chart config', async () => {
       dataset: {
         esql: 'from test | count=count() by category',
       },
-      layers: [
-        {
-          label: 'test',
-          value: 'count',
-          breakdown: ['category'],
-        },
-      ],
+      value: 'count',
+      breakdown: ['category'],
     },
     {
       dataViewsAPI: mockDataViewsService() as any,

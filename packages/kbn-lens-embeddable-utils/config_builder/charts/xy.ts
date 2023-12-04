@@ -95,7 +95,7 @@ function buildVisualizationState(config: LensXYConfig): XYState {
                   filter: {
                     type: 'kibana_query',
                     query: e.filter,
-                    language: 'kql',
+                    language: 'kuery',
                   },
                   ...(e.field ? { timeField: e.field } : {}),
                 } as QueryPointEventAnnotationConfig;

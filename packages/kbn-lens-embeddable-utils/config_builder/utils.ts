@@ -174,7 +174,7 @@ function buildDatasourceStatesLayer(
   return ['formBased', buildFormulaLayers(layer, i, dataView!)];
 }
 export const buildDatasourceStates = async (
-  config: LensBaseConfig & { layers: LensBaseLayer[] },
+  config: (LensBaseConfig & { layers: LensBaseLayer[] }) | (LensBaseLayer & LensBaseConfig),
   dataviews: Record<string, DataView>,
   buildFormulaLayers: (
     config: unknown,
@@ -190,8 +190,9 @@ export const buildDatasourceStates = async (
   };
 
   const mainDataset = config.dataset;
-  for (let i = 0; i < config.layers.length; i++) {
-    const layer = config.layers[i];
+  const configLayers = 'layers' in config ? config.layers : [config];
+  for (let i = 0; i < configLayers.length; i++) {
+    const layer = configLayers[i];
     const layerId = `layer_${i}`;
     const dataset = layer.dataset || mainDataset;
 

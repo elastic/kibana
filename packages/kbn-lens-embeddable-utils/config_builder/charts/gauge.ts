@@ -28,11 +28,7 @@ function getAccessorName(type: 'goal' | 'max' | 'min' | 'secondary') {
 }
 
 function buildVisualizationState(config: LensGaugeConfig): GaugeVisualizationState {
-  if (config.layers.length !== 1) {
-    throw new Error('metric must define a single layer');
-  }
-
-  const layer = config.layers[0];
+  const layer = config;
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -63,7 +59,7 @@ function buildVisualizationState(config: LensGaugeConfig): GaugeVisualizationSta
 }
 
 function buildFormulaLayer(
-  layer: LensGaugeConfig['layers'][0],
+  layer: LensGaugeConfig,
   i: number,
   dataView: DataView,
   formulaAPI: FormulaPublicApi
@@ -128,7 +124,7 @@ function buildFormulaLayer(
   return defaultLayer;
 }
 
-function getValueColumns(layer: LensGaugeConfig['layers'][0]) {
+function getValueColumns(layer: LensGaugeConfig) {
   return [
     getValueColumn(ACCESSOR, layer.value),
     ...(layer.queryMaxValue ? [getValueColumn(getAccessorName('max'), layer.queryMaxValue)] : []),
@@ -147,7 +143,7 @@ export async function buildGauge(
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg as LensGaugeConfig['layers'][0], i, dataView, formulaAPI);
+    buildFormulaLayer(cfg as LensGaugeConfig, i, dataView, formulaAPI);
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,

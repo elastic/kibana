@@ -34,11 +34,7 @@ const ACCESSOR = 'metric_formula_accessor';
 function buildVisualizationState(
   config: LensTreeMapConfig | LensPieConfig | LensMosaicConfig
 ): PieVisualizationState {
-  if (config.layers.length !== 1) {
-    throw new Error('single layer must be defined!');
-  }
-
-  const layer = config.layers[0];
+  const layer = config;
 
   const layerBreakdown = Array.isArray(layer.breakdown) ? layer.breakdown : [layer.breakdown];
 
@@ -70,10 +66,7 @@ function buildVisualizationState(
 }
 
 function buildFormulaLayer(
-  layer:
-    | LensTreeMapConfig['layers'][0]
-    | LensPieConfig['layers'][0]
-    | LensMosaicConfig['layers'][0],
+  layer: LensTreeMapConfig | LensPieConfig | LensMosaicConfig,
   layerNr: number,
   dataView: DataView,
   formulaAPI: FormulaPublicApi
@@ -110,7 +103,7 @@ function buildFormulaLayer(
   return defaultLayer;
 }
 
-function getValueColumns(layer: LensTreeMapConfig['layers'][0]) {
+function getValueColumns(layer: LensTreeMapConfig) {
   if (layer.breakdown && layer.breakdown.filter((b) => typeof b !== 'string').length) {
     throw new Error('breakdown must be a field name when not using index source');
   }

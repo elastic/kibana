@@ -135,152 +135,87 @@ export type LensBreakdownConfig =
 
 export interface LensMetricConfigBase {
   chartType: 'metric';
-  layers: [
-    Identity<
-      LensBaseLayer & {
-        // must be a single layer!
-        querySecondaryMetric?: LensLayerQuery;
-        queryMaxValue?: LensLayerQuery;
-        /** field name to apply breakdown based on field type or full breakdown configuration */
-        breakdown?: LensBreakdownConfig;
-        trendLine?: boolean;
-      }
-    >
-  ];
+  querySecondaryMetric?: LensLayerQuery;
+  queryMaxValue?: LensLayerQuery;
+  /** field name to apply breakdown based on field type or full breakdown configuration */
+  breakdown?: LensBreakdownConfig;
+  trendLine?: boolean;
 }
 
-export type LensMetricConfig = Identity<LensBaseConfig & LensMetricConfigBase>;
+export type LensMetricConfig = Identity<LensBaseConfig & LensBaseLayer & LensMetricConfigBase>;
 
 export interface LensGaugeConfigBase {
   chartType: 'gauge';
-  layers: [
-    Identity<
-      LensBaseLayer & {
-        // must be a single layer!
-        queryMinValue?: LensLayerQuery;
-        queryMaxValue?: LensLayerQuery;
-        queryGoalValue?: LensLayerQuery;
-        shape?: 'arc' | 'circle' | 'horizontalBullet' | 'verticalBullet';
-      }
-    >
-  ];
+  queryMinValue?: LensLayerQuery;
+  queryMaxValue?: LensLayerQuery;
+  queryGoalValue?: LensLayerQuery;
+  shape?: 'arc' | 'circle' | 'horizontalBullet' | 'verticalBullet';
 }
 
-export type LensGaugeConfig = Identity<LensBaseConfig & LensGaugeConfigBase>;
+export type LensGaugeConfig = Identity<LensBaseConfig & LensBaseLayer & LensGaugeConfigBase>;
 
 export interface LensPieConfigBase {
   chartType: 'pie' | 'donut';
-  layers: [
-    Identity<
-      LensBaseLayer & {
-        // must be a single layer!
-        /** field name to apply breakdown based on field type or full breakdown configuration */
-        breakdown: LensBreakdownConfig[];
-      }
-    >
-  ];
+  breakdown: LensBreakdownConfig[];
   legend?: Identity<LensLegendConfig>;
 }
 
-export type LensPieConfig = Identity<LensBaseConfig & LensPieConfigBase>;
+export type LensPieConfig = Identity<LensBaseConfig & LensBaseLayer & LensPieConfigBase>;
 
 export interface LensTreeMapConfigBase {
   chartType: 'treemap';
-  layers: [
-    Identity<
-      LensBaseLayer & {
-        // must be a single layer!
-        /** field name to apply breakdown based on field type or full breakdown configuration */
-        breakdown: LensBreakdownConfig[];
-      }
-    >
-  ];
+  /** field name to apply breakdown based on field type or full breakdown configuration */
+  breakdown: LensBreakdownConfig[];
 }
 
-export type LensTreeMapConfig = Identity<LensBaseConfig & LensTreeMapConfigBase>;
+export type LensTreeMapConfig = Identity<LensBaseConfig & LensBaseLayer & LensTreeMapConfigBase>;
 
 export interface LensTagCloudConfigBase {
   chartType: 'tagcloud';
-  layers: [
-    Identity<
-      LensBaseLayer & {
-        // must be a single layer!
-        /** field name to apply breakdown based on field type or full breakdown configuration */
-        breakdown: LensBreakdownConfig;
-      }
-    >
-  ];
+  /** field name to apply breakdown based on field type or full breakdown configuration */
+  breakdown: LensBreakdownConfig;
 }
 
-export type LensTagCloudConfig = Identity<LensBaseConfig & LensTagCloudConfigBase>;
+export type LensTagCloudConfig = Identity<LensBaseConfig & LensBaseLayer & LensTagCloudConfigBase>;
 export interface LensRegionMapConfigBase {
   chartType: 'regionmap';
-  layers: [
-    Identity<
-      LensBaseLayer & {
-        // must be a single layer!
-        /** field name to apply breakdown based on field type or full breakdown configuration */
-        breakdown: LensBreakdownConfig;
-      }
-    >
-  ];
+  /** field name to apply breakdown based on field type or full breakdown configuration */
+  breakdown: LensBreakdownConfig;
 }
 
-export type LensRegionMapConfig = Identity<LensBaseConfig & LensRegionMapConfigBase>;
+export type LensRegionMapConfig = Identity<
+  LensBaseConfig & LensBaseLayer & LensRegionMapConfigBase
+>;
 
 export interface LensMosaicConfigBase {
   chartType: 'mosaic';
-  layers: [
-    Identity<
-      LensBaseLayer & {
-        // must be a single layer!
-        /** field name to apply breakdown based on field type or full breakdown configuration */
-        breakdown: LensBreakdownConfig;
-        /** field name to apply breakdown based on field type or full breakdown configuration */
-        xAxis: LensBreakdownConfig;
-      }
-    >
-  ];
+  /** field name to apply breakdown based on field type or full breakdown configuration */
+  breakdown: LensBreakdownConfig;
+  /** field name to apply breakdown based on field type or full breakdown configuration */
+  xAxis: LensBreakdownConfig;
 }
 
-export type LensMosaicConfig = Identity<LensBaseConfig & LensMosaicConfigBase>;
+export type LensMosaicConfig = Identity<LensBaseConfig & LensBaseLayer & LensMosaicConfigBase>;
 
 export interface LensTableConfigBase {
   chartType: 'table';
-  /** *
-   * single layer must be defined (layers: [{ ... }])
-   */
-  layers: [
-    Identity<
-      LensBaseLayer & {
-        /** field name to breakdown based on field type or full breakdown configuration */
-        splitBy?: LensBreakdownConfig[];
-        /** field name to breakdown based on field type or full breakdown configuration */
-        breakdown?: LensBreakdownConfig[];
-      }
-    >
-  ];
+  /** field name to breakdown based on field type or full breakdown configuration */
+  splitBy?: LensBreakdownConfig[];
+  /** field name to breakdown based on field type or full breakdown configuration */
+  breakdown?: LensBreakdownConfig[];
 }
 
-export type LensTableConfig = Identity<LensBaseConfig & LensTableConfigBase>;
+export type LensTableConfig = Identity<LensBaseConfig & LensBaseLayer & LensTableConfigBase>;
 
 export interface LensHeatmapConfigBase {
   chartType: 'heatmap';
-  /** configure a single layer */
-  layers: [
-    Identity<
-      LensBaseLayer & {
-        // must be a single layer!
-        /** field name to apply breakdown based on field type or full breakdown configuration */
-        breakdown: LensBreakdownConfig;
-        xAxis: LensBreakdownConfig;
-      }
-    >
-  ];
+  /** field name to apply breakdown based on field type or full breakdown configuration */
+  breakdown: LensBreakdownConfig;
+  xAxis: LensBreakdownConfig;
   legend?: Identity<LensLegendConfig>;
 }
 
-export type LensHeatmapConfig = Identity<LensBaseConfig & LensHeatmapConfigBase>;
+export type LensHeatmapConfig = Identity<LensBaseConfig & LensBaseLayer & LensHeatmapConfigBase>;
 
 export interface LensReferenceLineLayerBase {
   type: 'reference';

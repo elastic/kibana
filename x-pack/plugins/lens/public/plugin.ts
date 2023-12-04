@@ -29,6 +29,7 @@ import {
   VisualizationsSetup,
   VisualizationsStart,
 } from '@kbn/visualizations-plugin/public';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
@@ -655,8 +656,12 @@ export class LensPlugin {
           this.editorFrameService!.loadVisualizations(),
           this.editorFrameService!.loadDatasources(),
         ]);
+
+        const formulaAPI = createFormulaPublicApi();
+        const configBulder = new LensConfigBuilder(formulaAPI, startDependencies.dataViews);
         return {
-          formula: createFormulaPublicApi(),
+          buildConfig: configBulder.build,
+          formula: formulaAPI,
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
           suggestions: (context, dataView, excludedVisualizations) => {
             return suggestionsApi({

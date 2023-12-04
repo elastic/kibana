@@ -28,11 +28,7 @@ function getAccessorName(type: 'x' | 'y') {
 }
 
 function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizationState {
-  if (config.layers.length !== 1) {
-    throw new Error('heatmap must define a single layer');
-  }
-
-  const layer = config.layers[0];
+  const layer = config;
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -67,7 +63,7 @@ function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizatio
 }
 
 function buildFormulaLayer(
-  layer: LensHeatmapConfig['layers'][0],
+  layer: LensHeatmapConfig,
   i: number,
   dataView: DataView,
   formulaAPI: FormulaPublicApi
@@ -104,7 +100,7 @@ function buildFormulaLayer(
   return defaultLayer;
 }
 
-function getValueColumns(layer: LensHeatmapConfig['layers'][0]) {
+function getValueColumns(layer: LensHeatmapConfig) {
   if (layer.breakdown && typeof layer.breakdown !== 'string') {
     throw new Error('breakdown must be a field name when not using index source');
   }
@@ -124,7 +120,7 @@ export async function buildHeatmap(
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg as LensHeatmapConfig['layers'][0], i, dataView, formulaAPI);
+    buildFormulaLayer(cfg as LensHeatmapConfig, i, dataView, formulaAPI);
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,

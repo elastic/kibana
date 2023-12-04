@@ -23,11 +23,7 @@ import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns
 
 const ACCESSOR = 'metric_formula_accessor';
 function buildVisualizationState(config: LensTableConfig): DatatableVisualizationState {
-  if (config.layers.length !== 1) {
-    throw new Error('single layer must be defined');
-  }
-
-  const layer = config.layers[0];
+  const layer = config;
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -42,7 +38,7 @@ function buildVisualizationState(config: LensTableConfig): DatatableVisualizatio
   };
 }
 function buildFormulaLayer(
-  layer: LensTableConfig['layers'][0],
+  layer: LensTableConfig,
   i: number,
   dataView: DataView,
   formulaAPI: FormulaPublicApi
@@ -89,7 +85,7 @@ function buildFormulaLayer(
   return defaultLayer;
 }
 
-function getValueColumns(layer: LensTableConfig['layers'][0]) {
+function getValueColumns(layer: LensTableConfig) {
   if (layer.breakdown && layer.breakdown.filter((b) => typeof b !== 'string').length) {
     throw new Error('breakdown must be a field name when not using index source');
   }
@@ -117,7 +113,7 @@ export async function buildTable(
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg as LensTableConfig['layers'][0], i, dataView, formulaAPI);
+    buildFormulaLayer(cfg as LensTableConfig, i, dataView, formulaAPI);
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,

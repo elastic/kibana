@@ -36,11 +36,7 @@ function getAccessorName(type: 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
 }
 function buildVisualizationState(config: LensMetricConfig): MetricVisualizationState {
-  if (config.layers.length !== 1) {
-    throw new Error('metric must define a single layer');
-  }
-
-  const layer = config.layers[0];
+  const layer = config;
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -98,7 +94,7 @@ function buildVisualizationState(config: LensMetricConfig): MetricVisualizationS
 }
 
 function buildFormulaLayer(
-  layer: LensMetricConfig['layers'][0],
+  layer: LensMetricConfig,
   i: number,
   dataView: DataView,
   formulaAPI: FormulaPublicApi
@@ -202,7 +198,7 @@ function buildFormulaLayer(
   return layers[DEFAULT_LAYER_ID];
 }
 
-function getValueColumns(layer: LensMetricConfig['layers'][0]) {
+function getValueColumns(layer: LensMetricConfig) {
   if (layer.breakdown && typeof layer.breakdown !== 'string') {
     throw new Error('breakdown must be a field name when not using index source');
   }
@@ -224,7 +220,7 @@ export async function buildMetric(
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg as LensMetricConfig['layers'][0], i, dataView, formulaAPI);
+    buildFormulaLayer(cfg as LensMetricConfig, i, dataView, formulaAPI);
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,

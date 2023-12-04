@@ -99,7 +99,7 @@ export const getBreakdownColumn = ({
           filters: filterOptions.filters.map((f) => ({
             label: f.label || '',
             input: {
-              language: 'kql',
+              language: 'kuery',
               query: f.filter,
             },
           })),

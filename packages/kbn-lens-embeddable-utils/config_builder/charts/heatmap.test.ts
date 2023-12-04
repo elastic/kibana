@@ -58,14 +58,9 @@ test('generates metric chart config', async () => {
       dataset: {
         esql: 'from test | count=count() by @timestamp, category',
       },
-      layers: [
-        {
-          label: 'test',
-          breakdown: 'category',
-          xAxis: '@timestamp',
-          value: 'count',
-        },
-      ],
+      breakdown: 'category',
+      xAxis: '@timestamp',
+      value: 'count',
     },
     {
       dataViewsAPI: mockDataViewsService() as any,

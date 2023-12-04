@@ -25,11 +25,7 @@ function getAccessorName(type: 'breakdown') {
 }
 
 function buildVisualizationState(config: LensTagCloudConfig): TagcloudState {
-  if (config.layers.length !== 1) {
-    throw new Error('tag cloud must define a single layer');
-  }
-
-  const layer = config.layers[0];
+  const layer = config;
   const isFormula = isFormulaDataset(config.dataset) || isFormulaDataset(layer.dataset);
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -47,7 +43,7 @@ function buildVisualizationState(config: LensTagCloudConfig): TagcloudState {
 }
 
 function buildFormulaLayer(
-  layer: LensTagCloudConfig['layers'][0],
+  layer: LensTagCloudConfig,
   i: number,
   dataView: DataView,
   formulaAPI: FormulaPublicApi
@@ -81,7 +77,7 @@ function buildFormulaLayer(
   return defaultLayer;
 }
 
-function getValueColumns(layer: LensTagCloudConfig['layers'][0]) {
+function getValueColumns(layer: LensTagCloudConfig) {
   if (layer.breakdown && typeof layer.breakdown !== 'string') {
     throw new Error('breakdown must be a field name when not using index source');
   }
@@ -98,7 +94,7 @@ export async function buildTagCloud(
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg as LensTagCloudConfig['layers'][0], i, dataView, formulaAPI);
+    buildFormulaLayer(cfg as LensTagCloudConfig, i, dataView, formulaAPI);
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,
