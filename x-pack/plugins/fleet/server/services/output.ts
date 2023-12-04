@@ -797,6 +797,10 @@ class OutputService {
 
     // If the output type changed
     if (data.type && data.type !== originalOutput.type) {
+      if (data.type === outputType.Elasticsearch && updateData.type === outputType.Elasticsearch) {
+        updateData.preset = null;
+      }
+
       if (data.type !== outputType.Kafka && originalOutput.type === outputType.Kafka) {
         removeKafkaFields(updateData as Nullable<OutputSoKafkaAttributes>);
       }
@@ -922,7 +926,7 @@ class OutputService {
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
-      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '');
+      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '');
     }
 
     // Remove the shipper data if the shipper is not enabled from the yaml config
