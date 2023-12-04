@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { FlyoutDetail } from '../components/flyout_detail/flyout_detail';
 import { FlyoutProps } from '../components/flyout_detail';
 import { useLogExplorerCustomizationsContext } from '../hooks/use_log_explorer_customizations';
@@ -36,10 +36,11 @@ export const CustomFlyoutContent = ({
     : renderPreviousContent();
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="m">
       {/* Apply custom Log Explorer detail */}
       {content}
       {/* Restore default content */}
+      <EuiHorizontalRule margin="xs" />
       <EuiFlexItem>{renderDefaultContent()}</EuiFlexItem>
     </EuiFlexGroup>
   );
