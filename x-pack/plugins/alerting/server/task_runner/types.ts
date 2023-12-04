@@ -85,7 +85,6 @@ export interface ExecutionHandlerOptions<
   ruleLabel: string;
   previousStartedAt: Date | null;
   actionsClient: PublicMethodsOf<ActionsClient>;
-  maintenanceWindowIds?: string[];
   alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
 }
 

@@ -10,6 +10,7 @@ import { ServerlessRoleName } from '../support/roles';
 import { cleanupRule, loadRule } from './api_fixtures';
 import { closeDateTabIfVisible } from './integrations';
 
+export const RESPONSE_ACTIONS_ERRORS = 'response-actions-error';
 export const RESPONSE_ACTIONS_ITEM_0 = 'response-actions-list-item-0';
 export const RESPONSE_ACTIONS_ITEM_1 = 'response-actions-list-item-1';
 export const RESPONSE_ACTIONS_ITEM_2 = 'response-actions-list-item-2';

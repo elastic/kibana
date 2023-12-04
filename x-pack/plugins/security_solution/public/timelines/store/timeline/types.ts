@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Action } from 'redux';
 import type { Observable } from 'rxjs';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -38,14 +37,6 @@ export interface TimelineState {
   timelineById: TimelineById;
   showCallOutUnauthorizedMsg: boolean;
   insertTimeline: InsertTimeline | null;
-}
-
-export interface ActionTimeline extends Action<string> {
-  payload: {
-    id: string;
-    eventId: string;
-    noteId: string;
-  };
 }
 
 export interface TimelineEpicDependencies<State> {
