@@ -53,7 +53,7 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
     },
 
     async deleteFile(index: number = 0) {
-      this.openActionsPopover(index);
+      await this.openActionsPopover(index);
 
       (await testSubjects.find('cases-files-delete-button', 1000)).click();
 
