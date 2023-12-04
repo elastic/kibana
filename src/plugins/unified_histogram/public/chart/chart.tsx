@@ -16,7 +16,7 @@ import type {
   Suggestion,
   LensEmbeddableOutput,
 } from '@kbn/lens-plugin/public';
-import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
@@ -45,6 +45,7 @@ import { useRefetch } from './hooks/use_refetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
 
 export interface ChartProps {
+  isChartAvailable: boolean;
   hiddenPanel?: boolean;
   className?: string;
   services: UnifiedHistogramServices;
@@ -60,7 +61,7 @@ export interface ChartProps {
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
   breakdown?: UnifiedHistogramBreakdownContext;
-  prependToToolbar?: ReactElement;
+  renderCustomChartToggleActions?: () => ReactElement | undefined;
   appendHistogram?: ReactElement;
   disableAutoFetching?: boolean;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
@@ -85,7 +86,7 @@ export interface ChartProps {
 const HistogramMemoized = memo(Histogram);
 
 export function Chart({
-  hiddenPanel,
+  isChartAvailable,
   className,
   services,
   dataView,
@@ -100,7 +101,7 @@ export function Chart({
   currentSuggestion,
   allSuggestions,
   isPlainRecord,
-  prependToToolbar,
+  renderCustomChartToggleActions,
   appendHistogram,
   disableAutoFetching,
   disableTriggers,
@@ -128,13 +129,7 @@ export function Chart({
     onChartHiddenChange,
   });
 
-  const chartVisible = !!(
-    chart &&
-    !chart.hidden &&
-    dataView.id &&
-    dataView.type !== DataViewType.ROLLUP &&
-    (isPlainRecord || (!isPlainRecord && dataView.isTimeBased()))
-  );
+  const chartVisible = isChartAvailable && !!chart && !chart.hidden;
 
   const input$ = useMemo(
     () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
@@ -226,8 +221,8 @@ export function Chart({
     isPlainRecord,
   });
 
-  if (hiddenPanel) {
-    return <div data-test-subj="unifiedHistogramPanelHidden" />;
+  if (Boolean(renderCustomChartToggleActions) && !chartVisible) {
+    return <div data-test-subj="unifiedHistogramChartPanelHidden" />;
   }
 
   const LensSaveModalComponent = services.lens.SaveModalComponent;
@@ -279,7 +274,9 @@ export function Chart({
       <EuiFlexItem grow={false} css={chartToolbarCss}>
         <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            {prependToToolbar || (
+            {renderCustomChartToggleActions ? (
+              renderCustomChartToggleActions()
+            ) : (
               <IconButtonGroup
                 legend={i18n.translate('unifiedHistogram.hideChartButtongroupLegend', {
                   defaultMessage: 'Chart visibility',

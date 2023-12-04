@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
@@ -40,6 +40,8 @@ export const DiscoverHistogramLayout = ({
     isPlainRecord,
   });
 
+  const renderCustomChartToggleActions = useCallback(() => panelsToggle, [panelsToggle]);
+
   // Initialized when the first search has been requested or
   // when in text-based mode since search sessions are not supported
   if (!searchSessionId && !isPlainRecord) {
@@ -53,8 +55,7 @@ export const DiscoverHistogramLayout = ({
       requestAdapter={dataState.inspectorAdapters.requests}
       container={container}
       css={histogramLayoutCss}
-      prependToToolbar={panelsToggle}
-      hidden={Boolean(hideChart)}
+      renderCustomChartToggleActions={renderCustomChartToggleActions}
     >
       <DiscoverMainContent
         {...mainContentProps}

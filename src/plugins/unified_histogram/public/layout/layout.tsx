@@ -13,6 +13,7 @@ import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal'
 import { css } from '@emotion/css';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
@@ -107,13 +108,9 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   topPanelHeight?: number;
   /**
-   * Prepend a custom element from the left of the toolbar
+   * This element would replace the default chart toggle buttons
    */
-  prependToToolbar?: ReactElement;
-  /**
-   * Pass `true` to hide chart panel and its toolbar
-   */
-  hidden?: boolean;
+  renderCustomChartToggleActions?: () => ReactElement | undefined;
   /**
    * Disable automatic refetching based on props changes, and instead wait for a `refetch` message
    */
@@ -201,8 +198,7 @@ export const UnifiedHistogramLayout = ({
   breakdown,
   container,
   topPanelHeight,
-  prependToToolbar,
-  hidden,
+  renderCustomChartToggleActions,
   disableAutoFetching,
   disableTriggers,
   disabledActions,
@@ -239,7 +235,12 @@ export const UnifiedHistogramLayout = ({
   });
 
   const chart = suggestionUnsupported ? undefined : originalChart;
-  const isChartAvailable = Boolean(chart);
+  const isChartAvailable = Boolean(
+    chart &&
+      dataView.id &&
+      dataView.type !== DataViewType.ROLLUP &&
+      (isPlainRecord || (!isPlainRecord && dataView.isTimeBased()))
+  );
 
   const [topPanelNode] = useState(() =>
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
@@ -274,7 +275,7 @@ export const UnifiedHistogramLayout = ({
     <>
       <InPortal node={topPanelNode}>
         <Chart
-          hiddenPanel={hidden || !isChartAvailable}
+          isChartAvailable={isChartAvailable}
           className={chartClassName}
           services={services}
           dataView={dataView}
@@ -290,7 +291,7 @@ export const UnifiedHistogramLayout = ({
           isPlainRecord={isPlainRecord}
           chart={chart}
           breakdown={breakdown}
-          prependToToolbar={prependToToolbar}
+          renderCustomChartToggleActions={renderCustomChartToggleActions}
           appendHistogram={<EuiSpacer size="s" />}
           disableAutoFetching={disableAutoFetching}
           disableTriggers={disableTriggers}

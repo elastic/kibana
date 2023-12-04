@@ -39,8 +39,8 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   const isInsideTabs = typeof isChartAvailable === 'boolean';
 
   const buttons = [
-    ...((isInsideHistogram && !isChartHidden && isSidebarCollapsed) ||
-    (isInsideTabs && (isChartHidden || !isChartAvailable) && isSidebarCollapsed)
+    ...((isInsideHistogram && isSidebarCollapsed) ||
+    (isInsideTabs && isSidebarCollapsed && (isChartHidden || !isChartAvailable))
       ? [
           {
             label: i18n.translate('discover.panelsToggle.showSidebarButton', {
@@ -52,7 +52,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
           },
         ]
       : []),
-    ...((isInsideHistogram && !isChartHidden) || (isInsideTabs && isChartAvailable && isChartHidden)
+    ...(isInsideHistogram || (isInsideTabs && isChartAvailable && isChartHidden)
       ? [
           {
             label: isChartHidden
