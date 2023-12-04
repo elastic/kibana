@@ -21,7 +21,10 @@ import _ from 'lodash';
 
 import pMap from 'p-map';
 
-import { getDefaultPresetForEsOutput } from '../../common/services/output_helpers';
+import {
+  getDefaultPresetForEsOutput,
+  outputYmlIncludesReservedPerformanceKey,
+} from '../../common/services/output_helpers';
 
 import type {
   NewOutput,
@@ -45,6 +48,7 @@ import {
   kafkaPartitionType,
   kafkaCompressionType,
   kafkaAcknowledgeReliabilityLevel,
+  RESERVED_CONFIG_YML_KEYS,
 } from '../../common/constants';
 import { normalizeHostsForAgents } from '../../common/services';
 import {
@@ -433,6 +437,20 @@ class OutputService {
         );
       }
     }
+
+    if (output.type === outputType.Elasticsearch) {
+      if (
+        data.preset === 'balanced' &&
+        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '')
+      ) {
+        throw new OutputInvalidError(
+          `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
+            ', '
+          )}`
+        );
+      }
+    }
+
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
     if (output.type === outputType.Logstash || output.type === outputType.Kafka) {
