@@ -9,6 +9,8 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
 import { APP_ID } from '../../../../common';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../services';
@@ -46,6 +48,7 @@ import type {
   ResponseActionsRequestBody,
 } from '../../../../common/api/endpoint';
 import type { CreateActionPayload } from '../../services/actions/create/types';
+import { dump } from '../../utils/dump';
 
 export interface ResponseActionsClientOptions {
   endpointContext: EndpointAppContext;
@@ -68,35 +71,42 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   /**
-   * Update cases with information about the hosts that received a response action
+   * Update cases with information about the hosts that received a response action.
+   *
+   * **NOTE:** Failures during update will not cause this operation to fail - it will only log the errors
+   *
    * @param caseIds
    * @param alertIds
    * @param updates
    * @protected
    */
   protected async updateCases({
+    command,
+    hosts,
     caseIds = [],
     alertIds = [],
-    updates,
+    comment = '',
   }: {
+    /** The Response Action that was taken */
+    command: ResponseActionsApiCommandNames;
+    /** the list of hosts that received the response action `command` */
+    hosts: Array<{
+      hostname: string;
+      endpointId: string;
+    }>;
     caseIds?: string[];
     /** If defined, any case that the alert is included in will also receive an update */
     alertIds?: string[];
-    /** The updates that will be added to each case */
-    updates: Array<{
-      command: ResponseActionsApiCommandNames;
-      hostname: string;
-      endpointId: string;
-      comment: string;
-    }>;
+    /** Comment to include in the Case attachment */
+    comment?: string;
   }): Promise<void> {
     if (caseIds.length === 0 && alertIds.length === 0) {
-      this.log.debug(`Nothing to do. No caseIds and alertIds are empty`);
+      this.log.debug(`Nothing to do. 'caseIds' and 'alertIds' are empty`);
       return;
     }
 
-    if (updates.length === 0) {
-      this.log.debug(`Nothing to do. No updates defined`);
+    if (hosts.length === 0) {
+      this.log.debug(`Nothing to do. 'hosts' is empty`);
       return;
     }
 
@@ -135,14 +145,43 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.log.debug(`Updating cases:\n${dump(allCases)}`);
 
-    // FIXME:PT implement adding the attachment to the case
+    // Create an attachment for each case that includes info. about the response actions taken against the hosts
+    const attachments = allCases.map(() => ({
+      type: AttachmentType.actions,
+      comment,
+      actions: {
+        targets: hosts,
+        type: command,
+      },
+      owner: APP_ID,
+    })) as BulkCreateArgs['attachments'];
+
+    const casesUpdateResponse = await Promise.all(
+      allCases.map((caseId) =>
+        casesClient.attachments
+          .bulkCreate({
+            caseId,
+            attachments,
+          })
+          .catch((err) => {
+            // Log any error, BUT: do not fail execution
+            this.log.warn(
+              `Attempt to update case ID [${caseId}] failed: ${err.message}\n${dump(err)}`
+            );
+            return null;
+          })
+      )
+    );
+
+    this.log.debug(`Update to cases done:\n${dump(casesUpdateResponse)}`);
   }
 
   /**
    * Returns the action details for a given response action id
    * @param actionId
+   * @protected
    */
-  public async fetchActionDetails<T extends ActionDetails = ActionDetails>(
+  protected async fetchActionDetails<T extends ActionDetails = ActionDetails>(
     actionId: string
   ): Promise<T> {
     return getActionDetailsById(
