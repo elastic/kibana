@@ -121,7 +121,7 @@ describe('UnifiedFieldList <FieldItemButton />', () => {
         size="xs"
         className="custom"
         dataTestSubj="test-subj"
-        dragHandle={<span>dragHandle</span>}
+        withDragHandle
         field={bytesField}
         fieldSearchHighlight={undefined}
         isEmpty={false}

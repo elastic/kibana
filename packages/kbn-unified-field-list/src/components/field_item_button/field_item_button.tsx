@@ -14,7 +14,10 @@ import { EuiButtonIcon, EuiButtonIconProps, EuiHighlight, EuiIcon, EuiToolTip } 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
+import { FieldItemDragHandle } from '../field_item_drag_handle';
 import './field_item_button.scss';
+
+const DRAG_HANDLE = <FieldItemDragHandle />;
 
 /**
  * Props of FieldItemButton component
@@ -28,7 +31,7 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
   infoIcon?: FieldButtonProps['fieldInfoIcon'];
   className?: FieldButtonProps['className'];
   flush?: FieldButtonProps['flush'];
-  dragHandle?: FieldButtonProps['dragHandle'];
+  withDragHandle?: boolean;
   getCustomFieldType?: GetCustomFieldType<T>;
   dataTestSubj?: string;
   size?: FieldButtonProps['size'];
@@ -53,6 +56,7 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
  * @param dataTestSubj
  * @param size
  * @param onClick
+ * @param withDragHandle
  * @param shouldAlwaysShowAction
  * @param buttonAddFieldToWorkspaceProps
  * @param buttonRemoveFieldFromWorkspaceProps
@@ -74,6 +78,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   dataTestSubj,
   size,
   onClick,
+  withDragHandle,
   shouldAlwaysShowAction,
   buttonAddFieldToWorkspaceProps,
   buttonRemoveFieldFromWorkspaceProps,
@@ -104,7 +109,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       [`unifiedFieldListItemButton--${type}`]: type,
       [`unifiedFieldListItemButton--exists`]: !isEmpty,
       [`unifiedFieldListItemButton--missing`]: isEmpty,
-      [`unifiedFieldListItemButton--withDragHandle`]: Boolean(otherProps.dragHandle),
+      [`unifiedFieldListItemButton--withDragHandle`]: withDragHandle,
     },
     className
   );
@@ -209,6 +214,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       fieldAction={fieldAction}
       fieldInfoIcon={conflictInfoIcon || infoIcon}
       onClick={onClick}
+      {...(withDragHandle ? { dragHandle: DRAG_HANDLE } : {})}
       {...otherProps}
     />
   );

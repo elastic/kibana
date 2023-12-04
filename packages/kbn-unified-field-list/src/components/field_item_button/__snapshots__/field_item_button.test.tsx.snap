@@ -236,11 +236,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly with a drag handl
   }
   className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists unifiedFieldListItemButton--withDragHandle custom"
   dataTestSubj="test-subj"
-  dragHandle={
-    <span>
-      dragHandle
-    </span>
-  }
+  dragHandle={<FieldItemDragHandle />}
   fieldIcon={
     <WrappedFieldIcon
       scripted={false}

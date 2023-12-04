@@ -20,7 +20,6 @@ import {
   FieldPopoverHeader,
   FieldPopoverFooter,
   FieldItemButton,
-  FieldItemDragHandle,
   type GetCustomFieldType,
 } from '@kbn/unified-field-list';
 import { DragDrop } from '@kbn/dom-drag-drop';
@@ -32,8 +31,6 @@ import type { LensAppServices } from '../../app_plugin/types';
 import { APP_ID, DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { combineQueryAndFilters } from '../../app_plugin/show_underlying_data';
 import { getFieldItemActions } from './get_field_item_actions';
-
-const DRAG_HANDLE = <FieldItemDragHandle />;
 
 type LensFieldListItem = IndexPatternField | DatatableColumn | DataViewField;
 
@@ -186,11 +183,11 @@ export function InnerFieldItem(props: FieldItemProps) {
   });
 
   const commonFieldItemButtonProps = {
+    withDragHandle: true,
     isSelected: false, // multiple selections are allowed
     isEmpty: !exists,
     isActive: infoIsOpen,
     fieldSearchHighlight: highlight,
-    dragHandle: DRAG_HANDLE,
     onClick: togglePopover,
     buttonAddFieldToWorkspaceProps,
     onAddFieldToWorkspace,
@@ -212,6 +209,7 @@ export function InnerFieldItem(props: FieldItemProps) {
         button={
           <DragDrop
             draggable
+            disableDraggableHoverStyles
             order={order}
             value={value}
             dataTestSubj={`lnsFieldListPanelField-${field.name}`}

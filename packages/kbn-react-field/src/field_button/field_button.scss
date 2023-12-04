@@ -49,6 +49,7 @@
 
 .kbnFieldButton__dragHandle {
   margin-right: $euiSizeS;
+  height: $euiSizeXL;
 }
 
 .kbnFieldButton__fieldAction,
@@ -71,6 +72,10 @@
   .kbnFieldButton__fieldAction,
   .kbnFieldButton__dragHandle {
     line-height: $euiSizeL;
+  }
+
+  .kbnFieldButton__dragHandle {
+    height: $euiSizeL;
   }
 }
 

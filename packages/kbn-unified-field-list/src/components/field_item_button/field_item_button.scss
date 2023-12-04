@@ -75,19 +75,18 @@
 .unifiedFieldListItemButton--withDragHandle {
   .kbnFieldButton__dragHandle {
     margin-right: 0;
+    flex-shrink: 0;
     width: 0;
     overflow: hidden;
     transition: $euiAnimSpeedNormal ease-in-out;
-    transition-property: width, margin-right;
+    transition-property: width;
   }
 
   &:hover,
   &[class*='-isActive'],
-  .domDragDrop__keyboardHandler:focus + &,
-  &:focus-within {
+  .domDragDrop__keyboardHandler:focus + & {
     .kbnFieldButton__dragHandle {
-      margin-right: $euiSizeS;
-      width: $euiSize;
+      width: $euiSize + $euiSizeS; // icon width plus right margin
     }
   }
 }

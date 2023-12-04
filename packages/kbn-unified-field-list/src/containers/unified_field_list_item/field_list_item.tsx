@@ -21,7 +21,6 @@ import {
   FieldPopoverFooter,
   type FieldPopoverFooterProps,
 } from '../../components/field_popover';
-import { FieldItemDragHandle } from '../../components/field_item_drag_handle';
 import {
   UnifiedFieldListItemStats,
   type UnifiedFieldListItemStatsProps,
@@ -30,8 +29,6 @@ import type {
   UnifiedFieldListSidebarContainerStateService,
   AddFieldFilterHandler,
 } from '../../types';
-
-const DRAG_HANDLE = <FieldItemDragHandle />;
 
 interface GetCommonFieldItemButtonPropsParams {
   stateService: UnifiedFieldListSidebarContainerStateService;
@@ -339,6 +336,7 @@ function UnifiedFieldListItemComponent({
         <DragDrop
           draggable
           dragClassName="unifiedFieldListItemButton__dragging"
+          disableDraggableHoverStyles
           order={order}
           value={value}
           onDragStart={closePopover}
@@ -349,12 +347,12 @@ function UnifiedFieldListItemComponent({
           }-${field.name}`}
         >
           <FieldItemButton
+            withDragHandle
             fieldSearchHighlight={highlight}
             isEmpty={isEmpty}
             isActive={infoIsOpen}
             flush={alwaysShowActionButton ? 'both' : undefined}
             shouldAlwaysShowAction={alwaysShowActionButton}
-            dragHandle={isDragDisabled ? undefined : DRAG_HANDLE}
             onClick={field.type !== '_source' ? togglePopover : undefined}
             {...getCommonFieldItemButtonProps({
               stateService,
