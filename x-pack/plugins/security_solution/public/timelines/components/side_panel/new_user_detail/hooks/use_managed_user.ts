@@ -23,6 +23,8 @@ import {
 import * as i18n from '../translations';
 import type { ObserverUser } from './use_observed_user';
 
+const packages = [ENTRA_ID_PACKAGE_NAME, OKTA_PACKAGE_NAME];
+
 export const useManagedUser = (userName: string, observedUser: ObserverUser) => {
   const { to, from, isInitializing, deleteQuery, setQuery } = useGlobalTime();
   const spaceId = useSpaceId();
@@ -68,7 +70,7 @@ export const useManagedUser = (userName: string, observedUser: ObserverUser) => 
   ]);
 
   const { data: installedIntegrations, isLoading: loadingIntegrations } = useInstalledIntegrations({
-    packages: [ENTRA_ID_PACKAGE_NAME, OKTA_PACKAGE_NAME],
+    packages,
   });
 
   useQueryInspector({
@@ -84,7 +86,7 @@ export const useManagedUser = (userName: string, observedUser: ObserverUser) => 
     () =>
       !!installedIntegrations?.some(
         ({ package_name: packageName, is_enabled: isEnabled }) =>
-          isEnabled && (packageName === ENTRA_ID_PACKAGE_NAME || packageName === OKTA_PACKAGE_NAME)
+          isEnabled && packages.includes(packageName)
       ),
     [installedIntegrations]
   );

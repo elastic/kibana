@@ -43,26 +43,24 @@ export const createToggleUserAssetFieldCellActionFactory = createCellActionFacto
     },
     execute: async ({ metadata, data }) => {
       const field = data[0]?.field;
-      const scopeId = metadata?.scopeId;
+      const scopeId = metadata?.scopeId as UserAssetTableType | undefined;
+
       if (!scopeId) return;
 
-      const { fields } = usersSelectors.selectUserAssetTableById(
-        store.getState(),
-        scopeId as UserAssetTableType
-      );
+      const { fields } = usersSelectors.selectUserAssetTableById(store.getState(), scopeId);
 
       if (fields.some((f) => f === field.name)) {
         store.dispatch(
           usersActions.removeUserAssetTableField({
             fieldName: field.name,
-            tableId: scopeId as UserAssetTableType,
+            tableId: scopeId,
           })
         );
       } else {
         store.dispatch(
           usersActions.addUserAssetTableField({
             fieldName: field.name,
-            tableId: scopeId as UserAssetTableType,
+            tableId: scopeId,
           })
         );
       }

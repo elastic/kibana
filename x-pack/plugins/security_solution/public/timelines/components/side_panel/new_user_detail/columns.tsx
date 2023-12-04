@@ -60,7 +60,7 @@ export const getManagedUserTableColumns = (
     render: (value: ManagedUserTable['value'], { field }) => {
       return field && value ? (
         <DefaultFieldRenderer
-          rowItems={value.map((v) => (typeof v === 'string' ? v : value.toString()))} // Array.isArray(value) ? value : [value]
+          rowItems={value.map((v) => value.toString())}
           attrName={field}
           idPrefix={contextID ? `managedUser-${contextID}` : 'managedUser'}
           isDraggable={isDraggable}

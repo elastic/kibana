@@ -29,9 +29,8 @@ export const addAssetTableField = ({
   fieldName,
 }: UpsertAssetTableFieldParams): UserFlyoutQueries => {
   const table = tableById[tableId];
-  const alreadyExists = table.fields.findIndex((c) => c === fieldName);
 
-  if (alreadyExists !== -1) {
+  if (table.fields.includes(fieldName)) {
     // Do not add the field if it already exists
     return tableById;
   }
