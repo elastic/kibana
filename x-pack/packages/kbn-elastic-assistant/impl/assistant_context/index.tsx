@@ -79,6 +79,7 @@ export interface AssistantProviderProps {
     }) => void;
     currentConversation: Conversation;
     isFetchingResponse: boolean;
+    isLangChain: boolean;
     regenerateMessage: (conversationId: string) => void;
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
@@ -110,13 +111,9 @@ export interface UseAssistantContext {
   baseSystemPrompts: Prompt[];
   conversationIds: string[];
   conversations: Record<string, Conversation>;
-  getComments: ({
-    currentConversation,
-    showAnonymizedValues,
-    amendMessage,
-    isFetchingResponse,
-  }: {
+  getComments: (props: {
     currentConversation: Conversation;
+    isLangChain: boolean;
     isFetchingResponse: boolean;
     amendMessage: ({
       conversationId,

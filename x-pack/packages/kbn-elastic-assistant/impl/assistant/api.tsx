@@ -11,7 +11,6 @@ import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
-import { getFormattedMessageContent } from './helpers';
 import { PerformEvaluationParams } from './settings/evaluation_settings/use_perform_evaluation';
 
 export interface FetchConnectorExecuteAction {
@@ -58,106 +57,46 @@ export const fetchConnectorExecuteAction = async ({
           messages: outboundMessages,
         };
 
-  // TODO: Remove in part 3 of streaming work for security solution
-  // tracked here: https://github.com/elastic/security-team/issues/7363
-  // In part 3 I will make enhancements to langchain to introduce streaming
-  // Once implemented, invokeAI can be removed
-  const isStream = !assistantLangChain;
-  const requestBody = isStream
-    ? {
-        params: {
-          subActionParams: body,
-          subAction: 'invokeStream',
-        },
-        assistantLangChain,
-      }
-    : {
-        params: {
-          subActionParams: body,
-          subAction: 'invokeAI',
-        },
-        assistantLangChain,
-      };
+  const requestBody = {
+    params: {
+      subActionParams: body,
+      subAction: 'invokeStream',
+    },
+    assistantLangChain,
+  };
 
   try {
-    if (isStream) {
-      const response = await http.fetch(
-        `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`,
-        {
-          method: 'POST',
-          body: JSON.stringify(requestBody),
-          signal,
-          asResponse: isStream,
-          rawResponse: isStream,
-        }
-      );
-
-      const reader = response?.response?.body?.getReader();
-
-      if (!reader) {
-        return {
-          response: `${API_ERROR}\n\nCould not get reader from response`,
-          isError: true,
-          isStream: false,
-        };
+    console.log('WE ARE HERE before fetch');
+    const response = await http.fetch(
+      `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`,
+      {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        signal,
+        asResponse: true,
+        rawResponse: true,
       }
-      return {
-        response: reader,
-        isStream: true,
-        isError: false,
-      };
-    }
+    );
+    console.log('WE ARE HERE after fetch with RESPONSE????', response?.response);
 
-    // TODO: Remove in part 3 of streaming work for security solution
-    // tracked here: https://github.com/elastic/security-team/issues/7363
-    // This is a temporary code to support the non-streaming API
-    const response = await http.fetch<{
-      connector_id: string;
-      status: string;
-      data: string;
-      service_message?: string;
-      trace_data?: {
-        transaction_id: string;
-        trace_id: string;
-      };
-    }>(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: { 'Content-Type': 'application/json' },
-      signal,
-    });
+    const reader = response?.response?.body?.getReader();
 
-    if (response.status !== 'ok' || !response.data) {
-      if (response.service_message) {
-        return {
-          response: `${API_ERROR}\n\n${response.service_message}`,
-          isError: true,
-          isStream: false,
-        };
-      }
+    if (!reader) {
       return {
-        response: API_ERROR,
+        response: `${API_ERROR}\n\nCould not get reader from response`,
         isError: true,
         isStream: false,
       };
     }
-
-    // Only add traceData if it exists in the response
-    const traceData =
-      response.trace_data?.trace_id != null && response.trace_data?.transaction_id != null
-        ? {
-            traceId: response.trace_data?.trace_id,
-            transactionId: response.trace_data?.transaction_id,
-          }
-        : undefined;
-
     return {
-      response: assistantLangChain ? getFormattedMessageContent(response.data) : response.data,
+      response: reader,
+      isStream: true,
       isError: false,
-      isStream: false,
-      traceData,
     };
+    // // might need this still???
+    //   response: assistantLangChain ? getFormattedMessageContent(response.data) : response.data,
   } catch (error) {
+    console.log('WE ARE HERE error 1', error);
     const reader = error?.response?.body?.getReader();
 
     if (!reader) {

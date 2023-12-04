@@ -75,10 +75,13 @@ export const postActionsConnectorExecuteRoute = (
           kbResource: ESQL_RESOURCE,
         });
 
+        console.log('WE ARE HERE LAST!!!!!', langChainResponseBody);
+
         return response.ok({
           body: langChainResponseBody,
         });
       } catch (err) {
+        console.log('WE ARE HERE ERROR?????', err);
         logger.error(err);
         const error = transformError(err);
 

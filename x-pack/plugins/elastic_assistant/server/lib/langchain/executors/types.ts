@@ -11,6 +11,7 @@ import { BaseMessage } from 'langchain/schema';
 import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { LangChainTracer } from 'langchain/callbacks';
+import { Readable } from 'stream';
 import { RequestBody, ResponseBody } from '../types';
 
 export interface AgentExecutorParams {
@@ -26,7 +27,7 @@ export interface AgentExecutorParams {
   traceOptions?: TraceOptions;
 }
 
-export type AgentExecutorResponse = Promise<ResponseBody>;
+export type AgentExecutorResponse = Promise<ResponseBody | Readable>;
 
 export type AgentExecutor = (params: AgentExecutorParams) => AgentExecutorResponse;
 

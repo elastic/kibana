@@ -46,12 +46,14 @@ export const getComments = ({
   amendMessage,
   currentConversation,
   isFetchingResponse,
+  isLangChain,
   regenerateMessage,
   showAnonymizedValues,
 }: {
   amendMessage: ({ conversationId, content }: { conversationId: string; content: string }) => void;
   currentConversation: Conversation;
   isFetchingResponse: boolean;
+  isLangChain: boolean;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
 }): EuiCommentProps[] => {
@@ -80,6 +82,7 @@ export const getComments = ({
               connectorTypeTitle={connectorTypeTitle}
               content=""
               regenerateMessage={regenerateMessageOfConversation}
+              isLangChain={isLangChain}
               isLastComment
               transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
               isFetching
@@ -127,6 +130,7 @@ export const getComments = ({
               amendMessage={amendMessageOfConversation}
               connectorTypeTitle={connectorTypeTitle}
               index={index}
+              isLangChain={isLangChain}
               isLastComment={isLastComment}
               isError={message.isError}
               reader={message.reader}
@@ -149,6 +153,7 @@ export const getComments = ({
             connectorTypeTitle={connectorTypeTitle}
             content={transformedMessage.content}
             index={index}
+            isLangChain={isLangChain}
             isLastComment={isLastComment}
             // reader is used to determine if streaming controls are shown
             reader={transformedMessage.reader}

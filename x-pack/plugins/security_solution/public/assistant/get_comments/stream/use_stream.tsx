@@ -12,6 +12,7 @@ import { getPlaceholderObservable, getStreamObservable } from './stream_observab
 interface UseStreamProps {
   amendMessage: (message: string) => void;
   isError: boolean;
+  isLangChain: boolean;
   content?: string;
   connectorTypeTitle: string;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
@@ -42,6 +43,7 @@ export const useStream = ({
   connectorTypeTitle,
   reader,
   isError,
+  isLangChain,
 }: UseStreamProps): UseStream => {
   const [pendingMessage, setPendingMessage] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
@@ -50,9 +52,9 @@ export const useStream = ({
   const observer$ = useMemo(
     () =>
       content == null && reader != null
-        ? getStreamObservable({ connectorTypeTitle, reader, setLoading, isError })
+        ? getStreamObservable({ connectorTypeTitle, reader, setLoading, isError, isLangChain })
         : getPlaceholderObservable(),
-    [content, isError, reader, connectorTypeTitle]
+    [content, reader, connectorTypeTitle, isError, isLangChain]
   );
   const onCompleteStream = useCallback(() => {
     subscription?.unsubscribe();
