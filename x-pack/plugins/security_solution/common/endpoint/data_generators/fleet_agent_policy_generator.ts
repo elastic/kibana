@@ -17,7 +17,7 @@ export class FleetAgentPolicyGenerator extends BaseDataGenerator<GetAgentPolicie
       status: agentPolicyStatuses.Active,
       description: 'Created by FleetAgentPolicyGenerator',
       namespace: 'default',
-      is_managed: false,
+      is_managed: true,
       monitoring_enabled: ['logs', 'metrics'],
       revision: 2,
       updated_at: '2020-07-22T16:36:49.196Z',
