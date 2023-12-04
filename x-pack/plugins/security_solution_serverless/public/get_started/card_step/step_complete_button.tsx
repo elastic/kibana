@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback } from 'react';
+import React from 'react';
 import icon_cross from '../images/icon_cross.svg';
 import { MARK_AS_DONE_TITLE, UNDO_MARK_AS_DONE_TITLE } from '../translations';
 
@@ -19,9 +19,7 @@ const StepCompleteButtonComponent = ({
   onClick: () => void;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const handleStepButtonClicked = useCallback(() => {
-    onClick?.();
-  }, [onClick]);
+
   return (
     <EuiButtonEmpty
       color="primary"
@@ -35,7 +33,7 @@ const StepCompleteButtonComponent = ({
           inline-size: ${euiTheme.size.m};
         }
       `}
-      onClick={handleStepButtonClicked}
+      onClick={onClick}
     >
       {isStepDone ? UNDO_MARK_AS_DONE_TITLE : MARK_AS_DONE_TITLE}
     </EuiButtonEmpty>
