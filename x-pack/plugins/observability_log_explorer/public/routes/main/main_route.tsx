@@ -25,7 +25,7 @@ import { noBreadcrumbs, useBreadcrumbs } from '../../utils/breadcrumbs';
 import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 
-export const ObservablityLogExplorerMainRoute = () => {
+export const ObservabilityLogExplorerMainRoute = () => {
   const { services } = useKibanaContextForPlugin();
   const { logExplorer, serverless, chrome, notifications, appParams } = services;
   const { history } = appParams;
