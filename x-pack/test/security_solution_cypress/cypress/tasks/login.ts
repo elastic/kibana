@@ -73,29 +73,6 @@ export const loginWithUser = (user: User): void => {
   });
 };
 
-/**
- * Builds a URL with basic auth using the passed in user.
- *
- * @param user the user information to build the basic auth with
- * @param route string route to visit
- */
-export const constructUrlWithUser = (user: User, route: string): string => {
-  const url = Cypress.config().baseUrl;
-  const kibana = new URL(String(url));
-  const hostname = kibana.hostname;
-  const username = user.username;
-  const password = user.password;
-  const protocol = kibana.protocol.replace(':', '');
-  const port = kibana.port;
-
-  const path = `${route.startsWith('/') ? '' : '/'}${route}`;
-  const strUrl = `${protocol}://${username}:${password}@${hostname}:${port}${path}`;
-  const builtUrl = new URL(strUrl);
-
-  cy.log(`origin: ${builtUrl.href}`);
-  return builtUrl.href;
-};
-
 export const logout = (): void => {
   cy.visit(LOGOUT_URL);
 };
