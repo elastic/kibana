@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { deepEqual } from '@hapi/hoek';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import deepEqual from 'fast-deep-equal';
 import { mapValues, pick } from 'lodash';
 import { InvokeCreator } from 'xstate';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  ControlPanels,
-  ControlPanelRT,
   availableControlPanelFields,
   controlPanelConfigs,
+  ControlPanelRT,
+  ControlPanels,
 } from '../../../../../common';
 import { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
 
