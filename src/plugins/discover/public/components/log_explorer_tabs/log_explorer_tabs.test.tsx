@@ -101,35 +101,45 @@ describe('LogExplorerTabs', () => {
   const getLogExplorerTab = () => screen.getByText('Logs Explorer').closest('a')!;
 
   it('should render properly', () => {
-    const { params, mockDiscoverLocator, mockLogExplorerLocator } = renderTabs();
+    const { /* params, */ mockDiscoverLocator, mockLogExplorerLocator } = renderTabs();
     expect(getDiscoverTab()).toBeInTheDocument();
-    expect(mockDiscoverLocator.getRedirectUrl).toHaveBeenCalledWith(params);
-    expect(getDiscoverTab()).toHaveAttribute('href', getRedirectUrl(DISCOVER_APP_LOCATOR, params));
+    // expect(mockDiscoverLocator.getRedirectUrl).toHaveBeenCalledWith(params);
+    expect(mockDiscoverLocator.getRedirectUrl).toHaveBeenCalledWith({});
+    // expect(getDiscoverTab()).toHaveAttribute('href', getRedirectUrl(DISCOVER_APP_LOCATOR, params));
+    expect(getDiscoverTab()).toHaveAttribute('href', getRedirectUrl(DISCOVER_APP_LOCATOR, {}));
     expect(getLogExplorerTab()).toBeInTheDocument();
-    expect(mockLogExplorerLocator.getRedirectUrl).toHaveBeenCalledWith(params);
+    // expect(mockLogExplorerLocator.getRedirectUrl).toHaveBeenCalledWith(params);
+    expect(mockLogExplorerLocator.getRedirectUrl).toHaveBeenCalledWith({});
+    // expect(getLogExplorerTab()).toHaveAttribute(
+    //   'href',
+    //   getRedirectUrl(ALL_DATASETS_LOCATOR_ID, params)
+    // );
     expect(getLogExplorerTab()).toHaveAttribute(
       'href',
-      getRedirectUrl(ALL_DATASETS_LOCATOR_ID, params)
+      getRedirectUrl(ALL_DATASETS_LOCATOR_ID, {})
     );
   });
 
   it('should render Discover as the selected tab', () => {
-    const { params, mockDiscoverLocator, mockLogExplorerLocator } = renderTabs();
+    const { /* params, */ mockDiscoverLocator, mockLogExplorerLocator } = renderTabs();
     expect(getDiscoverTab()).toHaveAttribute('aria-selected', 'true');
     userEvent.click(getDiscoverTab());
     expect(mockDiscoverLocator.navigate).not.toHaveBeenCalled();
     expect(getLogExplorerTab()).toHaveAttribute('aria-selected', 'false');
     userEvent.click(getLogExplorerTab());
-    expect(mockLogExplorerLocator.navigate).toHaveBeenCalledWith(params);
+    // expect(mockLogExplorerLocator.navigate).toHaveBeenCalledWith(params);
+    expect(mockLogExplorerLocator.navigate).toHaveBeenCalledWith({});
   });
 
   it('should render Log Explorer as the selected tab', () => {
-    const { params, mockDiscoverLocator, mockLogExplorerLocator } = renderTabs('log-explorer');
+    const { /* params, */ mockDiscoverLocator, mockLogExplorerLocator } =
+      renderTabs('log-explorer');
     expect(getLogExplorerTab()).toHaveAttribute('aria-selected', 'true');
     userEvent.click(getLogExplorerTab());
     expect(mockLogExplorerLocator.navigate).not.toHaveBeenCalled();
     expect(getDiscoverTab()).toHaveAttribute('aria-selected', 'false');
     userEvent.click(getDiscoverTab());
-    expect(mockDiscoverLocator.navigate).toHaveBeenCalledWith(params);
+    // expect(mockDiscoverLocator.navigate).toHaveBeenCalledWith(params);
+    expect(mockDiscoverLocator.navigate).toHaveBeenCalledWith({});
   });
 });

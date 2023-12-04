@@ -85,6 +85,11 @@ const ServerlessTopNav = ({
             selectedTab="log-explorer"
           />
         </EuiHeaderSectionItem>
+        <EuiHeaderSectionItem css={{ marginLeft: euiThemeVars.euiSizeM }}>
+          <EuiHeaderLinks gutterSize="xs">
+            <DiscoverLink services={services} state$={state$} />
+          </EuiHeaderLinks>
+        </EuiHeaderSectionItem>
       </EuiHeaderSection>
       <EuiHeaderSection
         side="right"

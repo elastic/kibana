@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
       );
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.svlCommonPage.login();
       await PageObjects.observabilityLogExplorer.navigateTo();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -39,11 +40,57 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
       );
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     it('should inject the app header menu on the top navbar', async () => {
       const headerMenu = await PageObjects.observabilityLogExplorer.getHeaderMenu();
       expect(await headerMenu.isDisplayed()).to.be(true);
+    });
+
+    describe('Discover fallback link', () => {
+      before(async () => {
+        await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      it('should render a button link ', async () => {
+        const discoverLink = await PageObjects.observabilityLogExplorer.getDiscoverFallbackLink();
+        expect(await discoverLink.isDisplayed()).to.be(true);
+      });
+
+      it('should navigate to discover keeping the current columns/filters/query/time/data view', async () => {
+        await retry.try(async () => {
+          await testSubjects.existOrFail('superDatePickerstartDatePopoverButton');
+          await testSubjects.existOrFail('superDatePickerendDatePopoverButton');
+        });
+        const timeConfig = await PageObjects.timePicker.getTimeConfig();
+        // Set query bar value
+        await PageObjects.observabilityLogExplorer.submitQuery('*favicon*');
+
+        const discoverLink = await PageObjects.observabilityLogExplorer.getDiscoverFallbackLink();
+        discoverLink.click();
+
+        await PageObjects.discover.waitForDocTableLoadingComplete();
+
+        await retry.try(async () => {
+          expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql('All logs');
+        });
+        await retry.try(async () => {
+          expect(await PageObjects.discover.getColumnHeaders()).to.eql([
+            '@timestamp',
+            'service.name',
+            'host.name',
+            'message',
+          ]);
+        });
+        await retry.try(async () => {
+          expect(await PageObjects.timePicker.getTimeConfig()).to.eql(timeConfig);
+        });
+        await retry.try(async () => {
+          expect(await PageObjects.observabilityLogExplorer.getQueryBarValue()).to.eql('*favicon*');
+        });
+      });
     });
 
     describe('Discover tabs', () => {
@@ -52,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
-      it('should navigate between discover tabs keeping the current columns/filters/query/time/data view', async () => {
+      it('should navigate between discover tabs without keeping the current columns/filters/query/time/data view', async () => {
         await retry.try(async () => {
           await testSubjects.existOrFail('superDatePickerstartDatePopoverButton');
           await testSubjects.existOrFail('superDatePickerendDatePopoverButton');
@@ -73,14 +120,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         expect(await browser.getCurrentUrl()).contain('/app/discover');
 
+        await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
         await PageObjects.discover.waitForDocTableLoadingComplete();
 
         await retry.try(async () => {
-          expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql('All logs');
+          expect(await PageObjects.discover.getCurrentlySelectedDataView()).not.to.eql('All logs');
         });
 
         await retry.try(async () => {
-          expect(await PageObjects.discover.getColumnHeaders()).to.eql([
+          expect(await PageObjects.discover.getColumnHeaders()).not.to.eql([
             '@timestamp',
             'service.name',
             'host.name',
@@ -89,11 +137,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await retry.try(async () => {
-          expect(await PageObjects.timePicker.getTimeConfig()).to.eql(timeConfig);
+          expect(await PageObjects.timePicker.getTimeConfig()).not.to.eql(timeConfig);
         });
 
         await retry.try(async () => {
-          expect(await PageObjects.observabilityLogExplorer.getQueryBarValue()).to.eql('*favicon*');
+          expect(await PageObjects.observabilityLogExplorer.getQueryBarValue()).not.to.eql(
+            '*favicon*'
+          );
         });
 
         // go to log explorer tab

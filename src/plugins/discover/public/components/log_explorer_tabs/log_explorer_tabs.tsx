@@ -11,8 +11,8 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { AllDatasetsLocatorParams, ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { map } from 'rxjs';
+// import useObservable from 'react-use/lib/useObservable';
+// import { map } from 'rxjs';
 import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../common';
 import type { DiscoverServices } from '../../build_services';
 
@@ -28,17 +28,19 @@ export interface LogExplorerTabsProps {
   selectedTab: 'discover' | 'log-explorer';
 }
 
-export const LogExplorerTabs = ({ services, params, selectedTab }: LogExplorerTabsProps) => {
+export const LogExplorerTabs = ({ services, /* params, */ selectedTab }: LogExplorerTabsProps) => {
   const { euiTheme } = useEuiTheme();
-  const { share, data } = services;
+  const { share /* , data */ } = services;
   const locators = share?.url.locators;
-  const {
-    time: timeRange,
-    refreshInterval,
-    query,
-    filters,
-  } = useObservable(data.query.state$.pipe(map(({ state }) => state)), data.query.getState());
-  const mergedParams = { ...params, timeRange, refreshInterval, query, filters };
+  // TODO: Temporarily commenting out state syncing code since we aren't sure if we want to keep it
+  // const {
+  //   time: timeRange,
+  //   refreshInterval,
+  //   query,
+  //   filters,
+  // } = useObservable(data.query.state$.pipe(map(({ state }) => state)), data.query.getState());
+  // const mergedParams = { ...params, timeRange, refreshInterval, query, filters };
+  const mergedParams = {};
   const discoverLocator = locators?.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const logExplorerLocator = locators?.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
   const discoverUrl = discoverLocator?.getRedirectUrl(mergedParams);
