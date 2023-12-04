@@ -7,6 +7,10 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
+import {
+  DATA_STREAMS_MALFORMED_STATS_URL,
+  DATA_STREAMS_STATS_URL,
+} from '../../../common/constants';
 import { DataStreamStat } from '../../types/data_stream';
 import { dataStreamTypesRt, rangeRt } from '../../types/default_api_types';
 import { Integration } from '../../types/integration';
@@ -17,7 +21,7 @@ import { getDataStreamsStats } from './get_data_streams_stats';
 import { getMalformedDocsPaginated } from './get_malformed_docs';
 
 const statsRoute = createDatasetQualityServerRoute({
-  endpoint: 'GET /internal/dataset_quality/data_streams/stats',
+  endpoint: `GET ${DATA_STREAMS_STATS_URL}`,
   params: t.type({
     query: t.intersection([
       dataStreamTypesRt,
@@ -73,7 +77,7 @@ const statsRoute = createDatasetQualityServerRoute({
 });
 
 const malformedDocsRoute = createDatasetQualityServerRoute({
-  endpoint: 'GET /internal/dataset_quality/data_streams/malformed_docs',
+  endpoint: `GET ${DATA_STREAMS_MALFORMED_STATS_URL}`,
   params: t.type({
     query: t.intersection([
       rangeRt,

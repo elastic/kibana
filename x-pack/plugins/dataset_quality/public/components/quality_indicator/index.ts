@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export const DATASET_QUALITY_APP_ID = 'dataset_quality';
-export const DATA_STREAMS_STATS_URL = '/internal/dataset_quality/data_streams/stats';
-export const DATA_STREAMS_MALFORMED_STATS_URL =
-  '/internal/dataset_quality/data_streams/malformed_docs';
+export * from './indicator';
+export * from './percentage_indicator';

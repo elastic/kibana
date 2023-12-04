@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export const DATASET_QUALITY_APP_ID = 'dataset_quality';
-export const DATA_STREAMS_STATS_URL = '/internal/dataset_quality/data_streams/stats';
-export const DATA_STREAMS_MALFORMED_STATS_URL =
-  '/internal/dataset_quality/data_streams/malformed_docs';
+const DEFAULT_FROM_IN_MILLISECONDS = 24 * 3600000;
+
+export const getDefaultTimeRange = () => {
+  const now = Date.now();
+
+  return {
+    from: new Date(now - DEFAULT_FROM_IN_MILLISECONDS).toISOString(),
+    to: new Date(now).toISOString(),
+  };
+};
