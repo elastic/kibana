@@ -6,26 +6,26 @@
  */
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { isInvestigateInResolverActionEnabled } from './investigate_in_resolver';
+import { useIsInvestigateInResolverActionEnabled } from './investigate_in_resolver';
 
 describe('InvestigateInResolverAction', () => {
   describe('isInvestigateInResolverActionEnabled', () => {
     it('returns false if agent.type does not equal endpoint', () => {
       const data: Ecs = { _id: '1', agent: { type: ['blah'] } };
 
-      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+      expect(useIsInvestigateInResolverActionEnabled(data)).toBeFalsy();
     });
 
     it('returns false if agent.type does not have endpoint in first array index', () => {
       const data: Ecs = { _id: '1', agent: { type: ['blah', 'endpoint'] } };
 
-      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+      expect(useIsInvestigateInResolverActionEnabled(data)).toBeFalsy();
     });
 
     it('returns false if process.entity_id is not defined', () => {
       const data: Ecs = { _id: '1', agent: { type: ['endpoint'] } };
 
-      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+      expect(useIsInvestigateInResolverActionEnabled(data)).toBeFalsy();
     });
 
     it('returns true if agent.type has endpoint in first array index', () => {
@@ -35,7 +35,7 @@ describe('InvestigateInResolverAction', () => {
         process: { entity_id: ['5'] },
       };
 
-      expect(isInvestigateInResolverActionEnabled(data)).toBeTruthy();
+      expect(useIsInvestigateInResolverActionEnabled(data)).toBeTruthy();
     });
 
     it('returns false if multiple entity_ids', () => {
@@ -45,7 +45,7 @@ describe('InvestigateInResolverAction', () => {
         process: { entity_id: ['5', '10'] },
       };
 
-      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+      expect(useIsInvestigateInResolverActionEnabled(data)).toBeFalsy();
     });
 
     it('returns false if entity_id is an empty string', () => {
@@ -55,7 +55,7 @@ describe('InvestigateInResolverAction', () => {
         process: { entity_id: [''] },
       };
 
-      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+      expect(useIsInvestigateInResolverActionEnabled(data)).toBeFalsy();
     });
 
     it('returns true for process event from sysmon via filebeat', () => {
@@ -66,7 +66,7 @@ describe('InvestigateInResolverAction', () => {
         process: { entity_id: ['always_unique'] },
       };
 
-      expect(isInvestigateInResolverActionEnabled(data)).toBeTruthy();
+      expect(useIsInvestigateInResolverActionEnabled(data)).toBeTruthy();
     });
 
     it('returns false for process event from filebeat but not from sysmon', () => {
@@ -77,7 +77,7 @@ describe('InvestigateInResolverAction', () => {
         process: { entity_id: ['always_unique'] },
       };
 
-      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+      expect(useIsInvestigateInResolverActionEnabled(data)).toBeFalsy();
     });
   });
 });

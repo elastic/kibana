@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { allowedExperimentalValues } from '../../../../../../common';
+import type { ExperimentalFeatures } from '../../../../../../common';
 import type { ResolverSchema } from '../../../../../../common/endpoint/types';
 
 interface SupportedSchema {
@@ -26,89 +26,94 @@ interface SupportedSchema {
   schema: ResolverSchema;
 }
 
-const { sentinelOneDataInAnalyzerEnabled } = allowedExperimentalValues;
-
-const supportedFileBeatDataSets = [
-  ...(sentinelOneDataInAnalyzerEnabled
-    ? ['sentinel_one_cloud_funnel.event', 'sentinel_one.alert']
-    : []),
-];
-
 /**
  * This structure defines the preset supported schemas for a resolver graph. We'll probably want convert this
  * implementation to something similar to how row renderers is implemented.
  */
-export const supportedSchemas: SupportedSchema[] = [
-  {
-    name: 'endpoint',
-    constraints: [
-      {
-        field: 'agent.type',
-        value: 'endpoint',
+
+export const getSupportedSchemas = (
+  experimentalFeatures: ExperimentalFeatures
+): SupportedSchema[] => {
+  const sentinelOneDataInAnalyzerEnabled = experimentalFeatures.sentinelOneDataInAnalyzerEnabled;
+
+  const supportedFileBeatDataSets = [
+    ...(sentinelOneDataInAnalyzerEnabled
+      ? ['sentinel_one_cloud_funnel.event', 'sentinel_one.alert']
+      : []),
+  ];
+
+  return [
+    {
+      name: 'endpoint',
+      constraints: [
+        {
+          field: 'agent.type',
+          value: 'endpoint',
+        },
+      ],
+      schema: {
+        id: 'process.entity_id',
+        parent: 'process.parent.entity_id',
+        ancestry: 'process.Ext.ancestry',
+        name: 'process.name',
       },
-    ],
-    schema: {
-      id: 'process.entity_id',
-      parent: 'process.parent.entity_id',
-      ancestry: 'process.Ext.ancestry',
-      name: 'process.name',
     },
-  },
-  {
-    name: 'winlogbeat',
-    constraints: [
-      {
-        field: 'agent.type',
-        value: 'winlogbeat',
+    {
+      name: 'winlogbeat',
+      constraints: [
+        {
+          field: 'agent.type',
+          value: 'winlogbeat',
+        },
+        {
+          field: 'event.module',
+          value: 'sysmon',
+        },
+      ],
+      schema: {
+        id: 'process.entity_id',
+        parent: 'process.parent.entity_id',
+        name: 'process.name',
       },
-      {
-        field: 'event.module',
-        value: 'sysmon',
-      },
-    ],
-    schema: {
-      id: 'process.entity_id',
-      parent: 'process.parent.entity_id',
-      name: 'process.name',
     },
-  },
-  {
-    name: 'sysmonViaFilebeat',
-    constraints: [
-      {
-        field: 'agent.type',
-        value: 'filebeat',
+    {
+      name: 'sysmonViaFilebeat',
+      constraints: [
+        {
+          field: 'agent.type',
+          value: 'filebeat',
+        },
+        {
+          field: 'event.dataset',
+          value: 'windows.sysmon_operational',
+        },
+      ],
+      schema: {
+        id: 'process.entity_id',
+        parent: 'process.parent.entity_id',
+        name: 'process.name',
       },
-      {
-        field: 'event.dataset',
-        value: 'windows.sysmon_operational',
-      },
-    ],
-    schema: {
-      id: 'process.entity_id',
-      parent: 'process.parent.entity_id',
-      name: 'process.name',
     },
-  },
-  {
-    name: 'filebeat',
-    constraints: [
-      {
-        field: 'agent.type',
-        value: 'filebeat',
+    {
+      name: 'filebeat',
+      constraints: [
+        {
+          field: 'agent.type',
+          value: 'filebeat',
+        },
+        {
+          field: 'event.dataset',
+          value: supportedFileBeatDataSets,
+        },
+      ],
+      schema: {
+        id: 'process.entity_id',
+        parent: 'process.parent.entity_id',
+        name: 'process.name',
       },
-      {
-        field: 'event.dataset',
-        value: supportedFileBeatDataSets,
-      },
-    ],
-    schema: {
-      id: 'process.entity_id',
-      parent: 'process.parent.entity_id',
-      name: 'process.name',
     },
-  },
-];
+  ];
+};
 
 export function getFieldAsString(doc: unknown, field: string): string | undefined {
   const value = _.get(doc, field);
