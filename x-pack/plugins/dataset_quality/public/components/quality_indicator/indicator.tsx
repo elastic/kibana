@@ -11,12 +11,11 @@ import React from 'react';
 export function QualityIndicator({ quality }: { quality: 'good' | 'degraded' | 'poor' }) {
   const { euiTheme } = useEuiTheme();
 
-  const color =
-    quality === 'poor'
-      ? euiTheme.colors.dangerText
-      : quality === 'degraded'
-      ? euiTheme.colors.warningText
-      : euiTheme.colors.successText;
+  const qualityColors = {
+    poor: euiTheme.colors.dangerText,
+    degraded: euiTheme.colors.warningText,
+    good: euiTheme.colors.successText,
+  };
 
-  return <EuiIcon type="dot" color={color} />;
+  return <EuiIcon type="dot" color={qualityColors[quality]} />;
 }
