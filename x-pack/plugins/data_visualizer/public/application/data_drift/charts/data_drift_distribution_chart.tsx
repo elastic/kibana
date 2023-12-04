@@ -47,7 +47,7 @@ const showAsBarChartOption = i18n.translate(
 );
 
 const visualizeComparisonChartType = i18n.translate(
-  'xpack.dataVisualizer.dataDrift.showAsBarChartOptionLabel',
+  'xpack.dataVisualizer.dataDrift.visualizeComparisonTypeLabel',
   { defaultMessage: 'Visualize comparison type' }
 );
 
