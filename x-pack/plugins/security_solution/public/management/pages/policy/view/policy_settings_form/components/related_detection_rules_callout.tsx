@@ -28,7 +28,10 @@ export const RelatedDetectionRulesCallout = memo<{ 'data-test-subj'?: string }>(
           defaultMessage="The Endpoint Security detection rule is enabled automatically with Elastic Defend. This rule must remain enabled to receive endpoint alerts. {detectionRulesDocsLink}."
           values={{
             detectionRulesDocsLink: (
-              <EuiLink data-test-subj={getTestId('link')} target="_blank" href={`${securitySolution.detectionEngineOverview}`}>
+              <EuiLink
+                data-test-subj={getTestId('link')}
+                target="_blank"
+                href={`${securitySolution.detectionEngineOverview}`}>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policy.details.detectionRulesMessageDocsLink"
                   defaultMessage="Learn More"
