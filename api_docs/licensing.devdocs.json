@@ -823,6 +823,10 @@
               "path": "x-pack/plugins/ml/public/plugin.ts"
             },
             {
+              "plugin": "observability",
+              "path": "x-pack/plugins/observability/public/plugin.ts"
+            },
+            {
               "plugin": "profiling",
               "path": "x-pack/plugins/profiling/public/components/contexts/license/license_context.tsx"
             },
@@ -2208,7 +2212,7 @@
             },
             {
               "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/index.ts"
+              "path": "src/plugins/maps_ems/server/plugin.ts"
             },
             {
               "plugin": "osquery",
@@ -2295,7 +2299,7 @@
           "references": [
             {
               "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/index.ts"
+              "path": "src/plugins/maps_ems/server/plugin.ts"
             }
           ],
           "children": [],

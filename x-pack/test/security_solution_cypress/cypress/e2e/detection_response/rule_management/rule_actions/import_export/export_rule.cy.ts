@@ -7,6 +7,7 @@
 
 import path from 'path';
 
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { expectedExportedRule, getNewRule } from '../../../../../objects/rule';
 import {
   TOASTER_BODY,
@@ -29,11 +30,7 @@ import {
 } from '../../../../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../../../../objects/exception';
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import {
-  cleanKibana,
-  resetRulesTableState,
-  deleteAlertsAndRules,
-} from '../../../../../tasks/common';
+import { resetRulesTableState } from '../../../../../tasks/common';
 import { login } from '../../../../../tasks/login';
 import { visit } from '../../../../../tasks/navigation';
 
@@ -57,10 +54,6 @@ const prebuiltRules = Array.from(Array(7)).map((_, i) => {
 
 describe('Export rules', { tags: ['@ess', '@serverless'] }, () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
-
-  before(() => {
-    cleanKibana();
-  });
 
   beforeEach(() => {
     login();
@@ -100,19 +93,23 @@ describe('Export rules', { tags: ['@ess', '@serverless'] }, () => {
     expectManagementTableRules(['Enabled rule to export']);
   });
 
-  it('shows a modal saying that no rules can be exported if all the selected rules are prebuilt', function () {
-    createAndInstallMockedPrebuiltRules(prebuiltRules);
+  it(
+    'shows a modal saying that no rules can be exported if all the selected rules are prebuilt',
+    { tags: ['@brokenInServerlessQA'] },
+    function () {
+      createAndInstallMockedPrebuiltRules(prebuiltRules);
 
-    filterByElasticRules();
-    selectAllRules();
-    bulkExportRules();
+      filterByElasticRules();
+      selectAllRules();
+      bulkExportRules();
 
-    cy.get(MODAL_CONFIRMATION_BODY).contains(
-      `${prebuiltRules.length} prebuilt Elastic rules (exporting prebuilt rules is not supported)`
-    );
-  });
+      cy.get(MODAL_CONFIRMATION_BODY).contains(
+        `${prebuiltRules.length} prebuilt Elastic rules (exporting prebuilt rules is not supported)`
+      );
+    }
+  );
 
-  it('exports only custom rules', function () {
+  it('exports only custom rules', { tags: ['@brokenInServerlessQA'] }, function () {
     const expectedNumberCustomRulesToBeExported = 1;
 
     createAndInstallMockedPrebuiltRules(prebuiltRules);
@@ -141,7 +138,7 @@ describe('Export rules', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  context('rules with exceptions', () => {
+  context('rules with exceptions', { tags: ['@brokenInServerlessQA'] }, () => {
     beforeEach(() => {
       deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
       // create rule with exceptions

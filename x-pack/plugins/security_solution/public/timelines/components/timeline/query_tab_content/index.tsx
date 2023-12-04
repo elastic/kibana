@@ -35,7 +35,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
-import { TimelineHeader } from '../header';
+import { QueryTabHeader } from './header';
 import { calculateTotalPages } from '../helpers';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { TimelineRefetch } from '../refetch_timeline';
@@ -46,7 +46,6 @@ import type {
 } from '../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
-import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
@@ -55,22 +54,19 @@ import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
 import type { TimelineModel } from '../../../store/timeline/model';
-import { TimelineDatePickerLock } from '../date_picker_lock';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { Sourcerer } from '../../../../common/components/sourcerer';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
-const TimelineHeaderContainer = styled.div`
-  margin-top: 6px;
+const QueryTabHeaderContainer = styled.div`
   width: 100%;
 `;
 
-TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
+QueryTabHeaderContainer.displayName = 'TimelineHeaderContainer';
 
 const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   align-items: stretch;
@@ -79,8 +75,7 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   flex-direction: column;
 
   &.euiFlyoutHeader {
-    ${({ theme }) =>
-      `padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS};`}
+    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}
   }
 `;
 
@@ -280,22 +275,24 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     );
   }, [dispatch, filterManager, timelineId]);
 
-  const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
-    useTimelineEvents({
-      dataViewId,
-      endDate: end,
-      fields: getTimelineQueryFields(),
-      filterQuery: combinedQueries?.filterQuery,
-      id: timelineId,
-      indexNames: selectedPatterns,
-      language: kqlQuery.language,
-      limit: itemsPerPage,
-      runtimeMappings,
-      skip: !canQueryTimeline,
-      sort: timelineQuerySortField,
-      startDate: start,
-      timerangeKind,
-    });
+  const [
+    isQueryLoading,
+    { events, inspect, totalCount, pageInfo, loadPage, refreshedAt, refetch },
+  ] = useTimelineEvents({
+    dataViewId,
+    endDate: end,
+    fields: getTimelineQueryFields(),
+    filterQuery: combinedQueries?.filterQuery,
+    id: timelineId,
+    indexNames: selectedPatterns,
+    language: kqlQuery.language,
+    limit: itemsPerPage,
+    runtimeMappings,
+    skip: !canQueryTimeline,
+    sort: timelineQuerySortField,
+    startDate: start,
+    timerangeKind,
+  });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
@@ -318,10 +315,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     );
   }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
 
-  const isDatePickerDisabled = useMemo(() => {
-    return (combinedQueries && combinedQueries.kqlError != null) || false;
-  }, [combinedQueries]);
-
   const leadingControlColumns = useMemo(
     () =>
       getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
@@ -331,10 +324,15 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [ACTION_BUTTON_COUNT]
   );
 
+  // NOTE: The timeline is blank after browser FORWARD navigation (after using back button to navigate to
+  // the previous page from the timeline), yet we still see total count. This is because the timeline
+  // is not getting refreshed when using browser navigation.
+  const showEventsCountBadge = !isBlankTimeline && totalCount >= 0;
+
   return (
     <>
       <InPortal node={timelineEventsCountPortalNode}>
-        {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+        {showEventsCountBadge ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
       </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.query}`}
@@ -350,45 +348,35 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             data-test-subj={`${activeTab}-tab-flyout-header`}
             hasBorder={false}
           >
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
-              data-test-subj="timeline-date-picker-container"
-            >
+            <EuiFlexGroup gutterSize="s" direction="column">
               {timelineFullScreen && setTimelineFullScreen != null && (
-                <ExitFullScreen
-                  fullScreen={timelineFullScreen}
-                  setFullScreen={setTimelineFullScreen}
-                />
+                <EuiFlexItem>
+                  <EuiFlexGroup alignItems="center" gutterSize="s">
+                    <ExitFullScreen
+                      fullScreen={timelineFullScreen}
+                      setFullScreen={setTimelineFullScreen}
+                    />
+                  </EuiFlexGroup>
+                </EuiFlexItem>
               )}
-              <EuiFlexItem grow={10}>
-                <SuperDatePicker
-                  width="auto"
-                  id={InputsModelId.timeline}
-                  timelineId={timelineId}
-                  disabled={isDatePickerDisabled}
-                />
+              <EuiFlexItem data-test-subj="timeline-date-picker-container">
+                <QueryTabHeaderContainer data-test-subj="timelineHeader">
+                  <QueryTabHeader
+                    filterManager={filterManager}
+                    show={show && activeTab === TimelineTabs.query}
+                    showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+                    status={status}
+                    timelineId={timelineId}
+                  />
+                </QueryTabHeaderContainer>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TimelineDatePickerLock />
-              </EuiFlexItem>
-              <SourcererFlex grow={1}>
-                {activeTab === TimelineTabs.query && (
-                  <Sourcerer scope={SourcererScopeName.timeline} />
-                )}
-              </SourcererFlex>
+              {/* TODO: This is a temporary solution to hide the KPIs until lens components play nicely with timelines */}
+              {/* https://github.com/elastic/kibana/issues/17156 */}
+              {/* <EuiFlexItem grow={false}> */}
+              {/*   <TimelineKpi timelineId={timelineId} /> */}
+              {/* </EuiFlexItem> */}
             </EuiFlexGroup>
-            <TimelineHeaderContainer data-test-subj="timelineHeader">
-              <TimelineHeader
-                filterManager={filterManager}
-                show={show && activeTab === TimelineTabs.query}
-                showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-                status={status}
-                timelineId={timelineId}
-              />
-            </TimelineHeaderContainer>
           </StyledEuiFlyoutHeader>
-
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody
               data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}
@@ -421,7 +409,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 <Footer
                   activePage={pageInfo?.activePage ?? 0}
                   data-test-subj="timeline-footer"
-                  updatedAt={updatedAt}
+                  updatedAt={refreshedAt}
                   height={footerHeight}
                   id={timelineId}
                   isLive={isLive}

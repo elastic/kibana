@@ -8,6 +8,7 @@
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
+  fillInQueryTimeout,
   inputQuery,
   selectAllAgents,
   submitQuery,
@@ -36,18 +37,31 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     cy.contains('Query is a required field').should('not.exist');
     checkResults();
     getAdvancedButton().click();
+    fillInQueryTimeout('910');
+    submitQuery();
+    cy.contains('Timeout value must be lower than 900 seconds.');
+    fillInQueryTimeout('890');
+    submitQuery();
+    cy.contains('Timeout value must be lower than 900 seconds.').should('not.exist');
     typeInOsqueryFieldInput('days{downArrow}{enter}');
     submitQuery();
     cy.contains('ECS field is required.');
     typeInECSFieldInput('message{downArrow}{enter}');
+
+    cy.intercept('POST', '/api/osquery/live_queries').as('postQuery');
     submitQuery();
     cy.contains('ECS field is required.').should('not.exist');
-
+    cy.wait('@postQuery').then((interception) => {
+      expect(interception.request.body).to.have.property('query', 'select * from uptime;');
+      expect(interception.request.body).to.have.property('timeout', 890);
+      expect(interception.response?.statusCode).to.eq(200);
+      expect(interception.response?.body.data.queries[0]).to.have.property('timeout', 890);
+    });
     checkResults();
-    cy.react('Cell', { props: { colIndex: 0 } })
-      .should('exist')
-      .first()
-      .click();
+    cy.get('[data-gridcell-column-index="0"][data-gridcell-row-index="0"]').should('exist');
+    cy.get(
+      '[data-gridcell-column-index="0"][data-gridcell-row-index="0"] [data-datagrid-interactable="true"]'
+    ).click();
     cy.url().should('include', 'app/fleet/agents/');
   });
 
@@ -70,22 +84,22 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
       "where pos.remote_port !='0' {shift+enter}" +
       'limit 1000;';
     cy.contains('New live query').click();
-    cy.get(LIVE_QUERY_EDITOR).invoke('height').and('be.gt', 99).and('be.lt', 110);
-    cy.get(LIVE_QUERY_EDITOR).click().invoke('val', multilineQuery);
+    cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').and('be.gt', 99).and('be.lt', 110);
+    cy.getBySel(LIVE_QUERY_EDITOR).click().invoke('val', multilineQuery);
 
     inputQuery(multilineQuery);
-    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
+    cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
     selectAllAgents();
     submitQuery();
     cy.getBySel('osqueryResultsPanel');
 
     // check if it get's bigger when we add more lines
-    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
+    cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
     inputQuery(multilineQuery);
-    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 350).and('be.lt', 550);
+    cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 350).and('be.lt', 600);
 
     inputQuery('{selectall}{backspace}{selectall}{backspace}');
     // not sure if this is how it used to work when I implemented the functionality, but let's leave it like this for now
-    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 200).and('be.lt', 400);
+    cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 200).and('be.lt', 400);
   });
 });

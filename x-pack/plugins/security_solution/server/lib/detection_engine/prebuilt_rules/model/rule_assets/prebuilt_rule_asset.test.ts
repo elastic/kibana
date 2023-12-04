@@ -17,7 +17,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, description: Required, risk_score: Required, severity: Required, Invalid input, rule_id: Required, version: Required"`
+      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 2 more"`
     );
   });
 
@@ -40,7 +40,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, description: Required, risk_score: Required, severity: Required, Invalid input, version: Required"`
+      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 1 more"`
     );
   });
 
@@ -176,7 +176,9 @@ describe('Prebuilt rule asset schema', () => {
 
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"index.0: Expected string, received number"`
+    );
   });
 
   test('saved_query type can have filters with it', () => {
@@ -198,7 +200,9 @@ describe('Prebuilt rule asset schema', () => {
 
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"filters: Expected array, received string"`
+    );
   });
 
   test('language validates with kuery', () => {
@@ -231,7 +235,9 @@ describe('Prebuilt rule asset schema', () => {
 
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up'"`
+    );
   });
 
   test('max_signals cannot be negative', () => {

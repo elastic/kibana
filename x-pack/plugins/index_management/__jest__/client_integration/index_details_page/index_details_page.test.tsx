@@ -11,11 +11,7 @@ import { act } from 'react-dom/test-utils';
 
 import React from 'react';
 
-import {
-  IndexDetailsSection,
-  IndexDetailsTab,
-  IndexDetailsTabIds,
-} from '../../../common/constants';
+import { IndexDetailsSection, IndexDetailsTab, IndexDetailsTabId } from '../../../common/constants';
 import { API_BASE_PATH, Index, INTERNAL_API_BASE_PATH } from '../../../common';
 
 import {
@@ -399,57 +395,51 @@ describe('<IndexDetailsPage />', () => {
       expect(testBed.actions.overview.addDocCodeBlockExists()).toBe(true);
     });
 
-    describe('extension service summary', () => {
-      it('renders all summaries added to the extension service', async () => {
-        await act(async () => {
-          testBed = await setup({
-            httpSetup,
-            dependencies: {
-              services: {
-                extensionsService: {
-                  summaries: [() => <span>test</span>, () => <span>test2</span>],
-                },
+    it('renders index name badges from the extensions service', async () => {
+      const testBadges = ['testBadge1', 'testBadge2'];
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: {
+              extensionsService: {
+                _badges: testBadges.map((badge) => ({
+                  matchIndex: () => true,
+                  label: badge,
+                  color: 'primary',
+                })),
               },
             },
-          });
+          },
         });
-        testBed.component.update();
-        expect(testBed.actions.overview.extensionSummaryExists(0)).toBe(true);
-        expect(testBed.actions.overview.extensionSummaryExists(1)).toBe(true);
       });
+      testBed.component.update();
+      const header = testBed.actions.getHeader();
+      expect(header).toEqual(`${testIndexName} ${testBadges.join(' ')}`);
+    });
 
-      it(`doesn't render empty panels if the summary renders null`, async () => {
+    describe('extension service overview content', () => {
+      it('renders the content instead of the default code block', async () => {
+        const extensionsServiceOverview = 'Test content via extensions service';
         await act(async () => {
           testBed = await setup({
             httpSetup,
             dependencies: {
               services: {
                 extensionsService: {
-                  summaries: [() => null],
+                  _indexOverviewContent: {
+                    renderContent: () => extensionsServiceOverview,
+                  },
                 },
               },
             },
           });
         });
         testBed.component.update();
-        expect(testBed.actions.overview.extensionSummaryExists(0)).toBe(false);
-      });
 
-      it(`doesn't render anything when no summaries added to the extension service`, async () => {
-        await act(async () => {
-          testBed = await setup({
-            httpSetup,
-            dependencies: {
-              services: {
-                extensionsService: {
-                  summaries: [],
-                },
-              },
-            },
-          });
-        });
-        testBed.component.update();
-        expect(testBed.actions.overview.extensionSummaryExists(0)).toBe(false);
+        expect(testBed.actions.overview.addDocCodeBlockExists()).toBe(false);
+        const content = testBed.actions.getActiveTabContent();
+        expect(content).toContain(extensionsServiceOverview);
       });
     });
   });
@@ -510,6 +500,28 @@ describe('<IndexDetailsPage />', () => {
         await testBed.actions.mappings.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
       });
+    });
+
+    it('renders the content set via the extensions service', async () => {
+      const mappingsContent = 'test mappings extension';
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: {
+              extensionsService: {
+                _indexMappingsContent: {
+                  renderContent: () => mappingsContent,
+                },
+              },
+            },
+          },
+        });
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      const content = testBed.actions.getActiveTabContent();
+      expect(content).toContain(mappingsContent);
     });
   });
 
@@ -851,8 +863,9 @@ describe('<IndexDetailsPage />', () => {
       );
     });
   });
+
   describe('extension service tabs', () => {
-    const testTabId = 'testTab' as IndexDetailsTabIds;
+    const testTabId = 'testTab' as IndexDetailsTabId;
     const testContent = 'Test content';
     const additionalTab: IndexDetailsTab = {
       id: testTabId,

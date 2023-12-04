@@ -32,7 +32,6 @@ import { useAppContext } from '../../../../../app_context';
 import { documentationService } from '../../../../../services';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../../services/breadcrumbs';
 import { languageDefinitions, curlDefinition } from './languages';
-import { ExtensionsSummary } from './extensions_summary';
 import { DataStreamDetails } from './data_stream_details';
 import { StorageDetails } from './storage_details';
 import { AliasesDetails } from './aliases_details';
@@ -55,7 +54,11 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
     size,
     primary_size: primarySize,
   } = indexDetails;
-  const { core, plugins } = useAppContext();
+  const {
+    core,
+    plugins,
+    services: { extensionsService },
+  } = useAppContext();
 
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsOverview);
@@ -94,59 +97,64 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
 
       <EuiSpacer />
 
-      <ExtensionsSummary index={indexDetails} />
+      {extensionsService.indexOverviewContent ? (
+        extensionsService.indexOverviewContent.renderContent({
+          index: indexDetails,
+          getUrlForApp: core.getUrlForApp,
+        })
+      ) : (
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h2>
+                {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.addMoreDataTitle', {
+                  defaultMessage: 'Add data to this index',
+                })}
+              </h2>
+            </EuiTitle>
 
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.addMoreDataTitle', {
-                defaultMessage: 'Add data to this index',
-              })}
-            </h2>
-          </EuiTitle>
+            <EuiSpacer size="s" />
 
-          <EuiSpacer size="s" />
+            <EuiTextColor color="subdued">
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexDetails.overviewTab.addMoreDataDescription"
+                    defaultMessage="Use the bulk API to add data to your index. {docsLink}"
+                    values={{
+                      docsLink: (
+                        <EuiLink href={documentationService.getBulkApi()} target="_blank" external>
+                          <FormattedMessage
+                            id="xpack.idxMgmt.indexDetails.overviewTab.addDocsLink"
+                            defaultMessage="Learn more."
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
+            </EuiTextColor>
+          </EuiFlexItem>
 
-          <EuiTextColor color="subdued">
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexDetails.overviewTab.addMoreDataDescription"
-                  defaultMessage="Use the bulk API to add data to your index. {docsLink}"
-                  values={{
-                    docsLink: (
-                      <EuiLink href={documentationService.getBulkApi()} target="_blank" external>
-                        <FormattedMessage
-                          id="xpack.idxMgmt.indexDetails.overviewTab.addDocsLink"
-                          defaultMessage="Learn more."
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
-          </EuiTextColor>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <CodeBox
-            languages={languageDefinitions}
-            codeSnippet={getLanguageDefinitionCodeSnippet(
-              selectedLanguage,
-              'ingestDataIndex',
-              codeSnippetArguments
-            )}
-            selectedLanguage={selectedLanguage}
-            setSelectedLanguage={setSelectedLanguage}
-            assetBasePath={core.http.basePath.prepend(`/plugins/indexManagement/assets`)}
-            sharePlugin={plugins.share}
-            application={core.application}
-            consoleRequest={getConsoleRequest('ingestDataIndex', codeSnippetArguments)}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          <EuiFlexItem>
+            <CodeBox
+              languages={languageDefinitions}
+              codeSnippet={getLanguageDefinitionCodeSnippet(
+                selectedLanguage,
+                'ingestDataIndex',
+                codeSnippetArguments
+              )}
+              selectedLanguage={selectedLanguage}
+              setSelectedLanguage={setSelectedLanguage}
+              assetBasePath={core.http.basePath.prepend(`/plugins/indexManagement/assets`)}
+              sharePlugin={plugins.share}
+              application={core.application}
+              consoleRequest={getConsoleRequest('ingestDataIndex', codeSnippetArguments)}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </>
   );
 };

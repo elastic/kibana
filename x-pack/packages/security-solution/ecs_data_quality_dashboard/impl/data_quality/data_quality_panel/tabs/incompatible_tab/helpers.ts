@@ -65,7 +65,22 @@ export const getIncompatibleMappingsFields = (
   enrichedFieldMetadata: EnrichedFieldMetadata[]
 ): string[] =>
   enrichedFieldMetadata.reduce<string[]>((acc, x) => {
-    if (!x.isEcsCompliant && x.type !== x.indexFieldType) {
+    if (
+      !x.isEcsCompliant &&
+      x.type !== x.indexFieldType &&
+      !getIsInSameFamily({ ecsExpectedType: x.type, type: x.indexFieldType })
+    ) {
+      const field = escape(x.indexFieldName);
+      if (field != null) {
+        return [...acc, field];
+      }
+    }
+    return acc;
+  }, []);
+
+export const getSameFamilyFields = (enrichedFieldMetadata: EnrichedFieldMetadata[]): string[] =>
+  enrichedFieldMetadata.reduce<string[]>((acc, x) => {
+    if (!x.isEcsCompliant && x.type !== x.indexFieldType && x.isInSameFamily) {
       const field = escape(x.indexFieldName);
       if (field != null) {
         return [...acc, field];

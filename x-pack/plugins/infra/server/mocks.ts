@@ -17,7 +17,6 @@ import { InfraPluginSetup, InfraPluginStart } from './types';
 
 const createInfraSetupMock = () => {
   const infraSetupMock: jest.Mocked<InfraPluginSetup> = {
-    defineInternalSourceConfiguration: jest.fn(),
     inventoryViews: createInventoryViewsServiceSetupMock(),
     metricsExplorerViews: createMetricsExplorerViewsServiceSetupMock(),
   };

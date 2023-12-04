@@ -27,9 +27,13 @@ import { getRegistryDataStreamAssetBaseName } from '../../../../../common/servic
 import {
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
   FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
+  STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS,
+  STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS,
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
+import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
 
@@ -76,12 +80,14 @@ export function getTemplate({
   registryElasticsearch,
   mappings,
   isIndexModeTimeSeries,
+  type,
 }: {
   templateIndexPattern: string;
   packageName: string;
   composedOfTemplates: string[];
   templatePriority: number;
   mappings: IndexTemplateMappings;
+  type: string;
   hidden?: boolean;
   registryElasticsearch?: RegistryElasticsearch | undefined;
   isIndexModeTimeSeries?: boolean;
@@ -97,10 +103,15 @@ export function getTemplate({
     isIndexModeTimeSeries,
   });
   if (template.template.settings.index.final_pipeline) {
-    throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
+    throw new PackageInvalidArchiveError(
+      `Error template for ${templateIndexPattern} contains a final_pipeline`
+    );
   }
 
+  const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries);
+
   template.composed_of = [
+    ...esBaseComponents,
     ...(template.composed_of || []),
     FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
@@ -111,6 +122,20 @@ export function getTemplate({
   return template;
 }
 
+const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): string[] => {
+  if (type === 'metrics') {
+    if (isIndexModeTimeSeries) {
+      return [STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS];
+    }
+
+    return [STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS];
+  } else if (type === 'logs') {
+    return [STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS];
+  }
+
+  return [];
+};
+
 /**
  * Generate mapping takes the given nested fields array and creates the Elasticsearch
  * mapping properties out of it.
@@ -119,46 +144,53 @@ export function getTemplate({
  *
  * @param fields
  */
-export function generateMappings(fields: Field[]): IndexTemplateMappings {
+export function generateMappings(
+  fields: Field[],
+  isIndexModeTimeSeries = false
+): IndexTemplateMappings {
   const dynamicTemplates: Array<Record<string, Properties>> = [];
   const dynamicTemplateNames = new Set<string>();
   const runtimeFields: RuntimeFields = {};
 
-  const { properties } = _generateMappings(fields, {
-    addDynamicMapping: (dynamicMapping: {
-      path: string;
-      matchingType: string;
-      pathMatch: string;
-      properties: string;
-      runtimeProperties?: string;
-    }) => {
-      const name = dynamicMapping.path;
-      if (dynamicTemplateNames.has(name)) {
-        return;
-      }
+  const { properties } = _generateMappings(
+    fields,
+    {
+      addDynamicMapping: (dynamicMapping: {
+        path: string;
+        matchingType: string;
+        pathMatch: string;
+        properties: Properties;
+        runtimeProperties?: Properties;
+      }) => {
+        const name = dynamicMapping.path;
+        if (dynamicTemplateNames.has(name)) {
+          return;
+        }
 
-      const dynamicTemplate: Properties = {};
-      if (dynamicMapping.runtimeProperties !== undefined) {
-        dynamicTemplate.runtime = dynamicMapping.runtimeProperties;
-      } else {
-        dynamicTemplate.mapping = dynamicMapping.properties;
-      }
+        const dynamicTemplate: Properties = {};
+        if (dynamicMapping.runtimeProperties !== undefined) {
+          dynamicTemplate.runtime = dynamicMapping.runtimeProperties;
+        } else {
+          dynamicTemplate.mapping = dynamicMapping.properties;
+        }
 
-      if (dynamicMapping.matchingType) {
-        dynamicTemplate.match_mapping_type = dynamicMapping.matchingType;
-      }
+        if (dynamicMapping.matchingType) {
+          dynamicTemplate.match_mapping_type = dynamicMapping.matchingType;
+        }
 
-      if (dynamicMapping.pathMatch) {
-        dynamicTemplate.path_match = dynamicMapping.pathMatch;
-      }
+        if (dynamicMapping.pathMatch) {
+          dynamicTemplate.path_match = dynamicMapping.pathMatch;
+        }
 
-      dynamicTemplateNames.add(name);
-      dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
+        dynamicTemplateNames.add(name);
+        dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
+      },
+      addRuntimeField: (runtimeField: { path: string; properties: Properties }) => {
+        runtimeFields[`${runtimeField.path}`] = runtimeField.properties;
+      },
     },
-    addRuntimeField: (runtimeField: { path: string; properties: Properties }) => {
-      runtimeFields[`${runtimeField.path}`] = runtimeField.properties;
-    },
-  });
+    isIndexModeTimeSeries
+  );
 
   const indexTemplateMappings: IndexTemplateMappings = { properties };
   if (dynamicTemplates.length > 0) {
@@ -184,13 +216,69 @@ function _generateMappings(
     addDynamicMapping: any;
     addRuntimeField: any;
     groupFieldName?: string;
-  }
+  },
+  isIndexModeTimeSeries: boolean
 ): {
   properties: IndexTemplateMappings['properties'];
   hasNonDynamicTemplateMappings: boolean;
+  hasDynamicTemplateMappings: boolean;
 } {
   let hasNonDynamicTemplateMappings = false;
+  let hasDynamicTemplateMappings = false;
   const props: Properties = {};
+
+  function addParentObjectAsStaticProperty(field: Field) {
+    // Don't add intermediate objects for wildcard names, as it will
+    // be added for its parent object.
+    if (field.name.includes('*')) {
+      return;
+    }
+
+    const fieldProps = {
+      type: 'object',
+      dynamic: true,
+    };
+
+    props[field.name] = fieldProps;
+    hasNonDynamicTemplateMappings = true;
+  }
+
+  function addDynamicMappingWithIntermediateObjects(
+    path: string,
+    pathMatch: string,
+    matchingType: string,
+    dynProperties: Properties,
+    fieldProps?: Properties
+  ) {
+    ctx.addDynamicMapping({
+      path,
+      pathMatch,
+      matchingType,
+      properties: dynProperties,
+      runtimeProperties: fieldProps,
+    });
+    hasDynamicTemplateMappings = true;
+
+    // Add dynamic intermediate objects.
+    const parts = pathMatch.split('.');
+    for (let i = parts.length - 1; i > 0; i--) {
+      const name = parts.slice(0, i).join('.');
+      if (!name.includes('*')) {
+        continue;
+      }
+      const dynProps: Properties = {
+        type: 'object',
+        dynamic: true,
+      };
+      ctx.addDynamicMapping({
+        path: name,
+        pathMatch: name,
+        matchingType: 'object',
+        properties: dynProps,
+      });
+    }
+  }
+
   // TODO: this can happen when the fields property in fields.yml is present but empty
   // Maybe validation should be moved to fields/field.ts
   if (fields) {
@@ -217,7 +305,9 @@ function _generateMappings(
             case 'long':
             case 'boolean':
               dynProperties.type = field.object_type;
-              dynProperties.time_series_metric = field.metric_type;
+              if (isIndexModeTimeSeries) {
+                dynProperties.time_series_metric = field.metric_type;
+              }
               matchingType = field.object_type_mapping_type ?? field.object_type;
             default:
               break;
@@ -228,13 +318,17 @@ function _generateMappings(
           const fieldProps = generateRuntimeFieldProps(_field);
 
           if (dynProperties && matchingType) {
-            ctx.addDynamicMapping({
+            addDynamicMappingWithIntermediateObjects(
               path,
               pathMatch,
               matchingType,
-              properties: dynProperties,
-              runtimeProperties: fieldProps,
-            });
+              dynProperties,
+              fieldProps
+            );
+
+            // Add the parent object as static property, this is needed for
+            // index templates not using `"dynamic": true`.
+            addParentObjectAsStaticProperty(field);
           }
           return;
         }
@@ -278,7 +372,9 @@ function _generateMappings(
           case 'float':
           case 'half_float':
             dynProperties.type = field.object_type;
-            dynProperties.time_series_metric = field.metric_type;
+            if (isIndexModeTimeSeries) {
+              dynProperties.time_series_metric = field.metric_type;
+            }
             matchingType = field.object_type_mapping_type ?? 'double';
             break;
           case 'byte':
@@ -286,18 +382,24 @@ function _generateMappings(
           case 'short':
           case 'unsigned_long':
             dynProperties.type = field.object_type;
-            dynProperties.time_series_metric = field.metric_type;
+            if (isIndexModeTimeSeries) {
+              dynProperties.time_series_metric = field.metric_type;
+            }
             matchingType = field.object_type_mapping_type ?? 'long';
             break;
           case 'integer':
             // Map integers as long, as in other cases.
             dynProperties.type = 'long';
-            dynProperties.time_series_metric = field.metric_type;
+            if (isIndexModeTimeSeries) {
+              dynProperties.time_series_metric = field.metric_type;
+            }
             matchingType = field.object_type_mapping_type ?? 'long';
             break;
           case 'boolean':
             dynProperties.type = field.object_type;
-            dynProperties.time_series_metric = field.metric_type;
+            if (isIndexModeTimeSeries) {
+              dynProperties.time_series_metric = field.metric_type;
+            }
             matchingType = field.object_type_mapping_type ?? field.object_type;
             break;
           case 'group':
@@ -309,59 +411,84 @@ function _generateMappings(
               type: 'object',
               object_type: subField.object_type ?? subField.type,
             }));
-            _generateMappings(subFields, {
-              ...ctx,
-              groupFieldName: ctx.groupFieldName
-                ? `${ctx.groupFieldName}.${field.name}`
-                : field.name,
-            });
+            const mappings = _generateMappings(
+              subFields,
+              {
+                ...ctx,
+                groupFieldName: ctx.groupFieldName
+                  ? `${ctx.groupFieldName}.${field.name}`
+                  : field.name,
+              },
+              isIndexModeTimeSeries
+            );
+            if (mappings.hasDynamicTemplateMappings) {
+              hasDynamicTemplateMappings = true;
+            }
             break;
           case 'flattened':
             dynProperties.type = field.object_type;
             matchingType = field.object_type_mapping_type ?? 'object';
             break;
           default:
-            throw new Error(
-              `no dynamic mapping generated for field ${path} of type ${field.object_type}`
+            throw new PackageInvalidArchiveError(
+              `No dynamic mapping generated for field ${path} of type ${field.object_type}`
             );
         }
 
         if (dynProperties && matchingType) {
-          ctx.addDynamicMapping({
-            path,
-            pathMatch,
-            matchingType,
-            properties: dynProperties,
-          });
+          addDynamicMappingWithIntermediateObjects(path, pathMatch, matchingType, dynProperties);
+
+          // Add the parent object as static property, this is needed for
+          // index templates not using `"dynamic": true`.
+          addParentObjectAsStaticProperty(field);
         }
       } else {
         let fieldProps = getDefaultProperties(field);
 
         switch (type) {
           case 'group':
-            const mappings = _generateMappings(field.fields!, {
-              ...ctx,
-              groupFieldName: ctx.groupFieldName
-                ? `${ctx.groupFieldName}.${field.name}`
-                : field.name,
-            });
-            if (!mappings.hasNonDynamicTemplateMappings) {
-              return;
-            }
-
-            fieldProps = {
-              properties: mappings.properties,
-              ...generateDynamicAndEnabled(field),
-            };
-            break;
-          case 'group-nested':
-            fieldProps = {
-              properties: _generateMappings(field.fields!, {
+            const mappings = _generateMappings(
+              field.fields!,
+              {
                 ...ctx,
                 groupFieldName: ctx.groupFieldName
                   ? `${ctx.groupFieldName}.${field.name}`
                   : field.name,
-              }).properties,
+              },
+              isIndexModeTimeSeries
+            );
+            if (mappings.hasNonDynamicTemplateMappings) {
+              fieldProps = {
+                properties:
+                  Object.keys(mappings.properties).length > 0 ? mappings.properties : undefined,
+                ...generateDynamicAndEnabled(field),
+              };
+              if (mappings.hasDynamicTemplateMappings) {
+                fieldProps.type = 'object';
+                fieldProps.dynamic = true;
+              }
+            } else if (mappings.hasDynamicTemplateMappings) {
+              fieldProps = {
+                type: 'object',
+                dynamic: true,
+              };
+              hasDynamicTemplateMappings = true;
+            } else {
+              return;
+            }
+            break;
+          case 'group-nested':
+            fieldProps = {
+              properties: _generateMappings(
+                field.fields!,
+                {
+                  ...ctx,
+                  groupFieldName: ctx.groupFieldName
+                    ? `${ctx.groupFieldName}.${field.name}`
+                    : field.name,
+                },
+                isIndexModeTimeSeries
+              ).properties,
               ...generateNestedProps(field),
               type: 'nested',
             };
@@ -449,20 +576,32 @@ function _generateMappings(
           }
         }
 
-        if ('metric_type' in field) {
+        if ('metric_type' in field && isIndexModeTimeSeries) {
           fieldProps.time_series_metric = field.metric_type;
         }
-        if (field.dimension) {
+        if (field.dimension && isIndexModeTimeSeries) {
           fieldProps.time_series_dimension = field.dimension;
         }
 
-        props[field.name] = fieldProps;
+        // Even if we don't add the property because it has a wildcard, notify
+        // the parent that there is some kind of property, so the intermediate object
+        // is still created.
+        // This is done for legacy packages that include ambiguous mappings with objects
+        // without object type. This is not allowed starting on Package Spec v3.
         hasNonDynamicTemplateMappings = true;
+
+        // Avoid including maps with wildcards, they have generated dynamic mappings.
+        if (field.name.includes('*')) {
+          hasDynamicTemplateMappings = true;
+          return;
+        }
+
+        props[field.name] = fieldProps;
       }
     });
   }
 
-  return { properties: props, hasNonDynamicTemplateMappings };
+  return { properties: props, hasNonDynamicTemplateMappings, hasDynamicTemplateMappings };
 }
 
 function generateDynamicAndEnabled(field: Field) {
@@ -772,7 +911,9 @@ const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClien
       alias: dataStreamName,
     });
   } catch (error) {
-    throw new Error(`cannot rollover data stream [${dataStreamName}] due to error: ${error}`);
+    throw new PackageESError(
+      `Cannot rollover data stream [${dataStreamName}] due to error: ${error}`
+    );
   }
 };
 
@@ -919,7 +1060,11 @@ const updateExistingDataStream = async ({
         { logger }
       );
     } catch (err) {
-      throw new Error(`could not update lifecycle settings for ${dataStreamName}: ${err.message}`);
+      // Check if this error can happen because of invalid settings;
+      // We are returning a 500 but in that case it should be a 400 instead
+      throw new PackageESError(
+        `Could not update lifecycle settings for ${dataStreamName}: ${err.message}`
+      );
     }
   }
 
@@ -942,6 +1087,8 @@ const updateExistingDataStream = async ({
       { logger }
     );
   } catch (err) {
-    throw new Error(`could not update index template settings for ${dataStreamName}`);
+    // Same as above - Check if this error can happen because of invalid settings;
+    // We are returning a 500 but in that case it should be a 400 instead
+    throw new PackageESError(`Could not update index template settings for ${dataStreamName}`);
   }
 };

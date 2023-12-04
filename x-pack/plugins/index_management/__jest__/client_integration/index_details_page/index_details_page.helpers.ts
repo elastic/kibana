@@ -14,7 +14,7 @@ import {
 import { HttpSetup } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 
-import { IndexDetailsTabIds } from '../../../common/constants';
+import { IndexDetailsTabId } from '../../../common/constants';
 import { IndexDetailsPage } from '../../../public/application/sections/home/index_list/details_page';
 import { WithAppDependencies } from '../helpers';
 import { testIndexName } from './mocks';
@@ -35,7 +35,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
   routerMock: typeof reactRouterMock;
   actions: {
     getHeader: () => string;
-    clickIndexDetailsTab: (tab: IndexDetailsTabIds) => Promise<void>;
+    clickIndexDetailsTab: (tab: IndexDetailsTabId) => Promise<void>;
     getIndexDetailsTabs: () => string[];
     getActiveTabContent: () => string;
     mappings: {
@@ -88,7 +88,6 @@ export interface IndexDetailsPageTestBed extends TestBed {
       getDataStreamDetailsContent: () => string;
       reloadDataStreamDetails: () => Promise<void>;
       addDocCodeBlockExists: () => boolean;
-      extensionSummaryExists: (index: number) => boolean;
     };
   };
 }
@@ -127,7 +126,7 @@ export const setup = async ({
     return component.find('[data-test-subj="indexDetailsHeader"] h1').text();
   };
 
-  const clickIndexDetailsTab = async (tab: IndexDetailsTabIds) => {
+  const clickIndexDetailsTab = async (tab: IndexDetailsTabId) => {
     await act(async () => {
       find(`indexDetailsTab-${tab}`).simulate('click');
     });
@@ -177,9 +176,6 @@ export const setup = async ({
     },
     addDocCodeBlockExists: () => {
       return exists('codeBlockControlsPanel');
-    },
-    extensionSummaryExists: (index: number) => {
-      return exists(`extensionsSummary-${index}`);
     },
   };
 

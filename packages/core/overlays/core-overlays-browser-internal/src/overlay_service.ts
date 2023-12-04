@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
@@ -15,6 +16,7 @@ import { FlyoutService } from './flyout';
 import { ModalService } from './modal';
 
 interface StartDeps {
+  analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
   targetDomElement: HTMLElement;
@@ -27,16 +29,26 @@ export class OverlayService {
   private modalService = new ModalService();
   private flyoutService = new FlyoutService();
 
-  public start({ i18n, targetDomElement, uiSettings, theme }: StartDeps): OverlayStart {
+  public start({ analytics, i18n, targetDomElement, uiSettings, theme }: StartDeps): OverlayStart {
     const flyoutElement = document.createElement('div');
     targetDomElement.appendChild(flyoutElement);
-    const flyouts = this.flyoutService.start({ i18n, theme, targetDomElement: flyoutElement });
+    const flyouts = this.flyoutService.start({
+      analytics,
+      i18n,
+      theme,
+      targetDomElement: flyoutElement,
+    });
 
     const banners = this.bannersService.start({ i18n, uiSettings });
 
     const modalElement = document.createElement('div');
     targetDomElement.appendChild(modalElement);
-    const modals = this.modalService.start({ i18n, theme, targetDomElement: modalElement });
+    const modals = this.modalService.start({
+      analytics,
+      i18n,
+      theme,
+      targetDomElement: modalElement,
+    });
 
     return {
       banners,

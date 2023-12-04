@@ -20,7 +20,12 @@ import { paths } from '../../../../common/locators/paths';
 
 import { EmbeddableSloProps } from './types';
 
-export function SloOverview({ sloId, sloInstanceId, lastReloadRequestTime }: EmbeddableSloProps) {
+export function SloOverview({
+  sloId,
+  sloInstanceId,
+  lastReloadRequestTime,
+  onRenderComplete,
+}: EmbeddableSloProps) {
   const {
     uiSettings,
     application: { navigateToUrl },
@@ -39,6 +44,13 @@ export function SloOverview({ sloId, sloInstanceId, lastReloadRequestTime }: Emb
   useEffect(() => {
     refetch();
   }, [lastReloadRequestTime, refetch]);
+  useEffect(() => {
+    if (!onRenderComplete) return;
+
+    if (!isLoading) {
+      onRenderComplete();
+    }
+  }, [isLoading, onRenderComplete]);
 
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloNotFound = !isLoading && slo === undefined;
@@ -97,6 +109,7 @@ export function SloOverview({ sloId, sloInstanceId, lastReloadRequestTime }: Emb
       </LoadingContainer>
     );
   }
+
   const TargetCopy = i18n.translate('xpack.observability.sloEmbeddable.overview.sloTargetLabel', {
     defaultMessage: 'Target',
   });

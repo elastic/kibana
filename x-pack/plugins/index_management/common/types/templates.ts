@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DataRetention, DataStream } from './data_streams';
 import { IndexSettings } from './indices';
 import { Aliases } from './aliases';
 import { Mappings } from './mappings';
@@ -18,12 +19,14 @@ export interface TemplateSerialized {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
+    lifecycle?: DataStream['lifecycle'];
   };
   composed_of?: string[];
   version?: number;
   priority?: number;
   _meta?: { [key: string]: any };
   data_stream?: {};
+  allow_auto_create?: boolean;
 }
 
 /**
@@ -39,9 +42,11 @@ export interface TemplateDeserialized {
     aliases?: Aliases;
     mappings?: Mappings;
   };
+  lifecycle?: DataRetention;
   composedOf?: string[]; // Composable template only
   version?: number;
   priority?: number; // Composable template only
+  allowAutoCreate?: boolean;
   order?: number; // Legacy template only
   ilmPolicy?: {
     name: string;

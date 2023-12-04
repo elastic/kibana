@@ -29,6 +29,8 @@ import {
   IAlertsClient,
   InitializeExecutionOpts,
   ProcessAndLogAlertsOpts,
+  ProcessAlertsOpts,
+  LogAlertsOpts,
   TrackedAlerts,
 } from './types';
 import { DEFAULT_MAX_ALERTS } from '../config';
@@ -134,14 +136,11 @@ export class LegacyAlertsClient<
     return this.alertFactory?.get(id);
   }
 
-  public processAndLogAlerts({
-    eventLogger,
-    ruleRunMetricsStore,
-    shouldLogAlerts,
-    flappingSettings,
+  public processAlerts({
     notifyOnActionGroupChange,
+    flappingSettings,
     maintenanceWindowIds,
-  }: ProcessAndLogAlertsOpts) {
+  }: ProcessAlertsOpts) {
     const {
       newAlerts: processedAlertsNew,
       activeAlerts: processedAlertsActive,
@@ -181,17 +180,40 @@ export class LegacyAlertsClient<
     this.processedAlerts.activeCurrent = alerts.currentActiveAlerts;
     this.processedAlerts.recovered = alerts.recoveredAlerts;
     this.processedAlerts.recoveredCurrent = alerts.currentRecoveredAlerts;
+  }
 
+  public logAlerts({ eventLogger, ruleRunMetricsStore, shouldLogAlerts }: LogAlertsOpts) {
     logAlerts({
       logger: this.options.logger,
       alertingEventLogger: eventLogger,
-      newAlerts: alerts.newAlerts,
-      activeAlerts: alerts.currentActiveAlerts,
-      recoveredAlerts: alerts.currentRecoveredAlerts,
+      newAlerts: this.processedAlerts.new,
+      activeAlerts: this.processedAlerts.activeCurrent,
+      recoveredAlerts: this.processedAlerts.recoveredCurrent,
       ruleLogPrefix: this.ruleLogPrefix,
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAlerts,
+    });
+  }
+
+  public processAndLogAlerts({
+    eventLogger,
+    ruleRunMetricsStore,
+    shouldLogAlerts,
+    flappingSettings,
+    notifyOnActionGroupChange,
+    maintenanceWindowIds,
+  }: ProcessAndLogAlertsOpts) {
+    this.processAlerts({
+      notifyOnActionGroupChange,
+      flappingSettings,
+      maintenanceWindowIds,
+    });
+
+    this.logAlerts({
+      eventLogger,
+      ruleRunMetricsStore,
+      shouldLogAlerts,
     });
   }
 

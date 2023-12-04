@@ -23,8 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/168750
-  describe.skip('Event Log public API', () => {
+  describe('Event Log public API', () => {
     before(async () => {
       await spacesService.create({
         id: 'namespace-a',

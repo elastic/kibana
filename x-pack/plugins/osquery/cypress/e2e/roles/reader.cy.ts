@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  activeStateSwitchComponentSelector,
+  customActionEditSavedQuerySelector,
+  customActionRunSavedQuerySelector,
+  formFieldInputSelector,
+} from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
 import {
   cleanupPack,
@@ -49,19 +55,10 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
     navigateTo('/app/osquery/saved_queries');
     cy.contains(savedQueryName);
     cy.contains('Add saved query').should('be.disabled');
-    cy.react('PlayButtonComponent', {
-      props: { savedQuery: { id: savedQueryName } },
-      options: { timeout: 3000 },
-    }).should('not.exist');
-    cy.react('CustomItemAction', {
-      props: { index: 1, item: { id: savedQueryName } },
-    }).click();
-    cy.react('EuiFormRow', { props: { label: 'ID' } })
-      .getBySel('input')
-      .should('be.disabled');
-    cy.react('EuiFormRow', { props: { label: 'Description (optional)' } })
-      .getBySel('input')
-      .should('be.disabled');
+    cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('not.exist');
+    cy.get(customActionEditSavedQuerySelector(savedQueryName)).click();
+    cy.get(formFieldInputSelector('id')).should('be.disabled');
+    cy.get(formFieldInputSelector('description')).should('be.disabled');
 
     cy.contains('Update query').should('not.exist');
     cy.contains(`Delete query`).should('not.exist');
@@ -76,8 +73,8 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
     navigateTo('/app/osquery/live_queries');
     cy.contains('New live query').should('be.disabled');
     cy.contains(liveQueryQuery);
-    cy.react('EuiIconPlay', { options: { timeout: 3000 } }).should('not.exist');
-    cy.react('ActionTableResultsButton').should('exist');
+    cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('not.exist');
+    cy.get(`[aria-label="Details"]`).should('exist');
   });
 
   it('should not be able to add nor edit packs', () => {
@@ -85,22 +82,13 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
     cy.contains('Add pack').should('be.disabled');
     cy.getBySel('tablePaginationPopoverButton').click();
     cy.getBySel('tablePagination-50-rows').click();
-    cy.react('ActiveStateSwitchComponent', {
-      props: { item: { name: packName } },
-    })
-      .find('button')
-      .should('be.disabled');
+
+    cy.get(activeStateSwitchComponentSelector(packName)).should('be.disabled');
+
     cy.contains(packName).click();
     cy.contains(`${packName} details`);
     cy.contains('Edit').should('be.disabled');
-    // TODO: Verify assertions
-    cy.react('CustomItemAction', {
-      props: { index: 0, item: { id: savedQueryName } },
-      options: { timeout: 3000 },
-    }).should('not.exist');
-    cy.react('CustomItemAction', {
-      props: { index: 1, item: { id: savedQueryName } },
-      options: { timeout: 3000 },
-    }).should('not.exist');
+    cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('not.exist');
+    cy.get(customActionEditSavedQuerySelector(savedQueryName)).should('not.exist');
   });
 });

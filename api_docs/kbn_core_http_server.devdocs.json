@@ -105,9 +105,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.AddVersionOpts",
         "type": "Interface",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "AddVersionOpts",
         "description": [
           "\nOptions for a versioned route. Probably needs a lot more options like sunsetting\nof an endpoint etc."
@@ -130,9 +128,7 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.AddVersionOpts.version",
             "type": "string",
-            "tags": [
-              "experimental"
-            ],
+            "tags": [],
             "label": "version",
             "description": [
               "\nVersion to assign to this route"
@@ -145,9 +141,7 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.AddVersionOpts.validate",
             "type": "CompoundType",
-            "tags": [
-              "experimental"
-            ],
+            "tags": [],
             "label": "validate",
             "description": [
               "\nValidation for this version of a route"
@@ -754,7 +748,7 @@
               "The headers associated with the request."
             ],
             "signature": [
-              "{ date?: string | string[] | undefined; warning?: string | string[] | undefined; range?: string | string[] | undefined; from?: string | string[] | undefined; etag?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; allow?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; location?: string | string[] | undefined; origin?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+              "{ date?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; range?: string | string[] | undefined; from?: string | string[] | undefined; etag?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; allow?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; origin?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
             "path": "packages/core/http/core-http-server/src/router/raw_request.ts",
             "deprecated": false,
@@ -1003,9 +997,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.FullValidationConfig",
         "type": "Interface",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "FullValidationConfig",
         "description": [
           "\nVersioned route validation"
@@ -1028,9 +1020,7 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.FullValidationConfig.request",
             "type": "CompoundType",
-            "tags": [
-              "experimental"
-            ],
+            "tags": [],
             "label": "request",
             "description": [
               "\nValidation to run against route inputs: params, query and body"
@@ -1054,8 +1044,7 @@
             "id": "def-common.FullValidationConfig.response",
             "type": "Object",
             "tags": [
-              "note",
-              "experimental"
+              "note"
             ],
             "label": "response",
             "description": [
@@ -1842,6 +1831,28 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.HttpServiceSetup.staticAssets",
+            "type": "Object",
+            "tags": [],
+            "label": "staticAssets",
+            "description": [
+              "\nAPIs for creating hrefs to static assets.\nSee {@link IStaticAssets}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IStaticAssets",
+                "text": "IStaticAssets"
+              }
+            ],
+            "path": "packages/core/http/core-http-server/src/http_contract.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.HttpServiceSetup.csp",
             "type": "Object",
             "tags": [],
@@ -2014,6 +2025,28 @@
                 "docId": "kibKbnCoreHttpServerPluginApi",
                 "section": "def-common.IBasePath",
                 "text": "IBasePath"
+              }
+            ],
+            "path": "packages/core/http/core-http-server/src/http_contract.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.HttpServiceStart.staticAssets",
+            "type": "Object",
+            "tags": [],
+            "label": "staticAssets",
+            "description": [
+              "\nAPIs for creating hrefs to static assets.\nSee {@link IStaticAssets}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IStaticAssets",
+                "text": "IStaticAssets"
               }
             ],
             "path": "packages/core/http/core-http-server/src/http_contract.ts",
@@ -3668,20 +3701,20 @@
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/internal/find_tags.ts"
               },
               {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/routes/fields.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/routes/metric_indices/index.ts"
+              },
+              {
                 "plugin": "assetManager",
                 "path": "x-pack/plugins/asset_manager/server/routes/ping.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/asset_manager/server/routes/assets/index.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/asset_manager/server/routes/assets/index.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/asset_manager/server/routes/assets/index.ts"
               },
               {
                 "plugin": "assetManager",
@@ -3694,6 +3727,14 @@
               {
                 "plugin": "assetManager",
                 "path": "x-pack/plugins/asset_manager/server/routes/assets/services.ts"
+              },
+              {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/asset_manager/server/routes/assets/containers.ts"
+              },
+              {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/asset_manager/server/routes/assets/pods.ts"
               },
               {
                 "plugin": "banners",
@@ -4005,6 +4046,10 @@
               },
               {
                 "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/indices.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/mapping.ts"
               },
               {
@@ -4242,10 +4287,6 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/snapshot_repositories/register_fetch_route.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/routes/fields.ts"
               },
               {
                 "plugin": "infra",
@@ -5818,6 +5859,10 @@
                 "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/set.ts"
               },
               {
+                "plugin": "@kbn/core-ui-settings-server-internal",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/validate.ts"
+              },
+              {
                 "plugin": "@kbn/core-capabilities-server-internal",
                 "path": "packages/core/capabilities/core-capabilities-server-internal/src/routes/resolve_capabilities.ts"
               },
@@ -6172,6 +6217,14 @@
               {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/internal/bulk_delete.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/routes/vis.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "assetManager",
@@ -6656,10 +6709,6 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/templates/register_add_policy_route.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/routes/vis.ts"
               },
               {
                 "plugin": "infra",
@@ -7952,6 +8001,10 @@
                 "path": "src/plugins/guided_onboarding/server/routes/plugin_state_routes.ts"
               },
               {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/routes/internal/deprecations/deprecations.ts"
               },
@@ -8606,6 +8659,10 @@
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.ts"
               },
               {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/security.ts"
               },
@@ -8950,6 +9007,10 @@
               {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/tags/delete_tag.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "assetManager",
@@ -9636,6 +9697,56 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.IStaticAssets",
+        "type": "Interface",
+        "tags": [],
+        "label": "IStaticAssets",
+        "description": [
+          "\nAPIs for creating hrefs to static assets.\n"
+        ],
+        "path": "packages/core/http/core-http-server/src/static_assets.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.IStaticAssets.getPluginAssetHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getPluginAssetHref",
+            "description": [
+              "\nGets the full href to the current plugin's asset,\ngiven its path relative to the plugin's `public/assets` folder.\n"
+            ],
+            "signature": [
+              "(assetPath: string) => string"
+            ],
+            "path": "packages/core/http/core-http-server/src/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-common.IStaticAssets.getPluginAssetHref.$1",
+                "type": "string",
+                "tags": [],
+                "label": "assetPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server/src/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.KibanaErrorResponseFactory",
         "type": "Interface",
         "tags": [],
@@ -10209,7 +10320,7 @@
               "\nReadonly copy of incoming request headers."
             ],
             "signature": [
-              "{ date?: string | string[] | undefined; warning?: string | string[] | undefined; range?: string | string[] | undefined; from?: string | string[] | undefined; etag?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; allow?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; location?: string | string[] | undefined; origin?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+              "{ date?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; range?: string | string[] | undefined; from?: string | string[] | undefined; etag?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; allow?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; origin?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
@@ -12673,9 +12784,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.VersionedRoute",
         "type": "Interface",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "VersionedRoute",
         "description": [
           "\nA versioned route"
@@ -12698,9 +12807,7 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.VersionedRoute.addVersion",
             "type": "Function",
-            "tags": [
-              "experimental"
-            ],
+            "tags": [],
             "label": "addVersion",
             "description": [
               "\nAdd a new version of this route"
@@ -12843,9 +12950,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.VersionedRouter",
         "type": "Interface",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "VersionedRouter",
         "description": [
           "\nA router, very similar to {@link IRouter} that will return an {@link VersionedRoute}\ninstead.\n"
@@ -12869,7 +12974,6 @@
             "id": "def-common.VersionedRouter.get",
             "type": "Function",
             "tags": [
-              "experimental",
               "track-adoption"
             ],
             "label": "get",
@@ -13186,6 +13290,10 @@
                 "path": "x-pack/plugins/ml/server/routes/management.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_config.ts"
               },
@@ -13198,8 +13306,8 @@
                 "path": "src/plugins/telemetry/server/routes/telemetry_last_reported.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "canvas",
@@ -13503,22 +13611,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/get_timeline/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/get_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/resolve_timeline/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/draft_timelines/get_draft_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route.ts"
               },
               {
@@ -13539,7 +13631,39 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_status_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/users/suggest_user_profiles_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/status.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/privileges.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/get_timeline/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/get_timelines/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/resolve_timeline/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/draft_timelines/get_draft_timelines/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/status.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/get.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -13619,27 +13743,27 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms_audit_messages.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/audit_messages/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms_nodes.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_nodes/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_all/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_single/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_stats_all/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_stats_single/register_route.ts"
               },
               {
                 "plugin": "uptime",
@@ -13817,7 +13941,6 @@
             "id": "def-common.VersionedRouter.put",
             "type": "Function",
             "tags": [
-              "experimental",
               "track-adoption"
             ],
             "label": "put",
@@ -13918,6 +14041,10 @@
                 "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_user_has_seen_notice.ts"
               },
@@ -13926,8 +14053,8 @@
                 "path": "src/plugins/telemetry/server/routes/telemetry_last_reported.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "canvas",
@@ -14011,7 +14138,7 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_create/register_route.ts"
               },
               {
                 "plugin": "uptime",
@@ -14085,7 +14212,6 @@
             "id": "def-common.VersionedRouter.post",
             "type": "Function",
             "tags": [
-              "experimental",
               "track-adoption"
             ],
             "label": "post",
@@ -14224,6 +14350,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/datafeeds.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
@@ -14506,6 +14636,10 @@
                 "path": "x-pack/plugins/ml/server/routes/alerting.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_opt_in_stats.ts"
               },
@@ -14518,8 +14652,8 @@
                 "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "canvas",
@@ -14751,14 +14885,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/export_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/draft_timelines/clean_draft_timelines/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/indices/delete_indices_route.ts"
               },
               {
@@ -14787,27 +14913,47 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_score_preview_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/set_alert_assignees_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_init_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/init.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_enable_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/enable.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_disable_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/disable.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_score_calculation_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/export_timelines/index.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_upload_handler.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/copy_timeline/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/draft_timelines/clean_draft_timelines/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/routes/calculation.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/routes/preview.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upsert.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14859,39 +15005,39 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/field_histograms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/field_histograms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_update/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/reauthorize_transforms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/reset_transforms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_preview/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/start_transforms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/stop_transforms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/delete_transforms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/schedule_now_transforms/register_route.ts"
               },
               {
                 "plugin": "controls",
@@ -14993,7 +15139,6 @@
             "id": "def-common.VersionedRouter.patch",
             "type": "Function",
             "tags": [
-              "experimental",
               "track-adoption"
             ],
             "label": "patch",
@@ -15028,6 +15173,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "logsShared",
@@ -15117,7 +15266,6 @@
             "id": "def-common.VersionedRouter.delete",
             "type": "Function",
             "tags": [
-              "experimental",
               "track-adoption"
             ],
             "label": "delete",
@@ -15214,6 +15362,10 @@
                 "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
               },
               {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/custom_elements/delete.ts"
               },
@@ -15283,6 +15435,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/stored_scripts/delete_script_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/timeline/routes/timelines/delete_timelines/index.ts"
               },
               {
@@ -15291,7 +15447,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/stored_scripts/delete_script_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/delete.ts"
               },
               {
                 "plugin": "synthetics",
@@ -15359,9 +15515,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.VersionedRouteResponseValidation",
         "type": "Interface",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "VersionedRouteResponseValidation",
         "description": [],
         "path": "packages/core/http/core-http-server/src/versioning/types.ts",
@@ -15926,7 +16080,7 @@
           "\nHttp request headers to read."
         ],
         "signature": [
-          "{ date?: string | string[] | undefined; warning?: string | string[] | undefined; range?: string | string[] | undefined; from?: string | string[] | undefined; etag?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; allow?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; location?: string | string[] | undefined; origin?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+          "{ date?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; range?: string | string[] | undefined; from?: string | string[] | undefined; etag?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; allow?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; origin?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
         ],
         "path": "packages/core/http/core-http-server/src/router/headers.ts",
         "deprecated": false,
@@ -16232,7 +16386,7 @@
           "\nSet of well-known HTTP headers."
         ],
         "signature": [
-          "\"date\" | \"warning\" | \"range\" | \"from\" | \"etag\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\""
+          "\"date\" | \"warning\" | \"location\" | \"range\" | \"from\" | \"etag\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\""
         ],
         "path": "packages/core/http/core-http-server/src/router/headers.ts",
         "deprecated": false,
@@ -17338,7 +17492,7 @@
           "\nHttp response headers to set."
         ],
         "signature": [
-          "Record<string, string | string[]> | Record<\"date\" | \"warning\" | \"range\" | \"from\" | \"etag\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]>"
+          "Record<string, string | string[]> | Record<\"date\" | \"warning\" | \"location\" | \"range\" | \"from\" | \"etag\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]>"
         ],
         "path": "packages/core/http/core-http-server/src/router/headers.ts",
         "deprecated": false,
@@ -17804,9 +17958,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.VersionedRouteConfig",
         "type": "Type",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "VersionedRouteConfig",
         "description": [
           "\nConfiguration for a versioned route"
@@ -17839,9 +17991,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.VersionedRouteRegistrar",
         "type": "Type",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "VersionedRouteRegistrar",
         "description": [
           "\nCreate an {@link VersionedRoute | versioned route}.\n"
@@ -17911,9 +18061,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.VersionedRouteRequestValidation",
         "type": "Type",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "VersionedRouteRequestValidation",
         "description": [],
         "signature": [

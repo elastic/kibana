@@ -35,6 +35,7 @@ export const createRuleDataSchema = schema.object({
       ),
       uuid: schema.maybe(schema.string()),
       alertsFilter: schema.maybe(actionAlertsFilterSchema),
+      useAlertDataForTemplate: schema.maybe(schema.boolean()),
     }),
     { defaultValue: [] }
   ),

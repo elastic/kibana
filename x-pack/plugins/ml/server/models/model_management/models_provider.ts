@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { JOB_MAP_NODE_TYPES, type MapElements } from '@kbn/ml-data-frame-analytics-utils';
 import { flatten } from 'lodash';
@@ -18,16 +19,22 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import {
   ELASTIC_MODEL_DEFINITIONS,
-  type GetElserOptions,
+  type GetModelDownloadConfigOptions,
   type ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
 import type { PipelineDefinition } from '../../../common/types/trained_models';
+import type { MlClient } from '../../lib/ml_client';
+import type { MLSavedObjectService } from '../../saved_objects';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 
-export const modelsProvider = (client: IScopedClusterClient, cloud?: CloudSetup) =>
-  new ModelsProvider(client, cloud);
+export const modelsProvider = (
+  client: IScopedClusterClient,
+  mlClient: MlClient,
+  cloud: CloudSetup
+) => new ModelsProvider(client, mlClient, cloud);
 
 interface ModelMapResult {
   ingestPipelines: Map<string, Record<string, PipelineDefinition> | null>;
@@ -46,10 +53,16 @@ interface ModelMapResult {
   error: null | any;
 }
 
+export type GetCuratedModelConfigParams = Parameters<ModelsProvider['getCuratedModelConfig']>;
+
 export class ModelsProvider {
   private _transforms?: TransformGetTransformTransformSummary[];
 
-  constructor(private _client: IScopedClusterClient, private _cloud?: CloudSetup) {}
+  constructor(
+    private _client: IScopedClusterClient,
+    private _mlClient: MlClient,
+    private _cloud: CloudSetup
+  ) {}
 
   private async initTransformData() {
     if (!this._transforms) {
@@ -400,8 +413,6 @@ export class ModelsProvider {
       }
       throw error;
     }
-
-    return result;
   }
 
   /**
@@ -450,17 +461,17 @@ export class ModelsProvider {
 
     const modelDefinitionMap = new Map<string, ModelDefinitionResponse[]>();
 
-    for (const [name, def] of Object.entries(ELASTIC_MODEL_DEFINITIONS)) {
+    for (const [modelId, def] of Object.entries(ELASTIC_MODEL_DEFINITIONS)) {
       const recommended =
         (isCloud && def.os === 'Linux' && def.arch === 'amd64') ||
         (sameArch && !!def?.os && def?.os === osName && def?.arch === arch);
 
-      const { modelName, ...rest } = def;
+      const { modelName } = def;
 
       const modelDefinitionResponse = {
-        ...rest,
+        ...def,
         ...(recommended ? { recommended } : {}),
-        name,
+        model_id: modelId,
       };
 
       if (modelDefinitionMap.has(modelName)) {
@@ -484,14 +495,19 @@ export class ModelsProvider {
   }
 
   /**
-   * Provides an ELSER model name and configuration for download based on the current cluster architecture.
-   * The current default version is 2. If running on Cloud it returns the Linux x86_64 optimized version.
-   * If any of the ML nodes run a different OS rather than Linux, or the CPU architecture isn't x86_64,
-   * a portable version of the model is returned.
+   * Provides an appropriate model ID and configuration for download based on the current cluster architecture.
+   *
+   * @param modelName
+   * @param options
+   * @returns
    */
-  async getELSER(options?: GetElserOptions): Promise<ModelDefinitionResponse> | never {
-    const modelDownloadConfig = await this.getModelDownloads();
-
+  async getCuratedModelConfig(
+    modelName: ElasticCuratedModelName,
+    options?: GetModelDownloadConfigOptions
+  ): Promise<ModelDefinitionResponse> | never {
+    const modelDownloadConfig = (await this.getModelDownloads()).filter(
+      (model) => model.modelName === modelName
+    );
     let requestedModel: ModelDefinitionResponse | undefined;
     let recommendedModel: ModelDefinitionResponse | undefined;
     let defaultModel: ModelDefinitionResponse | undefined;
@@ -515,5 +531,54 @@ export class ModelsProvider {
     }
 
     return requestedModel || recommendedModel || defaultModel!;
+  }
+
+  /**
+   * Provides an ELSER model name and configuration for download based on the current cluster architecture.
+   * The current default version is 2. If running on Cloud it returns the Linux x86_64 optimized version.
+   * If any of the ML nodes run a different OS rather than Linux, or the CPU architecture isn't x86_64,
+   * a portable version of the model is returned.
+   */
+  async getELSER(
+    options?: GetModelDownloadConfigOptions
+  ): Promise<ModelDefinitionResponse> | never {
+    return await this.getCuratedModelConfig('elser', options);
+  }
+
+  /**
+   * Puts the requested ELSER model into elasticsearch, triggering elasticsearch to download the model.
+   * Assigns the model to the * space.
+   * @param modelId
+   * @param mlSavedObjectService
+   */
+  async installElasticModel(modelId: string, mlSavedObjectService: MLSavedObjectService) {
+    const availableModels = await this.getModelDownloads();
+    const model = availableModels.find((m) => m.model_id === modelId);
+    if (!model) {
+      throw Boom.notFound('Model not found');
+    }
+
+    let esModelExists = false;
+    try {
+      await this._client.asInternalUser.ml.getTrainedModels({ model_id: modelId });
+      esModelExists = true;
+    } catch (error) {
+      if (error.statusCode !== 404) {
+        throw error;
+      }
+      // model doesn't exist, ignore error
+    }
+
+    if (esModelExists) {
+      throw Boom.badRequest('Model already exists');
+    }
+
+    const putResponse = await this._mlClient.putTrainedModel({
+      model_id: model.model_id,
+      body: model.config,
+    });
+
+    await mlSavedObjectService.updateTrainedModelsSpaces([modelId], ['*'], []);
+    return putResponse;
   }
 }

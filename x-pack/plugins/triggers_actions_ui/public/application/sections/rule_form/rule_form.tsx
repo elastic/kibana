@@ -153,6 +153,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   hideGrouping?: boolean;
   hideInterval?: boolean;
   connectorFeatureId?: string;
+  selectedConsumer?: RuleCreationValidConsumer | null;
   validConsumers?: RuleCreationValidConsumer[];
   onChangeMetaData: (metadata: MetaData) => void;
   useRuleProducer?: boolean;
@@ -168,6 +169,7 @@ export const RuleForm = ({
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   setConsumer = NOOP,
+  selectedConsumer,
   operation,
   ruleTypeRegistry,
   actionTypeRegistry,
@@ -251,11 +253,11 @@ export const RuleForm = ({
             validConsumers,
           })
         )
-        .filter((item) => {
-          return rule.consumer === ALERTS_FEATURE_ID
+        .filter((item) =>
+          rule.consumer === ALERTS_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
-            : item.ruleType!.producer === rule.consumer;
-        });
+            : item.ruleType!.producer === rule.consumer
+        );
 
     const availableRuleTypesResult = getAvailableRuleTypes(ruleTypes);
     setAvailableRuleTypes(availableRuleTypesResult);
@@ -425,6 +427,7 @@ export const RuleForm = ({
     const selectedRuleType = availableRuleTypes.find(
       ({ ruleType: availableRuleType }) => availableRuleType.id === rule.ruleTypeId
     );
+
     if (!selectedRuleType?.ruleType?.authorizedConsumers) {
       return [];
     }
@@ -643,6 +646,23 @@ export const RuleForm = ({
     }
   };
 
+  const hasFieldsForAAD = useMemo(() => {
+    const hasAlertHasData = selectedRuleType
+      ? selectedRuleType.hasFieldsForAAD ||
+        selectedRuleType.producer === AlertConsumers.SIEM ||
+        selectedRuleType.hasAlertsMappings
+      : false;
+
+    if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule?.ruleTypeId ?? '')) {
+      return (
+        (validConsumers || VALID_CONSUMERS).includes(
+          selectedConsumer as RuleCreationValidConsumer
+        ) && hasAlertHasData
+      );
+    }
+    return hasAlertHasData;
+  }, [rule?.ruleTypeId, selectedConsumer, selectedRuleType, validConsumers]);
+
   const ruleTypeDetails = (
     <>
       <EuiHorizontalRule />
@@ -793,6 +813,7 @@ export const RuleForm = ({
               consumers={authorizedConsumers}
               onChange={setConsumer}
               errors={errors}
+              selectedConsumer={selectedConsumer}
             />
           </EuiFlexItem>
         </>
@@ -820,8 +841,12 @@ export const RuleForm = ({
             defaultActionGroupId={defaultActionGroupId}
             hasAlertsMappings={selectedRuleType.hasAlertsMappings}
             featureId={connectorFeatureId}
-            producerId={selectedRuleType.producer}
-            hasFieldsForAAD={selectedRuleType.hasFieldsForAAD}
+            producerId={
+              MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule.ruleTypeId)
+                ? selectedConsumer ?? rule.consumer
+                : selectedRuleType.producer
+            }
+            hasFieldsForAAD={hasFieldsForAAD}
             ruleTypeId={rule.ruleTypeId}
             isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
               isActionGroupDisabledForActionType(selectedRuleType, actionGroupId, actionTypeId)
@@ -839,6 +864,9 @@ export const RuleForm = ({
                 : { ...actionGroup, defaultActionMessage: ruleTypeModel?.defaultActionMessage }
             )}
             recoveryActionGroup={recoveryActionGroup}
+            setActionUseAlertDataForTemplate={(enabled: boolean, index: number) => {
+              setActionProperty('useAlertDataForTemplate', enabled, index);
+            }}
             setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
             setActionGroupIdByIndex={(group: string, index: number) =>
               setActionProperty('group', group, index)
@@ -894,8 +922,16 @@ export const RuleForm = ({
           <EuiFormRow
             fullWidth
             label={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.tagsFieldLabel', {
-              defaultMessage: 'Tags (optional)',
+              defaultMessage: 'Tags',
             })}
+            labelAppend={
+              <EuiText color="subdued" size="xs">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleForm.tagsFieldOptional"
+                  defaultMessage="Optional"
+                />
+              </EuiText>
+            }
           >
             <EuiComboBox
               noSuggestions

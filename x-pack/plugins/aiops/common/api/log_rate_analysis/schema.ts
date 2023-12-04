@@ -5,37 +5,17 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { AiopsLogRateAnalysisSchemaV1 } from './schema_v1';
+import type { AiopsLogRateAnalysisSchemaV2 } from './schema_v2';
 
-export const aiopsLogRateAnalysisSchema = schema.object({
-  start: schema.number(),
-  end: schema.number(),
-  searchQuery: schema.string(),
-  timeFieldName: schema.string(),
-  includeFrozen: schema.maybe(schema.boolean()),
-  grouping: schema.maybe(schema.boolean()),
-  /** Analysis selection time ranges */
-  baselineMin: schema.number(),
-  baselineMax: schema.number(),
-  deviationMin: schema.number(),
-  deviationMax: schema.number(),
-  /** The index to query for log rate analysis */
-  index: schema.string(),
-  /** Settings to override headers derived compression and flush fix */
-  compressResponse: schema.maybe(schema.boolean()),
-  flushFix: schema.maybe(schema.boolean()),
-  /** Overrides to skip steps of the analysis with existing data */
-  overrides: schema.maybe(
-    schema.object({
-      loaded: schema.maybe(schema.number()),
-      remainingFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
-      // TODO Improve schema
-      significantTerms: schema.maybe(schema.arrayOf(schema.any())),
-      regroupOnly: schema.maybe(schema.boolean()),
-    })
-  ),
-  /** Probability used for the random sampler aggregations */
-  sampleProbability: schema.maybe(schema.number()),
-});
+export type AiopsLogRateAnalysisApiVersion = '1' | '2';
 
-export type AiopsLogRateAnalysisSchema = TypeOf<typeof aiopsLogRateAnalysisSchema>;
+const LATEST_API_VERSION: AiopsLogRateAnalysisApiVersion = '2';
+
+export type AiopsLogRateAnalysisSchema<
+  T extends AiopsLogRateAnalysisApiVersion = typeof LATEST_API_VERSION
+> = T extends '1'
+  ? AiopsLogRateAnalysisSchemaV1
+  : T extends '2'
+  ? AiopsLogRateAnalysisSchemaV2
+  : never;

@@ -6,11 +6,12 @@
  */
 
 import { RequestHandler, RouteMethod } from '@kbn/core/server';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { i18n } from '@kbn/i18n';
+import { AuthenticatedUser } from '@kbn/security-plugin/server';
+
 import { ReportingCore } from '../../core';
+import { ReportingRequestHandlerContext } from '../../types';
 import { getUser } from './get_user';
-import type { ReportingRequestHandlerContext } from '../../types';
 
 const superuserRole = 'superuser';
 

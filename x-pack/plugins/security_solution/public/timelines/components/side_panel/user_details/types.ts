@@ -12,5 +12,4 @@ export interface UserDetailsProps {
   handleOnClose: () => void;
   isFlyoutView?: boolean;
   isDraggable?: boolean;
-  isNewUserDetailsFlyoutEnable?: boolean;
 }

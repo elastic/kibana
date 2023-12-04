@@ -8,13 +8,13 @@
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { EuiPanel } from '@elastic/eui';
-import { RightPanelKey } from '../right';
+import { DocumentDetailsRightPanelKey } from '../right';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { EndpointIsolateSuccess } from '../../../common/components/endpoint/host_isolation';
 import { useHostIsolationTools } from '../../../timelines/components/side_panel/event_details/use_host_isolation_tools';
 import { useIsolateHostPanelContext } from './context';
 import { HostIsolationPanel } from '../../../detections/components/host_isolation';
+import { FlyoutBody } from '../../shared/components/flyout_body';
 
 /**
  * Document details expandable flyout section content for the isolate host component, displaying the form or the success banner
@@ -32,7 +32,7 @@ export const PanelContent: FC = () => {
   const showAlertDetails = useCallback(
     () =>
       openRightPanel({
-        id: RightPanelKey,
+        id: DocumentDetailsRightPanelKey,
         params: {
           id: eventId,
           indexName,
@@ -43,7 +43,7 @@ export const PanelContent: FC = () => {
   );
 
   return (
-    <EuiPanel hasShadow={false} hasBorder={false}>
+    <FlyoutBody>
       {isIsolateActionSuccessBannerVisible && (
         <EndpointIsolateSuccess
           hostName={hostName}
@@ -57,6 +57,6 @@ export const PanelContent: FC = () => {
         successCallback={handleIsolationActionSuccess}
         isolateAction={isolateAction}
       />
-    </EuiPanel>
+    </FlyoutBody>
   );
 };

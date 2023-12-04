@@ -31,7 +31,10 @@ type Output = Observable<Datatable>;
 
 interface Arguments {
   query: string;
-  timezone?: string;
+  // TODO: time_zone support was temporarily removed from ES|QL,
+  // we will need to add it back in once it is supported again.
+  // https://github.com/elastic/elasticsearch/pull/102767
+  // timezone?: string;
   timeField?: string;
   locale?: string;
 }
@@ -67,10 +70,6 @@ function normalizeType(type: string): DatatableColumnType {
   }
 }
 
-function sanitize(value: string) {
-  return value.replace(/[\(\)]/g, '_');
-}
-
 function extractTypeAndReason(attributes: any): { type?: string; reason?: string } {
   if (['type', 'reason'].every((prop) => prop in attributes)) {
     return attributes;
@@ -82,7 +81,10 @@ function extractTypeAndReason(attributes: any): { type?: string; reason?: string
 }
 
 interface ESQLSearchParams {
-  time_zone?: string;
+  // TODO: time_zone support was temporarily removed from ES|QL,
+  // we will need to add it back in once it is supported again.
+  // https://github.com/elastic/elasticsearch/pull/102767
+  // time_zone?: string;
   query: string;
   filter?: unknown;
   locale?: string;
@@ -112,15 +114,15 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'An ES|QL query.',
         }),
       },
-      timezone: {
-        aliases: ['tz'],
-        types: ['string'],
-        default: 'UTC',
-        help: i18n.translate('data.search.esql.timezone.help', {
-          defaultMessage:
-            'The timezone to use for date operations. Valid ISO8601 formats and UTC offsets both work.',
-        }),
-      },
+      // timezone: {
+      //   aliases: ['tz'],
+      //   types: ['string'],
+      //   default: 'UTC',
+      //   help: i18n.translate('data.search.esql.timezone.help', {
+      //     defaultMessage:
+      //       'The timezone to use for date operations. Valid ISO8601 formats and UTC offsets both work.',
+      //   }),
+      // },
       timeField: {
         aliases: ['timeField'],
         types: ['string'],
@@ -138,7 +140,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     },
     fn(
       input,
-      { query, timezone, timeField, locale },
+      { query, /* timezone, */ timeField, locale },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
       return defer(() =>
@@ -157,7 +159,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         switchMap(({ search, uiSettings }) => {
           const params: ESQLSearchParams = {
             query,
-            time_zone: timezone,
+            // time_zone: timezone,
             locale,
           };
           if (input) {
@@ -220,7 +222,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               return throwError(() => error);
             }),
             tap({
-              next({ rawResponse }) {
+              next({ rawResponse, requestParams }) {
                 logInspectorRequest()
                   .stats({
                     hits: {
@@ -234,12 +236,14 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                     },
                   })
                   .json(params)
-                  .ok({ json: rawResponse });
+                  .ok({ json: rawResponse, requestParams });
               },
               error(error) {
-                logInspectorRequest().error({
-                  json: 'attributes' in error ? error.attributes : { message: error.message },
-                });
+                logInspectorRequest()
+                  .json(params)
+                  .error({
+                    json: 'attributes' in error ? error.attributes : { message: error.message },
+                  });
               },
             })
           );
@@ -247,8 +251,8 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         map(({ rawResponse: body, warning }) => {
           const columns =
             body.columns?.map(({ name, type }) => ({
-              id: sanitize(name),
-              name: sanitize(name),
+              id: name,
+              name,
               meta: { type: normalizeType(type) },
             })) ?? [];
           const columnNames = columns.map(({ name }) => name);

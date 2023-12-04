@@ -44,18 +44,18 @@ describe('breadcrumbs', () => {
         {
           id: 'root',
           title: 'Root',
-          path: ['root'],
+          path: 'root',
           breadcrumbStatus: 'hidden' as 'hidden',
           children: [
             {
               id: 'subNav',
-              path: ['root', 'subNav'],
+              path: 'root.subNav',
               title: '', // intentionally empty to skip rendering
               children: [
                 {
                   id: 'navItem1',
                   title: 'Nav Item 1',
-                  path: ['root', 'subNav', 'navItem1'],
+                  path: 'root.subNav.navItem1',
                   deepLink: {
                     id: 'navItem1',
                     title: 'Nav Item 1',
@@ -86,7 +86,7 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "popoverContent": <EuiContextMenuPanel
+          "popoverContent": <EuiContextMenuPanelClass
             items={
               Array [
                 <EuiContextMenuItem
@@ -113,6 +113,9 @@ describe('breadcrumbs', () => {
           />,
           "popoverProps": Object {
             "panelPaddingSize": "none",
+          },
+          "style": Object {
+            "maxWidth": "320px",
           },
           "text": "Project",
         },
@@ -148,7 +151,7 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "popoverContent": <EuiContextMenuPanel
+          "popoverContent": <EuiContextMenuPanelClass
             items={
               Array [
                 <EuiContextMenuItem
@@ -175,6 +178,9 @@ describe('breadcrumbs', () => {
           />,
           "popoverProps": Object {
             "panelPaddingSize": "none",
+          },
+          "style": Object {
+            "maxWidth": "320px",
           },
           "text": "Project",
         },
@@ -204,7 +210,7 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "popoverContent": <EuiContextMenuPanel
+          "popoverContent": <EuiContextMenuPanelClass
             items={
               Array [
                 <EuiContextMenuItem
@@ -231,6 +237,9 @@ describe('breadcrumbs', () => {
           />,
           "popoverProps": Object {
             "panelPaddingSize": "none",
+          },
+          "style": Object {
+            "maxWidth": "320px",
           },
           "text": "Project",
         },
@@ -309,12 +318,12 @@ describe('getActiveNodes$()', () => {
         {
           id: 'root',
           title: 'Root',
-          path: ['root'],
+          path: 'root',
           children: [
             {
               id: 'item1',
               title: 'Item 1',
-              path: ['root', 'item1'],
+              path: 'root.item1',
               deepLink: {
                 id: 'item1',
                 title: 'Item 1',
@@ -335,14 +344,12 @@ describe('getActiveNodes$()', () => {
         {
           id: 'root',
           title: 'Root',
-          isActive: true,
-          path: ['root'],
+          path: 'root',
         },
         {
           id: 'item1',
           title: 'Item 1',
-          isActive: true,
-          path: ['root', 'item1'],
+          path: 'root.item1',
           deepLink: {
             id: 'item1',
             title: 'Item 1',
@@ -366,12 +373,12 @@ describe('getActiveNodes$()', () => {
         {
           id: 'root',
           title: 'Root',
-          path: ['root'],
+          path: 'root',
           children: [
             {
               id: 'item1',
               title: 'Item 1',
-              path: ['root', 'item1'],
+              path: 'root.item1',
               getIsActive: () => true,
             },
           ],
@@ -386,14 +393,12 @@ describe('getActiveNodes$()', () => {
         {
           id: 'root',
           title: 'Root',
-          isActive: true,
-          path: ['root'],
+          path: 'root',
         },
         {
           id: 'item1',
           title: 'Item 1',
-          isActive: true,
-          path: ['root', 'item1'],
+          path: 'root.item1',
           getIsActive: expect.any(Function),
         },
       ],

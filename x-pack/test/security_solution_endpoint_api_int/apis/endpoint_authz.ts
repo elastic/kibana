@@ -10,10 +10,11 @@ import {
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
   AGENT_POLICY_SUMMARY_ROUTE,
-  BASE_POLICY_RESPONSE_ROUTE,
   BASE_ENDPOINT_ACTION_ROUTE,
-  GET_PROCESSES_ROUTE,
+  BASE_POLICY_RESPONSE_ROUTE,
+  EXECUTE_ROUTE,
   GET_FILE_ROUTE,
+  GET_PROCESSES_ROUTE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
@@ -21,9 +22,9 @@ import {
   METADATA_TRANSFORMS_STATUS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
-  EXECUTE_ROUTE,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { targetTags } from '../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { ROLE } from '../services/roles_users';
 
@@ -39,7 +40,9 @@ export default function ({ getService }: FtrProviderContext) {
     body: Record<string, unknown> | undefined;
   }
 
-  describe('When attempting to call an endpoint api', () => {
+  describe('When attempting to call an endpoint api', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     let actionId = '';
     let agentId = '';
@@ -246,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
           apiListItem.path
         }]`, async () => {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_operations_analyst, 'changeme')
             .set('kbn-xsrf', 'xxx')
             .send(apiListItem.body)
             .expect(403, {
@@ -268,7 +271,7 @@ export default function ({ getService }: FtrProviderContext) {
           apiListItem.path
         }]`, async () => {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_operations_analyst, 'changeme')
             .set('kbn-xsrf', 'xxx')
             .send(apiListItem.body)
             .expect(200);

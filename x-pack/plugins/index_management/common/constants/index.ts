@@ -10,6 +10,10 @@ export { API_BASE_PATH, INTERNAL_API_BASE_PATH } from './api_base_path';
 export { INVALID_INDEX_PATTERN_CHARS, INVALID_TEMPLATE_NAME_CHARS } from './invalid_characters';
 export * from './index_statuses';
 
+// Since each index can have a max length or 255 characters and the max length of
+// the request is 4096 bytes we can fit a max of 16 indices in a single request.
+export const MAX_INDICES_PER_REQUEST = 16;
+
 export {
   UIM_APP_NAME,
   UIM_APP_LOAD,
@@ -49,4 +53,4 @@ export {
 export { MAJOR_VERSION } from './plugin';
 
 export { Section, IndexDetailsSection } from './home_sections';
-export type { IndexDetailsTab, IndexDetailsTabIds } from './home_sections';
+export type { IndexDetailsTab, IndexDetailsTabId } from './home_sections';

@@ -135,6 +135,10 @@ describe('<IndexManagementHome />', () => {
   it('navigates to the index details page when the index name is clicked', async () => {
     const indexName = 'testIndex';
     httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+    httpRequestsMockHelpers.setLoadIndexDetailsResponse(
+      indexName,
+      createNonDataStreamIndex(indexName)
+    );
 
     testBed = await setup(httpSetup, {
       history: createMemoryHistory(),
@@ -150,6 +154,10 @@ describe('<IndexManagementHome />', () => {
   it('index page works with % character in index name', async () => {
     const indexName = 'test%';
     httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+    httpRequestsMockHelpers.setLoadIndexDetailsResponse(
+      encodeURIComponent(indexName),
+      createNonDataStreamIndex(indexName)
+    );
 
     testBed = await setup(httpSetup);
     const { component, actions } = testBed;

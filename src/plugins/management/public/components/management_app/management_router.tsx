@@ -9,7 +9,12 @@
 import React, { memo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import {
+  AnalyticsServiceStart,
+  AppMountParameters,
+  ChromeBreadcrumb,
+  ScopedHistory,
+} from '@kbn/core/public';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { ManagementAppWrapper } from '../management_app_wrapper';
 import { ManagementLandingPage } from '../landing';
@@ -21,12 +26,20 @@ interface ManagementRouterProps {
   setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], appHistory?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
   sections: ManagementSection[];
+  analytics: AnalyticsServiceStart;
 }
 
 export const ManagementRouter = memo(
-  ({ history, setBreadcrumbs, onAppMounted, sections, theme$ }: ManagementRouterProps) => {
+  ({
+    history,
+    setBreadcrumbs,
+    onAppMounted,
+    sections,
+    theme$,
+    analytics,
+  }: ManagementRouterProps) => {
     return (
-      <KibanaErrorBoundaryProvider>
+      <KibanaErrorBoundaryProvider analytics={analytics}>
         <KibanaErrorBoundary>
           <Router history={history}>
             <Routes>

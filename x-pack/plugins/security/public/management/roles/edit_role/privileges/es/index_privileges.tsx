@@ -13,8 +13,7 @@ import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { IndexPrivilegeForm } from './index_privilege_form';
-import type { SecurityLicense } from '../../../../../../common/licensing';
-import type { Role, RoleIndexPrivilege } from '../../../../../../common/model';
+import type { Role, RoleIndexPrivilege, SecurityLicense } from '../../../../../../common';
 import { isRoleEnabled, isRoleReadOnly } from '../../../../../../common/model';
 import type { IndicesAPIClient } from '../../../indices_api_client';
 import type { RoleValidator } from '../../validate_role';

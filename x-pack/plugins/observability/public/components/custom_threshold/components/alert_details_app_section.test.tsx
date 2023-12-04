@@ -13,9 +13,9 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
-  buildMetricThresholdAlert,
-  buildMetricThresholdRule,
-} from '../mocks/metric_threshold_rule';
+  buildCustomThresholdAlert,
+  buildCustomThresholdRule,
+} from '../mocks/custom_threshold_rule';
 import AlertDetailsAppSection from './alert_details_app_section';
 import { ExpressionChart } from './expression_chart';
 
@@ -24,6 +24,9 @@ const mockedChartStartContract = chartPluginMock.createStartContract();
 jest.mock('@kbn/observability-alert-details', () => ({
   AlertAnnotation: () => {},
   AlertActiveTimeRangeAnnotation: () => {},
+}));
+
+jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({
   getPaddedAlertTimeRange: () => ({
     from: '2023-03-28T10:43:13.802Z',
     to: '2023-03-29T13:14:09.581Z',
@@ -59,8 +62,8 @@ describe('AlertDetailsAppSection', () => {
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <AlertDetailsAppSection
-            alert={buildMetricThresholdAlert()}
-            rule={buildMetricThresholdRule()}
+            alert={buildCustomThresholdAlert()}
+            rule={buildCustomThresholdRule()}
             ruleLink={ruleLink}
             setAlertSummaryFields={mockedSetAlertSummaryFields}
           />

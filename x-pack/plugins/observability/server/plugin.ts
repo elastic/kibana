@@ -18,6 +18,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { LOG_EXPLORER_LOCATOR_ID, LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
@@ -30,6 +31,7 @@ import {
   ApmRuleType,
   ES_QUERY_ID,
   ML_ANOMALY_DETECTION_ID,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { ObservabilityConfig } from '.';
@@ -64,7 +66,7 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 interface PluginSetup {
   alerting: PluginSetupContract;
   features: FeaturesSetup;
-  guidedOnboarding: GuidedOnboardingPluginSetup;
+  guidedOnboarding?: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
   spaces?: SpacesPluginSetup;
@@ -83,6 +85,7 @@ const o11yRuleTypes = [
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ES_QUERY_ID,
   ML_ANOMALY_DETECTION_ID,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   ...Object.values(ApmRuleType),
 ];
 
@@ -101,6 +104,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const config = this.initContext.config.get<ObservabilityConfig>();
 
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
+    const logExplorerLocator =
+      plugins.share.url.locators.get<LogExplorerLocatorParams>(LOG_EXPLORER_LOCATOR_ID);
 
     plugins.features.registerKibanaFeature({
       id: casesFeatureId,
@@ -170,6 +175,36 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                     delete: [observabilityFeatureId],
                   },
                   ui: casesCapabilities.delete,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: i18n.translate('xpack.observability.featureRegistry.casesSettingsSubFeatureName', {
+            defaultMessage: 'Case Settings',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'cases_settings',
+                  name: i18n.translate(
+                    'xpack.observability.featureRegistry.casesSettingsSubFeatureDetails',
+                    {
+                      defaultMessage: 'Edit Case Settings',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
+                  },
+                  cases: {
+                    settings: [observabilityFeatureId],
+                  },
+                  ui: casesCapabilities.settings,
                 },
               ],
             },
@@ -302,14 +337,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(threshold);
 
-    registerRuleTypes(
-      plugins.alerting,
-      this.logger,
-      ruleDataService,
-      core.http.basePath,
-      config,
-      alertsLocator
-    );
+    registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, ruleDataService, {
+      alertsLocator,
+      logExplorerLocator,
+    });
     registerSloUsageCollector(plugins.usageCollection);
 
     core.getStartServices().then(([coreStart, pluginStart]) => {
@@ -346,7 +377,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     /**
      * Register a config for the observability guide
      */
-    plugins.guidedOnboarding.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
+    plugins.guidedOnboarding?.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
 
     return {
       getAlertDetailsConfig() {

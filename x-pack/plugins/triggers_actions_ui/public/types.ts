@@ -25,7 +25,7 @@ import type {
   EuiSuperSelectOption,
   EuiDataGridOnColumnResizeHandler,
 } from '@elastic/eui';
-import type { AlertConsumers, STACK_ALERTS_FEATURE_ID, ValidFeatureId } from '@kbn/rule-data-utils';
+import type { RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
 import { KueryNode } from '@kbn/es-query';
@@ -217,12 +217,14 @@ export interface ActionParamsProps<TParams> {
   index: number;
   editAction: (key: string, value: RuleActionParam, index: number) => void;
   errors: IErrorObject;
+  ruleTypeId?: string;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
   useDefaultMessage?: boolean;
   actionConnector?: ActionConnector;
   isLoading?: boolean;
   isDisabled?: boolean;
+  selectedActionGroupId?: string;
   showEmailSubjectAndMessage?: boolean;
   executionMode?: ActionConnectorMode;
   onBlur?: (field?: string) => void;
@@ -466,6 +468,7 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   filteredRuleTypes?: string[];
   validConsumers?: RuleCreationValidConsumer[];
   useRuleProducer?: boolean;
+  initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
 export interface RuleDefinitionProps {
   rule: Rule;
@@ -566,15 +569,29 @@ export type AlertsTableProps = {
    * Allows to consumers of the table to decide to highlight a row based on the current alert.
    */
   shouldHighlightRow?: (alert: Alert) => boolean;
+  /**
+   * Enable when rows may have variable heights (disables virtualization)
+   */
+  dynamicRowHeight?: boolean;
   featureIds?: ValidFeatureId[];
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
-export type GetRenderCellValue = ({
+export type GetRenderCellValue<T = unknown> = ({
   setFlyoutAlert,
+  context,
 }: {
   setFlyoutAlert?: (data: unknown) => void;
+  context?: T;
 }) => (props: unknown) => React.ReactNode;
+
+export type PreFetchPageContext<T = unknown> = ({
+  alerts,
+  columns,
+}: {
+  alerts: Alerts;
+  columns: EuiDataGridColumn[];
+}) => T;
 
 export type AlertTableFlyoutComponent =
   | React.FunctionComponent<AlertsTableFlyoutBaseProps>
@@ -694,6 +711,7 @@ export interface AlertsTableConfigurationRegistry {
   };
   useFieldBrowserOptions?: UseFieldBrowserOptions;
   showInspectButton?: boolean;
+  useFetchPageContext?: PreFetchPageContext;
 }
 
 export interface AlertsTableConfigurationRegistryWithActions
@@ -835,8 +853,4 @@ export interface NotifyWhenSelectOptions {
   value: EuiSuperSelectOption<RuleNotifyWhenType>;
 }
 
-export type RuleCreationValidConsumer =
-  | typeof AlertConsumers.LOGS
-  | typeof AlertConsumers.INFRASTRUCTURE
-  | typeof AlertConsumers.OBSERVABILITY
-  | typeof STACK_ALERTS_FEATURE_ID;
+export type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';

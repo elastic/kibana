@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_BODY,
@@ -79,11 +80,7 @@ import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../../../../tasks/api_calls/timelines';
-import {
-  cleanKibana,
-  resetRulesTableState,
-  deleteAlertsAndRules,
-} from '../../../../../tasks/common';
+import { resetRulesTableState } from '../../../../../tasks/common';
 
 import {
   getEqlRule,
@@ -185,7 +182,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
       cy.get(APPLY_TIMELINE_RULE_BULK_MENU_ITEM).should('be.disabled');
     });
 
-    it('Only prebuilt rules selected', () => {
+    it('Only prebuilt rules selected', { tags: ['@brokenInServerlessQA'] }, () => {
       createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
 
       // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
@@ -203,47 +200,55 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
       });
     });
 
-    it('Prebuilt and custom rules selected: user proceeds with custom rules editing', () => {
-      getRulesManagementTableRows().then((existedRulesRows) => {
+    it(
+      'Prebuilt and custom rules selected: user proceeds with custom rules editing',
+      { tags: ['@brokenInServerlessQA'] },
+      () => {
+        getRulesManagementTableRows().then((existedRulesRows) => {
+          createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
+
+          // modal window should show how many rules can be edit, how many not
+          selectAllRules();
+          clickAddTagsMenuItem();
+
+          waitForMixedRulesBulkEditModal(existedRulesRows.length);
+
+          getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+            checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
+          });
+
+          // user can proceed with custom rule editing
+          cy.get(MODAL_CONFIRMATION_BTN)
+            .should('have.text', `Edit ${existedRulesRows.length} custom rules`)
+            .click();
+
+          // action should finish
+          typeTags(['test-tag']);
+          submitBulkEditForm();
+          waitForBulkEditActionToFinish({ updatedCount: existedRulesRows.length });
+        });
+      }
+    );
+
+    it(
+      'Prebuilt and custom rules selected: user cancels action',
+      { tags: ['@brokenInServerlessQA'] },
+      () => {
         createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
 
-        // modal window should show how many rules can be edit, how many not
-        selectAllRules();
-        clickAddTagsMenuItem();
+        getRulesManagementTableRows().then((rows) => {
+          // modal window should show how many rules can be edit, how many not
+          selectAllRules();
+          clickAddTagsMenuItem();
+          waitForMixedRulesBulkEditModal(rows.length);
 
-        waitForMixedRulesBulkEditModal(existedRulesRows.length);
+          checkPrebuiltRulesCannotBeModified(PREBUILT_RULES.length);
 
-        getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
-          checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
+          // user cancels action and modal disappears
+          cancelConfirmationModal();
         });
-
-        // user can proceed with custom rule editing
-        cy.get(MODAL_CONFIRMATION_BTN)
-          .should('have.text', `Edit ${existedRulesRows.length} custom rules`)
-          .click();
-
-        // action should finish
-        typeTags(['test-tag']);
-        submitBulkEditForm();
-        waitForBulkEditActionToFinish({ updatedCount: existedRulesRows.length });
-      });
-    });
-
-    it('Prebuilt and custom rules selected: user cancels action', () => {
-      createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
-
-      getRulesManagementTableRows().then((rows) => {
-        // modal window should show how many rules can be edit, how many not
-        selectAllRules();
-        clickAddTagsMenuItem();
-        waitForMixedRulesBulkEditModal(rows.length);
-
-        checkPrebuiltRulesCannotBeModified(PREBUILT_RULES.length);
-
-        // user cancels action and modal disappears
-        cancelConfirmationModal();
-      });
-    });
+      }
+    );
 
     it('should not lose rules selection after edit action', () => {
       const rulesToUpdate = [RULE_NAME, 'New EQL Rule', 'New Terms Rule'] as const;
@@ -673,9 +678,6 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
 // Having 2 sets of complete scenarios for both envs would have a high maintenance cost
 // When ES|QL enabled on serverless this rule type can be added to complete set of tests, with minimal changes to tests itself (adding creation of new rule, change number of expected rules, etc)
 describe('Detection rules, bulk edit, ES|QL rule type', { tags: ['@ess'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
   beforeEach(() => {
     login();
     preventPrebuiltRulesPackageInstallation(); // Make sure prebuilt rules aren't pulled from Fleet API

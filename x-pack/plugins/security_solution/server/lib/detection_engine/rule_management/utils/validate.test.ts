@@ -95,7 +95,7 @@ describe('validate', () => {
       delete ruleAlert.name;
       expect(() => {
         transformValidate(ruleAlert);
-      }).toThrowError('Invalid input');
+      }).toThrowError('Required');
     });
   });
 
@@ -113,7 +113,7 @@ describe('validate', () => {
       const validatedOrError = transformValidateBulkError('rule-1', ruleAlert);
       const expected: BulkError = {
         error: {
-          message: 'Invalid input',
+          message: 'name: Required',
           status_code: 500,
         },
         rule_id: 'rule-1',

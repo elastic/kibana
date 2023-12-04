@@ -27,6 +27,6 @@ export interface BuildQueryBarDescription {
 }
 
 export interface BuildThreatDescription {
-  label: string;
   threat: Threats;
+  'data-test-subj'?: string;
 }

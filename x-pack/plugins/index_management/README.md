@@ -1,4 +1,48 @@
 # Index Management UI
+## Extensions service
+This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page. 
+### Extensions to the indices list
+- `addBanner(banner: any)`: adds a banner on top of the indices list, for example when some indices run into an ILM issue
+- `addFilter(filter: any)`: adds a filter to the indices list, for example to filter indices managed by ILM 
+- `addToggle(toggle: any)`: adds a toggle to the indices list, for example to display hidden indices
+
+#### Extensions to the indices list and the index details page
+- `addAction(action: any)`: adds an option to the "manage index" menu, for example to add an ILM policy to the index
+- `addBadge(badge: any)`: adds a badge to the index name, for example to indicate frozen, rollup or follower indices
+
+#### Extensions to the index details page
+- `addIndexDetailsTab(tab: IndexDetailsTab)`: adds a tab to the index details page. The tab has the following interface:
+
+```ts
+interface IndexDetailsTab {
+  // a unique key to identify the tab
+  id: IndexDetailsTabId;
+  // a text that is displayed on the tab label, usually a Formatted message component
+  name: ReactNode;
+  // a function that renders the content of the tab
+  renderTabContent: (args: {
+    index: Index;
+    getUrlForApp: ApplicationStart['getUrlForApp'];
+  }) => ReturnType<FunctionComponent>;
+  // a number to specify the order of the tabs
+  order: number;
+  // an optional function to return a boolean for when to render the tab
+  // if omitted, the tab is always rendered
+  shouldRenderTab?: (args: { index: Index }) => boolean;
+}
+```
+
+An example of adding an ILM tab can be found in [this file](https://github.com/elastic/kibana/blob/main/x-pack/plugins/index_lifecycle_management/public/extend_index_management/components/index_lifecycle_summary.tsx#L250).
+
+- `setIndexOverviewContent(content: IndexContent)`: replaces the default content in the overview tab (code block describing adding documents to the index) with the custom content. The custom content has the following interface: 
+```ts
+interface IndexContent {
+  renderContent: (args: {
+    index: Index;
+    getUrlForApp: ApplicationStart['getUrlForApp'];
+  }) => ReturnType<FunctionComponent>;
+```
+- `setIndexMappingsContent(content: IndexContent)`: adds content to the mappings tab of the index details page. The content is displayed in the right bottom corner, below the mappings docs link. 
 
 ## Indices tab
 

@@ -185,7 +185,7 @@ export interface DiscoverStateContainer {
     /**
      * Undo changes made to the saved search, e.g. when the user triggers the "Reset search" button
      */
-    undoSavedSearchChanges: () => void;
+    undoSavedSearchChanges: () => Promise<SavedSearch>;
     /**
      * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
      * This is to prevent duplicate ids messing with our system

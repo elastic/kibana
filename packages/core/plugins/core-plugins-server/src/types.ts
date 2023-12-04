@@ -8,7 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
-import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { RecursiveReadonly, MaybePromise } from '@kbn/utility-types';
 import type { PathConfigType } from '@kbn/utils';
 import type { LoggerFactory } from '@kbn/logging';
 import type {
@@ -297,7 +297,7 @@ export interface Plugin<
 
   start(core: CoreStart, plugins: TPluginsStart): TStart;
 
-  stop?(): void;
+  stop?(): MaybePromise<void>;
 }
 
 /**
@@ -317,7 +317,7 @@ export interface AsyncPlugin<
 
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
 
-  stop?(): void;
+  stop?(): MaybePromise<void>;
 }
 
 /**
@@ -473,7 +473,8 @@ export type PluginInitializer<
   TPluginsStart extends object = object
 > = (
   core: PluginInitializerContext
-) =>
+) => Promise<
   | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
   | PrebootPlugin<TSetup, TPluginsSetup>
-  | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+>;

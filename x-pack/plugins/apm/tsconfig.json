@@ -28,7 +28,6 @@
     "@kbn/alerting-plugin",
     "@kbn/cloud-plugin",
     "@kbn/features-plugin",
-    "@kbn/infra-plugin",
     "@kbn/licensing-plugin",
     "@kbn/license-management-plugin",
     "@kbn/maps-plugin",
@@ -103,7 +102,11 @@
     "@kbn/analytics-client",
     "@kbn/monaco",
     "@kbn/shared-svg",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/custom-icons",
+    "@kbn/elastic-agent-utils",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/observability-get-padded-alert-time-range-util"
   ],
   "exclude": ["target/**/*"]
 }

@@ -23,10 +23,9 @@ import {
   FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
 } from '../../../screens/common/filter_group';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
-import { ALERTS_URL } from '../../../urls/navigation';
+import { ALERTS_URL, CASES_URL } from '../../../urls/navigation';
 import {
   closePageFilterPopover,
   markAcknowledgedFirstAlert,
@@ -39,8 +38,7 @@ import {
   waitForPageFilters,
 } from '../../../tasks/alerts';
 import { ALERTS_COUNT, ALERTS_REFRESH_BTN, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
-import { kqlSearch, navigateFromHeaderTo } from '../../../tasks/security_header';
-import { ALERTS, CASES } from '../../../screens/security_header';
+import { kqlSearch } from '../../../tasks/security_header';
 import {
   addNewFilterGroupControlValues,
   cancelFieldEditing,
@@ -53,6 +51,7 @@ import {
 import { TOASTER } from '../../../screens/alerts_detection_rules';
 import { setEndDate, setStartDate } from '../../../tasks/date_picker';
 import { fillAddFilterForm, openAddFilterPopover } from '../../../tasks/search_bar';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 const customFilters = [
   {
@@ -108,20 +107,14 @@ const assertFilterControlsWithFilterObject = (
   });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/167914
-// Failing: See https://github.com/elastic/kibana/issues/167915
-// Failing: See https://github.com/elastic/kibana/issues/167914
-describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] }, () => {
-  before(() => {
-    cleanKibana();
-    createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
-  });
-
+// FLAKY: https://github.com/elastic/kibana/issues/171890
+describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
+    deleteAlertsAndRules();
+    createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
     login();
     visitWithTimeRange(ALERTS_URL);
     waitForAlerts();
-    resetFilters();
   });
 
   it('Default page filters are populated when nothing is provided in the URL', () => {
@@ -129,16 +122,6 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless
   });
 
   context('Alert Page Filters Customization ', () => {
-    beforeEach(() => {
-      login();
-      visitWithTimeRange(ALERTS_URL);
-      waitForAlerts();
-    });
-
-    afterEach(() => {
-      resetFilters();
-    });
-
     it('should be able to delete Controls', () => {
       waitForPageFilters();
       editFilterGroupControls();
@@ -238,12 +221,7 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
   });
 
-  context.skip('with data modificiation', () => {
-    after(() => {
-      cleanKibana();
-      createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
-    });
-
+  context('with data modificiation', () => {
     it(`Alert list is updated when the alerts are updated`, () => {
       // mark status of one alert to be acknowledged
       selectCountTable();
@@ -258,7 +236,7 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless
           cy.get(ALERTS_COUNT)
             .invoke('text')
             .should((newAlertCount) => {
-              expect(newAlertCount.split(' ')[0]).eq(String(parseInt(originalAlertCount, 10) - 1));
+              expect(newAlertCount.split(' ')[0]).eq(String(parseInt(originalAlertCount, 10)));
             });
         });
     });
@@ -267,7 +245,7 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless
   it(`URL is updated when filters are updated`, () => {
     openPageFilterPopover(1);
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
-    cy.get(OPTION_SELECTABLE(1, 'high')).click({});
+    cy.get(OPTION_SELECTABLE(1, 'high')).click();
     closePageFilterPopover(1);
 
     const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
@@ -289,9 +267,8 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless
     cy.get(OPTION_LIST_VALUES(1)).contains('high');
     waitForPageFilters();
 
-    navigateFromHeaderTo(CASES); // navigate away from alert page
-
-    navigateFromHeaderTo(ALERTS); // navigate back to alert page
+    visitWithTimeRange(CASES_URL); // navigate away from alert page
+    visitWithTimeRange(ALERTS_URL); // navigate back to alert page
 
     waitForPageFilters();
 
@@ -332,20 +309,17 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless
   });
 
   context('Impact of inputs', () => {
-    afterEach(() => {
-      resetFilters();
-    });
     it('should recover from invalid kql Query result', () => {
       // do an invalid search
       //
       kqlSearch('\\');
-      cy.get(ALERTS_REFRESH_BTN).trigger('click');
+      cy.get(ALERTS_REFRESH_BTN).click();
       waitForPageFilters();
       cy.get(TOASTER).should('contain.text', 'KQLSyntaxError');
       togglePageFilterPopover(0);
       cy.get(OPTION_SELECTABLE(0, 'open')).should('be.visible');
       cy.get(OPTION_SELECTABLE(0, 'open')).should('contain.text', 'open');
-      cy.get(OPTION_SELECTABLE(0, 'open')).get(OPTION_SELECTABLE_COUNT).should('have.text', 2);
+      cy.get(OPTION_SELECTABLE(0, 'open')).get(OPTION_SELECTABLE_COUNT).should('have.text', 1);
     });
 
     it('should take kqlQuery into account', () => {
@@ -372,7 +346,6 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless
     it('should take timeRange into account', () => {
       const startDateWithZeroAlerts = 'Jan 1, 2002 @ 00:00:00.000';
       const endDateWithZeroAlerts = 'Jan 1, 2010 @ 00:00:00.000';
-
       setStartDate(startDateWithZeroAlerts);
       setEndDate(endDateWithZeroAlerts);
 

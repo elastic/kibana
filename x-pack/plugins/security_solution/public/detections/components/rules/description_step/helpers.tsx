@@ -25,7 +25,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { FieldIcon } from '@kbn/react-field';
 
-import type { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping, Type, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
 import type {
   RequiredFieldArray,
@@ -40,7 +40,7 @@ import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
 
 import * as i18n from './translations';
-import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
+import type { BuildQueryBarDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
 import type {
   AboutStepRiskScore,
@@ -163,12 +163,20 @@ export const buildEqlOptionsDescription = (eqlOptions: EqlOptionsSelected): List
   return items;
 };
 
-export const buildThreatDescription = ({ label, threat }: BuildThreatDescription): ListItems[] => {
+interface BuildThreatDescriptionProps {
+  label: string;
+  threat: Threats;
+}
+
+export const buildThreatDescription = ({
+  threat,
+  label,
+}: BuildThreatDescriptionProps): ListItems[] => {
   if (threat.length > 0) {
     return [
       {
         title: label,
-        description: <ThreatEuiFlexGroup label={label} threat={threat} />,
+        description: <ThreatEuiFlexGroup threat={threat} />,
       },
     ];
   }

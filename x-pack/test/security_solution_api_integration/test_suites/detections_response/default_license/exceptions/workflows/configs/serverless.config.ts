@@ -10,6 +10,6 @@ import { createTestConfig } from '../../../../../../config/serverless/config.bas
 export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
-    reportName: 'Detection Engine Serverless/ Exception Workflows API Integration Tests',
+    reportName: 'Detection Engine Serverless - Exception - Workflows API Integration Tests',
   },
 });

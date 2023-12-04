@@ -32,12 +32,11 @@ import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker
 import { login } from '../../../../tasks/login';
 import {
   addDescriptionToTimeline,
-  addNameToTimeline,
+  addNameToTimelineAndSave,
   createNewTimeline,
   gotToEsqlTab,
   openTimelineById,
   openTimelineFromSettings,
-  waitForTimelineChanges,
 } from '../../../../tasks/timeline';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
 import { STACK_MANAGEMENT_PAGE } from '../../../../screens/kibana_navigation';
@@ -113,7 +112,7 @@ describe.skip(
     });
     context('save/restore', () => {
       it('should be able create an empty timeline with default discover state', () => {
-        addNameToTimeline('Timerange timeline');
+        addNameToTimelineAndSave('Timerange timeline');
         createNewTimeline();
         gotToEsqlTab();
         cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).should(
@@ -131,7 +130,7 @@ describe.skip(
         addFieldToTable(column2);
 
         // create a custom timeline
-        addNameToTimeline(timelineName);
+        addNameToTimelineAndSave(timelineName);
         cy.wait(`@${TIMELINE_PATCH_REQ}`)
           .its(TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH)
           .then((timelineId) => {
@@ -162,7 +161,7 @@ describe.skip(
         addFieldToTable(column2);
 
         // create a custom timeline
-        addNameToTimeline(timelineName);
+        addNameToTimelineAndSave(timelineName);
         cy.wait(`@${TIMELINE_PATCH_REQ}`)
           .its(TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH)
           .then((timelineId) => {
@@ -181,7 +180,7 @@ describe.skip(
       it('should save/restore discover ES|QL when saving timeline', () => {
         const timelineSuffix = Date.now();
         const timelineName = `ES|QL timeline-${timelineSuffix}`;
-        addNameToTimeline(timelineName);
+        addNameToTimelineAndSave(timelineName);
         cy.wait(`@${TIMELINE_PATCH_REQ}`)
           .its(TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH)
           .then((timelineId) => {
@@ -209,7 +208,7 @@ describe.skip(
         const timelineSuffix = Date.now();
         const timelineName = `SavedObject timeline-${timelineSuffix}`;
         addDiscoverEsqlQuery(esqlQuery);
-        addNameToTimeline(timelineName);
+        addNameToTimelineAndSave(timelineName);
         cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
         openKibanaNavigation();
         navigateFromKibanaCollapsibleTo(STACK_MANAGEMENT_PAGE);
@@ -231,7 +230,7 @@ describe.skip(
         const timelineName = `Rename timeline-${timelineSuffix}`;
         addDiscoverEsqlQuery(esqlQuery);
 
-        addNameToTimeline(timelineName);
+        addNameToTimelineAndSave(timelineName);
         cy.wait(`@${TIMELINE_PATCH_REQ}`)
           .its(TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH)
           .then((timelineId) => {
@@ -244,7 +243,6 @@ describe.skip(
             openTimelineById(timelineId);
             cy.get(TIMELINE_TITLE).should('have.text', timelineName);
             const timelineDesc = 'Timeline Description with Saved Seach';
-            waitForTimelineChanges();
             addDescriptionToTimeline(timelineDesc);
             cy.wait(`@${SAVED_SEARCH_UPDATE_WITH_DESCRIPTION}`, {
               timeout: 30000,

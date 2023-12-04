@@ -23,9 +23,6 @@ import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
-import { createLazyContainerMetricsTable } from './components/infrastructure_node_metrics_tables/container/create_lazy_container_metrics_table';
-import { createLazyHostMetricsTable } from './components/infrastructure_node_metrics_tables/host/create_lazy_host_metrics_table';
-import { createLazyPodMetricsTable } from './components/infrastructure_node_metrics_tables/pod/create_lazy_pod_metrics_table';
 import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import {
@@ -45,7 +42,6 @@ import type {
   InfraClientSetupDeps,
   InfraClientStartDeps,
   InfraClientStartExports,
-  InfraClientStartServices,
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
 
@@ -370,8 +366,6 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
-    const getStartServices = (): InfraClientStartServices => [core, plugins, startContract];
-
     const inventoryViews = this.inventoryViews.start({
       http: core.http,
     });
@@ -387,9 +381,6 @@ export class Plugin implements InfraClientPluginClass {
       metricsExplorerViews,
       telemetry,
       locators: this.locators!,
-      ContainerMetricsTable: createLazyContainerMetricsTable(getStartServices),
-      HostMetricsTable: createLazyHostMetricsTable(getStartServices),
-      PodMetricsTable: createLazyPodMetricsTable(getStartServices),
     };
 
     return startContract;

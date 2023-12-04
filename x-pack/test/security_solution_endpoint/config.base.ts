@@ -14,7 +14,10 @@ import {
 } from '../security_solution_endpoint_api_int/registry';
 import type { TargetTags } from './target_tags';
 
-const SUITE_TAGS: Record<string, { include: TargetTags[]; exclude: TargetTags[] }> = {
+export const SUITE_TAGS: Record<
+  'ess' | 'serverless',
+  { include: TargetTags[]; exclude: TargetTags[] }
+> = {
   ess: {
     include: ['@ess'],
     exclude: ['@skipInEss'],

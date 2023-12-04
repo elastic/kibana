@@ -7,20 +7,20 @@
 
 import { uniqWith, isEqual } from 'lodash';
 
-import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
+import type { SignificantItemGroup } from '@kbn/ml-agg-utils';
 
-import type { SignificantTermDuplicateGroup } from '../../../../common/types';
+import type { SignificantItemDuplicateGroup } from '../../../../common/types';
 
 export function getGroupsWithReaddedDuplicates(
-  groups: SignificantTermGroup[],
-  groupedSignificantTerms: SignificantTermDuplicateGroup[]
-): SignificantTermGroup[] {
+  groups: SignificantItemGroup[],
+  groupedSignificantItems: SignificantItemDuplicateGroup[]
+): SignificantItemGroup[] {
   return groups.map((g) => {
     const group = [...g.group];
 
     for (const groupItem of g.group) {
       const { duplicate } = groupItem;
-      const duplicates = groupedSignificantTerms.find((d) =>
+      const duplicates = groupedSignificantItems.find((d) =>
         d.group.some(
           (dg) => dg.fieldName === groupItem.fieldName && dg.fieldValue === groupItem.fieldValue
         )
