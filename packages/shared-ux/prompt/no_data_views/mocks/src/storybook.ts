@@ -59,6 +59,7 @@ export class StorybookMock extends AbstractStorybookMock<
         action('openDataViewEditor')(options);
         return () => {};
       },
+      redirectToESQL: {},
     };
   }
 }

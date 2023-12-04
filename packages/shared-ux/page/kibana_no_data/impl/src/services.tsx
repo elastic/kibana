@@ -43,12 +43,12 @@ export const KibanaNoDataPageProvider: FC<KibanaNoDataPageServices> = ({
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependencies> = ({
+export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependencies> = async ({
   children,
   ...dependencies
 }) => {
   const { dataViews, discover, showESQLViewLocator } = dependencies;
-  const { defaultDataView } = dataViews;
+  const { defaultDataView } = await dataViews.getDefault({ displayErrors: false });
   const params = {
     query: {
       esql: `from ${defaultDataView.getIndexPattern()} | limit 10`,
@@ -57,19 +57,21 @@ export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependenci
   };
   const discoverLocation = discover.locator?.getLocation(params);
 
-  const value: Services = {
-    redirectToESQL: showESQLViewLocator.navigate({
-      query: {
-        esql: `from ${defaultDataView?.getIndexPattern()} | limit 10`,
-      },
-      url: `/app/${discoverLocation.app}${discoverLocation.path}`,
-    }),
-    hasESData: dataViews.hasData.hasESData,
-    hasUserDataView: dataViews.hasData.hasUserDataView,
-  };
+  const value: Services[] = [
+    {
+      redirectToESQL: await showESQLViewLocator.navigate({
+        query: {
+          esql: `from ${defaultDataView?.getIndexPattern()} | limit 10`,
+        },
+        url: `/app/${discoverLocation.app}${discoverLocation.path}`,
+      }),
+      hasESData: dataViews.hasData.hasESData,
+      hasUserDataView: dataViews.hasData.hasUserDataView,
+    },
+  ];
 
   return (
-    <KibanaNoDataPageContext.Provider value={value}>
+    <KibanaNoDataPageContext.Provider value={...value}>
       <NoDataViewsPromptKibanaProvider {...dependencies}>
         <NoDataCardKibanaProvider {...dependencies}>{children}</NoDataCardKibanaProvider>
       </NoDataViewsPromptKibanaProvider>

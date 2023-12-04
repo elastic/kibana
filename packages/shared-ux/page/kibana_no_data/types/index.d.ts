@@ -35,9 +35,11 @@ export type KibanaNoDataPageServices = Services & NoDataCardServices & NoDataVie
 
 export interface KibanaDependencies {
   dataViews: {
-    defaultDataView: {
-      getIndexPattern: () => Promise<boolean>;
-      toSpec: () => Promise<boolean>;
+    getDefault: ({ displayErrors: boolean }) => {
+      defaultDataView: {
+        getIndexPattern: () => Promise<string>;
+        toSpec: () => Promise<boolean>;
+      };
     };
     hasData: {
       hasESData: () => Promise<boolean>;
@@ -45,7 +47,7 @@ export interface KibanaDependencies {
     };
   };
   showESQLViewLocator: {
-    navigate: ({ query: { esql: string }, url: string }) => Promise<any>;
+    navigate: ({ query: { esql: string }, url: string }) => Promise<{}>;
   };
 }
 /**

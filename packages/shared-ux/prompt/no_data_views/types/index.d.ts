@@ -60,7 +60,14 @@ export interface NoDataViewsPromptKibanaDependencies {
       getLocation: (params: any) => KibanaLocation<{ app: string; path: string }>;
     };
   };
-  dataView: DataViewsServicePublic;
+  dataViews: {
+    getDefaultDataView: () => {
+      defaultDataView: {
+        getIndexPattern: () => Promise<string>;
+        toSpec: () => Promise<boolean>;
+      };
+    };
+  };
 }
 
 export interface NoDataViewsPromptComponentProps {

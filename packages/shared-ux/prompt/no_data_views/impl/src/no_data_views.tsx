@@ -29,13 +29,8 @@ export const NoDataViewsPrompt = ({
   showESQLView = false,
   allowAdHocDataView = false,
 }: NoDataViewsPromptProps) => {
-  const {
-    canCreateNewDataView,
-    openDataViewEditor,
-    dataViewsDocLink,
-    showESQLViewLocator,
-    dataViews,
-  } = useServices();
+  const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink, redirectToESQL } =
+    useServices();
   const closeDataViewEditor = useRef<CloseDataViewEditorFn>();
 
   useEffect(() => {
@@ -84,8 +79,7 @@ export const NoDataViewsPrompt = ({
         canCreateNewDataView,
         dataViewsDocLink,
         showESQLView,
-        showESQLViewLocator,
-        dataViews,
+        redirectToESQL,
       }}
     />
   );

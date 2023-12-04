@@ -56,7 +56,7 @@ export const NoDataViewsPrompt = ({
         <EuiButton
           onClick={onClickEsql}
           iconType="plusInCircle"
-          fill={true}
+          fill={false}
           data-test-subj="gotoESQLDiscover"
         >
           {i18n.translate('sharedUXPackages.noDataViewsPrompt.goToESQLDiscover', {

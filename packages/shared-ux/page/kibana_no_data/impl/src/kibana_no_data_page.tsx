@@ -24,24 +24,26 @@ export const KibanaNoDataPage = ({
 }: KibanaNoDataPageProps) => {
   // These hooks are temporary, until this component is moved to a package.
   const services = useServices();
-  const { hasESData, hasUserDataView } = services;
+  const { hasESData, hasUserDataView, redirectToESQL } = services;
 
   const [isLoading, setIsLoading] = useState(true);
   const [dataExists, setDataExists] = useState(false);
   const [hasUserDataViews, setHasUserDataViews] = useState(false);
+  const [, setUseRedirectToESQL] = useState({});
 
   useEffect(() => {
     const checkData = async () => {
       setDataExists(await hasESData());
       setHasUserDataViews(await hasUserDataView());
       setIsLoading(false);
+      setUseRedirectToESQL(await redirectToESQL);
     };
     // TODO: add error handling
     // https://github.com/elastic/kibana/issues/130913
     checkData().catch(() => {
       setIsLoading(false);
     });
-  }, [hasESData, hasUserDataView]);
+  }, [hasESData, hasUserDataView, redirectToESQL]);
 
   if (isLoading) {
     return showPlainSpinner ? (
