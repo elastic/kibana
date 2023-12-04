@@ -119,12 +119,24 @@ export abstract class TransformGenerator {
       fixedInterval = slo.objective.timesliceWindow!.format();
     }
 
-    const instanceIdField =
-      slo.groupBy !== '' && slo.groupBy !== ALL_VALUE ? slo.groupBy : 'slo.instanceId';
+    const partitions =
+      slo.groupBy !== ALL_VALUE
+        ? [slo.groupBy].flat().reduce((acc, field) => {
+            return {
+              ...acc,
+              [`slo.partitions.${field}`]: {
+                terms: {
+                  field,
+                },
+              },
+            };
+          }, {})
+        : {};
 
     return {
       'slo.id': { terms: { field: 'slo.id' } },
       'slo.revision': { terms: { field: 'slo.revision' } },
+<<<<<<< Updated upstream
       'slo.groupBy': { terms: { field: 'slo.groupBy' } },
       'slo.instanceId': { terms: { field: instanceIdField } },
       'slo.name': { terms: { field: 'slo.name' } },
@@ -132,6 +144,12 @@ export abstract class TransformGenerator {
       'slo.tags': { terms: { field: 'slo.tags' } },
       'slo.indicator.type': { terms: { field: 'slo.indicator.type' } },
       'slo.objective.target': { terms: { field: 'slo.objective.target' } },
+=======
+      ...((slo.groupBy === ALL_VALUE && {
+        'slo.instanceId': { terms: { field: 'slo.instanceId' } },
+      }) ||
+        partitions),
+>>>>>>> Stashed changes
       ...(slo.objective.timesliceWindow && {
         'slo.objective.sliceDurationInSeconds': {
           terms: { field: 'slo.objective.sliceDurationInSeconds' },

@@ -11,6 +11,7 @@ import * as t from 'io-ts';
 const ALL_VALUE = '*';
 
 const allOrAnyString = t.union([t.literal(ALL_VALUE), t.string]);
+const allOrAnyStringOrArrayOfStrings = t.union([allOrAnyString, t.array(allOrAnyString)]);
 
 const dateType = new t.Type<Date, string, unknown>(
   'DateType',
@@ -69,6 +70,7 @@ const dateRangeSchema = t.type({ from: dateType, to: dateType });
 export {
   ALL_VALUE,
   allOrAnyString,
+  allOrAnyStringOrArrayOfStrings,
   dateRangeSchema,
   dateType,
   errorBudgetSchema,

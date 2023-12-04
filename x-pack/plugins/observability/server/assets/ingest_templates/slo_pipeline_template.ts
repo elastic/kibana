@@ -12,6 +12,53 @@ export const getSLOPipelineTemplate = (id: string, indexNamePrefix: string) => (
   description: 'Monthly date-time index naming for SLO data',
   processors: [
     {
+<<<<<<< Updated upstream
+=======
+      enrich: {
+        field: 'slo.id',
+        policy_name: SLO_SUMMARY_ENRICH_POLICY_NAME,
+        target_field: '_enrich',
+      },
+    },
+    {
+      set: {
+        field: 'slo.timeWindow',
+        copy_from: '_enrich.slo.timeWindow',
+      },
+    },
+    {
+      set: {
+        field: 'slo.budgetingMethod',
+        copy_from: '_enrich.slo.budgetingMethod',
+      },
+    },
+    {
+      set: {
+        field: 'slo.objective.target',
+        copy_from: '_enrich.slo.objective.target',
+      },
+    },
+    {
+      remove: {
+        field: '_enrich',
+      },
+    },
+    {
+      set: {
+        field: 'event.ingested',
+        value: '{{{_ingest.timestamp}}}',
+      },
+    },
+    {
+      fingerprint: {
+        fields: ['slo.partitions'],
+        target_field: 'slo.instanceId',
+        ignore_missing: true,
+        if: "ctx?.slo?.instanceId !== '*'",
+      },
+    },
+    {
+>>>>>>> Stashed changes
       date_index_name: {
         field: '@timestamp',
         index_name_prefix: indexNamePrefix,

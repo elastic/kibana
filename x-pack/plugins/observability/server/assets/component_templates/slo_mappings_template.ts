@@ -110,6 +110,9 @@ export const getSLOMappingsTemplate = (name: string) => ({
             isGoodSlice: {
               type: 'byte',
             },
+            partitions: {
+              type: 'flattened',
+            },
           },
         },
       },

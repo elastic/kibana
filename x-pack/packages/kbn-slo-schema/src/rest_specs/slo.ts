@@ -32,6 +32,7 @@ import {
   timesliceMetricBasicMetricWithField,
   timesliceMetricDocCountMetric,
   timesliceMetricPercentileMetric,
+  allOrAnyStringOrArrayOfStrings,
 } from '../schema';
 
 const createSLOParamsSchema = t.type({
@@ -48,7 +49,7 @@ const createSLOParamsSchema = t.type({
       id: sloIdSchema,
       settings: optionalSettingsSchema,
       tags: tagsSchema,
-      groupBy: allOrAnyString,
+      groupBy: allOrAnyStringOrArrayOfStrings,
     }),
   ]),
 });
