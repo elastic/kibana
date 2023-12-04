@@ -117,7 +117,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
     );
   }, [ecsData, eventType]);
 
-  const isDisabled = useIsInvestigateInResolverActionEnabled(ecsData);
+  const isDisabled = !useIsInvestigateInResolverActionEnabled(ecsData);
   const { setGlobalFullScreen } = useGlobalFullScreen();
   const { setTimelineFullScreen } = useTimelineFullScreen();
   const scopedActions = getScopedActions(timelineId);
