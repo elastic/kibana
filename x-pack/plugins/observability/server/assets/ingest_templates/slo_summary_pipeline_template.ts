@@ -6,8 +6,8 @@
  */
 
 import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { getSLOSummaryPipelineId, SLO_RESOURCES_VERSION } from '../../../common/slo/constants';
 import { SLO } from '../../domain/models';
-import { getSLOSummaryPipelineId, SLO_RESOURCES_VERSION } from '../constants';
 
 export const getSLOSummaryPipelineTemplate = (slo: SLO, spaceId: string) => {
   const errorBudgetEstimated =

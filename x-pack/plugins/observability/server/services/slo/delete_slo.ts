@@ -13,7 +13,7 @@ import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-} from '../../assets/constants';
+} from '../../../common/slo/constants';
 import { retryTransientEsErrors } from '../../utils/retry';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';

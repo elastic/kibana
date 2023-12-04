@@ -14,7 +14,7 @@ import {
   getSLOTransformId,
   SLO_MODEL_VERSION,
   SLO_SUMMARY_TEMP_INDEX_NAME,
-} from '../../assets/constants';
+} from '../../../common/slo/constants';
 import { getSLOSummaryPipelineTemplate } from '../../assets/ingest_templates/slo_summary_pipeline_template';
 import { Duration, DurationUnit, SLO } from '../../domain/models';
 import { validateSLO } from '../../domain/services';

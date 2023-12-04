@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSLOSummaryTransformId, getSLOTransformId } from '../../assets/constants';
+import { getSLOSummaryTransformId, getSLOTransformId } from '../../../common/slo/constants';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
