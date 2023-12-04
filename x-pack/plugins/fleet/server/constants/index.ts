@@ -98,4 +98,4 @@ export {
 } from './fleet_es_assets';
 export { FILE_STORAGE_DATA_AGENT_INDEX } from './fleet_es_assets';
 export { FILE_STORAGE_METADATA_AGENT_INDEX } from './fleet_es_assets';
-export * from './mappings';
+export * from '../../common/constants/mappings';

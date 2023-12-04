@@ -6,7 +6,7 @@
  */
 
 /**
- * ATTENTION: New mappings for Fleet are defined in the ElasticSearch repo.
+ * ATTENTION: Mappings for Fleet are defined in the ElasticSearch repo.
  *
  * The following mappings declared here closely mirror them
  * But they are only used to perform validation on the endpoints using ListWithKuery
