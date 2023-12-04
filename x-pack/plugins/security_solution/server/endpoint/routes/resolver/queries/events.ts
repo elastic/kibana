@@ -24,8 +24,9 @@ export class EventsQuery extends BaseResolverQuery {
     timeRange,
     isInternalRequest,
     pagination,
+    shouldExcludeColdAndFrozenTiers,
   }: ResolverQueryParams & { pagination: PaginationBuilder }) {
-    super({ indexPatterns, timeRange, isInternalRequest });
+    super({ indexPatterns, timeRange, isInternalRequest, shouldExcludeColdAndFrozenTiers });
     this.pagination = pagination;
   }
 
@@ -36,6 +37,7 @@ export class EventsQuery extends BaseResolverQuery {
           filter: [
             ...filters,
             ...this.getRangeFilter(),
+            ...this.getColdAndFrozenTierFilter(),
             {
               term: { 'event.kind': 'event' },
             },
