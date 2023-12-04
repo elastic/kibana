@@ -50,8 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     ]);
   }
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/172242
-  describe.skip('discover field visualize button', () => {
+  describe('discover field visualize button', () => {
     before(async () => {
       await kibanaServer.uiSettings.replace(defaultSettings);
     });

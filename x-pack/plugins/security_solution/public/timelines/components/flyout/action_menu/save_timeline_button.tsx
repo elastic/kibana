@@ -42,7 +42,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
   // TODO: User may have Crud privileges but they may not have access to timeline index.
   // Do we need to check that?
   const {
-    kibanaSecuritySolutionsPrivileges: { crud: canEditTimeline },
+    kibanaSecuritySolutionsPrivileges: { crud: canEditTimelinePrivilege },
   } = useUserPrivileges();
   const getTimelineStatus = useMemo(() => getTimelineStatusByIdSelector(), []);
   const {
@@ -60,6 +60,8 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
       return !valueFromStorage;
     },
   });
+
+  const canEditTimeline = canEditTimelinePrivilege && timelineStatus !== TimelineStatus.immutable;
   // Why are we checking for so many flags here?
   // The tour popup should only show when timeline is fully populated and all necessary
   // elements are visible on screen. If we would not check for all these flags, the tour
