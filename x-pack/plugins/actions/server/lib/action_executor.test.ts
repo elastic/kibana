@@ -22,7 +22,6 @@ import {
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
-import { SecurityConnectorFeatureId } from '../../common';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -841,48 +840,6 @@ test('successfully authorize system actions', async () => {
   });
 });
 
-test('Execute of SentinelOne sub-actions require create privilege', async () => {
-  const actionType: jest.Mocked<ActionType> = {
-    id: '.sentinelone',
-    name: 'sentinelone',
-    minimumLicenseRequired: 'enterprise',
-    supportedFeatureIds: [SecurityConnectorFeatureId],
-    validate: {
-      config: { schema: schema.any() },
-      secrets: { schema: schema.any() },
-      params: { schema: schema.any() },
-    },
-    executor: jest.fn(),
-  };
-  const actionSavedObject = {
-    id: '1',
-    type: 'action',
-    attributes: {
-      name: '1',
-      actionTypeId: '.sentinelone',
-      config: {
-        bar: true,
-      },
-      secrets: {
-        baz: true,
-      },
-      isMissingSecrets: false,
-    },
-    references: [],
-  };
-
-  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
-  actionTypeRegistry.get.mockReturnValueOnce(actionType);
-
-  await actionExecutor.execute({ ...executeParams, actionId: 'sentinel-one-connector-authz' });
-
-  expect(authorizationMock.ensureAuthorized).toHaveBeenCalledWith({
-    actionTypeId: '.sentinelone',
-    additionalPrivileges: [],
-    operation: 'execute',
-  });
-});
-
 test('pass the params to the actionTypeRegistry when authorizing system actions', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: '.cases',
@@ -920,7 +877,7 @@ test('pass the params to the actionTypeRegistry when authorizing system actions'
   });
 });
 
-test('Authorizes all actions for execute', async () => {
+test('does not authorize non system actions', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
@@ -939,11 +896,7 @@ test('Authorizes all actions for execute', async () => {
 
   await actionExecutor.execute({ ...executeParams, actionId: 'preconfigured' });
 
-  expect(authorizationMock.ensureAuthorized).toBeCalledWith({
-    actionTypeId: 'test',
-    additionalPrivileges: [],
-    operation: 'execute',
-  });
+  expect(authorizationMock.ensureAuthorized).not.toBeCalled();
 });
 
 test('successfully executes as a task', async () => {
