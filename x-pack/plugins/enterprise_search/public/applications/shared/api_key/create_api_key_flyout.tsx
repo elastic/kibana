@@ -15,6 +15,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -23,6 +24,7 @@ import {
   EuiFlyoutHeader,
   EuiIcon,
   EuiPanel,
+  EuiStep,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
@@ -31,7 +33,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CreateAPIKeyArgs } from '../../api/create_elasticsearch_api_key_logic';
+import {
+  CreateAPIKeyArgs,
+  CreateApiKeyResponse,
+} from '../../enterprise_search_overview/api/create_elasticsearch_api_key_logic';
 
 import { BasicSetupForm, DEFAULT_EXPIRES_VALUE } from './basic_setup_form';
 import { MetadataForm } from './metadata_form';
@@ -52,6 +57,7 @@ const DEFAULT_METADATA = `{
 }`;
 
 interface CreateApiKeyFlyoutProps {
+  createdApiKey?: CreateApiKeyResponse;
   error?: string;
   isLoading: boolean;
   onClose: () => void;
@@ -88,6 +94,7 @@ const INVALID_JSON_ERROR: string = i18n.translate('xpack.enterpriseSearch.invali
 });
 
 export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
+  createdApiKey,
   error,
   isLoading,
   onClose,
@@ -169,6 +176,36 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {createdApiKey && (
+          <>
+            <EuiPanel className="apiKeySuccessPanel" data-test-subj="api-key-create-success-panel">
+              <EuiStep
+                css={css`
+                  .euiStep__content {
+                    padding-bottom: 0;
+                  }
+                `}
+                status="complete"
+                headingElement="h3"
+                title={i18n.translate('xpack.enterpriseSearch.apiKey.apiKeyStepTitle', {
+                  defaultMessage: 'Store this API key',
+                })}
+                titleSize="xs"
+              >
+                <EuiText>
+                  {i18n.translate('xpack.enterpriseSearch.apiKey.apiKeyStepDescription', {
+                    defaultMessage:
+                      "You'll only see this key once, so save it somewhere safe. We don't store your API keys, so if you lose a key you'll need to generate a replacement.",
+                  })}
+                </EuiText>
+                <EuiSpacer size="s" />
+                <EuiCodeBlock isCopyable data-test-subj="api-key-created-key-codeblock">
+                  {JSON.stringify(createdApiKey, undefined, 2)}
+                </EuiCodeBlock>
+              </EuiStep>
+            </EuiPanel>
+          </>
+        )}
         {error && (
           <EuiCallOut
             color="danger"

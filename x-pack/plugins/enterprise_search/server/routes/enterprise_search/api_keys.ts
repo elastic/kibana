@@ -56,7 +56,7 @@ export function registerApiKeysRoutes(
       if (user) {
         const apiKeys = await client.asCurrentUser.security.getApiKey({ username: user.username });
         const validKeys = apiKeys.api_keys.filter(({ invalidated }) => !invalidated);
-        return response.ok({ body: { apiKeys: validKeys } });
+        return response.ok({ body: { api_keys: validKeys } });
       }
       return response.customError({
         body: 'Could not retrieve current user, security plugin is not ready',

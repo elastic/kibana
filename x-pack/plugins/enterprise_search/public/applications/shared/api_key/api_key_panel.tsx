@@ -7,8 +7,6 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { css } from '@emotion/react';
-
 import { useActions, useValues } from 'kea';
 
 import {
@@ -16,13 +14,11 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiCode,
-  EuiCodeBlock,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiStep,
   EuiText,
 } from '@elastic/eui';
 
@@ -30,12 +26,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 
-import { Status } from '../../../../../common/types/api';
+import { Status } from '../../../../common/types/api';
 
-import { KibanaLogic } from '../../../shared/kibana';
-
-import { CreateApiKeyAPILogic } from '../../api/create_elasticsearch_api_key_logic';
-import { FetchApiKeysAPILogic } from '../../api/fetch_api_keys_logic';
+import { CreateApiKeyAPILogic } from '../../enterprise_search_overview/api/create_elasticsearch_api_key_logic';
+import { FetchApiKeysAPILogic } from '../../enterprise_search_overview/api/fetch_api_keys_logic';
+import { KibanaLogic } from '../kibana';
 
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
 import './api_key.scss';
@@ -54,16 +49,11 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ user }) => {
   const { cloud, navigateToUrl } = useValues(KibanaLogic);
   const { makeRequest } = useActions(FetchApiKeysAPILogic);
   const { makeRequest: saveApiKey } = useActions(CreateApiKeyAPILogic);
-  const { data: apiKey, error, status } = useValues(CreateApiKeyAPILogic);
+  const { error, status } = useValues(CreateApiKeyAPILogic);
   const { data } = useValues(FetchApiKeysAPILogic);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   useEffect(() => makeRequest({}), []);
-  useEffect(() => {
-    if (status === Status.SUCCESS) {
-      setIsFlyoutOpen(false);
-    }
-  }, [status]);
 
   const apiKeys = data?.api_keys || [];
   const cloudId = cloud?.cloudId;
@@ -82,61 +72,31 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ user }) => {
       )}
       <EuiPanel>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" direction="row">
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem>
-                <EuiText size="s">
-                  {i18n.translate('xpack.enterpriseSearch.apiKey.elasticsearchEndpoint', {
-                    defaultMessage: 'Elasticsearch endpoint:',
-                  })}
-                </EuiText>
-                <EuiSpacer size="s" />
-
-                <EuiFlexGroup direction="row">
-                  <EuiFlexItem>
-                    <EuiCode>{elasticsearchEndpoint}</EuiCode>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiCopy textToCopy={elasticsearchEndpoint || ''} afterMessage={COPIED_LABEL}>
-                      {(copy) => (
-                        <EuiButtonIcon
-                          onClick={copy}
-                          iconType="copyClipboard"
-                          aria-label={i18n.translate(
-                            'xpack.enterpriseSearch.overview.apiKey.copyApiEndpoint',
-                            {
-                              defaultMessage: 'Copy Elasticsearch endpoint to clipboard.',
-                            }
-                          )}
-                        />
-                      )}
-                    </EuiCopy>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              {cloudId && (
+          {Boolean(cloud) && (
+            <EuiFlexItem>
+              <EuiFlexGroup direction="column">
                 <EuiFlexItem>
                   <EuiText size="s">
-                    {i18n.translate('xpack.enterpriseSearch.apiKey.cloudId', {
-                      defaultMessage: 'Cloud ID:',
+                    {i18n.translate('xpack.enterpriseSearch.apiKey.elasticsearchEndpoint', {
+                      defaultMessage: 'Elasticsearch endpoint:',
                     })}
                   </EuiText>
                   <EuiSpacer size="s" />
 
                   <EuiFlexGroup direction="row">
                     <EuiFlexItem>
-                      <EuiCode>{cloudId}</EuiCode>
+                      <EuiCode>{elasticsearchEndpoint}</EuiCode>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiCopy textToCopy={cloudId || ''} afterMessage={COPIED_LABEL}>
+                      <EuiCopy textToCopy={elasticsearchEndpoint || ''} afterMessage={COPIED_LABEL}>
                         {(copy) => (
                           <EuiButtonIcon
                             onClick={copy}
                             iconType="copyClipboard"
                             aria-label={i18n.translate(
-                              'xpack.enterpriseSearch.overview.apiKey.copyCloudID',
+                              'xpack.enterpriseSearch.overview.apiKey.copyApiEndpoint',
                               {
-                                defaultMessage: 'Copy cloud ID to clipboard.',
+                                defaultMessage: 'Copy Elasticsearch endpoint to clipboard.',
                               }
                             )}
                           />
@@ -145,9 +105,41 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ user }) => {
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+                {cloudId && (
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      {i18n.translate('xpack.enterpriseSearch.apiKey.cloudId', {
+                        defaultMessage: 'Cloud ID:',
+                      })}
+                    </EuiText>
+                    <EuiSpacer size="s" />
+
+                    <EuiFlexGroup direction="row">
+                      <EuiFlexItem>
+                        <EuiCode>{cloudId}</EuiCode>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiCopy textToCopy={cloudId || ''} afterMessage={COPIED_LABEL}>
+                          {(copy) => (
+                            <EuiButtonIcon
+                              onClick={copy}
+                              iconType="copyClipboard"
+                              aria-label={i18n.translate(
+                                'xpack.enterpriseSearch.overview.apiKey.copyCloudID',
+                                {
+                                  defaultMessage: 'Copy cloud ID to clipboard.',
+                                }
+                              )}
+                            />
+                          )}
+                        </EuiCopy>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup>
               <EuiFlexItem>
@@ -216,37 +208,6 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ user }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-      {apiKey && (
-        <>
-          <EuiSpacer />
-          <EuiPanel className="apiKeySuccessPanel" data-test-subj="api-key-create-success-panel">
-            <EuiStep
-              css={css`
-                .euiStep__content {
-                  padding-bottom: 0;
-                }
-              `}
-              status="complete"
-              headingElement="h3"
-              title={i18n.translate('xpack.enterpriseSearch.apiKey.apiKeyStepTitle', {
-                defaultMessage: 'Store this API key',
-              })}
-              titleSize="xs"
-            >
-              <EuiText>
-                {i18n.translate('xpack.enterpriseSearch.apiKey.apiKeyStepDescription', {
-                  defaultMessage:
-                    "You'll only see this key once, so save it somewhere safe. We don't store your API keys, so if you lose a key you'll need to generate a replacement.",
-                })}
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiCodeBlock isCopyable data-test-subj="api-key-created-key-codeblock">
-                {JSON.stringify(apiKey, undefined, 2)}
-              </EuiCodeBlock>
-            </EuiStep>
-          </EuiPanel>
-        </>
-      )}
     </>
   );
 };

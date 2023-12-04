@@ -74,6 +74,5 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ user, assetBasePat
         />
       </EuiFlexItem>
     </EuiFlexGroup>
-    <EuiSpacer size="xxl" />
   </>
 );

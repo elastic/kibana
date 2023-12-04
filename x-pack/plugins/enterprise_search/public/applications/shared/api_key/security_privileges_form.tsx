@@ -11,7 +11,7 @@ import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
 
-import { docLinks } from '../../../shared/doc_links';
+import { docLinks } from '../doc_links';
 
 interface SecurityPrivilegesFormProps {
   roleDescriptors: string;

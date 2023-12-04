@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { useValues } from 'kea';
 
@@ -18,8 +18,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
 
+import { ApiKeyPanel } from '../../../shared/api_key/api_key_panel';
 import { ErrorStateCallout } from '../../../shared/error_state';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -28,7 +28,6 @@ import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/
 
 import headerImage from '../../assets/search_header.svg';
 
-import { ApiKeyPanel } from '../api_key/api_key_panel';
 import { EnterpriseSearchOverviewPageTemplate } from '../layout';
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
@@ -55,22 +54,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
   const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
   const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
-  const { security } = useValues(KibanaLogic);
-
-  const [user, setUser] = useState<AuthenticatedUser | null>(null);
-
-  useEffect(() => {
-    try {
-      security.authc
-        .getCurrentUser()
-        .then(setUser)
-        .catch(() => {
-          setUser(null);
-        });
-    } catch {
-      setUser(null);
-    }
-  }, [security.authc]);
+  const { user } = useValues(KibanaLogic);
 
   const showErrorConnecting = !!(config.host && errorConnectingMessage);
   // The create index flow does not work without ent-search, when content is updated
@@ -82,14 +66,11 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
         <TrialCallout />
         <EuiPageTemplate.Section alignment="top" className="entSearchProductSelectorHeader">
           <WelcomeBanner user={user || undefined} image={headerImage} />
-        </EuiPageTemplate.Section>
-
-        <EuiPageTemplate.Section>
           <SetPageChrome />
           <SendTelemetry action="viewed" metric="overview" />
         </EuiPageTemplate.Section>
 
-        <EuiPageTemplate.Section>
+        <EuiPageTemplate.Section color="subdued">
           <ApiKeyPanel user={user} />
           <EuiSpacer size="xl" />
           <EuiTitle>
