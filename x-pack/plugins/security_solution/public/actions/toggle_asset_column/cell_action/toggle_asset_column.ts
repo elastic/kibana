@@ -21,26 +21,20 @@ const TOGGLE_FIELD = i18n.translate(
     defaultMessage: 'Toggle field in asset table',
   }
 );
-const NESTED_COLUMN = (field: string) =>
-  i18n.translate('xpack.securitySolution.actions.toggleFieldToAssetTable.nestedLabel', {
-    values: { field },
-    defaultMessage:
-      'The {field} field is an object, and is broken down into nested fields which can be added to asset table',
-  });
 
 export const createToggleUserAssetFieldCellActionFactory = createCellActionFactory(
   ({ store }: { store: SecurityAppStore }): CellActionTemplate<SecurityCellAction> => ({
     type: SecurityCellActionType.TOGGLE_COLUMN,
     getIconType: () => ICON,
     getDisplayName: () => TOGGLE_FIELD,
-    getDisplayNameTooltip: ({ data, metadata }) =>
-      metadata?.isObjectArray ? NESTED_COLUMN(data[0]?.field.name) : TOGGLE_FIELD,
+    getDisplayNameTooltip: ({ data }) => TOGGLE_FIELD,
     isCompatible: async ({ data, metadata }) => {
       const field = data[0]?.field;
 
       return (
         data.length === 1 &&
         fieldHasCellActions(field.name) &&
+        !metadata?.isObjectArray &&
         !!metadata?.scopeId &&
         Object.values(UserAssetTableType).includes(
           metadata?.scopeId as unknown as UserAssetTableType
