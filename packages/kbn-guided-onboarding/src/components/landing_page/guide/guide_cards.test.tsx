@@ -17,7 +17,7 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { GuideCardSolutions } from '../classic_version/guide_cards';
 
-const defaultProps: Partial<GuideCardsProps> = {
+const defaultProps: Omit<GuideCardsProps, 'activeFilter'> = {
   activateGuide: jest.fn(),
   navigateToApp: jest.fn(),
   guidesState: [],
