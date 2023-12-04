@@ -22,6 +22,7 @@ import {
   loadKafkaOutput,
   loadLogstashOutput,
   resetKafkaOutputForm,
+  selectESOutput,
   selectKafkaOutput,
   shouldDisplayError,
   validateOutputTypeChangeToKafka,
@@ -35,6 +36,36 @@ import { visit } from '../tasks/common';
 describe('Outputs', () => {
   beforeEach(() => {
     login();
+  });
+
+  describe('Elasticsearch', () => {
+    describe('Preset input', () => {
+      it('is set to balanced by default', () => {
+        selectESOutput();
+
+        cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT).should('have.value', 'balanced');
+      });
+
+      it('forces custom when reserved key is included in config YAML box', () => {
+        selectESOutput();
+
+        cy.getBySel('kibanaCodeEditor').click().focused().type('bulk_max_size: 1000');
+
+        cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT)
+          .should('have.value', 'custom')
+          .should('be.disabled');
+      });
+
+      it('allows balanced when reserved key is not included in config yaml box', () => {
+        selectESOutput();
+
+        cy.getBySel('kibanaCodeEditor').click().focused().type('some_random_key: foo');
+
+        cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT)
+          .should('have.value', 'balanced')
+          .should('be.enabled');
+      });
+    });
   });
 
   describe('Kafka', () => {

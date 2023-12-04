@@ -568,7 +568,8 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               >
                 <>
                   <EuiSelect
-                    value={inputs.presetInput.value}
+                    data-test-subj="settingsOutputsFlyout.presetInput"
+                    {...inputs.presetInput.props}
                     onChange={(e) => inputs.presetInput.setValue(e.target.value)}
                     disabled={
                       inputs.presetInput.props.disabled ||
