@@ -13872,10 +13872,10 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-server.uiSettings.profilingUseLegacyFlamegraphAPI",
+            "id": "def-server.uiSettings.profilingPervCPUWattX86",
             "type": "Object",
             "tags": [],
-            "label": "[profilingUseLegacyFlamegraphAPI]",
+            "label": "[profilingPervCPUWattX86]",
             "description": [],
             "path": "x-pack/plugins/observability/server/ui_settings.ts",
             "deprecated": false,
@@ -13883,7 +13883,7 @@
             "children": [
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingUseLegacyFlamegraphAPI.category",
+                "id": "def-server.uiSettings.profilingPervCPUWattX86.category",
                 "type": "Array",
                 "tags": [],
                 "label": "category",
@@ -13897,7 +13897,7 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingUseLegacyFlamegraphAPI.name",
+                "id": "def-server.uiSettings.profilingPervCPUWattX86.name",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -13908,80 +13908,7 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingUseLegacyFlamegraphAPI.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "false"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingUseLegacyFlamegraphAPI.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.uiSettings.profilingPerCoreWatt",
-            "type": "Object",
-            "tags": [],
-            "label": "[profilingPerCoreWatt]",
-            "description": [],
-            "path": "x-pack/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPerCoreWatt.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPerCoreWatt.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPerCoreWatt.value",
+                "id": "def-server.uiSettings.profilingPervCPUWattX86.value",
                 "type": "number",
                 "tags": [],
                 "label": "value",
@@ -13992,7 +13919,7 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPerCoreWatt.description",
+                "id": "def-server.uiSettings.profilingPervCPUWattX86.description",
                 "type": "string",
                 "tags": [],
                 "label": "description",
@@ -14003,7 +13930,7 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPerCoreWatt.schema",
+                "id": "def-server.uiSettings.profilingPervCPUWattX86.schema",
                 "type": "Object",
                 "tags": [],
                 "label": "schema",
@@ -14024,7 +13951,102 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPerCoreWatt.requiresPageReload",
+                "id": "def-server.uiSettings.profilingPervCPUWattX86.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.profilingPervCPUWattArm64",
+            "type": "Object",
+            "tags": [],
+            "label": "[profilingPervCPUWattArm64]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingPervCPUWattArm64.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingPervCPUWattArm64.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingPervCPUWattArm64.value",
+                "type": "number",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingPervCPUWattArm64.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingPervCPUWattArm64.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<number>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingPervCPUWattArm64.requiresPageReload",
                 "type": "boolean",
                 "tags": [],
                 "label": "requiresPageReload",
@@ -14215,6 +14237,269 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.profilingCo2PerKWH.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.profilingUseLegacyCo2Calculation",
+            "type": "Object",
+            "tags": [],
+            "label": "[profilingUseLegacyCo2Calculation]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingUseLegacyCo2Calculation.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingUseLegacyCo2Calculation.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingUseLegacyCo2Calculation.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingUseLegacyCo2Calculation.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.profilingAWSCostDiscountRate",
+            "type": "Object",
+            "tags": [],
+            "label": "[profilingAWSCostDiscountRate]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.value",
+                "type": "number",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<number>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.profilingCostPervCPUPerHour",
+            "type": "Object",
+            "tags": [],
+            "label": "[profilingCostPervCPUPerHour]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.value",
+                "type": "number",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<number>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.requiresPageReload",
                 "type": "boolean",
                 "tags": [],
                 "label": "requiresPageReload",
@@ -15623,6 +15908,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.profilingAWSCostDiscountRate",
+        "type": "string",
+        "tags": [],
+        "label": "profilingAWSCostDiscountRate",
+        "description": [],
+        "signature": [
+          "\"observability:profilingAWSCostDiscountRate\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.profilingCo2PerKWH",
         "type": "string",
         "tags": [],
@@ -15630,6 +15930,21 @@
         "description": [],
         "signature": [
           "\"observability:profilingCo2PerKWH\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.profilingCostPervCPUPerHour",
+        "type": "string",
+        "tags": [],
+        "label": "profilingCostPervCPUPerHour",
+        "description": [],
+        "signature": [
+          "\"observability:profilingCostPervCPUPerHour\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
@@ -15653,13 +15968,13 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-common.profilingPerCoreWatt",
+        "id": "def-common.profilingPervCPUWattArm64",
         "type": "string",
         "tags": [],
-        "label": "profilingPerCoreWatt",
+        "label": "profilingPervCPUWattArm64",
         "description": [],
         "signature": [
-          "\"observability:profilingPerCoreWatt\""
+          "\"observability:profilingPervCPUWattArm64\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
@@ -15668,13 +15983,28 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-common.profilingUseLegacyFlamegraphAPI",
+        "id": "def-common.profilingPervCPUWattX86",
         "type": "string",
         "tags": [],
-        "label": "profilingUseLegacyFlamegraphAPI",
+        "label": "profilingPervCPUWattX86",
         "description": [],
         "signature": [
-          "\"observability:profilingUseLegacyFlamegraphAPI\""
+          "\"observability:profilingPerVCPUWattX86\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.profilingUseLegacyCo2Calculation",
+        "type": "string",
+        "tags": [],
+        "label": "profilingUseLegacyCo2Calculation",
+        "description": [],
+        "signature": [
+          "\"observability:profilingUseLegacyCo2Calculation\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
