@@ -84,6 +84,7 @@ export const createMockTelemetryReceiver = (
     fetchFleetAgents: jest.fn(),
     openPointInTime: jest.fn(),
     getAlertsIndex: jest.fn().mockReturnValue('alerts-*'),
+    getExperimentalFeatures: jest.fn().mockReturnValue(undefined),
     fetchDiagnosticAlerts: jest.fn().mockReturnValue(diagnosticsAlert ?? jest.fn()),
     fetchEndpointMetrics: jest.fn().mockReturnValue(stubEndpointMetricsResponse),
     fetchEndpointPolicyResponses: jest.fn(),
