@@ -43,8 +43,14 @@ const InspectInConsoleButtonUi: React.FC<PropsUI> = (props) => {
       throw new Error(`The search must have a reference to an index pattern!`);
     }
     const indexPatternTitle = index.getIndexPattern();
-    const pitId = `[ID returned from first request]`; // TODO: translate - user-facing content
-    const queryInfo = getQueryFromCsvJob(searchSource, csvConfig, pitId);
+    const examplePitId = i18n.translate(
+      'xpack.reporting.reportInfoFlyout.devToolsContent.examplePitId',
+      {
+        defaultMessage: `[ID returned from first request]`,
+        description: `This gets used in place of an ID string that is sent in a request body.`,
+      }
+    );
+    const queryInfo = getQueryFromCsvJob(searchSource, csvConfig, examplePitId);
     const queryUri = compressToEncodedURIComponent(
       getTextForConsole(jobTitle, indexPatternTitle, queryInfo, csvConfig)
     );
@@ -63,6 +69,7 @@ const InspectInConsoleButtonUi: React.FC<PropsUI> = (props) => {
     >
       {i18n.translate('xpack.reporting.reportInfoFlyout.openInConsole', {
         defaultMessage: 'Inspect query in Console',
+        description: 'An option in a menu of actions.',
       })}
     </EuiContextMenuItem>
   );
@@ -115,8 +122,13 @@ const getTextForConsole = (
     id: `[ID returned from latest request]`,
   })}`;
 
-  const consoleUserText = `
-# Report title: ${jobTitle}
+  const introText = i18n.translate(
+    // intro to the content
+    'xpack.reporting.reportInfoFlyout.devToolsContent.introText',
+    {
+      description: `Script used in the Console app`,
+      defaultMessage: `
+# Report title: {jobTitle}
 # These are the queries used when exporting data for
 # the CSV report.
 #
@@ -131,8 +143,20 @@ const getTextForConsole = (
 #
 # The response will include an "id" value, which is
 # needed for the second query.
-${pitRequest}
+{pitRequest}`,
+      values: {
+        jobTitle,
+        pitRequest,
+      },
+    }
+  );
 
+  const queryText = i18n.translate(
+    // query with the request path and body
+    'xpack.reporting.reportInfoFlyout.devToolsContent.queryText',
+    {
+      description: `Script used in the Console app`,
+      defaultMessage: `
 # The second query executes a search using the PIT ID.
 # The "keep_alive" and "size" values come from the
 # "xpack.reporting.csv.scroll.duration" and
@@ -143,18 +167,37 @@ ${pitRequest}
 # not be the same as the ID returned from the first
 # query.
 ${queryRequest}
-${queryAsString}
+${queryAsString}`,
+      values: { queryRequest, queryAsString },
+    }
+  );
 
-# The first request retrieves the first page of search
+  const pagingText = i18n.translate(
+    // info about querying further pages, and link to documentation
+    'xpack.reporting.reportInfoFlyout.devToolsContent.pagingText',
+    {
+      description: `Script used in the Console app`,
+      defaultMessage: `# The first request retrieves the first page of search
 # results. If you want to retrieve more hits, use PIT
 # with search_after. Always use the PIT ID from the
 # latest search response. See
-# https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html`,
+    }
+  );
 
+  const closingText = i18n.translate(
+    // reminder to close the point-in-time context
+    'xpack.reporting.reportInfoFlyout.devToolsContent.closingText',
+    {
+      description: `Script used in the Console app`,
+      defaultMessage: `
 # Finally, release the resources held in Elasticsearch
 # memory by clearing the PIT.
-${closePitRequest}
-  `;
+{closePitRequest}
+  `,
+      values: { closePitRequest },
+    }
+  );
 
-  return consoleUserText.trim();
+  return (introText + queryText + pagingText + closingText).trim();
 };
