@@ -152,9 +152,12 @@ export const SentinelOneGetAgentsResponseSchema = schema.object({
 
 export const SentinelOneIsolateHostResponseSchema = schema.object({
   errors: schema.nullable(schema.arrayOf(schema.string())),
-  data: schema.object({
-    affected: schema.number(),
-  }),
+  data: schema.object(
+    {
+      affected: schema.number(),
+    },
+    { unknowns: 'allow' }
+  ),
 });
 
 export const SentinelOneGetRemoteScriptsParamsSchema = schema.object({

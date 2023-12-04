@@ -51,7 +51,7 @@ export const startElasticAgentWithDocker = async ({
 
   const agentVersion = version || (await getAgentVersionMatchingCurrentStack(kbnClient));
 
-  log.info(`Starting a new fleet server using Docker (version: ${agentVersion})`);
+  log.info(`Starting a new Elastic agent using Docker (version: ${agentVersion})`);
 
   const response: StartedElasticAgent = await log.indent(4, async () => {
     const fleetServerUrl = await fetchFleetServerUrl(kbnClient);
@@ -79,7 +79,7 @@ export const startElasticAgentWithDocker = async ({
         })
         .catch((error) => {
           if (!/no such container/i.test(error.message)) {
-            log.verbose(`Attempt to kill currently running fleet-server container with name [${containerName}] was unsuccessful:
+            log.verbose(`Attempt to kill currently running elastic-agent container with name [${containerName}] was unsuccessful:
       ${error}`);
           }
         });
@@ -136,7 +136,7 @@ Kill container:       ${chalk.cyan(`docker kill ${containerId}`)}
     };
   });
 
-  log.info(`Done. Fleet server up and running`);
+  log.info(`Done. Elastic agent up and running`);
 
   return response;
 };

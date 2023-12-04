@@ -14,7 +14,6 @@ import { ROLE, login } from '../../tasks/login';
 import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/alerts';
 
-// Currently it supports only Multipass, so it's not possible to test it on CI, Vagrant support will be added later.
 describe.skip(
   'Isolate command',
   {
@@ -119,7 +118,10 @@ describe.skip(
         cy.getByTestSubj('hostIsolateConfirmButton').click();
         cy.dataSession('SENTINELONE_HOST').then((createdHost) => {
           cy.log('create', createdHost);
-          cy.contains(`Isolation on host ${createdHost.name} successfully submitted`);
+          cy.getByTestSubj('hostIsolateSuccessMessage').should(
+            'contain.text',
+            `Isolation on host ${createdHost.name} successfully submitted`
+          );
         });
 
         cy.getByTestSubj('euiFlyoutCloseButton').click();
@@ -138,11 +140,17 @@ describe.skip(
           }
         );
 
-        cy.contains('Release host', { timeout: 120000 }).click();
+        cy.getByTestSubj('isolate-host-action-item').should('contain.text', 'Release host', {
+          timeout: 120000,
+        });
+        cy.getByTestSubj('isolate-host-action-item').click();
 
         cy.contains('Confirm').click();
         cy.dataSession('SENTINELONE_HOST').then((createdHost) => {
-          cy.contains(`Release on host ${createdHost.name} successfully submitted`);
+          cy.getByTestSubj('hostUnisolateSuccessMessage').should(
+            'contain.text',
+            `Release on host ${createdHost.name} successfully submitted`
+          );
         });
       });
     });

@@ -43,6 +43,11 @@ export const isAlertFromSentinelOneEvent = ({
   return findEndpointAlert ? findEndpointAlert[0] === 'sentinel_one' : false;
 };
 
+/**
+ * Checks to see if the given alert was generated out of the SentinelOne Alerts dataset, coming from
+ * sentinel_one Fleet integration
+ * @param ecsData
+ */
 export const isAlertFromSentinelOneAlert = ({
   ecsData,
 }: {

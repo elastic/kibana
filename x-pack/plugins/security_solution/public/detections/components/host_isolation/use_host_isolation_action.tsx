@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
-import type { SentinelOneAgent } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
@@ -82,7 +81,7 @@ export const useHostIsolationAction = ({
   const { data: sentinelOneResponse } = useSentinelOneAgentData({ agentId: sentinelOneAgentId });
 
   const sentinelOneAgentData = useMemo(
-    () => sentinelOneResponse?.data?.data?.[0] as SentinelOneAgent,
+    () => sentinelOneResponse?.data?.data?.[0],
     [sentinelOneResponse]
   );
 

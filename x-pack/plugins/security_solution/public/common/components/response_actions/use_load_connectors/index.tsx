@@ -20,6 +20,11 @@ export interface Props {
   toasts?: IToasts;
 }
 
+/**
+ * Hook to load all connectors for a given action type.
+ * @param actionTypeId
+ * @param toasts
+ */
 export const useLoadConnectors = ({
   actionTypeId,
   toasts,

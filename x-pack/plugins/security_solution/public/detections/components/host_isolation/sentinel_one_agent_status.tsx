@@ -19,7 +19,7 @@ import {
   RELEASING_LABEL,
 } from '../../../common/components/endpoint/endpoint_agent_status';
 
-export const getSentinelOneAgentStatus = (data?: SentinelOneAgent) => {
+const getSentinelOneAgentStatus = (data?: SentinelOneAgent) => {
   if (!data) {
     return HostStatus.UNENROLLED;
   }
@@ -44,58 +44,54 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   }
 `;
 
-const SentinelOneAgentStatusComponent = ({
-  agentId,
-  dataTestSubj,
-}: {
-  agentId: string;
-  dataTestSubj?: string;
-}) => {
-  const { data, isFetched } = useSentinelOneAgentData({ agentId });
+export const SentinelOneAgentStatus = React.memo(
+  ({ agentId, dataTestSubj }: { agentId: string; dataTestSubj?: string }) => {
+    const { data, isFetched } = useSentinelOneAgentData({ agentId });
 
-  const label = useMemo(() => {
-    const networkStatus = data?.data?.data?.[0]?.networkStatus;
+    const label = useMemo(() => {
+      const networkStatus = data?.data?.data?.[0]?.networkStatus;
 
-    if (networkStatus === SENTINEL_ONE_NETWORK_STATUS.DISCONNECTING) {
-      return ISOLATING_LABEL;
-    }
+      if (networkStatus === SENTINEL_ONE_NETWORK_STATUS.DISCONNECTING) {
+        return ISOLATING_LABEL;
+      }
 
-    if (networkStatus === SENTINEL_ONE_NETWORK_STATUS.DISCONNECTED) {
-      return ISOLATED_LABEL;
-    }
+      if (networkStatus === SENTINEL_ONE_NETWORK_STATUS.DISCONNECTED) {
+        return ISOLATED_LABEL;
+      }
 
-    if (networkStatus === SENTINEL_ONE_NETWORK_STATUS.CONNECTING) {
-      return RELEASING_LABEL;
-    }
-  }, [data?.data?.data]);
+      if (networkStatus === SENTINEL_ONE_NETWORK_STATUS.CONNECTING) {
+        return RELEASING_LABEL;
+      }
+    }, [data?.data?.data]);
 
-  const agentStatus = useMemo(() => getSentinelOneAgentStatus(data?.data?.data?.[0]), [data]);
+    const agentStatus = useMemo(() => getSentinelOneAgentStatus(data?.data?.data?.[0]), [data]);
 
-  return (
-    <EuiFlexGroupStyled
-      gutterSize="none"
-      responsive={false}
-      className="eui-textTruncate"
-      data-test-subj={dataTestSubj}
-    >
-      <EuiFlexItem grow={false}>
-        {isFetched ? (
-          <EuiBadge color={HOST_STATUS_TO_BADGE_COLOR[agentStatus]} className="eui-textTruncate">
-            {getAgentStatusText(agentStatus)}
-          </EuiBadge>
-        ) : (
-          '-'
-        )}
-      </EuiFlexItem>
-      {label && (
-        <EuiFlexItem grow={false} className="eui-textTruncate isolation-status">
-          <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
-            <>{label}</>
-          </EuiBadge>
+    return (
+      <EuiFlexGroupStyled
+        gutterSize="none"
+        responsive={false}
+        className="eui-textTruncate"
+        data-test-subj={dataTestSubj}
+      >
+        <EuiFlexItem grow={false}>
+          {isFetched ? (
+            <EuiBadge color={HOST_STATUS_TO_BADGE_COLOR[agentStatus]} className="eui-textTruncate">
+              {getAgentStatusText(agentStatus)}
+            </EuiBadge>
+          ) : (
+            '-'
+          )}
         </EuiFlexItem>
-      )}
-    </EuiFlexGroupStyled>
-  );
-};
+        {label && (
+          <EuiFlexItem grow={false} className="eui-textTruncate isolation-status">
+            <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
+              <>{label}</>
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroupStyled>
+    );
+  }
+);
 
-export const SentinelOneAgentStatus = React.memo(SentinelOneAgentStatusComponent);
+SentinelOneAgentStatus.displayName = 'SentinelOneAgentStatus';

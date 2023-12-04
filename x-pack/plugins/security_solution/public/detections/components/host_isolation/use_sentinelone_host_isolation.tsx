@@ -16,6 +16,11 @@ import { useSubAction } from '../../../timelines/components/side_panel/event_det
 import { useLoadConnectors } from '../../../common/components/response_actions/use_load_connectors';
 import { SENTINEL_ONE_NETWORK_STATUS } from './sentinel_one_agent_status';
 
+/**
+ * Using SentinelOne connector to pull agent's data from the SentinelOne API. If the agentId is in the transition state
+ * (isolating/releasing) it will keep pulling the state until it finalizes the action
+ * @param agentId
+ */
 export const useSentinelOneAgentData = ({ agentId }: { agentId?: string }) => {
   const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
     'sentinelOneManualHostActionsEnabled'

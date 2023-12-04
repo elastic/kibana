@@ -34,8 +34,7 @@ export const IsolateSentinelOneHost = React.memo(
     const [isIsolated, setIsIsolated] = useState(false);
 
     const { mutateAsync: isolateHost, isLoading } = useSubActionMutation({
-      // @ts-expect-error update types
-      connectorId: connector?.id,
+      connectorId: connector?.id as string,
       subAction: SUB_ACTION.ISOLATE_HOST,
       subActionParams: {
         uuid: sentinelOneAgentId,
@@ -58,14 +57,15 @@ export const IsolateSentinelOneHost = React.memo(
 
     const backToAlertDetails = useCallback(() => cancelCallback(), [cancelCallback]);
 
-    const hostIsolatedSuccessButton = useMemo(() => {
-      return (
+    const hostIsolatedSuccessButton = useMemo(
+      () => (
         <ActionCompletionReturnButton
           onClick={backToAlertDetails}
           buttonText={RETURN_TO_ALERT_DETAILS}
         />
-      );
-    }, [backToAlertDetails]);
+      ),
+      [backToAlertDetails]
+    );
 
     const hostNotIsolated = useMemo(
       () => (
