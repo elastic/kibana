@@ -5,18 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { I18nProvider } from '@kbn/i18n-react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
-
-import { shallow } from 'enzyme';
-
-import { EuiCallOut, EuiPagination } from '@elastic/eui';
-
-import { DocumentList } from './document_list';
-
 import { INDEX_DOCUMENTS_META_DEFAULT } from '../types';
-import { Result } from './result/result';
-
+import { DocumentList } from './document_list';
+import '@testing-library/jest-dom';
 export const DEFAULT_VALUES = {
   dataTelemetryIdPrefix: `entSearchContent-api`,
   docs: [],
@@ -29,20 +23,18 @@ export const DEFAULT_VALUES = {
 };
 
 const mockValues = { ...DEFAULT_VALUES };
-
 describe('DocumentList', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    const mockFn = jest.fn();
-    mockFn.mockImplementation(() => Promise.resolve({ ...DEFAULT_VALUES }));
-  });
-  it('renders empty', () => {
-    const wrapper = shallow(<DocumentList {...DEFAULT_VALUES} />);
-    expect(wrapper.find(Result)).toHaveLength(0);
-    expect(wrapper.find(EuiPagination)).toHaveLength(2);
-  });
+  test('render empty', async () => {
+    const { container } = render(
+      <I18nProvider>
+        <DocumentList {...DEFAULT_VALUES} />
+      </I18nProvider>
+    );
 
-  it('renders documents when results when there is data and mappings', () => {
+    expect(container.querySelector('[data-testId="search-index-documents-result"]')).toBeNull();
+    expect(container.querySelector('[aria-label="Pagination for document list"]')).not.toBeNull();
+  });
+  test('renders documents when results when there is data and mappings', () => {
     const values = {
       ...DEFAULT_VALUES,
       docs: [
@@ -69,12 +61,16 @@ describe('DocumentList', () => {
         },
       },
     };
-
-    const wrapper = shallow(<DocumentList {...values} />);
-    expect(wrapper.find(Result)).toHaveLength(2);
+    render(
+      <I18nProvider>
+        <DocumentList {...values} />
+      </I18nProvider>
+    );
+    expect(screen.getByText('Document id: M9ntXoIBTq5dF-1Xnc8A')).toBeInTheDocument();
+    expect(screen.getByText('Document id: NNntXoIBTq5dF-1Xnc8A')).toBeInTheDocument();
   });
 
-  it('renders callout when total results are 10.000', () => {
+  test('renders callout when total results are 10.000', () => {
     const values = {
       ...DEFAULT_VALUES,
       ...mockValues,
@@ -83,7 +79,11 @@ describe('DocumentList', () => {
         totalItemCount: 10000,
       },
     };
-    const wrapper = shallow(<DocumentList {...values} />);
-    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
+    render(
+      <I18nProvider>
+        <DocumentList {...values} />
+      </I18nProvider>
+    );
+    expect(screen.getByText('Results are limited to 10,000 documents')).toBeInTheDocument();
   });
 });

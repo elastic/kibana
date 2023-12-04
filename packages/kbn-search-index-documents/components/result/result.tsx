@@ -42,7 +42,7 @@ export const Result: React.FC<ResultProps> = ({ metaData, fields }) => {
   const toolTipContent = <>{tooltipText}</>;
 
   return (
-    <EuiPanel hasBorder paddingSize="s">
+    <EuiPanel hasBorder paddingSize="s" data-test-subj="search-index-documents-result">
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
