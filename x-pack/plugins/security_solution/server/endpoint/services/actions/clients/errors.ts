@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
+import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 import { dump } from '../../../utils/dump';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 
@@ -22,8 +25,16 @@ export class ResponseActionsClientError extends CustomHttpRequestError {
   }
 
   toString() {
-    const content = this.toJSON();
-    content.meta = dump(content.meta);
-    return JSON.stringify(content, null, 2);
+    return JSON.stringify(dump(this.toJSON()), null, 2);
+  }
+}
+
+export class ResponseActionsNotSupportedError extends ResponseActionsClientError {
+  constructor(
+    responseAction?: ResponseActionsApiCommandNames,
+    statusCode: number = 405,
+    meta?: unknown
+  ) {
+    super(`Action ${responseAction ? `[${responseAction}] ` : ''}not supported`, statusCode, meta);
   }
 }

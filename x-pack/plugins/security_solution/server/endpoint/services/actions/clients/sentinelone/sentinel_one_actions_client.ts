@@ -14,8 +14,7 @@ import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/appl
 import { once } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { dump } from '../../../../utils/dump';
-import { ResponseActionsClientError } from '../errors';
-import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
+import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import type {
   ActionDetails,
   GetProcessesActionOutputContent,
@@ -39,11 +38,6 @@ import type {
 } from '../../../../../../common/api/endpoint';
 import type { ResponseActionsClientOptions } from '../../../../lib/response_actions/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../../../../lib/response_actions/base_response_actions_client';
-
-const createNotSupportedError = () => {
-  // Throw a 405 Method Not Allowed
-  return new CustomHttpRequestError(`Action is not currently supported`, 405);
-};
 
 export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private readonly connectorActionsClient: ActionsClient;
@@ -95,7 +89,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private async sendAction(
     actionType: SUB_ACTION,
     actionParams: object
-    // FIXME:PT type properly the options above
+    // FIXME:PT type properly the options above once PR 168441 for 8.12 merges
   ): Promise<ActionTypeExecutorResult<unknown>> {
     const { id: connectorId } = await this.getConnector();
     const executeOptions: Parameters<typeof this.connectorActionsClient.execute>[0] = {
@@ -111,6 +105,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     );
 
     const actionSendResponse = await this.connectorActionsClient.execute(executeOptions);
+
+    this.log.debug(`Response:\n${dump(actionSendResponse)}`);
 
     if (actionSendResponse.status === 'error') {
       throw new ResponseActionsClientError(
@@ -144,7 +140,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    throw createNotSupportedError();
+    throw new ResponseActionsNotSupportedError('unisolate');
   }
 
   async killProcess(
@@ -152,7 +148,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   ): Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   > {
-    throw createNotSupportedError();
+    throw new ResponseActionsNotSupportedError('kill-process');
   }
 
   async suspendProcess(
@@ -160,30 +156,30 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   ): Promise<
     ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   > {
-    throw createNotSupportedError();
+    throw new ResponseActionsNotSupportedError('suspend-process');
   }
 
   async runningProcesses(
     options: GetProcessesRequestBody
   ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
-    throw createNotSupportedError();
+    throw new ResponseActionsNotSupportedError('running-processes');
   }
 
   async getFile(
     options: ResponseActionGetFileRequestBody
   ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
-    throw createNotSupportedError();
+    throw new ResponseActionsNotSupportedError('get-file');
   }
 
   async execute(
     options: ExecuteActionRequestBody
   ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
-    throw createNotSupportedError();
+    throw new ResponseActionsNotSupportedError('execute');
   }
 
   async upload(
     options: UploadActionApiRequestBody
   ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>> {
-    throw createNotSupportedError();
+    throw new ResponseActionsNotSupportedError('upload');
   }
 }
