@@ -116,9 +116,14 @@ export function initRoutes(
     },
     async (context, request, response) => {
       const [, { security }] = await core.getStartServices();
-      return response.ok({
-        body: await security.authc.apiKeys.grantAsInternalUser(request, request.body),
-      });
+      const apiKey = await security.authc.apiKeys.grantAsInternalUser(request, request.body);
+      if (!apiKey) {
+        throw new Error(
+          `Couldn't generate API key with the following parameters: ${JSON.stringify(request.body)}`
+        );
+      }
+
+      return response.ok({ body: apiKey });
     }
   );
 
