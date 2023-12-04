@@ -75,10 +75,9 @@ export const GettingStarted = () => {
   const query = parse(search);
   // using for A/B testing
   const [classicGuide] = useState<boolean>(false);
+  const useCase = query.useCase as GuideFilterValues;
   const [filter, setFilter] = useState<GuideFilterValues | GuideFilterValuesClassic>(
-    classicGuide
-      ? (query.useCase as GuideFilterValues) ?? 'all'
-      : (query.useCase as GuideFilterValues) ?? 'search'
+    classicGuide ? useCase ?? 'all' : useCase ?? 'search'
   );
 
   const history = useHistory();
