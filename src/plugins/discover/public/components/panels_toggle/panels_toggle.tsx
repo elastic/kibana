@@ -18,7 +18,7 @@ import { SidebarToggleState } from '../../application/types';
 export interface PanelsToggleProps {
   stateContainer: DiscoverStateContainer;
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
-  isChartAvailable?: boolean;
+  isChartAvailable?: boolean; // it will be injected in `DiscoverMainContent` when rendering view mode tabs
 }
 
 export const PanelsToggle: React.FC<PanelsToggleProps> = ({
