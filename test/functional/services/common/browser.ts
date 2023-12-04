@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import Url from 'url';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import { modifyUrl } from '@kbn/std';
 import { cloneDeepWith, isString } from 'lodash';
 import { Key, Origin, type WebDriver } from 'selenium-webdriver';
 import { Driver as ChromiumWebDriver } from 'selenium-webdriver/chrome';
-import { modifyUrl } from '@kbn/std';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import Url from 'url';
 
-import sharp from 'sharp';
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
+import sharp from 'sharp';
+import { FtrService, type FtrProviderContext } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
-import { type FtrProviderContext, FtrService } from '../../ftr_provider_context';
 import { Browsers } from '../remote/browsers';
 import {
+  NETWORK_PROFILES,
   type NetworkOptions,
   type NetworkProfile,
-  NETWORK_PROFILES,
 } from '../remote/network_profiles';
 
 export type Browser = BrowserService;
@@ -244,6 +244,16 @@ class BrowserService extends FtrService {
       return await this.driver.get(urlWithTime);
     }
     return await this.driver.get(url);
+  }
+
+  /**
+   * Deletes all the cookies of the current browsing context.
+   * https://www.selenium.dev/documentation/webdriver/interactions/cookies/#delete-all-cookies
+   *
+   * @return {Promise<void>}
+   */
+  public async deleteAllCookies() {
+    await this.driver.manage().deleteAllCookies();
   }
 
   /**
