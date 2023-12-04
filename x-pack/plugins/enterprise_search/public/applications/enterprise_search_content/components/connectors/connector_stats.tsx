@@ -45,21 +45,33 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connectorType })
               <EuiFlexItem>
                 <EuiTitle size="xxxs">
                   <h4>
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.connectorStats.h4.connectorSummaryLabel',
-                      { defaultMessage: 'Connector summary' }
-                    )}
+                    {connectorType === 'connector'
+                      ? i18n.translate(
+                          'xpack.enterpriseSearch.connectorStats.h4.connectorSummaryLabel',
+                          { defaultMessage: 'Connector summary' }
+                        )
+                      : i18n.translate(
+                          'xpack.enterpriseSearch.connectorStats.h4.crawlerSummaryLabel',
+                          { defaultMessage: 'Crawler summary' }
+                        )}
                   </h4>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText>
-                  {i18n.translate('xpack.enterpriseSearch.connectorStats.connectorsTextLabel', {
-                    defaultMessage: '{count} connectors',
-                    values: {
-                      count: (data?.connected || 0) + (data?.incomplete || 0),
-                    },
-                  })}
+                  {connectorType === 'connector'
+                    ? i18n.translate('xpack.enterpriseSearch.connectorStats.connectorsTextLabel', {
+                        defaultMessage: '{count} connectors',
+                        values: {
+                          count: (data?.connected || 0) + (data?.incomplete || 0),
+                        },
+                      })
+                    : i18n.translate('xpack.enterpriseSearch.connectorStats.crawlersTextLabel', {
+                        defaultMessage: '{count} crawlers',
+                        values: {
+                          count: (data?.connected || 0) + (data?.incomplete || 0),
+                        },
+                      })}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
