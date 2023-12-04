@@ -22,7 +22,6 @@ interface LogLevelProps {
 
 export function LogLevel({ level }: LogLevelProps) {
   if (!level) return null;
-
   const levelColor = LEVEL_DICT[level] ?? LEVEL_DICT.default;
 
   return (
