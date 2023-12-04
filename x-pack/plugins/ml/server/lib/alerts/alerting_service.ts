@@ -25,6 +25,7 @@ import {
 } from '@kbn/ml-anomaly-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
 import type { MlClient } from '../ml_client';
 import type {
   MlAnomalyDetectionAlertParams,
@@ -397,6 +398,25 @@ export function alertingServiceProvider(
     return alertInstanceKey;
   };
 
+  const getAlertMessage = (
+    resultType: MlAnomalyResultType,
+    source: Record<string, unknown>
+  ): string => {
+    let message = i18n.translate('xpack.ml.alertTypes.anomalyDetectionAlertingRule.alertMessage', {
+      defaultMessage:
+        'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
+    });
+
+    if (resultType === ML_ANOMALY_RESULT_TYPE.RECORD) {
+      message = getMetricChangeDescription(
+        source.actual as number[],
+        source.typical as number[]
+      ).message;
+    }
+
+    return message;
+  };
+
   /**
    * Returns a callback for formatting elasticsearch aggregation response
    * to the alert-as-data document.
@@ -419,14 +439,10 @@ export function alertingServiceProvider(
       const topAnomaly = requestedAnomalies[0];
       const timestamp = topAnomaly._source.timestamp;
 
+      const message = getAlertMessage(resultType, topAnomaly._source);
+
       return {
-        [ALERT_REASON]: i18n.translate(
-          'xpack.ml.alertTypes.anomalyDetectionAlertingRule.alertMessage',
-          {
-            defaultMessage:
-              'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
-          }
-        ),
+        [ALERT_REASON]: message,
         job_id: [...new Set(requestedAnomalies.map((h) => h._source.job_id))][0],
         is_interim: requestedAnomalies.some((h) => h._source.is_interim),
         anomaly_timestamp: timestamp,
@@ -495,14 +511,12 @@ export function alertingServiceProvider(
       const alertInstanceKey = getAlertInstanceKey(topAnomaly._source);
       const timestamp = topAnomaly._source.timestamp;
       const bucketSpanInSeconds = topAnomaly._source.bucket_span;
+      const message = getAlertMessage(resultType, topAnomaly._source);
 
       return {
         count: aggTypeResults.doc_count,
         key: v.key,
-        message: i18n.translate('xpack.ml.alertTypes.anomalyDetectionAlertingRule.alertMessage', {
-          defaultMessage:
-            'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
-        }),
+        message,
         alertInstanceKey,
         jobIds: [...new Set(requestedAnomalies.map((h) => h._source.job_id))],
         isInterim: requestedAnomalies.some((h) => h._source.is_interim),
