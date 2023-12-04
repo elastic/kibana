@@ -9,10 +9,11 @@ import React from 'react';
 
 import { useLocation, useParams } from 'react-router-dom';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ConnectorMode } from '@kbn/search-connectors';
+import { ConnectorMode, ConnectorType } from '@kbn/search-connectors';
 
 import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
 import { parseQueryParams } from '../../../shared/query_params';
@@ -94,6 +95,29 @@ const parseConnectorTypeParam = (
   return undefined;
 };
 
+const getConnectorModeBadge = (connectorMode?: ConnectorMode) => {
+  if (connectorMode === 'native') {
+    return (
+      <EuiBadge iconSide="right">
+        <FormattedMessage
+          id="xpack.enterpriseSearch.getConnectorTypeBadge.nativeBadgeLabel"
+          defaultMessage="Native connector"
+        />
+      </EuiBadge>
+    );
+  }
+  if (connectorMode === 'connector_client') {
+    return (
+      <EuiBadge iconSide="right">
+        {i18n.translate('xpack.enterpriseSearch.getConnectorTypeBadge.connectorClientBadgeLabel', {
+          defaultMessage: 'Connector client',
+        })}
+      </EuiBadge>
+    );
+  }
+  return undefined;
+};
+
 export const NewSearchIndexPage: React.FC = () => {
   const type = decodeURIComponent(useParams<{ type: string }>().type);
   const { search } = useLocation();
@@ -103,7 +127,7 @@ export const NewSearchIndexPage: React.FC = () => {
     ? inputServiceType[0]
     : inputServiceType || '';
 
-  const connectorType = parseConnectorTypeParam(inputConnectorType);
+  const connectorMode = parseConnectorTypeParam(inputConnectorType);
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -118,11 +142,12 @@ export const NewSearchIndexPage: React.FC = () => {
       pageHeader={{
         description: getDescription(type),
         pageTitle: (
-          <EuiFlexGroup>
+          <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiIcon type={getIngestionMethodIconType(type)} size="xxl" />
             </EuiFlexItem>
-            <EuiFlexItem>{getTitle(type, serviceType)}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{getTitle(type, serviceType)}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{getConnectorModeBadge(connectorMode)}</EuiFlexItem>
           </EuiFlexGroup>
         ),
       }}
@@ -132,7 +157,7 @@ export const NewSearchIndexPage: React.FC = () => {
           {type === INGESTION_METHOD_IDS.CRAWLER && <MethodCrawler />}
           {type === INGESTION_METHOD_IDS.API && <MethodApi />}
           {type === INGESTION_METHOD_IDS.CONNECTOR && (
-            <MethodConnector serviceType={serviceType} connectorType={connectorType} />
+            <MethodConnector serviceType={serviceType} connectorType={connectorMode} />
           )}
         </>
       }
