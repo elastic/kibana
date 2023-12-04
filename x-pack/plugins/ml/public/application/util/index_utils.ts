@@ -126,7 +126,7 @@ export function timeBasedIndexCheck(dataView: DataView, showNotification = false
 }
 
 /**
- * Returns true if the data view index pattern contains a :
+ * Returns true if the index pattern contains a :
  * which means it is cross-cluster
  */
 export function isCcsIndexPattern(indexPattern: string) {

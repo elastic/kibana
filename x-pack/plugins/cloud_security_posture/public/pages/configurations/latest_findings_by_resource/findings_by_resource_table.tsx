@@ -29,6 +29,10 @@ import {
 } from '../layout/findings_layout';
 import { EmptyState } from '../../../components/empty_state';
 
+/**
+ * @deprecated: This function is deprecated and will be removed in the next release.
+ * use getAbbreviatedNumber from x-pack/plugins/cloud_security_posture/public/common/utils/get_abbreviated_number.ts
+ */
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
 
@@ -44,11 +48,17 @@ interface Props {
   onResetFilters: () => void;
 }
 
+/**
+ * @deprecated: This function is deprecated and will be removed in the next release.
+ */
 export const getResourceId = (resource: FindingsByResourcePage) => {
   const sections = resource['rule.section'] || [];
   return [resource.resource_id, ...sections].join('/');
 };
 
+/**
+ * @deprecated: This component is deprecated and will be removed in the next release.
+ */
 const FindingsByResourceTableComponent = ({
   items,
   loading,
@@ -189,8 +199,14 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
 
 type BaseFindingColumnName = typeof baseColumns[number]['field'];
 
+/**
+ * @deprecated: This function is deprecated and will be removed in the next release.
+ */
 export const findingsByResourceColumns = Object.fromEntries(
   baseColumns.map((column) => [column.field, column])
 ) as Record<BaseFindingColumnName, typeof baseColumns[number]>;
 
+/**
+ * @deprecated: This component is deprecated and will be removed in the next release.
+ */
 export const FindingsByResourceTable = React.memo(FindingsByResourceTableComponent);
