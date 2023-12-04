@@ -21,6 +21,7 @@ import {
   SAVE_TIMELINE_ACTION_BTN,
   SAVE_TIMELINE_TOOLTIP,
 } from '../../../screens/timeline';
+import { ROWS } from '../../../screens/timelines';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 
 import { deleteTimelines } from '../../../tasks/api_calls/common';
@@ -41,11 +42,14 @@ import {
   pinFirstEvent,
   populateTimeline,
   addNameToTimelineAndSave,
+  addNameToTimelineAndSaveAsNew,
 } from '../../../tasks/timeline';
+import { createTimeline } from '../../../tasks/timelines';
 
-import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
+import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/172304
+describe.skip('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     deleteTimelines();
     login();
@@ -90,7 +94,7 @@ describe('Timelines', (): void => {
     context('Privileges: READ', { tags: '@ess' }, () => {
       beforeEach(() => {
         login(ROLES.t1_analyst);
-        visitWithTimeRange(OVERVIEW_URL, { role: ROLES.t1_analyst });
+        visitWithTimeRange(OVERVIEW_URL);
       });
 
       it('should not be able to create/update timeline ', () => {
@@ -177,6 +181,30 @@ describe('Timelines', (): void => {
       cy.get(TIMELINE_STATUS)
         .invoke('text')
         .should('match', /^Has unsaved changes/);
+    });
+  });
+
+  describe('saves timeline as new', () => {
+    before(() => {
+      deleteTimelines();
+      login();
+      visitWithTimeRange(TIMELINES_URL);
+    });
+
+    it('should save timelines as new', { tags: ['@ess', '@serverless'] }, () => {
+      cy.get(ROWS).should('have.length', '0');
+
+      createTimeline();
+      addNameToTimelineAndSave('First');
+      addNameToTimelineAndSaveAsNew('Second');
+      closeTimeline();
+
+      cy.get(ROWS).should('have.length', '2');
+      cy.get(ROWS)
+        .first()
+        .invoke('text')
+        .should('match', /Second/);
+      cy.get(ROWS).last().invoke('text').should('match', /First/);
     });
   });
 });

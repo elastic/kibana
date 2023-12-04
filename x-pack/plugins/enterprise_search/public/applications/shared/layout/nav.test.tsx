@@ -27,12 +27,11 @@ const DEFAULT_PRODUCT_ACCESS: ProductAccess = {
   hasWorkplaceSearchAccess: true,
 };
 const baseNavItems = [
-  {
+  expect.objectContaining({
     href: '/app/enterprise_search/overview',
-    id: 'overview',
+    id: 'home',
     items: undefined,
-    name: 'Overview',
-  },
+  }),
   {
     id: 'content',
     items: [
@@ -225,8 +224,8 @@ describe('useEnterpriseSearchApplicationNav', () => {
   it('returns selected engine sub nav items', () => {
     const engineName = 'my-test-engine';
     const navItems = useEnterpriseSearchApplicationNav(engineName);
-    expect(navItems?.map((ni) => ni.name)).toEqual([
-      'Overview',
+    expect(navItems![0].id).toEqual('home');
+    expect(navItems?.slice(1).map((ni) => ni.name)).toEqual([
       'Content',
       'Applications',
       'Getting started',
@@ -282,8 +281,8 @@ describe('useEnterpriseSearchApplicationNav', () => {
   it('returns selected engine without tabs when isEmpty', () => {
     const engineName = 'my-test-engine';
     const navItems = useEnterpriseSearchApplicationNav(engineName, true);
-    expect(navItems?.map((ni) => ni.name)).toEqual([
-      'Overview',
+    expect(navItems![0].id).toEqual('home');
+    expect(navItems?.slice(1).map((ni) => ni.name)).toEqual([
       'Content',
       'Applications',
       'Getting started',
@@ -355,7 +354,12 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
     expect(navItems).toEqual(
       baseNavItems.map((item) =>
         item.id === 'content'
-          ? { ...item, items: item.items?.filter((contentItem) => contentItem.id !== 'settings') }
+          ? {
+              ...item,
+              items: item.items?.filter(
+                (contentItem: { id: string }) => contentItem.id !== 'settings'
+              ),
+            }
           : item
       )
     );
@@ -367,7 +371,12 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
     expect(navItems).toEqual(
       baseNavItems.map((item) =>
         item.id === 'content'
-          ? { ...item, items: item.items?.filter((contentItem) => contentItem.id !== 'settings') }
+          ? {
+              ...item,
+              items: item.items?.filter(
+                (contentItem: { id: string }) => contentItem.id !== 'settings'
+              ),
+            }
           : item
       )
     );
