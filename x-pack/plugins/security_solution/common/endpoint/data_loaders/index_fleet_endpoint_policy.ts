@@ -55,11 +55,12 @@ export const indexFleetEndpointPolicy = usageTracker.track(
 
     // Create Agent Policy first
     const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-      name:
-        agentPolicyName || `Policy for ${policyName} (${Math.random().toString(36).substr(2, 5)})`,
+      name: 'Managed Test Policy',
+      // agentPolicyName || `Policy for ${policyName} (${Math.random().toString(36).substr(2, 5)})`,
       description: `Policy created with endpoint data generator (${policyName})`,
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
+      is_managed: true,
     };
 
     let agentPolicy: AxiosResponse<CreateAgentPolicyResponse>;
