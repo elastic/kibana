@@ -9,7 +9,7 @@ jest.mock('fs');
 
 import { createReadStream, ReadStream } from 'fs';
 import { Readable } from 'stream';
-import { sha1 } from './checksum';
+import { sha256 } from './checksum';
 
 describe('sha1', () => {
   let stream: ReadStream;
@@ -25,14 +25,16 @@ describe('sha1', () => {
     (createReadStream as jest.MockedFunction<typeof createReadStream>).mockReturnValue(stream);
   });
 
-  it('should return an sha1 hash', async () => {
-    expect(await sha1('path')).toMatchInlineSnapshot(`"1af17e73721dbe0c40011b82ed4bb1a7dbe3ce29"`);
+  it('should return an sha256 hash', async () => {
+    expect(await sha256('path')).toMatchInlineSnapshot(
+      `"3fc9b689459d738f8c88a3a48aa9e33542016b7a4052e001aaa536fca74813cb"`
+    );
   });
 
   it('should reject on stream error', async () => {
     const error = new Error('Some error');
     stream.destroy(error);
 
-    await expect(sha1('path')).rejects.toEqual(error);
+    await expect(sha256('path')).rejects.toEqual(error);
   });
 });

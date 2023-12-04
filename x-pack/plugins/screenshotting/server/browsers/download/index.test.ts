@@ -10,7 +10,7 @@ import mockFs from 'mock-fs';
 import { existsSync, readdirSync } from 'fs';
 import { ChromiumArchivePaths, PackageInfo } from '../chromium';
 import { fetch } from './fetch';
-import { sha1 } from './checksum';
+import { sha256 } from './checksum';
 import { download } from '.';
 
 jest.mock('./checksum');
@@ -24,16 +24,16 @@ describe('ensureDownloaded', () => {
     paths = new ChromiumArchivePaths();
     pkg = paths.find('linux', 'x64') as PackageInfo;
 
-    (sha1 as jest.MockedFunction<typeof sha1>).mockImplementation(
+    (sha256 as jest.MockedFunction<typeof sha256>).mockImplementation(
       async (packagePath) =>
         paths.packages.find((packageInfo) => paths.resolvePath(packageInfo) === packagePath)
-          ?.archiveChecksum ?? 'some-sha1'
+          ?.archiveChecksum ?? 'some-sha256'
     );
 
     (fetch as jest.MockedFunction<typeof fetch>).mockImplementation(
       async (_url, packagePath) =>
         paths.packages.find((packageInfo) => paths.resolvePath(packageInfo) === packagePath)
-          ?.archiveChecksum ?? 'some-sha1'
+          ?.archiveChecksum ?? 'some-sha256'
     );
 
     mockFs();
@@ -65,8 +65,8 @@ describe('ensureDownloaded', () => {
     await expect(download(paths, pkg)).rejects.toBeInstanceOf(Error);
   });
 
-  it('should reject when downloaded sha1 hash is different', async () => {
-    (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue('random-sha1');
+  it('should reject when downloaded sha256 hash is different', async () => {
+    (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue('random-sha256');
 
     await expect(download(paths, pkg)).rejects.toBeInstanceOf(Error);
   });
@@ -99,8 +99,8 @@ describe('ensureDownloaded', () => {
       );
     });
 
-    it('should download again if sha1 hash different', async () => {
-      (sha1 as jest.MockedFunction<typeof sha1>).mockResolvedValueOnce('random-sha1');
+    it('should download again if sha256 hash different', async () => {
+      (sha256 as jest.MockedFunction<typeof sha256>).mockResolvedValueOnce('random-sha256');
       await download(paths, pkg);
 
       expect(fetch).toHaveBeenCalledTimes(1);

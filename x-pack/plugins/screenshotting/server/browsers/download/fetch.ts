@@ -19,7 +19,7 @@ import type { Logger } from '@kbn/core/server';
 export async function fetch(url: string, path: string, logger?: Logger): Promise<string> {
   logger?.info(`Downloading ${url} to ${path}`);
 
-  const hash = createHash('sha1');
+  const hash = createHash('sha256');
 
   mkdirSync(dirname(path), { recursive: true });
   const handle = openSync(path, 'w');
