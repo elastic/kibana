@@ -15,5 +15,6 @@ export const LEARN_MORE_LABEL: string = i18n.translate(
   }
 );
 export const API_KEY_PLACEHOLDER = 'your_api_key';
-export const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
+export const ELASTICSEARCH_URL_PLACEHOLDER =
+  'https://demo-dce8a5.kb.eu-west-1.aws.qa.elastic.cloud/';
 export const INDEX_NAME_PLACEHOLDER = 'index_name';

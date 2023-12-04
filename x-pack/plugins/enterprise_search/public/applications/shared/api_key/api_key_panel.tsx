@@ -24,6 +24,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 import { Status } from '../../../../common/types/api';
@@ -42,8 +43,6 @@ interface ApiKeyPanelProps {
 const COPIED_LABEL = i18n.translate('xpack.enterpriseSearch.overview.apiKey.copied', {
   defaultMessage: 'Copied',
 });
-
-const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
 
 export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ user }) => {
   const { cloud, navigateToUrl } = useValues(KibanaLogic);

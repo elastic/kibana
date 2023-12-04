@@ -97,7 +97,7 @@ export const EndpointsHeaderAction: React.FC<EndpointsHeaderActionProps> = ({
               </EuiText>
               <EuiSpacer size="s" />
 
-              <EuiFlexGroup direction="row">
+              <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
                 <EuiFlexItem>
                   <EuiCode>{elasticsearchEndpoint}</EuiCode>
                 </EuiFlexItem>
@@ -127,7 +127,7 @@ export const EndpointsHeaderAction: React.FC<EndpointsHeaderActionProps> = ({
               </EuiText>
               <EuiSpacer size="s" />
 
-              <EuiFlexGroup direction="row">
+              <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
                 <EuiFlexItem>
                   <EuiCode>{cloudId}</EuiCode>
                 </EuiFlexItem>
@@ -154,8 +154,8 @@ export const EndpointsHeaderAction: React.FC<EndpointsHeaderActionProps> = ({
                 <EuiFlexItem>
                   <EuiText size="xs" color="subdued">
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.apiKey.activeKeys"
-                      defaultMessage="{number} active API keys."
+                      id="xpack.enterpriseSearch.endpointsHeader.apiKey.activeKeys"
+                      defaultMessage="{number} active API keys"
                       values={{
                         number: (
                           <EuiBadge

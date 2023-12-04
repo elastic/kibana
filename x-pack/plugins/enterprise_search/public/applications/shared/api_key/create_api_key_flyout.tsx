@@ -178,7 +178,12 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
       <EuiFlyoutBody>
         {createdApiKey && (
           <>
-            <EuiPanel className="apiKeySuccessPanel" data-test-subj="api-key-create-success-panel">
+            <EuiPanel
+              css={css`
+                background-color: transparentize($euiColorSuccess, 0.9);
+              `}
+              data-test-subj="api-key-create-success-panel"
+            >
               <EuiStep
                 css={css`
                   .euiStep__content {
@@ -204,6 +209,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
                 </EuiCodeBlock>
               </EuiStep>
             </EuiPanel>
+            <EuiSpacer />
           </>
         )}
         {error && (

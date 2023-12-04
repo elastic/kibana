@@ -50,6 +50,7 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
   pageViewTelemetry?: string;
   setPageChrome?: React.ReactNode;
   solutionNavIcon?: string;
+  useEndpointHeaderActions: boolean;
 };
 
 export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({
@@ -63,6 +64,7 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
   setPageChrome,
   solutionNav,
   solutionNavIcon,
+  useEndpointHeaderActions = true,
   ...pageTemplateProps
 }) => {
   const { readOnlyMode } = useValues(HttpLogic);
@@ -80,7 +82,7 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
     <EndpointsHeaderAction isFlyoutOpen={isFlyoutOpen} setIsFlyoutOpen={setIsFlyoutOpen} />
   );
 
-  if (cloud) {
+  if (cloud && useEndpointHeaderActions) {
     renderHeaderActions(HeaderAction);
   }
   return (

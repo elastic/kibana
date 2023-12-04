@@ -78,7 +78,6 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
           fullWidth
           disabled
           value={user}
-          onChange={() => {}}
         />
       </EuiFormRow>
       <EuiFormRow
