@@ -45,7 +45,7 @@ export const getAddPanelActionMenuItems = (
   return actionsWithContext?.map((item) => {
     const context: ActionExecutionContext<object> = {
       ...item.context,
-      trigger: addPanelMenuTrigger,
+      trigger: item.trigger,
     };
     const actionName = item.action.getDisplayName(context);
     return {

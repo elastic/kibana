@@ -242,6 +242,7 @@ export function LensEditConfigurationFlyout({
         onApply={onApply}
         isScrollable={true}
         attributesChanged={attributesChanged}
+        isNewPanel={isNewPanel}
       >
         <LayerConfiguration
           attributes={attributes}

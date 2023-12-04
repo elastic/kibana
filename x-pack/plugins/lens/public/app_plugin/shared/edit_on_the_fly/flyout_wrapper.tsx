@@ -50,7 +50,7 @@ export const FlyoutWrapper = ({
         >
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
+              <EuiTitle size="xs" data-test-subj="inlineEditingFlyoutLabel">
                 <h2>
                   {isNewPanel
                     ? i18n.translate('xpack.lens.config.createVisualizationLabel', {

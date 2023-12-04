@@ -94,6 +94,16 @@ describe('LensEditConfigurationFlyout', () => {
     expect(navigateToLensEditorSpy).toHaveBeenCalled();
   });
 
+  it('should display the header title correctly for a newly created panel', async () => {
+    renderConfigFlyout({
+      displayFlyoutHeader: true,
+      isNewPanel: true,
+    });
+    expect(screen.getByTestId('inlineEditingFlyoutLabel').textContent).toBe(
+      'Create  visualization'
+    );
+  });
+
   it('should call the closeFlyout callback if cancel button is clicked', async () => {
     const closeFlyoutSpy = jest.fn();
 

@@ -163,6 +163,8 @@ export class DashboardPlugin
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
 
+    // this trigger enables external consumers to register actions for
+    // adding items to the add panel menu
     uiActions.registerTrigger(addPanelMenuTrigger);
 
     if (share) {
