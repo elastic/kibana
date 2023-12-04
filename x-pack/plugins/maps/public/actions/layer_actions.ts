@@ -826,6 +826,8 @@ export function setTileState(
       newValue: tileErrors,
     });
 
+    getInspectorAdapters(getState()).vectorTiles.setTileMetaFeatures(layerId, tileMetaFeatures);
+
     if (!tileMetaFeatures && !layer.getDescriptor().__tileMetaFeatures) {
       return;
     }

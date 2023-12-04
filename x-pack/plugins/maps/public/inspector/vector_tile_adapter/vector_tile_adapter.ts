@@ -11,6 +11,7 @@ import { TileRequest } from './types';
 export class VectorTileAdapter extends EventEmitter {
   private _layers: Record<string, { label: string; tileUrl: string }> = {};
   private _tiles: Array<{ x: number; y: number; z: number }> = [];
+  private _layerTileMetaFeatures: Record<string, TileMetaFeature[]> = {};
 
   addLayer(layerId: string, label: string, tileUrl: string) {
     this._layers[layerId] = { label, tileUrl };
@@ -28,6 +29,11 @@ export class VectorTileAdapter extends EventEmitter {
 
   setTiles(tiles: Array<{ x: number; y: number; z: number }>) {
     this._tiles = tiles;
+    this._onChange();
+  }
+
+  setTileMetaFeatures(layerId: string, tileMetaFeatures?: TileMetaFeature[]) {
+    this._layerTileMetaFeatures[layerId] = tileMetaFeatures ? tileMetaFeatures : [];
     this._onChange();
   }
 
