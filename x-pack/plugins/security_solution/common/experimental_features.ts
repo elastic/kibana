@@ -70,8 +70,14 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
+  /**
+   * Enables the alert type column in KPI visualizations on Alerts Page
+   */
   alertTypeEnabled: false,
-
+  /**
+   * Enables expandable flyout in create rule page, alert preview
+   */
+  expandableFlyoutInCreateRuleEnabled: false,
   /*
    * Enables new Set of filters on the Alerts page.
    *
@@ -110,10 +116,26 @@ export const allowedExperimentalValues = Object.freeze({
   protectionUpdatesEnabled: true,
 
   /**
+   * Enables alerts suppression for threshold rules
+   */
+  alertSuppressionForThresholdRuleEnabled: false,
+
+  /**
    * Disables the timeline save tour.
    * This flag is used to disable the tour in cypress tests.
    */
   disableTimelineSaveTour: false,
+
+  /**
+   * Enables the risk engine privileges route
+   * and associated callout in the UI
+   */
+  riskEnginePrivilegesRouteEnabled: true,
+
+  /*
+   * Enables experimental Entity Analytics Asset Criticality feature
+   */
+  entityAnalyticsAssetCriticalityEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

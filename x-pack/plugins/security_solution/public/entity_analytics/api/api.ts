@@ -11,6 +11,7 @@ import {
   RISK_ENGINE_ENABLE_URL,
   RISK_ENGINE_DISABLE_URL,
   RISK_ENGINE_INIT_URL,
+  RISK_ENGINE_PRIVILEGES_URL,
 } from '../../../common/constants';
 
 import { KibanaServices } from '../../common/lib/kibana';
@@ -20,7 +21,8 @@ import type {
   GetRiskEngineStatusResponse,
   InitRiskEngineResponse,
   DisableRiskEngineResponse,
-} from '../../../server/lib/entity_analytics/risk_engine/types';
+  RiskEnginePrivilegesResponse,
+} from '../../../server/lib/entity_analytics/types';
 import type { RiskScorePreviewRequestSchema } from '../../../common/risk_engine/risk_score_preview/request_schema';
 
 /**
@@ -83,5 +85,15 @@ export const disableRiskEngine = async (): Promise<DisableRiskEngineResponse> =>
   return KibanaServices.get().http.fetch<DisableRiskEngineResponse>(RISK_ENGINE_DISABLE_URL, {
     version: '1',
     method: 'POST',
+  });
+};
+
+/**
+ * Get risk engine privileges
+ */
+export const fetchRiskEnginePrivileges = async (): Promise<RiskEnginePrivilegesResponse> => {
+  return KibanaServices.get().http.fetch<RiskEnginePrivilegesResponse>(RISK_ENGINE_PRIVILEGES_URL, {
+    version: '1',
+    method: 'GET',
   });
 };

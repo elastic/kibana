@@ -7,18 +7,20 @@
  */
 
 import React from 'react';
+import { skip, take } from 'rxjs/operators';
 
-import { withSuspense } from '@kbn/shared-ux-utility';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
-import { tracksOverlays } from '@kbn/embeddable-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import { tracksOverlays } from '@kbn/embeddable-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { withSuspense } from '@kbn/shared-ux-utility';
 
-import { LinksInput, LinksByReferenceInput, LinksEditorFlyoutReturn } from '../embeddable/types';
-import { coreServices } from '../services/kibana_services';
-import { runSaveToLibrary } from '../content_management/save_to_library';
+import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { Link, LinksLayoutType } from '../../common/content_management';
+import { runSaveToLibrary } from '../content_management/save_to_library';
+import { LinksByReferenceInput, LinksEditorFlyoutReturn, LinksInput } from '../embeddable/types';
 import { getLinksAttributeService } from '../services/attribute_service';
+import { coreServices } from '../services/kibana_services';
 
 const LazyLinksEditor = React.lazy(() => import('../components/editor/links_editor'));
 
@@ -40,7 +42,8 @@ export async function openEditorFlyout(
   const { attributes } = await attributeService.unwrapAttributes(initialInput);
   const isByReference = attributeService.inputIsRefType(initialInput);
   const initialLinks = attributes?.links;
-  const overlayTracker = tracksOverlays(parentDashboard) ? parentDashboard : undefined;
+  const overlayTracker =
+    parentDashboard && tracksOverlays(parentDashboard) ? parentDashboard : undefined;
 
   if (!initialLinks) {
     /**
@@ -55,6 +58,22 @@ export async function openEditorFlyout(
   }
 
   return new Promise((resolve, reject) => {
+    const closeEditorFlyout = (editorFlyout: OverlayRef) => {
+      if (overlayTracker) {
+        overlayTracker.clearOverlays();
+      } else {
+        editorFlyout.close();
+      }
+    };
+
+    /**
+     * Close the flyout whenever the app changes - this handles cases for when the flyout is open outside of the
+     * Dashboard app (`overlayTracker` is not available)
+     */
+    coreServices.application.currentAppId$.pipe(skip(1), take(1)).subscribe(() => {
+      if (!overlayTracker) editorFlyout.close();
+    });
+
     const onSaveToLibrary = async (newLinks: Link[], newLayout: LinksLayoutType) => {
       const newAttributes = {
         ...attributes,
@@ -74,7 +93,7 @@ export async function openEditorFlyout(
         attributes: newAttributes,
       });
       parentDashboard?.reload();
-      if (overlayTracker) overlayTracker.clearOverlays();
+      closeEditorFlyout(editorFlyout);
     };
 
     const onAddToDashboard = (newLinks: Link[], newLayout: LinksLayoutType) => {
@@ -94,12 +113,12 @@ export async function openEditorFlyout(
         attributes: newAttributes,
       });
       parentDashboard?.reload();
-      if (overlayTracker) overlayTracker.clearOverlays();
+      closeEditorFlyout(editorFlyout);
     };
 
     const onCancel = () => {
       reject();
-      if (overlayTracker) overlayTracker.clearOverlays();
+      closeEditorFlyout(editorFlyout);
     };
 
     const editorFlyout = coreServices.overlays.openFlyout(
@@ -125,6 +144,8 @@ export async function openEditorFlyout(
       }
     );
 
-    if (overlayTracker) overlayTracker.openOverlay(editorFlyout);
+    if (overlayTracker) {
+      overlayTracker.openOverlay(editorFlyout);
+    }
   });
 }
