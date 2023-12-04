@@ -8,16 +8,15 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { migrateToLatest } from '@kbn/kibana-utils-plugin/common';
-import type { Location } from 'history';
 import { BehaviorSubject } from 'rxjs';
+import type { Location } from 'history';
+import { migrateToLatest } from '@kbn/kibana-utils-plugin/common';
 import type { UrlService } from '../../../common/url_service';
+import { parseSearchParams, RedirectOptions } from '../../../common/url_service/locators/redirect';
 import {
   LEGACY_SHORT_URL_LOCATOR_ID,
   LegacyShortUrlLocatorParams,
 } from '../../../common/url_service/locators/legacy_short_url_locator';
-import { parseSearchParams, RedirectOptions } from '../../../common/url_service/locators/redirect';
-import { getHomeHref } from '../../lib/get_home_href';
 
 export interface RedirectManagerDependencies {
   url: UrlService;
@@ -29,27 +28,18 @@ export class RedirectManager {
   constructor(public readonly deps: RedirectManagerDependencies) {}
 
   public registerLocatorRedirectApp(core: CoreSetup) {
-    const { application, customBranding, http, theme } = core;
-
-    application.register({
+    core.application.register({
       id: 'r',
       title: 'Redirect endpoint',
       chromeless: true,
       mount: async (params) => {
         const { render } = await import('./render');
-        const [start] = await core.getStartServices();
-        const { chrome, uiSettings } = start;
-
         const unmount = render(params.element, {
           manager: this,
-          customBranding,
-          docTitle: chrome.docTitle,
-          theme,
-          homeHref: getHomeHref(http, uiSettings),
+          theme: core.theme,
+          customBranding: core.customBranding,
         });
-
         this.onMount(params.history.location);
-
         return () => {
           unmount();
         };
