@@ -52,6 +52,12 @@ import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query'
 
 const UseField = getUseField({ component: Field });
 
+const VALID_CATEGORIES = [
+  DEFAULT_APP_CATEGORIES.observability.id,
+  DEFAULT_APP_CATEGORIES.security.id,
+  DEFAULT_APP_CATEGORIES.management.id,
+];
+
 export interface CreateMaintenanceWindowFormProps {
   onCancel: () => void;
   onSuccess: () => void;
@@ -88,22 +94,20 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const [filters, setFilters] = useState<Filter[]>(
     (initialValue?.scopedQuery?.filters as Filter[]) || []
   );
-  const [isQueryInvalid, setIsQueryInvalid] = useState<boolean>(false);
+  const [scopedQueryErrors, setScopedQueryErrors] = useState<string[]>([]);
   const hasSetInitialCategories = useRef<boolean>(false);
+  const categoryIdsHistory = useRef<string[]>([]);
 
   const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
 
-  const onCreateOrUpdateError = useCallback(
-    (error: IHttpFetchError<KibanaServerError>) => {
-      if (!error.body?.message) {
-        return;
-      }
-      if (isScopedQueryError(error.body.message)) {
-        setIsQueryInvalid(true);
-      }
-    },
-    [setIsQueryInvalid]
-  );
+  const onCreateOrUpdateError = useCallback((error: IHttpFetchError<KibanaServerError>) => {
+    if (!error.body?.message) {
+      return;
+    }
+    if (isScopedQueryError(error.body.message)) {
+      setScopedQueryErrors([i18n.CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE]);
+    }
+  }, []);
 
   const { mutate: createMaintenanceWindow, isLoading: isCreateLoading } =
     useCreateMaintenanceWindow({
@@ -134,7 +138,12 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   const submitMaintenanceWindow = useCallback(
     async (formData, isValid) => {
-      if (!isValid || isQueryInvalid) {
+      if (!isValid || scopedQueryErrors.length !== 0) {
+        return;
+      }
+
+      if (isScopedQueryEnabled && !scopedQueryPayload) {
+        setScopedQueryErrors([i18n.CREATE_FORM_SCOPED_QUERY_EMPTY_ERROR_MESSAGE]);
         return;
       }
 
@@ -160,7 +169,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     },
     [
       isEditMode,
-      isQueryInvalid,
+      isScopedQueryEnabled,
+      scopedQueryErrors,
       maintenanceWindowId,
       updateMaintenanceWindow,
       createMaintenanceWindow,
@@ -189,28 +199,32 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   const { setFieldValue } = form;
 
-  const availableCategories = useMemo(() => {
+  const validRuleTypes = useMemo(() => {
     if (!ruleTypes) {
       return [];
     }
-    return [...new Set(ruleTypes.map((ruleType) => ruleType.category))];
+    return ruleTypes.filter((ruleType) => VALID_CATEGORIES.includes(ruleType.category));
   }, [ruleTypes]);
 
+  const availableCategories = useMemo(() => {
+    return [...new Set(validRuleTypes.map((ruleType) => ruleType.category))];
+  }, [validRuleTypes]);
+
   const featureIds = useMemo(() => {
-    if (!Array.isArray(ruleTypes) || !Array.isArray(categoryIds) || !mounted) {
+    if (!Array.isArray(validRuleTypes) || !Array.isArray(categoryIds) || !mounted) {
       return [];
     }
 
     const featureIdsSet = new Set<ValidFeatureId>();
 
-    ruleTypes.forEach((ruleType) => {
+    validRuleTypes.forEach((ruleType) => {
       if (categoryIds.includes(ruleType.category)) {
         featureIdsSet.add(ruleType.producer as ValidFeatureId);
       }
     });
 
     return [...featureIdsSet];
-  }, [ruleTypes, categoryIds, mounted]);
+  }, [validRuleTypes, categoryIds, mounted]);
 
   const onCategoryIdsChange = useCallback(
     (ids: string[]) => {
@@ -226,6 +240,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     (isEnabled: boolean) => {
       if (isEnabled) {
         setFieldValue('categoryIds', [categoryIds?.sort()[0] || availableCategories.sort()[0]]);
+      } else {
+        setFieldValue('categoryIds', categoryIdsHistory.current);
       }
       setIsScopedQueryEnabled(isEnabled);
     },
@@ -234,12 +250,12 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   const onQueryChange = useCallback(
     (newQuery: string) => {
-      if (isQueryInvalid) {
-        setIsQueryInvalid(false);
+      if (scopedQueryErrors.length) {
+        setScopedQueryErrors([]);
       }
       setQuery(newQuery);
     },
-    [isQueryInvalid]
+    [scopedQueryErrors]
   );
 
   const modal = useMemo(() => {
@@ -280,13 +296,13 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     if (hasSetInitialCategories.current) {
       return;
     }
-    if (!ruleTypes) {
+    if (!validRuleTypes.length) {
       return;
     }
-    setFieldValue('categoryIds', [...new Set(ruleTypes.map((ruleType) => ruleType.category))]);
+    setFieldValue('categoryIds', [...new Set(validRuleTypes.map((ruleType) => ruleType.category))]);
     hasSetInitialCategories.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditMode, ruleTypes, mounted]);
+  }, [isEditMode, validRuleTypes, mounted]);
 
   // For edit mode, if a maintenance window => category_ids is not an array, this means
   // the maintenance window was created before the introduction of category filters.
@@ -304,14 +320,16 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     if (Array.isArray(categoryIds)) {
       return;
     }
-    setFieldValue('categoryIds', [
-      DEFAULT_APP_CATEGORIES.observability.id,
-      DEFAULT_APP_CATEGORIES.security.id,
-      DEFAULT_APP_CATEGORIES.management.id,
-    ]);
+    setFieldValue('categoryIds', VALID_CATEGORIES);
     hasSetInitialCategories.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditMode, categoryIds, mounted]);
+
+  useEffect(() => {
+    if (!isScopedQueryEnabled && Array.isArray(categoryIds)) {
+      categoryIdsHistory.current = categoryIds;
+    }
+  }, [categoryIds, isScopedQueryEnabled]);
 
   return (
     <Form form={form}>
@@ -450,7 +468,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                   filters={filters}
                   isLoading={isLoadingRuleTypes}
                   isEnabled={isScopedQueryEnabled}
-                  isInvalid={isQueryInvalid}
+                  errors={scopedQueryErrors}
                   onQueryChange={onQueryChange}
                   onFiltersChange={setFilters}
                 />

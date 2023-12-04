@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiLoadingSpinner } from '@elast
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { Filter } from '@kbn/es-query';
 import { AlertsSearchBar } from '@kbn/alerts-ui-shared';
-import * as translations from '../translations';
 import { PLUGIN } from '../../../../common/constants/plugin';
 import { useKibana } from '../../../utils/kibana_react';
 
@@ -18,7 +17,7 @@ export interface MaintenanceWindowScopedQueryProps {
   featureIds: AlertConsumers[];
   query: string;
   filters: Filter[];
-  isInvalid?: boolean;
+  errors?: string[];
   isLoading?: boolean;
   isEnabled?: boolean;
   onQueryChange: (query: string) => void;
@@ -31,7 +30,7 @@ export const MaintenanceWindowScopedQuery = React.memo(
       featureIds,
       query,
       filters,
-      isInvalid = false,
+      errors = [],
       isLoading,
       isEnabled = true,
       onQueryChange,
@@ -74,11 +73,7 @@ export const MaintenanceWindowScopedQuery = React.memo(
     return (
       <EuiFlexGroup data-test-subj="maintenanceWindowScopeQuery" direction="column">
         <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            isInvalid={isInvalid}
-            error={translations.CREATE_FORM_SCOPED_QUERY_ERROR_MESSAGE}
-          >
+          <EuiFormRow fullWidth isInvalid={errors.length !== 0} error={errors[0]}>
             <AlertsSearchBar
               appName={PLUGIN.getI18nName(i18n)}
               featureIds={featureIds}

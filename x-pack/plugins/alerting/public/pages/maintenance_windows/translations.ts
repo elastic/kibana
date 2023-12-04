@@ -230,10 +230,17 @@ export const CREATE_FORM_SCOPED_QUERY_TOGGLE_TITLE = i18n.translate(
   }
 );
 
-export const CREATE_FORM_SCOPED_QUERY_ERROR_MESSAGE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.scopedQuery.errorMessage',
+export const CREATE_FORM_SCOPED_QUERY_INVALID_ERROR_MESSAGE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.scopedQuery.invalidErrorMessage',
   {
     defaultMessage: 'Invalid scoped query.',
+  }
+);
+
+export const CREATE_FORM_SCOPED_QUERY_EMPTY_ERROR_MESSAGE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.scopedQuery.emptyErrorMessage',
+  {
+    defaultMessage: 'Scoped query is required.',
   }
 );
 

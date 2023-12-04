@@ -70,7 +70,7 @@ export const MaintenanceWindowCategorySelection = (
     return CHECKBOX_OPTIONS.map((option) => ({
       ...option,
       disabled: !availableCategories.includes(option.id),
-    }));
+    })).sort((a, b) => a.id.localeCompare(b.id));
   }, [availableCategories]);
 
   const onCheckboxChange = useCallback(
