@@ -38,7 +38,8 @@ import { mapSavedObjectToMonitor } from './helper';
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
-  validate: {
+  validate: {},
+  validation: {
     params: schema.object({
       monitorId: schema.string(),
     }),

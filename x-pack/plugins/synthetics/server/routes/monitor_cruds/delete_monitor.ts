@@ -30,8 +30,8 @@ import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/
 
 export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
-  unknown,
-  unknown,
+  Record<string, any>,
+  Record<string, any>,
   { ids: string[] }
 > = () => ({
   method: 'DELETE',
@@ -50,13 +50,13 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
 
     const { ids } = request.body;
 
-    const result = [];
+    const result: Array<{ id: string; deleted: boolean }> = [];
 
     await pMap(ids, async (id) => {
       try {
         const { errors, res } = await deleteMonitor({
           routeContext,
-          monitorId,
+          monitorId: id,
         });
         if (res) {
           return res;
@@ -71,7 +71,7 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
         result.push({ id, deleted: true });
       } catch (getErr) {
         if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-          return getMonitorNotFoundResponse(response, monitorId);
+          return getMonitorNotFoundResponse(response, id);
         }
 
         throw getErr;
