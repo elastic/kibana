@@ -459,12 +459,12 @@ const fetchComparisonDriftedData = async ({
   );
 
   const fieldsWithNoOverlap = new Set<string>();
-  const rangesAggs = rangesResp.aggregations.sample
+  const rangesAggs = rangesResp?.aggregations?.sample
     ? rangesResp.aggregations.sample
-    : rangesResp.aggregations;
+    : rangesResp?.aggregations;
   for (const { field } of fields) {
-    if (rangesAggs[`${field}_ranges`]) {
-      const buckets = rangesAggs[`${field}_ranges`].buckets as AggregationsRangeBucketKeys[];
+    if (isPopulatedObject(rangesAggs, [`${field}_ranges`])) {
+      const buckets = rangesAggs[`${field}_ranges`];
 
       if (buckets) {
         const totalSumOfAllBuckets = buckets.reduce((acc, bucket) => acc + bucket.doc_count, 0);
@@ -781,7 +781,7 @@ export const useFetchDataComparisonResult = (
 
           setProgressMessage(
             i18n.translate('xpack.dataVisualizer.dataDrift.progress.loadingReference', {
-              defaultMessage: `Loading reference data for { fieldsCount } fields.`,
+              defaultMessage: `Loading reference data for {fieldsCount} fields.`,
               values: { fieldsCount },
             })
           );
@@ -843,7 +843,7 @@ export const useFetchDataComparisonResult = (
 
           setProgressMessage(
             i18n.translate('xpack.dataVisualizer.dataDrift.progress.loadingComparison', {
-              defaultMessage: `Loading comparison data for { fieldsCount } fields.`,
+              defaultMessage: `Loading comparison data for {fieldsCount} fields.`,
               values: { fieldsCount },
             })
           );
@@ -886,7 +886,7 @@ export const useFetchDataComparisonResult = (
           setLoaded(0.5);
           setProgressMessage(
             i18n.translate('xpack.dataVisualizer.dataDrift.progress.loadedComparison', {
-              defaultMessage: `Loaded comparison data.Now loading histogram data.`,
+              defaultMessage: `Loaded comparison data. Now loading histogram data.`,
             })
           );
 
