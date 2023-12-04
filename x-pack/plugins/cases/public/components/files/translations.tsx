@@ -36,7 +36,7 @@ export const COPY_FILE_HASH = i18n.translate('xpack.cases.caseView.files.copyFil
 });
 
 export const COPY_FILE_HASH_SUCCESS = (hashName: string) =>
-  i18n.translate('xpack.cases.caseView.files.copyFileHash', {
+  i18n.translate('xpack.cases.caseView.files.copyFileHashSuccess', {
     values: { hashName },
     defaultMessage: `Copied {hashName} file hash successfully`,
   });
