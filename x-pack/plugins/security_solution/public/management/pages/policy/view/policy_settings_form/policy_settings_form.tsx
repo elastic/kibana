@@ -54,7 +54,7 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 
       {!ProtectionsUpSellingComponent && (
         <>
-          <RelatedDetectionRulesCallout></RelatedDetectionRulesCallout>
+          <RelatedDetectionRulesCallout />
           <EuiSpacer size="l" />
           <MalwareProtectionsCard {...props} data-test-subj={getTestId('malware')} />
           <EuiSpacer size="l" />
