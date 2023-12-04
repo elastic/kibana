@@ -151,7 +151,7 @@ describe('MaintenanceWindowClient - create', () => {
         title: mockMaintenanceWindow.title,
         duration: mockMaintenanceWindow.duration,
         rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
-        categoryIds: ['observability', 'securitySolution'],
+        categoryIds: ['securitySolution'],
         scopedQuery: {
           kql: "_id: '1234'",
           filters: [
@@ -189,7 +189,7 @@ describe('MaintenanceWindowClient - create', () => {
         rRule: mockMaintenanceWindow.rRule,
         enabled: true,
         expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
-        categoryIds: ['observability', 'securitySolution'],
+        categoryIds: ['securitySolution'],
         ...updatedMetadata,
       }),
       {
@@ -245,10 +245,57 @@ describe('MaintenanceWindowClient - create', () => {
         },
       });
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Error validating create maintenance scoped query - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
+      "Error validating create maintenance window data - invalid scoped query - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
       invalid: 
       ---------^"
     `);
+  });
+
+  it('should throw if trying to create a MW with a scoped query with other than 1 category ID', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
+    });
+
+    await expect(async () => {
+      await createMaintenanceWindow(mockContext, {
+        data: {
+          title: mockMaintenanceWindow.title,
+          duration: mockMaintenanceWindow.duration,
+          rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
+          categoryIds: ['observability', 'securitySolution'],
+          scopedQuery: {
+            kql: "_id: '1234'",
+            filters: [
+              {
+                meta: {
+                  disabled: false,
+                  negate: false,
+                  alias: null,
+                  key: 'kibana.alert.action_group',
+                  field: 'kibana.alert.action_group',
+                  params: {
+                    query: 'test',
+                  },
+                  type: 'phrase',
+                },
+                $state: {
+                  store: 'appState',
+                },
+                query: {
+                  match_phrase: {
+                    'kibana.alert.action_group': 'test',
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+    }).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error validating create maintenance window data - scoped query must be accompanied by 1 category ID"`
+    );
   });
 
   it('should throw if trying to create a maintenance window with invalid category ids', async () => {
