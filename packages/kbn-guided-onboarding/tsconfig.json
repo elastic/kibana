@@ -25,7 +25,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-theme-browser-mocks",
     "@kbn/analytics",
-    "@kbn/core-doc-links-browser-mocks"
+    "@kbn/core-doc-links-browser-mocks",
+    "@kbn/core-mount-utils-browser"
   ],
   "exclude": [
     "target/**/*",
