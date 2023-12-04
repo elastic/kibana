@@ -117,7 +117,6 @@ test('generates gauge chart config', async () => {
           "layerType": "data",
           "metricAccessor": "metric_formula_accessor",
           "shape": "horizontalBullet",
-          "showBar": false,
           "ticksPosition": "auto",
         },
       },
