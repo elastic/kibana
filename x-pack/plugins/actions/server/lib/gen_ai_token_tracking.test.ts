@@ -67,7 +67,7 @@ describe('getGenAiTokenTracking', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('should return the total, prompt, and completion token counts when given a valid Bedrock response', async () => {
+  it('should return the total, prompt, and completion token counts when given a valid Bedrock response for run/test subactions', async () => {
     const actionTypeId = '.bedrock';
 
     const result = {
@@ -100,6 +100,46 @@ describe('getGenAiTokenTracking', () => {
     expect(mockGetTokenCountFromBedrockInvoke).toHaveBeenCalledWith({
       response: 'Sample completion',
       body: 'Sample body',
+    });
+  });
+
+  it('should return the total, prompt, and completion token counts when given a valid Bedrock response for invokeAI subaction', async () => {
+    const actionTypeId = '.bedrock';
+
+    const result = {
+      actionId: '123',
+      status: 'ok' as const,
+      data: {
+        message: 'Sample completion',
+      },
+    };
+    const validatedParams = {
+      subAction: 'invokeAI',
+      subActionParams: {
+        messages: [
+          {
+            role: 'user',
+            content: 'Sample message',
+          },
+        ],
+      },
+    };
+    const tokenTracking = await getGenAiTokenTracking({
+      actionTypeId,
+      logger,
+      result,
+      validatedParams,
+    });
+
+    expect(tokenTracking).toEqual({
+      total_tokens: 100,
+      prompt_tokens: 50,
+      completion_tokens: 50,
+    });
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(mockGetTokenCountFromBedrockInvoke).toHaveBeenCalledWith({
+      response: 'Sample completion',
+      body: '{"prompt":"Sample message"}',
     });
   });
 

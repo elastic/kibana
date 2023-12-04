@@ -39,6 +39,8 @@ import {
   getMobileMostUsedCharts,
   MobileMostUsedChartResponse,
 } from './get_mobile_most_used_charts';
+import { mobileErrorRoutes } from './errors/route';
+import { mobileCrashRoutes } from './crashes/route';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -306,7 +308,6 @@ const mobileTermsByFieldRoute = createApmServerRoute({
     const { params } = resources;
     const { serviceName } = params.path;
     const { kuery, environment, start, end, size, fieldName } = params.query;
-
     const terms = await getMobileTermsByField({
       kuery,
       environment,
@@ -401,6 +402,8 @@ const mobileDetailedStatisticsByField = createApmServerRoute({
 });
 
 export const mobileRouteRepository = {
+  ...mobileErrorRoutes,
+  ...mobileCrashRoutes,
   ...mobileFiltersRoute,
   ...mobileChartsRoute,
   ...sessionsChartRoute,
