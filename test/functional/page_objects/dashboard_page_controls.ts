@@ -15,15 +15,10 @@ import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_
 import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
-
-const CONTROL_DISPLAY_NAMES: { [key: string]: string } = {
-  default: 'No field selected yet',
-  [OPTIONS_LIST_CONTROL]: 'Options list',
-  [RANGE_SLIDER_CONTROL]: 'Range slider',
-};
 
 interface OptionsListAdditionalSettings {
   searchTechnique?: OptionsListSearchTechnique;
@@ -112,7 +107,14 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-editor-flyout');
     });
-    await this.controlEditorVerifyType('default');
+
+    /** All control type options should be disabled until a field is selected */
+    const controlTypeOptions = await this.find.allByCssSelector(
+      '[data-test-subj="controlTypeMenu"] > li > button'
+    );
+    await asyncForEach(controlTypeOptions, async (controlTypeOption) => {
+      expect(await controlTypeOption.isEnabled()).to.be(false);
+    });
   }
 
   /* -----------------------------------------------------------
@@ -270,7 +272,10 @@ export class DashboardPageControls extends FtrService {
     await this.openCreateControlFlyout();
 
     if (dataViewTitle) await this.controlsEditorSetDataView(dataViewTitle);
-    if (fieldName) await this.controlsEditorSetfield(fieldName, controlType);
+    if (fieldName) {
+      await this.controlsEditorSetfield(fieldName);
+      await this.controlsEditorSetControlType(controlType);
+    }
     if (title) await this.controlEditorSetTitle(title);
     if (width) await this.controlEditorSetWidth(width);
     if (grow !== undefined) await this.controlEditorSetGrow(grow);
@@ -601,11 +606,7 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click(`data-view-picker-${dataViewTitle}`);
   }
 
-  public async controlsEditorSetfield(
-    fieldName: string,
-    expectedType?: string,
-    shouldSearch: boolean = true
-  ) {
+  public async controlsEditorSetfield(fieldName: string, shouldSearch: boolean = true) {
     this.log.debug(`Setting control field to ${fieldName}`);
     if (shouldSearch) {
       await this.testSubjects.setValue('field-search-input', fieldName);
@@ -614,13 +615,14 @@ export class DashboardPageControls extends FtrService {
       await this.testSubjects.existOrFail(`field-picker-select-${fieldName}`);
     });
     await this.testSubjects.click(`field-picker-select-${fieldName}`);
-    if (expectedType) await this.controlEditorVerifyType(expectedType);
   }
 
-  public async controlEditorVerifyType(type: string) {
-    this.log.debug(`Verifying that the control editor picked the type ${type}`);
-    const autoSelectedType = await this.testSubjects.getVisibleText('control-editor-type');
-    expect(autoSelectedType).to.equal(CONTROL_DISPLAY_NAMES[type]);
+  public async controlsEditorSetControlType(type: string) {
+    this.log.debug(`Setting control type to ${type}`);
+    const controlTypeItem = await this.testSubjects.find(`create__${type}`);
+    expect(await controlTypeItem.isEnabled()).to.be(true);
+    await controlTypeItem.click();
+    expect(await controlTypeItem.getAttribute('aria-pressed')).to.be('true');
   }
 
   // Options List editor functions

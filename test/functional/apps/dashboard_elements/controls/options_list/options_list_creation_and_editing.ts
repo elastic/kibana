@@ -106,7 +106,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await saveButton.isEnabled()).to.be(true);
         await dashboardControls.controlsEditorSetDataView('animals-*');
         expect(await saveButton.isEnabled()).to.be(false);
-        await dashboardControls.controlsEditorSetfield('animal.keyword', OPTIONS_LIST_CONTROL);
+        await dashboardControls.controlsEditorSetfield('animal.keyword');
+        await dashboardControls.controlsEditorSetControlType(OPTIONS_LIST_CONTROL);
         await dashboardControls.controlEditorSave();
 
         const selectionString = await dashboardControls.optionsListGetSelectionsString(firstId);

@@ -172,7 +172,7 @@ export const ControlEditor = ({
   const CompatibleControlTypes = useMemo(() => {
     const allDataControlTypes = getControlTypes().filter((type) => type !== TIME_SLIDER_CONTROL);
     return (
-      <EuiKeyPadMenu>
+      <EuiKeyPadMenu data-test-subj={`controlTypeMenu`}>
         {allDataControlTypes.map((controlType) => {
           const factory = getControlFactory(controlType);
           return (

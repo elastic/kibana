@@ -128,7 +128,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await saveButton.isEnabled()).to.be(true);
         await dashboardControls.controlsEditorSetDataView('kibana_sample_data_flights');
         expect(await saveButton.isEnabled()).to.be(false);
-        await dashboardControls.controlsEditorSetfield('dayOfWeek', RANGE_SLIDER_CONTROL);
+        await dashboardControls.controlsEditorSetfield('dayOfWeek');
+        await dashboardControls.controlsEditorSetControlType(RANGE_SLIDER_CONTROL);
         await dashboardControls.controlEditorSave();
         await dashboardControls.rangeSliderWaitForLoading(firstId);
         await dashboardControls.validateRange('placeholder', firstId, '0', '6');
