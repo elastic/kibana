@@ -180,6 +180,8 @@ export function DifferentialTopNFunctionsView() {
                       totalCount: state.data.TotalCount,
                       totalCPU: state.data.totalCPU,
                       scaleFactor: isNormalizedByTime ? baselineTime : baseline,
+                      totalAnnualCO2Kgs: state.data.totalAnnualCO2Kgs,
+                      totalAnnualCostUSD: state.data.totalAnnualCostUSD,
                     }
                   : undefined
               }
@@ -191,6 +193,8 @@ export function DifferentialTopNFunctionsView() {
                       totalCount: comparisonState.data.TotalCount,
                       totalCPU: comparisonState.data.totalCPU,
                       scaleFactor: isNormalizedByTime ? comparisonTime : comparison,
+                      totalAnnualCO2Kgs: comparisonState.data.totalAnnualCO2Kgs,
+                      totalAnnualCostUSD: comparisonState.data.totalAnnualCostUSD,
                     }
                   : undefined
               }

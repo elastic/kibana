@@ -10,16 +10,27 @@ import { MlTrainedModels } from '@kbn/ml-plugin/server';
 import { MlModelDeploymentState } from '../../../common/types/ml';
 
 import { fetchMlModels } from './fetch_ml_models';
-import { E5_MODEL_ID, ELSER_MODEL_ID } from './utils';
+import {
+  E5_LINUX_OPTIMIZED_MODEL_ID,
+  E5_MODEL_ID,
+  ELSER_LINUX_OPTIMIZED_MODEL_ID,
+  ELSER_MODEL_ID,
+} from './utils';
 
 describe('fetchMlModels', () => {
   const mockTrainedModelsProvider = {
     getTrainedModels: jest.fn(),
     getTrainedModelsStats: jest.fn(),
+    getCuratedModelConfig: jest.fn(),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // getCuratedModelConfig() default behavior is to return the cross-platform models
+    mockTrainedModelsProvider.getCuratedModelConfig.mockImplementation((modelName) => ({
+      model_id: modelName === 'elser' ? ELSER_MODEL_ID : E5_MODEL_ID,
+      modelName,
+    }));
   });
 
   it('errors when there is no trained model provider', () => {
@@ -138,6 +149,111 @@ describe('fetchMlModels', () => {
     expect(models.length).toBe(2);
     expect(models[0].modelId).toEqual(ELSER_MODEL_ID); // Placeholder
     expect(models[1].modelId).toEqual(E5_MODEL_ID); // Placeholder
+  });
+
+  it('filters incompatible model variants of promoted models', async () => {
+    const mockModelConfigs = {
+      count: 2,
+      trained_model_configs: [
+        {
+          model_id: E5_MODEL_ID,
+          inference_config: {
+            text_embedding: {},
+          },
+        },
+        {
+          model_id: E5_LINUX_OPTIMIZED_MODEL_ID,
+          inference_config: {
+            text_embedding: {},
+          },
+        },
+        {
+          model_id: ELSER_MODEL_ID,
+          inference_config: {
+            text_expansion: {},
+          },
+        },
+        {
+          model_id: ELSER_LINUX_OPTIMIZED_MODEL_ID,
+          inference_config: {
+            text_expansion: {},
+          },
+        },
+      ],
+    };
+    const mockModelStats = {
+      trained_model_stats: mockModelConfigs.trained_model_configs.map((modelConfig) => ({
+        model_id: modelConfig.model_id,
+      })),
+    };
+
+    mockTrainedModelsProvider.getTrainedModels.mockImplementation(() =>
+      Promise.resolve(mockModelConfigs)
+    );
+    mockTrainedModelsProvider.getTrainedModelsStats.mockImplementation(() =>
+      Promise.resolve(mockModelStats)
+    );
+
+    const models = await fetchMlModels(mockTrainedModelsProvider as unknown as MlTrainedModels);
+
+    expect(models.length).toBe(2);
+    expect(models[0].modelId).toEqual(ELSER_MODEL_ID);
+    expect(models[1].modelId).toEqual(E5_MODEL_ID);
+  });
+
+  it('filters incompatible model variants of promoted models (Linux variants)', async () => {
+    const mockModelConfigs = {
+      count: 2,
+      trained_model_configs: [
+        {
+          model_id: E5_MODEL_ID,
+          inference_config: {
+            text_embedding: {},
+          },
+        },
+        {
+          model_id: E5_LINUX_OPTIMIZED_MODEL_ID,
+          inference_config: {
+            text_embedding: {},
+          },
+        },
+        {
+          model_id: ELSER_MODEL_ID,
+          inference_config: {
+            text_expansion: {},
+          },
+        },
+        {
+          model_id: ELSER_LINUX_OPTIMIZED_MODEL_ID,
+          inference_config: {
+            text_expansion: {},
+          },
+        },
+      ],
+    };
+    const mockModelStats = {
+      trained_model_stats: mockModelConfigs.trained_model_configs.map((modelConfig) => ({
+        model_id: modelConfig.model_id,
+      })),
+    };
+
+    mockTrainedModelsProvider.getTrainedModels.mockImplementation(() =>
+      Promise.resolve(mockModelConfigs)
+    );
+    mockTrainedModelsProvider.getTrainedModelsStats.mockImplementation(() =>
+      Promise.resolve(mockModelStats)
+    );
+    mockTrainedModelsProvider.getCuratedModelConfig.mockImplementation((modelName) => ({
+      model_id:
+        modelName === 'elser' ? ELSER_LINUX_OPTIMIZED_MODEL_ID : E5_LINUX_OPTIMIZED_MODEL_ID,
+      modelName,
+    }));
+
+    const models = await fetchMlModels(mockTrainedModelsProvider as unknown as MlTrainedModels);
+
+    expect(models.length).toBe(2);
+    expect(models[0].modelId).toEqual(ELSER_LINUX_OPTIMIZED_MODEL_ID);
+    expect(models[1].modelId).toEqual(E5_LINUX_OPTIMIZED_MODEL_ID);
   });
 
   it('sets deployment state on models', async () => {
