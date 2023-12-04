@@ -36,6 +36,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
   } = useKibana().services;
   const basePath = useBasePath();
   const isModelEvaluationEnabled = useIsExperimentalFeatureEnabled('assistantModelEvaluation');
+  const isStreamingEnabled = useIsExperimentalFeatureEnabled('aiStreamingEnabled');
 
   const { conversations, setConversations } = useConversationStore();
   const getInitialConversation = useCallback(() => {
@@ -68,6 +69,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
       getInitialConversations={getInitialConversation}
       getComments={getComments}
       http={http}
+      isStreamingEnabled={isStreamingEnabled}
       modelEvaluatorEnabled={isModelEvaluationEnabled}
       nameSpace={nameSpace}
       setConversations={setConversations}

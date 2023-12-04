@@ -83,6 +83,7 @@ export interface AssistantProviderProps {
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
+  isStreamingEnabled: boolean;
   getInitialConversations: () => Record<string, Conversation>;
   modelEvaluatorEnabled?: boolean;
   nameSpace?: string;
@@ -129,6 +130,7 @@ export interface UseAssistantContext {
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
+  isStreamingEnabled: boolean;
   knowledgeBase: KnowledgeBaseConfig;
   localStorageLastConversationId: string | undefined;
   promptContexts: Record<string, PromptContext>;
@@ -170,6 +172,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   getComments,
   http,
   getInitialConversations,
+  isStreamingEnabled,
   modelEvaluatorEnabled = false,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   setConversations,
@@ -301,6 +304,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
+      isStreamingEnabled,
       knowledgeBase: localStorageKnowledgeBase ?? DEFAULT_KNOWLEDGE_BASE_SETTINGS,
       modelEvaluatorEnabled,
       promptContexts,
@@ -339,6 +343,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
+      isStreamingEnabled,
       localStorageKnowledgeBase,
       localStorageLastConversationId,
       localStorageQuickPrompts,

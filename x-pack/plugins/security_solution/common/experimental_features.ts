@@ -47,6 +47,11 @@ export const allowedExperimentalValues = Object.freeze({
   extendedRuleExecutionLoggingEnabled: false,
 
   /**
+   * Enables streaming for Security AI Assistant - non-langchain only (knowledge base off)
+   */
+  aiStreamingEnabled: false,
+
+  /**
    * Enables the SOC trends timerange and stats on D&R page
    */
   socTrendsEnabled: false,
