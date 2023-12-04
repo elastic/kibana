@@ -129,10 +129,13 @@ export async function topNElasticSearchQuery({
         kuery: stackTraceKuery,
       });
 
+      const totalSeconds = timeTo - timeFrom;
+
       return searchStackTraces({
         client,
         filter: stackTraceFilter,
         sampleSize: targetSampleSize,
+        durationSeconds: totalSeconds,
       });
     }
   );

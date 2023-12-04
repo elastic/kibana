@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import { TestProviders } from '../../../../common/mock';
@@ -182,7 +183,7 @@ describe('<CorrelationsOverview />', () => {
   it('should navigate to the left section Insights tab when clicking on button', () => {
     const flyoutContextValue = {
       openLeftPanel: jest.fn(),
-    } as unknown as ExpandableFlyoutContext;
+    } as unknown as ExpandableFlyoutContextValue;
 
     const { getByTestId } = render(
       <TestProviders>
