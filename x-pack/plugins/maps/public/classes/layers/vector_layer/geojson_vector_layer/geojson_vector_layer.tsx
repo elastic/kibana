@@ -34,7 +34,6 @@ import {
   noResultsIcon,
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
 } from '../vector_layer';
-import { DataRequestAbortError } from '../../../util/data_request';
 import { getFeatureCollectionBounds } from '../../../util/get_feature_collection_bounds';
 import { syncGeojsonSourceData } from './geojson_source_data';
 import { performInnerJoins } from './perform_inner_joins';
