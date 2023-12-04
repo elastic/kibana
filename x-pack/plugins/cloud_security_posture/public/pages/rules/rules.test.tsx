@@ -13,7 +13,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { TestProvider } from '../../test/test_provider';
 import { useCspIntegrationInfo } from './use_csp_integration';
 import { type RouteComponentProps } from 'react-router-dom';
-import type { PageUrlParams } from './rules_container';
+import type { PageUrlParams, PageUrlParamsVersion2 } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -21,9 +21,13 @@ import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
+import { useFindCspRuleTemplates } from './use_csp_rules';
 
 jest.mock('./use_csp_integration', () => ({
   useCspIntegrationInfo: jest.fn(),
+}));
+jest.mock('./use_csp_rules', () => ({
+  useFindCspRuleTemplates: jest.fn(),
 }));
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_license_management_locator_api');
@@ -39,7 +43,7 @@ const queryClient = new QueryClient({
 });
 
 const getTestComponent =
-  (params: PageUrlParams): React.FC =>
+  (params: PageUrlParamsVersion2): React.FC =>
   () => {
     const coreStart = coreMock.createStart();
     const core = {
@@ -57,7 +61,7 @@ const getTestComponent =
         <Rules
           {...({
             match: { params },
-          } as RouteComponentProps<PageUrlParams>)}
+          } as RouteComponentProps<PageUrlParamsVersion2>)}
         />
       </TestProvider>
     );
@@ -99,51 +103,45 @@ describe('<Rules />', () => {
   });
 
   it('calls API with URL params', async () => {
-    const params = { packagePolicyId: '1', policyId: '2' };
+    const benchmarkId = 'cis_eks';
+    const benchmarkVersion = '2.0.0';
+    const params = { benchmarkId: 'cis_eks', benchmarkVersion: '2.0.0' };
     const Component = getTestComponent(params);
     const result = createReactQueryResponse({
       status: 'loading',
     });
 
-    (useCspIntegrationInfo as jest.Mock).mockReturnValue(result);
+    (useFindCspRuleTemplates as jest.Mock).mockReturnValue(result);
 
     render(<Component />);
 
-    expect(useCspIntegrationInfo).toHaveBeenCalledWith(params);
+    expect(useFindCspRuleTemplates).toHaveBeenCalledWith(
+      {
+        page: 1,
+        perPage: 10000,
+      },
+      benchmarkId,
+      benchmarkVersion
+    );
   });
 
   it('displays success state when result request is resolved', async () => {
-    const Component = getTestComponent({ packagePolicyId: '21', policyId: '22' });
+    const params = { benchmarkId: 'cis_eks', benchmarkVersion: '2.0.0' };
+    const Component = getTestComponent(params);
     const response = createReactQueryResponse({
       status: 'success',
-      data: [
-        {
-          name: 'CIS Kubernetes Benchmark',
-          package: {
-            title: 'my package',
-          },
-          inputs: [
-            {
-              enabled: true,
-              policy_template: 'kspm',
-              type: 'cloudbeat/cis_k8s',
-            },
-            {
-              enabled: false,
-              policy_template: 'kspm',
-              type: 'cloudbeat/cis_eks',
-            },
-          ],
-        },
-        { name: 'my agent' },
-      ],
+      data: {
+        items: [],
+        page: 1,
+        perPage: 10000,
+        total: 1,
+      },
     });
 
-    (useCspIntegrationInfo as jest.Mock).mockReturnValue(response);
+    (useFindCspRuleTemplates as jest.Mock).mockReturnValue(response);
 
     render(<Component />);
 
     expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_CONTAINER)).toBeInTheDocument();
-    expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_SHARED_VALUES)).toBeInTheDocument();
   });
 });

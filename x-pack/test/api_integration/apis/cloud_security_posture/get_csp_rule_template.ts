@@ -33,6 +33,40 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
       agentPolicyId = agentPolicyResponse.item.id;
+      // Mock saved Object to make sure this test is always able to run no matter what benchmark version CSP integration installs
+      await kibanaServer.savedObjects.create({
+        id: `TEST-ID-1234567`,
+        type: 'csp-rule-template',
+        overwrite: true,
+        attributes: {
+          metadata: {
+            audit: "MOCK'",
+            benchmark: {
+              id: "cis_k8s",
+              name: "CIS Kubernetes V1.23",
+              posture_type: "kspm",
+              rule_number: "2.1.2",
+              version: "v1.9.1"
+            },
+            default_value: "",
+            description: "MOCK.",
+            id: "1d6ff20d-4803-574b-80d2-e47031d9baa2-MOCK",
+            impact: "",
+            name: "MOCK",
+            profile_applicability: "* Level 2",
+            rationale: "Mock Rationale.",
+            references: "Mock Ref",
+            rego_rule_id: "cis_2_1_2_mock",
+            remediation: "Mock Remediation",
+            section: "Simple Storage Service (S3)",
+            tags: [
+              "CIS",
+              "CIS 2.1.2",
+            ],
+            version: "1.0"
+          }
+        },
+      });
     });
 
     afterEach(async () => {
@@ -124,6 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .query({
           benchmarkId: 'cis_k8s',
+          benchmarkVersion: '1.9.1' 
         })
         .expect(200);
 
@@ -155,6 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .query({
           benchmarkId: 'cis_k8s',
+          benchmarkVersion: '1.9.1',
           fields: ['metadata.name', 'metadata.section', 'metadata.id'],
         })
         .expect(200);
@@ -188,6 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .query({
           benchmarkId: 'cis_k8s',
+          benchmarkVersion: '1.9.1',
           sortField: 'metadata.section',
           sortOrder: 'asc',
         })
@@ -205,7 +242,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`Should return 200 status code and paginate rules with a limit of PerPage`, async () => {
-      const perPage = 10;
+      const perPage = 1;
 
       await createPackagePolicy(
         supertest,
@@ -222,6 +259,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .query({
           benchmarkId: 'cis_k8s',
+          benchmarkVersion: '1.9.1',
           perPage,
         })
         .expect(200);

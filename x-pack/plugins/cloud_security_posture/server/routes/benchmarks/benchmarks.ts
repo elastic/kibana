@@ -153,8 +153,20 @@ const getBenchmarks = async (
               ],
             },
           };
-          const benchmarkScore = await getStats(esClient, query, pitId, runtimeMappings);
-          const benchmarkEvaluation = await getClusters(esClient, query, pitId, runtimeMappings);
+          const benchmarkScore = await getStats(
+            esClient,
+            query,
+            pitId,
+            runtimeMappings,
+            cspContext.logger
+          );
+          const benchmarkEvaluation = await getClusters(
+            esClient,
+            query,
+            pitId,
+            runtimeMappings,
+            cspContext.logger
+          );
 
           return {
             id: benchmarkId,

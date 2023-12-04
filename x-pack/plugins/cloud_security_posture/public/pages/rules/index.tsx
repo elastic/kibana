@@ -36,6 +36,7 @@ import {
 } from '../benchmarks/use_csp_benchmark_integrations';
 import { getBenchmarkCisName } from '../../../common/utils/helpers';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
+import { useFindCspRuleTemplates } from './use_csp_rules';
 // import { useCspIntegrationInfo } from './use_csp_integration';
 // import { useFindCspRuleTemplates } from './use_csp_rules';
 
@@ -91,20 +92,18 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParamsVe
     sortOrder: 'asc',
   };
   const { euiTheme } = useEuiTheme();
-  const integrationInfo = useCspBenchmarkIntegrations(query);
+  // const integrationInfo = useCspBenchmarkIntegrations(query);
 
   // const integrationInfoX = useCspIntegrationInfo(params); // CHANGE THIS to useFindCspRuleTemplates
-  // const integrationInfo = useFindCspRuleTemplates(
-  //   {
-  //     section: undefined,
-  //     search: 'rulesQuery.search',
-  //     page: 1,
-  //     perPage: 10,
-  //   },
-  //   params.benchmarkId,
-  //   params.benchmarkVersion
-  // );
-
+  const integrationInfo = useFindCspRuleTemplates(
+    {
+      page: 1,
+      perPage: 10000,
+    },
+    params.benchmarkId,
+    params.benchmarkVersion
+  );
+console.log(integrationInfo)
   const SpyRoute = useSecuritySolutionContext()?.getSpyRouteComponent();
 
   const [packageInfo] = integrationInfo.data?.items || [];
