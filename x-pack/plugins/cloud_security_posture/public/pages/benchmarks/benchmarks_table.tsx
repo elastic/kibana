@@ -65,7 +65,7 @@ const IntegrationButtonLink = ({
 
   return (
     <EuiLink
-      href={application.getUrlForApp('security', {
+      href={application?.getUrlForApp('security', {
         path: generatePath(benchmarksNavigation.rules.path, {
           benchmarkVersion,
           benchmarkId,
@@ -170,8 +170,8 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     render: (complianceScore: BenchmarkVersion2['id'], benchmarkId) => (
       <IntegrationButtonLink
         packageName={getBenchmarkCisName(benchmarkId.id)}
-        benchmarkId={benchmarkId.id}
-        benchmarkVersion={benchmarkId.version}
+        benchmarkId={benchmarkId.id || ''}
+        benchmarkVersion={benchmarkId.version || ''}
       />
     ),
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CIS_NAME,

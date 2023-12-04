@@ -16,85 +16,19 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-// import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
-// import { PackagePolicy } from '@kbn/fleet-plugin/common';
-// import { CspInlineDescriptionList } from '../../components/csp_inline_description_list';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { RulesContainer, PageUrlParamsVersion2 } from './rules_container';
 import { cloudPosturePages } from '../../common/navigation/constants';
-// import { useCspIntegrationInfo } from './use_csp_integration';
-// import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useSecuritySolutionContext } from '../../application/security_solution_context';
-// import * as TEST_SUBJECTS from './test_subjects';
-// import { getEnabledCspIntegrationDetails } from '../../common/utils/get_enabled_csp_integration_details';
-// import { pageSize } from '@kbn/files-plugin/server/routes/common_schemas';
-import {
-  useCspBenchmarkIntegrations,
-  UseCspBenchmarkIntegrationsProps,
-} from '../benchmarks/use_csp_benchmark_integrations';
 import { getBenchmarkCisName } from '../../../common/utils/helpers';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
 import { useFindCspRuleTemplates } from './use_csp_rules';
-// import { useCspIntegrationInfo } from './use_csp_integration';
-// import { useFindCspRuleTemplates } from './use_csp_rules';
-
-// const getRulesSharedValues = (
-//   packageInfo?: PackagePolicy
-// ): NonNullable<EuiDescriptionListProps['listItems']> => {
-//   const enabledIntegration = getEnabledCspIntegrationDetails(packageInfo);
-//   const values = [];
-
-//   if (enabledIntegration?.integration?.shortName) {
-//     values.push({
-//       title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.integrationTitle', {
-//         defaultMessage: 'Integration',
-//       }),
-//       description: enabledIntegration?.integration.shortName,
-//     });
-//   }
-
-//   if (!enabledIntegration?.enabledIntegrationOption) return values;
-
-//   values.push(
-//     {
-//       title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.deploymentTypeTitle', {
-//         defaultMessage: 'Deployment Type',
-//       }),
-//       description: enabledIntegration?.enabledIntegrationOption.name,
-//     },
-//     {
-//       title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.benchmarkTitle', {
-//         defaultMessage: 'Benchmark',
-//       }),
-//       description: enabledIntegration?.enabledIntegrationOption.benchmark,
-//     }
-//   );
-
-//   return values;
-// };
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParamsVersion2>) => {
-  // const { http } = useKibana().services;
-  // const [query, setQuery] = useState<UseCspBenchmarkIntegrationsProps>({
-  //   name: '',
-  //   page: 1,
-  //   perPage: 10,
-  //   sortField: 'package_policy.name',
-  //   sortOrder: 'asc',
-  // });
-  const query: UseCspBenchmarkIntegrationsProps = {
-    name: '',
-    page: 1,
-    perPage: 10,
-    sortField: 'package_policy.name',
-    sortOrder: 'asc',
-  };
   const { euiTheme } = useEuiTheme();
-  // const integrationInfo = useCspBenchmarkIntegrations(query);
 
-  // const integrationInfoX = useCspIntegrationInfo(params); // CHANGE THIS to useFindCspRuleTemplates
   const integrationInfo = useFindCspRuleTemplates(
     {
       page: 1,
@@ -103,10 +37,8 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParamsVe
     params.benchmarkId,
     params.benchmarkVersion
   );
-console.log(integrationInfo)
-  const SpyRoute = useSecuritySolutionContext()?.getSpyRouteComponent();
 
-  const [packageInfo] = integrationInfo.data?.items || [];
+  const SpyRoute = useSecuritySolutionContext()?.getSpyRouteComponent();
 
   return (
     <CloudPosturePage query={integrationInfo}>
@@ -150,7 +82,7 @@ console.log(integrationInfo)
       {SpyRoute && (
         <SpyRoute
           pageName={cloudPosturePages.benchmarks.id}
-          state={{ ruleName: packageInfo?.name }}
+          state={{ ruleName: getBenchmarkCisName(params.benchmarkId) }}
         />
       )}
     </CloudPosturePage>
