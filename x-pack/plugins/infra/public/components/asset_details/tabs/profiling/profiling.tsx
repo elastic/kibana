@@ -17,6 +17,7 @@ import { DatePicker } from '../../date_picker/date_picker';
 import { useProfilingStatusData } from '../../hooks/use_profiling_status_data';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ContentTabIds } from '../../types';
+import { ErrorPrompt } from './error_prompt';
 
 export function Profiling() {
   const { activeTabId } = useTabSwitcherContext();
@@ -64,9 +65,13 @@ export function Profiling() {
     );
   }
 
+  if (error !== null) {
+    return <ErrorPrompt />;
+  }
+
   return (
     <>
-      {error !== null && response?.has_setup === false ? (
+      {response?.has_setup === false ? (
         <ProfilingEmptyState />
       ) : (
         <>
