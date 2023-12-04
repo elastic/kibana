@@ -23,6 +23,10 @@ import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns
 
 const ACCESSOR = 'metric_formula_accessor';
 
+function getAccessorName(type: 'x' | 'y') {
+  return `${ACCESSOR}_${type}`;
+}
+
 function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizationState {
   if (config.layers.length !== 1) {
     throw new Error('heatmap must define a single layer');
@@ -37,13 +41,13 @@ function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizatio
     valueAccessor: ACCESSOR,
     ...(layer.xAxis
       ? {
-          xAccessor: `${ACCESSOR}_x`,
+          xAccessor: getAccessorName('x'),
         }
       : {}),
 
     ...(layer.breakdown
       ? {
-          yAccessor: `${ACCESSOR}_y`,
+          yAccessor: getAccessorName('y'),
         }
       : {}),
     gridConfig: {
@@ -80,7 +84,7 @@ function buildFormulaLayer(
   };
 
   if (layer.xAxis) {
-    const columnName = `${ACCESSOR}_x`;
+    const columnName = getAccessorName('x');
     const breakdownColumn = getBreakdownColumn({
       options: layer.xAxis,
       dataView,
@@ -89,7 +93,7 @@ function buildFormulaLayer(
   }
 
   if (layer.breakdown) {
-    const columnName = `${ACCESSOR}_y`;
+    const columnName = getAccessorName('y');
     const breakdownColumn = getBreakdownColumn({
       options: layer.breakdown,
       dataView,
@@ -108,8 +112,8 @@ function getValueColumns(layer: LensHeatmapConfig['layers'][0]) {
     throw new Error('xAxis must be a field name when not using index source');
   }
   return [
-    ...(layer.breakdown ? [getValueColumn(`${ACCESSOR}_y`, layer.breakdown as string)] : []),
-    getValueColumn(`${ACCESSOR}_x`, layer.xAxis as string),
+    ...(layer.breakdown ? [getValueColumn(getAccessorName('y'), layer.breakdown as string)] : []),
+    getValueColumn(getAccessorName('x'), layer.xAxis as string),
     getValueColumn(ACCESSOR, layer.value),
   ];
 }

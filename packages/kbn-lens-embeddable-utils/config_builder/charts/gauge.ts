@@ -23,6 +23,10 @@ import { getFormulaColumn, getValueColumn } from '../columns';
 
 const ACCESSOR = 'metric_formula_accessor';
 
+function getAccessorName(type: 'goal' | 'max' | 'min' | 'secondary') {
+  return `${ACCESSOR}_${type}`;
+}
+
 function buildVisualizationState(config: LensGaugeConfig): GaugeVisualizationState {
   if (config.layers.length !== 1) {
     throw new Error('metric must define a single layer');
@@ -33,27 +37,26 @@ function buildVisualizationState(config: LensGaugeConfig): GaugeVisualizationSta
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
-    showBar: false,
     ticksPosition: 'auto',
     shape: layer.shape || 'horizontalBullet',
     labelMajorMode: 'auto',
     metricAccessor: ACCESSOR,
     ...(layer.queryGoalValue
       ? {
-          goalAccessor: `${ACCESSOR}_goal`,
+          goalAccessor: getAccessorName('goal'),
         }
       : {}),
 
     ...(layer.queryMaxValue
       ? {
-          maxAccessor: `${ACCESSOR}_max`,
+          maxAccessor: getAccessorName('max'),
           showBar: true,
         }
       : {}),
 
     ...(layer.queryMinValue
       ? {
-          minAccessor: `${ACCESSOR}_min`,
+          minAccessor: getAccessorName('min'),
         }
       : {}),
   };
@@ -81,7 +84,7 @@ function buildFormulaLayer(
   const defaultLayer = layers[DEFAULT_LAYER_ID];
 
   if (layer.queryGoalValue) {
-    const columnName = `${ACCESSOR}_goal`;
+    const columnName = getAccessorName('goal');
     const formulaColumn = getFormulaColumn(
       columnName,
       {
@@ -95,7 +98,7 @@ function buildFormulaLayer(
   }
 
   if (layer.queryMinValue) {
-    const columnName = `${ACCESSOR}_min`;
+    const columnName = getAccessorName('min');
     const formulaColumn = getFormulaColumn(
       columnName,
       {
@@ -109,7 +112,7 @@ function buildFormulaLayer(
   }
 
   if (layer.queryMaxValue) {
-    const columnName = `${ACCESSOR}_max`;
+    const columnName = getAccessorName('max');
     const formulaColumn = getFormulaColumn(
       columnName,
       {
@@ -128,10 +131,12 @@ function buildFormulaLayer(
 function getValueColumns(layer: LensGaugeConfig['layers'][0]) {
   return [
     getValueColumn(ACCESSOR, layer.value),
-    ...(layer.queryMaxValue ? [getValueColumn(`${ACCESSOR}_max`, layer.queryMaxValue)] : []),
-    ...(layer.queryMinValue ? [getValueColumn(`${ACCESSOR}_secondary`, layer.queryMinValue)] : []),
+    ...(layer.queryMaxValue ? [getValueColumn(getAccessorName('max'), layer.queryMaxValue)] : []),
+    ...(layer.queryMinValue
+      ? [getValueColumn(getAccessorName('secondary'), layer.queryMinValue)]
+      : []),
     ...(layer.queryGoalValue
-      ? [getValueColumn(`${ACCESSOR}_secondary`, layer.queryGoalValue)]
+      ? [getValueColumn(getAccessorName('secondary'), layer.queryGoalValue)]
       : []),
   ];
 }

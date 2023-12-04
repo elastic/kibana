@@ -20,6 +20,10 @@ import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns
 
 const ACCESSOR = 'metric_formula_accessor';
 
+function getAccessorName(type: 'breakdown') {
+  return `${ACCESSOR}_${type}`;
+}
+
 function buildVisualizationState(config: LensTagCloudConfig): TagcloudState {
   if (config.layers.length !== 1) {
     throw new Error('tag cloud must define a single layer');
@@ -36,7 +40,7 @@ function buildVisualizationState(config: LensTagCloudConfig): TagcloudState {
     showLabel: true,
     ...(layer.breakdown
       ? {
-          tagAccessor: !isFormula ? (layer.breakdown as string) : `${ACCESSOR}_breakdown`,
+          tagAccessor: !isFormula ? (layer.breakdown as string) : getAccessorName('breakdown'),
         }
       : {}),
   };
@@ -64,7 +68,7 @@ function buildFormulaLayer(
   const defaultLayer = layers[DEFAULT_LAYER_ID];
 
   if (layer.breakdown) {
-    const columnName = `${ACCESSOR}_breakdown`;
+    const columnName = getAccessorName('breakdown');
     const breakdownColumn = getBreakdownColumn({
       options: layer.breakdown,
       dataView,
@@ -84,7 +88,7 @@ function getValueColumns(layer: LensTagCloudConfig['layers'][0]) {
 
   return [
     getValueColumn(ACCESSOR, layer.value),
-    getValueColumn(`${ACCESSOR}_breakdown`, layer.breakdown as string),
+    getValueColumn(getAccessorName('breakdown'), layer.breakdown as string),
   ];
 }
 

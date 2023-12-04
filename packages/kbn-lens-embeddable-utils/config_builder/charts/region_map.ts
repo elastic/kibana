@@ -26,6 +26,9 @@ import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns
 
 const ACCESSOR = 'metric_formula_accessor';
 
+function getAccessorName(type: 'breakdown') {
+  return `${ACCESSOR}_${type}`;
+}
 function buildVisualizationState(
   config: LensRegionMapConfig
 ): ChoroplethChartState & { layerType: 'data' } {
@@ -41,7 +44,7 @@ function buildVisualizationState(
     valueAccessor: ACCESSOR,
     ...(layer.breakdown
       ? {
-          regionAccessor: `${ACCESSOR}_breakdown`,
+          regionAccessor: getAccessorName('breakdown'),
         }
       : {}),
   };
@@ -69,7 +72,7 @@ function buildFormulaLayer(
   const defaultLayer = layers[DEFAULT_LAYER_ID];
 
   if (layer.breakdown) {
-    const columnName = `${ACCESSOR}_breakdown`;
+    const columnName = getAccessorName('breakdown');
     const breakdownColumn = getBreakdownColumn({
       options: layer.breakdown,
       dataView,
@@ -88,7 +91,7 @@ function getValueColumns(layer: LensTagCloudConfig['layers'][0]) {
   }
   return [
     getValueColumn(ACCESSOR, layer.value),
-    getValueColumn(`${ACCESSOR}_breakdown`, layer.breakdown as string),
+    getValueColumn(getAccessorName('breakdown'), layer.breakdown as string),
   ];
 }
 

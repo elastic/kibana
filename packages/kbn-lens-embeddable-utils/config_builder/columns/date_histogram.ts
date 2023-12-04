@@ -18,6 +18,8 @@ export const getHistogramColumn = ({
     }
   >;
 }): DateHistogramIndexPatternColumn => {
+  const { interval = 'auto', ...rest } = options?.params ?? {};
+
   return {
     dataType: 'date',
     isBucketed: true,
@@ -26,6 +28,6 @@ export const getHistogramColumn = ({
     scale: 'interval',
     sourceField: '@timestamp',
     ...options,
-    params: { interval: 'auto', ...options?.params },
+    params: { interval, ...rest },
   };
 };

@@ -19,6 +19,9 @@ import { getHistogramColumn } from './date_histogram';
 import { getTopValuesColumn } from './top_values';
 import { getIntervalsColumn } from './intervals';
 import { getFiltersColumn } from './filters';
+
+const DEFAULT_BREAKDOWN_SIZE = 5;
+
 function getBreakdownType(field: string, dataview: DataView) {
   if (!dataview.fields.getByName(field)) {
     throw new Error(
@@ -70,7 +73,7 @@ export const getBreakdownColumn = ({
       return getTopValuesColumn({
         field,
         options: {
-          size: topValuesOptions.size || 5,
+          size: topValuesOptions.size || DEFAULT_BREAKDOWN_SIZE,
         },
       });
     case 'intervals':

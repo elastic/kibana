@@ -60,7 +60,7 @@ export interface LensBaseConfig {
 }
 
 export interface LensBaseLayer {
-  label: string;
+  label?: string;
   filter?: string;
   format?: 'bytes' | 'currency' | 'duration' | 'number' | 'percent' | 'string';
   randomSampling?: number;

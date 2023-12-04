@@ -32,6 +32,9 @@ const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = `layer_trendline`;
 
+function getAccessorName(type: 'max' | 'breakdown' | 'secondary') {
+  return `${ACCESSOR}_${type}`;
+}
 function buildVisualizationState(config: LensMetricConfig): MetricVisualizationState {
   if (config.layers.length !== 1) {
     throw new Error('metric must define a single layer');
@@ -49,20 +52,20 @@ function buildVisualizationState(config: LensMetricConfig): MetricVisualizationS
 
     ...(layer.querySecondaryMetric
       ? {
-          secondaryMetricAccessor: `${ACCESSOR}_secondary`,
+          secondaryMetricAccessor: getAccessorName('secondary'),
         }
       : {}),
 
     ...(layer.queryMaxValue
       ? {
-          maxAccessor: `${ACCESSOR}_max`,
+          maxAccessor: getAccessorName('max'),
           showBar: true,
         }
       : {}),
 
     ...(layer.breakdown
       ? {
-          breakdownByAccessor: `${ACCESSOR}_breakdown`,
+          breakdownByAccessor: getAccessorName('breakdown'),
         }
       : {}),
 
@@ -150,7 +153,7 @@ function buildFormulaLayer(
   const trendLineLayer = layers[TRENDLINE_LAYER_ID];
 
   if (layer.breakdown) {
-    const columnName = `${ACCESSOR}_breakdown`;
+    const columnName = getAccessorName('breakdown');
     const breakdownColumn = getBreakdownColumn({
       options: layer.breakdown,
       dataView,
@@ -163,7 +166,7 @@ function buildFormulaLayer(
   }
 
   if (layer.querySecondaryMetric) {
-    const columnName = `${ACCESSOR}_secondary`;
+    const columnName = getAccessorName('secondary');
     const formulaColumn = getFormulaColumn(
       columnName,
       {
@@ -180,7 +183,7 @@ function buildFormulaLayer(
   }
 
   if (layer.queryMaxValue) {
-    const columnName = `${ACCESSOR}_max`;
+    const columnName = getAccessorName('max');
     const formulaColumn = getFormulaColumn(
       columnName,
       {
@@ -205,12 +208,12 @@ function getValueColumns(layer: LensMetricConfig['layers'][0]) {
   }
   return [
     ...(layer.breakdown
-      ? [getValueColumn(`${ACCESSOR}_breakdown`, layer.breakdown as string)]
+      ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown as string)]
       : []),
     getValueColumn(ACCESSOR, layer.value),
-    ...(layer.queryMaxValue ? [getValueColumn(`${ACCESSOR}_max`, layer.queryMaxValue)] : []),
+    ...(layer.queryMaxValue ? [getValueColumn(getAccessorName('max'), layer.queryMaxValue)] : []),
     ...(layer.querySecondaryMetric
-      ? [getValueColumn(`${ACCESSOR}_secondary`, layer.querySecondaryMetric)]
+      ? [getValueColumn(getAccessorName('secondary'), layer.querySecondaryMetric)]
       : []),
   ];
 }
