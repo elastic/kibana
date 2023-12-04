@@ -7905,6 +7905,7 @@
             "type": "object"
           },
           "preset": {
+            "type": "string",
             "enum": [
               "balanced",
               "custom"
@@ -8401,6 +8402,7 @@
             "type": "object"
           },
           "preset": {
+            "type": "string",
             "enum": [
               "balanced",
               "custom"

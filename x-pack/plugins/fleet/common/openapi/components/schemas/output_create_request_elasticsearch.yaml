@@ -23,6 +23,7 @@ properties:
   config:
     type: object
   preset:
+    type: string
     enum: ['balanced', 'custom']
   config_yaml:
     type: string
