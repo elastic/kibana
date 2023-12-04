@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
-import { useKibana } from '../../../../../../common/lib/kibana';;
+import { useKibana } from '../../../../../../common/lib/kibana';
 
 export const RelatedDetectionRulesCallout = memo<{ 'data-test-subj'?: string }>(
   ({ 'data-test-subj': dataTestSubj }) => {
