@@ -6,11 +6,7 @@
  */
 
 import { QueryState } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
-import {
-  DiscoverContainerProps,
-  FlyoutContentProps as DiscoverFlyoutContentProps,
-} from '@kbn/discover-plugin/public';
+import { DiscoverContainerProps } from '@kbn/discover-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { Observable } from 'rxjs';
 import {
@@ -24,6 +20,7 @@ import {
   LogExplorerControllerStateMachine,
   LogExplorerControllerStateService,
 } from '../state_machines/log_explorer_controller';
+import { LogExplorerCustomizations } from './controller_customizations';
 
 export interface LogExplorerController {
   actions: {};
@@ -35,22 +32,6 @@ export interface LogExplorerController {
   state$: Observable<LogExplorerPublicState>;
   stateMachine: LogExplorerControllerStateMachine;
 }
-
-export interface LogExplorerCustomizations {
-  flyout?: {
-    renderContent?: RenderContentCustomization<LogExplorerFlyoutContentProps>;
-  };
-}
-
-export interface LogExplorerFlyoutContentProps extends DiscoverFlyoutContentProps {
-  dataView: DataView;
-}
-
-export type RenderContentCustomization<Props> = (
-  renderPreviousContent: RenderPreviousContent<Props>
-) => (props: Props) => React.ReactNode;
-
-export type RenderPreviousContent<Props> = (props: Props) => React.ReactNode;
 
 export type LogExplorerDiscoverServices = Pick<
   Required<DiscoverContainerProps['overrideServices']>,

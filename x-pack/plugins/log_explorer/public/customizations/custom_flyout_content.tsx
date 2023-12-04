@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { FlyoutDetail } from '../components/flyout_detail/flyout_detail';
 import { LogExplorerFlyoutContentProps } from '../components/flyout_detail';
 import { useLogExplorerControllerContext } from '../controller';
@@ -22,10 +22,11 @@ export const CustomFlyoutContent = (props: LogExplorerFlyoutContentProps) => {
   );
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="m">
       {/* Apply custom Log Explorer detail */}
       {renderCustomizedContent(props)}
       {/* Restore default content */}
+      <EuiHorizontalRule margin="xs" />
       <EuiFlexItem>{props.renderDefaultContent()}</EuiFlexItem>
     </EuiFlexGroup>
   );
