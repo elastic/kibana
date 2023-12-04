@@ -14,10 +14,10 @@ import {
   PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
   PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
-import { ExpandableFlyoutContext } from '../context';
+import { ExpandableFlyoutContext, ExpandableFlyoutContextValue } from '../context';
 
 describe('PreviewSection', () => {
-  const context: ExpandableFlyoutContext = {
+  const context = {
     panels: {
       right: {},
       left: {},
@@ -27,7 +27,7 @@ describe('PreviewSection', () => {
         },
       ],
     },
-  } as unknown as ExpandableFlyoutContext;
+  } as unknown as ExpandableFlyoutContextValue;
 
   const component = <div>{'component'}</div>;
   const left = 500;
