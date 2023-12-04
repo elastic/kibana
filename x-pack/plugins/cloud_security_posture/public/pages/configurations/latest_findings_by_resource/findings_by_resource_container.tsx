@@ -39,6 +39,9 @@ const getDefaultQuery = ({
   sort: { field: 'compliance_score' as keyof CspFinding, direction: 'asc' },
 });
 
+/**
+ * @deprecated: This component is deprecated and will be removed in the next release.
+ */
 export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => (
   <Routes>
     <Route
@@ -61,6 +64,9 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
   </Routes>
 );
 
+/**
+ * @deprecated: This component is deprecated and will be removed in the next release.
+ */
 const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   const { queryError, query, pageSize, setTableOptions, urlQuery, setUrlQuery, onResetFilters } =
     useCloudPostureTable({
