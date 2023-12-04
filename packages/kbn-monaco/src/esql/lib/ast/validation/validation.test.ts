@@ -233,10 +233,10 @@ describe('validation logic', () => {
   describe('from', () => {
     testErrorsAndWarnings('f', ['SyntaxError: expected {EXPLAIN, FROM, ROW, SHOW} but found "f"']);
     testErrorsAndWarnings(`from `, [
-      "SyntaxError: missing {FROM_UNQUOTED_IDENTIFIER, FROM_QUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, FROM_UNQUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings(`from index,`, [
-      "SyntaxError: missing {FROM_UNQUOTED_IDENTIFIER, FROM_QUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, FROM_UNQUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings(`from assignment = 1`, [
       'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET} but found "="',
@@ -1330,7 +1330,7 @@ describe('validation logic', () => {
 
   describe('enrich', () => {
     testErrorsAndWarnings(`from a | enrich`, [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, FROM_UNQUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings(`from a | enrich policy `, []);
     testErrorsAndWarnings(`from a | enrich missing-policy `, ['Unknown policy [missing-policy]']);
