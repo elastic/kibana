@@ -76,6 +76,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "cases-connector-mappings": "f9d1ac57e484e69506c36a8051e4d61f4a8cfd25",
         "cases-telemetry": "f219eb7e26772884342487fc9602cfea07b3cedc",
         "cases-user-actions": "483f10db9b3bd1617948d7032a98b7791bf87414",
+        "cloud-security-posture-settings": "035ebd44ac3d9a0848401fd424338aa366c1ced3",
         "config": "179b3e2bc672626aafce3cf92093a113f456af38",
         "config-global": "8e8a134a2952df700d7d4ec51abb794bbd4cf6da",
         "connector_token": "5a9ac29fe9c740eb114e9c40517245c71706b005",
@@ -161,7 +162,6 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "usage-counters": "48782b3bcb6b5a23ba6f2bfe3a380d835e68890a",
         "visualization": "93a3e73994ad836fe2b1dccbe208238f41f63da0",
         "workplace_search_telemetry": "52b32b47ee576f554ac77cb1d5896dfbcfe9a1fb",
-        cloud-security-posture-settings": "035ebd44ac3d9a0848401fd424338aa366c1ced3
       }
     `);
   });
