@@ -44,6 +44,7 @@ export const initGetLogEntryExamplesRoute = ({
             dataset,
             exampleCount,
             logView,
+            idFormat,
             timeRange: { startTime, endTime },
             categoryId,
           },
@@ -60,6 +61,7 @@ export const initGetLogEntryExamplesRoute = ({
           const { data: logEntryExamples, timing } = await getLogEntryExamples(
             infraMlContext,
             logView,
+            idFormat,
             startTime,
             endTime,
             dataset,

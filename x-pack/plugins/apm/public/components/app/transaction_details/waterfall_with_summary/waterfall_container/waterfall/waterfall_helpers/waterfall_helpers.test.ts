@@ -16,6 +16,7 @@ import {
   IWaterfallTransaction,
   IWaterfallError,
   IWaterfallSpanOrTransaction,
+  getHasOrphanTraceItems,
 } from './waterfall_helpers';
 import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import {
@@ -715,6 +716,48 @@ describe('waterfall_helpers', () => {
       const parent = undefined;
 
       expect(getClockSkew(child, parent)).toBe(0);
+    });
+  });
+
+  describe('getHasOrphanTraceItems', () => {
+    const myTransactionItem = {
+      processor: { event: 'transaction' },
+      trace: { id: 'myTrace' },
+      transaction: {
+        id: 'myTransactionId1',
+      },
+    } as WaterfallTransaction;
+
+    it('should return false if there are no orphan items', () => {
+      const traceItems: Array<WaterfallTransaction | WaterfallSpan> = [
+        myTransactionItem,
+        {
+          processor: { event: 'span' },
+          span: {
+            id: 'mySpanId',
+          },
+          parent: {
+            id: 'myTransactionId1',
+          },
+        } as WaterfallSpan,
+      ];
+      expect(getHasOrphanTraceItems(traceItems)).toBe(false);
+    });
+
+    it('should return true if there are orphan items', () => {
+      const traceItems: Array<WaterfallTransaction | WaterfallSpan> = [
+        myTransactionItem,
+        {
+          processor: { event: 'span' },
+          span: {
+            id: 'myOrphanSpanId',
+          },
+          parent: {
+            id: 'myNotExistingTransactionId1',
+          },
+        } as WaterfallSpan,
+      ];
+      expect(getHasOrphanTraceItems(traceItems)).toBe(true);
     });
   });
 });

@@ -242,6 +242,11 @@ describe('mappingFromFieldMap', () => {
                 },
                 reason: {
                   type: 'keyword',
+                  fields: {
+                    text: {
+                      type: 'match_only_text',
+                    },
+                  },
                 },
                 rule: {
                   properties: {
@@ -304,6 +309,9 @@ describe('mappingFromFieldMap', () => {
                   type: 'keyword',
                 },
                 workflow_tags: {
+                  type: 'keyword',
+                },
+                workflow_assignee_ids: {
                   type: 'keyword',
                 },
               },

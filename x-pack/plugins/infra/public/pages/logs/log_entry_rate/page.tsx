@@ -11,6 +11,7 @@ import { LogEntryRatePageContent } from './page_content';
 import { LogEntryRatePageProviders } from './page_providers';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { anomaliesTitle } from '../../../translations';
+import { LogMlJobIdFormatsShimProvider } from '../shared/use_log_ml_job_id_formats_shim';
 
 export const LogEntryRatePage = () => {
   useLogsBreadcrumbs([
@@ -20,9 +21,11 @@ export const LogEntryRatePage = () => {
   ]);
   return (
     <EuiErrorBoundary>
-      <LogEntryRatePageProviders>
-        <LogEntryRatePageContent />
-      </LogEntryRatePageProviders>
+      <LogMlJobIdFormatsShimProvider>
+        <LogEntryRatePageProviders>
+          <LogEntryRatePageContent />
+        </LogEntryRatePageProviders>
+      </LogMlJobIdFormatsShimProvider>
     </EuiErrorBoundary>
   );
 };

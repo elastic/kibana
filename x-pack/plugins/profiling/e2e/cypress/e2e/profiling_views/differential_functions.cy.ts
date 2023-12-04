@@ -31,8 +31,8 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },
-        { id: 'annualizedCo2', value: '33.79 lbs / 15.33 kg' },
-        { id: 'annualizedCost', value: '$318.32' },
+        { id: 'annualizedCo2', value: '2.5k lbs / 1.13k kg' },
+        { id: 'annualizedCost', value: '$10.66k' },
         { id: 'totalNumberOfSamples', value: '513' },
       ].forEach((item) => {
         cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
@@ -50,8 +50,8 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },
-        { id: 'annualizedCo2', value: '0 lbs / 0 kg', comparisonValue: '33.79 lbs / 15.33 kg' },
-        { id: 'annualizedCost', value: '$0', comparisonValue: '$318.32' },
+        { id: 'annualizedCo2', value: '0 lbs / 0 kg', comparisonValue: '2.5k lbs / 1.13k kg' },
+        { id: 'annualizedCost', value: '$0', comparisonValue: '$10.66k' },
         { id: 'totalNumberOfSamples', value: '0', comparisonValue: '15,390' },
       ].forEach((item) => {
         cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
@@ -76,14 +76,14 @@ describe('Differential Functions page', () => {
         { id: 'overallPerformance', value: '65.89%', icon: 'sortUp_success' },
         {
           id: 'annualizedCo2',
-          value: '33.79 lbs / 15.33 kg',
-          comparisonValue: '11.53 lbs / 5.23 kg (65.89%)',
+          value: '2.5k lbs / 1.13k kg',
+          comparisonValue: '548.84 lbs / 248.95 kg (78.01%',
           icon: 'comparison_sortUp_success',
         },
         {
           id: 'annualizedCost',
-          value: '$318.32',
-          comparisonValue: '$108.59 (65.89%)',
+          value: '$10.66k',
+          comparisonValue: '$2.35k (78.01%)',
           icon: 'comparison_sortUp_success',
         },
         {
@@ -116,14 +116,14 @@ describe('Differential Functions page', () => {
         { id: 'overallPerformance', value: '193.14%', icon: 'sortDown_danger' },
         {
           id: 'annualizedCo2',
-          value: '11.53 lbs / 5.23 kg',
-          comparisonValue: '33.79 lbs / 15.33 kg (193.14%)',
+          value: '548.84 lbs / 248.95 kg',
+          comparisonValue: '2.5k lbs / 1.13k kg (354.66%)',
           icon: 'comparison_sortDown_danger',
         },
         {
           id: 'annualizedCost',
-          value: '$108.59',
-          comparisonValue: '$318.32 (193.14%)',
+          value: '$2.35k',
+          comparisonValue: '$10.66k (354.66%)',
           icon: 'comparison_sortDown_danger',
         },
         {
@@ -167,17 +167,8 @@ describe('Differential Functions page', () => {
       });
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
-      cy.get('[data-test-subj="topNFunctionsGrid"] .euiDataGridRow').should('have.length.gt', 1);
-      cy.get('[data-test-subj="TopNFunctionsComparisonGrid"] .euiDataGridRow').should(
-        'have.length.gt',
-        1
-      );
-      cy.get(
-        '[data-test-subj="topNFunctionsGrid"] [data-test-subj="profilingStackFrameSummaryLink"]'
-      ).contains('vmlinux');
-      cy.get(
-        '[data-test-subj="TopNFunctionsComparisonGrid"] [data-test-subj="profilingStackFrameSummaryLink"]'
-      ).contains('vmlinux');
+      cy.get('[data-test-subj="frame"]').contains('vmlinux');
+      cy.get('[data-test-subj="comparison_frame"]').contains('vmlinux');
 
       cy.addKqlFilter({
         key: 'process.thread.name',
@@ -190,12 +181,8 @@ describe('Differential Functions page', () => {
       });
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
-      cy.get(
-        '[data-test-subj="topNFunctionsGrid"] [data-test-subj="profilingStackFrameSummaryLink"]'
-      ).contains('libsystemd-shared-237.so');
-      cy.get(
-        '[data-test-subj="TopNFunctionsComparisonGrid"] [data-test-subj="profilingStackFrameSummaryLink"]'
-      ).contains('libjvm.so');
+      cy.get('[data-test-subj="frame"]').contains('libsystemd-shared-237.so');
+      cy.get('[data-test-subj="comparison_frame"]').contains('libjvm.so');
     });
   });
 });
