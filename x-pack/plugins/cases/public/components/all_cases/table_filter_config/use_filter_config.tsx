@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { merge } from 'lodash';
 import type { FilterOptions } from '../../../../common/ui';
@@ -30,6 +30,29 @@ const mergeSystemAndCustomFieldConfigs = ({
   return newFilterConfig;
 };
 
+const deactivateNonExistingFilters = ({
+  prevFilterConfigs,
+  currentFilterConfigs,
+  onFilterOptionsChange,
+}: {
+  prevFilterConfigs: Map<string, FilterConfig>;
+  currentFilterConfigs: Map<string, FilterConfig>;
+  onFilterOptionsChange: (params: Partial<FilterOptions>) => void;
+}) => {
+  const emptyOptions: Array<Partial<FilterOptions>> = [];
+
+  [...(prevFilterConfigs?.entries() ?? [])].forEach(([filterKey, filter]) => {
+    if (!currentFilterConfigs.has(filterKey)) {
+      emptyOptions.push(filter.getEmptyOptions());
+    }
+  });
+
+  if (emptyOptions.length > 0) {
+    const mergedEmptyOptions = merge({}, ...emptyOptions);
+    onFilterOptionsChange(mergedEmptyOptions);
+  }
+};
+
 export const useFilterConfig = ({
   isSelectorView,
   onFilterOptionsChange,
@@ -44,9 +67,7 @@ export const useFilterConfig = ({
     isSelectorView,
     onFilterOptionsChange,
   });
-  const [filterConfigs, setFilterConfigs] = useState<Map<string, FilterConfig>>(
-    () => new Map([...systemFilterConfig].map((filter) => [filter.key, filter]))
-  );
+
   /**
    * Initially we won't save any order, it will use the default config as it is defined in the system.
    * Once the user adds/removes a filter, we start saving the order and the visible state.
@@ -56,42 +77,18 @@ export const useFilterConfig = ({
     []
   );
 
-  /**
-   * This effect is needed in case a filter (mostly custom field) is removed from the settings
-   * but the user was filtering by it.
-   */
-  useEffect(() => {
-    const newFilterConfig = mergeSystemAndCustomFieldConfigs({
-      systemFilterConfig,
-      customFieldsFilterConfig,
-    });
+  const filterConfigs = mergeSystemAndCustomFieldConfigs({
+    systemFilterConfig,
+    customFieldsFilterConfig,
+  });
 
-    const emptyOptions: Array<Partial<FilterOptions>> = [];
-    filterConfigs.forEach((filter) => {
-      if (!newFilterConfig.has(filter.key)) {
-        emptyOptions.push(filter.getEmptyOptions());
-      }
-    });
+  const prevFilterConfigs = usePrevious(filterConfigs) ?? new Map();
 
-    if (emptyOptions.length > 0) {
-      const mergedEmptyOptions = merge({}, ...emptyOptions);
-      onFilterOptionsChange(mergedEmptyOptions);
-    }
-  }, [filterConfigs, systemFilterConfig, customFieldsFilterConfig, onFilterOptionsChange]);
-
-  /**
-   * As custom fields are loaded by fetching an API and they might also be removed
-   * while using the app, we merge the system and custom fields configs on every time
-   * they change.
-   */
-  useEffect(() => {
-    setFilterConfigs(
-      mergeSystemAndCustomFieldConfigs({
-        systemFilterConfig,
-        customFieldsFilterConfig,
-      })
-    );
-  }, [systemFilterConfig, customFieldsFilterConfig]);
+  deactivateNonExistingFilters({
+    prevFilterConfigs,
+    currentFilterConfigs: filterConfigs,
+    onFilterOptionsChange,
+  });
 
   const onChange = ({ selectedOptionKeys }: { filterId: string; selectedOptionKeys: string[] }) => {
     const newActiveByFilterKey = [...(activeByFilterKey || [])];
