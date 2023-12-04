@@ -21,6 +21,7 @@ export const useStepContext = () => {
         CreateProjectSteps.createFirstProject,
       ]),
     },
+    onStepClicked: jest.fn(),
     toggleTaskCompleteStatus: jest.fn(),
   };
 };

@@ -67,6 +67,13 @@ export const CREATE_PROJECT_TITLE = i18n.translate(
   }
 );
 
+export const CREATE_PROJECT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.step.createProject.description',
+  {
+    defaultMessage: `Create Elastic Security project with our fully-managed serverless solutions that automatically manage nodes, shards, data tiers and scaling to maintain the health and performance so you can focus on your data and goals.`,
+  }
+);
+
 export const WATCH_VIDEO_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.step.watchVideo.title',
   {

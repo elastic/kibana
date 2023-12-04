@@ -97,9 +97,7 @@ describe('CardStepComponent', () => {
       stepId: CreateProjectSteps.createFirstProject,
       cardId: QuickStartSectionCardsId.createFirstProject,
       finishedSteps: new Set<StepId>([CreateProjectSteps.createFirstProject]),
-      description: undefined,
-      splitPanel: undefined,
-      step: createProjectSteps[0],
+      step: { ...createProjectSteps[0], description: undefined, splitPanel: undefined },
     };
     const { getByText } = render(<CardStep {...mockProps} />);
 
@@ -123,10 +121,8 @@ describe('CardStepComponent', () => {
     const mockProps = {
       ...props,
       cardId: GetStartedWithAlertsCardsId.enablePrebuiltRules,
-      description: undefined,
       finishedSteps: new Set<StepId>([EnablePrebuiltRulesSteps.enablePrebuiltRules]),
       sectionId: SectionId.getStartedWithAlerts,
-      splitPanel: undefined,
       step: enablePrebuildRuleSteps[0],
     };
     const { queryByText } = render(<CardStep {...mockProps} />);

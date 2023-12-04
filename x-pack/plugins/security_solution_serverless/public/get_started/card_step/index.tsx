@@ -106,6 +106,10 @@ const CardStepComponent: React.FC<{
     'step-panel-collapsed': !isExpandedStep,
   });
 
+  const stepIconClassNames = classnames('step-icon', {
+    'step-icon-done': isDone,
+  });
+
   return (
     <EuiPanel
       color="plain"
@@ -119,7 +123,7 @@ const CardStepComponent: React.FC<{
     >
       <EuiFlexGroup gutterSize="none" css={stepGroundStyles}>
         <EuiFlexItem grow={false} onClick={toggleStep} css={stepItemStyles}>
-          <span className="step-icon" css={stepIconStyles}>
+          <span className={stepIconClassNames} css={stepIconStyles}>
             {icon && <EuiIcon {...icon} size="l" className="eui-alignMiddle" />}
           </span>
         </EuiFlexItem>

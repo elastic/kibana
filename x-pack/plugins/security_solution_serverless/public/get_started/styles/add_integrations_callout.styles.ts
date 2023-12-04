@@ -29,6 +29,9 @@ export const useAddIntegrationsCalloutStyles = () => {
         line-height: ${euiTheme.base * 1.25}px;
         margin-left: ${euiTheme.size.xs};
       `,
+      calloutAnchorStyles: css`
+        margin-left: ${euiTheme.size.s};
+      `,
     }),
     [
       backgroundColor,
@@ -39,6 +42,7 @@ export const useAddIntegrationsCalloutStyles = () => {
       euiTheme.font.weight.regular,
       euiTheme.size.base,
       euiTheme.size.m,
+      euiTheme.size.s,
       euiTheme.size.xs,
     ]
   );

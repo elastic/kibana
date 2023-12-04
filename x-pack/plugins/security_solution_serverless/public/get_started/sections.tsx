@@ -29,7 +29,7 @@ import { AddIntegrationButton } from './step_links/add_integration_button';
 import { AlertsButton } from './step_links/alerts_link';
 import connectToDataSources from './images/connect_to_existing_sources.png';
 import enablePrebuiltRules from './images/enable_prebuilt_rules.png';
-
+import createProjects from './images/create_projects.png';
 import viewAlerts from './images/view_alerts.png';
 import analyzeDataUsingDashboards from './images/analyze_data_using_dashboards.png';
 import { AddElasticRulesButton } from './step_links/add_elastic_rules_button';
@@ -38,12 +38,17 @@ import overviewVideo from './images/overview_video.svg';
 import { Video } from './card_step/video';
 import { fetchRuleManagementFilters } from './apis';
 import { OverviewVideoDescription } from './card_step/overview_video_description';
+import { ManageProjectsButton } from './step_links/manage_projects_button';
 
 export const createProjectSteps = [
   {
     id: CreateProjectSteps.createFirstProject,
     title: i18n.CREATE_PROJECT_TITLE,
     icon: { type: 'addDataApp', size: 'xl' as const },
+    description: [i18n.CREATE_PROJECT_DESCRIPTION, <ManageProjectsButton />],
+    splitPanel: (
+      <img src={createProjects} alt={i18n.CREATE_PROJECT_TITLE} height="100%" width="100%" />
+    ),
   },
 ];
 export const overviewVideoSteps = [

@@ -96,13 +96,10 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes, i
           expandedCardSteps={expandedCardSteps}
           finishedSteps={finishedSteps}
           indicesExist={!!indicesExist}
+          onStepClicked={onStepClicked}
           toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         >
-          <TogglePanel
-            activeProducts={activeProducts}
-            activeSections={activeSections}
-            onStepClicked={onStepClicked}
-          />
+          <TogglePanel activeProducts={activeProducts} activeSections={activeSections} />
         </StepContextProvider>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>

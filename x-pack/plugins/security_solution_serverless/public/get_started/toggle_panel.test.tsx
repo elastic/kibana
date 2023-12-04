@@ -26,7 +26,6 @@ describe('TogglePanel', () => {
   const mockUseSetUpCardSections = {
     setUpSections: jest.fn(() => <div data-test-subj="mock-sections" />),
   };
-  const onStepClicked = jest.fn();
 
   const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
 
@@ -53,11 +52,7 @@ describe('TogglePanel', () => {
 
   it('should render empty prompt', () => {
     const { getByText } = render(
-      <TogglePanel
-        activeProducts={new Set()}
-        activeSections={activeSections}
-        onStepClicked={onStepClicked}
-      />
+      <TogglePanel activeProducts={new Set()} activeSections={activeSections} />
     );
 
     expect(getByText(`Hmm, there doesn't seem to be anything there`)).toBeInTheDocument();
@@ -68,11 +63,7 @@ describe('TogglePanel', () => {
 
   it('should render sections', () => {
     const { getByTestId } = render(
-      <TogglePanel
-        activeProducts={activeProducts}
-        activeSections={activeSections}
-        onStepClicked={onStepClicked}
-      />
+      <TogglePanel activeProducts={activeProducts} activeSections={activeSections} />
     );
 
     expect(getByTestId(`mock-sections`)).toBeInTheDocument();

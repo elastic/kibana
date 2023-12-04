@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const MANAGE_PROJECTS = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.task.manageProjects',
+  {
+    defaultMessage: 'Manage projects',
+  }
+);
+
 export const ADD_ELASTIC_RULES = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.task.addElasticRules',
   {
@@ -21,10 +28,10 @@ export const ADD_ELASTIC_RULES_CALLOUT_TITLE = i18n.translate(
   }
 );
 
-export const ADD_INTEGRATIONS = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.task.addIntegrations',
+export const ADD_INTEGRATIONS_STEP = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.task.addIntegrationsStep.title',
   {
-    defaultMessage: 'Add integrations',
+    defaultMessage: 'Add integrations step',
   }
 );
 
@@ -52,6 +59,6 @@ export const GO_TO_DASHBOARDS = i18n.translate(
 export const VIEW_DASHBOARDS_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.task.viewDashboards.callout.title',
   {
-    defaultMessage: 'view Dashboards',
+    defaultMessage: 'view dashboards',
   }
 );

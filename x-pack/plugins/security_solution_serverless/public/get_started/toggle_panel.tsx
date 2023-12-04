@@ -13,18 +13,18 @@ import { css } from '@emotion/react';
 import * as i18n from './translations';
 import { useSetUpSections } from './hooks/use_setup_sections';
 
-import type { ActiveSections, OnStepClicked } from './types';
+import type { ActiveSections } from './types';
 import type { ProductLine } from '../../common/product';
 import { useStepContext } from './context/step_context';
 
 const TogglePanelComponent: React.FC<{
   activeProducts: Set<ProductLine>;
   activeSections: ActiveSections | null;
-  onStepClicked: OnStepClicked;
-}> = ({ activeSections, activeProducts, onStepClicked }) => {
+}> = ({ activeSections, activeProducts }) => {
   const { euiTheme } = useEuiTheme();
 
-  const { expandedCardSteps, finishedSteps, toggleTaskCompleteStatus } = useStepContext();
+  const { expandedCardSteps, finishedSteps, toggleTaskCompleteStatus, onStepClicked } =
+    useStepContext();
 
   const { setUpSections } = useSetUpSections({ euiTheme });
   const sectionNodes = setUpSections({

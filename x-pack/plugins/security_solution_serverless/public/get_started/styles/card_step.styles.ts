@@ -13,7 +13,7 @@ export const HEIGHT_ANIMATION_DURATION = 250;
 
 export const useCardStepStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const completeBadgeBackgroundColor = useEuiBackgroundColor('success');
+  const completeStepBackgroundColor = useEuiBackgroundColor('success');
 
   const customStyles = useMemo(
     () => ({
@@ -47,6 +47,10 @@ export const useCardStepStyles = () => {
           padding: ${euiTheme.size.m};
           background-color: ${euiTheme.colors.body};
         }
+
+        &.step-icon-done {
+          background-color: ${completeStepBackgroundColor};
+        }
       `,
       stepTitleStyles: css`
         &.step-title {
@@ -59,7 +63,7 @@ export const useCardStepStyles = () => {
       `,
       allDoneTextStyles: css`
         &.all-done-badge {
-          background-color: ${completeBadgeBackgroundColor};
+          background-color: ${completeStepBackgroundColor};
           color: ${euiTheme.colors.successText};
         }
       `,
@@ -70,7 +74,7 @@ export const useCardStepStyles = () => {
       `,
     }),
     [
-      completeBadgeBackgroundColor,
+      completeStepBackgroundColor,
       euiTheme.base,
       euiTheme.colors.body,
       euiTheme.colors.successText,

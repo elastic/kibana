@@ -6,12 +6,19 @@
  */
 
 import React from 'react';
-import type { ToggleTaskCompleteStatus, CardId, StepId, ExpandedCardSteps } from '../types';
+import type {
+  ToggleTaskCompleteStatus,
+  CardId,
+  StepId,
+  ExpandedCardSteps,
+  OnStepClicked,
+} from '../types';
 
 export interface StepContextType {
   expandedCardSteps: ExpandedCardSteps;
   finishedSteps: Record<CardId, Set<StepId>>;
   indicesExist: boolean;
+  onStepClicked: OnStepClicked;
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
 }
 

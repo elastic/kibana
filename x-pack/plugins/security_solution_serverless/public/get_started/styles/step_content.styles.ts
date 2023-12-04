@@ -33,7 +33,7 @@ export const useStepContentStyles = () => {
       `,
       leftContentStyles: css`
         &.left-panel {
-          padding: 0 ${euiTheme.size.l} 0 ${euiTheme.size.s};
+          padding: 0 0 0 ${euiTheme.size.s};
           width: ${LEFT_CONTENT_PANEL_WIDTH}px;
         }
       `,
