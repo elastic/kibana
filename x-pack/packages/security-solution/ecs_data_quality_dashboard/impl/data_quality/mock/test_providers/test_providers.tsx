@@ -47,7 +47,6 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
           actionTypeRegistry={actionTypeRegistry}
           assistantAvailability={mockAssistantAvailability}
           augmentMessageCodeBlocks={jest.fn()}
-          assistantStreamingEnabled
           baseAllow={[]}
           baseAllowReplacement={[]}
           basePath={'https://localhost:5601/kbn'}

@@ -35,7 +35,6 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({ children }) =>
       actionTypeRegistry={actionTypeRegistry}
       assistantAvailability={mockAssistantAvailability}
       augmentMessageCodeBlocks={jest.fn(() => [])}
-      assistantStreamingEnabled
       baseAllow={[]}
       baseAllowReplacement={[]}
       basePath={'https://localhost:5601/kbn'}
