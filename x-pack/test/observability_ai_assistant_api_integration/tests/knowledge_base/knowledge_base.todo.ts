@@ -11,9 +11,10 @@ import http, { Server } from 'http';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 /*
-  This test is disabled because there Knowledge Base required a trained model (ELSER) 
-  which is not available in FTR tests. When a comparable, less expensive trained model
-  is available, this test should be re-enabled.
+  This test is disabled because the Knowledge base requires a trained model (ELSER) 
+  which is not available in FTR tests. 
+  
+  When a comparable, less expensive trained model is available, this test should be re-enabled.
 */
 
 export default function ApiTest({ getService }: FtrProviderContext) {
