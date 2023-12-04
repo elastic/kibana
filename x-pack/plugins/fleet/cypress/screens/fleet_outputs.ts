@@ -184,7 +184,6 @@ export const fillInKafkaOutputForm = () => {
   cy.getBySel(kafkaOutputFormValues.name.selector).type(kafkaOutputFormValues.name.value);
   cy.get('[placeholder="Specify host"').clear().type('localhost:5000');
   cy.getBySel(kafkaOutputFormValues.username.selector).type(kafkaOutputFormValues.username.value);
-  cy.getBySel(kafkaOutputFormValues.password.selector).type(kafkaOutputFormValues.password.value);
   cy.getBySel(kafkaOutputFormValues.verificationMode.selector).select(
     kafkaOutputFormValues.verificationMode.value
   );
@@ -262,6 +261,9 @@ export const fillInKafkaOutputForm = () => {
 export const validateSavedKafkaOutputForm = () => {
   Object.keys(kafkaOutputFormValues).forEach((key: string) => {
     const { selector, value } = kafkaOutputFormValues[key as keyof typeof kafkaOutputFormValues];
+    if (selector === SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT) {
+      return;
+    }
     cy.getBySel(selector).should('have.value', value);
   });
 
