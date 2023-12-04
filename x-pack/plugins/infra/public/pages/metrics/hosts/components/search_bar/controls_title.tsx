@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { EuiFormLabel, EuiPopover, EuiIcon, EuiToolTip, EuiLink } from '@elastic/eui';
-import useToggle from 'react-use/lib/useToggle';
-import { css } from '@emotion/react';
+import { EuiFormLabel, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { availableControlsPanels } from '../../hooks/use_control_panels_url_state';
+import { Popover } from '../table/popover';
 
 const helpMessages = {
   [availableControlsPanels.SERVICE_NAME]: {
@@ -25,6 +25,26 @@ const helpMessages = {
       ['data-test-subj']: 'hostsViewServiceNameControlPopoverHelpLink',
     },
   },
+  [availableControlsPanels.SERVICE_NAME]: (
+    <FormattedMessage
+      id="xpack.infra.hostsViewPage.serviceNameControl.popoverHelpLabel"
+      defaultMessage="Services detected via {APMDocs}"
+      values={{
+        APMDocs: (
+          <EuiLink
+            href="https://ela.st/docs-infra-apm"
+            target="_blank"
+            data-test-subj="hostsViewServiceNameControlPopoverHelpLink"
+          >
+            <FormattedMessage
+              id="xpack.infra.hostsViewPage.serviceNameControl.popoverHelpLink"
+              defaultMessage="APM"
+            />
+          </EuiLink>
+        ),
+      }}
+    />
+  ),
 };
 
 const TitleWithPopoverMessage = ({
@@ -33,61 +53,19 @@ const TitleWithPopoverMessage = ({
   embeddableId,
 }: {
   title?: string;
-  helpMessage: {
-    text: string;
-    link?: {
-      href: string;
-      'data-test-subj': string;
-      text: string;
-    };
-  };
+  helpMessage: React.ReactNode;
   embeddableId: string;
 }) => {
-  const [isPopoverOpen, togglePopover] = useToggle(false);
-
-  return helpMessage?.text ? (
+  return (
     <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
-      <>
-        {title}
-        <EuiPopover
-          panelPaddingSize="s"
-          button={
-            <EuiIcon
-              data-test-subj={`control-group-help-message-${embeddableId}`}
-              type="iInCircle"
-              size="m"
-              onClick={togglePopover}
-              css={css`
-                cursor: pointer;
-                margin: 0 2px 2px;
-              `}
-            />
-          }
-          isOpen={isPopoverOpen}
-          offset={10}
-          closePopover={() => togglePopover(false)}
-          repositionOnScroll
-          anchorPosition="upCenter"
-          panelStyle={{ maxWidth: 250 }}
-        >
-          {helpMessage?.link ? (
-            <>
-              {helpMessage.text}{' '}
-              <EuiLink
-                data-test-subj={helpMessage.link['data-test-subj']}
-                href={helpMessage.link.href}
-                target="_blank"
-              >
-                {helpMessage.link.text}
-              </EuiLink>
-            </>
-          ) : (
-            <>{helpMessage.text}</>
-          )}
-        </EuiPopover>
-      </>
+      <EuiFlexGroup alignItems="center" gutterSize="xs">
+        <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <Popover>{helpMessage}</Popover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFormLabel>
-  ) : null;
+  );
 };
 
 export const ControlTitle = ({ title, embeddableId }: { title?: string; embeddableId: string }) => {
@@ -95,10 +73,8 @@ export const ControlTitle = ({ title, embeddableId }: { title?: string; embeddab
   return helpMessage ? (
     <TitleWithPopoverMessage title={title} helpMessage={helpMessage} embeddableId={embeddableId} />
   ) : (
-    <EuiToolTip anchorClassName="controlFrame__labelToolTip" content={title}>
-      <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
-        {title}
-      </EuiFormLabel>
-    </EuiToolTip>
+    <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
+      {title}
+    </EuiFormLabel>
   );
 };
