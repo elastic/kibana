@@ -117,7 +117,10 @@ export function isNonAggregatableFieldOverallStats(
 export function isNonAggregatableSampledDocs(
   arg: unknown
 ): arg is IKibanaSearchResponse<estypes.SearchResponse<unknown>> {
-  return isPopulatedObject(arg, ['aggregatableFields']);
+  return (
+    isPopulatedObject(arg, ['rawResponse']) &&
+    (arg.rawResponse as estypes.SearchResponse).hasOwnProperty('hits')
+  );
 }
 
 export const processAggregatableFieldsExistResponse = (

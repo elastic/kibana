@@ -259,6 +259,11 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
             () => new Set<string>()
           );
 
+          // @TODO: remove
+          console.log(
+            `--@@sampledNonAggregatableFieldsExamples`,
+            sampledNonAggregatableFieldsExamples
+          );
           if (sampledNonAggregatableFieldsExamples) {
             sampledNonAggregatableFieldsExamples.forEach((doc) => {
               nonAggregatableFields.forEach((field, fieldIdx) => {
