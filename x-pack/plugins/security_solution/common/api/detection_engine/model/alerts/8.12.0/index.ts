@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-
 import type { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 import type {
   ALERT_HOST_CRITICALITY,
   ALERT_USER_CRITICALITY,
 } from '../../../../../field_maps/field_names';
-import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 import type {
   Ancestor890,
   BaseFields890,
