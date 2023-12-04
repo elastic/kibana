@@ -30,10 +30,7 @@ import { useSecuritySolutionContext } from '../../application/security_solution_
 // import * as TEST_SUBJECTS from './test_subjects';
 // import { getEnabledCspIntegrationDetails } from '../../common/utils/get_enabled_csp_integration_details';
 // import { pageSize } from '@kbn/files-plugin/server/routes/common_schemas';
-import {
-  useCspBenchmarkIntegrations,
-  UseCspBenchmarkIntegrationsProps,
-} from '../benchmarks/use_csp_benchmark_integrations';
+import { UseCspBenchmarkIntegrationsProps } from '../benchmarks/use_csp_benchmark_integrations';
 import { getBenchmarkCisName } from '../../../common/utils/helpers';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
 import { useFindCspRuleTemplates } from './use_csp_rules';
@@ -103,7 +100,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParamsVe
     params.benchmarkId,
     params.benchmarkVersion
   );
-console.log(integrationInfo)
+  console.log(integrationInfo);
   const SpyRoute = useSecuritySolutionContext()?.getSpyRouteComponent();
 
   const [packageInfo] = integrationInfo.data?.items || [];
