@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import semver from 'semver';
-import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import moment from 'moment';
+import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from './services';
@@ -1476,13 +1476,14 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
+        const today = new Date(Date.now());
         await supertest
           .post(`/api/fleet/agents/bulk_upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
             version: fleetServerVersion,
             agents: ['agent1', 'agent2'],
-            start_time: new Date(Date.now()).toISOString(),
+            start_time: today.toISOString(),
           })
           .expect(200);
 
@@ -1500,12 +1501,8 @@ export default function (providerContext: FtrProviderContext) {
           'minimum_execution_duration',
           'expiration'
         );
-        // calculate 1 month from now
-        const today = new Date();
-        const todayMoment = moment(today).startOf('day');
-
-        const ONE_MONTH_IN_MS = 2592000000;
-        const nextMonth = todayMoment.clone().add(ONE_MONTH_IN_MS, 'ms').format('YYYY-MM-DD');
+        // add 30 days from now
+        const nextMonth = moment(today).add(30, 'days').toISOString().slice(0, 10);
 
         expect(action.expiration).contain(`${nextMonth}`);
         expect(action.agents).contain('agent1');
