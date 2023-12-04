@@ -176,7 +176,6 @@ export const resetKafkaOutputForm = () => {
   cy.getBySel(kafkaOutputFormValues.name.selector).clear();
   cy.get('[placeholder="Specify host"').clear();
   cy.getBySel(kafkaOutputFormValues.username.selector).clear();
-  cy.getBySel(kafkaOutputFormValues.password.selector).clear();
   cy.getBySel(kafkaOutputFormValues.defaultTopic.selector).clear();
   cy.getBySel(SETTINGS_OUTPUTS_KAFKA.COMPRESSION_SWITCH).click();
 };
