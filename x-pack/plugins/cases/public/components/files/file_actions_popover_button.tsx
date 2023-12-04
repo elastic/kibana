@@ -67,7 +67,7 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
         title: i18n.COPY_FILE_HASH,
         items: [
           {
-            name: 'md5',
+            name: 'MD5',
             icon: 'copyClipboard',
             disabled: !theFile.hash?.md5,
             onClick: () => {
@@ -81,7 +81,7 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
             'data-test-subj': 'cases-files-copy-md5-hash-button',
           },
           {
-            name: 'sha1',
+            name: 'SHA1',
             icon: 'copyClipboard',
             disabled: !theFile.hash?.sha1,
             onClick: () => {
@@ -95,7 +95,7 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
             'data-test-subj': 'cases-files-copy-sha1-hash-button',
           },
           {
-            name: 'sha256',
+            name: 'SHA256',
             icon: 'copyClipboard',
             disabled: !theFile.hash?.sha256,
             onClick: () => {
