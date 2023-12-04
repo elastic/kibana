@@ -23,5 +23,5 @@ export function UnifiedDocViewer({ docViewsRegistry, ...props }: DocViewRenderPr
     return unifiedDocViewer.registry;
   }, [docViewsRegistry, unifiedDocViewer.registry]);
 
-  return <DocViewer docViews={registry.getAll()} {...props} />
+  return <DocViewer docViews={registry.getAll()} {...props} />;
 }
