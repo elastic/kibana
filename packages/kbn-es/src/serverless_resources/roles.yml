@@ -18,6 +18,16 @@ viewer:
   cluster: []
   indices:
     - names:
+        - "*"
+      privileges:
+        - read
+    - names:
+        - "/~(([.]|ilm-history-).*)/"
+      privileges:
+        - "read"
+        - "view_index_metadata"
+      allow_restricted_indices: false
+    - names:
         - ".siem-signals*"
         - ".lists-*"
         - ".items-*"
@@ -32,47 +42,29 @@ viewer:
         - "read"
         - "view_index_metadata"
       allow_restricted_indices: false
-    - names:
-        - apm-*-transaction*
-        - traces-apm*
-        - auditbeat-*
-        - endgame-*
-        - filebeat-*
-        - logs-*
-        - packetbeat-*
-        - winlogbeat-*
-        - metrics-endpoint.metadata_current_*
-        - ".fleet-agents*"
-        - ".fleet-actions*"
-        - "risk-score.risk-score-*"
-        - ".asset-criticality.asset-criticality-*"
-      privileges:
-        - read
   applications:
     - application: "kibana-.kibana"
       privileges:
-        - feature_ml.read
-        - feature_siem.read
-        - feature_siem.read_alerts
-        - feature_siem.endpoint_list_read
-        - feature_securitySolutionCases.read
-        - feature_securitySolutionAssistant.all
-        - feature_actions.read
-        - feature_builtInAlerts.read
-        - feature_osquery.read
-        - feature_discover.all
-        - feature_dashboard.all
-        - feature_canvas.all
-        - feature_graph.all
-        - feature_maps.all
-        - feature_visualize.all
-      resources: "*"
+        - "read"
+      resources:
+        - "*"
   run_as: []
-
-# modeled after t3_analyst
 editor:
   cluster: []
   indices:
+    - names:
+        - "/~(([.]|ilm-history-).*)/"
+      privileges:
+        - "read"
+        - "view_index_metadata"
+      allow_restricted_indices: false
+    - names:
+        - "observability-annotations"
+      privileges:
+        - "read"
+        - "view_index_metadata"
+        - "write"
+      allow_restricted_indices: false
     - names:
         - ".siem-signals*"
         - ".lists-*"
@@ -83,65 +75,26 @@ editor:
         - "write"
         - "maintenance"
       allow_restricted_indices: false
-    - names:
-        - apm-*-transaction*
-        - traces-apm*
-        - auditbeat-*
-        - endgame-*
-        - filebeat-*
-        - logs-*
-        - packetbeat-*
-        - winlogbeat-*
-      privileges:
-        - read
-        - write
     - names:
         - ".internal.alerts*"
         - ".alerts*"
         - ".internal.preview.alerts*"
         - ".preview.alerts*"
-        - "risk-score.risk-score-*"
       privileges:
         - "read"
         - "view_index_metadata"
         - "write"
         - "maintenance"
-    - names:
-        - ".asset-criticality.asset-criticality-*"
-      privileges:
-        - "read"
-        - "write"
       allow_restricted_indices: false
   applications:
     - application: "kibana-.kibana"
       privileges:
-        - feature_ml.read
-        - feature_siem.all
-        - feature_siem.read_alerts
-        - feature_siem.crud_alerts
-        - feature_siem.endpoint_list_all
-        - feature_siem.trusted_applications_all
-        - feature_siem.event_filters_all
-        - feature_siem.host_isolation_exceptions_all
-        - feature_siem.blocklist_all
-        - feature_siem.policy_management_read # Elastic Defend Policy Management
-        - feature_siem.host_isolation_all
-        - feature_siem.process_operations_all
-        - feature_siem.actions_log_management_all # Response actions history
-        - feature_siem.file_operations_all
-        - feature_securitySolutionCases.all
-        - feature_securitySolutionAssistant.all
-        - feature_actions.read
-        - feature_builtInAlerts.all
-        - feature_osquery.all
-        - feature_discover.all
-        - feature_dashboard.all
-        - feature_canvas.all
-        - feature_graph.all
-        - feature_maps.all
-        - feature_visualize.all
-      resources: "*"
+        - "all"
+      resources:
+        - "*"
   run_as: []
+
+# source: https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
 
 t1_analyst:
   cluster:
