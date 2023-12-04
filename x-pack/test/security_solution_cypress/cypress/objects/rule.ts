@@ -167,7 +167,7 @@ export const getSavedQueryRule = (
   index: getIndexPatterns(),
   name: 'New Rule Test',
   description: 'The new rule description.',
-  interval: '24h',
+  interval: '100m',
   from: 'now-50000h',
   severity: 'low',
   risk_score: 21,
