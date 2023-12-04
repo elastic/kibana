@@ -11,7 +11,6 @@ import {
   HorizontalAlignment,
   Position,
   VerticalAlignment,
-  BarSeriesProps,
 } from '@elastic/charts';
 import type { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
@@ -291,7 +290,7 @@ export interface LayeredXYArgs {
   addTimeMarker?: boolean;
   markSizeRatio?: number;
   minTimeBarInterval?: string;
-  minBarHeight: number;
+  minBarHeight?: number;
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
   splitRowAccessor?: ExpressionValueVisDimension | string;
@@ -520,7 +519,5 @@ export type AllowedXYOverrides = Partial<
     'axisX' | 'axisLeft' | 'axisRight',
     // id and groupId should not be overridden
     Simplify<Omit<MakeOverridesSerializable<AxisProps>, 'id' | 'groupId'>>
-  > & {
-    barSeries: Simplify<Pick<MakeOverridesSerializable<BarSeriesProps>, 'minBarHeight'>>;
-  }
+  >
 >;
