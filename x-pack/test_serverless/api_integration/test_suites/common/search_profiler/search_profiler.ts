@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       const { body } = await supertest
-        .post(`${API_BASE_PATH}/execute`)
+        .post(`${API_BASE_PATH}/profile`)
         .set(svlCommonApi.getInternalRequestHeader())
         .set('Content-Type', 'application/json;charset=UTF-8')
         .send(payloadWithInvalidIndex)
