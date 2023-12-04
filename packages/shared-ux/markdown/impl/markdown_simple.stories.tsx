@@ -31,7 +31,7 @@ export const MarkdownStoryComponent = () => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <MarkdownSimple src='My content in **markdown** format set as the *markdownContent prop*' />
+        <MarkdownSimple src="My content in **markdown** format set as the *markdownContent prop*" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
