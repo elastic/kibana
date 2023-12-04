@@ -198,7 +198,8 @@ export interface ITelemetryReceiver {
   fetchValueListMetaData(interval: number): Promise<ValueListResponse>;
 
   getAlertsIndex(): string | undefined;
-  getExperimentalFeatures(): ExperimentalFeatures;
+
+  getExperimentalFeatures(): ExperimentalFeatures | undefined;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -213,7 +214,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private clusterInfo?: ESClusterInfo;
   private processTreeFetcher?: Fetcher;
   private packageService?: PackageService;
-  private experimentalFeatures?: ExperimentalFeatures;
+  private experimentalFeatures: ExperimentalFeatures | undefined;
   private readonly maxRecords = 10_000 as const;
 
   constructor(logger: Logger) {
