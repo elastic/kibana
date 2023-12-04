@@ -13,6 +13,7 @@ Review important information about the {kib} 7.17.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.17.16>>
 * <<release-notes-7.17.15>>
 * <<release-notes-7.17.14>>
 * <<release-notes-7.17.13>>
@@ -85,6 +86,17 @@ Review important information about the {kib} 7.17.x releases.
 //* <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.17.16]]
+== {kib} 7.17.16
+
+The 7.17.16 release includes the following bug fixes.
+
+[float]
+[[fixes-v7.17.16]]
+=== Bug Fixes
+Discover::
+* Fixes support for nested field columns in CSV reports {kibana-pull}172240[#172240].
+
 [[release-notes-7.17.15]]
 == {kib} 7.17.15
 
