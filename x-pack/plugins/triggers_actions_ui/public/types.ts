@@ -363,7 +363,10 @@ export interface RuleType<
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
 
-export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus' | 'lastRun' | 'nextRun'>;
+export type RuleUpdates = Omit<
+  Rule,
+  'id' | 'executionStatus' | 'lastRun' | 'nextRun' | 'executionGaps'
+>;
 
 export type RuleSnoozeSettings = Pick<
   Rule,

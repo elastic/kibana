@@ -42,6 +42,7 @@ const NUMBER_OF_RECOVERED_ALERTS_FIELD =
   'kibana.alert.rule.execution.metrics.alert_counts.recovered';
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 const MAINTENANCE_WINDOW_IDS_FIELD = 'kibana.alert.maintenance_window_ids';
+const GAP_FIELD = 'kibana.alert.rule.execution.gap.gap_ms';
 
 const Millis2Nanos = 1000 * 1000;
 
@@ -418,6 +419,7 @@ export function getExecutionLogAggregation({
                         RULE_NAME_FIELD,
                         ALERTING_OUTCOME_FIELD,
                         MAINTENANCE_WINDOW_IDS_FIELD,
+                        GAP_FIELD,
                       ],
                     },
                   },
@@ -510,6 +512,9 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const maintenanceWindowIds = outcomeMessageAndMaintenanceWindow
     ? outcomeMessageAndMaintenanceWindow.kibana?.alert?.maintenance_window_ids ?? []
     : [];
+  const gapMs = outcomeMessageAndMaintenanceWindow
+    ? outcomeMessageAndMaintenanceWindow.kibana?.alert?.rule?.execution?.gap?.gap_ms ?? 0
+    : 0;
   const ruleName = outcomeMessageAndMaintenanceWindow
     ? outcomeMessageAndMaintenanceWindow.rule?.name ?? ''
     : '';
@@ -535,6 +540,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     space_ids: spaceIds,
     rule_name: ruleName,
     maintenance_window_ids: maintenanceWindowIds,
+    gap_ms: gapMs > 0 ? gapMs : 0,
   };
 }
 

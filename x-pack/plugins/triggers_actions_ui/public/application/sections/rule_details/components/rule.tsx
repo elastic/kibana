@@ -33,6 +33,7 @@ import {
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
+const RuleExecutionGapsList = lazy(() => import('./rule_execution_gaps_list'));
 const RuleDefinition = lazy(() => import('./rule_definition'));
 
 export type RuleComponentProps = {
@@ -50,6 +51,7 @@ export type RuleComponentProps = {
 
 const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
 const ALERT_LIST_TAB = 'rule_alert_list';
+const EXECUTION_GAP_LIST_TAB = 'rule_exectuion_gap_list';
 
 export function RuleComponent({
   rule,
@@ -97,6 +99,16 @@ export function RuleComponent({
     });
   };
 
+  const renderRuleExecutionGapsList = () => {
+    return suspendedComponentWithProps(
+      RuleExecutionGapsList,
+      'xl'
+    )({
+      items: rule.executionGaps!,
+      ruleId: rule.id,
+    });
+  };
+
   const tabs = [
     {
       id: ALERT_LIST_TAB,
@@ -133,6 +145,25 @@ export function RuleComponent({
       }),
     },
   ];
+
+  if (rule.executionGaps && rule.executionGaps.length > 0) {
+    tabs.push({
+      id: EXECUTION_GAP_LIST_TAB,
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.ruleDetails.rule.executionGapsTabText',
+        {
+          defaultMessage: 'Execution Gaps',
+        }
+      ),
+      'data-test-subj': 'ruleExeuctionGapsListTab',
+      content: (
+        <>
+          <EuiSpacer />
+          {renderRuleExecutionGapsList()}
+        </>
+      ),
+    });
+  }
 
   const renderTabs = () => {
     const isEnabled = getIsExperimentalFeatureEnabled('rulesDetailLogs');

@@ -6,7 +6,6 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { RuleExecutionGap } from '../../../../common';
 import {
   ruleNotifyWhen,
   ruleLastRunOutcomeValues,

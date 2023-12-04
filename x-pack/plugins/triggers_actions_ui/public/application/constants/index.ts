@@ -76,6 +76,7 @@ export const RULE_EXECUTION_LOG_DURATION_COLUMNS = [
   'total_search_duration',
   'es_search_duration',
   'schedule_delay',
+  'gap_ms',
 ];
 
 export const RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS = [

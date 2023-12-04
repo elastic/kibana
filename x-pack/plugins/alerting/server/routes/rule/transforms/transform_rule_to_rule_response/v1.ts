@@ -104,6 +104,15 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
       ? { last_duration: rule.executionStatus.lastDuration }
       : {}),
   },
+  ...(rule.executionGaps
+    ? {
+        execution_gaps: (rule.executionGaps ?? []).map(({ gapStart, gapEnd, gapDuration }) => ({
+          gap_start: gapStart,
+          gap_end: gapEnd,
+          gap_duration: gapDuration,
+        })),
+      }
+    : {}),
   ...(rule.monitoring ? { monitoring: transformMonitoring(rule.monitoring) } : {}),
   ...(rule.snoozeSchedule ? { snooze_schedule: rule.snoozeSchedule } : {}),
   ...(rule.activeSnoozes ? { active_snoozes: rule.activeSnoozes } : {}),

@@ -74,6 +74,14 @@ const actionSchema = schema.object({
   alerts_filter: schema.maybe(actionAlertsFilterSchema),
 });
 
+export const ruleExecutionGapSchema = schema.arrayOf(
+  schema.object({
+    gap_start: schema.string(),
+    gap_end: schema.string(),
+    gap_duration: schema.number(),
+  })
+);
+
 export const ruleExecutionStatusSchema = schema.object({
   status: schema.oneOf([
     schema.literal(ruleExecutionStatusValuesV1.OK),
@@ -205,6 +213,7 @@ export const ruleResponseSchema = schema.object({
   notify_when: schema.maybe(schema.nullable(notifyWhenSchema)),
   muted_alert_ids: schema.arrayOf(schema.string()),
   execution_status: ruleExecutionStatusSchema,
+  execution_gaps: schema.maybe(ruleExecutionGapSchema),
   monitoring: schema.maybe(monitoringSchema),
   snooze_schedule: schema.maybe(schema.arrayOf(ruleSnoozeScheduleSchema)),
   active_snoozes: schema.maybe(schema.arrayOf(schema.string())),

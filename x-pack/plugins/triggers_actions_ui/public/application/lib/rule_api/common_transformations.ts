@@ -71,6 +71,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   muted_alert_ids: mutedInstanceIds,
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus,
+  execution_gaps: executionGaps,
   actions: actions,
   snooze_schedule: snoozeSchedule,
   is_snoozed_until: isSnoozedUntil,
@@ -90,6 +91,15 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   mutedInstanceIds,
   snoozeSchedule,
   executionStatus: executionStatus ? transformExecutionStatus(executionStatus) : undefined,
+  executionGaps: executionGaps
+    ? (executionGaps ?? []).map(
+        ({ gap_start: gapStart, gap_end: gapEnd, gap_duration: gapDuration }) => ({
+          gapStart,
+          gapEnd,
+          gapDuration,
+        })
+      )
+    : undefined,
   actions: actions
     ? actions.map((action: AsApiContract<RuleAction>) => transformAction(action))
     : [],

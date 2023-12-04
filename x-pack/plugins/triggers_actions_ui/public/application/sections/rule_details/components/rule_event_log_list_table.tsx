@@ -605,6 +605,20 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         },
         isSortable: getIsColumnSortable('maintenance_window_ids'),
       },
+      {
+        id: 'gap_ms',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.gapMs',
+          {
+            defaultMessage: 'Execution Gap',
+          }
+        ),
+        actions: {
+          showSortAsc: false,
+          showSortDesc: false,
+        },
+        isSortable: getIsColumnSortable('gap_ms'),
+      },
     ],
     [getPaginatedRowIndex, onFlyoutOpen, onFilterChange, hasRuleNames, showFromAllSpaces, logs]
   );

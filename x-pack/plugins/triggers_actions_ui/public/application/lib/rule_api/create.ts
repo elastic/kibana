@@ -19,6 +19,7 @@ type RuleCreateBody = Omit<
   | 'executionStatus'
   | 'lastRun'
   | 'nextRun'
+  | 'executionGaps'
 >;
 const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   ruleTypeId,
