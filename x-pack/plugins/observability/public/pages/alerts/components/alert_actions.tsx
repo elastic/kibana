@@ -14,19 +14,17 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import {
-  ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { useBulkUntrackAlerts } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
@@ -70,6 +68,7 @@ export function AlertActions({
   } = useKibana().services;
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
   const userCasesPermissions = canUseCases([observabilityFeatureId]);
+  const [viewInAppUrl, setViewInAppUrl] = useState<string>();
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -78,6 +77,14 @@ export function AlertActions({
 
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const alert = parseObservabilityAlert(dataFieldEs);
+
+  useEffect(() => {
+    if (!alert.hasBasePath) {
+      setViewInAppUrl(prepend(alert.link ?? ''));
+    } else {
+      setViewInAppUrl(alert.link);
+    }
+  }, [alert.hasBasePath, alert.link, prepend]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -236,10 +243,7 @@ export function AlertActions({
 
   return (
     <>
-      {/* Hide the View In App for the Threshold alerts, temporarily https://github.com/elastic/kibana/pull/159915  */}
-      {alert.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID ? (
-        <EuiFlexItem style={{ width: 32 }} />
-      ) : (
+      {viewInAppUrl ? (
         <EuiFlexItem>
           <EuiToolTip
             content={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
@@ -252,12 +256,14 @@ export function AlertActions({
                 defaultMessage: 'View in app',
               })}
               color="text"
-              href={prepend(alert.link ?? '')}
+              href={viewInAppUrl}
               iconType="eye"
               size="s"
             />
           </EuiToolTip>
         </EuiFlexItem>
+      ) : (
+        <EuiFlexItem style={{ width: 32 }} />
       )}
 
       <EuiFlexItem>

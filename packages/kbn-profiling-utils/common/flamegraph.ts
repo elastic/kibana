@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CalleeTree } from './callee';
 import { createFrameGroupID } from './frame_group';
 import { fnv1a64 } from './hash';
 import { createStackFrameMetadata, getCalleeLabel } from './profiling';
+import { convertTonsToKgs } from './utils';
 
 /**
  * Base Flamegraph
@@ -48,63 +48,37 @@ export interface BaseFlameGraph {
   TotalSamples: number;
   TotalCPU: number;
   SelfCPU: number;
-}
-
-/**
- * createBaseFlameGraph encapsulates the tree representation into a serialized form.
- * @param tree CalleeTree
- * @param samplingRate number
- * @param totalSeconds number
- * @returns BaseFlameGraph
- */
-export function createBaseFlameGraph(
-  tree: CalleeTree,
-  samplingRate: number,
-  totalSeconds: number
-): BaseFlameGraph {
-  const graph: BaseFlameGraph = {
-    Size: tree.Size,
-    SamplingRate: samplingRate,
-    Edges: new Array<number[]>(tree.Size),
-
-    FileID: tree.FileID.slice(0, tree.Size),
-    FrameType: tree.FrameType.slice(0, tree.Size),
-    Inline: tree.Inline.slice(0, tree.Size),
-    ExeFilename: tree.ExeFilename.slice(0, tree.Size),
-    AddressOrLine: tree.AddressOrLine.slice(0, tree.Size),
-    FunctionName: tree.FunctionName.slice(0, tree.Size),
-    FunctionOffset: tree.FunctionOffset.slice(0, tree.Size),
-    SourceFilename: tree.SourceFilename.slice(0, tree.Size),
-    SourceLine: tree.SourceLine.slice(0, tree.Size),
-
-    CountInclusive: tree.CountInclusive.slice(0, tree.Size),
-    CountExclusive: tree.CountExclusive.slice(0, tree.Size),
-
-    TotalSeconds: totalSeconds,
-    TotalSamples: tree.TotalSamples,
-    SelfCPU: tree.SelfCPU,
-    TotalCPU: tree.TotalCPU,
-  };
-
-  for (let i = 0; i < tree.Size; i++) {
-    let j = 0;
-    const nodes = new Array<number>(tree.Edges[i].size);
-    for (const [, n] of tree.Edges[i]) {
-      nodes[j] = n;
-      j++;
-    }
-    graph.Edges[i] = nodes;
-  }
-
-  return graph;
+  AnnualCO2TonsExclusive: number[];
+  AnnualCO2TonsInclusive: number[];
+  AnnualCostsUSDInclusive: number[];
+  AnnualCostsUSDExclusive: number[];
+  SelfAnnualCO2Tons: number;
+  TotalAnnualCO2Tons: number;
+  SelfAnnualCostsUSD: number;
+  TotalAnnualCostsUSD: number;
 }
 
 /** Elasticsearch flamegraph */
-export interface ElasticFlameGraph extends BaseFlameGraph {
+export interface ElasticFlameGraph
+  extends Omit<
+    BaseFlameGraph,
+    | 'AnnualCO2TonsExclusive'
+    | 'AnnualCO2TonsInclusive'
+    | 'SelfAnnualCO2Tons'
+    | 'TotalAnnualCO2Tons'
+    | 'AnnualCostsUSDInclusive'
+    | 'AnnualCostsUSDExclusive'
+  > {
   /** ID */
   ID: string[];
   /** Label */
   Label: string[];
+  SelfAnnualCO2KgsItems: number[];
+  TotalAnnualCO2KgsItems: number[];
+  SelfAnnualCostsUSDItems: number[];
+  TotalAnnualCostsUSDItems: number[];
+  SelfAnnualCO2Kgs: number;
+  TotalAnnualCO2Kgs: number;
 }
 
 /**
@@ -141,6 +115,14 @@ export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
     TotalSamples: base.TotalSamples,
     SelfCPU: base.SelfCPU,
     TotalCPU: base.TotalCPU,
+    SelfAnnualCO2KgsItems: base.AnnualCO2TonsExclusive.map(convertTonsToKgs),
+    TotalAnnualCO2KgsItems: base.AnnualCO2TonsInclusive.map(convertTonsToKgs),
+    SelfAnnualCostsUSDItems: base.AnnualCostsUSDExclusive,
+    TotalAnnualCostsUSDItems: base.AnnualCostsUSDInclusive,
+    SelfAnnualCO2Kgs: convertTonsToKgs(base.SelfAnnualCO2Tons),
+    TotalAnnualCO2Kgs: convertTonsToKgs(base.TotalAnnualCO2Tons),
+    SelfAnnualCostsUSD: base.SelfAnnualCostsUSD,
+    TotalAnnualCostsUSD: base.TotalAnnualCostsUSD,
   };
 
   const rootFrameGroupID = createFrameGroupID(

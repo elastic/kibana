@@ -79,30 +79,20 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh 
-    env:
-      TARGET: cypress:run:serverless
-      ROOT_DIR: x-pack/test/security_solution_cypress
-      JOB_TITLE: kibana-serverless-security-cypress
-      MSG: "--- Security Serverless Cypress Tests"
+  - command: .buildkite/scripts/steps/functional/security_serverless.sh
     label: 'Serverless Security Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-    env:
-      TARGET: cypress:explore:run:serverless
-      ROOT_DIR: x-pack/test/security_solution_cypress
-      JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Serverless Explore - Security Cypress Tests"
-    label: 'Serverless Explore - Security Cypress Tests'
+  - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
+    label: 'Serverless Explore - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
@@ -113,13 +103,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-    env:
-      TARGET: cypress:investigations:run:serverless
-      ROOT_DIR: x-pack/test/security_solution_cypress
-      JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Serverless Investigations - Security Cypress Tests"    
-    label: 'Serverless Investigations - Security Cypress Tests'
+  - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
+    label: 'Serverless Investigations - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
@@ -130,13 +115,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-    env:
-      TARGET: cypress:rule_management:run:serverless
-      ROOT_DIR: x-pack/test/security_solution_cypress
-      JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Serverless Rule Management - Security Cypress Tests "
-    label: 'Serverless Rule Management - Security Cypress Tests'
+  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
+    label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
@@ -147,29 +127,19 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-    env:
-      TARGET: cypress:rule_management:prebuilt_rules:run:serverless
-      ROOT_DIR: x-pack/test/security_solution_cypress
-      JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Rule Management - Prebuilt Rules - Security Cypress Tests"
-    label: 'Rule Management - Prebuilt Rules - Security Cypress Tests'
+  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
+    label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 4
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-    env:
-      TARGET: cypress:rule_management:run:ess
-      ROOT_DIR: x-pack/test/security_solution_cypress
-      JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Rule Management - Security Solution Cypress Tests"
+  - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
@@ -181,12 +151,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-    env:
-      TARGET: cypress:rule_management:prebuilt_rules:run:ess
-      ROOT_DIR: x-pack/test/security_solution_cypress
-      JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Rule Management - Prebuilt Rules - Security Solution Cypress Tests"
+  - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules.sh
     label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
@@ -198,29 +163,67 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-    env:
-      TARGET: cypress:run:ess
-      ROOT_DIR: x-pack/test/security_solution_cypress
-      JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Security Solution Cypress tests (Chrome)"
-    label: 'Security Solution Cypress Tests'
+  - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
+    label: 'Serverless Detection Engine - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 16
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-    env:
-      TARGET: cypress:explore:run:ess
-      ROOT_DIR: x-pack/test/security_solution_cypress
-      JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Explore Cypress Tests on Security Solution"
+  - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
+    label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 6
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
+    label: 'Detection Engine - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 8
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh
+    label: 'Detection Engine - Exceptions - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 6
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution.sh
+    label: 'Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 8
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution_explore.sh
     label: 'Explore - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
@@ -232,12 +235,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-    env:
-      TARGET: cypress:investigations:run:ess
-      ROOT_DIR: x-pack/test/security_solution_cypress
-      JOB_TITLE: kibana-security-solution-chrome
-      MSG: "--- Investigations - Security Solution Cypress Tests"
+  - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
@@ -249,12 +247,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-    env:
-      TARGET: cypress:dw:run
-      ROOT_DIR: x-pack/plugins/security_solution
-      JOB_TITLE: kibana-defend-workflows-cypress
-      MSG: "--- Defend Workflows Cypress tests"
+  - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
     agents:
       queue: n2-4-virt
@@ -266,12 +259,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-    env:
-      TARGET: cypress:dw:serverless:run
-      ROOT_DIR: x-pack/plugins/security_solution
-      JOB_TITLE: kibana-defend-workflows-serverless-cypress
-      MSG: "--- Defend Workflows Cypress tests on Serverless"
+  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
       queue: n2-4-virt
@@ -283,12 +271,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_cypress_exec.sh
-    env:
-      TARGET: cypress:run
-      ROOT_DIR: x-pack/plugins/threat_intelligence
-      JOB_TITLE: kibana-threat-intelligence-chrome
-      MSG: "--- Threat Intelligence Cypress tests (Chrome)"
+  - command: .buildkite/scripts/steps/functional/threat_intelligence.sh
     label: 'Threat Intelligence Cypress Tests'
     agents:
       queue: n2-4-spot
