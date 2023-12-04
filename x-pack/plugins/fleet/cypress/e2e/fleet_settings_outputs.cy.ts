@@ -271,7 +271,7 @@ describe('Outputs', () => {
       it('saves the output', () => {
         selectKafkaOutput();
 
-        fillInKafkaOutputForm();
+        fillInKafkaOutputForm(true);
 
         cy.intercept('POST', '**/api/fleet/outputs').as('saveOutput');
 

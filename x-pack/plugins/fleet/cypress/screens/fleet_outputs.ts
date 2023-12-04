@@ -180,10 +180,13 @@ export const resetKafkaOutputForm = () => {
   cy.getBySel(SETTINGS_OUTPUTS_KAFKA.COMPRESSION_SWITCH).click();
 };
 
-export const fillInKafkaOutputForm = () => {
+export const fillInKafkaOutputForm = (create?: boolean) => {
   cy.getBySel(kafkaOutputFormValues.name.selector).type(kafkaOutputFormValues.name.value);
   cy.get('[placeholder="Specify host"').clear().type('localhost:5000');
   cy.getBySel(kafkaOutputFormValues.username.selector).type(kafkaOutputFormValues.username.value);
+  if (create) {
+    cy.getBySel(kafkaOutputFormValues.password.selector).type(kafkaOutputFormValues.password.value);
+  }
   cy.getBySel(kafkaOutputFormValues.verificationMode.selector).select(
     kafkaOutputFormValues.verificationMode.value
   );
@@ -290,7 +293,7 @@ export const validateOutputTypeChangeToKafka = (outputId: string) => {
   cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('kafka');
   cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION).click();
 
-  fillInKafkaOutputForm();
+  fillInKafkaOutputForm(true);
   cy.intercept('PUT', '**/api/fleet/outputs/**').as('saveOutput');
 
   cy.getBySel(SETTINGS_SAVE_BTN).click();
