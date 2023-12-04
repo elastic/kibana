@@ -15,10 +15,10 @@ describe('Custom link', () => {
       expect(result).toEqual(['name']);
     });
 
-    it('handles multiple occurrences of the same variable', () => {
+    it('removes duplicates and only return unique template variable names', () => {
       const url = 'https://example.com/{{name}}/details/{{name}}';
       const result = extractTemplateVariableNames(url);
-      expect(result).toEqual(['name', 'name']);
+      expect(result).toEqual(['name']);
     });
 
     it('handles different variable names', () => {

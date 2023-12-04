@@ -103,15 +103,10 @@ const validateUrl = (url: string, transaction?: Transaction) => {
 export const replaceTemplateVariables = (
   url: string,
   transaction?: Transaction
-) => {
-  const error = validateUrl(url, transaction);
-  try {
-    return { formattedUrl: getEncodedCustomLinkUrl(url, transaction), error };
-  } catch (e) {
-    // errors will be caught on validateUrl function
-    return { formattedUrl: url, error };
-  }
-};
+) => ({
+  formattedUrl: getEncodedCustomLinkUrl(url, transaction),
+  error: validateUrl(url, transaction),
+});
 
 export const convertFiltersToQuery = (filters: Filter[]) => {
   return filters.reduce((acc: Record<string, string>, { key, value }) => {

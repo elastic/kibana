@@ -27,10 +27,13 @@ export const NO_PERMISSION_LABEL = i18n.translate(
   }
 );
 
-export const extractTemplateVariableNames = (url: string): string[] =>
+export const extractTemplateVariableNames = (url: string): string[] => {
+  const uniqueVariableNames = new Set<string>();
   Mustache.parse(url)
     .filter((v: any[]) => v[0] === 'name')
-    .map((v: any[]) => v[1]);
+    .map((v: any[]) => uniqueVariableNames.add(v[1]));
+  return Array.from(uniqueVariableNames);
+};
 
 export function getEncodedCustomLinkUrl(
   url: string,
@@ -38,15 +41,15 @@ export function getEncodedCustomLinkUrl(
 ) {
   try {
     const templateVariables = extractTemplateVariableNames(url);
-    const view = {};
+    const encodedTemplateVariables = {};
     templateVariables.forEach((name) => {
       const value = get(transaction, name);
       if (value) {
         const encodedValue = encodeURIComponent(value);
-        set(view, name, encodedValue);
+        set(encodedTemplateVariables, name, encodedValue);
       }
     });
-    return Mustache.render(url, view);
+    return Mustache.render(url, encodedTemplateVariables);
   } catch (e) {
     return url;
   }
