@@ -10,23 +10,23 @@ import {
   Datum,
   Flame,
   FlameLayerValue,
+  FlameSpec,
   PartialTheme,
   Settings,
   Tooltip,
-  FlameSpec,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
-import React, { useEffect, useMemo, useState } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { ElasticFlameGraph } from '@kbn/profiling-utils';
-import { i18n } from '@kbn/i18n';
+import React, { useEffect, useMemo, useState } from 'react';
 import { getFlamegraphModel } from '../../utils/get_flamegraph_model';
-import { FlameGraphLegend } from './flame_graph_legend';
-import { FrameInformationWindow } from '../frame_information_window';
+import { Frame } from '../frame_information_window';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
-import { FlameGraphTooltip } from './flamegraph_tooltip';
 import { ComparisonMode } from '../normalization_menu';
+import { FlameGraphTooltip } from './flamegraph_tooltip';
+import { FlameGraphLegend } from './flame_graph_legend';
 
 interface Props {
   id: string;
@@ -90,7 +90,7 @@ export function FlameGraph({
 
   const [highlightedVmIndex, setHighlightedVmIndex] = useState<number | undefined>(undefined);
 
-  const selected: undefined | React.ComponentProps<typeof FrameInformationWindow>['frame'] =
+  const selected: Frame | undefined =
     primaryFlamegraph && highlightedVmIndex !== undefined
       ? {
           fileID: primaryFlamegraph.FileID[highlightedVmIndex],
@@ -102,6 +102,10 @@ export function FlameGraph({
           sourceLine: primaryFlamegraph.SourceLine[highlightedVmIndex],
           countInclusive: primaryFlamegraph.CountInclusive[highlightedVmIndex],
           countExclusive: primaryFlamegraph.CountExclusive[highlightedVmIndex],
+          selfAnnualCO2Kgs: primaryFlamegraph.SelfAnnualCO2KgsItems[highlightedVmIndex],
+          totalAnnualCO2Kgs: primaryFlamegraph.TotalAnnualCO2KgsItems[highlightedVmIndex],
+          selfAnnualCostUSD: primaryFlamegraph.SelfAnnualCostsUSDItems[highlightedVmIndex],
+          totalAnnualCostUSD: primaryFlamegraph.TotalAnnualCostsUSDItems[highlightedVmIndex],
         }
       : undefined;
 
@@ -154,23 +158,35 @@ export function FlameGraph({
 
                       return (
                         <FlameGraphTooltip
-                          isRoot={valueIndex === 0}
-                          label={label}
-                          countInclusive={countInclusive}
-                          countExclusive={countExclusive}
-                          totalSamples={totalSamples}
-                          totalSeconds={totalSeconds}
-                          comparisonCountInclusive={comparisonNode?.CountInclusive}
+                          annualCO2KgsInclusive={
+                            primaryFlamegraph.TotalAnnualCO2KgsItems[valueIndex]
+                          }
+                          annualCostsUSDInclusive={
+                            primaryFlamegraph.TotalAnnualCostsUSDItems[valueIndex]
+                          }
+                          baselineScaleFactor={baseline}
+                          comparisonAnnualCO2KgsInclusive={
+                            comparisonFlamegraph?.TotalAnnualCO2KgsItems[valueIndex]
+                          }
+                          comparisonAnnualCostsUSDInclusive={
+                            comparisonFlamegraph?.TotalAnnualCostsUSDItems[valueIndex]
+                          }
                           comparisonCountExclusive={comparisonNode?.CountExclusive}
+                          comparisonCountInclusive={comparisonNode?.CountInclusive}
+                          comparisonScaleFactor={comparison}
                           comparisonTotalSamples={comparisonFlamegraph?.CountInclusive[0]}
                           comparisonTotalSeconds={comparisonFlamegraph?.TotalSeconds}
-                          baselineScaleFactor={baseline}
-                          comparisonScaleFactor={comparison}
+                          countExclusive={countExclusive}
+                          countInclusive={countInclusive}
+                          isRoot={valueIndex === 0}
+                          label={label}
                           onShowMoreClick={() => {
                             trackProfilingEvent({ metric: 'flamegraph_node_details_click' });
                             toggleShowInformationWindow();
                             setHighlightedVmIndex(valueIndex);
                           }}
+                          totalSamples={totalSamples}
+                          totalSeconds={totalSeconds}
                           inline={inline}
                           parentLabel={parentLabel}
                         />

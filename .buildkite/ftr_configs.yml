@@ -124,7 +124,6 @@ enabled:
   - test/functional/apps/kibana_overview/config.ts
   - test/functional/apps/management/config.ts
   - test/functional/apps/saved_objects_management/config.ts
-  - test/functional/apps/sharing/config.ts
   - test/functional/apps/status_page/config.ts
   - test/functional/apps/visualize/group1/config.ts
   - test/functional/apps/visualize/group2/config.ts
@@ -192,6 +191,7 @@ enabled:
   - x-pack/test/api_integration/apis/es/config.ts
   - x-pack/test/api_integration/apis/features/config.ts
   - x-pack/test/api_integration/apis/file_upload/config.ts
+  - x-pack/test/api_integration/apis/grok_debugger/config.ts
   - x-pack/test/api_integration/apis/kibana/config.ts
   - x-pack/test/api_integration/apis/lists/config.ts
   - x-pack/test/api_integration/apis/logs_ui/config.ts
