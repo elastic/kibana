@@ -18,6 +18,7 @@ const CURRENT_COMMIT_META_KEY = 'current-commit-hash';
 
 const DEPLOY_TAG_META_KEY = 'deploy-tag';
 const COMMIT_INFO_CTX = 'commit-info';
+const DRY_RUN_CTX = 'dry-run';
 
 const octokit = getGithubClient();
 
@@ -51,6 +52,7 @@ export {
   COMMIT_INFO_CTX,
   DEPLOY_TAG_META_KEY,
   CURRENT_COMMIT_META_KEY,
+  DRY_RUN_CTX,
 };
 
 export interface CommitWithStatuses extends GitCommitExtract {
@@ -64,7 +66,29 @@ export interface CommitWithStatuses extends GitCommitExtract {
 }
 
 export function sendSlackMessage(payload: any) {
-  if (!process.env.DEPLOY_TAGGER_SLACK_WEBHOOK_URL) {
+  if (process.env.DRY_RUN?.match(/(1|true)/i)) {
+    const message =
+      typeof payload === 'string'
+        ? payload
+        : JSON.stringify(
+            payload,
+            // The slack playground doesn't like long strings
+            (_key, value) => (value?.length > 301 ? value.slice(0, 300) : value),
+            0
+          );
+    const slackPlaygroundLink = `https://app.slack.com/block-kit-builder/#${encodeURIComponent(
+      message
+    )}`;
+
+    buildkite.setAnnotation(
+      DRY_RUN_CTX,
+      'warning',
+      `Preview slack message <a href="${slackPlaygroundLink}">here</a>.`
+    );
+    console.log('DRY_RUN, not sending slack message:', slackPlaygroundLink);
+
+    return Promise.resolve();
+  } else if (!process.env.DEPLOY_TAGGER_SLACK_WEBHOOK_URL) {
     console.log('No SLACK_WEBHOOK_URL set, not sending slack message');
     return Promise.resolve();
   } else {
