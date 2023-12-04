@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
+import { catchAndWrapError } from '../../utils';
 import { APP_ID } from '../../../../common';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../services';
@@ -20,7 +21,10 @@ import {
   getActionParameters,
   getActionRequestExpiration,
 } from '../../services/actions/create/write_action_to_indices';
-import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
+import {
+  ENDPOINT_ACTION_RESPONSES_DS,
+  ENDPOINT_ACTIONS_INDEX,
+} from '../../../../common/endpoint/constants';
 import type { EndpointAppContext } from '../../types';
 import type { ResponseActionsClient } from './types';
 import type {
@@ -38,6 +42,7 @@ import type {
   SuspendProcessActionOutputContent,
   LogsEndpointAction,
   EndpointActionDataParameterTypes,
+  LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -253,6 +258,24 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
       throw err;
     }
+  }
+
+  /**
+   * Writes a Response Action response document to the Endpoint index
+   * @param doc
+   * @protected
+   */
+  protected async writeActionResponseToEndpointIndex(
+    doc: LogsEndpointActionResponse
+  ): Promise<LogsEndpointActionResponse> {
+    await this.options.esClient
+      .index<LogsEndpointActionResponse>({
+        index: `${ENDPOINT_ACTION_RESPONSES_DS}-default`,
+        document: doc,
+      })
+      .catch(catchAndWrapError);
+
+    return doc;
   }
 
   public abstract isolate(options: IsolationRouteRequestBody): Promise<ActionDetails>;

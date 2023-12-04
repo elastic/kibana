@@ -136,6 +136,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       command: 'isolate',
     });
 
+    // FIXME:PT Write response for this action
+
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
 
