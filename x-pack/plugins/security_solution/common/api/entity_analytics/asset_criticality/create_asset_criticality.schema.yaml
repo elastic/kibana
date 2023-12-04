@@ -1,0 +1,23 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Asset Criticality Create Record Schema
+paths:
+  /internal/asset_criticality:
+    post:
+      summary: Create Criticality Record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleAssetCriticality'
+        '400':
+          description: Invalid request

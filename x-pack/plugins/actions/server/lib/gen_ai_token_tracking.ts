@@ -117,6 +117,32 @@ export const getGenAiTokenTracking = async ({
       logger.error(e);
     }
   }
+
+  // this is a non-streamed Bedrock response used by security solution
+  if (actionTypeId === '.bedrock' && validatedParams.subAction === 'invokeAI') {
+    try {
+      const { total, prompt, completion } = await getTokenCountFromBedrockInvoke({
+        response: (
+          result.data as unknown as {
+            message: string;
+          }
+        ).message,
+        body: JSON.stringify({
+          prompt: (validatedParams as { subActionParams: { messages: Array<{ content: string }> } })
+            .subActionParams.messages[0].content,
+        }),
+      });
+
+      return {
+        total_tokens: total,
+        prompt_tokens: prompt,
+        completion_tokens: completion,
+      };
+    } catch (e) {
+      logger.error('Failed to calculate tokens from Bedrock invoke response');
+      logger.error(e);
+    }
+  }
   return null;
 };
 

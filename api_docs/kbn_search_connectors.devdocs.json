@@ -25600,6 +25600,2271 @@
           },
           {
             "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle",
+            "type": "Object",
+            "tags": [],
+            "label": "oracle",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/search-connectors",
+                "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration",
+                "type": "Object",
+                "tags": [],
+                "label": "configuration",
+                "description": [],
+                "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.host",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "host",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.host.default_value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.host.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.host.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".TEXTBOX"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.host.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.host.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.host.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.host.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.host.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.host.tooltip",
+                        "type": "string",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.host.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".STRING"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.host.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.host.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.host.value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.port",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "port",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.port.default_value",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "signature": [
+                          "null"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.port.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.port.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".NUMERIC"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.port.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.port.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.port.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.port.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.port.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.port.tooltip",
+                        "type": "string",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.port.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".INTEGER"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.port.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.port.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.port.value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.username",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "username",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.username.default_value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.username.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.username.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".TEXTBOX"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.username.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.username.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.username.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.username.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.username.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.username.tooltip",
+                        "type": "string",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.username.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".STRING"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.username.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.username.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.username.value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.password",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "password",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.password.default_value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.password.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.password.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".TEXTBOX"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.password.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.password.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.password.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.password.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.password.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.password.tooltip",
+                        "type": "string",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.password.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".STRING"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.password.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.password.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.password.value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.database",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "database",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.database.default_value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.database.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.database.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".TEXTBOX"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.database.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.database.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.database.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.database.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.database.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.database.tooltip",
+                        "type": "string",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.database.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".STRING"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.database.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.database.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.database.value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.tables",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "tables",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.tables.default_value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.tables.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.tables.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".TEXTAREA"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.tables.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.tables.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.tables.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.tables.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.tables.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.tables.tooltip",
+                        "type": "string",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.tables.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".LIST"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.tables.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.tables.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.tables.value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.fetch_size",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "fetch_size",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.fetch_size.default_value",
+                        "type": "number",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.fetch_size.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.fetch_size.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".NUMERIC"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.fetch_size.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.fetch_size.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.fetch_size.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.fetch_size.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.fetch_size.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.fetch_size.tooltip",
+                        "type": "string",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.fetch_size.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".INTEGER"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.fetch_size.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "string[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.fetch_size.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.fetch_size.value",
+                        "type": "number",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.retry_count",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "retry_count",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.retry_count.default_value",
+                        "type": "number",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.retry_count.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.retry_count.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".NUMERIC"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.retry_count.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.retry_count.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.retry_count.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.retry_count.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.retry_count.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.retry_count.tooltip",
+                        "type": "string",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.retry_count.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".INTEGER"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.retry_count.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "string[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.retry_count.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.retry_count.value",
+                        "type": "number",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_protocol",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "oracle_protocol",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_protocol.default_value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_protocol.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_protocol.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".DROPDOWN"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_protocol.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_protocol.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "{ label: string; value: string; }[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_protocol.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_protocol.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_protocol.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_protocol.tooltip",
+                        "type": "string",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_protocol.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".STRING"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_protocol.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "string[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_protocol.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_protocol.value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_home",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "oracle_home",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_home.default_value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_home.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_home.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".TEXTBOX"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_home.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_home.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_home.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_home.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_home.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_home.tooltip",
+                        "type": "string",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_home.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".STRING"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_home.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "string[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_home.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.oracle_home.value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.wallet_configuration_path",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "wallet_configuration_path",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.wallet_configuration_path.default_value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.wallet_configuration_path.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.wallet_configuration_path.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".TEXTBOX"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.wallet_configuration_path.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.wallet_configuration_path.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.wallet_configuration_path.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.wallet_configuration_path.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.wallet_configuration_path.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.wallet_configuration_path.tooltip",
+                        "type": "string",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.wallet_configuration_path.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".STRING"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.wallet_configuration_path.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "string[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.wallet_configuration_path.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.configuration.wallet_configuration_path.value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/search-connectors",
+                "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.features",
+                "type": "Object",
+                "tags": [],
+                "label": "features",
+                "description": [],
+                "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.features.FeatureName.SYNC_RULES",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "[FeatureName.SYNC_RULES]",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.features.FeatureName.SYNC_RULES.advanced",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "advanced",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/search-connectors",
+                            "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.features.FeatureName.SYNC_RULES.advanced.enabled",
+                            "type": "boolean",
+                            "tags": [],
+                            "label": "enabled",
+                            "description": [],
+                            "signature": [
+                              "false"
+                            ],
+                            "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.features.FeatureName.SYNC_RULES.basic",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "basic",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/search-connectors",
+                            "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.features.FeatureName.SYNC_RULES.basic.enabled",
+                            "type": "boolean",
+                            "tags": [],
+                            "label": "enabled",
+                            "description": [],
+                            "signature": [
+                              "true"
+                            ],
+                            "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/search-connectors",
+                "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/search-connectors",
+                "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.oracle.serviceType",
+                "type": "string",
+                "tags": [],
+                "label": "serviceType",
+                "description": [],
+                "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
             "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.postgresql",
             "type": "Object",
             "tags": [],

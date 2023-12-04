@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { backOff } from 'exponential-backoff';
-
 import { generateKeyPairSync, createSign, randomBytes } from 'crypto';
+
+import { backOff } from 'exponential-backoff';
 
 import type { LoggerFactory, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -202,10 +202,10 @@ export class MessageSigningService implements MessageSigningServiceInterface {
         soDoc = await this.getCurrentKeyPairObj();
       },
       {
-        maxDelay: 60 * 60 * 1000, // 1 hour in milliseconds
         startingDelay: 1000, // 1 second
+        maxDelay: 3000, // 3 seconds
         jitter: 'full',
-        numOfAttempts: Infinity,
+        numOfAttempts: 10,
         retry: (_err: Error, attempt: number) => {
           // not logging the error since we don't control what's in the error and it might contain sensitive data
           // ESO already logs specific caught errors before passing the error along
@@ -250,7 +250,13 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       }
     | undefined
   > {
-    const currentKeyPair = await this.getCurrentKeyPairObjWithRetry();
+    let currentKeyPair;
+    try {
+      currentKeyPair = await this.getCurrentKeyPairObjWithRetry();
+    } catch (e) {
+      throw new MessageSigningError('Cannot read existing Message Signing Key pair');
+    }
+
     if (!currentKeyPair) {
       return;
     }
