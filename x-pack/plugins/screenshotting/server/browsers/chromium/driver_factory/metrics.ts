@@ -5,27 +5,12 @@
  * 2.0.
  */
 
+import { type Protocol } from 'devtools-protocol';
 import type { Metrics as PuppeteerMetrics } from 'puppeteer';
 import { cpus } from 'os';
 import { PerformanceMetrics } from '../../../../common/types';
 
-declare module 'puppeteer' {
-  interface CDPSession {
-    // @ts-expect-error required to augment the actual definition from puppeteer
-    send(command: 'Performance.getMetrics'): Promise<RawMetrics>;
-  }
-}
-
-type RawMetrics = Metrics;
-
-export interface Metrics {
-  metrics: Metric[];
-}
-
-interface Metric {
-  name: keyof NormalizedMetrics;
-  value: unknown;
-}
+export type Metrics = Protocol.Performance.GetMetricsResponse;
 
 interface NormalizedMetrics extends Required<PuppeteerMetrics> {
   ProcessTime: number;
