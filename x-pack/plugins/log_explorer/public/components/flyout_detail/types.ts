@@ -11,13 +11,14 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 export interface FlyoutProps extends FlyoutContentProps {
   dataView: DataView;
+  doc: LogDocument;
 }
 
 export interface LogDocument extends DataTableRecord {
   flattened: {
     '@timestamp': string;
-    'log.level'?: string;
-    message?: string;
+    'log.level'?: [string];
+    message?: [string];
 
     'host.name'?: string;
     'service.name'?: string;
