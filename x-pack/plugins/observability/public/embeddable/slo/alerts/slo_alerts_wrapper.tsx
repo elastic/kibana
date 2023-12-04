@@ -48,7 +48,7 @@ export function SloAlertsWrapper({ embeddable, slos, deps, timeRange, onRenderCo
     let kuery = '';
     slos.map((slo, index) => {
       const shouldAddOr = index < slos.length - 1;
-      kuery += `slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}"`;
+      kuery += `(slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}")`;
       if (shouldAddOr) {
         kuery += ' or ';
       }
