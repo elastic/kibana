@@ -51,6 +51,7 @@ type ShowAssistantOverlay = ({
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   assistantAvailability: AssistantAvailability;
+  assistantStreamingEnabled: boolean;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   baseAllow: string[];
@@ -83,7 +84,6 @@ export interface AssistantProviderProps {
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
-  assistantStreamingEnabled: boolean;
   getInitialConversations: () => Record<string, Conversation>;
   modelEvaluatorEnabled?: boolean;
   nameSpace?: string;
@@ -96,6 +96,7 @@ export interface AssistantProviderProps {
 export interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   assistantAvailability: AssistantAvailability;
+  assistantStreamingEnabled: boolean;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];
@@ -130,7 +131,6 @@ export interface UseAssistantContext {
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
-  assistantStreamingEnabled: boolean;
   knowledgeBase: KnowledgeBaseConfig;
   localStorageLastConversationId: string | undefined;
   promptContexts: Record<string, PromptContext>;
@@ -157,6 +157,7 @@ const AssistantContext = React.createContext<UseAssistantContext | undefined>(un
 export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   actionTypeRegistry,
   assistantAvailability,
+  assistantStreamingEnabled,
   assistantTelemetry,
   augmentMessageCodeBlocks,
   baseAllow,
@@ -172,7 +173,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   getComments,
   http,
   getInitialConversations,
-  assistantStreamingEnabled,
   modelEvaluatorEnabled = false,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   setConversations,
@@ -287,6 +287,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     () => ({
       actionTypeRegistry,
       assistantAvailability,
+      assistantStreamingEnabled,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       allQuickPrompts: localStorageQuickPrompts ?? [],
@@ -304,7 +305,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
-      assistantStreamingEnabled,
       knowledgeBase: localStorageKnowledgeBase ?? DEFAULT_KNOWLEDGE_BASE_SETTINGS,
       modelEvaluatorEnabled,
       promptContexts,
@@ -328,6 +328,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     [
       actionTypeRegistry,
       assistantAvailability,
+      assistantStreamingEnabled,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       baseAllow,
@@ -343,7 +344,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
-      assistantStreamingEnabled,
       localStorageKnowledgeBase,
       localStorageLastConversationId,
       localStorageQuickPrompts,
