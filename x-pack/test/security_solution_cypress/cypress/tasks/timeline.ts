@@ -55,6 +55,7 @@ import {
   OPEN_TIMELINE_TEMPLATE_ICON,
   TIMELINE_SAVE_MODAL,
   TIMELINE_EDIT_MODAL_SAVE_BUTTON,
+  TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH,
   TIMELINE_PROGRESS_BAR,
   QUERY_TAB_BUTTON,
   CLOSE_OPEN_TIMELINE_MODAL_BTN,
@@ -118,6 +119,17 @@ export const addNameToTimelineAndSave = (name: string) => {
   cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
+  cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+  cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
+};
+
+export const addNameToTimelineAndSaveAsNew = (name: string) => {
+  cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
+  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
+  cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
+  cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
+  cy.get(TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH).should('exist');
+  cy.get(TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH).click();
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };

@@ -1,0 +1,22 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Asset Criticality Get Record Schema
+paths:
+  /internal/asset_criticality:
+    get:
+      summary: Get Criticality Record
+      parameters:
+        - $ref: '#/components/parameters/id_value'
+        - $ref: '#/components/parameters/id_field'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleAssetCriticality'
+        '400':
+          description: Invalid request
+        '404':
+          description: Criticality record not found

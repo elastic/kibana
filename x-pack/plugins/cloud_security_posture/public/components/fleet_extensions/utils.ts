@@ -13,6 +13,9 @@ import type {
   RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
 import merge from 'lodash/merge';
+import semverValid from 'semver/functions/valid';
+import semverCoerce from 'semver/functions/coerce';
+import semverLt from 'semver/functions/lt';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_EKS,
@@ -262,4 +265,10 @@ export const getCspmCloudShellDefaultValue = (packageInfo: PackageInfo): string 
   }, '');
 
   return cloudShellUrl;
+};
+
+export const isBelowMinVersion = (version: string, minVersion: string) => {
+  const semanticVersion = semverValid(version);
+  const versionNumberOnly = semverCoerce(semanticVersion) || '';
+  return semverLt(versionNumberOnly, minVersion);
 };
