@@ -16,7 +16,7 @@ import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../timeline/utils/common';
 import { bulkDeleteSavedObjects } from '../helpers/bulk_delete_saved_objects';
-import { deletePrebuiltSavedObjectsRequestBody } from '../../../../../common/api/risk_score';
+import { deletePrebuiltSavedObjectsRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
 export const deletePrebuiltSavedObjectsRoute = (
   router: SecuritySolutionPluginRouter,
