@@ -351,6 +351,9 @@ export interface DocLinks {
     readonly createEsqlRuleType: string;
     readonly entityAnalytics: {
       readonly riskScorePrerequisites: string;
+      readonly hostRiskScore: string;
+      readonly userRiskScore: string;
+      readonly entityRiskScoring: string;
     };
   };
   readonly query: {

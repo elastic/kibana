@@ -461,6 +461,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       createEsqlRuleType: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#create-esql-rule`,
       entityAnalytics: {
         riskScorePrerequisites: `${SECURITY_SOLUTION_DOCS}ers-requirements.html`,
+        hostRiskScore: `${SECURITY_SOLUTION_DOCS}host-risk-score.html`,
+        userRiskScore: `${SECURITY_SOLUTION_DOCS}user-risk-score.html`,
+        entityRiskScoring: `${SECURITY_SOLUTION_DOCS}advanced-entity-analytics-overview.html#entity-risk-scoring`,
       },
     },
     query: {
