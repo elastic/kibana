@@ -33,7 +33,6 @@ import {
   GuideCardsClassic,
   GuideFiltersClassic,
   guideCardsClassic,
-  type GuideCardConstantsClassic,
   type GuideFilterValuesClassic,
 } from '@kbn/guided-onboarding/classic';
 import { GuideId, GuideState } from '@kbn/guided-onboarding/src/types';
@@ -157,19 +156,11 @@ export const GettingStarted = () => {
   );
 
   // filter cards for solution and based on classic or new format
+  const guide = classicGuide ? guideCardsClassic : guideCards;
   useEffect(() => {
-    if (classicGuide) {
-      const tempFiltered = guideCardsClassic.filter(
-        (card: GuideCardConstantsClassic) => card.solution === filter
-      );
-      setFilteredCards(tempFiltered);
-    } else {
-      const tempFiltered = guideCards.filter(
-        (card: GuideCardConstants) => card.solution === filter
-      );
-      setFilteredCards(tempFiltered);
-    }
-  }, [filter, classicGuide]);
+    const tempFiltered = guide.filter(({ solution }) => solution === filter);
+    setFilteredCards(tempFiltered);
+  }, [filter, guide]);
 
   if (isLoading) {
     return (
