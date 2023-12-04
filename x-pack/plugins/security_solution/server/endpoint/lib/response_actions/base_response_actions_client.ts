@@ -22,7 +22,7 @@ import {
   getActionRequestExpiration,
 } from '../../services/actions/create/write_action_to_indices';
 import {
-  ENDPOINT_ACTION_RESPONSES_DS,
+  ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
 import type { EndpointAppContext } from '../../types';
@@ -270,7 +270,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   ): Promise<LogsEndpointActionResponse> {
     await this.options.esClient
       .index<LogsEndpointActionResponse>({
-        index: `${ENDPOINT_ACTION_RESPONSES_DS}-default`,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX,
         document: doc,
       })
       .catch(catchAndWrapError);
