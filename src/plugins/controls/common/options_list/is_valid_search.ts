@@ -27,18 +27,18 @@ export const isValidSearch = ({
   if (!searchString || searchString.length === 0) return true;
 
   switch (fieldType) {
-    case 'ip': {
-      if (searchTechnique === 'exact') {
-        return getIsValidIp(searchString);
-      }
-      return getIpRangeQuery(searchString).validSearch;
-    }
     case 'number': {
       return !isNaN(Number(searchString));
     }
     case 'date': {
       // searching is not currently supported for date fields
       return false;
+    }
+    case 'ip': {
+      if (searchTechnique === 'exact') {
+        return getIsValidIp(searchString);
+      }
+      return getIpRangeQuery(searchString).validSearch;
     }
     default: {
       // string searches are always considered to be valid

@@ -617,6 +617,23 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click(`field-picker-select-${fieldName}`);
   }
 
+  public async controlsEditorVerifySupportedControlTypes({
+    supportedTypes,
+    selectedType = OPTIONS_LIST_CONTROL,
+  }: {
+    supportedTypes: string[];
+    selectedType?: string;
+  }) {
+    this.log.debug(`Verifying that control types match what is expected for the selected field`);
+    asyncForEach(supportedTypes, async (type) => {
+      const controlTypeItem = await this.testSubjects.find(`create__${type}`);
+      expect(await controlTypeItem.isEnabled()).to.be(true);
+      if (type === selectedType) {
+        expect(await controlTypeItem.getAttribute('aria-pressed')).to.be('true');
+      }
+    });
+  }
+
   public async controlsEditorSetControlType(type: string) {
     this.log.debug(`Setting control type to ${type}`);
     const controlTypeItem = await this.testSubjects.find(`create__${type}`);

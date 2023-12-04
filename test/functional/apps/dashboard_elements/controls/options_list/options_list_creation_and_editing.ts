@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -140,6 +140,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(selectionString).to.be('hiss');
 
         await dashboard.clearUnsavedChanges();
+      });
+
+      it('can change an existing control to a number field', async () => {
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.editExistingControl(firstId);
+        await dashboardControls.controlsEditorSetfield('weightLbs');
+        await dashboardControls.controlsEditorVerifySupportedControlTypes({
+          supportedTypes: [OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL],
+          selectedType: OPTIONS_LIST_CONTROL,
+        });
+        await dashboardControls.controlEditorSave();
       });
 
       it('deletes an existing control', async () => {

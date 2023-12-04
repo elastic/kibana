@@ -291,6 +291,18 @@ describe('Options list popover', () => {
       const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
       expect(optionsText).toEqual(['By document count. Checked option.', 'By date']);
     });
+
+    test('when sorting suggestions, show "Numerically" sorting option for number fields', async () => {
+      const popover = await mountComponent({
+        componentState: { field: { name: 'Test number field', type: 'number' } as FieldSpec },
+      });
+      const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
+      sortButton.simulate('click');
+
+      const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
+      const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
+      expect(optionsText).toEqual(['By document count. Checked option.', 'Numerically']);
+    });
   });
 
   describe('allow expensive queries warning', () => {

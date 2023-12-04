@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -112,6 +112,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const secondId = (await dashboardControls.getAllControlIds())[1];
         const newTitle = 'Average ticket price';
         await dashboardControls.editExistingControl(secondId);
+        await dashboardControls.controlsEditorVerifySupportedControlTypes({
+          supportedTypes: [OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL],
+          selectedType: RANGE_SLIDER_CONTROL,
+        });
         await dashboardControls.controlEditorSetTitle(newTitle);
         await dashboardControls.controlEditorSetWidth('large');
         await dashboardControls.controlEditorSave();
