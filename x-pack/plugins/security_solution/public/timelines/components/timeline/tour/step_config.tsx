@@ -25,7 +25,7 @@ export const timelineTourSteps = [
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.timeline.tour.newTimeline.description"
-          defaultMessage="Create a {newButton} timeline or {openButton} an existing timeline here"
+          defaultMessage="Click {newButton} to create a new timeline. Click {openButton} to open an existing one"
           values={{
             newButton: <EuiCode>{i18n.TIMELINE_TOUR_NEW}</EuiCode>,
             openButton: <EuiCode>{i18n.TIMELINE_TOUR_OPEN}</EuiCode>,
@@ -38,7 +38,17 @@ export const timelineTourSteps = [
   {
     step: 2,
     title: i18n.TIMELINE_TOUR_CHANGE_DATA_VIEW_TITLE,
-    content: <EuiText>{i18n.TIMELINE_TOUR_CHANGE_DATA_VIEW_DESCRIPTION}</EuiText>,
+    content: (
+      <EuiText>
+        <FormattedMessage
+          id="xpack.securitySolution.timeline.tour.changeDataView.description"
+          defaultMessage="Click {dataViewButton} to choose appropriate data view or index patterns"
+          values={{
+            dataViewButton: <EuiCode> {i18n.TIMELINE_TOUR_DATA_VIEW}</EuiCode>,
+          }}
+        />
+      </EuiText>
+    ),
     anchor: TIMELINE_TOUR_CONFIG_ANCHORS.DATA_VIEW,
   },
   {
@@ -54,7 +64,7 @@ export const timelineTourSteps = [
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.timeline.tour.saveTimeline.description"
-          defaultMessage="Click {saveButton} to manually save existing timeline, {editButton} its name and description. You also have the option to {saveAsNew} timeline."
+          defaultMessage="Click {saveButton} to manually save new changes. You can also {editButton} its name and description or save it as new timeline"
           values={{
             saveButton: <EuiCode>{i18n.TIMELINE_TOUR_SAVE}</EuiCode>,
             editButton: <EuiCode>{i18n.TIMELINE_TOUR_EDIT}</EuiCode>,

@@ -10,49 +10,42 @@ import { i18n } from '@kbn/i18n';
 export const TIMELINE_TOUR_SUBTITLE = i18n.translate(
   'xpack.securitySolution.timeline.tour.subTitle',
   {
-    defaultMessage: 'Timeline has changed',
+    defaultMessage: 'Recent timeline improvements',
   }
 );
 
 export const TIMELINE_TOUR_TIMELINE_ACTIONS_STEP_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.tour.newTimeline.title',
   {
-    defaultMessage: 'Timeline actions have moved',
+    defaultMessage: 'Actions are now easier to find',
   }
 );
 
 export const TIMELINE_TOUR_DATA_PROVIDER_VISIBILITY_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.tour.dataProviderToggle.title',
   {
-    defaultMessage: 'Toggle Query Builder',
+    defaultMessage: 'The query builder is collapsed by default',
   }
 );
 
 export const TIMELINE_TOUR_DATA_PROVIDER_VISIBILITY_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.timeline.tour.dataProviderToggle.description',
   {
-    defaultMessage: 'You have the option to toggle query builder from here.',
+    defaultMessage: 'Click here to expand or collapse the query builder',
   }
 );
 
 export const TIMELINE_TOUR_SAVE_TIMELINE_STEP_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.tour.saveTimeline.title',
   {
-    defaultMessage: 'Save Timeline',
+    defaultMessage: 'An easier way to save new changes',
   }
 );
 
 export const TIMELINE_TOUR_CHANGE_DATA_VIEW_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.tour.changeDataView.title',
   {
-    defaultMessage: 'Change Data view control has moved',
-  }
-);
-
-export const TIMELINE_TOUR_CHANGE_DATA_VIEW_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.timeline.tour.changeDataView.description',
-  {
-    defaultMessage: 'Click here is to change data view or add/remove index patterns',
+    defaultMessage: 'The Data view menu has moved',
   }
 );
 
@@ -90,3 +83,10 @@ export const TIMELINE_TOUR_SAVE_AS_NEW = i18n.translate(
 export const TIMELINE_TOUR_EDIT = i18n.translate('xpack.securitySolution.timeline.tour.edit', {
   defaultMessage: 'Edit',
 });
+
+export const TIMELINE_TOUR_DATA_VIEW = i18n.translate(
+  'xpack.securitySolution.timeline.tour.dataView',
+  {
+    defaultMessage: 'Data view',
+  }
+);
