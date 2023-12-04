@@ -59,6 +59,8 @@ export const useLoadRuleTypesQuery = ({
     queryFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
+    // Leveraging TanStack Query's caching system to avoid duplicated requests as
+    // other state-sharing solutions turned out to be overly complex and less readable
     staleTime: 60 * 1000,
     enabled,
   });
