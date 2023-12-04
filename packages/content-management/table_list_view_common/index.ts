@@ -6,10 +6,16 @@
  * Side Public License, v 1.
  */
 
-export { TableListViewTable } from './table_list_view_table';
+import type { SavedObjectsReference } from '@kbn/content-management-content-editor';
 
-export type { TableListViewTableProps, State as TableListViewState } from './table_list_view_table';
-
-export { TableListViewProvider, TableListViewKibanaProvider } from './services';
-
-export type { RowActions } from './types';
+export interface UserContentCommonSchema {
+  id: string;
+  updatedAt: string;
+  managed?: boolean;
+  references: SavedObjectsReference[];
+  type: string;
+  attributes: {
+    title: string;
+    description?: string;
+  };
+}
