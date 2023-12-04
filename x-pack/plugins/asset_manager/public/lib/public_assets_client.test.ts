@@ -110,21 +110,13 @@ describe('Public assets client', () => {
 
     it('should include provided filters, but in string form', async () => {
       const client = new PublicAssetsClient(http);
-      const filters = { id: '*id-1*' };
+      const filters = { id: '*id-1*', parentEan: 'container:123' };
       await client.getServices({ from: 'x', filters });
       expect(http.get).toBeCalledWith(routePaths.GET_SERVICES, {
         query: {
           from: 'x',
           stringFilters: JSON.stringify(filters),
         },
-      });
-    });
-
-    it('should include specified "parent" parameter in http.get query', async () => {
-      const client = new PublicAssetsClient(http);
-      await client.getServices({ from: 'x', to: 'y', parent: 'container:123' });
-      expect(http.get).toBeCalledWith(routePaths.GET_SERVICES, {
-        query: { from: 'x', to: 'y', parent: 'container:123' },
       });
     });
 

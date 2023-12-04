@@ -30,7 +30,7 @@ import {
   SLO_SUMMARY_INDEX_TEMPLATE_PATTERN,
   SLO_SUMMARY_INGEST_PIPELINE_NAME,
   SLO_SUMMARY_TEMP_INDEX_NAME,
-} from '../../assets/constants';
+} from '../../../common/slo/constants';
 import { getSLOIndexTemplate } from '../../assets/index_templates/slo_index_templates';
 import { getSLOSummaryIndexTemplate } from '../../assets/index_templates/slo_summary_index_templates';
 import { getSLOPipelineTemplate } from '../../assets/ingest_templates/slo_pipeline_template';

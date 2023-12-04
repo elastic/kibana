@@ -37,9 +37,12 @@ export function registerTopNFunctionsSearchRoute({
     },
     async (context, request, response) => {
       try {
+        const core = await context.core;
+
         const { timeFrom, timeTo, startIndex, endIndex, kuery }: QuerySchemaType = request.query;
         const esClient = await getClient(context);
         const topNFunctions = await profilingDataAccess.services.fetchFunction({
+          core,
           esClient,
           rangeFromMs: timeFrom,
           rangeToMs: timeTo,
