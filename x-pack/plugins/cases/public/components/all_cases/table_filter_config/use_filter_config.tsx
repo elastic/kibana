@@ -43,10 +43,6 @@ const shouldBeActive = ({
 
 const useActiveByFilterKeyState = ({ filterOptions }: { filterOptions: FilterOptions }) => {
   const { appId } = useCasesContext();
-  /**
-   * Initially we won't save any order, it will use the default config as it is defined in the system.
-   * Once the user adds/removes a filter, we start saving the order and the visible state.
-   */
   const [activeByFilterKey, setActiveByFilterKey] = useLocalStorage<FilterConfigState[]>(
     `${appId}.${LOCAL_STORAGE_KEYS.casesTableFiltersConfig}`,
     []
@@ -85,6 +81,10 @@ export const useFilterConfig = ({
   systemFilterConfig: FilterConfig[];
   filterOptions: FilterOptions;
 }) => {
+  /**
+   * Initially we won't save any order, it will use the default config as it is defined in the system.
+   * Once the user adds/removes a filter, we start saving the order and the visible state.
+   */
   const [activeByFilterKey, setActiveByFilterKey] = useActiveByFilterKeyState({ filterOptions });
   const { customFieldsFilterConfig } = useCustomFieldsFilterConfig({
     isSelectorView,
