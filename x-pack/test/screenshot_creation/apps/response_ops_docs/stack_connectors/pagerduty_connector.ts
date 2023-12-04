@@ -30,7 +30,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('create-connector-flyout-save-test-btn');
       await testSubjects.click('toastCloseButton');
       await testSubjects.setValue('eventActionSelect', 'trigger');
-      await commonScreenshots.takeScreenshot('pagerduty-trigger-test', screenshotDirectories);
+      await commonScreenshots.takeScreenshot(
+        'pagerduty-trigger-test',
+        screenshotDirectories,
+        1400,
+        1600
+      );
       await testSubjects.setValue('eventActionSelect', 'resolve');
       await commonScreenshots.takeScreenshot('pagerduty-resolve-test', screenshotDirectories);
       await testSubjects.setValue('eventActionSelect', 'acknowledge');

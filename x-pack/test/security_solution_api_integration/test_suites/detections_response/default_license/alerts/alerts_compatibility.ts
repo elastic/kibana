@@ -320,6 +320,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.status': 'active',
           'kibana.alert.workflow_status': 'open',
           'kibana.alert.workflow_tags': [],
+          'kibana.alert.workflow_assignee_ids': [],
           'kibana.alert.depth': 2,
           'kibana.alert.reason':
             'event on security-linux-1 created high alert Alert Testing Query.',
@@ -482,6 +483,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.status': 'active',
           'kibana.alert.workflow_status': 'open',
           'kibana.alert.workflow_tags': [],
+          'kibana.alert.workflow_assignee_ids': [],
           'kibana.alert.depth': 2,
           'kibana.alert.reason':
             'event on security-linux-1 created high alert Alert Testing Query.',
