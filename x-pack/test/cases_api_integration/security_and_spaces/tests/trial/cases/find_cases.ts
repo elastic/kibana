@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { Cookie } from 'tough-cookie';
-import { User } from '@kbn/cases-plugin/common/types/domain';
 import { UserProfile } from '@kbn/security-plugin/common';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -20,7 +19,6 @@ import {
   loginUsers,
 } from '../../../../common/lib/api';
 import { secOnlySpacesAll, superUser } from '../../../../common/lib/authentication/users';
-import { getUserInfo } from '../../../../common/lib/authentication';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
 import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
 
@@ -31,7 +29,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('find_cases', () => {
-    const secOnlyInfo: User = getUserInfo(secOnlySpacesAll);
     let cookies: Cookie[];
     let suggestedSecUsers: UserProfile[];
     let superUserHeaders: { Cookie: string };
@@ -62,7 +59,7 @@ export default ({ getService }: FtrProviderContext): void => {
       suggestedSecUsers = await suggestUserProfiles({
         supertest: supertestWithoutAuth,
         req: {
-          name: secOnlyInfo.username!,
+          name: 'all_spaces',
           owners: ['securitySolutionFixture'],
           size: 1,
         },

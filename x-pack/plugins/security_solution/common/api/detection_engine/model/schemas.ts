@@ -107,3 +107,6 @@ export const alert_tags = t.type({
 });
 
 export type AlertTags = t.TypeOf<typeof alert_tags>;
+
+export const user_search_term = t.string;
+export type UserSearchTerm = t.TypeOf<typeof user_search_term>;
