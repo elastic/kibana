@@ -7,6 +7,7 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { EuiButtonIcon } from '@elastic/eui';
 import { FlyoutNavigation } from './flyout_navigation';
@@ -21,7 +22,7 @@ export default {
 const flyoutContextValue = {
   closeLeftPanel: () => window.alert('close left panel'),
   panels: {},
-} as unknown as ExpandableFlyoutContext;
+} as unknown as ExpandableFlyoutContextValue;
 
 export const Expand: Story<void> = () => {
   return (
@@ -38,7 +39,7 @@ export const Collapse: Story<void> = () => {
         {
           ...flyoutContextValue,
           panels: { left: {} },
-        } as unknown as ExpandableFlyoutContext
+        } as unknown as ExpandableFlyoutContextValue
       }
     >
       <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />

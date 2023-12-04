@@ -6,3 +6,12 @@
  */
 
 export const MAX_SPACES_COUNT = 1;
+
+export const RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
+  'manage_index_templates',
+  'manage_transform',
+];
+
+export const RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES = Object.freeze({
+  'risk-score.risk-score-*': ['read', 'write'],
+});

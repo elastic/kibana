@@ -83,12 +83,15 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
   },
   createDataFrameAnalytics(
     analyticsId: string,
-    analyticsConfig: DeepPartial<DataFrameAnalyticsConfig>
+    analyticsConfig: DeepPartial<DataFrameAnalyticsConfig>,
+    createDataView: boolean = false,
+    timeFieldName?: string
   ) {
     const body = JSON.stringify(analyticsConfig);
     return httpService.http<any>({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
       method: 'PUT',
+      query: { createDataView, timeFieldName },
       body,
       version: '1',
     });

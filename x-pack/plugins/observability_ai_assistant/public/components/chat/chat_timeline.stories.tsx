@@ -9,11 +9,13 @@ import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { ComponentStory } from '@storybook/react';
 import React, { ComponentProps, useState } from 'react';
 import { MessageRole } from '../../../common';
+import { ChatState } from '../../hooks/use_chat';
+import { ObservabilityAIAssistantChatService } from '../../types';
 import {
-  buildAssistantChatItem,
-  buildChatInitItem,
-  buildFunctionChatItem,
-  buildUserChatItem,
+  buildAssistantMessage,
+  buildFunctionResponseMessage,
+  buildSystemMessage,
+  buildUserMessage,
 } from '../../utils/builders';
 import { ChatTimeline as Component, ChatTimelineProps } from './chat_timeline';
 
@@ -30,17 +32,17 @@ export default {
 };
 
 const Template: ComponentStory<typeof Component> = (props: ChatTimelineProps) => {
-  const [count, setCount] = useState(props.items.length - 1);
+  const [count, setCount] = useState(props.messages.length - 1);
 
   return (
     <>
-      <Component {...props} items={props.items.filter((_, index) => index <= count)} />
+      <Component {...props} messages={props.messages.filter((_, index) => index <= count)} />
 
       <EuiSpacer />
 
       <EuiButton
         data-test-subj="observabilityAiAssistantTemplateAddMessageButton"
-        onClick={() => setCount(count >= 0 && count < props.items.length - 1 ? count + 1 : 0)}
+        onClick={() => setCount(count >= 0 && count < props.messages.length - 1 ? count + 1 : 0)}
       >
         Add message
       </EuiButton>
@@ -61,13 +63,23 @@ const defaultProps: ComponentProps<typeof Component> = {
     installError: undefined,
     install: async () => {},
   },
-  items: [
-    buildChatInitItem(),
-    buildUserChatItem(),
-    buildAssistantChatItem(),
-    buildUserChatItem({ content: 'How does it work?' }),
-    buildAssistantChatItem({
-      content: `The way functions work depends on whether we are talking about mathematical functions or programming functions. Let's explore both:
+  chatService: {
+    hasRenderFunction: () => false,
+  } as unknown as ObservabilityAIAssistantChatService,
+  chatState: ChatState.Ready,
+  hasConnector: true,
+  currentUser: {
+    full_name: 'John Doe',
+    username: 'johndoe',
+  },
+  messages: [
+    buildSystemMessage(),
+    buildUserMessage(),
+    buildAssistantMessage(),
+    buildUserMessage({ message: { content: 'How does it work?' } }),
+    buildAssistantMessage({
+      message: {
+        content: `The way functions work depends on whether we are talking about mathematical functions or programming functions. Let's explore both:
 
         Mathematical Functions:
         In mathematics, a function maps input values to corresponding output values based on a specific rule or expression. The general process of how a mathematical function works can be summarized as follows:
@@ -78,54 +90,33 @@ const defaultProps: ComponentProps<typeof Component> = {
         Step 3: Output - After processing the input, the function produces an output value, denoted as 'f(x)' or 'y'. This output represents the dependent variable and is the result of applying the function's rule to the input.
         
         Step 4: Uniqueness - A well-defined mathematical function ensures that each input value corresponds to exactly one output value. In other words, the function should yield the same output for the same input whenever it is called.`,
-    }),
-    buildUserChatItem({
-      content: 'Can you execute a function?',
-    }),
-    buildAssistantChatItem({
-      content: 'Sure, I can do that.',
-      title: 'suggested a function',
-      function_call: {
-        name: 'a_function',
-        arguments: '{ "foo": "bar" }',
-        trigger: MessageRole.Assistant,
-      },
-      actions: {
-        canEdit: false,
-        canCopy: true,
-        canGiveFeedback: true,
-        canRegenerate: true,
       },
     }),
-    buildFunctionChatItem({
-      content: '{ "message": "The arguments are wrong" }',
-      error: new Error(),
-      actions: {
-        canRegenerate: false,
-        canEdit: true,
-        canGiveFeedback: false,
-        canCopy: true,
+    buildUserMessage({
+      message: { content: 'Can you execute a function?' },
+    }),
+    buildAssistantMessage({
+      message: {
+        content: 'Sure, I can do that.',
+        function_call: {
+          name: 'a_function',
+          arguments: '{ "foo": "bar" }',
+          trigger: MessageRole.Assistant,
+        },
       },
     }),
-    buildAssistantChatItem({
-      content: '',
-      title: 'suggested a function',
-      function_call: {
-        name: 'a_function',
-        arguments: '{ "bar": "foo" }',
-        trigger: MessageRole.Assistant,
-      },
-      actions: {
-        canEdit: true,
-        canCopy: true,
-        canGiveFeedback: true,
-        canRegenerate: true,
-      },
+    buildFunctionResponseMessage({
+      message: { content: '{ "message": "The arguments are wrong" }' },
     }),
-    buildFunctionChatItem({
-      content: '',
-      title: 'are executing a function',
-      loading: true,
+    buildAssistantMessage({
+      message: {
+        content: '',
+        function_call: {
+          name: 'a_function',
+          arguments: '{ "bar": "foo" }',
+          trigger: MessageRole.Assistant,
+        },
+      },
     }),
   ],
   onEdit: async () => {},
