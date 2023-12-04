@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { constructUrlWithUser, getEnvAuth } from './login';
+import { constructUrlWithUser, defaultUser } from './login';
 
 interface User {
   username: string;
@@ -183,14 +183,13 @@ const getUserInfo = (user: User): UserInfo => ({
 });
 
 export const createUsersAndRoles = (users: User[], roles: Role[]) => {
-  const envUser = getEnvAuth();
   for (const role of roles) {
     cy.log(`Creating role: ${JSON.stringify(role)}`);
     cy.request({
       body: role.privileges,
       headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       method: 'PUT',
-      url: constructUrlWithUser(envUser, `/api/security/role/${role.name}`),
+      url: constructUrlWithUser(defaultUser, `/api/security/role/${role.name}`),
     })
       .its('status')
       .should('eql', 204);
@@ -209,7 +208,7 @@ export const createUsersAndRoles = (users: User[], roles: Role[]) => {
       },
       headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       method: 'POST',
-      url: constructUrlWithUser(envUser, `/internal/security/users/${user.username}`),
+      url: constructUrlWithUser(defaultUser, `/internal/security/users/${user.username}`),
     })
       .its('status')
       .should('eql', 200);
@@ -217,13 +216,12 @@ export const createUsersAndRoles = (users: User[], roles: Role[]) => {
 };
 
 export const deleteUsersAndRoles = (users: User[], roles: Role[]) => {
-  const envUser = getEnvAuth();
   for (const user of users) {
     cy.log(`Deleting user: ${JSON.stringify(user)}`);
     cy.request({
       headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       method: 'DELETE',
-      url: constructUrlWithUser(envUser, `/internal/security/users/${user.username}`),
+      url: constructUrlWithUser(defaultUser, `/internal/security/users/${user.username}`),
       failOnStatusCode: false,
     })
       .its('status')
@@ -235,7 +233,7 @@ export const deleteUsersAndRoles = (users: User[], roles: Role[]) => {
     cy.request({
       headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       method: 'DELETE',
-      url: constructUrlWithUser(envUser, `/api/security/role/${role.name}`),
+      url: constructUrlWithUser(defaultUser, `/api/security/role/${role.name}`),
       failOnStatusCode: false,
     })
       .its('status')
