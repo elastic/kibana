@@ -8,7 +8,7 @@
 
 export * from './tag_cloud';
 export * from './metric';
-export * from './treemap';
+export * from './partition';
 export * from './gauge';
 export * from './heatmap';
 export * from './region_map';

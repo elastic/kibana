@@ -125,7 +125,7 @@ function getValueColumns(layer: LensTreeMapConfig['layers'][0]) {
   ];
 }
 
-export async function buildTreeMap(
+export async function buildPartitionChart(
   config: LensTreeMapConfig | LensPieConfig,
   { dataViewsAPI, formulaAPI }: BuildDependencies
 ): Promise<LensAttributes> {

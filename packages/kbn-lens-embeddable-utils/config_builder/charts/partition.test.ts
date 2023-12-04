@@ -7,7 +7,7 @@
  */
 
 import { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
-import { buildTreeMap } from './treemap';
+import { buildPartitionChart } from './partition';
 
 const dataViews: Record<string, DataView> = {
   test: {
@@ -51,7 +51,7 @@ function mockDataViewsService() {
 }
 
 test('generates metric chart config', async () => {
-  const result = await buildTreeMap(
+  const result = await buildPartitionChart(
     {
       chartType: 'treemap',
       title: 'test',

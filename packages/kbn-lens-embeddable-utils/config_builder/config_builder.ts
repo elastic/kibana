@@ -16,21 +16,21 @@ import {
   buildMetric,
   buildRegionMap,
   buildTagCloud,
-  buildTreeMap,
   buildTable,
   buildXY,
+  buildPartitionChart,
 } from './charts';
 
 export class LensConfigBuilder {
   private charts = {
     metric: buildMetric,
     tagcloud: buildTagCloud,
-    treemap: buildTreeMap,
-    pie: buildTreeMap,
-    donut: buildTreeMap,
+    treemap: buildPartitionChart,
+    pie: buildPartitionChart,
+    donut: buildPartitionChart,
     gauge: buildGauge,
     heatmap: buildHeatmap,
-    mosaic: buildTreeMap,
+    mosaic: buildPartitionChart,
     regionmap: buildRegionMap,
     xy: buildXY,
     table: buildTable,
