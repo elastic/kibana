@@ -9,11 +9,16 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Adapters } from '@kbn/inspector-plugin/public';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
+import { XJsonLang } from '@kbn/monaco';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiForm, EuiFormRow, EuiSpacer, EuiTabs, EuiTab, EuiText } from '@elastic/eui';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { EmptyPrompt } from './empty_prompt';
 import type { TileRequest } from '../types';
 import { TileRequestTab } from './tile_request_tab';
 import { RequestsViewCallout } from './requests_view_callout';
+
+const REQUEST_VIEW_ID = 'request_view';
+const RESPONSE_VIEW_ID = 'response_view';
 
 interface Props {
   adapters: Adapters;
@@ -22,6 +27,7 @@ interface Props {
 interface State {
   selectedLayer: EuiComboBoxOptionOption<string> | null;
   selectedTileRequest: TileRequest | null;
+  selectedView: REQUEST_VIEW_ID | RESPONSE_VIEW_ID;
   tileRequests: TileRequest[];
   layerOptions: Array<EuiComboBoxOptionOption<string>>;
 }
@@ -32,6 +38,7 @@ class VectorTileInspector extends Component<Props, State> {
   state: State = {
     selectedLayer: null,
     selectedTileRequest: null,
+    selectedView: REQUEST_VIEW_ID,
     tileRequests: [],
     layerOptions: [],
   };
@@ -128,6 +135,51 @@ class VectorTileInspector extends Component<Props, State> {
     });
   }
 
+  _renderTileRequest() {
+    if (!this.state.selectedTileRequest) {
+      return null;
+    }
+
+    if (this.state.selectedView === REQUEST_VIEW_ID) {
+      return (
+        <TileRequestTab
+          key={`${this.state.selectedTileRequest.layerId}${this.state.selectedTileRequest.x}${this.state.selectedTileRequest.y}${this.state.selectedTileRequest.z}`}
+          tileRequest={this.state.selectedTileRequest}
+        />
+      );
+    }
+    
+    return this.state.selectedTileRequest.tileMetaFeature
+      ? (
+        <CodeEditor
+          languageId={XJsonLang.ID}
+          value={JSON.stringify({ meta: this.state.selectedTileRequest.tileMetaFeature.properties }, null, 2)}
+          options={{
+            readOnly: true,
+            lineNumbers: 'off',
+            fontSize: 12,
+            minimap: {
+              enabled: false,
+            },
+            folding: true,
+            scrollBeyondLastLine: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            automaticLayout: true,
+          }}
+        />
+      )
+      : (
+        <EuiText>
+          <p>
+            {i18n.translate('xpack.maps.inspector.vectorTile.tileMetaFeatureNotAvailable', {
+              defaultMessage: 'Not available',
+            })}
+          </p>
+        </EuiText>
+      )
+  }
+
   render() {
     return this.state.layerOptions.length === 0 ? (
       <>
@@ -137,45 +189,77 @@ class VectorTileInspector extends Component<Props, State> {
     ) : (
       <>
         <RequestsViewCallout />
+
         <EuiSpacer />
-        <EuiComboBox
-          singleSelection={true}
-          options={this.state.layerOptions}
-          selectedOptions={this.state.selectedLayer ? [this.state.selectedLayer] : []}
-          onChange={this._onLayerSelect}
-          isClearable={false}
-          prepend={i18n.translate('xpack.maps.inspector.vectorTile.layerSelectPrepend', {
+
+        <EuiFormRow
+          display="columnCompressed"
+          label={i18n.translate('xpack.maps.inspector.vectorTile.layerSelectLabel', {
             defaultMessage: 'Layer',
           })}
-        />
-        <EuiSpacer />
-        <EuiComboBox
-          singleSelection={true}
-          options={this.state.tileRequests.map(tileRequest => {
-            return {
-              label: `${tileRequest.z}/${tileRequest.x}/${tileRequest.y}`,
-              value: tileRequest
-            }
-          })}
-          selectedOptions={this.state.selectedTileRequest
-            ? [{ 
-                label: `${this.state.selectedTileRequest.z}/${this.state.selectedTileRequest.x}/${this.state.selectedTileRequest.y}`,
-                value: this.state.selectedTileRequest
-              }] 
-            : []}
-          onChange={this._onTileSelect}
-          isClearable={false}
-          prepend={i18n.translate('xpack.maps.inspector.vectorTile.layerSelectPrepend', {
-            defaultMessage: 'Tile',
-          })}
-        />
-        <EuiSpacer size="s" />
-        {this.state.selectedTileRequest && (
-          <TileRequestTab
-            key={`${this.state.selectedTileRequest.layerId}${this.state.selectedTileRequest.x}${this.state.selectedTileRequest.y}${this.state.selectedTileRequest.z}`}
-            tileRequest={this.state.selectedTileRequest}
+        >
+          <EuiComboBox
+            fullWidth
+            singleSelection={true}
+            options={this.state.layerOptions}
+            selectedOptions={this.state.selectedLayer ? [this.state.selectedLayer] : []}
+            onChange={this._onLayerSelect}
+            isClearable={false}
           />
-        )}
+        </EuiFormRow>
+
+        <EuiFormRow
+          display="columnCompressed"
+          label={i18n.translate('xpack.maps.inspector.vectorTile.layerSelectLabel', {
+          defaultMessage: 'Tile',
+        })}
+        >
+          <EuiComboBox
+            fullWidth
+            singleSelection={true}
+            options={this.state.tileRequests.map(tileRequest => {
+              return {
+                label: `${tileRequest.z}/${tileRequest.x}/${tileRequest.y}`,
+                value: tileRequest
+              }
+            })}
+            selectedOptions={this.state.selectedTileRequest
+              ? [{ 
+                  label: `${this.state.selectedTileRequest.z}/${this.state.selectedTileRequest.x}/${this.state.selectedTileRequest.y}`,
+                  value: this.state.selectedTileRequest
+                }] 
+              : []}
+            onChange={this._onTileSelect}
+            isClearable={false}
+          />
+        </EuiFormRow>
+
+        <EuiTabs size="s">
+          <>
+            <EuiTab
+              onClick={() => {
+                this.setState({ selectedView: REQUEST_VIEW_ID });
+              }}
+              isSelected={this.state.selectedView === REQUEST_VIEW_ID}
+            >
+              {i18n.translate('xpack.maps.inspector.vectorTile.requestTabLabel', {
+                defaultMessage: 'Request',
+              })}
+            </EuiTab>
+            <EuiTab
+              onClick={() => {
+                this.setState({ selectedView: RESPONSE_VIEW_ID });
+              }}
+              isSelected={this.state.selectedView === RESPONSE_VIEW_ID}
+            >
+              {i18n.translate('xpack.maps.inspector.vectorTile.requestTabLabel', {
+                defaultMessage: 'Response',
+              })}
+            </EuiTab>
+          </>
+        </EuiTabs>
+        <EuiSpacer size="s" />
+        {this._renderTileRequest()}
       </>
     );
   }

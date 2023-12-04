@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// @ts-expect-error
+import turfCenterOfMass from '@turf/center-of-mass';
 import { LAT_INDEX, LON_INDEX } from '../../../common/constants';
 import { EventEmitter } from 'events';
 import { TileRequest } from './types';
@@ -70,11 +72,8 @@ export class VectorTileAdapter extends EventEmitter {
     }
 
     return this._layerTileMetaFeatures[layerId].find(tileMetaFeature => {
-      const boundaryPoint = tileMetaFeature.geometry?.coordinates?.[0]?.[0];
-      if (!boundaryPoint) {
-        return false;
-      }
-      return isPointInTile(boundaryPoint[LAT_INDEX], boundaryPoint[LON_INDEX], x, y, z);
+      const centerGeometry = turfCenterOfMass(tileMetaFeature).geometry;
+      return isPointInTile(centerGeometry.coordinates[LAT_INDEX], centerGeometry.coordinates[LON_INDEX], x, y, z);
     });
   }
 
