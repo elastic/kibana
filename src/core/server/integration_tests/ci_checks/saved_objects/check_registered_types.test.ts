@@ -161,6 +161,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "usage-counters": "48782b3bcb6b5a23ba6f2bfe3a380d835e68890a",
         "visualization": "93a3e73994ad836fe2b1dccbe208238f41f63da0",
         "workplace_search_telemetry": "52b32b47ee576f554ac77cb1d5896dfbcfe9a1fb",
+        cloud-security-posture-settings": "035ebd44ac3d9a0848401fd424338aa366c1ced3
       }
     `);
   });
