@@ -768,6 +768,19 @@ class OutputService {
     }
 
     const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, ['ssl', 'secrets']) };
+
+    if (updateData.type === outputType.Elasticsearch) {
+      if (
+        updateData.preset === 'balanced' &&
+        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '')
+      ) {
+        throw new OutputInvalidError(
+          `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
+            ', '
+          )}`
+        );
+      }
+    }
     if (isOutputSecretsEnabled()) {
       const secretsRes = await extractAndUpdateOutputSecrets({
         oldOutput: originalOutput,
