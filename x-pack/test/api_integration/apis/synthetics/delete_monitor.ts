@@ -47,10 +47,13 @@ export default function ({ getService }: FtrProviderContext) {
       return res.body;
     };
 
-    const deleteMonitor = async (monitorId: string, statusCode = 200) => {
+    const deleteMonitor = async (monitorId?: string, statusCode = 200) => {
       const deleteResponse = await supertest
-        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + invalidMonitorId)
+        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .send({ ids: [monitorId] })
         .set('kbn-xsrf', 'true');
+      expect(deleteResponse.status).to.eql(statusCode);
+      return deleteResponse;
     };
 
     before(async () => {
@@ -82,23 +85,20 @@ export default function ({ getService }: FtrProviderContext) {
       const invalidMonitorId = 'invalid-id';
       const expected404Message = `Monitor id ${invalidMonitorId} not found!`;
 
-      const deleteResponse = await deleteMonitor(monitorId);
+      const deleteResponse = await deleteMonitor(invalidMonitorId);
 
       expect(deleteResponse.status).eql(404);
       expect(deleteResponse.body.message).eql(expected404Message);
     });
 
     it('validates empty monitor id', async () => {
-      const deleteResponse = await deleteMonitor(monitorId, 400);
+      await deleteMonitor(undefined, 400);
     });
 
     it('validates param length', async () => {
       const veryLargeMonId = new Array(1050).fill('1').join('');
 
-      await supertest
-        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + veryLargeMonId)
-        .set('kbn-xsrf', 'true')
-        .expect(400);
+      await deleteMonitor(veryLargeMonId, 400);
     });
 
     it.skip('handles private location errors and does not delete the monitor if integration policy is unable to be deleted', async () => {
