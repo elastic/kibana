@@ -61,7 +61,7 @@ describe('API tests', () => {
       );
     });
 
-    it('calls the actions connector api when assistantLangChain is false', async () => {
+    it('calls the actions connector api with streaming when isStreamingEnabled is true when assistantLangChain is false', async () => {
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
         assistantLangChain: false,
@@ -81,12 +81,54 @@ describe('API tests', () => {
       );
     });
 
+    it('calls the actions connector api with invoke when isStreamingEnabled is false when assistantLangChain is false', async () => {
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        assistantLangChain: false,
+        isStreamingEnabled: false,
+      };
+
+      await fetchConnectorExecuteAction(testProps);
+
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"assistantLangChain":false}',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal: undefined,
+        }
+      );
+    });
+
     it('returns API_ERROR when the response status is error and langchain is on', async () => {
       (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
 
       const result = await fetchConnectorExecuteAction(fetchConnectorArgs);
 
       expect(result).toEqual({ response: API_ERROR, isStream: false, isError: true });
+    });
+
+    it('returns API_ERROR + error message on non streaming responses', async () => {
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({
+        status: 'error',
+        service_message: 'an error message',
+      });
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        assistantLangChain: false,
+        isStreamingEnabled: false,
+      };
+
+      const result = await fetchConnectorExecuteAction(testProps);
+
+      expect(result).toEqual({
+        response: `${API_ERROR}\n\nan error message`,
+        isStream: false,
+        isError: true,
+      });
     });
 
     it('returns API_ERROR when the response status is error, langchain is off, and response is not a reader', async () => {
