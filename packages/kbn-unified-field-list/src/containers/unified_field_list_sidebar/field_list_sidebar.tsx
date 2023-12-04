@@ -191,25 +191,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     onSelectedFieldFilter,
   ]);
 
-  useEffect(() => {
-    if (
-      searchMode !== 'documents' ||
-      !useNewFieldsApi ||
-      stateService.creationOptions.disableMultiFieldsGroupingByParent
-    ) {
-      setMultiFieldsMap(undefined); // we don't have to calculate multifields in this case
-    } else {
-      setMultiFieldsMap(calculateMultiFields(allFields, selectedFieldsState.selectedFieldsMap));
-    }
-  }, [
-    stateService.creationOptions.disableMultiFieldsGroupingByParent,
-    selectedFieldsState.selectedFieldsMap,
-    allFields,
-    useNewFieldsApi,
-    setMultiFieldsMap,
-    searchMode,
-  ]);
-
   const popularFieldsLimit = useMemo(
     () => core.uiSettings.get(FIELDS_LIMIT_SETTING),
     [core.uiSettings]
@@ -226,7 +207,11 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       [searchMode, stateService.creationOptions.disableMultiFieldsGroupingByParent]
     );
 
-  const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields<DataViewField>({
+  const {
+    fieldListFiltersProps,
+    fieldListGroupedProps,
+    allFields: allFieldsModified,
+  } = useGroupedFields<DataViewField>({
     dataViewId: (searchMode === 'documents' && dataView?.id) || null, // passing `null` for text-based queries
     allFields,
     popularFieldsLimit:
@@ -244,6 +229,27 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       stateService.creationOptions.onSupportedFieldFilter ?? onSupportedFieldFilter,
     onOverrideFieldGroupDetails: stateService.creationOptions.onOverrideFieldGroupDetails,
   });
+
+  useEffect(() => {
+    if (
+      searchMode !== 'documents' ||
+      !useNewFieldsApi ||
+      stateService.creationOptions.disableMultiFieldsGroupingByParent
+    ) {
+      setMultiFieldsMap(undefined); // we don't have to calculate multifields in this case
+    } else {
+      setMultiFieldsMap(
+        calculateMultiFields(allFieldsModified, selectedFieldsState.selectedFieldsMap)
+      );
+    }
+  }, [
+    stateService.creationOptions.disableMultiFieldsGroupingByParent,
+    selectedFieldsState.selectedFieldsMap,
+    allFieldsModified,
+    useNewFieldsApi,
+    setMultiFieldsMap,
+    searchMode,
+  ]);
 
   const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
     ({ field, groupName, groupIndex, itemIndex, fieldSearchHighlight }) => (

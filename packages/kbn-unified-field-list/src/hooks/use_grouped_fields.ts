@@ -7,7 +7,7 @@
  */
 
 import { groupBy } from 'lodash';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { type CoreStart } from '@kbn/core-lifecycle-browser';
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
@@ -52,6 +52,7 @@ export interface GroupedFieldsResult<T extends FieldListItem> {
     fieldsExistInIndex: boolean;
     screenReaderDescriptionId?: string;
   };
+  allFields: T[] | null; // `null` is for loading indicator
 }
 
 export function useGroupedFields<T extends FieldListItem = DataViewField>({
@@ -73,6 +74,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     getCustomFieldType,
     onSupportedFieldFilter,
   });
+  const fieldsToSort = useRef(allFields);
   const onFilterFieldList = fieldListFilters.onFilterField;
   const [dataView, setDataView] = useState<DataView | null>(null);
   const isAffectedByTimeFilter = Boolean(dataView?.timeFieldName);
@@ -121,13 +123,14 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
 
     const selectedFields = sortedSelectedFields || [];
     const newFields = dataViewId ? fieldsExistenceReader.getNewFields(dataViewId) : [];
-    const fieldsToSort =
+    fieldsToSort.current =
       allFields && newFields.length
         ? allFields.map((field) => {
             return (dataView?.getFieldByName(field.name) as unknown as T) ?? field;
           })
         : allFields;
-    const sortedFields = [...(fieldsToSort || [])].sort(sortFields);
+
+    const sortedFields = [...(fieldsToSort.current || [])].sort(sortFields);
 
     const groupedFields = {
       ...getDefaultFieldGroups(),
@@ -391,6 +394,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   return {
     fieldListGroupedProps,
     fieldListFiltersProps: fieldListFilters.fieldListFiltersProps,
+    allFields: fieldsToSort.current,
   };
 }
 
