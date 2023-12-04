@@ -459,10 +459,12 @@ const fetchComparisonDriftedData = async ({
   );
 
   const fieldsWithNoOverlap = new Set<string>();
+  const rangesAggs = rangesResp.aggregations.sample
+    ? rangesResp.aggregations.sample
+    : rangesResp.aggregations;
   for (const { field } of fields) {
-    if (rangesResp.aggregations[`${field}_ranges`]) {
-      const buckets = rangesResp.aggregations[`${field}_ranges`]
-        .buckets as AggregationsRangeBucketKeys[];
+    if (rangesAggs[`${field}_ranges`]) {
+      const buckets = rangesAggs[`${field}_ranges`].buckets as AggregationsRangeBucketKeys[];
 
       if (buckets) {
         const totalSumOfAllBuckets = buckets.reduce((acc, bucket) => acc + bucket.doc_count, 0);
@@ -475,7 +477,7 @@ const fetchComparisonDriftedData = async ({
         if (totalSumOfAllBuckets > 0) {
           driftedRequestAggs[`${field}_ks_test`] = {
             bucket_count_ks_test: {
-              buckets_path: `${field}_ranges>_count`,
+              buckets_path: `${field}_ranges > _count`,
               alternative: ['two_sided'],
               ...(totalSumOfAllBuckets > 0
                 ? { fractions: fractions.map((bucket) => Number(bucket.fraction.toFixed(3))) }
@@ -779,7 +781,7 @@ export const useFetchDataComparisonResult = (
 
           setProgressMessage(
             i18n.translate('xpack.dataVisualizer.dataDrift.progress.loadingReference', {
-              defaultMessage: `Loading reference data for {fieldsCount} fields.`,
+              defaultMessage: `Loading reference data for { fieldsCount } fields.`,
               values: { fieldsCount },
             })
           );
@@ -841,7 +843,7 @@ export const useFetchDataComparisonResult = (
 
           setProgressMessage(
             i18n.translate('xpack.dataVisualizer.dataDrift.progress.loadingComparison', {
-              defaultMessage: `Loading comparison data for {fieldsCount} fields.`,
+              defaultMessage: `Loading comparison data for { fieldsCount } fields.`,
               values: { fieldsCount },
             })
           );
@@ -870,6 +872,7 @@ export const useFetchDataComparisonResult = (
                 signal,
               }),
           });
+
           if (isReturnedError(driftedRespAggs)) {
             setResult({
               data: undefined,
@@ -883,7 +886,7 @@ export const useFetchDataComparisonResult = (
           setLoaded(0.5);
           setProgressMessage(
             i18n.translate('xpack.dataVisualizer.dataDrift.progress.loadedComparison', {
-              defaultMessage: `Loaded comparison data. Now loading histogram data.`,
+              defaultMessage: `Loaded comparison data.Now loading histogram data.`,
             })
           );
 
