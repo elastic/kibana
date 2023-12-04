@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { merge } from 'lodash';
+import { merge, isEqual, isEmpty } from 'lodash';
 import type { FilterOptions } from '../../../../common/ui';
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import type { FilterConfig, FilterConfigState } from './types';
@@ -34,10 +34,12 @@ export const useFilterConfig = ({
   isSelectorView,
   onFilterOptionsChange,
   systemFilterConfig,
+  filterOptions,
 }: {
   isSelectorView: boolean;
   onFilterOptionsChange: (params: Partial<FilterOptions>) => void;
   systemFilterConfig: FilterConfig[];
+  filterOptions: FilterOptions;
 }) => {
   const { appId } = useCasesContext();
   const { customFieldsFilterConfig } = useCustomFieldsFilterConfig({
@@ -92,6 +94,29 @@ export const useFilterConfig = ({
       })
     );
   }, [systemFilterConfig, customFieldsFilterConfig]);
+
+  /**
+   * This effect is needed in case one of the not active filters has a value set (from the URL)
+   * In that case we want to activate that filter.
+   */
+  useEffect(() => {
+    if (!filterOptions || !activeByFilterKey) return;
+
+    const newActiveByFilterKey = [...activeByFilterKey];
+
+    activeByFilterKey.forEach(({ key, isActive }) => {
+      const customFieldKey = key as keyof FilterOptions;
+      if (!isActive && !isEmpty(filterOptions[customFieldKey])) {
+        const currentIndex = newActiveByFilterKey.findIndex((filter) => filter.key === key);
+        newActiveByFilterKey.splice(currentIndex, 1);
+        newActiveByFilterKey.push({ key, isActive: true });
+      }
+    });
+
+    if (!isEqual(newActiveByFilterKey, activeByFilterKey)) {
+      setActiveByFilterKey(newActiveByFilterKey);
+    }
+  }, [activeByFilterKey, filterOptions, setActiveByFilterKey]);
 
   const onChange = ({ selectedOptionKeys }: { filterId: string; selectedOptionKeys: string[] }) => {
     const newActiveByFilterKey = [...(activeByFilterKey || [])];
