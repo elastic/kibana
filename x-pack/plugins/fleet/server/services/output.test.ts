@@ -931,6 +931,7 @@ describe('Output Service', () => {
         type: 'elasticsearch',
         hosts: ['http://test:4343'],
         ssl: null,
+        preset: 'balanced',
       });
     });
 
@@ -969,6 +970,7 @@ describe('Output Service', () => {
         headers: null,
         username: null,
         version: null,
+        preset: 'balanced',
       });
     });
 
