@@ -145,10 +145,10 @@ export const ModelMenuPopover: React.FC<{
 
 export interface LicenseBadgeProps {
   licenseType: string;
-  licensePageUrl?: string;
+  modelDetailsPageUrl?: string;
 }
 
-export const LicenseBadge: React.FC<LicenseBadgeProps> = ({ licenseType, licensePageUrl }) => {
+export const LicenseBadge: React.FC<LicenseBadgeProps> = ({ licenseType, modelDetailsPageUrl }) => {
   const licenseLabel = i18n.translate(
     'xpack.enterpriseSearch.content.indices.pipelines.modelSelectOption.licenseBadge.label',
     {
@@ -161,8 +161,8 @@ export const LicenseBadge: React.FC<LicenseBadgeProps> = ({ licenseType, license
 
   return (
     <EuiBadge color="hollow">
-      {licensePageUrl ? (
-        <EuiLink target="_blank" href={licensePageUrl}>
+      {modelDetailsPageUrl ? (
+        <EuiLink target="_blank" href={modelDetailsPageUrl}>
           {licenseLabel}
         </EuiLink>
       ) : (
@@ -177,10 +177,9 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
   title,
   description,
   licenseType,
-  licensePageUrl,
+  modelDetailsPageUrl,
   deploymentState,
   deploymentStateReason,
-  modelDetailsPageUrl,
   isPlaceholder,
   checked,
 }) => {
@@ -222,7 +221,10 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
                   <EuiFlexItem grow={false}>
                     {/* Wrap in a div to prevent the badge from growing to a whole row on mobile */}
                     <div>
-                      <LicenseBadge licenseType={licenseType} licensePageUrl={licensePageUrl} />
+                      <LicenseBadge
+                        licenseType={licenseType}
+                        modelDetailsPageUrl={modelDetailsPageUrl}
+                      />
                     </div>
                   </EuiFlexItem>
                 )}
