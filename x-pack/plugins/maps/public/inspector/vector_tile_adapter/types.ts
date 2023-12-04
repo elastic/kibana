@@ -8,6 +8,7 @@
 export interface TileRequest {
   layerId: string;
   tileUrl: string;
+  tileMetaFeature: TileMetaFeature | undefined;
   x: number;
   y: number;
   z: number;

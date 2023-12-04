@@ -5,39 +5,41 @@
  * 2.0.
  */
 
+import { LAT_INDEX, LON_INDEX } from '../../../common/constants';
 import { EventEmitter } from 'events';
 import { TileRequest } from './types';
+import { isPointInTile } from '../../classes/util/geo_tile_utils';
 
 export class VectorTileAdapter extends EventEmitter {
   private _layers: Record<string, { label: string; tileUrl: string }> = {};
   private _tiles: Array<{ x: number; y: number; z: number }> = [];
   private _layerTileMetaFeatures: Record<string, TileMetaFeature[]> = {};
 
-  addLayer(layerId: string, label: string, tileUrl: string) {
+  public addLayer(layerId: string, label: string, tileUrl: string) {
     this._layers[layerId] = { label, tileUrl };
     this._onChange();
   }
 
-  removeLayer(layerId: string) {
+  public removeLayer(layerId: string) {
     delete this._layers[layerId];
     this._onChange();
   }
 
-  hasLayers() {
+  public hasLayers() {
     return Object.keys(this._layers).length > 0;
   }
 
-  setTiles(tiles: Array<{ x: number; y: number; z: number }>) {
+  public setTiles(tiles: Array<{ x: number; y: number; z: number }>) {
     this._tiles = tiles;
     this._onChange();
   }
 
-  setTileMetaFeatures(layerId: string, tileMetaFeatures?: TileMetaFeature[]) {
+  public setTileMetaFeatures(layerId: string, tileMetaFeatures?: TileMetaFeature[]) {
     this._layerTileMetaFeatures[layerId] = tileMetaFeatures ? tileMetaFeatures : [];
     this._onChange();
   }
 
-  getLayerOptions(): Array<{ value: string; label: string }> {
+  public getLayerOptions(): Array<{ value: string; label: string }> {
     return Object.keys(this._layers).map((layerId) => {
       return {
         value: layerId,
@@ -46,7 +48,7 @@ export class VectorTileAdapter extends EventEmitter {
     });
   }
 
-  getTileRequests(layerId: string): TileRequest[] {
+  public getTileRequests(layerId: string): TileRequest[] {
     if (!this._layers[layerId]) {
       return [];
     }
@@ -56,12 +58,27 @@ export class VectorTileAdapter extends EventEmitter {
       return {
         layerId,
         tileUrl,
+        tileMetaFeature: this._getTileMetaFeature(layerId, tile.x, tile.y, tile.z),
         ...tile,
       };
     });
   }
 
-  _onChange() {
+  private _getTileMetaFeature(layerId: string, x: number, y: number, z: number) {
+    if (!this._layerTileMetaFeatures[layerId]) {
+      return;
+    }
+
+    return this._layerTileMetaFeatures[layerId].find(tileMetaFeature => {
+      const boundaryPoint = tileMetaFeature.geometry?.coordinates?.[0]?.[0];
+      if (!boundaryPoint) {
+        return false;
+      }
+      return isPointInTile(boundaryPoint[LAT_INDEX], boundaryPoint[LON_INDEX], x, y, z);
+    });
+  }
+
+  private _onChange() {
     this.emit('change');
   }
 }
