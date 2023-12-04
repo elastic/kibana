@@ -58,6 +58,8 @@ import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
 import { userInfo } from 'os';
+import { fetchEndpointMetadataList } from './endpoint_metadata_services';
+import type { HostInfo } from '../../../common/endpoint/types';
 import { isFleetServerRunning } from './fleet_server/fleet_server_services';
 import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 import type { DownloadAndStoreAgentResponse } from './agent_downloads_service';
@@ -160,12 +162,14 @@ export const fetchFleetAgents = async (
  * @param log
  * @param hostname
  * @param timeoutMs
+ * @param awaitMetadata
  */
 export const waitForHostToEnroll = async (
   kbnClient: KbnClient,
   log: ToolingLog,
   hostname: string,
-  timeoutMs: number = 30000
+  timeoutMs: number = 30000,
+  awaitMetadata = false
 ): Promise<Agent> => {
   log.info(`Waiting for host [${hostname}] to enroll with fleet`);
 
@@ -208,8 +212,51 @@ export const waitForHostToEnroll = async (
     );
   }
 
-  log.debug(`Host [${hostname}] has been enrolled with fleet`);
+  log.info(`Host [${hostname}] has been enrolled with fleet`);
   log.verbose(found);
+
+  if (!awaitMetadata) {
+    return found;
+  }
+
+  log.info(`Awaiting host to show up in Metadata`);
+
+  const metadataLookupStartedTime = new Date();
+  const hasTimedOutMetadataLookup = (): boolean => {
+    const elapsedTime = Date.now() - metadataLookupStartedTime.getTime();
+    return elapsedTime > timeoutMs;
+  };
+  let metadataFound: HostInfo | undefined;
+
+  while (!metadataFound && !hasTimedOutMetadataLookup()) {
+    metadataFound = await retryOnError(
+      async () =>
+        fetchEndpointMetadataList(kbnClient).then((response) => {
+          return response.data.filter(
+            (record) =>
+              record.metadata.host.hostname === hostname && record.host_status === 'healthy'
+          )[0];
+        }),
+      RETRYABLE_TRANSIENT_ERRORS
+    );
+
+    if (!metadataFound) {
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+
+  if (!metadataFound) {
+    throw Object.assign(
+      new Error(
+        `Timed out waiting for host [${hostname}] to show up in Metadata. Waited ${
+          timeoutMs / 1000
+        } seconds`
+      ),
+      { agentId, hostname }
+    );
+  }
+
+  log.info(`Host [${hostname}] is healthy.`);
 
   return found;
 };
