@@ -7,9 +7,16 @@
     "id": "cloudLinks",
     "server": false,
     "browser": true,
-    "common": true,
-    "optionalPlugins": ["cloud", "security", "guidedOnboarding"],
-    "requiredBundles": ["kibanaReact"],
-    "requiredPlugins": ["share"]
+    "optionalPlugins": [
+      "cloud",
+      "security",
+      "guidedOnboarding"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "requiredPlugins": [
+      "share"
+    ]
   }
 }
