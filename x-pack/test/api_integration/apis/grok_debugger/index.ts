@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { API_BASE_PATH } from './constants';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export const registerHelpers = ({ supertest }) => {
-  const getIndexStats = (indexName) => supertest.get(`${API_BASE_PATH}/stats/${indexName}`);
-
-  return {
-    getIndexStats,
-  };
-};
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Grok Debugger', () => {
+    loadTestFile(require.resolve('./grok_debugger'));
+  });
+}
