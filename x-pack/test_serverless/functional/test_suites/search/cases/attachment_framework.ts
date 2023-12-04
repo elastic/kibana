@@ -34,6 +34,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
 
+        await settings.refreshDataViewFieldList('log*');
         await settings.refreshDataViewFieldList('logstash-*');
 
         await svlSearchNavigation.navigateToLandingPage();
