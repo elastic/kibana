@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BaseMessage } from '@langchain/core/dist/messages';
 import { APMTracer } from '../tracers/apm_tracer';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
@@ -40,7 +41,7 @@ export const callChainExecutor = async ({
   });
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
-  const latestMessage = langChainMessages.slice(-1)[0]; // the last message
+  const latestMessage: BaseMessage = langChainMessages.slice(-1)[0]; // the last message
 
   // ELSER backed ElasticsearchStore for Knowledge Base
   const esStore = new ElasticsearchStore(
@@ -82,8 +83,10 @@ export const callChainExecutor = async ({
       span.addLabels({ evaluationId: traceOptions?.evaluationId });
     }
 
+    // casting because MessageContent can be a string or an array of objects, its a weird type
+    const question = latestMessage.content as string;
     return chain.invoke(
-      { question: latestMessage.content, chat_history: pastMessages },
+      { question, chat_history: pastMessages },
       {
         callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
         runName: DEFAULT_AGENT_EXECUTOR_ID,
@@ -91,12 +94,7 @@ export const callChainExecutor = async ({
       }
     );
   });
-  console.log('what do we return here', {
-    connector_id: connectorId,
-    data: llm.getActionResultData(), // the response from the actions framework
-    trace_data: traceData,
-    status: 'ok',
-  });
+
   return {
     connector_id: connectorId,
     data: llm.getActionResultData(), // the response from the actions framework

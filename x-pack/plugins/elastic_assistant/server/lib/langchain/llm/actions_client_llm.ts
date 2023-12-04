@@ -72,7 +72,6 @@ export class ActionsClientLlm extends LLM {
   }
 
   async _call(prompt: string): Promise<string> {
-    console.log('_call happening!', prompt);
     // convert the Langchain prompt to an assistant message:
     const assistantMessage = getMessageContentAndRole(prompt);
     this.#logger.debug(
