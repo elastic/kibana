@@ -171,6 +171,7 @@ export const RuleForm = ({
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   setConsumer = NOOP,
+  selectedConsumer,
   operation,
   ruleTypeRegistry,
   actionTypeRegistry,
@@ -179,7 +180,6 @@ export const RuleForm = ({
   hideGrouping = false,
   hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,
-  selectedConsumer,
   validConsumers,
   onChangeMetaData,
   useRuleProducer,
@@ -257,11 +257,11 @@ export const RuleForm = ({
             validConsumers,
           })
         )
-        .filter((item) => {
-          return rule.consumer === ALERTS_FEATURE_ID
+        .filter((item) =>
+          rule.consumer === ALERTS_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
-            : item.ruleType!.producer === rule.consumer;
-        });
+            : item.ruleType!.producer === rule.consumer
+        );
 
     const availableRuleTypesResult = getAvailableRuleTypes(ruleTypes);
     setAvailableRuleTypes(availableRuleTypesResult);
@@ -431,6 +431,7 @@ export const RuleForm = ({
     const selectedRuleType = availableRuleTypes.find(
       ({ ruleType: availableRuleType }) => availableRuleType.id === rule.ruleTypeId
     );
+
     if (!selectedRuleType?.ruleType?.authorizedConsumers) {
       return [];
     }
@@ -816,6 +817,7 @@ export const RuleForm = ({
               consumers={authorizedConsumers}
               onChange={setConsumer}
               errors={errors}
+              selectedConsumer={selectedConsumer}
             />
           </EuiFlexItem>
         </>

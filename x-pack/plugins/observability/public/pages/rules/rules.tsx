@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useLoadRuleTypesQuery } from '@kbn/triggers-actions-ui-plugin/public';
 import { RULES_LOGS_PATH, RULES_PATH } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
@@ -146,6 +147,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
           consumer={ALERTS_FEATURE_ID}
           filteredRuleTypes={filteredRuleTypes}
           validConsumers={observabilityRuleCreationValidConsumers}
+          initialSelectedConsumer={AlertConsumers.LOGS}
           onClose={() => {
             setAddRuleFlyoutVisibility(false);
           }}

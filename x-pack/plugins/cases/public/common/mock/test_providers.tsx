@@ -129,7 +129,7 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: StartServices;
   queryClient: QueryClient;
-  AppWrapper: React.FC<{ children: React.ReactElement }>;
+  AppWrapper: React.FC<{ children: React.ReactNode }>;
   getFilesClient: () => ScopedFilesClient;
 }
 
@@ -176,7 +176,7 @@ export const createAppMockRenderer = ({
 
   const getFilesClient = mockGetFilesClient();
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
