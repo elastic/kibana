@@ -135,6 +135,20 @@ class VectorTileInspector extends Component<Props, State> {
     });
   }
 
+  _getTileResponse() {
+    if (this.state.selectedTileRequest.tileError?.error) {
+      return {
+        error: this.state.selectedTileRequest.tileError.error
+      };
+    }
+
+    return this.state.selectedTileRequest.tileMetaFeature
+      ? { 
+          meta: this.state.selectedTileRequest.tileMetaFeature.properties
+        }
+      : undefined;
+  }
+
   _renderTileRequest() {
     if (!this.state.selectedTileRequest) {
       return null;
@@ -148,12 +162,14 @@ class VectorTileInspector extends Component<Props, State> {
         />
       );
     }
+
+    const tileResponse = this._getTileResponse();
     
-    return this.state.selectedTileRequest.tileMetaFeature
+    return tileResponse
       ? (
         <CodeEditor
           languageId={XJsonLang.ID}
-          value={JSON.stringify({ meta: this.state.selectedTileRequest.tileMetaFeature.properties }, null, 2)}
+          value={JSON.stringify(tileResponse, null, 2)}
           options={{
             readOnly: true,
             lineNumbers: 'off',
