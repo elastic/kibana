@@ -68,7 +68,6 @@ const Application = (props: SyntheticsAppProps) => {
   kibanaService.theme = props.appMountParameters.theme$;
 
   store.dispatch(setBasePath(basePath));
-  const queryClient = new QueryClient();
 
   const queryClient = new QueryClient();
 
