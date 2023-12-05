@@ -14,28 +14,9 @@ import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/appl
 import { once } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { dump } from '../../../../utils/dump';
-import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
-import type {
-  ActionDetails,
-  GetProcessesActionOutputContent,
-  KillOrSuspendProcessRequestBody,
-  KillProcessActionOutputContent,
-  ResponseActionExecuteOutputContent,
-  ResponseActionGetFileOutputContent,
-  ResponseActionGetFileParameters,
-  ResponseActionParametersWithPidOrEntityId,
-  ResponseActionsExecuteParameters,
-  ResponseActionUploadOutputContent,
-  ResponseActionUploadParameters,
-  SuspendProcessActionOutputContent,
-} from '../../../../../../common/endpoint/types';
-import type {
-  ExecuteActionRequestBody,
-  GetProcessesRequestBody,
-  IsolationRouteRequestBody,
-  ResponseActionGetFileRequestBody,
-  UploadActionApiRequestBody,
-} from '../../../../../../common/api/endpoint';
+import { ResponseActionsClientError } from '../errors';
+import type { ActionDetails } from '../../../../../../common/endpoint/types';
+import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
 import type { ResponseActionsClientOptions } from '../../../../lib/response_actions/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../../../../lib/response_actions/base_response_actions_client';
 
@@ -148,49 +129,5 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     // });
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
-  }
-
-  async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    throw new ResponseActionsNotSupportedError('unisolate');
-  }
-
-  async killProcess(
-    options: KillOrSuspendProcessRequestBody
-  ): Promise<
-    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
-  > {
-    throw new ResponseActionsNotSupportedError('kill-process');
-  }
-
-  async suspendProcess(
-    options: KillOrSuspendProcessRequestBody
-  ): Promise<
-    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
-  > {
-    throw new ResponseActionsNotSupportedError('suspend-process');
-  }
-
-  async runningProcesses(
-    options: GetProcessesRequestBody
-  ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
-    throw new ResponseActionsNotSupportedError('running-processes');
-  }
-
-  async getFile(
-    options: ResponseActionGetFileRequestBody
-  ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
-    throw new ResponseActionsNotSupportedError('get-file');
-  }
-
-  async execute(
-    options: ExecuteActionRequestBody
-  ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
-    throw new ResponseActionsNotSupportedError('execute');
-  }
-
-  async upload(
-    options: UploadActionApiRequestBody
-  ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>> {
-    throw new ResponseActionsNotSupportedError('upload');
   }
 }

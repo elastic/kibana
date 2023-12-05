@@ -14,7 +14,10 @@ import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments
 import { APP_ID } from '../../../../common';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../services';
-import { ResponseActionsClientError } from '../../services/actions/clients/errors';
+import {
+  ResponseActionsClientError,
+  ResponseActionsNotSupportedError,
+} from '../../services/actions/clients/errors';
 import {
   addRuleInfoToAction,
   getActionParameters,
@@ -65,7 +68,7 @@ export interface ResponseActionsClientOptions {
 /**
  * Base class for a Response Actions client
  */
-export abstract class ResponseActionsClientImpl implements ResponseActionsClient {
+export class ResponseActionsClientImpl implements ResponseActionsClient {
   protected readonly log: Logger;
 
   constructor(protected readonly options: ResponseActionsClientOptions) {
@@ -309,35 +312,51 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     return doc;
   }
 
-  public abstract isolate(options: IsolationRouteRequestBody): Promise<ActionDetails>;
+  public isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+    throw new ResponseActionsNotSupportedError('isolate');
+  }
 
-  public abstract release(options: IsolationRouteRequestBody): Promise<ActionDetails>;
+  public async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+    throw new ResponseActionsNotSupportedError('unisolate');
+  }
 
-  public abstract killProcess(
+  public async killProcess(
     options: KillOrSuspendProcessRequestBody
   ): Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
-  >;
+  > {
+    throw new ResponseActionsNotSupportedError('kill-process');
+  }
 
-  public abstract suspendProcess(
+  public async suspendProcess(
     options: KillOrSuspendProcessRequestBody
   ): Promise<
     ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
-  >;
+  > {
+    throw new ResponseActionsNotSupportedError('suspend-process');
+  }
 
-  public abstract runningProcesses(
+  public async runningProcesses(
     options: GetProcessesRequestBody
-  ): Promise<ActionDetails<GetProcessesActionOutputContent>>;
+  ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
+    throw new ResponseActionsNotSupportedError('running-processes');
+  }
 
-  public abstract getFile(
+  public async getFile(
     options: ResponseActionGetFileRequestBody
-  ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>>;
+  ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
+    throw new ResponseActionsNotSupportedError('get-file');
+  }
 
-  public abstract execute(
+  public async execute(
     options: ExecuteActionRequestBody
-  ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>>;
+  ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
+    throw new ResponseActionsNotSupportedError('execute');
+  }
 
-  public abstract upload(
+  public async upload(
     options: UploadActionApiRequestBody
-  ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>>;
+  ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>> {
+    throw new ResponseActionsNotSupportedError('upload');
+  }
 }
