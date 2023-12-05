@@ -5170,15 +5170,15 @@
         "signature": [
           "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: K extends \"frequency\" ? ",
           {
-            "pluginId": "actions",
+            "pluginId": "@kbn/actions-types",
             "scope": "common",
-            "docId": "kibActionsPluginApi",
+            "docId": "kibKbnActionsTypesPluginApi",
             "section": "def-common.AsApiContract",
             "text": "AsApiContract"
           },
           "<T[K]> : T[K]; }"
         ],
-        "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5283,15 +5283,15 @@
         "signature": [
           "(requested: ",
           {
-            "pluginId": "actions",
+            "pluginId": "@kbn/actions-types",
             "scope": "common",
-            "docId": "kibActionsPluginApi",
+            "docId": "kibKbnActionsTypesPluginApi",
             "section": "def-common.AsApiContract",
             "text": "AsApiContract"
           },
           "<T>) => T"
         ],
-        "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -5306,15 +5306,15 @@
             "signature": [
               "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: K extends \"frequency\" ? ",
               {
-                "pluginId": "actions",
+                "pluginId": "@kbn/actions-types",
                 "scope": "common",
-                "docId": "kibActionsPluginApi",
+                "docId": "kibKbnActionsTypesPluginApi",
                 "section": "def-common.AsApiContract",
                 "text": "AsApiContract"
               },
               "<T[K]> : T[K]; }"
             ],
-            "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+            "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5331,23 +5331,23 @@
         "signature": [
           "(responded: T) => T extends (infer Item)[] ? ",
           {
-            "pluginId": "actions",
+            "pluginId": "@kbn/actions-types",
             "scope": "common",
-            "docId": "kibActionsPluginApi",
+            "docId": "kibKbnActionsTypesPluginApi",
             "section": "def-common.AsApiContract",
             "text": "AsApiContract"
           },
           "<Item>[] : ",
           {
-            "pluginId": "actions",
+            "pluginId": "@kbn/actions-types",
             "scope": "common",
-            "docId": "kibActionsPluginApi",
+            "docId": "kibKbnActionsTypesPluginApi",
             "section": "def-common.AsApiContract",
             "text": "AsApiContract"
           },
           "<T>"
         ],
-        "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -5362,7 +5362,7 @@
             "signature": [
               "T"
             ],
-            "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+            "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
