@@ -95,15 +95,20 @@ export const useAsync: UseAsync = (fn, dependencies) => {
     // Show a toast notification if an API takes more them 15s to return
     const timeout = setTimeout(() => {
       if (asyncState.status === AsyncStatus.Loading) {
-        notifications.toasts.addWarning({
-          title: i18n.translate('xpack.profiling.fetch.toast.title', {
-            defaultMessage: 'Data Retrieval in Progress',
-          }),
-          text: i18n.translate('xpack.profiling.fetch.toast.describe', {
-            defaultMessage:
-              'We may be accessing your requested data from the warm storage tier. This process may take a bit longer than usual.',
-          }),
-        });
+        notifications.toasts.addWarning(
+          {
+            title: i18n.translate('xpack.profiling.fetch.toast.title', {
+              defaultMessage: 'Data Retrieval in Progress',
+            }),
+            text: i18n.translate('xpack.profiling.fetch.toast.describe', {
+              defaultMessage:
+                'If necessary, retrieving requested data from the warm storage tier may take longer than expected.',
+            }),
+          },
+          {
+            toastLifeTimeMs: 300000,
+          }
+        );
       }
     }, 15000);
     return () => {
