@@ -226,7 +226,7 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant.sh
-    label: 'Detection AI Assistant - Security Solution Cypress Tests'
+    label: 'AI Assistant - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
