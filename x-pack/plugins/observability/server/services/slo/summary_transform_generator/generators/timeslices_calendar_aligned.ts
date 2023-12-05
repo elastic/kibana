@@ -63,8 +63,8 @@ export function generateTransformForTimeslicesAndCalendarAligned(
             buckets_path: {},
             script: {
               source: `
-                if (${isWeeklyAligned}) {
-                  return Math.ceil(7 * 24 * 60 * 60 / ${sliceDurationInSeconds})
+                if (${isWeeklyAligned} == true) {
+                  return Math.ceil(7 * 24 * 60 * 60 / ${sliceDurationInSeconds});
                 } else {
                   Date d = new Date(); 
                   Instant instant = Instant.ofEpochMilli(d.getTime());
