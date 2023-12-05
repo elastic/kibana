@@ -40,6 +40,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
     kibanaSecuritySolutionsPrivileges: { crud: canEditTimeline },
   } = useUserPrivileges();
   const getTimelineStatus = useMemo(() => getTimelineStatusByIdSelector(), []);
+
   const { status: timelineStatus, isSaving } = useDeepEqualSelector((state) =>
     getTimelineStatus(state, timelineId)
   );

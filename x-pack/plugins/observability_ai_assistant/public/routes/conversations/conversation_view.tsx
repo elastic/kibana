@@ -4,34 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import React, { useMemo, useRef, useState } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
+import { v4 } from 'uuid';
 import { ChatBody } from '../../components/chat/chat_body';
 import { ConversationList } from '../../components/chat/conversation_list';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
-import { useConversation } from '../../hooks/use_conversation';
 import { useCurrentUser } from '../../hooks/use_current_user';
+import { useForceUpdate } from '../../hooks/use_force_update';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantParams } from '../../hooks/use_observability_ai_assistant_params';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
+import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 import { getModelsManagementHref } from '../../utils/get_models_management_href';
-import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 
 const containerClassName = css`
   max-width: 100%;
-`;
-
-const chatBodyContainerClassNameWithError = css`
-  align-self: center;
 `;
 
 const conversationListContainerName = css`
@@ -80,12 +78,24 @@ export function ConversationView() {
 
   const conversationId = 'conversationId' in path ? path.conversationId : undefined;
 
-  const { conversation, displayedMessages, setDisplayedMessages, save, saveTitle } =
-    useConversation({
-      conversationId,
-      chatService: chatService.value,
-      connectorId: connectors.selectedConnector,
-    });
+  // Regenerate the key only when the id changes, except after
+  // creating the conversation. Ideally this happens by adding
+  // state to the current route, but I'm not keen on adding
+  // the concept of state to the router, due to a mismatch
+  // between router.link() and router.push(). So, this is a
+  // pretty gross workaround for persisting a key under some
+  // conditions.
+  const chatBodyKeyRef = useRef(v4());
+  const keepPreviousKeyRef = useRef(false);
+  const prevConversationId = usePrevious(conversationId);
+
+  if (conversationId !== prevConversationId && keepPreviousKeyRef.current === false) {
+    chatBodyKeyRef.current = v4();
+  }
+
+  keepPreviousKeyRef.current = false;
+
+  const forceUpdate = useForceUpdate();
 
   const conversations = useAbortableAsync(
     ({ signal }) => {
@@ -111,14 +121,17 @@ export function ConversationView() {
     ];
   }, [conversations.value?.conversations, conversationId, observabilityAIAssistantRouter]);
 
-  function navigateToConversation(nextConversationId?: string) {
-    observabilityAIAssistantRouter.push(
-      nextConversationId ? '/conversations/{conversationId}' : '/conversations/new',
-      {
-        path: { conversationId: nextConversationId },
+  function navigateToConversation(nextConversationId?: string, usePrevConversationKey?: boolean) {
+    if (nextConversationId) {
+      observabilityAIAssistantRouter.push('/conversations/{conversationId}', {
+        path: {
+          conversationId: nextConversationId,
+        },
         query: {},
-      }
-    );
+      });
+    } else {
+      observabilityAIAssistantRouter.push('/conversations/new', { path: {}, query: {} });
+    }
   }
 
   function handleRefreshConversations() {
@@ -136,10 +149,16 @@ export function ConversationView() {
             error={conversations.error}
             conversations={displayedConversations}
             onClickNewChat={() => {
-              observabilityAIAssistantRouter.push('/conversations/new', {
-                path: {},
-                query: {},
-              });
+              if (conversationId) {
+                observabilityAIAssistantRouter.push('/conversations/new', {
+                  path: {},
+                  query: {},
+                });
+              } else {
+                // clear the chat
+                chatBodyKeyRef.current = v4();
+                forceUpdate();
+              }
             }}
             onClickDeleteConversation={(id) => {
               confirmDeleteFunction()
@@ -194,69 +213,36 @@ export function ConversationView() {
           />
           <EuiSpacer size="s" />
         </EuiFlexItem>
-        <EuiFlexItem
-          grow
-          className={conversation.error ? chatBodyContainerClassNameWithError : undefined}
-        >
-          {conversation.error ? (
-            <EuiCallOut
-              color="danger"
-              title={i18n.translate(
-                'xpack.observabilityAiAssistant.couldNotFindConversationTitle',
-                {
-                  defaultMessage: 'Conversation not found',
+
+        {!chatService.value ? (
+          <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="xl" />
+              <EuiLoadingSpinner size="l" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
+        {chatService.value && (
+          <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
+            <ChatBody
+              key={chatBodyKeyRef.current}
+              currentUser={currentUser}
+              connectors={connectors}
+              connectorsManagementHref={getConnectorsManagementHref(http)}
+              modelsManagementHref={getModelsManagementHref(http)}
+              initialConversationId={conversationId}
+              knowledgeBase={knowledgeBase}
+              startedFrom="conversationView"
+              onConversationUpdate={(conversation) => {
+                if (!conversationId) {
+                  keepPreviousKeyRef.current = true;
+                  navigateToConversation(conversation.conversation.id);
                 }
-              )}
-              iconType="warning"
-            >
-              {i18n.translate('xpack.observabilityAiAssistant.couldNotFindConversationContent', {
-                defaultMessage:
-                  'Could not find a conversation with id {conversationId}. Make sure the conversation exists and you have access to it.',
-                values: { conversationId },
-              })}
-            </EuiCallOut>
-          ) : null}
-          {!chatService.value ? (
-            <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
-              <EuiFlexItem grow={false}>
-                <EuiSpacer size="xl" />
-                <EuiLoadingSpinner size="l" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null}
-          {conversation.value && chatService.value && !conversation.error ? (
-            <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
-              <ChatBody
-                loading={conversation.loading}
-                currentUser={currentUser}
-                connectors={connectors}
-                connectorsManagementHref={getConnectorsManagementHref(http)}
-                modelsManagementHref={getModelsManagementHref(http)}
-                conversationId={conversationId}
-                knowledgeBase={knowledgeBase}
-                messages={displayedMessages}
-                title={conversation.value.conversation.title}
-                startedFrom="conversationView"
-                onChatUpdate={(messages) => {
-                  setDisplayedMessages(messages);
-                }}
-                onChatComplete={(messages) => {
-                  save(messages, handleRefreshConversations)
-                    .then((nextConversation) => {
-                      conversations.refresh();
-                      if (!conversationId && nextConversation?.conversation?.id) {
-                        navigateToConversation(nextConversation.conversation.id);
-                      }
-                    })
-                    .catch((e) => {});
-                }}
-                onSaveTitle={(title) => {
-                  saveTitle(title, handleRefreshConversations);
-                }}
-              />
-            </ObservabilityAIAssistantChatServiceProvider>
-          ) : null}
-        </EuiFlexItem>
+                handleRefreshConversations();
+              }}
+            />
+          </ObservabilityAIAssistantChatServiceProvider>
+        )}
       </EuiFlexGroup>
     </>
   );
