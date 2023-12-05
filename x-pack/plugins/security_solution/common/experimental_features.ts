@@ -141,6 +141,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental Entity Analytics Asset Criticality feature
    */
   entityAnalyticsAssetCriticalityEnabled: false,
+
+  /**
+   * Enables SentinelOne manual host manipulation actions
+   */
+  sentinelOneManualHostActionsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
