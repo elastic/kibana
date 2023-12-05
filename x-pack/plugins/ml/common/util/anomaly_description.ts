@@ -9,7 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
 import { getSeverity, type MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 
-export function getAnomalyDescription(anomaly: MlAnomaliesTableRecordExtended): string {
+export function getAnomalyDescription(anomaly: MlAnomaliesTableRecordExtended): {
+  anomalyDescription: string;
+  mvDescription: string | undefined;
+} {
   const source = anomaly.source;
 
   let anomalyDescription = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyInLabel', {
@@ -62,5 +65,8 @@ export function getAnomalyDescription(anomaly: MlAnomaliesTableRecordExtended): 
     );
   }
 
-  return `${anomalyDescription}${mvDescription ? ` (${mvDescription})` : ''}`;
+  return {
+    anomalyDescription,
+    mvDescription,
+  };
 }

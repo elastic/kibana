@@ -439,7 +439,11 @@ export function alertingServiceProvider(
         record.entityValue = getEntityFieldValue(recordSource);
       }
 
-      const anomalyDescription = getAnomalyDescription(record);
+      const { anomalyDescription, mvDescription } = getAnomalyDescription(record);
+
+      const anomalyDescriptionSummary = `${anomalyDescription}${
+        mvDescription ? ` (${mvDescription})` : ''
+      }`;
 
       let actual = recordSource.actual;
       let typical = recordSource.typical;
@@ -457,7 +461,7 @@ export function alertingServiceProvider(
         metricChangeDescription = capitalize(getMetricChangeDescription(actual, typical).message);
       }
 
-      message = `${anomalyDescription}. ${
+      message = `${anomalyDescriptionSummary}. ${
         metricChangeDescription ? `${metricChangeDescription}.` : ''
       }`;
     }
