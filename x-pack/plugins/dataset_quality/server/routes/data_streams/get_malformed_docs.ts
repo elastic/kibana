@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { MalformedDocs } from '../../../common/api_types';
 import {
   DATA_STREAM_DATASET,
   DATA_STREAM_NAMESPACE,
@@ -14,7 +15,6 @@ import {
   _IGNORED,
 } from '../../../common/es_fields';
 import { DataStreamTypes } from '../../types/data_stream';
-import { MalformedDocs } from '../../types/malformed_docs';
 import { createDatasetQualityESClient, wildcardQuery } from '../../utils';
 
 export async function getMalformedDocsPaginated(options: {

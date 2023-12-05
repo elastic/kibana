@@ -42,6 +42,13 @@ export const integrationRt = rt.intersection([
   }),
 ]);
 
+export const malformedDocsRt = rt.type({
+  dataset: rt.string,
+  percentage: rt.number,
+});
+
+export type MalformedDocs = rt.TypeOf<typeof malformedDocsRt>;
+
 export const getDataStreamsStatsResponseRt = rt.exact(
   rt.intersection([
     rt.type({
@@ -55,11 +62,6 @@ export const getDataStreamsStatsResponseRt = rt.exact(
 
 export const getDataStreamsMalformedDocsStatsResponseRt = rt.exact(
   rt.type({
-    malformedDocs: rt.array(
-      rt.type({
-        dataset: rt.string,
-        percentage: rt.number,
-      })
-    ),
+    malformedDocs: rt.array(malformedDocsRt),
   })
 );

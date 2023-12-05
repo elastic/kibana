@@ -14,11 +14,11 @@ import {
 import { DataStreamStat } from '../../types/data_stream';
 import { dataStreamTypesRt, rangeRt } from '../../types/default_api_types';
 import { Integration } from '../../types/integration';
-import { MalformedDocs } from '../../types/malformed_docs';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getMalformedDocsPaginated } from './get_malformed_docs';
+import { MalformedDocs } from '../../../common/api_types';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: `GET ${DATA_STREAMS_STATS_URL}`,
