@@ -79,6 +79,7 @@ export type AlertsTableStateProps = {
    * Enable when rows may have variable heights (disables virtualization)
    */
   dynamicRowHeight?: boolean;
+  lastReloadRequestTime?: number;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -165,9 +166,9 @@ const AlertsTableStateWithQueryProvider = ({
   toolbarVisibility,
   shouldHighlightRow,
   dynamicRowHeight,
+  lastReloadRequestTime,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
-
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
 
@@ -279,6 +280,11 @@ const AlertsTableStateWithQueryProvider = ({
       onUpdate({ isLoading, totalCount: alertsCount, refresh });
     }
   }, [isLoading, alertsCount, onUpdate, refresh]);
+  useEffect(() => {
+    if (lastReloadRequestTime) {
+      refresh();
+    }
+  }, [lastReloadRequestTime, refresh]);
 
   const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
   const maintenanceWindowIds = useMemo(() => getMaintenanceWindowIdsFromAlerts(alerts), [alerts]);

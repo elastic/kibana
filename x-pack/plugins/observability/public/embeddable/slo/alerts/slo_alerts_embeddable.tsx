@@ -101,6 +101,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
 
     const I18nContext = this.deps.i18n.Context;
     const { slos, timeRange = { from: 'now-15m/m', to: 'now' } } = this.getInput();
+    this.input.lastReloadRequestTime = Date.now();
     const deps = this.deps;
     const kibanaVersion = this.kibanaVersion;
     ReactDOM.render(
@@ -121,6 +122,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
                 deps={deps}
                 slos={slos}
                 timeRange={timeRange}
+                lastReloadRequestTime={this.input.lastReloadRequestTime}
               />
             </QueryClientProvider>
           </Router>

@@ -26,9 +26,17 @@ interface Props {
   timeRange: TimeRange;
   embeddable: IEmbeddable<SloAlertsEmbeddableInput, EmbeddableOutput>;
   onRenderComplete?: () => void;
+  lastReloadRequestTime?: number | undefined;
 }
 
-export function SloAlertsWrapper({ embeddable, slos, deps, timeRange, onRenderComplete }: Props) {
+export function SloAlertsWrapper({
+  embeddable,
+  slos,
+  deps,
+  timeRange,
+  onRenderComplete,
+  lastReloadRequestTime,
+}: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -117,6 +125,7 @@ export function SloAlertsWrapper({ embeddable, slos, deps, timeRange, onRenderCo
                 deps={deps}
                 timeRange={timeRange}
                 onLoaded={() => setIsTableLoaded(true)}
+                lastReloadRequestTime={lastReloadRequestTime}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

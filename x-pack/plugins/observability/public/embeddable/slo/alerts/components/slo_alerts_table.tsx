@@ -24,9 +24,10 @@ interface Props {
   slos: SloItem[];
   timeRange: TimeRange;
   onLoaded?: () => void;
+  lastReloadRequestTime: number | undefined;
 }
 
-export function SloAlertsTable({ slos, deps, timeRange, onLoaded }: Props) {
+export function SloAlertsTable({ slos, deps, timeRange, onLoaded, lastReloadRequestTime }: Props) {
   const {
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
   } = deps;
@@ -83,6 +84,7 @@ export function SloAlertsTable({ slos, deps, timeRange, onLoaded }: Props) {
           onLoaded();
         }
       }}
+      lastReloadRequestTime={lastReloadRequestTime}
     />
   );
 }
