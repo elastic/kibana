@@ -42,7 +42,7 @@ export const timelineTourSteps = [
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.timeline.tour.changeDataView.description"
-          defaultMessage="Click {dataViewButton} to choose appropriate data view or index patterns"
+          defaultMessage="Click the {dataViewButton} menu to choose the event or alert data that you want to display"
           values={{
             dataViewButton: <EuiCode> {i18n.TIMELINE_TOUR_DATA_VIEW}</EuiCode>,
           }}
@@ -64,7 +64,7 @@ export const timelineTourSteps = [
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.timeline.tour.saveTimeline.description"
-          defaultMessage="Click {saveButton} to manually save new changes. You can also {editButton} its name and description or save it as new timeline"
+          defaultMessage="Click {saveButton} to manually save new changes. While saving your Timeline, you can {editButton} its name and description or save it as a new Timeline"
           values={{
             saveButton: <EuiCode>{i18n.TIMELINE_TOUR_SAVE}</EuiCode>,
             editButton: <EuiCode>{i18n.TIMELINE_TOUR_EDIT}</EuiCode>,

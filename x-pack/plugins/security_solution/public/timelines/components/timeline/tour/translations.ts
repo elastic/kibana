@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const TIMELINE_TOUR_SUBTITLE = i18n.translate(
   'xpack.securitySolution.timeline.tour.subTitle',
   {
-    defaultMessage: 'Recent timeline improvements',
+    defaultMessage: 'Recent Timeline improvements',
   }
 );
 
@@ -31,7 +31,7 @@ export const TIMELINE_TOUR_DATA_PROVIDER_VISIBILITY_TITLE = i18n.translate(
 export const TIMELINE_TOUR_DATA_PROVIDER_VISIBILITY_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.timeline.tour.dataProviderToggle.description',
   {
-    defaultMessage: 'Click here to expand or collapse the query builder',
+    defaultMessage: 'Click to expand or collapse the query builder',
   }
 );
 
