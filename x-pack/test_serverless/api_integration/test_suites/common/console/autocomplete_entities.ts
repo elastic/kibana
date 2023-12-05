@@ -1,51 +1,63 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../ftr_provider_context';
-import { helpers } from './helpers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
-  const {
-    createIndex,
-    createAlias,
-    createLegacyTemplate,
-    createIndexTemplate,
-    createComponentTemplate,
-    createDataStream,
-    deleteIndex,
-    deleteAlias,
-    deleteLegacyTemplate,
-    deleteIndexTemplate,
-    deleteComponentTemplate,
-    deleteDataStream,
-  } = helpers(getService);
-
+  const svlCommonApi = getService('svlCommonApi');
+  const consoleService = getService('console');
   const supertest = getService('supertest');
   const sendRequest = (query: object) =>
-    supertest.get('/api/console/autocomplete_entities').query(query);
+    supertest
+      .get('/api/console/autocomplete_entities')
+      .set(svlCommonApi.getInternalRequestHeader())
+      .query(query);
 
   describe('/api/console/autocomplete_entities', function () {
+    let createIndex: typeof consoleService['helpers']['createIndex'];
+    let createAlias: typeof consoleService['helpers']['createAlias'];
+    let createIndexTemplate: typeof consoleService['helpers']['createIndexTemplate'];
+    let createComponentTemplate: typeof consoleService['helpers']['createComponentTemplate'];
+    let createDataStream: typeof consoleService['helpers']['createDataStream'];
+    let deleteIndex: typeof consoleService['helpers']['deleteIndex'];
+    let deleteAlias: typeof consoleService['helpers']['deleteAlias'];
+    let deleteIndexTemplate: typeof consoleService['helpers']['deleteIndexTemplate'];
+    let deleteComponentTemplate: typeof consoleService['helpers']['deleteComponentTemplate'];
+    let deleteDataStream: typeof consoleService['helpers']['deleteDataStream'];
+
     const indexName = 'test-index-1';
     const aliasName = 'test-alias-1';
     const indexTemplateName = 'test-index-template-1';
     const componentTemplateName = 'test-component-template-1';
     const dataStreamName = 'test-data-stream-1';
-    const legacyTemplateName = 'test-legacy-template-1';
 
     before(async () => {
+      ({
+        helpers: {
+          createIndex,
+          createAlias,
+          createIndexTemplate,
+          createComponentTemplate,
+          createDataStream,
+          deleteIndex,
+          deleteAlias,
+          deleteIndexTemplate,
+          deleteComponentTemplate,
+          deleteDataStream,
+        },
+      } = consoleService);
+
       // Setup indices, aliases, templates, and data streams
       await createIndex(indexName);
       await createAlias(indexName, aliasName);
       await createComponentTemplate(componentTemplateName);
       await createIndexTemplate(indexTemplateName, [dataStreamName], [componentTemplateName]);
       await createDataStream(dataStreamName);
-      await createLegacyTemplate(legacyTemplateName);
     });
 
     after(async () => {
@@ -55,7 +67,6 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteDataStream(dataStreamName);
       await deleteIndexTemplate(indexTemplateName);
       await deleteComponentTemplate(componentTemplateName);
-      await deleteLegacyTemplate(legacyTemplateName);
     });
 
     it('should not succeed if no settings are provided in query params', async () => {
@@ -179,7 +190,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { body, status } = response;
       expect(status).to.be(200);
-      expect(Object.keys(body.legacyTemplates)).to.contain(legacyTemplateName);
       expect(body.indexTemplates.index_templates.map((it: { name: string }) => it.name)).to.contain(
         indexTemplateName
       );
