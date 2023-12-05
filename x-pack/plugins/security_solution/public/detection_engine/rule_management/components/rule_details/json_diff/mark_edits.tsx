@@ -131,8 +131,8 @@ function convertToLinesOfEdits(linesOfDiffs: Diff[][], startLineNumber: number) 
   return flatMap(linesOfDiffs, (diffs, i) => diffsToEdits(diffs, startLineNumber + i));
 }
 
-function diffBy(diffMethod: DiffMethod, x: string, y: string): [Diff[], Diff[]] {
-  const jsDiffChanges: Change[] = jsDiff[diffMethod](x, y);
+function diffBy(diffMethod: DiffMethod, oldSource: string, newSource: string): [Diff[], Diff[]] {
+  const jsDiffChanges: Change[] = jsDiff[diffMethod](oldSource, newSource);
   const diffs: Diff[] = diff.convertChangesToDMP(jsDiffChanges);
 
   if (diffs.length <= 1) {
@@ -141,6 +141,14 @@ function diffBy(diffMethod: DiffMethod, x: string, y: string): [Diff[], Diff[]] 
 
   return groupDiffs(diffs);
 }
+
+const getLineNumber = (change: ChangeData | undefined) => {
+  if (!change || isNormal(change)) {
+    return undefined;
+  }
+
+  return change.lineNumber;
+};
 
 function diffChangeBlock(
   changes: ChangeData[],
@@ -173,13 +181,6 @@ function diffChangeBlock(
     return [[], []];
   }
 
-  const getLineNumber = (change: ChangeData | undefined) => {
-    if (!change || isNormal(change)) {
-      return undefined;
-    }
-
-    return change.lineNumber;
-  };
   const oldStartLineNumber = getLineNumber(changes.find(isDelete));
   const newStartLineNumber = getLineNumber(changes.find(isInsert));
 
