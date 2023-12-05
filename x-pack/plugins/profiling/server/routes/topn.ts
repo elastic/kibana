@@ -13,7 +13,7 @@ import {
   ProfilingESField,
   TopNType,
 } from '@kbn/profiling-utils';
-import { RouteRegisterParameters } from '.';
+import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
 import { getRoutePaths, INDEX_EVENTS } from '../../common';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../common/histogram';
 import { createTopNSamples, getTopNAggregationRequest, TopNResponse } from '../../common/topn';
@@ -167,7 +167,7 @@ export function queryTopNCommon({
   router.get(
     {
       path: pathName,
-      options: { tags: ['access:profiling'] },
+      options: { tags: ['access:profiling'], timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
       validate: {
         query: schema.object({
           timeFrom: schema.number(),
