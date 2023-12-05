@@ -113,7 +113,7 @@ List of {kib} client-side headers to send to {es}. To send *no* client-side
 headers, set this value to [] (an empty list). Removing the `authorization`
 header from being whitelisted means that you cannot use
 <<basic-authentication, basic authentication>> in {kib}.
-*Default: `[ 'authorization' ]`*
+*Default: `[ 'authorization', 'es-client-authentication' ]`*
 
 [[elasticsearch-requestTimeout]] `elasticsearch.requestTimeout`::
 Time in milliseconds to wait for responses from the back end or {es}.
