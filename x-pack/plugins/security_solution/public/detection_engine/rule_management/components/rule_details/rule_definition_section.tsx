@@ -55,6 +55,8 @@ import { TechnicalPreviewBadge } from '../../../../detections/components/rules/t
 import { BadgeList } from './badge_list';
 import { DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -427,7 +429,8 @@ const HistoryWindowSize = ({ historyWindowStart }: HistoryWindowSizeProps) => {
 const prepareDefinitionSectionListItems = (
   rule: Partial<RuleResponse>,
   isInteractive: boolean,
-  savedQuery?: SavedQuery
+  savedQuery: SavedQuery | undefined,
+  { alertSuppressionForThresholdRuleEnabled }: Partial<ExperimentalFeatures>
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -658,36 +661,42 @@ const prepareDefinitionSectionListItems = (
   }
 
   if ('alert_suppression' in rule && rule.alert_suppression) {
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="alertSuppressionGroupByPropertyTitle">
-          <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL} />
-        </span>
-      ),
-      description: <SuppressAlertsByField fields={rule.alert_suppression.group_by} />,
-    });
+    if ('group_by' in rule.alert_suppression) {
+      definitionSectionListItems.push({
+        title: (
+          <span data-test-subj="alertSuppressionGroupByPropertyTitle">
+            <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL} />
+          </span>
+        ),
+        description: <SuppressAlertsByField fields={rule.alert_suppression.group_by} />,
+      });
+    }
 
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="alertSuppressionDurationPropertyTitle">
-          <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />
-        </span>
-      ),
-      description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
-    });
+    if (rule.type !== 'threshold' || alertSuppressionForThresholdRuleEnabled) {
+      definitionSectionListItems.push({
+        title: (
+          <span data-test-subj="alertSuppressionDurationPropertyTitle">
+            <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />
+          </span>
+        ),
+        description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
+      });
+    }
 
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="alertSuppressionSuppressionFieldPropertyTitle">
-          <AlertSuppressionTitle title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL} />
-        </span>
-      ),
-      description: (
-        <MissingFieldsStrategy
-          missingFieldsStrategy={rule.alert_suppression.missing_fields_strategy}
-        />
-      ),
-    });
+    if ('missing_fields_strategy' in rule.alert_suppression) {
+      definitionSectionListItems.push({
+        title: (
+          <span data-test-subj="alertSuppressionSuppressionFieldPropertyTitle">
+            <AlertSuppressionTitle title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL} />
+          </span>
+        ),
+        description: (
+          <MissingFieldsStrategy
+            missingFieldsStrategy={rule.alert_suppression.missing_fields_strategy}
+          />
+        ),
+      });
+    }
   }
 
   if ('new_terms_fields' in rule && rule.new_terms_fields && rule.new_terms_fields.length > 0) {
@@ -733,10 +742,15 @@ export const RuleDefinitionSection = ({
     ruleType: rule.type,
   });
 
+  const alertSuppressionForThresholdRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForThresholdRuleEnabled'
+  );
+
   const definitionSectionListItems = prepareDefinitionSectionListItems(
     rule,
     isInteractive,
-    savedQuery
+    savedQuery,
+    { alertSuppressionForThresholdRuleEnabled }
   );
 
   return (
