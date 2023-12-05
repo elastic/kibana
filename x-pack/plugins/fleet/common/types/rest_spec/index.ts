@@ -14,7 +14,6 @@ export * from './download_sources';
 export * from './enrollment_api_key';
 export * from './epm';
 export * from './error';
-export * from './fleet_setup';
 export * from './output';
 export * from './package_policy';
 export * from './settings';

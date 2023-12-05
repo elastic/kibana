@@ -198,4 +198,4 @@ export type {
 } from './types';
 
 export { ElasticsearchAssetType } from './types';
-export { PostFleetSetupResponse } from './api';
+export { PostFleetSetupResponse, GetFleetStatusResponse } from './api';

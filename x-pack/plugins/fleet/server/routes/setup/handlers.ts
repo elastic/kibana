@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { PostFleetSetupResponse } from '../../../common';
+import type { PostFleetSetupResponse, GetFleetStatusResponse } from '../../../common';
 
 import { appContextService } from '../../services';
-import type { GetFleetStatusResponse } from '../../../common/types';
 import { formatNonFatalErrors, setupFleet } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import { defaultFleetErrorHandler } from '../../errors';
