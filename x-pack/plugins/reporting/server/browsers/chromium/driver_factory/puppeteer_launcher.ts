@@ -5,25 +5,30 @@
  * 2.0.
  */
 
-import puppeteer from 'puppeteer';
+import puppeteer, { type PuppeteerLaunchOptions } from 'puppeteer';
 
-/**
- * This function exists as a JS file in order to prevent the v4.1.3 TypeScript compiler from interpreting types
- * in the Puppeteer node module.
- */
+import { CaptureConfig } from '../../../../server/types';
 
-export async function launch(
+type LaunchOptions = Pick<PuppeteerLaunchOptions, 'userDataDir' | 'protocolTimeout'> & {
+  browserConfig: CaptureConfig['browser']['chromium'];
+  binaryPath: PuppeteerLaunchOptions['executablePath'];
+  chromiumArgs: PuppeteerLaunchOptions['args'];
+  viewport: PuppeteerLaunchOptions['defaultViewport'];
+  browserTimezone?: string;
+};
+
+export async function launch({
   browserConfig,
   userDataDir,
   binaryPath,
   chromiumArgs,
   viewport,
   browserTimezone,
-  protocolTimeout
-) {
+  protocolTimeout,
+}: LaunchOptions) {
   return await puppeteer.launch({
     pipe: !browserConfig.inspect,
-    userDataDir: userDataDir,
+    userDataDir,
     executablePath: binaryPath,
     ignoreHTTPSErrors: true,
     handleSIGHUP: false,

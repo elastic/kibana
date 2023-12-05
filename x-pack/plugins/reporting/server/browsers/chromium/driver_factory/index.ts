@@ -24,7 +24,6 @@ import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
 import { getMetrics, Metrics } from './metrics';
-// @ts-ignore
 import { launch } from './puppeteer_launcher';
 
 interface CreatePageOptions {
@@ -99,15 +98,15 @@ export class HeadlessChromiumDriverFactory {
       let startMetrics: Metrics | undefined;
 
       try {
-        browser = await launch(
-          this.browserConfig,
-          this.userDataDir,
-          this.binaryPath,
+        browser = await launch({
+          browserConfig: this.browserConfig,
+          userDataDir: this.userDataDir,
+          binaryPath: this.binaryPath,
           chromiumArgs,
           viewport,
           browserTimezone,
-          this.protocolTimeout
-        );
+          protocolTimeout: this.protocolTimeout,
+        });
 
         page = await browser.newPage();
         devTools = await page.target().createCDPSession();
