@@ -14,5 +14,15 @@ export type GetDataStreamsStatsQuery = GetDataStreamsStatsParams['query'];
 export type GetDataStreamsStatsResponse =
   APIReturnType<`GET /internal/dataset_quality/data_streams/stats`>;
 export type DataStreamStatServiceResponse = DataStreamStat[];
-export type DataStreamStatType = GetDataStreamsStatsResponse['dataStreamsStats'][0];
 export type IntegrationType = GetDataStreamsStatsResponse['integrations'][0];
+export type DataStreamStatType = GetDataStreamsStatsResponse['dataStreamsStats'][0] & {
+  integration?: IntegrationType;
+};
+
+export type GetDataStreamsMalformedDocsStatsParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/malformed_docs`>['params'];
+export type GetDataStreamsMalformedDocsStatsQuery = GetDataStreamsMalformedDocsStatsParams['query'];
+export type GetDataStreamsMalformedDocsStatsResponse =
+  APIReturnType<`GET /internal/dataset_quality/data_streams/malformed_docs`>;
+export type DataStreamMalformedDocsStatServiceResponse = MalformedDocsStatType[];
+export type MalformedDocsStatType = GetDataStreamsMalformedDocsStatsResponse['malformedDocs'][0];

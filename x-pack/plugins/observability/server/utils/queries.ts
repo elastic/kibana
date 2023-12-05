@@ -9,7 +9,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-function isUndefinedOrNull(value: any): value is undefined | null {
+export function isUndefinedOrNull(value: any): value is undefined | null {
   return value === undefined || value === null;
 }
 
