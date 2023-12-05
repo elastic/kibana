@@ -34,7 +34,7 @@ export interface ServerlessPluginStart {
     definition: ProjectNavigationDefinition<LinkId, Id, ChildrenId>
   ): void;
   setProjectHome(homeHref: string): void;
-  setSideNavComponent: (navigation: SideNavComponent) => void;
+  setSideNavComponentDeprecated: (navigation: SideNavComponent) => void;
   getActiveNavigationNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
 }
 

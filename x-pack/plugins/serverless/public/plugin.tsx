@@ -74,8 +74,8 @@ export class ServerlessPlugin
     }
 
     return {
-      setSideNavComponent: (sideNavigationComponent) =>
-        project.setSideNavComponent(sideNavigationComponent),
+      setSideNavComponentDeprecated: (sideNavigationComponent) =>
+        project.setSideNavComponentDeprecated(sideNavigationComponent),
       setNavigationDeprecated: (projectNavigation) =>
         project.setNavigationDeprecated(projectNavigation),
       setNavigation: (definition) => project.setNavigation(definition),

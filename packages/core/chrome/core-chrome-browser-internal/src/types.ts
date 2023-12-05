@@ -94,7 +94,7 @@ export interface InternalChromeStart extends ChromeStart {
      *
      * Use {@link ServerlessPluginStart.setSideNavComponent} to set custom project navigation.
      */
-    setSideNavComponent(component: SideNavComponent | null): void;
+    setSideNavComponentDeprecated(component: SideNavComponent | null): void;
 
     /**
      * Set project breadcrumbs

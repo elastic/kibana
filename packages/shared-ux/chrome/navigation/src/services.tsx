@@ -91,7 +91,7 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
     deepLinks$,
     navigateToUrl,
     navIsOpen: true,
-    onProjectNavigationChange: serverless.setNavigation,
+    onProjectNavigationChange: serverless.setNavigationDeprecated,
     activeNodes$: serverless.getActiveNavigationNodes$(),
     cloudLinks,
     isSideNavCollapsed,

@@ -36,12 +36,12 @@ export const startNavigation = (services: Services) => {
 
   if (services.experimentalFeatures.platformNavEnabled) {
     const SideNavComponentWithServices = withServicesProvider(SecuritySideNavComponent, services);
-    serverless.setSideNavComponent(SideNavComponentWithServices);
+    serverless.setSideNavComponentDeprecated(SideNavComponentWithServices);
   } else {
     projectNavigationTree.getChromeNavigationTree$().subscribe((chromeNavigationTree) => {
       serverless.setNavigationDeprecated({ navigationTree: chromeNavigationTree });
     });
-    serverless.setSideNavComponent(getSecuritySideNavComponent(services));
+    serverless.setSideNavComponentDeprecated(getSecuritySideNavComponent(services));
   }
   management.setIsSidebarEnabled(false);
 

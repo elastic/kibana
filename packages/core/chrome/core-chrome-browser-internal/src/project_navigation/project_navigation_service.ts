@@ -135,7 +135,7 @@ export class ProjectNavigationService {
       getActiveNodes$: () => {
         return this.activeNodes$.pipe(takeUntil(this.stop$));
       },
-      setProjectSideNavComponent: (component: SideNavComponent | null) => {
+      setSideNavComponentDeprecated: (component: SideNavComponent | null) => {
         this.customProjectSideNavComponent$.next({ current: component });
       },
       getProjectSideNavComponent$: () => {

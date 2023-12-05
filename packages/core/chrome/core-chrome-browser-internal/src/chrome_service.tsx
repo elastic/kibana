@@ -265,9 +265,9 @@ export class ChromeService {
       }
     };
 
-    const setProjectSideNavComponent = (component: ISideNavComponent | null) => {
+    const setSideNavComponentDeprecated = (component: ISideNavComponent | null) => {
       validateChromeStyle();
-      projectNavigation.setProjectSideNavComponent(component);
+      projectNavigation.setSideNavComponentDeprecated(component);
     };
 
     const setProjectNavigationDeprecated = (config: ChromeProjectNavigation) => {
@@ -539,7 +539,7 @@ export class ChromeService {
         setProjectName,
         setNavigationDeprecated: setProjectNavigationDeprecated,
         setNavigation: setProjectNavigation,
-        setSideNavComponent: setProjectSideNavComponent,
+        setSideNavComponentDeprecated,
         setBreadcrumbs: setProjectBreadcrumbs,
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
       },
