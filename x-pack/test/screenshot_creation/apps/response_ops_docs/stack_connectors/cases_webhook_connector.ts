@@ -13,6 +13,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const actions = getService('actions');
   const testSubjects = getService('testSubjects');
+  const createCaseJson =
+    `{\n` +
+    `"fields": {\n` +
+    `  "summary": {{{case.title}}},\n` +
+    `"description": {{{case.description}}},\n` +
+    `"labels": {{{case.tags}}},\n` +
+    `"project": {"key": "ROC"},\n` +
+    `"issueType": {"id": "10024"}\n` +
+    `}`;
 
   describe('webhook case management connector', function () {
     beforeEach(async () => {
@@ -25,9 +34,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
       await actions.common.openNewConnectorForm('cases-webhook');
       await testSubjects.setValue('nameInput', 'Webhook Case Management test connector');
-      await testSubjects.setValue('webhookUserInput', 'testuser');
+      await testSubjects.setValue('webhookUserInput', 'testuser@example.com');
       await testSubjects.setValue('webhookPasswordInput', 'password');
       await commonScreenshots.takeScreenshot('cases-webhook-connector', screenshotDirectories);
+      await testSubjects.click('casesWebhookNext');
+      await testSubjects.setValue(
+        'webhookCreateUrlText',
+        'https://testing-jira.atlassian.net/rest/api/2/issue'
+      );
+      await testSubjects.setValue('actionJsonEditor', createCaseJson);
+      await testSubjects.setValue('createIncidentResponseKeyText', 'id');
+      await commonScreenshots.takeScreenshot(
+        'cases-webhook-connector-create-case',
+        screenshotDirectories,
+        1920,
+        1400
+      );
       await testSubjects.click('euiFlyoutCloseButton');
     });
   });
