@@ -16,7 +16,7 @@ import {
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getAlertsTableDefaultAlertActionsLazy } from '../../../../common/get_alerts_table_default_row_actions';
-import { AlertActionsProps } from './types';
+import type { AlertActionsProps } from '../../../../types';
 
 const actionsToolTip = i18n.translate('xpack.triggersActionsUI.alertsTable.moreActionsTextLabel', {
   defaultMessage: 'More actions',
