@@ -7,7 +7,6 @@
 
 import { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { noop } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ESQL_RESOURCE } from '../knowledge_base/constants';
@@ -149,7 +148,6 @@ export const postEvaluateRoute = (
                   langChainMessages,
                   llmType,
                   logger,
-                  onNewReplacements: noop,
                   request: skeletonRequest,
                   kbResource: ESQL_RESOURCE,
                   traceOptions: {

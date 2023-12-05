@@ -42,5 +42,6 @@ export const getAlertCountsTool = ({
 
       return JSON.stringify(result);
     },
+    tags: ['alerts', 'alerts-count'],
   });
 };

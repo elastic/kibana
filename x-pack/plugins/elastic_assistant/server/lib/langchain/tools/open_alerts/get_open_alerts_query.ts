@@ -7,19 +7,19 @@
 
 export const getOpenAlertsQuery = ({
   alertsIndexPattern,
+  allow,
   size,
 }: {
   alertsIndexPattern: string;
+  allow: string[];
   size: number;
 }) => ({
   allow_no_indices: true,
   body: {
-    fields: [
-      {
-        field: '*',
-        include_unmapped: true,
-      },
-    ],
+    fields: allow.map((field) => ({
+      field,
+      include_unmapped: true,
+    })),
     query: {
       bool: {
         filter: [

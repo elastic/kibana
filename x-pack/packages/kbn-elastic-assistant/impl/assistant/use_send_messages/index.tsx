@@ -11,7 +11,6 @@ import { useCallback, useState } from 'react';
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
 import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
-import { useSettingsUpdater } from '../settings/use_settings_updater/use_settings_updater';
 
 interface SendMessagesProps {
   allow?: string[];
@@ -33,9 +32,15 @@ interface UseSendMessages {
 }
 
 export const useSendMessages = (): UseSendMessages => {
-  const { alertsIndexPattern, assistantStreamingEnabled, ragOnAlerts } = useAssistantContext();
+  const {
+    alertsIndexPattern,
+    assistantStreamingEnabled,
+    defaultAllow,
+    defaultAllowReplacement,
+    ragOnAlerts,
+    knowledgeBase,
+  } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
-  const { defaultAllow, defaultAllowReplacement, knowledgeBase } = useSettingsUpdater();
 
   const sendMessages = useCallback(
     async ({ apiConfig, http, messages, onNewReplacements, replacements }: SendMessagesProps) => {

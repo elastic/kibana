@@ -37,7 +37,7 @@ export const getOpenAlertsTool = ({
   allow?: string[];
   allowReplacement?: string[];
   esClient: ElasticsearchClient;
-  onNewReplacements: (newReplacements: Record<string, string>) => void;
+  onNewReplacements?: (newReplacements: Record<string, string>) => void;
   replacements?: Record<string, string>;
   request: KibanaRequest<unknown, unknown, RequestBody>;
   size?: number;
@@ -57,6 +57,7 @@ export const getOpenAlertsTool = ({
     func: async () => {
       const query = getOpenAlertsQuery({
         alertsIndexPattern,
+        allow: allow ?? [],
         size,
       });
 
@@ -68,7 +69,7 @@ export const getOpenAlertsTool = ({
       const localOnNewReplacements = (newReplacements: Record<string, string>) => {
         localReplacements = { ...localReplacements, ...newReplacements }; // update the local state
 
-        onNewReplacements(localReplacements); // invoke the callback with the latest replacements
+        onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
       };
 
       return JSON.stringify(
@@ -84,5 +85,6 @@ export const getOpenAlertsTool = ({
         )
       );
     },
+    tags: ['alerts', 'open-alerts'],
   });
 };

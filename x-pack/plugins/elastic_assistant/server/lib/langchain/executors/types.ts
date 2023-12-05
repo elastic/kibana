@@ -25,7 +25,7 @@ export interface AgentExecutorParams {
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
-  onNewReplacements: (newReplacements: Record<string, string>) => void;
+  onNewReplacements?: (newReplacements: Record<string, string>) => void;
   replacements?: Record<string, string>;
   request: KibanaRequest<unknown, unknown, RequestBody>;
   size?: number;

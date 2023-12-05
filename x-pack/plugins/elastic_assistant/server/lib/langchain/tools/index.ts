@@ -23,7 +23,7 @@ export interface GetApplicableTools {
   chain: RetrievalQAChain;
   esClient: ElasticsearchClient;
   modelExists: boolean;
-  onNewReplacements: (newReplacements: Record<string, string>) => void;
+  onNewReplacements?: (newReplacements: Record<string, string>) => void;
   replacements?: Record<string, string>;
   request: KibanaRequest<unknown, unknown, RequestBody>;
   size?: number;

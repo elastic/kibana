@@ -9,7 +9,7 @@ import { EuiCommentProps } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit, uniq } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';

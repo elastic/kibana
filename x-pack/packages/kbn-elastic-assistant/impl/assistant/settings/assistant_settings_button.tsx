@@ -52,7 +52,6 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
       cleanupAndCloseModal();
       toasts?.addSuccess({
         iconType: 'check',
-        text: i18n.SETTINGS_UPDATED_TOAST_TEXT,
         title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
       });
     }, [cleanupAndCloseModal, toasts]);
