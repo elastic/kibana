@@ -19,7 +19,7 @@ import {
   DISCOVER_ESQL_INPUT_EXPAND,
 } from '../screens/discover';
 import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
-import { gotToEsqlTab } from './timeline';
+import { goToEsqlTab } from './timeline';
 
 export const switchDataViewTo = (dataviewName: string) => {
   openDataViewSwitcher();
@@ -49,7 +49,7 @@ export const waitForDiscoverGridToLoad = () => {
 export const selectCurrentDiscoverEsqlQuery = (
   discoverEsqlInput = DISCOVER_ESQL_EDITABLE_INPUT
 ) => {
-  gotToEsqlTab();
+  goToEsqlTab();
   cy.get(discoverEsqlInput).should('be.visible').click();
   cy.get(discoverEsqlInput).should('be.focused');
   cy.get(DISCOVER_ESQL_INPUT_EXPAND).click();

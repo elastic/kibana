@@ -20,7 +20,7 @@ import {
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
-import { closeTimeline, gotToEsqlTab, openActiveTimeline } from '../../../../tasks/timeline';
+import { closeTimeline, goToEsqlTab, openActiveTimeline } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { ALERTS, CSP_FINDINGS } from '../../../../screens/security_header';
 
@@ -39,7 +39,7 @@ describe(
       login();
       visitWithTimeRange(ALERTS_URL);
       openActiveTimeline();
-      gotToEsqlTab();
+      goToEsqlTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
     it('should not allow the dataview to be changed', () => {
@@ -56,7 +56,7 @@ describe(
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
       openActiveTimeline();
-      gotToEsqlTab();
+      goToEsqlTab();
 
       verifyDiscoverEsqlQuery(esqlQuery);
     });
@@ -67,7 +67,7 @@ describe(
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
       openActiveTimeline();
-      gotToEsqlTab();
+      goToEsqlTab();
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('host.name')).should('exist');
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('user.name')).should('exist');
     });
