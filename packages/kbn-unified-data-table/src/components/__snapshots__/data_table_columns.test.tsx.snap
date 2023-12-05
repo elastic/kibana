@@ -346,6 +346,7 @@ Array [
           "type": "default",
         }
       }
+      showColumnTokens={true}
     />,
     "displayAsText": "extension",
     "id": "extension",
@@ -629,6 +630,7 @@ Array [
           "type": "default",
         }
       }
+      showColumnTokens={true}
     />,
     "displayAsText": "message",
     "id": "message",
@@ -952,6 +954,7 @@ Array [
           "type": "default",
         }
       }
+      showColumnTokens={true}
     />,
     "displayAsText": "extension",
     "id": "extension",
@@ -1268,6 +1271,7 @@ Array [
           "type": "default",
         }
       }
+      showColumnTokens={true}
     />,
     "displayAsText": "message",
     "id": "message",

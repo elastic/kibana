@@ -16,5 +16,5 @@ import { renderCustomToolbar } from './render_custom_toolbar';
  * @constructor
  */
 export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
-  return <UnifiedDataTable renderCustomToolbar={renderCustomToolbar} {...props} />;
+  return <UnifiedDataTable showColumnTokens renderCustomToolbar={renderCustomToolbar} {...props} />;
 };

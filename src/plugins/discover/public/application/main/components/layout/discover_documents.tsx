@@ -419,6 +419,7 @@ function DiscoverDocumentsComponent({
                   totalHits={totalHits}
                   onFetchMoreRecords={onFetchMoreRecords}
                   componentsTourSteps={TOUR_STEPS}
+                  headerRowHeight={3}
                 />
               </CellActionsProvider>
             </div>
