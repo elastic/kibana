@@ -83,9 +83,11 @@ export class ResetSLO {
       throw err;
     }
 
-    const updatedSlo = await this.repository.save(
-      Object.assign({ ...slo, version: SLO_MODEL_VERSION, updatedAt: new Date() })
-    );
+    const updatedSlo = await this.repository.save({
+      ...slo,
+      version: SLO_MODEL_VERSION,
+      updatedAt: new Date(),
+    });
 
     return resetSLOResponseSchema.encode(updatedSlo);
   }
