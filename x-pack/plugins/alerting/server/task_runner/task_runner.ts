@@ -422,22 +422,29 @@ export class TaskRunner<
       );
     }
 
-    const maintenanceWindowIds = activeMaintenanceWindows
-      .filter(({ categoryIds }) => {
-        // If category IDs array doesn't exist: allow all
-        if (!Array.isArray(categoryIds)) {
-          return true;
-        }
-        // If category IDs array exist: check category
-        if ((categoryIds as string[]).includes(ruleType.category)) {
-          return true;
-        }
-        return false;
-      })
-      .map(({ id }) => id);
+    const maintenanceWindows = activeMaintenanceWindows.filter(({ categoryIds }) => {
+      // If category IDs array doesn't exist: allow all
+      if (!Array.isArray(categoryIds)) {
+        return true;
+      }
+      // If category IDs array exist: check category
+      if ((categoryIds as string[]).includes(ruleType.category)) {
+        return true;
+      }
+      return false;
+    });
 
-    if (maintenanceWindowIds.length) {
-      this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowIds);
+    const maintenanceWindowsWithoutScopedQuery = maintenanceWindows.filter(
+      ({ scopedQuery }) => !scopedQuery
+    );
+
+    const maintenanceWindowsWithoutScopedQueryIds = maintenanceWindowsWithoutScopedQuery.map(
+      ({ id }) => id
+    );
+
+    // Set the event log MW Id field the first time with MWs without scoped queries
+    if (maintenanceWindowsWithoutScopedQuery.length) {
+      this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
     }
 
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
@@ -520,7 +527,9 @@ export class TaskRunner<
               },
               logger: this.logger,
               flappingSettings,
-              ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
+              ...(maintenanceWindowsWithoutScopedQueryIds.length
+                ? { maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds }
+                : {}),
               getTimeRange: (timeWindow) =>
                 getTimeRange(this.logger, queryDelaySettings, timeWindow),
             })
@@ -563,20 +572,47 @@ export class TaskRunner<
     );
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-      alertsClient.processAndLogAlerts({
-        eventLogger: this.alertingEventLogger,
-        ruleRunMetricsStore,
-        shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+      alertsClient.processAlerts({
         flappingSettings,
         notifyOnActionGroupChange:
           notifyWhen === RuleNotifyWhen.CHANGE ||
           some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
-        maintenanceWindowIds,
+        maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
       });
     });
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
       await alertsClient.persistAlerts();
+    });
+
+    let updateAlertsMaintenanceWindowResult = null;
+
+    try {
+      updateAlertsMaintenanceWindowResult =
+        await alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery?.({
+          ruleId: rule.id,
+          spaceId,
+          executionUuid: this.executionId,
+          maintenanceWindows,
+        });
+    } catch (e) {
+      this.logger.debug(
+        `Failed to update alert matched by maintenance window scoped query for rule  ${ruleLabel}.`
+      );
+    }
+
+    // Set the event log MW ids again, this time including the ids that matched alerts with
+    // scoped query
+    if (updateAlertsMaintenanceWindowResult?.maintenanceWindowIds) {
+      this.alertingEventLogger.setMaintenanceWindowIds(
+        updateAlertsMaintenanceWindowResult.maintenanceWindowIds
+      );
+    }
+
+    alertsClient.logAlerts({
+      eventLogger: this.alertingEventLogger,
+      ruleRunMetricsStore,
+      shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
     });
 
     const executionHandler = new ExecutionHandler({
@@ -593,7 +629,6 @@ export class TaskRunner<
       previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       alertingEventLogger: this.alertingEventLogger,
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
-      maintenanceWindowIds,
       alertsClient,
     });
 

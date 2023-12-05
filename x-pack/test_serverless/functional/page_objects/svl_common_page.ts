@@ -15,6 +15,9 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
   const deployment = getService('deployment');
   const log = getService('log');
   const browser = getService('browser');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlCommonApi = getService('svlCommonApi');
 
   const delay = (ms: number) =>
     new Promise((resolve) => {
@@ -22,13 +25,54 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     });
 
   return {
+    async loginWithRole(role: string) {
+      await retry.waitForWithTimeout(
+        `Logging in by setting browser cookie for '${role}' role`,
+        30_000,
+        async () => {
+          log.debug(`Delete all the cookies in the current browser context`);
+          await browser.deleteAllCookies();
+          log.debug(`Setting the cookie for '${role}' role`);
+          const sidCookie = await svlUserManager.getSessionCookieForRole(role);
+          // Loading bootstrap.js in order to be on the domain that the cookie will be set for.
+          await browser.get(deployment.getHostPort() + '/bootstrap.js');
+          await browser.setCookie('sid', sidCookie);
+          // Cookie should be already set in the browsing context, navigating to the Home page
+          await browser.get(deployment.getHostPort());
+          // Verifying that we are logged in
+          if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
+            log.debug('userMenuButton found, login passed');
+          } else {
+            throw new Error(`Failed to login with cookie for '${role}' role`);
+          }
+
+          // Validating that the new cookie in the browser is set for the correct user
+          const browserCookies = await browser.getCookies();
+          if (browserCookies.length === 0) {
+            throw new Error(`The cookie is missing in browser context`);
+          }
+          const { body } = await supertestWithoutAuth
+            .get('/internal/security/me')
+            .set(svlCommonApi.getInternalRequestHeader())
+            .set('Cookie', `sid=${browserCookies[0].value}`);
+
+          const userData = await svlUserManager.getUserData(role);
+          // email returned from API call must match the email for the specified role
+          if (body.email === userData.email) {
+            log.debug(`The new cookie is properly set for  '${role}' role`);
+            return true;
+          } else {
+            throw new Error(
+              `Cookie is not set properly, expected email is '${userData.email}', but found '${body.email}'`
+            );
+          }
+        }
+      );
+    },
+
     async navigateToLoginForm() {
       const url = deployment.getHostPort() + '/login';
       await browser.get(url);
-      // ensure welcome screen won't be shown. This is relevant for environments which don't allow
-      // to use the yml setting, e.g. cloud
-      await browser.setLocalStorageItem('home:welcome:show', 'false');
-
       log.debug('Waiting for Login Form to appear.');
       await retry.waitForWithTimeout('login form', 10_000, async () => {
         return await pageObjects.security.isLoginFormVisible();
