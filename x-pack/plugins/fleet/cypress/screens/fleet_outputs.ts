@@ -176,16 +176,17 @@ export const resetKafkaOutputForm = () => {
   cy.getBySel(kafkaOutputFormValues.name.selector).clear();
   cy.get('[placeholder="Specify host"').clear();
   cy.getBySel(kafkaOutputFormValues.username.selector).clear();
-  cy.getBySel(kafkaOutputFormValues.password.selector).clear();
   cy.getBySel(kafkaOutputFormValues.defaultTopic.selector).clear();
   cy.getBySel(SETTINGS_OUTPUTS_KAFKA.COMPRESSION_SWITCH).click();
 };
 
-export const fillInKafkaOutputForm = () => {
+export const fillInKafkaOutputForm = (create?: boolean) => {
   cy.getBySel(kafkaOutputFormValues.name.selector).type(kafkaOutputFormValues.name.value);
   cy.get('[placeholder="Specify host"').clear().type('localhost:5000');
   cy.getBySel(kafkaOutputFormValues.username.selector).type(kafkaOutputFormValues.username.value);
-  cy.getBySel(kafkaOutputFormValues.password.selector).type(kafkaOutputFormValues.password.value);
+  if (create) {
+    cy.getBySel(kafkaOutputFormValues.password.selector).type(kafkaOutputFormValues.password.value);
+  }
   cy.getBySel(kafkaOutputFormValues.verificationMode.selector).select(
     kafkaOutputFormValues.verificationMode.value
   );
@@ -263,6 +264,9 @@ export const fillInKafkaOutputForm = () => {
 export const validateSavedKafkaOutputForm = () => {
   Object.keys(kafkaOutputFormValues).forEach((key: string) => {
     const { selector, value } = kafkaOutputFormValues[key as keyof typeof kafkaOutputFormValues];
+    if (selector === SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT) {
+      return;
+    }
     cy.getBySel(selector).should('have.value', value);
   });
 
@@ -289,7 +293,7 @@ export const validateOutputTypeChangeToKafka = (outputId: string) => {
   cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('kafka');
   cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION).click();
 
-  fillInKafkaOutputForm();
+  fillInKafkaOutputForm(true);
   cy.intercept('PUT', '**/api/fleet/outputs/**').as('saveOutput');
 
   cy.getBySel(SETTINGS_SAVE_BTN).click();

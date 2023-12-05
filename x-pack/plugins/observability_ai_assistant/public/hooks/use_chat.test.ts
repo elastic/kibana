@@ -6,7 +6,7 @@
  */
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { type RenderHookResult, renderHook, act } from '@testing-library/react-hooks';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { MessageRole } from '../../common';
 import type { ObservabilityAIAssistantChatService, PendingMessage } from '../types';
 import { type UseChatResult, useChat, type UseChatProps, ChatState } from './use_chat';
@@ -15,6 +15,11 @@ import * as useKibanaModule from './use_kibana';
 type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;
 
 const mockChatService: MockedChatService = {
+  analytics: {
+    optIn: jest.fn(),
+    reportEvent: jest.fn(),
+    telemetryCounter$: new Observable() as any,
+  },
   chat: jest.fn(),
   executeFunction: jest.fn(),
   getContexts: jest.fn().mockReturnValue([{ name: 'core', description: '' }]),
