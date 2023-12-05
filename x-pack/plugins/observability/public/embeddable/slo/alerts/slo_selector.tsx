@@ -40,9 +40,9 @@ export function SloSelector({ initialSlos, onSelected, hasError }: Props) {
   });
 
   useEffect(() => {
-    const isLoadedWithData = !isLoading && sloList!.results !== undefined;
+    const isLoadedWithData = !isLoading && sloList?.results !== undefined;
     const opts: Array<EuiComboBoxOptionOption<string>> = isLoadedWithData
-      ? mapSlosToOptions(sloList!.results!)
+      ? mapSlosToOptions(sloList?.results)
       : [];
     setOptions(opts);
   }, [isLoading, sloList]);

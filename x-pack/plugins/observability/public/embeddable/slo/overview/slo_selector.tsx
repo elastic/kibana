@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
@@ -58,7 +58,7 @@ export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
     onSelected(selectedSlo);
   };
 
-  const onSearchChange = useMemo(
+  const onSearchChange = useCallback(
     () =>
       debounce((value: string) => {
         setSearchValue(value);
