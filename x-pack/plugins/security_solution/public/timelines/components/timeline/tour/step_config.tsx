@@ -68,7 +68,6 @@ export const timelineTourSteps = [
           values={{
             saveButton: <EuiCode>{i18n.TIMELINE_TOUR_SAVE}</EuiCode>,
             editButton: <EuiCode>{i18n.TIMELINE_TOUR_EDIT}</EuiCode>,
-            saveAsNew: <EuiCode>{i18n.TIMELINE_TOUR_SAVE_AS_NEW}</EuiCode>,
           }}
         />
       </EuiText>

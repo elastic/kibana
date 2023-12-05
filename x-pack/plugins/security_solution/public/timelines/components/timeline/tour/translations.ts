@@ -73,13 +73,6 @@ export const TIMELINE_TOUR_OPEN = i18n.translate('xpack.securitySolution.timelin
   defaultMessage: 'Open',
 });
 
-export const TIMELINE_TOUR_SAVE_AS_NEW = i18n.translate(
-  'xpack.securitySolution.timeline.tour.saveAsNew',
-  {
-    defaultMessage: 'Save as new',
-  }
-);
-
 export const TIMELINE_TOUR_EDIT = i18n.translate('xpack.securitySolution.timeline.tour.edit', {
   defaultMessage: 'Edit',
 });
