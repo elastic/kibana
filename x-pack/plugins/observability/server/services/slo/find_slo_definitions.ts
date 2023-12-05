@@ -34,7 +34,7 @@ function toPagination(params: FindSLODefinitionsParams): Pagination {
   const perPage = Number(params.perPage);
 
   if (!isNaN(perPage) && perPage > MAX_PER_PAGE) {
-    throw new IllegalArgumentError(`perPage limit to ${MAX_PER_PAGE}`);
+    throw new IllegalArgumentError(`perPage limit set to ${MAX_PER_PAGE}`);
   }
 
   return {

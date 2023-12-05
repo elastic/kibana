@@ -149,7 +149,7 @@ describe('FindSLO', () => {
 
       await expect(findSLO.execute({ perPage: '5000' })).resolves.not.toThrow();
       await expect(findSLO.execute({ perPage: '5001' })).rejects.toThrowError(
-        'perPage limit to 5000'
+        'perPage limit set to 5000'
       );
     });
   });
