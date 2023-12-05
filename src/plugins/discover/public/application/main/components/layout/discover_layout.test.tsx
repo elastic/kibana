@@ -39,6 +39,7 @@ import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mo
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { act } from 'react-dom/test-utils';
 import { ErrorCallout } from '../../../../components/common/error_callout';
+import { PanelsToggle } from '../../../../components/panels_toggle';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -59,7 +60,7 @@ async function mountComponent(
     foundDocuments: true,
   }) as DataMain$
 ) {
-  const searchSourceMock = createSearchSourceMock({});
+  const searchSourceMock = createSearchSourceMock({ index: dataView });
   const services = createDiscoverServicesMock();
   const time = { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   services.data.query.timefilter.timefilter.getTime = () => time;
@@ -108,7 +109,7 @@ async function mountComponent(
 
   session.getSession$.mockReturnValue(new BehaviorSubject('123'));
 
-  stateContainer.appState.update({ interval: 'auto', query });
+  stateContainer.appState.update({ index: dataView.id, interval: 'auto', query });
   stateContainer.internalState.transitions.setDataView(dataView);
 
   const props = {
@@ -191,5 +192,7 @@ describe('Discover component', () => {
       }) as DataMain$
     );
     expect(component.find(ErrorCallout)).toHaveLength(1);
+    expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(false);
+    expect(component.find(PanelsToggle).prop('renderedFor')).toBe('prompt');
   }, 10000);
 });

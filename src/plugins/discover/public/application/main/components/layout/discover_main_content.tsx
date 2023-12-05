@@ -46,6 +46,7 @@ export interface DiscoverMainContentProps {
   onDropFieldToTable?: () => void;
   columns: string[];
   panelsToggle: ReactElement<PanelsToggleProps>;
+  isChartAvailable?: boolean; // it will be injected by UnifiedHistogram
 }
 
 export const DiscoverMainContent = ({
@@ -59,7 +60,7 @@ export const DiscoverMainContent = ({
   onDropFieldToTable,
   panelsToggle,
   isChartAvailable,
-}: DiscoverMainContentProps & { isChartAvailable?: boolean }) => {
+}: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
 
   const setDiscoverViewMode = useCallback(
