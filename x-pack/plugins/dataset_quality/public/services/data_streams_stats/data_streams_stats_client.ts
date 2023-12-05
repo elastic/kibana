@@ -13,10 +13,6 @@ import {
   getDataStreamsStatsResponseRt,
 } from '../../../common/api_types';
 import {
-  DATA_STREAMS_MALFORMED_STATS_URL,
-  DATA_STREAMS_STATS_URL,
-} from '../../../common/constants';
-import {
   DataStreamStatServiceResponse,
   GetDataStreamsMalformedDocsStatsQuery,
   GetDataStreamsMalformedDocsStatsResponse,
@@ -34,7 +30,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     params: GetDataStreamsStatsQuery = { type: 'logs' }
   ): Promise<DataStreamStatServiceResponse> {
     const response = await this.http
-      .get<GetDataStreamsStatsResponse>(DATA_STREAMS_STATS_URL, {
+      .get<GetDataStreamsStatsResponse>('/internal/dataset_quality/data_streams/stats', {
         query: params,
       })
       .catch((error) => {
@@ -58,12 +54,15 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
 
   public async getDataStreamsMalformedStats(params: GetDataStreamsMalformedDocsStatsQuery) {
     const response = await this.http
-      .get<GetDataStreamsMalformedDocsStatsResponse>(DATA_STREAMS_MALFORMED_STATS_URL, {
-        query: {
-          ...params,
-          type: 'logs',
-        },
-      })
+      .get<GetDataStreamsMalformedDocsStatsResponse>(
+        '/internal/dataset_quality/data_streams/malformed_docs',
+        {
+          query: {
+            ...params,
+            type: 'logs',
+          },
+        }
+      )
       .catch((error) => {
         throw new GetDataStreamsStatsError(
           `Failed to fetch data streams malformed stats": ${error}`
