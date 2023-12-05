@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { AnalyticsServiceStart, CoreStart } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -13,12 +13,14 @@ import { createCallObservabilityAIAssistantAPI } from '../api';
 import type { ChatRegistrationFunction, ObservabilityAIAssistantService } from '../types';
 
 export function createService({
+  analytics,
   coreStart,
   enabled,
   licenseStart,
   securityStart,
   shareStart,
 }: {
+  analytics: AnalyticsServiceStart;
   coreStart: CoreStart;
   enabled: boolean;
   licenseStart: LicensingPluginStart;
@@ -38,7 +40,7 @@ export function createService({
     },
     start: async ({ signal }) => {
       const mod = await import('./create_chat_service');
-      return await mod.createChatService({ client, signal, registrations });
+      return await mod.createChatService({ analytics, client, signal, registrations });
     },
 
     callApi: client,

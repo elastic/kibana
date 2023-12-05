@@ -2040,6 +2040,243 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     serviceType: 'onedrive',
   },
+  oracle: {
+    configuration: {
+      host: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.oracle.configuration.hostLabel', {
+          defaultMessage: 'Host',
+        }),
+        options: [],
+        order: 1,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      port: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate('searchConnectors.nativeConnectors.oracle.configuration.portLabel', {
+          defaultMessage: 'Port',
+        }),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.INTEGER,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      username: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.usernameLabel',
+          {
+            defaultMessage: 'Username',
+          }
+        ),
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      password: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.passwordLabel',
+          {
+            defaultMessage: 'Password',
+          }
+        ),
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: true,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      database: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.databaseLabel',
+          {
+            defaultMessage: 'Database',
+          }
+        ),
+        options: [],
+        order: 5,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      tables: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTAREA,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.tablesLabel',
+          {
+            defaultMessage: 'Comma-separated list of tables',
+          }
+        ),
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.LIST,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      fetch_size: {
+        default_value: 50,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.fetch_sizeLabel',
+          {
+            defaultMessage: 'Rows fetched per request',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 50,
+      },
+      retry_count: {
+        default_value: 3,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.retry_countLabel',
+          {
+            defaultMessage: 'Retries per request',
+          }
+        ),
+        options: [],
+        order: 8,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 3,
+      },
+      oracle_protocol: {
+        default_value: 'TCP',
+        depends_on: [],
+        display: DisplayType.DROPDOWN,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.oracle_protocolLabel',
+          {
+            defaultMessage: 'Oracle connection protocol',
+          }
+        ),
+        options: [
+          {
+            label: 'TCP',
+            value: 'TCP',
+          },
+          {
+            label: 'TCPS',
+            value: 'TCPS',
+          },
+        ],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 'TCP',
+      },
+      oracle_home: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.oracle_homeLabel',
+          {
+            defaultMessage: 'Path to Oracle Home',
+          }
+        ),
+        options: [],
+        order: 10,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: '',
+      },
+      wallet_configuration_path: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.wallet_configuration_pathLabel',
+          {
+            defaultMessage: 'Path to SSL Wallet configuration files',
+          }
+        ),
+        options: [],
+        order: 11,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: '',
+      },
+    },
+    features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: false },
+        basic: { enabled: true },
+      },
+    },
+    name: i18n.translate('searchConnectors.nativeConnectors.oracle.name', {
+      defaultMessage: 'Oracle',
+    }),
+    serviceType: 'oracle',
+  },
   postgresql: {
     configuration: {
       host: {

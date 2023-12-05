@@ -514,6 +514,50 @@ describe('utils', () => {
       `);
     });
 
+    it('should create a filter for multiple status values', () => {
+      const status = [CaseStatuses.open, CaseStatuses['in-progress']];
+      expect(constructQueryOptions({ status }).filter).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.status",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "0",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.status",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "10",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "or",
+          "type": "function",
+        }
+      `);
+    });
+
     it.each([
       [CaseSeverity.LOW, CasePersistedSeverity.LOW],
       [CaseSeverity.MEDIUM, CasePersistedSeverity.MEDIUM],
@@ -538,6 +582,50 @@ describe('utils', () => {
           "type": "function",
         }
         `);
+    });
+
+    it('should create a filter for multiple severity values', () => {
+      const severity = [CaseSeverity.MEDIUM, CaseSeverity.CRITICAL];
+      expect(constructQueryOptions({ severity }).filter).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.severity",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "10",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.severity",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "30",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "or",
+          "type": "function",
+        }
+      `);
     });
 
     it('creates a filter for the time range', () => {
