@@ -36,7 +36,10 @@ describe('<AssetDocumentLeftPanel />', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('securitySolutionFlyoutTableTab')).toHaveAttribute('aria-selected', 'true');
+    expect(getByTestId('securitySolutionFlyoutAssetTableTab')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
   });
 
   it('should select json tab when path tab is json', () => {
@@ -48,7 +51,10 @@ describe('<AssetDocumentLeftPanel />', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('securitySolutionFlyoutJsonTab')).toHaveAttribute('aria-selected', 'true');
+    expect(getByTestId('securitySolutionFlyoutAssetJsonTab')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
   });
 
   it('should select table tab when path tab is table', () => {
@@ -60,6 +66,9 @@ describe('<AssetDocumentLeftPanel />', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('securitySolutionFlyoutTableTab')).toHaveAttribute('aria-selected', 'true');
+    expect(getByTestId('securitySolutionFlyoutAssetTableTab')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
   });
 });
