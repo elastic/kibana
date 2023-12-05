@@ -13,6 +13,7 @@ import {
   ErrorEmbeddable,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
+import { COMMON_SLO_GROUPING } from '../overview/slo_embeddable_factory';
 import { SLO_ALERTS_EMBEDDABLE, SLOAlertsEmbeddable } from './slo_alerts_embeddable';
 import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../../..';
 import { SloAlertsEmbeddableInput } from './types';
@@ -21,12 +22,7 @@ export type SloAlertsEmbeddableFactory = EmbeddableFactory;
 export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
   public readonly type = SLO_ALERTS_EMBEDDABLE;
 
-  public readonly grouping = [
-    {
-      id: 'slos',
-      getDisplayName: () => 'SLOs',
-    },
-  ];
+  public readonly grouping = COMMON_SLO_GROUPING;
 
   constructor(
     private getStartServices: CoreSetup<

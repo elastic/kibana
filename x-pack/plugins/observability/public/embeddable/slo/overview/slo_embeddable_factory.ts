@@ -18,18 +18,19 @@ import { SLOEmbeddable, SLO_EMBEDDABLE } from './slo_embeddable';
 import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../../..';
 import type { SloEmbeddableInput } from './types';
 
+export const COMMON_SLO_GROUPING = [
+  {
+    id: 'slos',
+    getDisplayName: () => 'SLOs',
+  },
+];
 export type SloOverviewEmbeddableFactory = EmbeddableFactory;
 export class SloOverviewEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition, IProvidesPanelPlacementSettings<SloEmbeddableInput>
 {
   public readonly type = SLO_EMBEDDABLE;
 
-  public readonly grouping = [
-    {
-      id: 'slos',
-      getDisplayName: () => 'SLOs',
-    },
-  ];
+  public readonly grouping = COMMON_SLO_GROUPING;
 
   constructor(
     private getStartServices: CoreSetup<
