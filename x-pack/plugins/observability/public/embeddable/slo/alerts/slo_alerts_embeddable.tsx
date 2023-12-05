@@ -77,6 +77,10 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
     this.kibanaVersion = kibanaVersion;
     this.reloadSubject = new Subject<boolean>();
 
+    this.getInput$().subscribe(() => {
+      this.reloadSubject.next(true);
+    });
+
     this.setTitle(
       this.input.title ||
         i18n.translate('xpack.observability.sloAlertsEmbeddable.displayTitle', {

@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
 export interface EmbeddableSloProps {
   sloId: string | undefined;
   sloInstanceId: string | undefined;
-  reloadSubject: Subject<boolean>;
+  reloadSubject?: Subject<boolean>;
   onRenderComplete?: () => void;
 }
 

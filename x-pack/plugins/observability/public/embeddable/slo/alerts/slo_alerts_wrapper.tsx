@@ -47,7 +47,7 @@ export function SloAlertsWrapper({
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
 
   useEffect(() => {
-    reloadSubject.subscribe(() => {
+    reloadSubject?.subscribe(() => {
       setLastRefreshTime(Date.now());
     });
   }, [reloadSubject]);

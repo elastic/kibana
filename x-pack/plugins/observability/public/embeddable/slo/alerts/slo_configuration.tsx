@@ -35,7 +35,12 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
   const onConfirmClick = () => onCreate({ slos: selectedSlos });
 
   return (
-    <EuiModal onClose={onCancel} style={{ minWidth: 550 }}>
+    <EuiModal
+      onClose={onCancel}
+      css={`
+        min-width: 550px;
+      `}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.translate('xpack.observability.sloEmbeddable.config.sloSelector.headerTitle', {
