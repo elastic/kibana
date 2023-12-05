@@ -1,0 +1,9 @@
+components:
+  schemas:
+    XsrfHeader:
+      schema:
+        type: string
+      in: header
+      name: kbn-xsrf
+      required: true
+      description: Kibana's anti Cross-Site Request Forgery token. Can be any string value.

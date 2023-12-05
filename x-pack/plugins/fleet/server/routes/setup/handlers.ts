@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { PostFleetSetupResponse } from '../../../common/api/fleet_internals/fleet.gen';
+
 import { appContextService } from '../../services';
-import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common/types';
+import type { GetFleetStatusResponse } from '../../../common/types';
 import { formatNonFatalErrors, setupFleet } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import { defaultFleetErrorHandler } from '../../errors';

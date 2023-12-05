@@ -12,6 +12,9 @@
     "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-fleet/cypress/results/mochawesome*.json > ../../../target/kibana-fleet/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-fleet/cypress/results/output.json --reportDir ../../../target/kibana-fleet/cypress/results && mkdir -p ../../../target/junit && cp ../../../target/kibana-fleet/cypress/results/*.xml ../../../target/junit/",
     "openapi:build": "npx @redocly/openapi-cli bundle --ext yaml --output ./common/openapi/bundled.yaml ./common/openapi/entrypoint.yaml && npx @redocly/openapi-cli bundle --ext json --output ./common/openapi/bundled.json ./common/openapi/entrypoint.yaml",
     "openapi:lint": "npx @redocly/cli lint ./common/openapi/bundled.yaml",
-    "openapi:speccy": "npx speccy lint ./common/openapi/bundled.yaml"
+    "openapi:speccy": "npx speccy lint ./common/openapi/bundled.yaml",
+    "openapi:generate": "node scripts/openapi/generate",
+    "openapi:generate:debug": "node --inspect-brk scripts/openapi/generate",
+    "openapi:bundle": "node scripts/openapi/bundle"
   }
 }

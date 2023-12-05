@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-export interface PostFleetSetupResponse {
-  isInitialized: boolean;
-  nonFatalErrors: Array<{ name: string; message: string }>;
-}
-
 export interface GetFleetStatusResponse {
   isReady: boolean;
   missing_requirements: Array<

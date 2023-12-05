@@ -6,8 +6,9 @@
  */
 import https from 'https';
 
-import type { TypeOf } from '@kbn/config-schema';
 import fetch from 'node-fetch';
+
+import { FleetServerHealthCheckRequestBody } from '../../../common/api/fleet_internals/fleet.gen';
 
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
@@ -15,7 +16,7 @@ import type { FleetAuthzRouter } from '../../services/security';
 import { APP_API_ROUTES } from '../../constants';
 import type { FleetRequestHandler } from '../../types';
 import { defaultFleetErrorHandler } from '../../errors';
-import { PostHealthCheckRequestSchema } from '../../types';
+import { buildRouteValidationWithZod } from '../../utils/build_validation/route_validation';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // get fleet server health check by host
@@ -29,7 +30,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostHealthCheckRequestSchema },
+        validate: {
+          request: { body: buildRouteValidationWithZod(FleetServerHealthCheckRequestBody) },
+        },
       },
       postHealthCheckHandler
     );
@@ -38,7 +41,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
 export const postHealthCheckHandler: FleetRequestHandler<
   undefined,
   undefined,
-  TypeOf<typeof PostHealthCheckRequestSchema.body>
+  FleetServerHealthCheckRequestBody
 > = async (context, request, response) => {
   try {
     const abortController = new AbortController();
