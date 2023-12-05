@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
+import ReactDOM from 'react-dom';
 import {
   AppNavLinkStatus,
   DEFAULT_APP_CATEGORIES,
@@ -15,10 +17,8 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import { createService } from './service/create_service';
+import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import type {
   ConfigSchema,
   ObservabilityAIAssistantPluginSetup,
@@ -27,6 +27,7 @@ import type {
   ObservabilityAIAssistantPluginStartDependencies,
   ObservabilityAIAssistantService,
 } from './types';
+import { MessageFeedback, MESSAGE_FEEDBACK_SCHEMA } from './analytics/schema';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -65,7 +66,6 @@ export class ObservabilityAIAssistantPlugin
           path: '/conversations/new',
         },
       ],
-
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services
         const [{ Application }, [coreStart, pluginsStart]] = await Promise.all([
@@ -88,6 +88,9 @@ export class ObservabilityAIAssistantPlugin
         };
       },
     });
+
+    coreSetup.analytics.registerEventType<MessageFeedback>(MESSAGE_FEEDBACK_SCHEMA);
+
     return {};
   }
 
@@ -96,11 +99,12 @@ export class ObservabilityAIAssistantPlugin
     pluginsStart: ObservabilityAIAssistantPluginStartDependencies
   ): ObservabilityAIAssistantPluginStart {
     const service = (this.service = createService({
+      analytics: coreStart.analytics,
       coreStart,
-      securityStart: pluginsStart.security,
-      licenseStart: pluginsStart.licensing,
-      shareStart: pluginsStart.share,
       enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
+      licenseStart: pluginsStart.licensing,
+      securityStart: pluginsStart.security,
+      shareStart: pluginsStart.share,
     }));
 
     service.register(async ({ signal, registerContext, registerFunction }) => {

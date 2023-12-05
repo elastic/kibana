@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 import React, { ComponentType } from 'react';
 import { Observable } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -23,6 +22,11 @@ import { buildFunctionElasticsearch, buildFunctionServiceSummary } from './build
 import { ObservabilityAIAssistantChatServiceProvider } from '../context/observability_ai_assistant_chat_service_provider';
 
 const chatService: ObservabilityAIAssistantChatService = {
+  analytics: {
+    optIn: () => {},
+    reportEvent: () => {},
+    telemetryCounter$: new Observable(),
+  },
   chat: (options: { messages: Message[]; connectorId: string }) => new Observable<PendingMessage>(),
   getContexts: () => [],
   getFunctions: () => [buildFunctionElasticsearch(), buildFunctionServiceSummary()],
@@ -33,12 +37,8 @@ const chatService: ObservabilityAIAssistantChatService = {
     signal: AbortSignal;
   }): Promise<{ content?: Serializable; data?: Serializable }> => ({}),
   renderFunction: (name: string, args: string | undefined, response: {}) => (
-    <div>
-      {i18n.translate('xpack.observabilityAiAssistant.chatService.div.helloLabel', {
-        defaultMessage: 'Hello',
-      })}
-      {name}
-    </div>
+    // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
+    <div>Hello! {name}</div>
   ),
   hasFunction: () => true,
   hasRenderFunction: () => true,
