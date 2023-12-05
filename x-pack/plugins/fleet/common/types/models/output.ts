@@ -52,6 +52,8 @@ interface NewBaseOutput {
   preset?: 'custom' | 'balanced';
 }
 
+export type OutputPreset = 'custom' | 'balanced' | 'throughput' | 'scale' | 'latency';
+
 export interface NewElasticsearchOutput extends NewBaseOutput {
   type: OutputType['Elasticsearch'];
 }

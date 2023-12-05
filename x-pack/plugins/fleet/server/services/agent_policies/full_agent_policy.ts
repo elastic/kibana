@@ -11,7 +11,10 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { safeLoad } from 'js-yaml';
 import deepMerge from 'deepmerge';
 
-import { getDefaultPresetForEsOutput } from '../../../common/services/output_helpers';
+import {
+  getDefaultPresetForEsOutput,
+  outputTypeSupportPresets,
+} from '../../../common/services/output_helpers';
 
 import type {
   FullAgentPolicy,
@@ -493,7 +496,7 @@ export function transformOutputToFullPolicyOutput(
     newOutput.service_token = output.service_token;
   }
 
-  if (output.type === outputType.Elasticsearch) {
+  if (outputTypeSupportPresets(output.type)) {
     newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '');
   }
 

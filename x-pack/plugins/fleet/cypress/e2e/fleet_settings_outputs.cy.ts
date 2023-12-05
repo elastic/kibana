@@ -24,6 +24,7 @@ import {
   resetKafkaOutputForm,
   selectESOutput,
   selectKafkaOutput,
+  selectRemoteESOutput,
   shouldDisplayError,
   validateOutputTypeChangeToKafka,
   validateSavedKafkaOutputForm,
@@ -65,6 +66,64 @@ describe('Outputs', () => {
           .should('have.value', 'balanced')
           .should('be.enabled');
       });
+
+      const cases = [
+        {
+          name: 'Preset: Balanced',
+          preset: 'balanced',
+        },
+        {
+          name: 'Preset: Custom',
+          preset: 'custom',
+        },
+        {
+          name: 'Preset: Throughput',
+          preset: 'throughput',
+        },
+        {
+          name: 'Preset: Scale',
+          preset: 'scale',
+        },
+        {
+          name: 'Preset: Latency',
+          preset: 'latency',
+        },
+      ];
+
+      for (const type of ['elasticsearch', 'remote_elasticsearch']) {
+        for (const testCase of cases) {
+          describe(`When type is ${type} and preset is ${testCase.name}`, () => {
+            it('successfully creates output', () => {
+              if (type === 'elasticsearch') {
+                selectESOutput();
+              } else if (type === 'remote_elasticsearch') {
+                selectRemoteESOutput();
+              }
+
+              cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).type(testCase.name);
+              cy.get(`[placeholder="Specify host URL"]`).type(
+                `http://${testCase.preset}.elasticsearch.com:9200`
+              );
+              cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT).select(testCase.preset);
+
+              cy.intercept('POST', '**/api/fleet/outputs').as('saveOutput');
+              cy.getBySel(SETTINGS_SAVE_BTN).click();
+
+              cy.wait('@saveOutput').then((interception) => {
+                const responseBody = interception.response?.body;
+                cy.visit(`/app/fleet/settings/outputs/${responseBody?.item?.id}`);
+              });
+
+              cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).should('have.value', testCase.name);
+              cy.get(`[placeholder="Specify host URL"]`).should(
+                'have.value',
+                `http://${testCase.preset}.elasticsearch.com:9200`
+              );
+              cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT).should('have.value', testCase.preset);
+            });
+          });
+        }
+      }
     });
   });
 

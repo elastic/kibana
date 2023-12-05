@@ -38,7 +38,12 @@ import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
 
-import { outputYmlIncludesReservedPerformanceKey } from '../../../../../../../common/services/output_helpers';
+import type { OutputType, ValueOf } from '../../../../../../../common/types';
+
+import {
+  outputTypeSupportPresets,
+  outputYmlIncludesReservedPerformanceKey,
+} from '../../../../../../../common/services/output_helpers';
 
 import { ExperimentalFeaturesService } from '../../../../../../services';
 
@@ -93,6 +98,9 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const isRemoteESOutput = inputs.typeInput.value === outputType.RemoteElasticsearch;
   const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
+  const supportsPresets = inputs.typeInput.value
+    ? outputTypeSupportPresets(inputs.typeInput.value as ValueOf<OutputType>)
+    : false;
 
   // Remote ES output not yet supported in serverless
   const isStateful = !cloud?.isServerlessEnabled;
@@ -555,7 +563,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               }
             />
           </EuiFormRow>
-          {isESOutput && (
+          {supportsPresets && (
             <>
               <EuiSpacer size="l" />
               <EuiFormRow
@@ -580,6 +588,9 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                     options={[
                       { value: 'balanced', text: 'Balanced' },
                       { value: 'custom', text: 'Custom' },
+                      { value: 'throughput', text: 'Throughput' },
+                      { value: 'scale', text: 'Scale' },
+                      { value: 'latency', text: 'Latency' },
                     ]}
                   />
                 </>
@@ -587,7 +598,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             </>
           )}
 
-          {isESOutput &&
+          {supportsPresets &&
             outputYmlIncludesReservedPerformanceKey(inputs.additionalYamlConfigInput.value) && (
               <>
                 <EuiSpacer size="s" />

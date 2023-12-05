@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NewOutput } from '../types';
+import type { NewOutput, OutputType, ValueOf } from '../types';
 
 export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 
@@ -128,4 +128,9 @@ export const RESERVED_CONFIG_YML_KEYS = [
   'flush.timeout',
   'compression',
   'idle_timeout',
+];
+
+export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.RemoteElasticsearch,
 ];

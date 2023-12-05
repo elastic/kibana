@@ -23,6 +23,7 @@ import pMap from 'p-map';
 
 import {
   getDefaultPresetForEsOutput,
+  outputTypeSupportPresets,
   outputYmlIncludesReservedPerformanceKey,
 } from '../../common/services/output_helpers';
 
@@ -443,7 +444,7 @@ class OutputService {
       }
     }
 
-    if (output.type === outputType.Elasticsearch) {
+    if (outputTypeSupportPresets(data.type)) {
       if (
         data.preset === 'balanced' &&
         outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '')
@@ -778,7 +779,7 @@ class OutputService {
 
     const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, ['ssl', 'secrets']) };
 
-    if (updateData.type === outputType.Elasticsearch) {
+    if (updateData.type && outputTypeSupportPresets(updateData.type)) {
       if (
         updateData.preset === 'balanced' &&
         outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '')
@@ -1017,7 +1018,7 @@ class OutputService {
     const outputs = await this.list(soClient);
 
     await pMap(
-      outputs.items.filter((output) => output.type === outputType.Elasticsearch && !output.preset),
+      outputs.items.filter((output) => outputTypeSupportPresets(output.type) && !output.preset),
       async (output) => {
         const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '');
 

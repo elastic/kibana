@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { AgentPolicy } from '../types';
+import type { AgentPolicy, OutputType, ValueOf } from '../types';
 import {
   FLEET_APM_PACKAGE,
   FLEET_SERVER_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   outputType,
+  OUTPUT_TYPES_WITH_PRESET_SUPPORT,
   RESERVED_CONFIG_YML_KEYS,
 } from '../constants';
 
@@ -45,4 +46,8 @@ export function getDefaultPresetForEsOutput(configYaml: string): 'balanced' | 'c
   }
 
   return 'balanced';
+}
+
+export function outputTypeSupportPresets(type: ValueOf<OutputType>) {
+  return OUTPUT_TYPES_WITH_PRESET_SUPPORT.includes(type);
 }

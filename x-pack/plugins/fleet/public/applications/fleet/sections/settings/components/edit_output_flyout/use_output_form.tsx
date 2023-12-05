@@ -876,6 +876,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               hosts: elasticsearchUrlInput.value,
               is_default: false,
               is_default_monitoring: defaultMonitoringOutputInput.value,
+              preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
               service_token: serviceTokenInput.value || undefined,
               ...(!serviceTokenInput.value &&

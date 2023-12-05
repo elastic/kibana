@@ -21,6 +21,12 @@ export const selectESOutput = () => {
   cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('elasticsearch');
 };
 
+export const selectRemoteESOutput = () => {
+  visit('/app/fleet/settings');
+  cy.getBySel(SETTINGS_OUTPUTS.ADD_BTN).click();
+  cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('remote_elasticsearch');
+};
+
 export const selectKafkaOutput = () => {
   visit('/app/fleet/settings');
   cy.getBySel(SETTINGS_OUTPUTS.ADD_BTN).click();
