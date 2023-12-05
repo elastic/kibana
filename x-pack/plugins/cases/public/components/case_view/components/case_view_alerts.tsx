@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
 import type { ValidFeatureId } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { GENERAL_CASES_OWNER, SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import type { CaseUI } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
 import { getManualAlertIds } from './helpers';
@@ -34,18 +34,19 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     [alertIds]
   );
 
-  const { isLoading: isLoadingAlertFeatureIds, data: alertFeatureIds } = useGetFeatureIds(
+  const { isLoading: isLoadingAlertFeatureIds, data: alertData } = useGetFeatureIds(
     alertIds,
-    alertIdsQuery,
     caseData.owner !== SECURITY_SOLUTION_OWNER
   );
 
-  let configId = caseData.owner;
-  if (caseData.owner === SECURITY_SOLUTION_OWNER) {
-    configId = `${caseData.owner}-case`;
-  } else if (caseData.owner === GENERAL_CASES_OWNER && alertFeatureIds.includes('ml')) {
-    configId = `mlAlerts`;
-  }
+  const configId =
+    caseData.owner === SECURITY_SOLUTION_OWNER
+      ? `${caseData.owner}-case`
+      : !isLoadingAlertFeatureIds
+      ? triggersActionsUi.alertsTableConfigurationRegistry.getAlertConfigIdPerRuleType(
+          alertData?.ruleTypeIds ?? []
+        )
+      : '';
 
   const alertStateProps = useMemo(
     () => ({
@@ -54,7 +55,7 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
       id: `case-details-alerts-${caseData.owner}`,
       featureIds: (caseData.owner === SECURITY_SOLUTION_OWNER
         ? [AlertConsumers.SIEM]
-        : alertFeatureIds ?? []) as ValidFeatureId[],
+        : alertData?.featureIds ?? []) as ValidFeatureId[],
       query: alertIdsQuery,
       showAlertStatusWithFlapping: caseData.owner !== SECURITY_SOLUTION_OWNER,
     }),
@@ -62,7 +63,7 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
       triggersActionsUi.alertsTableConfigurationRegistry,
       configId,
       caseData.owner,
-      alertFeatureIds,
+      alertData?.featureIds,
       alertIdsQuery,
     ]
   );

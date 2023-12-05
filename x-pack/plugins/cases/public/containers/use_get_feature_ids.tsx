@@ -11,11 +11,16 @@ import { useMemo } from 'react';
 import type { ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';
 import * as i18n from './translations';
-import type { FeatureIdsResponse } from './api';
 import { getFeatureIds } from './api';
 import { casesQueriesKeys } from './constants';
+import type { FeatureIdsResponse } from './types';
 
-const featureIdsToMap = (data: FeatureIdsResponse): string[] => {
+interface UseGetFeatureIdsResponse {
+  featureIds: string[];
+  ruleTypeIds: string[];
+}
+
+const featureIdsToMap = (data: FeatureIdsResponse): UseGetFeatureIdsResponse => {
   const localFeatureIds = new Set<string>();
   data?.aggregations?.consumer?.buckets?.forEach(
     ({ key, doc_count: docCount }: { key: string; doc_count: number }) => {
@@ -31,23 +36,31 @@ const featureIdsToMap = (data: FeatureIdsResponse): string[] => {
       }
     }
   );
-  return [...localFeatureIds];
+  const ruleTypeIds =
+    data?.aggregations?.ruleTypeIds?.buckets
+      ?.filter(({ doc_count: docCount }: { doc_count: number }) => docCount > 0)
+      .map(({ key }: { key: string }) => key) ?? [];
+
+  return { featureIds: [...localFeatureIds], ruleTypeIds };
 };
 
-export const useGetFeatureIds = (
-  alertIds: string[],
-  alertIdsQuery: {
-    ids: {
-      values: string[];
-    };
-  },
-  enabled: boolean
-) => {
+export const useGetFeatureIds = (alertIds: string[], enabled: boolean) => {
   const { showErrorToast } = useCasesToast();
-  const { data, isInitialLoading, isLoading } = useQuery<FeatureIdsResponse, ServerError, string[]>(
+  const { data, isInitialLoading, isLoading } = useQuery<
+    FeatureIdsResponse,
+    ServerError,
+    UseGetFeatureIdsResponse
+  >(
     casesQueriesKeys.alertFeatureIds(alertIds),
     ({ signal }) => {
-      return getFeatureIds({ query: alertIdsQuery, signal });
+      return getFeatureIds({
+        query: {
+          ids: {
+            values: alertIds,
+          },
+        },
+        signal,
+      });
     },
     {
       select: featureIdsToMap,

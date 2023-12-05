@@ -69,4 +69,5 @@ export const getAlertsTableConfiguration = (
     const { header, body, footer } = useGetAlertFlyoutComponents(observabilityRuleTypeRegistry);
     return { header, body, footer };
   },
+  ruleTypeIds: observabilityRuleTypeRegistry.list(),
 });

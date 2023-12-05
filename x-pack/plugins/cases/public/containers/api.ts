@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import type { User } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
@@ -72,6 +71,7 @@ import {
 import type {
   ActionLicense,
   CaseUI,
+  FeatureIdsResponse,
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
   UserActionUI,
@@ -479,18 +479,6 @@ export const deleteFileAttachments = async ({
   });
 };
 
-export type FeatureIdsResponse = estypes.SearchResponse<
-  unknown,
-  {
-    consumer: {
-      buckets: Array<{ key: string; doc_count: number }>;
-    };
-    producer: {
-      buckets: Array<{ key: string; doc_count: number }>;
-    };
-  }
->;
-
 export const getFeatureIds = async ({
   query,
   signal,
@@ -515,6 +503,12 @@ export const getFeatureIds = async ({
         producer: {
           terms: {
             field: ALERT_RULE_PRODUCER,
+            size: 100,
+          },
+        },
+        ruleTypeIds: {
+          terms: {
+            field: ALERT_RULE_TYPE_ID,
             size: 100,
           },
         },

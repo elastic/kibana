@@ -27,6 +27,7 @@ export interface CellComponentProps {
   columnId: SystemCellId;
   isLoading: boolean;
   showAlertStatusWithFlapping: boolean;
+  caseAppId?: string;
 }
 
 export type CellComponent = React.FC<CellComponentProps>;

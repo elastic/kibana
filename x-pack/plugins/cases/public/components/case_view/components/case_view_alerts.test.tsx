@@ -30,6 +30,13 @@ describe('CaseUI View Page activity tab', () => {
     appMockRender = createAppMockRenderer();
     appMockRender.coreStart.triggersActionsUi.getAlertsStateTable =
       getAlertsStateTableMock.mockReturnValue(<div data-test-subj="alerts-table" />);
+    appMockRender.coreStart.triggersActionsUi.alertsTableConfigurationRegistry.register({
+      id: 'case-details-alerts-observability',
+      columns: [],
+      ruleTypeIds: ['log-threshold'],
+    });
+  });
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
@@ -60,7 +67,13 @@ describe('CaseUI View Page activity tab', () => {
 
   it('should call the alerts table with correct props for observability', async () => {
     const getFeatureIdsMock = jest.spyOn(api, 'getFeatureIds');
-    getFeatureIdsMock.mockResolvedValueOnce(['observability']);
+    getFeatureIdsMock.mockResolvedValueOnce({
+      aggregations: {
+        consumer: { buckets: [{ doc_count: 1, key: 'observability' }] },
+        producer: { buckets: [] },
+        ruleTypeIds: { buckets: [{ doc_count: 1, key: 'log-threshold' }] },
+      },
+    } as unknown as api.FeatureIdsResponse);
     appMockRender.render(
       <CaseViewAlerts
         caseData={{
@@ -73,7 +86,7 @@ describe('CaseUI View Page activity tab', () => {
     await waitFor(async () => {
       expect(getAlertsStateTableMock).toHaveBeenCalledWith({
         alertsTableConfigurationRegistry: expect.anything(),
-        configurationId: 'observability',
+        configurationId: 'case-details-alerts-observability',
         featureIds: ['observability'],
         id: 'case-details-alerts-observability',
         query: {
@@ -86,12 +99,23 @@ describe('CaseUI View Page activity tab', () => {
     });
   });
 
-  it('should call the getFeatureIds with the correct registration context', async () => {
+  it('should call the getFeatureIds with the correct alert ID', async () => {
     const getFeatureIdsMock = jest.spyOn(api, 'getFeatureIds');
-    appMockRender.render(<CaseViewAlerts caseData={caseData} />);
+    appMockRender.render(
+      <CaseViewAlerts
+        caseData={{
+          ...caseData,
+          owner: OBSERVABILITY_OWNER,
+        }}
+      />
+    );
     await waitFor(async () => {
       expect(getFeatureIdsMock).toHaveBeenCalledWith({
-        query: { registrationContext: ['matchme'] },
+        query: {
+          ids: {
+            values: ['alert-id-1'],
+          },
+        },
         signal: expect.anything(),
       });
     });
