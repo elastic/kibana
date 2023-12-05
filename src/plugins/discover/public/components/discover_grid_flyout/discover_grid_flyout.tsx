@@ -171,9 +171,9 @@ export function DiscoverGridFlyout({
 
   const contentActions = useMemo(
     () => ({
-      addFilter: onFilter,
-      addColumn,
-      removeColumn,
+      filter: onFilter,
+      onAddColumn: addColumn,
+      onRemoveColumn: removeColumn,
     }),
     [onFilter, addColumn, removeColumn]
   );
