@@ -58,7 +58,7 @@ export const KibanaNoDataPage = ({
       <NoDataViewsPrompt
         onDataViewCreated={onDataViewCreated}
         allowAdHocDataView={allowAdHocDataView}
-        showESQLView={Boolean(hasESData)}
+        showESQLView={Boolean(dataExists)}
       />
     );
   }

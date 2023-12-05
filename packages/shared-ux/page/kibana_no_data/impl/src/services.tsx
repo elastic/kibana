@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, useContext, useEffect, useMemo, useState } from 'react';
 import {
   NoDataViewsPromptProvider,
   NoDataViewsPromptKibanaProvider,
@@ -43,35 +43,43 @@ export const KibanaNoDataPageProvider: FC<KibanaNoDataPageServices> = ({
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependencies> = async ({
+export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependencies> = ({
   children,
   ...dependencies
 }) => {
   const { dataViews, discover, showESQLViewLocator } = dependencies;
-  const { defaultDataView } = await dataViews.getDefault({ displayErrors: false });
-  const params = {
-    query: {
-      esql: `from ${defaultDataView.getIndexPattern()} | limit 10`,
-    },
-    dataViewSpec: defaultDataView?.toSpec(),
-  };
+  const [defaultDataView, setDefaultDataView] = useState<any | null>(null);
+  useEffect(() => {
+    const temp = async () => {
+      setDefaultDataView(await dataViews.getDefaultDataView({ displayErrors: false }));
+    };
+    temp();
+  }, [dataViews]);
+  const params = useMemo(() => {
+    if (defaultDataView === null) return {};
+    return {
+      query: {
+        esql: `from ${defaultDataView.getIndexPattern()} | limit 10`,
+      },
+      dataViewSpec: defaultDataView?.toSpec(),
+    };
+  }, [defaultDataView]);
   const discoverLocation = discover.locator?.getLocation(params);
 
-  const value: Services[] = [
-    {
-      redirectToESQL: await showESQLViewLocator.navigate({
+  const value = {
+    redirectToESQL: () =>
+      showESQLViewLocator.navigate({
         query: {
           esql: `from ${defaultDataView?.getIndexPattern()} | limit 10`,
         },
         url: `/app/${discoverLocation.app}${discoverLocation.path}`,
       }),
-      hasESData: dataViews.hasData.hasESData,
-      hasUserDataView: dataViews.hasData.hasUserDataView,
-    },
-  ];
+    hasESData: dataViews.hasData.hasESData,
+    hasUserDataView: dataViews.hasData.hasUserDataView,
+  };
 
   return (
-    <KibanaNoDataPageContext.Provider value={...value}>
+    <KibanaNoDataPageContext.Provider value={value}>
       <NoDataViewsPromptKibanaProvider {...dependencies}>
         <NoDataCardKibanaProvider {...dependencies}>{children}</NoDataCardKibanaProvider>
       </NoDataViewsPromptKibanaProvider>

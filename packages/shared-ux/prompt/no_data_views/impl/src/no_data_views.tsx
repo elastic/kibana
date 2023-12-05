@@ -26,7 +26,8 @@ type CloseDataViewEditorFn = ReturnType<NoDataViewsPromptServices['openDataViewE
  */
 export const NoDataViewsPrompt = ({
   onDataViewCreated,
-  showESQLView = false,
+  // This component is called when there is ESData so we would want to default ESQL to true
+  showESQLView = true,
   allowAdHocDataView = false,
 }: NoDataViewsPromptProps) => {
   const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink, redirectToESQL } =

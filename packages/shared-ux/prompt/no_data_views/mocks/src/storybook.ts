@@ -38,7 +38,7 @@ export class StorybookMock extends AbstractStorybookMock<
     },
     showESQLView: {
       control: 'boolean',
-      defaultValue: false,
+      defaultValue: true,
     },
   };
   dependencies = [];
@@ -59,7 +59,7 @@ export class StorybookMock extends AbstractStorybookMock<
         action('openDataViewEditor')(options);
         return () => {};
       },
-      redirectToESQL: {},
+      redirectToESQL: () => {},
     };
   }
 }

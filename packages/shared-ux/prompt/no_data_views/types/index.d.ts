@@ -61,7 +61,7 @@ export interface NoDataViewsPromptKibanaDependencies {
     };
   };
   dataViews: {
-    getDefaultDataView: () => {
+    getDefaultDataView: ({ displayErrors: boolean }) => {
       defaultDataView: {
         getIndexPattern: () => Promise<string>;
         toSpec: () => Promise<boolean>;
