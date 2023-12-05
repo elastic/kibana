@@ -40,7 +40,7 @@ export function DocViewer({ docViews, ...renderProps }: DocViewerProps) {
   });
 
   if (!tabs.length) {
-    // There there's a minimum of 2 tabs active in Discover.
+    // There's a minimum of 2 tabs active in Discover.
     // This condition takes care of unit tests with 0 tabs.
     return null;
   }

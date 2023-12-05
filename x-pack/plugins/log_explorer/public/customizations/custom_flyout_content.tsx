@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { FlyoutDetail } from '../components/flyout_detail/flyout_detail';
 import { useLogExplorerCustomizationsContext } from '../hooks/use_log_explorer_customizations';
+import { LogDocument } from '../components/flyout_detail';
 
 export const CustomFlyoutContent = ({
   filter,
@@ -34,7 +35,7 @@ export const CustomFlyoutContent = ({
       <>
         {/* Apply custom Log Explorer detail */}
         <EuiFlexItem>
-          <FlyoutDetail actions={actions} dataView={dataView} doc={doc} />
+          <FlyoutDetail actions={actions} dataView={dataView} doc={doc as LogDocument} />
         </EuiFlexItem>
       </>
     ),
