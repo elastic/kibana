@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/public';
 import {
-  IContainer,
-  EmbeddableFactoryDefinition,
   EmbeddableFactory,
+  EmbeddableFactoryDefinition,
   ErrorEmbeddable,
+  IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { SLOAlertsEmbeddable, SLO_ALERTS_EMBEDDABLE } from './slo_alerts_embeddable';
+import { SLO_ALERTS_EMBEDDABLE, SLOAlertsEmbeddable } from './slo_alerts_embeddable';
 import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../../..';
 import { SloAlertsEmbeddableInput } from './types';
 
@@ -54,8 +54,7 @@ export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDe
     try {
       const [coreStart, pluginsStart] = await this.getStartServices();
       const deps = { ...coreStart, ...pluginsStart };
-      const kibanaVersion = this.kibanaVersion;
-      return new SLOAlertsEmbeddable(deps, initialInput, kibanaVersion, parent);
+      return new SLOAlertsEmbeddable(deps, initialInput, this.kibanaVersion, parent);
     } catch (e) {
       return new ErrorEmbeddable(e, initialInput, parent);
     }

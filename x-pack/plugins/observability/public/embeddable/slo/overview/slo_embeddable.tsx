@@ -65,7 +65,6 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
           defaultMessage: 'SLO Overview',
         })
     );
-    this.input.lastReloadRequestTime = Date.now();
 
     const { sloId, sloInstanceId } = this.getInput();
     const queryClient = new QueryClient();
@@ -89,6 +88,8 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
   }
 
   public reload() {
+    this.input.lastReloadRequestTime = Date.now();
+
     if (this.node) {
       this.render(this.node);
     }
