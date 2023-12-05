@@ -19,7 +19,6 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
-// import { toMountPoint } from '@kbn/react-kibana-mount';
 import { DeploymentDetailsModal, DeploymentDetailsProvider } from '@kbn/cloud/deployment_details';
 import type { ToMountPointParams } from '@kbn/react-kibana-mount';
 import { MountPoint } from '@kbn/core-mount-utils-browser';

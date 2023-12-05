@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ApplicationStart } from '@kbn/core-application-browser';
 import { css } from '@emotion/react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { GuideFilterValuesClassic } from '../../../../classic';
 import { GuideCardSolutions } from './guide_cards';
 
 const filterButtonCss = css`
@@ -31,7 +32,9 @@ const filterButtonCss = css`
 export type GuideFilterValues = GuideCardSolutions;
 export interface GuideFiltersProps {
   activeFilter: GuideFilterValues;
-  setActiveFilter: React.Dispatch<React.SetStateAction<GuideFilterValues>>;
+  setActiveFilter: React.Dispatch<
+    React.SetStateAction<GuideFilterValues | GuideFilterValuesClassic>
+  >;
   application: ApplicationStart;
   trackUiMetric: (type: UiCounterMetricType, eventNames: string | string[], count?: number) => void;
 }

@@ -125,6 +125,31 @@ describe('getting started', () => {
     expect((guideFilters.props() as GuideFiltersProps).activeFilter).toBe('search');
   });
 
+  test('should set default guide filter value to "all" for classic versions, if querystring parameter does NOT exist', async () => {
+    let component: ReactWrapper;
+
+    jest.mock('../../kibana_services', () => ({
+      getServices: () => ({
+        cloud: mockCloud,
+        chrome: mockChrome,
+        application: mockApplication,
+        share: mockShare,
+        guidedOnboardingService: mockApiService,
+      }),
+    }));
+
+    await act(async () => {
+      component = mountWithIntl(
+        <MemoryRouter>
+          <GettingStarted />
+        </MemoryRouter>
+      );
+    });
+
+    const guideFilters = component!.find('[data-test-subj="onboarding--guideFilters"]');
+    expect((guideFilters.props() as GuideFiltersProps).activeFilter).toBe('all');
+  });
+
   test('should auto-select guide filter value based on querystring parameter', async () => {
     const cloudDiscoveryUseCase = 'observability';
     let component: ReactWrapper;

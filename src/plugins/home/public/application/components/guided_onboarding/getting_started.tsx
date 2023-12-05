@@ -225,7 +225,6 @@ export const GettingStarted = () => {
     <GuideFilters
       application={application}
       activeFilter={filter as GuideFilterValues}
-      // @ts-ignore A/B testing type issue
       setActiveFilter={setFilter}
       data-test-subj="onboarding--guideFilters"
       trackUiMetric={trackUiMetric}
