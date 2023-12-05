@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import { PutSettingsRequestBody } from '../../../common/api/fleet_internals/settings.gen';
 
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { SETTINGS_API_ROUTES } from '../../constants';
 import type { FleetRequestHandler } from '../../types';
-import { PutSettingsRequestSchema, GetSettingsRequestSchema } from '../../types';
 import { defaultFleetErrorHandler } from '../../errors';
 import { settingsService, agentPolicyService, appContextService } from '../../services';
+import { buildRouteValidationWithZod } from '../../utils/build_validation/route_validation';
 
 export const getSettingsHandler: FleetRequestHandler = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
@@ -39,7 +39,7 @@ export const getSettingsHandler: FleetRequestHandler = async (context, request, 
 export const putSettingsHandler: FleetRequestHandler<
   undefined,
   undefined,
-  TypeOf<typeof PutSettingsRequestSchema.body>
+  PutSettingsRequestBody
 > = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
@@ -76,7 +76,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetSettingsRequestSchema },
+        validate: false,
       },
       getSettingsHandler
     );
@@ -90,7 +90,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PutSettingsRequestSchema },
+        validate: { request: { body: buildRouteValidationWithZod(PutSettingsRequestBody) } },
       },
       putSettingsHandler
     );

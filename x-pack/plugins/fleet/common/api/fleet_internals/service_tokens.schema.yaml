@@ -1,0 +1,32 @@
+openapi: 3.0.0
+tags: []
+info:
+  title: Fleet
+  description: OpenAPI schema for Fleet API endpoints
+  version: '2023-10-31'
+paths:
+  # /service-tokens:
+  #   $ref: paths/service_tokens_deprecated.yaml
+  /service_tokens:
+    post:
+      summary: Create service token
+      tags:
+        - Service tokens
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  value:
+                    type: string
+        '400':
+          $ref: ../components/responses/error.yaml#/components/schemas/GenericError
+      parameters:
+        - $ref: ../components/headers/kbn_xsrf.yaml#/components/schemas/XsrfHeader
+      operationId: GenerateServiceToken
+      x-codegen-enabled: true

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PostFleetSetupResponse } from '../../../common/api/fleet_internals/fleet.gen';
+import type { PostFleetSetupResponse } from '../../../common/api/fleet_internals/setup.gen';
 
 import { appContextService } from '../../services';
 import type { GetFleetStatusResponse } from '../../../common/types';

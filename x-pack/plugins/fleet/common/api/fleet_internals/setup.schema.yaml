@@ -13,40 +13,6 @@ servers:
   - url: 'http://localhost:5601/api/fleet'
     description: local
 paths:
-  /health_check:
-    post:
-      summary: Fleet Server health check
-      x-codegen-enabled: true
-      tags:
-        - Fleet internals
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  name:
-                    type: string
-                  status:
-                    type: string
-                  host:
-                    type: string
-        '400':
-          $ref: ../components/responses/error.yaml#/components/schemas/GenericError
-      operationId: FleetServerHealthCheck
-      parameters:
-        - $ref: ../components/headers/kbn_xsrf.yaml#/components/schemas/XsrfHeader
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                host:
-                  type: string
   /setup:
     post:
       summary: Initiate Fleet setup
@@ -93,9 +59,5 @@ paths:
       operationId: PostFleetSetup
       parameters:
         - $ref: ../components/headers/kbn_xsrf.yaml#/components/schemas/XsrfHeader
-  # /settings:
-  #   $ref: paths/settings.yaml
-  # /service-tokens:
-  #   $ref: paths/service_tokens_deprecated.yaml
-  # /service_tokens:
-  #   $ref: paths/service_tokens.yaml
+
+    # get:
