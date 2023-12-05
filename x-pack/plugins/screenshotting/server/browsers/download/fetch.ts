@@ -9,8 +9,8 @@ import Axios from 'axios';
 import { createHash } from 'crypto';
 import { closeSync, mkdirSync, openSync, writeSync } from 'fs';
 import { dirname } from 'path';
-import { finished, Readable } from 'stream';
-import { promisify } from 'util';
+import { Readable } from 'stream';
+import { finished } from 'stream/promises';
 import type { Logger } from '@kbn/core/server';
 
 /**
@@ -19,7 +19,7 @@ import type { Logger } from '@kbn/core/server';
 export async function fetch(url: string, path: string, logger?: Logger): Promise<string> {
   logger?.info(`Downloading ${url} to ${path}`);
 
-  const hash = createHash('md5');
+  const hash = createHash('sha256');
 
   mkdirSync(dirname(path), { recursive: true });
   const handle = openSync(path, 'w');
@@ -36,7 +36,7 @@ export async function fetch(url: string, path: string, logger?: Logger): Promise
       hash.update(chunk);
     });
 
-    await promisify(finished)(response.data, { writable: false });
+    await finished(response.data);
     logger?.info(`Downloaded ${url}`);
   } catch (error) {
     logger?.error(error);
