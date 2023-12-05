@@ -13,7 +13,7 @@ import { OptimisticConcurrency } from '../types/optimistic_concurrency';
 import { Connector, ConnectorDocument } from '../types/connectors';
 
 import { isIndexNotFoundException } from '../utils/identify_exceptions';
-import { CONNECTORS_INDEX } from '..';
+import { CONNECTORS_INDEX, CRAWLER_SERVICE_TYPE } from '..';
 import { isNotNullish } from '../utils/is_not_nullish';
 
 export const fetchConnectorById = async (
@@ -65,9 +65,33 @@ export const fetchConnectorByIndexName = async (
 
 export const fetchConnectors = async (
   client: ElasticsearchClient,
-  indexNames?: string[]
+  indexNames?: string[],
+  fetchOnlyCrawlers?: boolean,
+  searchQuery?: string
 ): Promise<Connector[]> => {
-  const query: QueryDslQueryContainer = indexNames
+  const q = searchQuery && searchQuery.length > 0 ? searchQuery : undefined;
+  const query: QueryDslQueryContainer = q
+    ? {
+        bool: {
+          should: [
+            {
+              wildcard: {
+                name: {
+                  value: `*${q}*`,
+                },
+              },
+            },
+            {
+              wildcard: {
+                index_name: {
+                  value: `*${q}*`,
+                },
+              },
+            },
+          ],
+        },
+      }
+    : indexNames
     ? { terms: { index_name: indexNames } }
     : { match_all: {} };
 
@@ -86,9 +110,18 @@ export const fetchConnectors = async (
       accumulator = accumulator.concat(hits);
     } while (hits.length >= 1000);
 
-    return accumulator
+    const result = accumulator
       .map(({ _source, _id }) => (_source ? { ..._source, id: _id } : undefined))
       .filter(isNotNullish);
+
+    if (fetchOnlyCrawlers !== undefined) {
+      return result.filter((hit) => {
+        return !fetchOnlyCrawlers
+          ? hit.service_type !== CRAWLER_SERVICE_TYPE
+          : hit.service_type === CRAWLER_SERVICE_TYPE;
+      });
+    }
+    return result;
   } catch (error) {
     if (isIndexNotFoundException(error)) {
       return [];
