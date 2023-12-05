@@ -51,6 +51,7 @@ type ShowAssistantOverlay = ({
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   assistantAvailability: AssistantAvailability;
+  assistantStreamingEnabled?: boolean;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   baseAllow: string[];
@@ -95,6 +96,7 @@ export interface AssistantProviderProps {
 export interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   assistantAvailability: AssistantAvailability;
+  assistantStreamingEnabled: boolean;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];
@@ -155,6 +157,7 @@ const AssistantContext = React.createContext<UseAssistantContext | undefined>(un
 export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   actionTypeRegistry,
   assistantAvailability,
+  assistantStreamingEnabled = false,
   assistantTelemetry,
   augmentMessageCodeBlocks,
   baseAllow,
@@ -284,6 +287,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     () => ({
       actionTypeRegistry,
       assistantAvailability,
+      assistantStreamingEnabled,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       allQuickPrompts: localStorageQuickPrompts ?? [],
@@ -324,6 +328,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     [
       actionTypeRegistry,
       assistantAvailability,
+      assistantStreamingEnabled,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       baseAllow,

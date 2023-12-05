@@ -57,7 +57,8 @@
     "@kbn/expressions-plugin",
     "@kbn/core-saved-objects-api-server",
     "@kbn/serverless",
-    "@kbn/field-formats-plugin"
+    "@kbn/field-formats-plugin",
+    "@kbn/triggers-actions-ui-types"
   ],
   "exclude": ["target/**/*"]
 }

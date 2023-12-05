@@ -12,7 +12,7 @@ import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 import { ApplicationStart } from '@kbn/core/public';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TableListView } from '@kbn/content-management-table-list-view';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { deleteSavedWorkspace, findSavedWorkspace } from '../helpers/saved_workspace_utils';
 import { getEditPath, getEditUrl, getNewPath, setBreadcrumbs } from '../services/url';
 import { GraphWorkspaceSavedObject } from '../types';

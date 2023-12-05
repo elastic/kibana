@@ -13,6 +13,7 @@ import {
   ALERT_CASE_IDS,
   ALERT_RULE_NAME,
   ALERT_RULE_UUID,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-data-utils';
 import {
@@ -64,6 +65,7 @@ const selectedIdsToTimelineItemMapper = (
         { field: ALERT_RULE_UUID, value: alert[ALERT_RULE_UUID] },
         { field: ALERT_CASE_IDS, value: alert[ALERT_CASE_IDS] ?? [] },
         { field: ALERT_WORKFLOW_TAGS, value: alert[ALERT_WORKFLOW_TAGS] ?? [] },
+        { field: ALERT_WORKFLOW_ASSIGNEE_IDS, value: alert[ALERT_WORKFLOW_ASSIGNEE_IDS] ?? [] },
       ],
       ecs: {
         _id: alert._id,
