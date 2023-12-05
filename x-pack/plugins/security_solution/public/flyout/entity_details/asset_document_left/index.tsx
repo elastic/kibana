@@ -10,12 +10,12 @@ import React, { memo, useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useRightPanelContext } from '../right/context';
-import { PanelHeader } from '../right/header';
-import type { RightPanelTabsType } from '../right/tabs';
-import { PanelContent } from '../right/content';
-import { JsonTab } from '../right/tabs/json_tab';
-import { TableTab } from '../right/tabs/table_tab';
+import { useRightPanelContext } from '../../document_details/right/context';
+import { PanelHeader } from '../../document_details/right/header';
+import type { RightPanelTabsType } from '../../document_details/right/tabs';
+import { PanelContent } from '../../document_details/right/content';
+import { JsonTab } from '../../document_details/right/tabs/json_tab';
+import { TableTab } from '../../document_details/right/tabs/table_tab';
 import { JSON_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './test_ids';
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 export const AssetDocumentLeftPanelKey: AssetDocumentLeftPanelProps['key'] =

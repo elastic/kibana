@@ -10,8 +10,8 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { AssetDocumentLeftPanel } from '.';
 import { JSON_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './test_ids';
-import { RightPanelContext } from '../right/context';
-import { mockContextValue } from '../right/mocks/mock_context';
+import { RightPanelContext } from '../../document_details/right/context';
+import { mockContextValue } from '../../document_details/right/mocks/mock_context';
 
 describe('<AssetDocumentLeftPanel />', () => {
   it('renders', () => {

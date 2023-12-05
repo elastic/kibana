@@ -17,7 +17,7 @@ import type { ManagedUserFields } from '../../../../../common/search_strategy/se
 
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { ONE_WEEK_IN_HOURS } from './constants';
-import { AssetDocumentLeftPanelKey } from '../../../../flyout/document_details/asset_document_left';
+import { AssetDocumentLeftPanelKey } from '../../../../flyout/entity_details/asset_document_left';
 import type { UserAssetTableType } from '../../../../explore/users/store/model';
 interface ManagedUserAccordionProps {
   children: React.ReactNode;
