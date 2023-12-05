@@ -40,7 +40,7 @@ export interface ConnectorCheckableProps {
   isDisabled: boolean;
   isTechPreview: boolean;
   name: string;
-  onConnectorSelect: (queryParams?: string) => void;
+  onConnectorSelect: (isNative?: boolean) => void;
   serviceType: string;
   showNativeBadge: boolean;
 }
@@ -140,7 +140,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                       key="native"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onConnectorSelect('connector_type=native');
+                        onConnectorSelect(true);
                       }}
                     >
                       {i18n.translate(
@@ -152,7 +152,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                       key="client"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onConnectorSelect('connector_type=connector_client');
+                        onConnectorSelect(false);
                       }}
                     >
                       {i18n.translate(

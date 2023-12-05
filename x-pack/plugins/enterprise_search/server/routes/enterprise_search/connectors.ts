@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import {
   fetchConnectors,
   fetchSyncJobsByConnectorId,
-  isConnectorType,
   putUpdateNative,
   updateConnectorConfiguration,
   updateConnectorNameAndDescription,
@@ -478,7 +477,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       path: '/internal/enterprise_search/connectors',
       validate: {
         query: schema.object({
-          connector_type: schema.maybe(schema.string()),
+          fetchCrawlersOnly: schema.maybe(schema.boolean()),
           from: schema.number({ defaultValue: 0, min: 0 }),
           searchQuery: schema.string({ defaultValue: '' }),
           size: schema.number({ defaultValue: 10, min: 0 }),
@@ -487,11 +486,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const { connector_type, from, size, searchQuery } = request.query;
-      let connectorType;
-      if (isConnectorType(connector_type)) {
-        connectorType = connector_type;
-      }
+      const { fetchCrawlersOnly, from, size, searchQuery } = request.query;
 
       let connectorResult;
       let connectorCountResult;
@@ -499,7 +494,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         connectorResult = await fetchConnectors(
           client.asCurrentUser,
           undefined,
-          connectorType,
+          fetchCrawlersOnly,
           searchQuery
         );
 

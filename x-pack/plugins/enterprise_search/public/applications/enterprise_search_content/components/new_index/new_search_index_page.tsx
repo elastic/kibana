@@ -12,9 +12,11 @@ import { useLocation, useParams } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorMode } from '@kbn/search-connectors';
-
-import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
+import {
+  CONNECTOR_CLIENTS_TYPE,
+  CONNECTOR_NATIVE_TYPE,
+  INGESTION_METHOD_IDS,
+} from '../../../../../common/constants';
 import { parseQueryParams } from '../../../shared/query_params';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
@@ -85,12 +87,10 @@ function getDescription(method: string): string {
   }
 }
 
-const parseConnectorTypeParam = (
-  queryString: string | string[] | null
-): ConnectorMode | undefined => {
+const parseIsNativeParam = (queryString: string | string[] | null): boolean | undefined => {
   const parsedStr = Array.isArray(queryString) ? queryString[0] : queryString;
-  if (parsedStr === 'native') return 'native';
-  if (parsedStr === 'connector_client') return 'connector_client';
+  if (parsedStr === CONNECTOR_NATIVE_TYPE) return true;
+  if (parsedStr === CONNECTOR_CLIENTS_TYPE) return false;
   return undefined;
 };
 
@@ -103,7 +103,7 @@ export const NewSearchIndexPage: React.FC = () => {
     ? inputServiceType[0]
     : inputServiceType || '';
 
-  const connectorType = parseConnectorTypeParam(inputConnectorType);
+  const isNative = parseIsNativeParam(inputConnectorType);
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -132,7 +132,7 @@ export const NewSearchIndexPage: React.FC = () => {
           {type === INGESTION_METHOD_IDS.CRAWLER && <MethodCrawler />}
           {type === INGESTION_METHOD_IDS.API && <MethodApi />}
           {type === INGESTION_METHOD_IDS.CONNECTOR && (
-            <MethodConnector serviceType={serviceType} connectorType={connectorType} />
+            <MethodConnector serviceType={serviceType} isNative={isNative} />
           )}
         </>
       }

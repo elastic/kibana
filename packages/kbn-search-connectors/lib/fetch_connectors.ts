@@ -10,10 +10,10 @@ import { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/ap
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import { OptimisticConcurrency } from '../types/optimistic_concurrency';
-import { Connector, ConnectorDocument, ConnectorType } from '../types/connectors';
+import { Connector, ConnectorDocument } from '../types/connectors';
 
 import { isIndexNotFoundException } from '../utils/identify_exceptions';
-import { CONNECTORS_INDEX } from '..';
+import { CONNECTORS_INDEX, CRAWLER_SERVICE_TYPE } from '..';
 import { isNotNullish } from '../utils/is_not_nullish';
 
 export const fetchConnectorById = async (
@@ -66,7 +66,7 @@ export const fetchConnectorByIndexName = async (
 export const fetchConnectors = async (
   client: ElasticsearchClient,
   indexNames?: string[],
-  connectorType?: ConnectorType,
+  fetchOnlyCrawlers?: boolean,
   searchQuery?: string
 ): Promise<Connector[]> => {
   const q = searchQuery && searchQuery.length > 0 ? searchQuery : undefined;
@@ -114,11 +114,11 @@ export const fetchConnectors = async (
       .map(({ _source, _id }) => (_source ? { ..._source, id: _id } : undefined))
       .filter(isNotNullish);
 
-    if (connectorType) {
+    if (fetchOnlyCrawlers !== undefined) {
       return result.filter((hit) => {
-        return connectorType === 'connector'
-          ? hit.service_type !== 'elastic-crawler'
-          : hit.service_type === 'elastic-crawler';
+        return !fetchOnlyCrawlers
+          ? hit.service_type !== CRAWLER_SERVICE_TYPE
+          : hit.service_type === CRAWLER_SERVICE_TYPE;
       });
     }
     return result;

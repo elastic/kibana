@@ -23,7 +23,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { handlePageChange } from '../../../shared/table_pagination';
-import { NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../routes';
+import {
+  NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH,
+  NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH,
+  NEW_INDEX_SELECT_CONNECTOR_PATH,
+} from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 import { SelectConnector } from '../new_index/select_connector/select_connector';
 
@@ -85,9 +89,7 @@ export const Connectors: React.FC = () => {
                   <EuiButton
                     key="newConnectorNative"
                     onClick={() => {
-                      KibanaLogic.values.navigateToUrl(
-                        NEW_INDEX_SELECT_CONNECTOR_PATH + '?filter=native'
-                      );
+                      KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH);
                     }}
                   >
                     {i18n.translate(
@@ -98,9 +100,7 @@ export const Connectors: React.FC = () => {
                   <EuiButton
                     key="newConnectorClient"
                     onClick={() => {
-                      KibanaLogic.values.navigateToUrl(
-                        NEW_INDEX_SELECT_CONNECTOR_PATH + '?filter=connector_client'
-                      );
+                      KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH);
                     }}
                   >
                     {i18n.translate(

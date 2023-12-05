@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Connector, ConnectorType } from '@kbn/search-connectors/types';
+import { Connector } from '@kbn/search-connectors/types';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -22,17 +22,17 @@ export interface ConnectorsActions {
   apiError: FetchConnectorsApiLogicActions['apiError'];
   apiSuccess: FetchConnectorsApiLogicActions['apiSuccess'];
   fetchConnectors({
-    connectorType,
+    fetchCrawlersOnly,
     from,
     size,
     searchQuery,
   }: {
-    connectorType: ConnectorType;
+    fetchCrawlersOnly: boolean;
     from: number;
     searchQuery?: string;
     size: number;
   }): {
-    connectorType: ConnectorType;
+    fetchCrawlersOnly: boolean;
     from: number;
     searchQuery?: string;
     size: number;
@@ -50,7 +50,7 @@ export interface ConnectorsValues {
   isLoading: boolean;
   meta: Meta;
   searchParams: {
-    connectorType: ConnectorType;
+    fetchCrawlersOnly: boolean;
     from: number;
     searchQuery?: string;
     size: number;
@@ -60,8 +60,8 @@ export interface ConnectorsValues {
 
 export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsActions>>({
   actions: {
-    fetchConnectors: ({ connectorType, from, size, searchQuery }) => ({
-      connectorType,
+    fetchConnectors: ({ fetchCrawlersOnly, from, size, searchQuery }) => ({
+      fetchCrawlersOnly,
       from,
       searchQuery,
       size,
@@ -91,14 +91,14 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
     ],
     searchParams: [
       {
-        connectorType: 'connector',
+        fetchCrawlersOnly: false,
         from: 0,
         searchQuery: '',
         size: 10,
       },
       {
-        apiSuccess: ({ connectorType, searchQuery }, { meta }) => ({
-          connectorType,
+        apiSuccess: ({ fetchCrawlersOnly, searchQuery }, { meta }) => ({
+          fetchCrawlersOnly,
           from: meta.page.from,
           searchQuery,
           size: meta.page.size,

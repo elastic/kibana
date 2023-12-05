@@ -13,8 +13,6 @@ import { EuiConfirmModal, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorMode } from '@kbn/search-connectors';
-
 import { Status } from '../../../../../../common/types/api';
 import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
@@ -35,11 +33,14 @@ import { errorToText } from '../utils/error_to_text';
 import { AddConnectorLogic } from './add_connector_logic';
 
 interface MethodConnectorProps {
-  connectorType?: ConnectorMode;
+  isNative?: boolean;
   serviceType: string;
 }
 
-export const MethodConnector: React.FC<MethodConnectorProps> = ({ serviceType, connectorType }) => {
+export const MethodConnector: React.FC<MethodConnectorProps> = ({
+  serviceType,
+  isNative: isNativeProp = true,
+}) => {
   const { apiReset, makeRequest } = useActions(AddConnectorApiLogic);
   const { error, status } = useValues(AddConnectorApiLogic);
   const { isModalVisible } = useValues(AddConnectorLogic);
@@ -55,9 +56,7 @@ export const MethodConnector: React.FC<MethodConnectorProps> = ({ serviceType, c
     BETA_CONNECTORS.find((connector) => connector.serviceType === serviceType)
   );
 
-  const isNative =
-    (isNativeAvailable && !connectorType) ||
-    Boolean(isNativeAvailable && connectorType && connectorType === 'native');
+  const isNative = isNativeAvailable && isNativeProp;
 
   const isGated = isNative && !isCloud && !hasPlatinumLicense;
 

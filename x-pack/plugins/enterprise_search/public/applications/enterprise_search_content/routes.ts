@@ -20,6 +20,8 @@ export const NEW_API_PATH = `${NEW_INDEX_PATH}/api`;
 export const NEW_ES_INDEX_PATH = `${NEW_INDEX_PATH}/elasticsearch`;
 export const NEW_DIRECT_UPLOAD_PATH = `${NEW_INDEX_PATH}/upload`;
 export const NEW_INDEX_SELECT_CONNECTOR_PATH = `${NEW_INDEX_PATH}/select_connector`;
+export const NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH = `${NEW_INDEX_PATH}/select_connector?filter=native`;
+export const NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH = `${NEW_INDEX_PATH}/select_connector?filter=connector_clients`;
 
 export const SEARCH_INDEX_PATH = `${SEARCH_INDICES_PATH}/:indexName`;
 export const SEARCH_INDEX_TAB_PATH = `${SEARCH_INDEX_PATH}/:tabId`;

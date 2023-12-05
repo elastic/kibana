@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Connector, ConnectorType } from '@kbn/search-connectors';
+import { Connector } from '@kbn/search-connectors';
 
 import { Meta } from '../../../../../common/types/pagination';
 
@@ -13,7 +13,7 @@ import { createApiLogic, Actions } from '../../../shared/api_logic/create_api_lo
 import { HttpLogic } from '../../../shared/http';
 
 export interface FetchConnectorsApiLogicArgs {
-  connectorType: ConnectorType;
+  fetchCrawlersOnly: boolean;
   from: number;
   searchQuery?: string;
   size: number;
@@ -26,14 +26,14 @@ export interface FetchConnectorsApiLogicResponse {
 }
 
 export const fetchConnectors = async ({
-  connectorType,
+  fetchCrawlersOnly,
   from,
   size,
   searchQuery,
 }: FetchConnectorsApiLogicArgs): Promise<FetchConnectorsApiLogicResponse> => {
   const isInitialRequest = from === 0 && !searchQuery;
   const route = '/internal/enterprise_search/connectors';
-  const query = { connector_type: connectorType, from, searchQuery, size };
+  const query = { fetchCrawlersOnly, from, searchQuery, size };
   const response = await HttpLogic.values.http.get<FetchConnectorsApiLogicResponse>(route, {
     query,
   });
