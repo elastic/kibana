@@ -22,6 +22,11 @@ import type {
 import { buildFunctionElasticsearch, buildFunctionServiceSummary } from './builders';
 
 const chatService: ObservabilityAIAssistantChatService = {
+  analytics: {
+    optIn: () => {},
+    reportEvent: () => {},
+    telemetryCounter$: new Observable(),
+  },
   chat: (options) => new Observable<PendingMessage>(),
   complete: (options) => new Observable<StreamingChatResponseEvent>(),
   getContexts: () => [],

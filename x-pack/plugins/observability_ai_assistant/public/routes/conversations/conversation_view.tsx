@@ -17,6 +17,7 @@ import { ObservabilityAIAssistantChatServiceProvider } from '../../context/obser
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import { useCurrentUser } from '../../hooks/use_current_user';
+import { useForceUpdate } from '../../hooks/use_force_update';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
@@ -94,6 +95,8 @@ export function ConversationView() {
 
   keepPreviousKeyRef.current = false;
 
+  const forceUpdate = useForceUpdate();
+
   const conversations = useAbortableAsync(
     ({ signal }) => {
       return service.callApi('POST /internal/observability_ai_assistant/conversations', {
@@ -146,10 +149,16 @@ export function ConversationView() {
             error={conversations.error}
             conversations={displayedConversations}
             onClickNewChat={() => {
-              observabilityAIAssistantRouter.push('/conversations/new', {
-                path: {},
-                query: {},
-              });
+              if (conversationId) {
+                observabilityAIAssistantRouter.push('/conversations/new', {
+                  path: {},
+                  query: {},
+                });
+              } else {
+                // clear the chat
+                chatBodyKeyRef.current = v4();
+                forceUpdate();
+              }
             }}
             onClickDeleteConversation={(id) => {
               confirmDeleteFunction()

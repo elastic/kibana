@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
@@ -41,6 +43,7 @@ import type { StreamingChatResponseEvent } from '../common/conversation_complete
 export type { CreateChatCompletionResponseChunk } from '../common/types';
 
 export interface ObservabilityAIAssistantChatService {
+  analytics: AnalyticsServiceStart;
   chat: (options: {
     messages: Message[];
     connectorId: string;

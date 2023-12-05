@@ -6,7 +6,7 @@
  */
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { type RenderHookResult, renderHook, act } from '@testing-library/react-hooks';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { MessageRole } from '../../common';
 import {
   ChatCompletionErrorCode,
@@ -23,6 +23,11 @@ type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;
 const mockChatService: MockedChatService = {
   chat: jest.fn(),
   complete: jest.fn(),
+  analytics: {
+    optIn: jest.fn(),
+    reportEvent: jest.fn(),
+    telemetryCounter$: new Observable() as any,
+  },
   getContexts: jest.fn().mockReturnValue([{ name: 'core', description: '' }]),
   getFunctions: jest.fn().mockReturnValue([]),
   hasFunction: jest.fn().mockReturnValue(false),

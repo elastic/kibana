@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpResponse } from '@kbn/core/public';
+import { AnalyticsServiceStart, HttpResponse } from '@kbn/core/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { IncomingMessage } from 'http';
 import { cloneDeep, pick } from 'lodash';
@@ -93,10 +93,12 @@ function toObservable(response: HttpResponse<IncomingMessage>) {
 }
 
 export async function createChatService({
+  analytics,
   signal: setupAbortSignal,
   registrations,
   client,
 }: {
+  analytics: AnalyticsServiceStart;
   signal: AbortSignal;
   registrations: ChatRegistrationRenderFunction[];
   client: ObservabilityAIAssistantAPIClient;
@@ -130,6 +132,7 @@ export async function createChatService({
   };
 
   return {
+    analytics,
     renderFunction: (name, args, response) => {
       const fn = renderFunctionRegistry.get(name);
 

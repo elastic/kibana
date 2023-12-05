@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { HttpFetchOptions } from '@kbn/core/public';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, Observable } from 'rxjs';
 import { ReadableStream } from 'stream/web';
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { createChatService } from './create_chat_service';
@@ -46,6 +46,11 @@ describe('createChatService', () => {
         };
       });
       service = await createChatService({
+        analytics: {
+          optIn: () => {},
+          reportEvent: () => {},
+          telemetryCounter$: new Observable(),
+        },
         client: clientSpy,
         registrations: [],
         signal: new AbortController().signal,
