@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export * from './types';
+import { QueryClient } from '@tanstack/react-query';
+
+/**
+ * The main query client for the triggers_actions_ui app
+ */
+export const queryClient = new QueryClient();
