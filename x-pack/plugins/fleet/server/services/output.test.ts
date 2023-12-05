@@ -1801,7 +1801,7 @@ describe('Output Service', () => {
   });
 
   describe('getLatestOutputHealth', () => {
-    it('should return unkown state if no hits', async () => {
+    it('should return unknown state if no hits', async () => {
       esClientMock.search.mockResolvedValue({
         hits: {
           hits: [],
@@ -1811,7 +1811,7 @@ describe('Output Service', () => {
       const response = await outputService.getLatestOutputHealth(esClientMock, 'id');
 
       expect(response).toEqual({
-        state: 'UNKOWN',
+        state: 'UNKNOWN',
         message: '',
         timestamp: '',
       });
