@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
+
+import { DEFAULT_LATEST_ALERTS } from '../assistant_context/constants';
 import { KnowledgeBaseSettings } from './knowledge_base_settings';
 import { TestProviders } from '../mock/test_providers/test_providers';
 import { useKnowledgeBaseStatus } from './use_knowledge_base_status';
@@ -15,6 +17,8 @@ const setUpdatedKnowledgeBaseSettings = jest.fn();
 const defaultProps = {
   knowledgeBase: {
     assistantLangChain: true,
+    alerts: false,
+    latestAlerts: DEFAULT_LATEST_ALERTS,
   },
   setUpdatedKnowledgeBaseSettings,
 };
@@ -99,7 +103,9 @@ describe('Knowledge base settings', () => {
     );
     fireEvent.click(getByTestId('assistantLangChainSwitch'));
     expect(setUpdatedKnowledgeBaseSettings).toHaveBeenCalledWith({
+      alerts: false,
       assistantLangChain: false,
+      latestAlerts: DEFAULT_LATEST_ALERTS,
     });
 
     expect(mockSetup).not.toHaveBeenCalled();
@@ -111,6 +117,8 @@ describe('Knowledge base settings', () => {
           {...defaultProps}
           knowledgeBase={{
             assistantLangChain: false,
+            alerts: false,
+            latestAlerts: DEFAULT_LATEST_ALERTS,
           }}
         />
       </TestProviders>
@@ -118,6 +126,8 @@ describe('Knowledge base settings', () => {
     fireEvent.click(getByTestId('assistantLangChainSwitch'));
     expect(setUpdatedKnowledgeBaseSettings).toHaveBeenCalledWith({
       assistantLangChain: true,
+      alerts: false,
+      latestAlerts: DEFAULT_LATEST_ALERTS,
     });
 
     expect(mockSetup).toHaveBeenCalledWith('esql');

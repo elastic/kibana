@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
-
 import { HttpSetup } from '@kbn/core-http-browser';
+import { useCallback, useState } from 'react';
 
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
 import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
+import { useSettingsUpdater } from '../settings/use_settings_updater/use_settings_updater';
 
 interface SendMessagesProps {
+  allow?: string[];
+  allowReplacement?: string[];
+  apiConfig: Conversation['apiConfig'];
   http: HttpSetup;
   messages: Message[];
-  apiConfig: Conversation['apiConfig'];
+  onNewReplacements: (newReplacements: Record<string, string>) => void;
+  replacements?: Record<string, string>;
 }
 
 interface UseSendMessages {
@@ -29,25 +33,44 @@ interface UseSendMessages {
 }
 
 export const useSendMessages = (): UseSendMessages => {
-  const { assistantStreamingEnabled, knowledgeBase } = useAssistantContext();
+  const { alertsIndexPattern, assistantStreamingEnabled, ragOnAlerts } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
+  const { defaultAllow, defaultAllowReplacement, knowledgeBase } = useSettingsUpdater();
 
   const sendMessages = useCallback(
-    async ({ apiConfig, http, messages }: SendMessagesProps) => {
+    async ({ apiConfig, http, messages, onNewReplacements, replacements }: SendMessagesProps) => {
       setIsLoading(true);
+
       try {
         return await fetchConnectorExecuteAction({
-          assistantLangChain: knowledgeBase.assistantLangChain,
-          http,
-          messages,
+          alerts: knowledgeBase.alerts, // settings toggle
+          alertsIndexPattern,
+          allow: defaultAllow,
+          allowReplacement: defaultAllowReplacement,
           apiConfig,
+          assistantLangChain: knowledgeBase.assistantLangChain,
           assistantStreamingEnabled,
+          http,
+          ragOnAlerts, // feature flag
+          replacements,
+          messages,
+          size: knowledgeBase.latestAlerts,
+          onNewReplacements,
         });
       } finally {
         setIsLoading(false);
       }
     },
-    [assistantStreamingEnabled, knowledgeBase.assistantLangChain]
+    [
+      alertsIndexPattern,
+      assistantStreamingEnabled,
+      defaultAllow,
+      defaultAllowReplacement,
+      knowledgeBase.alerts,
+      knowledgeBase.assistantLangChain,
+      knowledgeBase.latestAlerts,
+      ragOnAlerts,
+    ]
   );
 
   return { isLoading, sendMessages };

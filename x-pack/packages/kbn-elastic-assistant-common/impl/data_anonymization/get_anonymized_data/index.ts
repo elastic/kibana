@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { SelectedPromptContext } from '../../assistant/prompt_context/types';
-import { isAllowed } from '../../data_anonymization_editor/helpers';
+import { isAllowed } from '../helpers';
 import type { AnonymizedData, GetAnonymizedValues } from '../types';
 
 export const getAnonymizedData = ({
@@ -17,8 +16,8 @@ export const getAnonymizedData = ({
   getAnonymizedValues,
   rawData,
 }: {
-  allow: SelectedPromptContext['allow'];
-  allowReplacement: SelectedPromptContext['allowReplacement'];
+  allow: string[];
+  allowReplacement: string[];
   currentReplacements: Record<string, string> | undefined;
   getAnonymizedValue: ({
     currentReplacements,
@@ -28,7 +27,7 @@ export const getAnonymizedData = ({
     rawValue: string;
   }) => string;
   getAnonymizedValues: GetAnonymizedValues;
-  rawData: Record<string, string[]>;
+  rawData: Record<string, unknown[]>;
 }): AnonymizedData =>
   Object.keys(rawData).reduce<AnonymizedData>(
     (acc, field) => {

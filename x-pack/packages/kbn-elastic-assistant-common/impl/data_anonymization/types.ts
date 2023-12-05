@@ -40,5 +40,5 @@ export type GetAnonymizedValues = ({
     currentReplacements: Record<string, string> | undefined;
     rawValue: string;
   }) => string;
-  rawData: Record<string, string[]>;
+  rawData: Record<string, unknown[]>;
 }) => AnonymizedValues;

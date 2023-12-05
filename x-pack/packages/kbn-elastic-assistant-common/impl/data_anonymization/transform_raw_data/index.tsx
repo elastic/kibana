@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { SelectedPromptContext } from '../../assistant/prompt_context/types';
 import { getAnonymizedData } from '../get_anonymized_data';
 import { getAnonymizedValues } from '../get_anonymized_values';
 import { getCsvFromData } from '../get_csv_from_data';
 
 export const transformRawData = ({
+  allow,
+  allowReplacement,
   currentReplacements,
   getAnonymizedValue,
   onNewReplacements,
-  selectedPromptContext,
+  rawData,
 }: {
+  allow: string[];
+  allowReplacement: string[];
   currentReplacements: Record<string, string> | undefined;
   getAnonymizedValue: ({
     currentReplacements,
@@ -25,17 +28,17 @@ export const transformRawData = ({
     rawValue: string;
   }) => string;
   onNewReplacements?: (replacements: Record<string, string>) => void;
-  selectedPromptContext: SelectedPromptContext;
+  rawData: string | Record<string, unknown[]>;
 }): string => {
-  if (typeof selectedPromptContext.rawData === 'string') {
-    return selectedPromptContext.rawData;
+  if (typeof rawData === 'string') {
+    return rawData;
   }
 
   const anonymizedData = getAnonymizedData({
-    allow: selectedPromptContext.allow,
-    allowReplacement: selectedPromptContext.allowReplacement,
+    allow,
+    allowReplacement,
     currentReplacements,
-    rawData: selectedPromptContext.rawData,
+    rawData,
     getAnonymizedValue,
     getAnonymizedValues,
   });

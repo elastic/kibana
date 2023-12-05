@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isAllowed, isAnonymized } from '../../data_anonymization_editor/helpers';
+import { isAllowed, isAnonymized } from '../helpers';
 import { AnonymizedValues, GetAnonymizedValues } from '../types';
 
 export const getAnonymizedValues: GetAnonymizedValues = ({
@@ -20,19 +20,24 @@ export const getAnonymizedValues: GetAnonymizedValues = ({
 
   return rawValues.reduce<AnonymizedValues>(
     (acc, rawValue) => {
+      const stringValue = `${rawValue}`;
+
       if (isAllowed({ allowSet, field }) && isAnonymized({ allowReplacementSet, field })) {
-        const anonymizedValue = getAnonymizedValue({ currentReplacements, rawValue });
+        const anonymizedValue = `${getAnonymizedValue({
+          currentReplacements,
+          rawValue: stringValue,
+        })}`;
 
         return {
           anonymizedValues: [...acc.anonymizedValues, anonymizedValue],
           replacements: {
             ...acc.replacements,
-            [anonymizedValue]: rawValue,
+            [anonymizedValue]: stringValue,
           },
         };
       } else if (isAllowed({ allowSet, field })) {
         return {
-          anonymizedValues: [...acc.anonymizedValues, rawValue], // no anonymization for this value
+          anonymizedValues: [...acc.anonymizedValues, stringValue], // no anonymization for this value
           replacements: {
             ...acc.replacements, // no additional replacements
           },

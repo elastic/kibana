@@ -702,6 +702,8 @@
       "@kbn/elastic-agent-utils/*": ["packages/kbn-elastic-agent-utils/*"],
       "@kbn/elastic-assistant": ["x-pack/packages/kbn-elastic-assistant"],
       "@kbn/elastic-assistant/*": ["x-pack/packages/kbn-elastic-assistant/*"],
+      "@kbn/elastic-assistant-common": ["x-pack/packages/kbn-elastic-assistant-common"],
+      "@kbn/elastic-assistant-common/*": ["x-pack/packages/kbn-elastic-assistant-common/*"],
       "@kbn/elastic-assistant-plugin": ["x-pack/plugins/elastic_assistant"],
       "@kbn/elastic-assistant-plugin/*": ["x-pack/plugins/elastic_assistant/*"],
       "@kbn/elasticsearch-client-plugin": ["test/plugin_functional/plugins/elasticsearch_client_plugin"],

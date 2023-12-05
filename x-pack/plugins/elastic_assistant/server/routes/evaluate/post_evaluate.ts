@@ -7,6 +7,7 @@
 
 import { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { noop } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ESQL_RESOURCE } from '../knowledge_base/constants';
@@ -38,6 +39,8 @@ const AGENT_EXECUTOR_MAP: Record<string, AgentExecutor> = {
   DefaultAgentExecutor: callAgentExecutor,
   OpenAIFunctionsExecutor: callOpenAIFunctionsExecutor,
 };
+
+const DEFAULT_SIZE = 20;
 
 export const postEvaluateRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -109,12 +112,17 @@ export const postEvaluateRoute = (
         const skeletonRequest: KibanaRequest<unknown, unknown, RequestBody> = {
           ...request,
           body: {
+            alertsIndexPattern: '',
+            allow: [],
+            allowReplacement: [],
             params: {
               subAction: 'invokeAI',
               subActionParams: {
                 messages: [],
               },
             },
+            replacements: {},
+            size: DEFAULT_SIZE,
             assistantLangChain: true,
           },
         };
@@ -134,12 +142,14 @@ export const postEvaluateRoute = (
               agentEvaluator: (langChainMessages, exampleId) =>
                 AGENT_EXECUTOR_MAP[agentName]({
                   actions,
+                  assistantLangChain: true,
                   connectorId,
                   esClient,
                   elserId,
                   langChainMessages,
                   llmType,
                   logger,
+                  onNewReplacements: noop,
                   request: skeletonRequest,
                   kbResource: ESQL_RESOURCE,
                   traceOptions: {

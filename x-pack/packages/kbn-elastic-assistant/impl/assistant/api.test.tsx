@@ -35,11 +35,14 @@ const messages: Message[] = [
   { content: 'This is a test', role: 'user', timestamp: new Date().toLocaleString() },
 ];
 const fetchConnectorArgs: FetchConnectorExecuteAction = {
+  alerts: false,
+  apiConfig,
   assistantLangChain: true,
+  assistantStreamingEnabled: true,
   http: mockHttp,
   messages,
-  apiConfig,
-  assistantStreamingEnabled: true,
+  onNewReplacements: jest.fn(),
+  ragOnAlerts: false,
 };
 describe('API tests', () => {
   beforeEach(() => {
