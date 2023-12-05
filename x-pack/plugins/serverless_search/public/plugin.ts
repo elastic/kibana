@@ -24,6 +24,7 @@ import {
   ServerlessSearchPluginStart,
   ServerlessSearchPluginStartDependencies,
 } from './types';
+import { createDocumentsTab } from './application/components/index_documents/documents_tab';
 
 export class ServerlessSearchPlugin
   implements
@@ -96,6 +97,7 @@ export class ServerlessSearchPlugin
       hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
     });
     indexManagement?.extensionsService.setIndexMappingsContent(createIndexMappingsContent(core));
+    indexManagement?.extensionsService.addIndexDetailsTab(createDocumentsTab(core));
     return {};
   }
 
