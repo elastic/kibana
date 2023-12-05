@@ -27,16 +27,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
   return removeSteps ? str.replace(/^steps:/, '') : str;
 };
 
-const uploadPipeline = (pipelineContent: string | object) => {
-  const str =
-    typeof pipelineContent === 'string' ? pipelineContent : JSON.stringify(pipelineContent);
-
-  execSync('buildkite-agent pipeline upload', {
-    input: str,
-    stdio: ['pipe', 'inherit', 'inherit'],
-  });
-};
-
 (async () => {
   try {
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
