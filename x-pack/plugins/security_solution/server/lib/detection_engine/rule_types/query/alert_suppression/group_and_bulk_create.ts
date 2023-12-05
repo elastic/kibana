@@ -23,7 +23,7 @@ import { wrapSuppressedAlerts } from './wrap_suppressed_alerts';
 import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation';
 import type { EventGroupingMultiBucketAggregationResult } from './build_group_by_field_aggregation';
 import { singleSearchAfter } from '../../utils/single_search_after';
-import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
+import { bulkCreateWithSuppression } from '../../utils/bulk_create_with_suppression';
 import type { UnifiedQueryRuleParams } from '../../../rule_schema';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../../common/api/detection_engine/model/rule_schema';
