@@ -156,6 +156,13 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables SentinelOne manual host manipulation actions
    */
   sentinelOneManualHostActionsEnabled: false,
+
+  /*
+   * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
+   * This tab shows the JSON diff between the installed prebuilt rule
+   * version and the latest available version.
+   */
+  jsonPrebuiltRulesDiffingEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

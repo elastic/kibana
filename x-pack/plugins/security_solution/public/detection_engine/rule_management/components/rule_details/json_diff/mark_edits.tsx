@@ -12,15 +12,16 @@ import type { Change } from 'diff';
 import { isDelete, isInsert, isNormal, pickRanges } from 'react-diff-view';
 import type { ChangeData, HunkData, RangeTokenNode, TokenizeEnhancer } from 'react-diff-view';
 
+type StringDiffFn = (oldString: string, newString: string) => Change[];
+
 interface JsDiff {
-  diffChars: (oldStr: string, newStr: string) => Change[];
-  diffWords: (oldStr: string, newStr: string) => Change[];
-  diffWordsWithSpace: (oldStr: string, newStr: string) => Change[];
-  diffLines: (oldStr: string, newStr: string) => Change[];
-  diffTrimmedLines: (oldStr: string, newStr: string) => Change[];
-  diffSentences: (oldStr: string, newStr: string) => Change[];
-  diffCss: (oldStr: string, newStr: string) => Change[];
-  diffJson: (oldObject: Record<string, unknown>, newObject: Record<string, unknown>) => Change[];
+  diffChars: StringDiffFn;
+  diffWords: StringDiffFn;
+  diffWordsWithSpace: StringDiffFn;
+  diffLines: StringDiffFn;
+  diffTrimmedLines: StringDiffFn;
+  diffSentences: StringDiffFn;
+  diffCss: StringDiffFn;
 }
 
 const jsDiff: JsDiff = diff;
@@ -33,8 +34,6 @@ export enum DiffMethod {
   TRIMMED_LINES = 'diffTrimmedLines',
   SENTENCES = 'diffSentences',
   CSS = 'diffCss',
-  JSON = 'diffJson',
-  WORDS_CUSTOM_USING_DMP = 'diffWordsCustomUsingDmp',
 }
 
 const DMP_DIFF_EQUAL = 0;
@@ -191,7 +190,7 @@ function diffChangeBlock(
   return [oldEdits, newEdits];
 }
 
-export function markEditsBy(hunks: HunkData[], diffMethod: DiffMethod): TokenizeEnhancer {
+export function markEdits(hunks: HunkData[], diffMethod: DiffMethod): TokenizeEnhancer {
   const changeBlocks = flatMap(
     hunks.map((hunk) => hunk.changes),
     findChangeBlocks

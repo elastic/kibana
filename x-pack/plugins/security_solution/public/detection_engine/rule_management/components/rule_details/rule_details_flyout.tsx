@@ -21,11 +21,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import type { EuiTabbedContentTab, EuiTabbedContentProps } from '@elastic/eui';
+import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleOverviewTab, useOverviewTabSections } from './rule_overview_tab';
 import { RuleInvestigationGuideTab } from './rule_investigation_guide_tab';
+import {
+  DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
+  LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS,
+} from './constants';
 
 import * as i18n from './translations';
 
@@ -102,6 +106,7 @@ export const TabContentPadding: React.FC = ({ children }) => (
 interface RuleDetailsFlyoutProps {
   rule: RuleResponse;
   ruleActions?: React.ReactNode;
+  size?: EuiFlyoutProps['size'];
   dataTestSubj?: string;
   closeFlyout: () => void;
   getRuleTabs?: (rule: RuleResponse, defaultTabs: EuiTabbedContentTab[]) => EuiTabbedContentTab[];
@@ -110,6 +115,7 @@ interface RuleDetailsFlyoutProps {
 export const RuleDetailsFlyout = ({
   rule,
   ruleActions,
+  size = 'm',
   dataTestSubj,
   closeFlyout,
   getRuleTabs,
@@ -124,13 +130,18 @@ export const RuleDetailsFlyout = ({
         <TabContentPadding>
           <RuleOverviewTab
             rule={rule}
+            columnWidths={
+              size === 'l'
+                ? LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS
+                : DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS
+            }
             expandedOverviewSections={expandedOverviewSections}
             toggleOverviewSection={toggleOverviewSection}
           />
         </TabContentPadding>
       ),
     }),
-    [rule, expandedOverviewSections, toggleOverviewSection]
+    [rule, size, expandedOverviewSections, toggleOverviewSection]
   );
 
   const investigationGuideTab: EuiTabbedContentTab = useMemo(
@@ -171,7 +182,7 @@ export const RuleDetailsFlyout = ({
 
   return (
     <EuiFlyout
-      size="m"
+      size={size}
       onClose={closeFlyout}
       ownFocus={false}
       key="prebuilt-rules-flyout"
