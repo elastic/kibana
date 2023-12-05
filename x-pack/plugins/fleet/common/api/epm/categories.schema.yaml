@@ -1,0 +1,61 @@
+openapi: 3.0.0
+tags: []
+info:
+  title: Fleet
+  description: OpenAPI schema for Fleet API endpoints
+  version: '2023-10-31'
+paths:
+  /epm/categories:
+    get:
+      summary: List package categories
+      tags:
+        - Elastic Package Manager (EPM)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Get categories response
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        title:
+                          type: string
+                        count:
+                          type: number
+                      required:
+                        - id
+                        - title
+                        - count
+                required:
+                  - items
+        '400':
+          $ref: ../components/responses/error.yaml#/components/schemas/GenericError
+      operationId: GetCategories
+      x-codegen-enabled: true
+      parameters:
+        - in: query
+          name: prerelease
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            Whether to include prerelease packages in categories count (e.g. beta, rc, preview)
+        - in: query
+          name: experimental
+          deprecated: true
+          schema:
+            type: boolean
+            default: false
+        - in: query
+          name: include_policy_templates
+          schema:
+            type: boolean
+            default: false

@@ -109,7 +109,6 @@ export type {
   RequirementsByServiceName,
   ServiceName,
   GetCategoriesRequest,
-  GetCategoriesResponse,
   GetPackagesRequest,
   GetPackagesResponse,
   GetLimitedPackagesResponse,

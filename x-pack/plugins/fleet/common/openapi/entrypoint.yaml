@@ -30,8 +30,8 @@ paths:
   #   $ref: paths/epm@verification_key_id.yaml
   # /epm/bulk_assets:
   #   $ref: paths/epm@bulk_assets.yaml
-  /epm/categories:
-    $ref: paths/epm@categories.yaml
+  # /epm/categories:
+  #   $ref: paths/epm@categories.yaml
   /epm/packages/limited:
     $ref: paths/epm@limited_list.yaml
   /epm/packages:

@@ -14,13 +14,13 @@ import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 import type {
   GetBulkAssetsRequestBody,
   GetBulkAssetsResponse,
+  GetCategoriesResponse,
   GetVerificationKeyIdResponse,
 } from '../../../common/api';
 
 import { epmRouteService, isVerificationError } from '../../services';
 import type {
   GetCategoriesRequest,
-  GetCategoriesResponse,
   GetPackagesRequest,
   GetPackagesResponse,
   GetLimitedPackagesResponse,

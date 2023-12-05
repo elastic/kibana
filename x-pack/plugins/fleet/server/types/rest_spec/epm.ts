@@ -7,14 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const GetCategoriesRequestSchema = {
-  query: schema.object({
-    prerelease: schema.maybe(schema.boolean()),
-    experimental: schema.maybe(schema.boolean()), // deprecated
-    include_policy_templates: schema.maybe(schema.boolean()),
-  }),
-};
-
 export const GetPackagesRequestSchema = {
   query: schema.object({
     category: schema.maybe(schema.string()),

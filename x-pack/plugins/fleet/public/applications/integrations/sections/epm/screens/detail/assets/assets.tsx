@@ -109,7 +109,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
           }));
 
           const response = await sendGetBulkAssets({ assetIds });
-          setAssetsSavedObjects(response.data?.items);
+          setAssetsSavedObjects(response.data?.items as SimpleSOAssetType[]);
         } catch (e) {
           setFetchError(e);
         } finally {

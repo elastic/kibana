@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
-import { GetBulkAssetsRequestBody } from '../../../common/api';
+import { GetBulkAssetsRequestBody, GetCategoriesRequestQuery } from '../../../common/api';
 
 import { API_VERSIONS, INTERNAL_API_ACCESS } from '../../../common/constants';
 
@@ -30,7 +30,6 @@ import type {
 import { EPM_API_ROUTES } from '../../constants';
 import { splitPkgKey } from '../../services/epm/registry';
 import {
-  GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetInstalledPackagesRequestSchema,
   GetFileRequestSchema,
@@ -93,7 +92,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetCategoriesRequestSchema },
+        validate: { request: { query: buildRouteValidationWithZod(GetCategoriesRequestQuery) } },
       },
       getCategoriesHandler
     );

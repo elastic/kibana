@@ -14,6 +14,8 @@ import { pick } from 'lodash';
 import type {
   GetBulkAssetsRequestBody,
   GetBulkAssetsResponse,
+  GetCategoriesRequestQuery,
+  GetCategoriesResponse,
   GetVerificationKeyIdResponse,
 } from '../../../common/api';
 
@@ -25,7 +27,6 @@ import type {
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
-  GetCategoriesResponse,
   GetPackagesResponse,
   GetLimitedPackagesResponse,
   BulkInstallPackageInfo,
@@ -38,7 +39,6 @@ import type {
   AssetSOObject,
 } from '../../../common/types';
 import type {
-  GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetInstalledPackagesRequestSchema,
   GetDataStreamsRequestSchema,
@@ -90,7 +90,7 @@ const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
 
 export const getCategoriesHandler: FleetRequestHandler<
   undefined,
-  TypeOf<typeof GetCategoriesRequestSchema.query>
+  GetCategoriesRequestQuery
 > = async (context, request, response) => {
   try {
     const res = await getCategories({
@@ -98,7 +98,7 @@ export const getCategoriesHandler: FleetRequestHandler<
     });
     const body: GetCategoriesResponse = {
       items: res,
-      response: res,
+      // response: res, // TODO should we remove the deprecated properties?
     };
     return response.ok({ body, headers: { ...CACHE_CONTROL_10_MINUTES_HEADER } });
   } catch (error) {

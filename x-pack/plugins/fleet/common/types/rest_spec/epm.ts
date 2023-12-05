@@ -9,7 +9,6 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import type {
   AssetReference,
-  CategorySummaryList,
   PackageList,
   PackageInfo,
   PackageUsageStats,
@@ -25,12 +24,6 @@ export interface GetCategoriesRequest {
     prerelease?: boolean;
     include_policy_templates?: boolean;
   };
-}
-
-export interface GetCategoriesResponse {
-  items: CategorySummaryList;
-  // deprecated in 8.0
-  response?: CategorySummaryList;
 }
 
 export interface GetPackagesRequest {

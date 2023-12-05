@@ -7,3 +7,4 @@
 
 export * from './verification_key_id.gen';
 export * from './bulk_assets.gen';
+export * from './categories.gen';
