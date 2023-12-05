@@ -10,11 +10,11 @@ import {
   OVERVIEW_CTI_LINKS,
   OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL,
   OVERVIEW_CTI_TOTAL_EVENT_COUNT,
-} from '../../screens/overview';
+} from '../../../../screens/overview';
 
-import { login } from '../../tasks/login';
-import { visit } from '../../tasks/navigation';
-import { OVERVIEW_URL } from '../../urls/navigation';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
+import { OVERVIEW_URL } from '../../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/165709

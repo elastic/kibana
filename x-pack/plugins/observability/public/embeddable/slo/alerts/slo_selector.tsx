@@ -11,55 +11,54 @@ import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
+import { SloItem } from './types';
 
 interface Props {
-  initialSlo?: SLOWithSummaryResponse;
-  onSelected: (slo: SLOWithSummaryResponse | undefined) => void;
+  initialSlos?: SloItem[];
+  onSelected: (slos: SLOWithSummaryResponse[] | SLOWithSummaryResponse | undefined) => void;
   hasError?: boolean;
+  singleSelection?: boolean;
 }
 
 const SLO_REQUIRED = i18n.translate('xpack.observability.sloEmbeddable.config.errors.sloRequired', {
   defaultMessage: 'SLO is required.',
 });
 
-export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
+export function SloSelector({ initialSlos, onSelected, hasError, singleSelection }: Props) {
+  const mapSlosToOptions = (slos: SloItem[] | SLOWithSummaryResponse[] | undefined) =>
+    slos?.map((slo) => ({
+      label:
+        slo.instanceId !== ALL_VALUE ? `${slo.name} (${slo.groupBy}: ${slo.instanceId})` : slo.name,
+      value: `${slo.id}-${slo.instanceId}`,
+    })) ?? [];
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
-  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    mapSlosToOptions(initialSlos)
+  );
   const [searchValue, setSearchValue] = useState<string>('');
-  const {
-    isInitialLoading,
-    isLoading,
-    data: sloList,
-  } = useFetchSloList({
-    kqlQuery: `slo.name: ${searchValue.replaceAll(' ', '*')}*`,
+  const query = `${searchValue.replaceAll(' ', '*')}*`;
+  const { isLoading, data: sloList } = useFetchSloList({
+    kqlQuery: `slo.name: ${query} or slo.instanceId: ${query}`,
+    perPage: 100,
   });
 
   useEffect(() => {
-    const isLoadedWithData = !isLoading && sloList!.results !== undefined;
+    const isLoadedWithData = !isLoading && sloList?.results !== undefined;
     const opts: Array<EuiComboBoxOptionOption<string>> = isLoadedWithData
-      ? sloList!.results!.map((slo) => {
-          const label =
-            slo.instanceId !== ALL_VALUE
-              ? `${slo.name} (${slo.groupBy}: ${slo.instanceId})`
-              : slo.name;
-          return {
-            value: `${slo.id}-${slo.instanceId}`,
-            label,
-            instanceId: slo.instanceId,
-          };
-        })
+      ? mapSlosToOptions(sloList?.results)
       : [];
     setOptions(opts);
   }, [isLoading, sloList]);
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedOptions(opts);
-    const selectedSlo =
-      opts.length === 1
-        ? sloList!.results?.find((slo) => opts[0].value === `${slo.id}-${slo.instanceId}`)
+    const selectedSlos =
+      opts.length >= 1
+        ? sloList!.results?.filter((slo) =>
+            opts.find((opt) => opt.value === `${slo.id}-${slo.instanceId}`)
+          )
         : undefined;
-
-    onSelected(selectedSlo);
+    onSelected(singleSelection ? selectedSlos?.[0] : selectedSlos);
   };
 
   const onSearchChange = useMemo(
@@ -69,10 +68,6 @@ export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
       }, 300),
     []
   );
-
-  if (isInitialLoading) {
-    return null;
-  }
 
   return (
     <EuiFormRow fullWidth isInvalid={hasError} error={hasError ? SLO_REQUIRED : undefined}>
@@ -90,7 +85,6 @@ export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
           }
         )}
         data-test-subj="sloSelector"
-        singleSelection={{ asPlainText: true }}
         options={options}
         selectedOptions={selectedOptions}
         async
@@ -99,6 +93,7 @@ export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
         fullWidth
         onSearchChange={onSearchChange}
         isInvalid={hasError}
+        singleSelection={singleSelection ? { asPlainText: true } : undefined}
       />
     </EuiFormRow>
   );
