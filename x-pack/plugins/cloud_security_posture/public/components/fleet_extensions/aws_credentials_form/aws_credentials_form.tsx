@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { ReactNode } from 'react';
 import {
   EuiCallOut,
   EuiFormRow,
@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
+  AwsCredentialsTypeOptions,
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
   getAwsCredentialsFormManualOptions,
@@ -38,9 +39,9 @@ import { AwsCredentialsType } from '../../../../common/types';
 import { AwsInputVarFields } from './aws_input_var_fields';
 
 interface AWSSetupInfoContentProps {
-  integrationLink: string;
+  info: ReactNode;
 }
-const AWSSetupInfoContent = ({ integrationLink }: AWSSetupInfoContentProps) => {
+export const AWSSetupInfoContent = ({ info }: AWSSetupInfoContentProps) => {
   return (
     <>
       <EuiHorizontalRule margin="xl" />
@@ -54,20 +55,7 @@ const AWSSetupInfoContent = ({ integrationLink }: AWSSetupInfoContentProps) => {
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiText color="subdued" size="s">
-        <FormattedMessage
-          id="xpack.csp.awsIntegration.gettingStarted.setupInfoContent"
-          defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
-          values={{
-            gettingStartedLink: (
-              <EuiLink href={integrationLink} target="_blank">
-                <FormattedMessage
-                  id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
-                  defaultMessage="Getting Started"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
+        {info}
       </EuiText>
     </>
   );
@@ -243,7 +231,24 @@ export const AwsCredentialsForm = ({
 
   return (
     <>
-      <AWSSetupInfoContent integrationLink={integrationLink} />
+      <AWSSetupInfoContent
+        info={
+          <FormattedMessage
+            id="xpack.csp.awsIntegration.gettingStarted.setupInfoContent"
+            defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+            values={{
+              gettingStartedLink: (
+                <EuiLink href={integrationLink} target="_blank">
+                  <FormattedMessage
+                    id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
+                    defaultMessage="Getting Started"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+      />
       <EuiSpacer size="l" />
       <RadioGroup
         disabled={disabled}
@@ -261,6 +266,10 @@ export const AwsCredentialsForm = ({
       {setupFormat === 'manual' && (
         <>
           <AwsCredentialTypeSelector
+            label={i18n.translate('xpack.csp.awsIntegration.awsCredentialTypeSelectorLabel', {
+              defaultMessage: 'Preferred manual method',
+            })}
+            options={getAwsCredentialsFormManualOptions()}
             type={awsCredentialsType}
             onChange={(optionId) => {
               updatePolicy(
@@ -290,19 +299,18 @@ export const AwsCredentialsForm = ({
 export const AwsCredentialTypeSelector = ({
   type,
   onChange,
+  label,
+  options,
 }: {
   onChange(type: AwsCredentialsType): void;
   type: AwsCredentialsType;
+  label: string;
+  options: AwsCredentialsTypeOptions;
 }) => (
-  <EuiFormRow
-    fullWidth
-    label={i18n.translate('xpack.csp.awsIntegration.awsCredentialTypeSelectorLabel', {
-      defaultMessage: 'Preferred manual method',
-    })}
-  >
+  <EuiFormRow fullWidth label={label}>
     <EuiSelect
       fullWidth
-      options={getAwsCredentialsFormManualOptions()}
+      options={options}
       value={type}
       onChange={(optionElem) => {
         onChange(optionElem.target.value as AwsCredentialsType);
