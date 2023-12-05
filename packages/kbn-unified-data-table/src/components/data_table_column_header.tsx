@@ -60,11 +60,9 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = (prop
   );
 };
 
-const DataTableColumnToken: React.FC<{
-  columnName: DataTableColumnHeaderProps['columnName'];
-  columnTypes?: DataTableColumnHeaderProps['columnTypes'];
-  dataView: DataTableColumnHeaderProps['dataView'];
-}> = (props) => {
+const DataTableColumnToken: React.FC<
+  Pick<DataTableColumnHeaderProps, 'columnName' | 'columnTypes' | 'dataView'>
+> = (props) => {
   const { columnName, columnTypes, dataView } = props;
   const columnToken = useMemo(
     () => getRenderedToken({ columnName, columnTypes, dataView }),
@@ -74,15 +72,9 @@ const DataTableColumnToken: React.FC<{
   return columnToken ? <EuiFlexItem grow={false}>{columnToken}</EuiFlexItem> : null;
 };
 
-interface DataTableColumnTitleProps {
-  columnDisplayName: DataTableColumnHeaderProps['columnDisplayName'];
-  headerRowHeight?: DataTableColumnHeaderProps['headerRowHeight'];
-}
-
-const DataTableColumnTitle: React.FC<DataTableColumnTitleProps> = ({
-  columnDisplayName,
-  headerRowHeight = 1,
-}) => {
+const DataTableColumnTitle: React.FC<
+  Pick<DataTableColumnHeaderProps, 'columnDisplayName' | 'headerRowHeight'>
+> = ({ columnDisplayName, headerRowHeight = 1 }) => {
   return (
     <EuiFlexItem
       grow={false}
