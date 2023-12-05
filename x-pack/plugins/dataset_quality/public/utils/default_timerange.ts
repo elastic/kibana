@@ -5,5 +5,13 @@
  * 2.0.
  */
 
-export * from './use_kibana';
-export * from './default_timerange';
+const ONE_DAY_IN_MILLISECONDS = 24 * 3600000;
+
+export const getDefaultTimeRange = () => {
+  const now = Date.now();
+
+  return {
+    from: new Date(now - ONE_DAY_IN_MILLISECONDS).toISOString(),
+    to: new Date(now).toISOString(),
+  };
+};

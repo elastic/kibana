@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './use_kibana';
-export * from './default_timerange';
+export * from './indicator';
+export * from './percentage_indicator';

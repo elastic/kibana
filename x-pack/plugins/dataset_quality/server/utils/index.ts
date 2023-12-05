@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './types';
+export { createDatasetQualityESClient } from './create_dataset_quality_es_client';
+export { wildcardQuery } from './queries';
