@@ -96,8 +96,7 @@
     "@kbn/shared-ux-button-toolbar",
     "@kbn/cell-actions",
     "@kbn/calculate-width-from-char-count",
-    "@kbn/discover-utils",
-    "@kbn/lens-embeddable-utils"
+    "@kbn/discover-utils"
   ],
   "exclude": [
     "target/**/*"
