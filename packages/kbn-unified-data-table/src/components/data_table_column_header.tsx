@@ -19,41 +19,81 @@ interface DataTableColumnHeaderProps {
   columnName: string | null;
   columnDisplayName: string;
   columnTypes?: DataTableColumnTypes;
+  headerRowHeight?: number;
+  showColumnTokens?: boolean;
 }
 
 export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = (props) => {
-  const { columnDisplayName, columnName, columnTypes, dataView } = props;
-  const columnToken = useMemo(
-    () => getRenderedToken({ columnName, columnTypes, dataView }),
-    [columnName, columnTypes, dataView]
-  );
+  const {
+    columnDisplayName,
+    headerRowHeight,
+    showColumnTokens,
+    columnName,
+    columnTypes,
+    dataView,
+  } = props;
 
   return (
     <EuiFlexGroup
       direction="row"
-      wrap={false}
       responsive={false}
-      alignItems="center"
+      alignItems="flexStart"
       gutterSize="xs"
       css={css`
-        align-items: flex-start;
         .euiDataGridHeaderCell--numeric & {
           justify-content: flex-end;
         }
       `}
     >
-      {columnToken && <EuiFlexItem grow={false}>{columnToken}</EuiFlexItem>}
-      <EuiFlexItem
-        grow={false}
-        data-test-subj="unifiedDataTableColumnTitle"
-        css={css`
-          white-space: normal;
-          word-break: break-word;
-        `}
-      >
-        <EuiTextBlockTruncate lines={3}>{columnDisplayName}</EuiTextBlockTruncate>
-      </EuiFlexItem>
+      {showColumnTokens && (
+        <DataTableColumnToken
+          columnName={columnName}
+          columnTypes={columnTypes}
+          dataView={dataView}
+        />
+      )}
+      <DataTableColumnTitle
+        columnDisplayName={columnDisplayName}
+        headerRowHeight={headerRowHeight}
+      />
     </EuiFlexGroup>
+  );
+};
+
+const DataTableColumnToken: React.FC<{
+  columnName: DataTableColumnHeaderProps['columnName'];
+  columnTypes?: DataTableColumnHeaderProps['columnTypes'];
+  dataView: DataTableColumnHeaderProps['dataView'];
+}> = (props) => {
+  const { columnName, columnTypes, dataView } = props;
+  const columnToken = useMemo(
+    () => getRenderedToken({ columnName, columnTypes, dataView }),
+    [columnName, columnTypes, dataView]
+  );
+
+  return columnToken ? <EuiFlexItem grow={false}>{columnToken}</EuiFlexItem> : null;
+};
+
+interface DataTableColumnTitleProps {
+  columnDisplayName: DataTableColumnHeaderProps['columnDisplayName'];
+  headerRowHeight?: DataTableColumnHeaderProps['headerRowHeight'];
+}
+
+const DataTableColumnTitle: React.FC<DataTableColumnTitleProps> = ({
+  columnDisplayName,
+  headerRowHeight = 1,
+}) => {
+  return (
+    <EuiFlexItem
+      grow={false}
+      data-test-subj="unifiedDataTableColumnTitle"
+      css={css`
+        white-space: normal;
+        overflow-wrap: anywhere;
+      `}
+    >
+      <EuiTextBlockTruncate lines={headerRowHeight}>{columnDisplayName}</EuiTextBlockTruncate>
+    </EuiFlexItem>
   );
 };
 

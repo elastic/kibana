@@ -85,6 +85,7 @@ function buildEuiGridColumn({
   visibleCellActions,
   columnTypes,
   showColumnTokens,
+  headerRowHeight,
 }: {
   columnName: string;
   columnWidth: number | undefined;
@@ -102,6 +103,7 @@ function buildEuiGridColumn({
   visibleCellActions?: number;
   columnTypes?: DataTableColumnTypes;
   showColumnTokens?: boolean;
+  headerRowHeight?: number;
 }) {
   const dataViewField = dataView.getFieldByName(columnName);
   const editFieldButton =
@@ -131,14 +133,17 @@ function buildEuiGridColumn({
     id: columnName,
     schema: getSchemaByKbnType(columnType),
     isSortable: isSortEnabled && (isPlainRecord || dataViewField?.sortable === true),
-    display: showColumnTokens ? (
-      <DataTableColumnHeaderMemoized
-        dataView={dataView}
-        columnName={columnName}
-        columnDisplayName={columnDisplayName}
-        columnTypes={columnTypes}
-      />
-    ) : undefined,
+    display:
+      showColumnTokens || (headerRowHeight && headerRowHeight !== 1) ? (
+        <DataTableColumnHeaderMemoized
+          dataView={dataView}
+          columnName={columnName}
+          columnDisplayName={columnDisplayName}
+          columnTypes={columnTypes}
+          showColumnTokens={showColumnTokens}
+          headerRowHeight={headerRowHeight}
+        />
+      ) : undefined,
     displayAsText: columnDisplayName,
     actions: {
       showHide:
@@ -222,6 +227,7 @@ export function getEuiGridColumns({
   visibleCellActions,
   columnTypes,
   showColumnTokens,
+  headerRowHeight,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -242,6 +248,7 @@ export function getEuiGridColumns({
   visibleCellActions?: number;
   columnTypes?: DataTableColumnTypes;
   showColumnTokens?: boolean;
+  headerRowHeight?: number;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
@@ -263,6 +270,7 @@ export function getEuiGridColumns({
       visibleCellActions,
       columnTypes,
       showColumnTokens,
+      headerRowHeight,
     })
   );
 }

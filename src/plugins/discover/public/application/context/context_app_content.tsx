@@ -208,6 +208,8 @@ export function ContextAppContent({
               maxDocFieldsDisplayed={services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
               renderDocumentView={renderDocumentView}
               services={services}
+              showColumnTokens
+              headerRowHeight={3}
             />
           </CellActionsProvider>
         </div>
