@@ -10,6 +10,7 @@ import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
@@ -21,4 +22,5 @@ export interface SetupDeps {
 export interface StartDeps {
   contentManagement: ContentManagementPublicStart;
   savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
+  spaces?: SpacesPluginStart;
 }

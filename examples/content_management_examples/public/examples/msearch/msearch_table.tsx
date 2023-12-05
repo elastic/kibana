@@ -53,6 +53,11 @@ export const MSearchTable = () => {
     <TableListView
       id="cm-msearch-table"
       headingId="cm-msearch-table-heading"
+      deleteItems={async (items) => {
+        const itemList = items.map(({ attributes }) => attributes.title).join(', ');
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        alert(`This action would delete the following items: ${itemList}`);
+      }}
       findItems={findItems}
       listingLimit={LISTING_LIMIT}
       initialPageSize={50}

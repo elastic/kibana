@@ -7,8 +7,16 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiInMemoryTable,
+  EuiSpacer,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 function getI18nTexts(items: unknown[], entityName: string, entityNamePlural: string) {
   return {
@@ -46,10 +54,19 @@ function getI18nTexts(items: unknown[], entityName: string, entityNamePlural: st
         defaultMessage: 'Cancel',
       }
     ),
+    sharedItemsCallout: i18n.translate(
+      'contentManagement.tableList.listing.deleteSelectedItemsConfirmModal.sharedItemsCallout',
+      {
+        defaultMessage: `{entityNamePlural} are deleted from every space in which they are shared.`,
+        values: {
+          entityNamePlural,
+        },
+      }
+    ),
   };
 }
 
-interface Props<T> {
+export interface Props<T extends UserContentCommonSchema = UserContentCommonSchema> {
   /** Flag to indicate if the items are being deleted */
   isDeletingItems: boolean;
   /** Array of items to delete */
@@ -62,20 +79,102 @@ interface Props<T> {
   onCancel: () => void;
   /** Handler to be called when clicking the "Confirm" button */
   onConfirm: () => void;
+  /** Spaces plugin API */
+  spacesApi?: SpacesApi;
 }
 
-export function ConfirmDeleteModal<T>({
+export function ConfirmDeleteModal<T extends UserContentCommonSchema>({
   isDeletingItems,
   items,
   entityName,
   entityNamePlural,
   onCancel,
   onConfirm,
+  spacesApi,
 }: Props<T>) {
-  const { deleteBtnLabel, deletingBtnLabel, title, description, cancelBtnLabel } = useMemo(
+  const {
+    deleteBtnLabel,
+    deletingBtnLabel,
+    title,
+    description,
+    cancelBtnLabel,
+    sharedItemsCallout,
+  } = useMemo(
     () => getI18nTexts(items, entityName, entityNamePlural),
     [entityName, entityNamePlural, items]
   );
+
+  const hasSharedItemsSelected = useMemo(() => {
+    return items.some((item) =>
+      Boolean(item.namespaces && (item.namespaces.length > 1 || item.namespaces.includes('*')))
+    );
+  }, [items]);
+
+  const hasSpaces = useMemo(() => {
+    return Boolean(spacesApi && !spacesApi.hasOnlyDefaultSpace);
+  }, [spacesApi]);
+
+  const content = useMemo(() => {
+    const columns: Array<EuiTableFieldDataColumnType<T>> = [
+      {
+        field: 'attributes.title',
+        name: entityName,
+        sortable: true,
+      },
+    ];
+
+    if (hasSpaces) {
+      const SpacesList = spacesApi!.ui.components.getSpaceList;
+      columns.push({
+        field: 'namespaces',
+        name: 'Spaces',
+        sortable: true,
+        width: '100px',
+        align: 'left',
+        render: (field: string, record: T) => {
+          return record.namespaces?.indexOf('*') !== -1 ? 'all' : record.namespaces.length;
+          // return (
+          // <SpacesList
+          //   namespaces={record.namespaces ?? []}
+          //   displayLimit={4}
+          //   behaviorContext="outside-space"
+          // />
+          // )
+        },
+      });
+    }
+    return (
+      <div>
+        {hasSharedItemsSelected && hasSpaces && (
+          <>
+            <EuiCallOut
+              color="warning"
+              iconType="warning"
+              title={sharedItemsCallout}
+              data-test-subj={'sharedItemsInDeleteConfirmCallout'}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        <div>{description}</div>
+        <EuiSpacer size="m" />
+        <EuiInMemoryTable
+          items={items}
+          columns={columns}
+          pagination={items.length < 10 ? false : true}
+          data-test-subj={'itemsInDeleteConfirmTable'}
+        />
+      </div>
+    );
+  }, [
+    description,
+    entityName,
+    hasSharedItemsSelected,
+    hasSpaces,
+    items,
+    sharedItemsCallout,
+    spacesApi,
+  ]);
 
   return (
     <EuiConfirmModal
@@ -87,7 +186,7 @@ export function ConfirmDeleteModal<T>({
       confirmButtonText={isDeletingItems ? deletingBtnLabel : deleteBtnLabel}
       defaultFocusedButton="cancel"
     >
-      <p>{description}</p>
+      {content}
     </EuiConfirmModal>
   );
 }

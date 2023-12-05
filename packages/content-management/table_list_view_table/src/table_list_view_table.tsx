@@ -308,6 +308,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     notifyError,
     DateFormatterComp,
     getTagList,
+    spacesApi,
   } = useServices();
 
   const openContentEditor = useOpenContentEditor();
@@ -1013,6 +1014,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
             items={selectedItems}
             onConfirm={deleteSelectedItems}
             onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
+            spacesApi={spacesApi}
           />
         )}
       </div>

@@ -9,6 +9,7 @@
 import React, { FC, useContext, useMemo, useCallback } from 'react';
 import type { Observable } from 'rxjs';
 import type { FormattedRelative } from '@kbn/i18n-react';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
@@ -40,6 +41,7 @@ export interface TagListProps {
  */
 export interface Services {
   canEditAdvancedSettings: boolean;
+  canShareToSpaces?: boolean;
   getListingLimitSettingsUrl: () => string;
   notifyError: NotifyFn;
   currentAppId$: Observable<string | undefined>;
@@ -53,6 +55,7 @@ export interface Services {
   /** Handler to retrieve the list of available tags */
   getTagList: () => Tag[];
   TagList: FC<TagListProps>;
+  spacesApi?: SpacesApi;
   /** Predicate function to indicate if some of the saved object references are tags */
   itemHasTags: (references: SavedObjectsReference[]) => boolean;
   /** Handler to return the url to navigate to the kibana tags management */
@@ -152,6 +155,11 @@ export interface TableListViewKibanaDependencies {
       getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
     };
   };
+  /**
+   * The public API from the Spaces plugin. Provide the `spacesApi` to show the Spaces
+   * column in the table.
+   */
+  spacesApi?: SpacesApi;
   /** The <FormattedRelative /> component from the @kbn/i18n-react package */
   FormattedRelative: typeof FormattedRelative;
 }
@@ -163,7 +171,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
   children,
   ...services
 }) => {
-  const { core, toMountPoint, savedObjectsTagging, FormattedRelative } = services;
+  const { core, toMountPoint, savedObjectsTagging, spacesApi, FormattedRelative } = services;
 
   const searchQueryParser = useMemo(() => {
     if (savedObjectsTagging) {
@@ -225,6 +233,9 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
       >
         <TableListViewProvider
           canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
+          canShareToSpaces={Boolean(
+            core.application.capabilities.savedObjectsManagement.shareIntoSpace
+          )}
           getListingLimitSettingsUrl={() =>
             core.application.getUrlForApp('management', {
               path: `/kibana/settings?query=savedObjects:listingLimit`,
@@ -242,6 +253,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
           itemHasTags={itemHasTags}
           getTagIdsFromReferences={getTagIdsFromReferences}
           getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+          spacesApi={spacesApi}
         >
           {children}
         </TableListViewProvider>

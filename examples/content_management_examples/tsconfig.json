@@ -30,6 +30,7 @@
     "@kbn/content-management-table-list-view",
     "@kbn/shared-ux-router",
     "@kbn/saved-objects-finder-plugin",
+    "@kbn/spaces-plugin",
     "@kbn/content-management-table-list-view-common",
   ]
 }
