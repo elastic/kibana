@@ -87,11 +87,12 @@ export function LensEditConfigurationFlyout({
     const s = output$?.subscribe(() => {
       const activeData: Record<string, Datatable> = {};
       const adaptersTables = previousAdapters.current?.tables?.tables as Record<string, Datatable>;
-      layers.forEach((layerId) => {
-        activeData[layerId] = adaptersTables[layerId] || {};
-      });
+      const [table] = Object.values(adaptersTables || {});
+      if (table) {
+        layers.forEach((layer) => {
+          activeData[layer] = table;
+        });
 
-      if (adaptersTables) {
         dispatch(onActiveDataChange({ activeData }));
       }
     });
