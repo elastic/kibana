@@ -24,8 +24,9 @@ import {
 
 import styled from 'styled-components';
 
+import type { GetFleetStatusResponse } from '../../../../../../common';
+
 import { WithoutHeaderLayout } from '../../../layouts';
-import type { GetFleetStatusResponse } from '../../../types';
 import { useStartServices } from '../../../hooks';
 
 export const RequirementItem: React.FunctionComponent<{ isMissing: boolean }> = ({

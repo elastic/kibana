@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { GetFleetStatusResponse } from '../../../common';
+
 import { setupRouteService, fleetSetupRouteService } from '../../services';
-import type { GetFleetStatusResponse } from '../../types';
 import { API_VERSIONS } from '../../../common/constants';
 
 import { sendRequest } from './use_request';
