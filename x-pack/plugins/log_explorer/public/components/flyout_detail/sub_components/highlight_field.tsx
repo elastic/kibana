@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, copyToClipboard, EuiTextTruncate } from '@elastic/eui';
-import React, { ReactNode, useMemo, useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  copyToClipboard,
+  EuiTextTruncate,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { ValuesType } from 'utility-types';
 import {
   flyoutHoverActionFilterForText,
@@ -92,11 +100,18 @@ export function HighlightField({
     [filterForText, filterOutText, actions, field, value, columnAdded]
   );
 
+  const fieldDescription = useFieldDescription(field);
+
   return formattedValue ? (
     <EuiFlexGroup direction="column" gutterSize="none" {...props}>
       <EuiFlexItem>
         <EuiText color="subdued" size="xs">
           {label}
+          {fieldDescription && (
+            <EuiToolTip title={field} content={fieldDescription}>
+              <EuiIcon type="questionInCircle" />
+            </EuiToolTip>
+          )}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -125,3 +140,16 @@ export function HighlightField({
     </EuiFlexGroup>
   ) : null;
 }
+
+// POC code just to try visualize how we can access info about a field name
+const useFieldDescription = (fieldName: string) => {
+  const [field, setField] = useState(null);
+
+  useEffect(() => {
+    fetch(`http://localhost:5000/explain?name=${encodeURIComponent(fieldName)}`)
+      .then((res) => res.json())
+      .then((data) => setField(data.description));
+  }, [fieldName]);
+
+  return field;
+};
