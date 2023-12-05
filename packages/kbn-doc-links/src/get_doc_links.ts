@@ -464,6 +464,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
         userRiskScore: `${SECURITY_SOLUTION_DOCS}user-risk-score.html`,
         entityRiskScoring: `${SECURITY_SOLUTION_DOCS}advanced-entity-analytics-overview.html`,
       },
+      detectionEngineOverview: `${SECURITY_SOLUTION_DOCS}detection-engine-overview.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,

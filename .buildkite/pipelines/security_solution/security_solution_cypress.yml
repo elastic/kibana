@@ -82,3 +82,15 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
+
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:ai_assistant
+    label: 'Serverless MKI QA AI Assistant - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+    timeout_in_minutes: 300
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1          
