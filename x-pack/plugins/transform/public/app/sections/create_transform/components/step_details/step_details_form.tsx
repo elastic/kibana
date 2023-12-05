@@ -272,15 +272,29 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const retentionPolicyMaxAgeEmpty = retentionPolicyMaxAge === '';
     const isRetentionPolicyMaxAgeValid = retentionPolicyMaxAgeValidator(retentionPolicyMaxAge);
 
-    // Reset retention policy settings when the user disables the whole option
     useEffect(() => {
+      // Reset retention policy settings when the user disables the whole option
       if (!isRetentionPolicyEnabled) {
         setRetentionPolicyDateField(
-          isRetentionPolicyAvailable ? dataViewAvailableTimeFields[0] : ''
+          isRetentionPolicyAvailable && dataViewAvailableTimeFields.length > 0
+            ? dataViewAvailableTimeFields[0]
+            : ''
         );
         setRetentionPolicyMaxAge('');
       }
-    }, [isRetentionPolicyEnabled]);
+
+      // When retention policy is first enabled, pick a default option
+      if (
+        isRetentionPolicyEnabled &&
+        retentionPolicyDateField === undefined &&
+        dataViewAvailableTimeFields.length > 0
+      ) {
+        // If a time field '@timestamp' exists, prioritize that
+        const prioritizeTimestamp = dataViewAvailableTimeFields.find((d) => d === '@timestamp');
+        // else pick the first available option
+        setRetentionPolicyDateField(prioritizeTimestamp ?? dataViewAvailableTimeFields[0]);
+      }
+    }, [isRetentionPolicyEnabled, isRetentionPolicyAvailable, dataViewAvailableTimeFields]);
 
     const transformIdExists = transformIds.some((id) => transformId === id);
     const transformIdEmpty = transformId === '';
