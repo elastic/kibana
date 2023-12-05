@@ -473,6 +473,7 @@ export interface DocLinks {
   readonly security: Readonly<{
     apiKeyServiceSettings: string;
     clusterPrivileges: string;
+    definingRoles: string;
     elasticsearchSettings: string;
     elasticsearchEnableSecurity: string;
     elasticsearchEnableApiKeys: string;
