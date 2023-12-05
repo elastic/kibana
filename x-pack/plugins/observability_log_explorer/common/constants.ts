@@ -6,3 +6,5 @@
  */
 
 export const OBSERVABILITY_LOG_EXPLORER_APP_ID = 'observability-log-explorer';
+export const OBSERVABILITY_OVERVIEW_APP_ID = 'observability-overview';
+export const OBSERVABILITY_LOGS_APP_ID = 'logs';
