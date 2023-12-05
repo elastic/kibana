@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import Url from 'url';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import { modifyUrl } from '@kbn/std';
 import { cloneDeepWith, isString } from 'lodash';
 import { Key, Origin, type WebDriver } from 'selenium-webdriver';
 import { Driver as ChromiumWebDriver } from 'selenium-webdriver/chrome';
-import { modifyUrl } from '@kbn/std';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import Url from 'url';
 
-import sharp from 'sharp';
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
+import sharp from 'sharp';
+import { FtrService, type FtrProviderContext } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
-import { type FtrProviderContext, FtrService } from '../../ftr_provider_context';
 import { Browsers } from '../remote/browsers';
 import {
+  NETWORK_PROFILES,
   type NetworkOptions,
   type NetworkProfile,
-  NETWORK_PROFILES,
 } from '../remote/network_profiles';
 
 export type Browser = BrowserService;
@@ -247,6 +247,28 @@ class BrowserService extends FtrService {
   }
 
   /**
+   * Deletes all the cookies of the current browsing context.
+   * https://www.selenium.dev/documentation/webdriver/interactions/cookies/#delete-all-cookies
+   *
+   * @return {Promise<void>}
+   */
+  public async deleteAllCookies() {
+    await this.driver.manage().deleteAllCookies();
+  }
+
+  /**
+   * Adds a cookie to the current browsing context. You need to be on the domain that the cookie will be valid for.
+   * https://www.selenium.dev/documentation/webdriver/interactions/cookies/#add-cookie
+   *
+   * @param {string} name
+   * @param {string} value
+   * @return {Promise<void>}
+   */
+  public async setCookie(name: string, value: string) {
+    await this.driver.manage().addCookie({ name, value });
+  }
+
+  /**
    * Retrieves the cookie with the given name. Returns null if there is no such cookie. The cookie will be returned as
    * a JSON object as described by the WebDriver wire protocol.
    * https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Options.html
@@ -256,6 +278,18 @@ class BrowserService extends FtrService {
    */
   public async getCookie(cookieName: string) {
     return await this.driver.manage().getCookie(cookieName);
+  }
+
+  /**
+   * Returns a ‘successful serialized cookie data’ for current browsing context.
+   * If browser is no longer available it returns error.
+   * https://www.selenium.dev/documentation/webdriver/interactions/cookies/#get-all-cookies
+   *
+   * @param {string} cookieName
+   * @return {Promise<IWebDriverCookie>}
+   */
+  public async getCookies() {
+    return await this.driver.manage().getCookies();
   }
 
   /**
