@@ -51,9 +51,6 @@ const useTokens = (hunks: HunkData[], diffMethod: DiffMethod, oldSource: string)
   try {
     /*
       Synchroniously applies all the enhancers to the hunks and returns an array of tokens.
-      There's also a way to use a web worker to tokenize in a separate thread.
-      Example can be found here: https://github.com/otakustay/react-diff-view/blob/49cebd0958ef323c830395c1a1da601560a71781/site/components/DiffView/index.tsx#L43
-      It didn't work for me right away, but theoretically the possibility is there.
     */
     return tokenize(hunks, options);
   } catch (ex) {
