@@ -8,15 +8,21 @@
 // @ts-expect-error
 import turfCenterOfMass from '@turf/center-of-mass';
 import { LAT_INDEX, LON_INDEX } from '../../../common/constants';
-import type { TileMetaFeature } from '../../../common/descriptor_types';
+import type { TileError, TileMetaFeature } from '../../../common/descriptor_types';
 import { EventEmitter } from 'events';
 import { TileRequest } from './types';
 import { isPointInTile } from '../../classes/util/geo_tile_utils';
 
+interface LayerState {
+  label: string;
+  tileErrors?: TileError[];
+  tileMetaFeatures?: TileMetaFeature[];
+  tileUrl: string;
+}
+
 export class VectorTileAdapter extends EventEmitter {
-  private _layers: Record<string, { label: string; tileUrl: string }> = {};
+  private _layers: Record<string, LayerState> = {};
   private _tiles: Array<{ x: number; y: number; z: number }> = [];
-  private _layerTileMetaFeatures: Record<string, TileMetaFeature[]> = {};
 
   public addLayer(layerId: string, label: string, tileUrl: string) {
     this._layers[layerId] = { label, tileUrl };
@@ -37,8 +43,16 @@ export class VectorTileAdapter extends EventEmitter {
     this._onChange();
   }
 
-  public setTileMetaFeatures(layerId: string, tileMetaFeatures?: TileMetaFeature[]) {
-    this._layerTileMetaFeatures[layerId] = tileMetaFeatures ? tileMetaFeatures : [];
+  public setTileResults(layerId: string, tileMetaFeatures?: TileMetaFeature[], tileErrors?: TileError[]) {
+    if (!this._layers[layerId]) {
+      return;
+    }
+
+    this._layers[layerId] = {
+      ...this._layers[layerId],
+      tileErrors,
+      tileMetaFeatures,
+    }
     this._onChange();
   }
 
@@ -56,25 +70,15 @@ export class VectorTileAdapter extends EventEmitter {
       return [];
     }
 
-    const { tileUrl } = this._layers[layerId];
+    const { tileErrors, tileMetaFeatures, tileUrl } = this._layers[layerId];
     return this._tiles.map((tile) => {
       return {
         layerId,
         tileUrl,
-        tileMetaFeature: this._getTileMetaFeature(layerId, tile.x, tile.y, tile.z),
+        tileError: getTileError(layerId, tile.x, tile.y, tile.z, tileErrors),
+        tileMetaFeature: getTileMetaFeature(layerId, tile.x, tile.y, tile.z, tileMetaFeatures),
         ...tile,
       };
-    });
-  }
-
-  private _getTileMetaFeature(layerId: string, x: number, y: number, z: number) {
-    if (!this._layerTileMetaFeatures[layerId]) {
-      return;
-    }
-
-    return this._layerTileMetaFeatures[layerId].find(tileMetaFeature => {
-      const centerGeometry = turfCenterOfMass(tileMetaFeature).geometry;
-      return isPointInTile(centerGeometry.coordinates[LAT_INDEX], centerGeometry.coordinates[LON_INDEX], x, y, z);
     });
   }
 
@@ -82,3 +86,27 @@ export class VectorTileAdapter extends EventEmitter {
     this.emit('change');
   }
 }
+
+function getTileMetaFeature(layerId: string, x: number, y: number, z: number, tileMetaFeatures?: TileMetaFeature[]) {
+  if (!tileMetaFeatures || tileMetaFeatures.length === 0) {
+    return;
+  }
+
+  return tileMetaFeatures.find(tileMetaFeature => {
+    const centerGeometry = turfCenterOfMass(tileMetaFeature).geometry;
+    return isPointInTile(centerGeometry.coordinates[LAT_INDEX], centerGeometry.coordinates[LON_INDEX], x, y, z);
+  });
+}
+
+function getTileError(layerId: string, x: number, y: number, z: number, tileErrors?: TileError[]) {
+  if (!tileErrors || tileErrors.length === 0) {
+    return;
+  }
+
+  const tileKey = `${z}/${x}/${y}`;
+
+  return tileErrors.find(tileError => {
+    return tileError.tileKey === tileKey;
+  });
+}
+
