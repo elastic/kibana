@@ -100,6 +100,10 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
     const targetRule: RuleResponse = {
       ...convertPrebuiltRuleAssetToRuleResponse(targetVersion),
       id: installedCurrentVersion.id,
+      revision: installedCurrentVersion.revision + 1,
+      created_at: installedCurrentVersion.created_at,
+      created_by: installedCurrentVersion.created_by,
+      updated_at: new Date().toISOString(),
     };
 
     return {
