@@ -154,7 +154,9 @@ export function UXAppRoot({
             lens,
           }}
         >
-          <ObservabilityAIAssistantProvider value={observabilityAIAssistant}>
+          <ObservabilityAIAssistantProvider
+            value={observabilityAIAssistant.service}
+          >
             <KibanaThemeProvider
               theme$={appMountParameters.theme$}
               modify={{
