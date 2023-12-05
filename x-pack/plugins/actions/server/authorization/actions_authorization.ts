@@ -74,7 +74,13 @@ export class ActionsAuthorization {
           : [authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation)];
 
         if (operation === 'execute' && !actionTypeId) {
-          throw new Error('actionTypeId required to authorize execution of actions');
+          // FIXME:PT remove this after debug of test failures
+          const calledFrom: { stack: string } = { stack: '' };
+          Error.captureStackTrace(calledFrom);
+
+          throw new Error(
+            `actionTypeId required to authorize execution of actions: Called from:\n${calledFrom.stack}`
+          );
         }
 
         const { hasAllRequested } = await checkPrivileges({
