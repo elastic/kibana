@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { dump } from '../../../utils/dump';
 import type { HapiReadableStream } from '../../../../types';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 import { updateCases } from '../create/update_cases';
@@ -74,11 +75,16 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       .getActionCreateService()
       .createAction(createPayload, agentIds.valid);
 
-    await updateCases({
-      casesClient: this.options.casesClient,
-      endpointData: agentIds.hosts,
-      createActionPayload: createPayload,
-    });
+    try {
+      await updateCases({
+        casesClient: this.options.casesClient,
+        endpointData: agentIds.hosts,
+        createActionPayload: createPayload,
+      });
+    } catch (err) {
+      // failures during update of cases should not cause the response action to fail. Just log error
+      this.log.warn(`failed to update cases: ${err.message}\n${dump(err)}`);
+    }
 
     return response as TResponse;
   }
