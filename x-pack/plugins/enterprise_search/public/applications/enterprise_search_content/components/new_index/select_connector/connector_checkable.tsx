@@ -61,7 +61,14 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
   const [isNativePopoverOpen, setIsNativePopoverOpen] = useState(false);
   return (
     <EuiCard
-      onClick={() => onConnectorSelect()}
+      {...(!isDisabled
+        ? {
+            onClick: () => {
+              if (isDisabled) return;
+              onConnectorSelect();
+            },
+          }
+        : {})}
       hasBorder
       id={`checkableCard-${serviceType}`}
       css={
