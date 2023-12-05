@@ -30,7 +30,6 @@ interface CasesTableFiltersProps {
   availableSolutions: string[];
   isSelectorView?: boolean;
   onCreateCasePressed?: () => void;
-  initialFilterOptions: Partial<FilterOptions>;
   isLoading: boolean;
   currentUserProfile: CurrentUserProfile;
   filterOptions: FilterOptions;
@@ -51,7 +50,6 @@ const CasesTableFiltersComponent = ({
   availableSolutions,
   isSelectorView = false,
   onCreateCasePressed,
-  initialFilterOptions,
   isLoading,
   currentUserProfile,
   filterOptions,
@@ -94,7 +92,6 @@ const CasesTableFiltersComponent = ({
     currentUserProfile,
     handleSelectedAssignees,
     hiddenStatuses,
-    initialFilterOptions,
     isLoading,
     isSelectorView,
     onFilterOptionsChange,

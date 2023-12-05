@@ -183,11 +183,16 @@ export function CasesTableServiceProvider(
       await casesCommon.selectFirstRowInAssigneesPopover();
     },
 
-    async filterByOwner(owner: string) {
-      await common.clickAndValidate(
-        'options-filter-popover-button-owner',
-        `options-filter-popover-item-${owner}`
-      );
+    async filterByOwner(
+      owner: string,
+      options: { popupAlreadyOpen: boolean } = { popupAlreadyOpen: false }
+    ) {
+      if (!options.popupAlreadyOpen) {
+        await common.clickAndValidate(
+          'options-filter-popover-button-owner',
+          `options-filter-popover-item-${owner}`
+        );
+      }
 
       await testSubjects.click(`options-filter-popover-item-${owner}`);
     },

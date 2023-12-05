@@ -7,7 +7,6 @@
 
 import React, { useState, useEffect } from 'react';
 
-import type { FilterOptions } from '../../../../common/ui';
 import type { CaseStatuses } from '../../../../common/types/domain';
 import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../../common/constants';
 import { MultiSelectFilter, mapToMultiSelectOption } from '../multi_select_filter';
@@ -30,7 +29,6 @@ interface UseFilterConfigProps {
   currentUserProfile: CurrentUserProfile;
   handleSelectedAssignees: (newAssignees: AssigneesFilteringSelection[]) => void;
   hiddenStatuses?: CaseStatuses[];
-  initialFilterOptions: Partial<FilterOptions>;
   isLoading: boolean;
   isSelectorView?: boolean;
   onFilterOptionsChange: FilterChangeHandler;
@@ -48,7 +46,6 @@ export const getSystemFilterConfig = ({
   currentUserProfile,
   handleSelectedAssignees,
   hiddenStatuses,
-  initialFilterOptions,
   isLoading,
   isSelectorView,
   onFilterOptionsChange,
@@ -74,7 +71,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          severity: initialFilterOptions.severity || [],
+          severity: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -112,7 +109,7 @@ export const getSystemFilterConfig = ({
       isAvailable: caseAssignmentAuthorized && !isSelectorView,
       getEmptyOptions: () => {
         return {
-          assignees: initialFilterOptions.assignees || [],
+          assignees: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => {
@@ -201,7 +198,6 @@ export const useSystemFilterConfig = ({
   currentUserProfile,
   handleSelectedAssignees,
   hiddenStatuses,
-  initialFilterOptions,
   isLoading,
   isSelectorView,
   onFilterOptionsChange,
@@ -219,7 +215,6 @@ export const useSystemFilterConfig = ({
       currentUserProfile,
       handleSelectedAssignees,
       hiddenStatuses,
-      initialFilterOptions,
       isLoading,
       isSelectorView,
       onFilterOptionsChange,
@@ -240,7 +235,6 @@ export const useSystemFilterConfig = ({
         currentUserProfile,
         handleSelectedAssignees,
         hiddenStatuses,
-        initialFilterOptions,
         isLoading,
         isSelectorView,
         onFilterOptionsChange,
@@ -258,7 +252,6 @@ export const useSystemFilterConfig = ({
     currentUserProfile,
     handleSelectedAssignees,
     hiddenStatuses,
-    initialFilterOptions,
     isLoading,
     isSelectorView,
     onFilterOptionsChange,

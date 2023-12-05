@@ -213,7 +213,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           availableSolutions={hasOwner ? [] : availableSolutions}
           hiddenStatuses={hiddenStatuses}
           onCreateCasePressed={onCreateCasePressed}
-          initialFilterOptions={initialFilterOptions}
           isSelectorView={isSelectorView}
           isLoading={isLoadingCurrentUserProfile}
           currentUserProfile={currentUserProfile}
