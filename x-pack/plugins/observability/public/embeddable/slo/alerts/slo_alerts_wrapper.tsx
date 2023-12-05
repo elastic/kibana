@@ -28,14 +28,14 @@ interface Props {
   timeRange: TimeRange;
   embeddable: IEmbeddable<SloAlertsEmbeddableInput, EmbeddableOutput>;
   onRenderComplete?: () => void;
-  reloadSubject: Subject<boolean>;
+  reloadSubject: Subject<TimeRange>;
 }
 
 export function SloAlertsWrapper({
   embeddable,
   slos,
   deps,
-  timeRange,
+  timeRange: initialTimeRange,
   onRenderComplete,
   reloadSubject,
 }: Props) {
@@ -44,13 +44,20 @@ export function SloAlertsWrapper({
     http: { basePath },
   } = deps;
 
+  const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
+
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
 
   useEffect(() => {
-    reloadSubject?.subscribe(() => {
+    reloadSubject?.subscribe((nTimeRange) => {
       setLastRefreshTime(Date.now());
+      setTimeRange(nTimeRange);
     });
   }, [reloadSubject]);
+
+  useEffect(() => {
+    setTimeRange(initialTimeRange);
+  }, [initialTimeRange]);
 
   const [isSummaryLoaded, setIsSummaryLoaded] = useState(false);
   const [isTableLoaded, setIsTableLoaded] = useState(false);

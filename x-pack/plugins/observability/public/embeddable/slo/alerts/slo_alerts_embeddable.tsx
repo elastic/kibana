@@ -35,6 +35,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 
 import { Subject } from 'rxjs';
+import { TimeRange } from '@kbn/es-query';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 import type { SloAlertsEmbeddableInput } from './types';
 export const SLO_ALERTS_EMBEDDABLE = 'SLO_ALERTS_EMBEDDABLE';
@@ -62,7 +63,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
   EmbeddableOutput
 > {
   public readonly type = SLO_ALERTS_EMBEDDABLE;
-  private reloadSubject: Subject<boolean>;
+  private reloadSubject: Subject<TimeRange>;
   private node?: HTMLElement;
   kibanaVersion: string;
 
@@ -75,10 +76,11 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
     super(initialInput, {}, parent);
     this.deps = deps;
     this.kibanaVersion = kibanaVersion;
-    this.reloadSubject = new Subject<boolean>();
+    this.reloadSubject = new Subject<TimeRange>();
 
-    this.getInput$().subscribe(() => {
-      this.reloadSubject.next(true);
+    this.getInput$().subscribe((input) => {
+      const { timeRange = { from: 'now-15m/m', to: 'now' } } = input;
+      this.reloadSubject.next(timeRange);
     });
 
     this.setTitle(
@@ -138,9 +140,9 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
   }
 
   public reload() {
-    // this.input.lastReloadRequestTime = Date.now();
-    // console.log('reload', new Date(this.input.lastReloadRequestTime).toISOString());
-    this.reloadSubject?.next(true);
+    const { timeRange = { from: 'now-15m/m', to: 'now' } } = this.getInput();
+
+    this.reloadSubject?.next(timeRange);
   }
 
   public destroy() {
