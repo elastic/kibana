@@ -3,7 +3,7 @@ info:
   title: Get Asset Criticality Privileges Schema
   version: 1.0.0
 paths:
-  /internal/risk_score/criticality/privileges:
+  /internal/asset_criticality/privileges:
     get:
       summary: Get Asset Criticality Privileges
       responses:
