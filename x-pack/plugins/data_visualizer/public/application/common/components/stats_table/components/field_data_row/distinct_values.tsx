@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../../../common/constants';
 import { useDataVisualizerKibana } from '../../../../../kibana_context';
-import { FieldDataRowProps } from '../../types';
+import type { FieldDataRowProps } from '../../types';
 
 interface Props extends FieldDataRowProps {
   showIcon?: boolean;
@@ -26,7 +26,7 @@ export const DistinctValues = ({ showIcon, config }: Props) => {
     },
   } = useDataVisualizerKibana();
 
-  const cardinality = config?.stats?.cardinality;
+  const cardinality = stats?.cardinality;
 
   if (cardinality === undefined || stats === undefined) return null;
 
