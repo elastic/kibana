@@ -528,12 +528,15 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     ) : undefined;
 
     let filterBar;
+    const indexPatterns = this.props.indexPatterns
+      ? this.props.indexPatterns.filter((ip) => ip.type !== 'esql')
+      : [];
     if (this.shouldRenderFilterBar()) {
       filterBar = this.shouldShowDatePickerAsBadge() ? (
         <FilterItems
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
-          indexPatterns={this.props.indexPatterns!}
+          indexPatterns={indexPatterns}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
