@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
 import type { Duration } from 'moment/moment';
-import { memoize, pick } from 'lodash';
+import { capitalize, get, memoize, pick } from 'lodash';
 import {
   FIELD_FORMAT_IDS,
   type IFieldFormat,
@@ -22,9 +22,12 @@ import {
   type MlAnomalyRecordDoc,
   type MlAnomalyResultType,
   ML_ANOMALY_RESULT_TYPE,
+  MlAnomaliesTableRecordExtended,
 } from '@kbn/ml-anomaly-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import { getAnomalyDescription } from '../../../common/util/anomaly_description';
 import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
 import type { MlClient } from '../ml_client';
 import type {
@@ -184,6 +187,8 @@ export function alertingServiceProvider(
   getDataViewsService: GetDataViewsService
 ) {
   type FieldFormatters = AwaitReturnType<ReturnType<typeof getFormatters>>;
+
+  let jobs: MlJob[] = [];
 
   /**
    * Provides formatters based on the data view of the datafeed index pattern
@@ -408,10 +413,53 @@ export function alertingServiceProvider(
     });
 
     if (resultType === ML_ANOMALY_RESULT_TYPE.RECORD) {
-      message = getMetricChangeDescription(
-        source.actual as number[],
-        source.typical as number[]
-      ).message;
+      const recordSource = source as MlAnomalyRecordDoc;
+
+      const detectorsByJob = jobs.reduce((acc, job) => {
+        acc[job.job_id] = job.analysis_config.detectors.reduce((innterAcc, detector) => {
+          innterAcc[detector.detector_index!] = detector.detector_description;
+          return innterAcc;
+        }, {} as Record<number, string | undefined>);
+        return acc;
+      }, {} as Record<string, Record<number, string | undefined>>);
+
+      const detectorDescription = get(detectorsByJob, [
+        recordSource.job_id,
+        recordSource.detector_index,
+      ]);
+
+      const record = {
+        source: recordSource,
+        detector: detectorDescription ?? recordSource.function_description,
+        severity: recordSource.record_score,
+      } as MlAnomaliesTableRecordExtended;
+      const entityName = getEntityFieldName(recordSource);
+      if (entityName !== undefined) {
+        record.entityName = entityName;
+        record.entityValue = getEntityFieldValue(recordSource);
+      }
+
+      const anomalyDescription = getAnomalyDescription(record);
+
+      let actual = recordSource.actual;
+      let typical = recordSource.typical;
+      if (
+        (!isDefined(actual) || !isDefined(typical)) &&
+        Array.isArray(recordSource.causes) &&
+        recordSource.causes.length === 1
+      ) {
+        actual = recordSource.causes[0].actual;
+        typical = recordSource.causes[0].typical;
+      }
+
+      let metricChangeDescription = '';
+      if (isDefined(actual) && isDefined(typical)) {
+        metricChangeDescription = capitalize(getMetricChangeDescription(actual, typical).message);
+      }
+
+      message = `${anomalyDescription}. ${
+        metricChangeDescription ? `${metricChangeDescription}.` : ''
+      }`;
     }
 
     return message;
@@ -578,6 +626,8 @@ export function alertingServiceProvider(
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
     const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).jobs;
 
+    jobs = jobsResponse;
+
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
       throw new Error("Couldn't find the job with provided id");
@@ -712,6 +762,9 @@ export function alertingServiceProvider(
 
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
     const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).jobs;
+
+    // Cache jobs response
+    jobs = jobsResponse;
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
