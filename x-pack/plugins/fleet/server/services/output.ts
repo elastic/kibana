@@ -1033,15 +1033,19 @@ class OutputService {
   }
 
   async getLatestOutputHealth(esClient: ElasticsearchClient, id: string): Promise<OutputHealth> {
-    const response = await esClient.search({
-      index: OUTPUT_HEALTH_DATA_STREAM,
-      query: { bool: { filter: { term: { output: id } } } },
-      sort: { '@timestamp': 'desc' },
-      size: 1,
-    });
-    if (response.hits.hits.length === 0) {
+    const response = await esClient.search(
+      {
+        index: OUTPUT_HEALTH_DATA_STREAM,
+        query: { bool: { filter: { term: { output: id } } } },
+        sort: { '@timestamp': 'desc' },
+        size: 1,
+      },
+      { ignore: [404] }
+    );
+
+    if (!response.hits || response.hits.hits.length === 0) {
       return {
-        state: 'UNKOWN',
+        state: 'UNKNOWN',
         message: '',
         timestamp: '',
       };
