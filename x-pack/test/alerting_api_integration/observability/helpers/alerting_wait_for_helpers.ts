@@ -7,12 +7,12 @@
 
 import pRetry from 'p-retry';
 
-import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   AggregationsAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 
 export async function waitForRuleStatus({
   id,
@@ -21,7 +21,7 @@ export async function waitForRuleStatus({
 }: {
   id: string;
   expectedStatus: string;
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
 }): Promise<Record<string, any>> {
   return pRetry(
     async () => {

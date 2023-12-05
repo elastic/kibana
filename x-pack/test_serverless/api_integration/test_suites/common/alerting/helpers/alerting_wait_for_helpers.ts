@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import pRetry from 'p-retry';
-import type { SuperTest, Test } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   AggregationsAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
+import pRetry from 'p-retry';
 import { runRule } from './alerting_api_helper';
-
 export async function waitForDocumentInIndex({
   esClient,
   indexName,
@@ -372,7 +371,7 @@ export async function waitForNumRuleRuns({
   esClient,
   testStart,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   numOfRuns: number;
   ruleId: string;
   esClient: Client;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -21,7 +21,7 @@ const createSubActionConnector = async ({
   connectorTypeId = 'test.sub-action-connector',
   expectedHttpCode = 200,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   config?: Record<string, unknown>;
   secrets?: Record<string, unknown>;
   connectorTypeId?: string;
@@ -55,7 +55,7 @@ const executeSubAction = async ({
   subActionParams,
   expectedHttpCode = 200,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   connectorId: string;
   subAction: string;
   subActionParams: Record<string, unknown>;

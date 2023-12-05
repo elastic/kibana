@@ -19,10 +19,17 @@ import { format as formatUrl } from 'url';
 import { systemIndicesSuperuser } from '@kbn/test';
 import { FtrProviderContext } from './ftr_provider_context';
 
-export type FtrSupertest = Pick<SuperAgentTest, 'get' | 'delete' | 'patch' | 'post' | 'put'>;
+export type FtrSupertest = Pick<
+  SuperAgentTest,
+  'auth' | 'get' | 'delete' | 'patch' | 'post' | 'put'
+>;
 
 function createNewAgent(host: string, agentOptions?: { ca?: string[] }) {
   return {
+    auth(user: string, pass: string, options?: { type: 'basic' | 'auto' } | undefined) {
+      const agent = supertest.agent(host, agentOptions);
+      return agent.auth(user, pass, options);
+    },
     get(url: string) {
       const agent = supertest.agent(host, agentOptions);
       return agent.get(url);
@@ -30,6 +37,10 @@ function createNewAgent(host: string, agentOptions?: { ca?: string[] }) {
     delete(url: string) {
       const agent = supertest.agent(host, agentOptions);
       return agent.delete(url);
+    },
+    patch(url: string) {
+      const agent = supertest.agent(host, agentOptions);
+      return agent.patch(url);
     },
     post(url: string) {
       const agent = supertest.agent(host, agentOptions);

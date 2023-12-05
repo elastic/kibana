@@ -16,7 +16,7 @@ import {
   Configurations,
   ConnectorTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import type SuperTest from 'supertest';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 import { User } from '../authentication/types';
 
 import { superUser } from '../authentication/users';
@@ -60,7 +60,7 @@ export const getConfigurationOutput = (update = false, overwrite = {}): Partial<
 };
 
 export const createConfiguration = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: FtrSupertest,
   req: ConfigurationRequest = getConfigurationRequest(),
   expectedHttpCode: number = 200,
   auth: { user: User; space: string | null } | null = { user: superUser, space: null },
@@ -86,7 +86,7 @@ export const getConfiguration = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -102,14 +102,16 @@ export const getConfiguration = async ({
 };
 
 export const updateConfiguration = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: FtrSupertest,
   id: string,
   req: ConfigurationPatchRequest,
   expectedHttpCode: number = 200,
   auth: { user: User; space: string | null } | null = { user: superUser, space: null },
   headers: Record<string, unknown> = {}
 ): Promise<Configuration> => {
-  const apiCall = supertest.patch(`${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}/${id}`);
+  const apiCall = supertest.patch(
+    `${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}/${id}`
+  ) as unknown as FtrSupertest;
 
   setupAuth({ apiCall, headers, auth });
 

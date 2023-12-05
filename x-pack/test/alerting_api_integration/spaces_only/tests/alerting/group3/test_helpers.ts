@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
-import type { SuperTest, Test } from 'supertest';
 import expect from '@kbn/expect';
+import type { FtrSupertest, RetryService } from '@kbn/ftr-common-functional-services';
+import moment from 'moment';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
+import { getEventLog, getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import { Spaces } from '../../../scenarios';
 
 export const createRule = async ({
@@ -23,7 +22,7 @@ export const createRule = async ({
 }: {
   actionId: string;
   pattern: { instance: boolean[] };
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   objectRemover: ObjectRemover;
   overwrites?: any;
 }) => {
@@ -65,7 +64,7 @@ export const createAction = async ({
   supertest,
   objectRemover,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   objectRemover: ObjectRemover;
 }) => {
   const { body: createdAction } = await supertest
@@ -89,7 +88,7 @@ export const createMaintenanceWindow = async ({
   objectRemover,
 }: {
   overwrites?: any;
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   objectRemover: ObjectRemover;
 }) => {
   const { body: window } = await supertest
@@ -112,11 +111,7 @@ export const createMaintenanceWindow = async ({
   return window;
 };
 
-export const getActiveMaintenanceWindows = async ({
-  supertest,
-}: {
-  supertest: SuperTest<Test>;
-}) => {
+export const getActiveMaintenanceWindows = async ({ supertest }: { supertest: FtrSupertest }) => {
   const { body: activeMaintenanceWindows } = await supertest
     .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/maintenance_window/_active`)
     .set('kbn-xsrf', 'foo')
@@ -130,7 +125,7 @@ export const finishMaintenanceWindow = async ({
   supertest,
 }: {
   id: string;
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
 }) => {
   return supertest
     .post(
@@ -188,7 +183,7 @@ export const expectNoActionsFired = async ({
   retry,
 }: {
   id: string;
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   retry: RetryService;
 }) => {
   const events = await retry.try(async () => {
@@ -215,7 +210,7 @@ export const runSoon = async ({
   retry,
 }: {
   id: string;
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   retry: RetryService;
 }) => {
   return retry.try(async () => {

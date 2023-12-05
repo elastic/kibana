@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
 import { CASES_URL } from '@kbn/cases-plugin/common';
-import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
-import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
+import {
+  Case,
+  CaseSeverity,
+  CaseStatuses,
+  ConnectorTypes,
+} from '@kbn/cases-plugin/common/types/domain';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -62,10 +66,10 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
       headers,
       auth,
     }: {
-      apiCall: SuperTest.Test;
+      apiCall: FtrSupertest;
       headers: Record<string, unknown>;
       auth?: { user: User; space: string | null } | null;
-    }): SuperTest.Test {
+    }) {
       if (!Object.hasOwn(headers, 'Cookie') && auth != null) {
         return apiCall.auth(auth.user.username, auth.user.password);
       }

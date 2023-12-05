@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
-import { CASES_INTERNAL_URL, CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { AttachmentType, Case } from '@kbn/cases-plugin/common';
 import {
   getCaseFindAttachmentsUrl,
   getCasesDeleteFileAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
-import { Case, AttachmentType } from '@kbn/cases-plugin/common';
+import { CASES_INTERNAL_URL, CASES_URL } from '@kbn/cases-plugin/common/constants';
 import {
-  BulkGetAttachmentsResponse,
-  AttachmentRequest,
-  BulkCreateAttachmentsRequest,
   AttachmentPatchRequest,
+  AttachmentRequest,
   AttachmentsFindResponse,
+  BulkCreateAttachmentsRequest,
+  BulkGetAttachmentsResponse,
 } from '@kbn/cases-plugin/common/types/api';
-import { Attachments, Attachment } from '@kbn/cases-plugin/common/types/domain';
+import { Attachment, Attachments } from '@kbn/cases-plugin/common/types/domain';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
-import { getSpaceUrlPrefix, setupAuth } from './helpers';
-import { createCase } from './case';
 import { postCaseReq } from '../mock';
+import { createCase } from './case';
+import { getSpaceUrlPrefix, setupAuth } from './helpers';
 
 export const bulkGetAttachments = async ({
   supertest,
@@ -33,7 +33,7 @@ export const bulkGetAttachments = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   attachmentIds: string[];
   caseId: string;
   auth?: { user: User; space: string | null };
@@ -57,7 +57,7 @@ export const createComment = async ({
   expectedHttpCode = 200,
   headers = {},
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   caseId: string;
   params: AttachmentRequest;
   auth?: { user: User; space: string | null } | null;
@@ -86,7 +86,7 @@ export const bulkCreateAttachments = async ({
   auth = { user: superUser, space: null },
   expectedHttpCode = 200,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   caseId: string;
   params: BulkCreateAttachmentsRequest;
   auth?: { user: User; space: string | null };
@@ -110,7 +110,7 @@ export const createCaseAndBulkCreateAttachments = async ({
   auth = { user: superUser, space: null },
   expectedHttpCode = 200,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   numberOfAttachments?: number;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
@@ -156,7 +156,7 @@ export const deleteComment = async ({
   expectedHttpCode = 204,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   caseId: string;
   commentId: string;
   expectedHttpCode?: number;
@@ -178,7 +178,7 @@ export const deleteAllComments = async ({
   expectedHttpCode = 204,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   caseId: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -199,7 +199,7 @@ export const getAllComments = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   caseId: string;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
@@ -219,7 +219,7 @@ export const getComment = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   caseId: string;
   commentId: string;
   expectedHttpCode?: number;
@@ -241,7 +241,7 @@ export const updateComment = async ({
   auth = { user: superUser, space: null },
   headers = {},
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   caseId: string;
   req: AttachmentPatchRequest;
   expectedHttpCode?: number;
@@ -269,7 +269,7 @@ export const bulkDeleteFileAttachments = async ({
   expectedHttpCode = 204,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   caseId: string;
   fileIds: string[];
   expectedHttpCode?: number;
@@ -290,7 +290,7 @@ export const findAttachments = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   caseId: string;
   query?: Record<string, unknown>;
   expectedHttpCode?: number;

@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
 import { fromKueryExpression } from '@kbn/es-query';
-import { Spaces } from '../../../scenarios';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import expect from '@kbn/expect';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
+import { Spaces } from '../../../scenarios';
 
-async function createAlert(
-  objectRemover: ObjectRemover,
-  supertest: SuperTest<Test>,
-  overwrites = {}
-) {
+async function createAlert(objectRemover: ObjectRemover, supertest: FtrSupertest, overwrites = {}) {
   const { body: createdAlert } = await supertest
     .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
     .set('kbn-xsrf', 'foo')
@@ -28,7 +24,7 @@ async function createAlert(
 
 const findTestUtils = (
   describeType: 'internal' | 'public',
-  supertest: SuperTest<Test>,
+  supertest: FtrSupertest,
   objectRemover: ObjectRemover
 ) => {
   describe(describeType, () => {

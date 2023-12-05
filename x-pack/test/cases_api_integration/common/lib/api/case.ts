@@ -6,16 +6,16 @@
  */
 
 import { CASES_URL } from '@kbn/cases-plugin/common';
-import { Case } from '@kbn/cases-plugin/common/types/domain';
 import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
-import type SuperTest from 'supertest';
+import { Case } from '@kbn/cases-plugin/common/types/domain';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 import { User } from '../authentication/types';
 
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
 
 export const createCase = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: FtrSupertest,
   params: CasePostRequest,
   expectedHttpCode: number = 200,
   auth: { user: User; space: string | null } | null = { user: superUser, space: null },
@@ -44,7 +44,7 @@ export const deleteCases = async ({
   expectedHttpCode = 204,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   caseIDs: string[];
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
