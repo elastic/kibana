@@ -74,12 +74,15 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
      */
     const showBulkActions = (permissions.update || permissions.delete) && selectedCases.length > 0;
 
+    const pageStart = pagination?.pageSize ? pagination.pageSize * pagination.pageIndex + 1 : 0;
+
     const visibleCases =
-      pagination?.pageSize && totalCases > pagination.pageSize ? pagination.pageSize : totalCases;
+      pagination?.pageSize && totalCases > pagination.pageSize
+        ? pagination.pageSize * (pagination.pageIndex + 1)
+        : totalCases;
 
     const totalCasesDisplayed = totalCases > MAX_DOCS_PER_PAGE ? MAX_DOCS_PER_PAGE : totalCases;
 
-    console.log({ visibleCases, totalCases, pagination });
     return (
       <>
         <EuiFlexGroup
@@ -105,7 +108,9 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
                 }}
               >
                 <EuiText size="xs" color="subdued">
-                  {i18n.SHOWING_CASES(totalCasesDisplayed, visibleCases)}
+                  {visibleCases > 0
+                    ? i18n.SHOWING_CASES(totalCasesDisplayed, pageStart, visibleCases)
+                    : i18n.SHOWING_ZERO_CASES(totalCasesDisplayed, visibleCases)}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem data-test-subj="case-table-utility-bar-actions" grow={false}>

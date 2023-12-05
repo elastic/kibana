@@ -31,7 +31,7 @@ describe('Utility bar', () => {
     selectedCases: [basicCase],
     deselectCases,
     pagination: {
-      pageIndex: 1,
+      pageIndex: 0,
       pageSize: 10,
       totalItemCount: 5,
     },
@@ -45,7 +45,7 @@ describe('Utility bar', () => {
 
   it('renders', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
-    expect(screen.getByText('Showing 5 of 5 cases')).toBeInTheDocument();
+    expect(screen.getByText('Showing 1 to 5 of 5 cases')).toBeInTheDocument();
     expect(screen.getByText('Selected 1 case')).toBeInTheDocument();
     expect(screen.getByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
     expect(screen.getByTestId('all-cases-refresh-link-icon')).toBeInTheDocument();
@@ -62,7 +62,7 @@ describe('Utility bar', () => {
       },
     };
     appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
-    expect(screen.getByText('Showing 10 of 20 cases')).toBeInTheDocument();
+    expect(screen.getByText('Showing 1 to 10 of 20 cases')).toBeInTheDocument();
     expect(screen.getByText('Selected 1 case')).toBeInTheDocument();
   });
 
@@ -72,12 +72,12 @@ describe('Utility bar', () => {
       totalCases: 20,
       pagination: {
         ...props.pagination,
-        pageIndex: 2,
+        pageIndex: 1,
         totalItemCount: 20,
       },
     };
     appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
-    expect(screen.getByText('Showing 10 of 20 cases')).toBeInTheDocument();
+    expect(screen.getByText('Showing 11 to 20 of 20 cases')).toBeInTheDocument();
     expect(screen.getByText('Selected 1 case')).toBeInTheDocument();
   });
 
@@ -177,7 +177,8 @@ describe('Utility bar', () => {
   });
 
   it.each(allCasesPageSize)(`renders showing cases message correctly`, (size) => {
-    const newPageIndex = MAX_DOCS_PER_PAGE / size;
+    const newPageIndex = MAX_DOCS_PER_PAGE / size - 1;
+    const pageStart = size * newPageIndex + 1;
 
     appMockRender.render(
       <CasesTableUtilityBar
@@ -189,7 +190,9 @@ describe('Utility bar', () => {
       />
     );
 
-    expect(screen.getByText(`Showing ${size} of ${MAX_DOCS_PER_PAGE} cases`)).toBeInTheDocument();
+    expect(
+      screen.getByText(`Showing ${pageStart} to ${size} of ${MAX_DOCS_PER_PAGE} cases`)
+    ).toBeInTheDocument();
     expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
   });
 });

@@ -36,7 +36,14 @@ export const SHOWING_SELECTED_CASES = (totalRules: number) =>
     defaultMessage: 'Selected {totalRules} {totalRules, plural, =1 {case} other {cases}}',
   });
 
-export const SHOWING_CASES = (totalRules: number, pageSize: number) =>
+export const SHOWING_CASES = (totalRules: number, pageStart: number, pageSize: number) =>
+  i18n.translate('xpack.cases.caseTable.showingCasesTitle', {
+    values: { totalRules, pageStart, pageSize },
+    defaultMessage:
+      'Showing {pageStart} to {pageSize} of {totalRules} {totalRules, plural, =1 {case} other {cases}}',
+  });
+
+export const SHOWING_ZERO_CASES = (totalRules: number, pageSize: number) =>
   i18n.translate('xpack.cases.caseTable.showingCasesTitle', {
     values: { totalRules, pageSize },
     defaultMessage:
@@ -47,7 +54,7 @@ export const MAX_CASES = (maxCases: number) =>
   i18n.translate('xpack.cases.caseTable.maxCases', {
     values: { maxCases },
     defaultMessage:
-      'The results were capped at {maxCases} to maintain performance. Try limiting your search to reduce the results.',
+      'The results are limited to {maxCases} cases. Add more search terms to narrow your search.',
   });
 
 export const DISMISS = i18n.translate('xpack.cases.caseTable.dismiss', {

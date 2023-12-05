@@ -196,7 +196,7 @@ describe('AllCasesListGeneric', () => {
         screen.getAllByTestId('case-table-column-createdAt')[0].querySelector('.euiToolTipAnchor')
       ).toHaveTextContent(removeMsFromDate(useGetCasesMockState.data.cases[0].createdAt));
       expect(screen.getByTestId('case-table-case-count')).toHaveTextContent(
-        `Showing 10 of ${useGetCasesMockState.data.total} cases`
+        `Showing 1 to 10 of ${useGetCasesMockState.data.total} cases`
       );
       expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
     });
@@ -640,7 +640,7 @@ describe('AllCasesListGeneric', () => {
     expect(alertCounts.length).toBeGreaterThan(0);
   });
 
-  describe.only('Pagination', () => {
+  describe('Pagination', () => {
     const pageLimits = [10, 25, 50, 100];
 
     it.each(pageLimits)(
