@@ -25,17 +25,16 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
   } as unknown as AppMountParameters;
   const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 
-  const config: ConfigSchema = {
+  const config = {
     unsafe: {
       alertDetails: {
-        logs: { enabled: false },
         metrics: { enabled: false },
         uptime: { enabled: false },
         observability: { enabled: false },
       },
       thresholdRule: { enabled: false },
     },
-  };
+  } as ConfigSchema;
 
   const mockTheme: CoreTheme = {
     darkMode: false,
