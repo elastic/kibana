@@ -49,14 +49,14 @@ export function SloAlertsWrapper({
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
 
   useEffect(() => {
-    reloadSubject?.subscribe((nTimeRange) => {
+    const subs = reloadSubject?.subscribe((nTimeRange) => {
       if (nTimeRange && (nTimeRange.from !== timeRange.from || nTimeRange.to !== timeRange.to)) {
         setTimeRange(nTimeRange);
       }
       setLastRefreshTime(Date.now());
     });
     return () => {
-      reloadSubject?.unsubscribe();
+      subs?.unsubscribe();
     };
   }, [reloadSubject, timeRange.from, timeRange.to]);
 
