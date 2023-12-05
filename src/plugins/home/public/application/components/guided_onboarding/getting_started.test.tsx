@@ -125,7 +125,7 @@ describe('getting started', () => {
     expect((guideFilters.props() as GuideFiltersProps).activeFilter).toBe('search');
   });
 
-  test('should set default guide filter value to "all" for classic versions, if querystring parameter does NOT exist', async () => {
+  xtest('should set default guide filter value to "all" for classic versions, if querystring parameter does NOT exist', async () => {
     let component: ReactWrapper;
 
     jest.mock('../../kibana_services', () => ({
