@@ -8,6 +8,7 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import React, { useEffect } from 'react';
 import queryString from 'query-string';
 import moment, { Moment } from 'moment';
@@ -19,7 +20,6 @@ import { WithServices } from './__jest__';
 import { getTagList } from './mocks';
 import { TableListViewTable, type TableListViewTableProps } from './table_list_view_table';
 import { getActions } from './table_list_view.test.helpers';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 const mockUseEffect = useEffect;
 
