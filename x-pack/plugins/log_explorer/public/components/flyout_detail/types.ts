@@ -14,14 +14,14 @@ export interface FlyoutProps {
     removeColumn: DocViewRenderProps['onRemoveColumn'];
   };
   dataView: DocViewRenderProps['dataView'];
-  doc: DocViewRenderProps['hit'];
+  doc: LogDocument;
 }
 
 export interface LogDocument extends DataTableRecord {
   flattened: {
     '@timestamp': string;
-    'log.level'?: string;
-    message?: string;
+    'log.level'?: [string];
+    message?: [string];
 
     'host.name'?: string;
     'service.name'?: string;

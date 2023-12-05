@@ -28,6 +28,7 @@ export type {
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
   SummarizedAlertsChunk,
+  ScopedQueryAlerts,
   ExecutorType,
   IRuleTypeAlerts,
   GetViewInAppRelativeUrlFnOpts,
