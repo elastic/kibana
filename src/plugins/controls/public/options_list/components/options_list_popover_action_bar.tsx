@@ -38,20 +38,25 @@ export const OptionsListPopoverActionBar = ({
 
   const totalCardinality =
     optionsList.select((state) => state.componentState.totalCardinality) ?? 0;
-  const searchString = optionsList.select((state) => state.componentState.searchString);
   const fieldSpec = optionsList.select((state) => state.componentState.field);
+  const searchString = optionsList.select((state) => state.componentState.searchString);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
-
-  const hideSort = optionsList.select((state) => state.explicitInput.hideSort);
-  const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
   const allowExpensiveQueries = optionsList.select(
     (state) => state.componentState.allowExpensiveQueries
   );
+
+  const hideSort = optionsList.select((state) => state.explicitInput.hideSort);
+  const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
 
   const compatibleSearchTechniques = useMemo(() => {
     if (!fieldSpec) return [];
     return getCompatibleSearchTechniques(fieldSpec.type);
   }, [fieldSpec]);
+
+  const defaultSearchTechnique = useMemo(
+    () => searchTechnique ?? compatibleSearchTechniques[0],
+    [searchTechnique, compatibleSearchTechniques]
+  );
 
   return (
     <div className="optionsList__actions">
@@ -66,7 +71,7 @@ export const OptionsListPopoverActionBar = ({
             value={searchString.value}
             data-test-subj="optionsList-control-search-input"
             placeholder={OptionsListStrings.popover.getSearchPlaceholder(
-              allowExpensiveQueries ? searchTechnique ?? compatibleSearchTechniques[0] : 'exact'
+              allowExpensiveQueries ? defaultSearchTechnique : 'exact'
             )}
           />
         </EuiFormRow>

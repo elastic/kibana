@@ -17,7 +17,7 @@ interface IpSegments {
   type: 'ipv4' | 'ipv6' | 'unknown';
 }
 
-export const getIsValidIp = (searchString: string) => {
+export const getIsValidFullIp = (searchString: string) => {
   return ipaddr.IPv4.isValidFourPartDecimal(searchString) || ipaddr.IPv6.isValid(searchString);
 };
 

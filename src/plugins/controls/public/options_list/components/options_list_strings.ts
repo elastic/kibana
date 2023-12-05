@@ -12,7 +12,7 @@ import { OptionsListSearchTechnique } from '../../../common/options_list/suggest
 export const OptionsListStrings = {
   control: {
     getSeparator: (type?: string) => {
-      if (type === 'date' || type === 'number') {
+      if (['date', 'number'].includes(type ?? '')) {
         return i18n.translate('controls.optionsList.control.dateSeparator', {
           defaultMessage: ';  ',
         });
@@ -77,6 +77,17 @@ export const OptionsListStrings = {
           i18n.translate('controls.optionsList.editor.wildcardSearchTooltip', {
             defaultMessage:
               'Matches values that contain the given search string. Results might take longer to populate.',
+          }),
+      },
+      exact: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.exactSearchLabel', {
+            defaultMessage: 'Exact',
+          }),
+        getTooltip: () =>
+          i18n.translate('controls.optionsList.editor.exactSearchTooltip', {
+            defaultMessage:
+              'Matches values that are equal to the given search string. Returns results quickly.',
           }),
       },
     },

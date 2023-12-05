@@ -86,8 +86,8 @@ const allSearchOptions = [
     id: 'exact',
     label: (
       <TooltipText
-        label={'Exact'}
-        tooltip={'Matches values that are equal to the given search string.'}
+        label={OptionsListStrings.editor.searchTypes.exact.getLabel()}
+        tooltip={OptionsListStrings.editor.searchTypes.exact.getTooltip()}
       />
     ),
     'data-test-subj': 'optionsListControl__exactSearchOptionAdditionalSetting',

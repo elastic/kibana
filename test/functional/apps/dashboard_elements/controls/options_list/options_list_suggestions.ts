@@ -189,7 +189,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
       });
 
-      it('returning to default search technqiue should remove unsaved changes', async () => {
+      it('returning to default search technique should remove unsaved changes', async () => {
         await dashboardControls.editExistingControl(controlId);
         await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'prefix' });
         await dashboardControls.controlEditorSave();

@@ -169,7 +169,7 @@ export const ControlEditor = ({
     [selectedField, setControlEditorValid, selectedDataView, selectedControlType]
   );
 
-  const CompatibleControlTypes = useMemo(() => {
+  const CompatibleControlTypesComponent = useMemo(() => {
     const allDataControlTypes = getControlTypes().filter((type) => type !== TIME_SLIDER_CONTROL);
     return (
       <EuiKeyPadMenu data-test-subj={`controlTypeMenu`}>
@@ -196,14 +196,14 @@ export const ControlEditor = ({
     );
   }, [selectedField, fieldRegistry, getControlFactory, getControlTypes, selectedControlType]);
 
-  const CustomSettings = useMemo(() => {
+  const CustomSettingsComponent = useMemo(() => {
     if (!selectedControlType || !selectedField || !fieldRegistry) return;
 
     const controlFactory = getControlFactory(selectedControlType);
-    const CustomSettingsComponent = (controlFactory as IEditableControlFactory)
+    const CustomSettings = (controlFactory as IEditableControlFactory)
       .controlEditorOptionsComponent;
 
-    if (!CustomSettingsComponent) return;
+    if (!CustomSettings) return;
 
     return (
       <EuiDescribedFormGroup
@@ -220,7 +220,7 @@ export const ControlEditor = ({
         )}
         data-test-subj="control-editor-custom-settings"
       >
-        <CustomSettingsComponent
+        <CustomSettings
           onChange={(settings) => setCustomSettings(settings)}
           initialInput={embeddable?.getInput()}
           fieldType={fieldRegistry[selectedField].field.type}
@@ -290,7 +290,7 @@ export const ControlEditor = ({
               />
             </EuiFormRow>
             <EuiFormRow label={ControlGroupStrings.manageControl.dataSource.getControlTypeTitle()}>
-              {CompatibleControlTypes}
+              {CompatibleControlTypesComponent}
             </EuiFormRow>
           </EuiDescribedFormGroup>
           <EuiDescribedFormGroup
@@ -332,7 +332,7 @@ export const ControlEditor = ({
               </EuiFormRow>
             )}
           </EuiDescribedFormGroup>
-          {!editorConfig?.hideAdditionalSettings ? CustomSettings : null}
+          {!editorConfig?.hideAdditionalSettings ? CustomSettingsComponent : null}
           {removeControl && (
             <>
               <EuiSpacer size="l" />

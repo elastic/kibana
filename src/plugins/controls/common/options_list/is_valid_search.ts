@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getIpRangeQuery, getIsValidIp } from './ip_search';
+import { getIpRangeQuery, getIsValidFullIp } from './ip_search';
 import { OptionsListSearchTechnique } from './suggestions_searching';
 
 /**
@@ -31,17 +31,21 @@ export const isValidSearch = ({
       return !isNaN(Number(searchString));
     }
     case 'date': {
-      // searching is not currently supported for date fields
+      /** searching is not currently supported for date fields */
       return false;
     }
     case 'ip': {
       if (searchTechnique === 'exact') {
-        return getIsValidIp(searchString);
+        /**
+         * exact match searching will throw an error if the search string isn't a **full** IP,
+         * so we need a slightly different validity check here than for other search techniques
+         */
+        return getIsValidFullIp(searchString);
       }
       return getIpRangeQuery(searchString).validSearch;
     }
     default: {
-      // string searches are always considered to be valid
+      /** string searches are always considered to be valid */
       return true;
     }
   }

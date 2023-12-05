@@ -120,6 +120,8 @@ describe('Data control editor', () => {
           'optionsListControl__searchOptionsRadioGroup'
         );
         expect(searchOptions.exists()).toBe(true);
+        const options = searchOptions.find('div.euiRadioGroup__item');
+        expect(options.length).toBe(3);
       });
     });
 
@@ -144,6 +146,8 @@ describe('Data control editor', () => {
           'optionsListControl__searchOptionsRadioGroup'
         );
         expect(searchOptions.exists()).toBe(true);
+        const options = searchOptions.find('div.euiRadioGroup__item');
+        expect(options.length).toBe(2);
       });
     });
 
@@ -170,8 +174,19 @@ describe('Data control editor', () => {
 
       test('when creating options list, has custom settings', async () => {
         findTestSubject(controlEditor, 'create__optionsListControl').simulate('click');
-        const searchOptions = findTestSubject(controlEditor, 'control-editor-custom-settings');
+        const customSettings = findTestSubject(controlEditor, 'control-editor-custom-settings');
+        expect(customSettings.exists()).toBe(true);
+      });
+
+      test('when creating options list, has custom search options', async () => {
+        findTestSubject(controlEditor, 'create__optionsListControl').simulate('click');
+        const searchOptions = findTestSubject(
+          controlEditor,
+          'optionsListControl__searchOptionsRadioGroup'
+        );
         expect(searchOptions.exists()).toBe(true);
+        const options = searchOptions.find('div.euiRadioGroup__item');
+        expect(options.length).toBe(1);
       });
 
       test('when creating range slider, does not have custom settings', async () => {
