@@ -80,11 +80,30 @@ export interface Cluster {
   trend: PostureTrend[];
 }
 
+export interface BenchmarkData {
+  meta: {
+    benchmarkId: CspFinding['rule']['benchmark']['id'];
+    benchmarkVersion: CspFinding['rule']['benchmark']['version'];
+    benchmarkName: CspFinding['rule']['benchmark']['name'];
+    assetCount: number;
+  };
+  stats: Stats;
+  groupedFindingsEvaluation: GroupedFindingsEvaluation[];
+  trend: PostureTrend[];
+}
+
 export interface ComplianceDashboardData {
   stats: Stats;
   groupedFindingsEvaluation: GroupedFindingsEvaluation[];
   clusters: Cluster[];
   trend: PostureTrend[];
+}
+
+export interface ComplianceDashboardDataV2 {
+  stats: Stats;
+  groupedFindingsEvaluation: GroupedFindingsEvaluation[];
+  trend: PostureTrend[];
+  benchmarks: BenchmarkData[];
 }
 
 export type CspStatusCode =
