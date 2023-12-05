@@ -44,7 +44,6 @@ describe('useSetUpSections', () => {
     } as ActiveSections;
 
     const sections = result.current.setUpSections({
-      activeProducts: new Set([ProductLine.security]),
       activeSections,
       expandedCardSteps: {} as ExpandedCardSteps,
       onStepClicked,
@@ -62,7 +61,6 @@ describe('useSetUpSections', () => {
 
     const sections = result.current.setUpSections({
       activeSections,
-      activeProducts: new Set([ProductLine.security]),
       expandedCardSteps: {} as ExpandedCardSteps,
       onStepClicked,
       toggleTaskCompleteStatus,
