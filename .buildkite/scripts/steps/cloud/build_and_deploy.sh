@@ -121,6 +121,12 @@ fi
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
 CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')
 
+if [[ "$VAULT_ADDR" == *"secrets.elastic.co"* ]]; then
+  VAULT_PATH_PREFIX="secret/kibana-issues/dev"
+else
+  VAULT_PATH_PREFIX="secret/ci/elastic-kibana"
+fi
+
 cat << EOF | buildkite-agent annotate --style "info" --context cloud
   ### Cloud Deployment
 
@@ -128,7 +134,7 @@ cat << EOF | buildkite-agent annotate --style "info" --context cloud
 
   Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
 
-  Credentials: \`vault_get cloud-deploy/$CLOUD_DEPLOYMENT_NAME\`
+  Credentials: \`vault read $VAULT_PATH_PREFIX/$CLOUD_DEPLOYMENT_NAME\`
 
   Kibana image: \`$KIBANA_CLOUD_IMAGE\`
 
