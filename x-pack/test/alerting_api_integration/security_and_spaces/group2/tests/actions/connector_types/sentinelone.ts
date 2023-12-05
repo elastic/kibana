@@ -14,6 +14,7 @@ import SuperTest from 'supertest';
 import expect from '@kbn/expect';
 import { getUrlPrefix } from '../../../../../common/lib';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { createSupertestErrorLogger } from '../../../../../common/lib/log_supertest_errors';
 
 // eslint-disable-next-line import/no-default-export
 export default function createSentinelOneTests({ getService }: FtrProviderContext) {
@@ -21,43 +22,7 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const securityService = getService('security');
   const log = getService('log');
-
-  interface LogErrorDetailsInterface {
-    (this: SuperTest.Test, err: Error & { response?: any }): SuperTest.Test;
-    ignoreCodes: (
-      codes: number[]
-    ) => (this: SuperTest.Test, err: Error & { response?: SuperTest.Response }) => SuperTest.Test;
-  }
-
-  const logErrorDetails: LogErrorDetailsInterface = function (err) {
-    if (err.response && (err.response.body || err.response.text)) {
-      let outputData =
-        'RESPONSE:\n' + err.response.body
-          ? JSON.stringify(err.response.body, null, 2)
-          : err.response.text;
-
-      if (err.response.request) {
-        const { url = '', method = '', _data = '' } = err.response.request;
-
-        outputData += `\nREQUEST:
-${method}  ${url}
-${JSON.stringify(_data, null, 2)}
-`;
-      }
-
-      log.error(outputData);
-    }
-
-    return this ?? err;
-  };
-  logErrorDetails.ignoreCodes = (codes) => {
-    return function (err) {
-      if (err.response && err.response.status && !codes.includes(err.response.status)) {
-        return logErrorDetails.call(this, err);
-      }
-      return this;
-    };
-  };
+  const logErrorDetails = createSupertestErrorLogger(log);
 
   describe('SentinelOne', () => {
     describe('sub-actions authz', () => {
@@ -71,8 +36,8 @@ ${JSON.stringify(_data, null, 2)}
       const s1SubActions = [
         SUB_ACTION.KILL_PROCESS,
         SUB_ACTION.GET_AGENTS,
-        SUB_ACTION.ISOLATE_AGENT,
-        SUB_ACTION.RELEASE_AGENT,
+        SUB_ACTION.ISOLATE_HOST,
+        SUB_ACTION.RELEASE_HOST,
         SUB_ACTION.GET_REMOTE_SCRIPT_STATUS,
         SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS,
       ];
