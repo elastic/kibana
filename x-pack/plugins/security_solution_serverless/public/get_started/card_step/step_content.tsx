@@ -5,97 +5,92 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme, useEuiShadow, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
-
-const LEFT_CONTENT_PANEL_WIDTH = 486;
-const RIGHT_CONTENT_PANEL_WIDTH = 510;
-const RIGHT_CONTENT_HEIGHT = 270;
-const RIGHT_CONTENT_WIDTH = 480;
+import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
+import { useStepContentStyles } from '../styles/step_content.styles';
+import type {
+  CardId,
+  CheckIfStepCompleted,
+  SectionId,
+  Step,
+  ToggleTaskCompleteStatus,
+} from '../types';
 
 const StepContentComponent = ({
-  description,
-  hasStepContent,
-  isExpandedStep,
-  splitPanel,
-  stepId,
+  autoCheckIfStepCompleted,
+  cardId,
+  indicesExist,
+  sectionId,
+  step,
+  toggleTaskCompleteStatus,
 }: {
-  description?: React.ReactNode[];
-  hasStepContent: boolean;
-  isExpandedStep: boolean;
-  splitPanel?: React.ReactNode;
-  stepId: string;
+  autoCheckIfStepCompleted?: CheckIfStepCompleted;
+  cardId: CardId;
+  indicesExist: boolean;
+  sectionId: SectionId;
+  step: Step;
+  toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const shadow = useEuiShadow('s');
+  const { id: stepId, splitPanel } = step;
+  const {
+    stepContentGroupStyles,
+    leftContentStyles,
+    descriptionStyles,
+    rightPanelStyles,
+    rightPanelContentStyles,
+  } = useStepContentStyles();
 
-  return hasStepContent && isExpandedStep ? (
-    <>
-      <EuiFlexGroup
-        color="plain"
-        css={css`
-          margin-top: 20px;
-          margin-left: ${euiTheme.size.l};
-          transition: opacity ${euiTheme.animation.normal};
-          overflow: hidden;
-        `}
-        data-test-subj={`${stepId}-content`}
-        direction="row"
-        gutterSize="none"
-      >
-        {description && (
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              padding: 0 ${euiTheme.size.l} 0 ${euiTheme.size.s};
-              width: ${LEFT_CONTENT_PANEL_WIDTH}px;
-            `}
-          >
-            <EuiText size="s">
-              {description?.map((desc, index) => (
-                <p
-                  data-test-subj={`${stepId}-description-${index}`}
-                  key={`${stepId}-description-${index}`}
-                  className="eui-displayBlock"
-                  css={css`
-                    margin-bottom: ${euiTheme.base * 2}px;
-                    margin-block-end: ${euiTheme.base * 2}px !important;
-                    line-height: ${euiTheme.size.l};
-                  `}
-                >
-                  {desc}
-                </p>
-              ))}
-            </EuiText>
-          </EuiFlexItem>
-        )}
-        {splitPanel && (
-          <EuiFlexItem
-            grow={false}
-            data-test-subj="split-panel"
-            css={css`
-              padding: 0 6px 0 ${euiTheme.size.l};
-              width: ${RIGHT_CONTENT_PANEL_WIDTH}px;
-            `}
-          >
-            {splitPanel && (
+  useCheckStepCompleted({
+    autoCheckIfStepCompleted,
+    cardId,
+    indicesExist,
+    sectionId,
+    stepId,
+    stepTitle: step.title,
+    toggleTaskCompleteStatus,
+  });
+
+  return (
+    <EuiFlexGroup
+      color="plain"
+      className="step-content-group"
+      css={stepContentGroupStyles}
+      data-test-subj={`${stepId}-content`}
+      direction="row"
+      gutterSize="none"
+    >
+      {step.description && (
+        <EuiFlexItem grow={false} css={leftContentStyles} className="left-panel">
+          <EuiText size="s">
+            {step.description.map((desc, index) => (
               <div
-                css={css`
-                  height: ${RIGHT_CONTENT_HEIGHT}px;
-                  width: ${RIGHT_CONTENT_WIDTH}px;
-                  border-radius: ${euiTheme.border.radius.medium};
-                  overflow: hidden;
-                  box-shadow: ${shadow};
-                `}
+                data-test-subj={`${stepId}-description-${index}`}
+                key={`${stepId}-description-${index}`}
+                className="eui-displayBlock step-content-description"
+                css={descriptionStyles}
               >
-                {splitPanel}
+                {desc}
               </div>
-            )}
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </>
-  ) : null;
+            ))}
+          </EuiText>
+        </EuiFlexItem>
+      )}
+      {splitPanel && (
+        <EuiFlexItem
+          grow={false}
+          data-test-subj="split-panel"
+          className="right-panel"
+          css={rightPanelStyles}
+        >
+          {splitPanel && (
+            <div className="right-content-panel" css={rightPanelContentStyles}>
+              {splitPanel}
+            </div>
+          )}
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
 };
 export const StepContent = React.memo(StepContentComponent);

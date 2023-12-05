@@ -6,53 +6,33 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
 
 import * as i18n from './translations';
-import { useSetUpSections } from './use_setup_cards';
+import { useSetUpSections } from './hooks/use_setup_sections';
 
-import type {
-  ActiveSections,
-  CardId,
-  StepId,
-  OnStepClicked,
-  OnStepButtonClicked,
-  OnCardClicked,
-  ExpandedCardSteps,
-} from './types';
+import type { ActiveSections } from './types';
 import type { ProductLine } from '../../common/product';
+import { useStepContext } from './context/step_context';
 
 const TogglePanelComponent: React.FC<{
   activeProducts: Set<ProductLine>;
   activeSections: ActiveSections | null;
-  expandedCardSteps: ExpandedCardSteps;
-  finishedSteps: Record<CardId, Set<StepId>>;
-  onCardClicked: OnCardClicked;
-  onStepButtonClicked: OnStepButtonClicked;
-  onStepClicked: OnStepClicked;
-}> = ({
-  finishedSteps,
-  activeSections,
-  activeProducts,
-  expandedCardSteps,
-  onCardClicked,
-  onStepClicked,
-  onStepButtonClicked,
-}) => {
+}> = ({ activeSections, activeProducts }) => {
   const { euiTheme } = useEuiTheme();
 
-  const shadow = useEuiShadow('s');
+  const { expandedCardSteps, finishedSteps, toggleTaskCompleteStatus, onStepClicked } =
+    useStepContext();
 
-  const { setUpSections } = useSetUpSections({ euiTheme, shadow });
+  const { setUpSections } = useSetUpSections({ euiTheme });
   const sectionNodes = setUpSections({
     activeProducts,
     activeSections,
     expandedCardSteps,
     finishedSteps,
-    onCardClicked,
-    onStepButtonClicked,
+    toggleTaskCompleteStatus,
     onStepClicked,
   });
 
