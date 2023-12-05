@@ -99,7 +99,7 @@ Kibana: $PROJECT_KIBANA_LOGIN_URL
 
 Elasticsearch: $PROJECT_ELASTICSEARCH_URL
 
-Credentials: \`vault read $VAULT_PATH_PREFIX/$PROJECT_NAME\`
+Credentials: \`vault read $VAULT_PATH_PREFIX/cloud-deploy/$PROJECT_NAME\`
 
 Kibana image: \`$KIBANA_IMAGE\`
 EOF
