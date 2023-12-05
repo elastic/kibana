@@ -127,7 +127,7 @@ export function getMatchField(ctx: EnrichCommandContext) {
   if (!ctx._matchField) {
     return [];
   }
-  const identifier = ctx.qualifiedNamePattern(1);
+  const identifier = ctx.qualifiedNamePattern();
   if (identifier) {
     const fn = createOption(ctx.ON()!.text.toLowerCase(), ctx);
     if (identifier.text) {
