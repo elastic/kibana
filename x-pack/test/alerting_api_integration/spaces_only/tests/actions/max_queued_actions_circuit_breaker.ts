@@ -26,7 +26,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
       await esTestIndexTool.destroy();
     });
 
