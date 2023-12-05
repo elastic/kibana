@@ -13,6 +13,7 @@ import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { IEmbeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { Subject } from 'rxjs';
+import styled from 'styled-components';
 import { SloAlertsSummary } from './components/slo_alerts_summary';
 import { SloAlertsTable } from './components/slo_alerts_table';
 import type { SloItem } from './types';
@@ -78,68 +79,70 @@ export function SloAlertsWrapper({
   };
 
   return (
-    <>
-      <EuiFlexGroup
-        direction="column"
-        justifyContent="flexStart"
-        style={{ gap: 0, overflow: 'hidden' }}
-      >
-        <EuiFlexItem grow={false} style={{ paddingTop: '10px', marginRight: '35px' }}>
-          <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd">
-            <EuiFlexItem grow={false} style={{ flexBasis: 'auto' }}>
-              <EuiLink
-                onClick={() => {
-                  const trigger = deps.uiActions.getTrigger(CONTEXT_MENU_TRIGGER);
-                  deps.uiActions.getAction(EDIT_SLO_ALERTS_ACTION).execute({
-                    trigger,
-                    embeddable,
-                  } as ActionExecutionContext);
-                }}
-                data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
-              >
-                {i18n.translate('xpack.observability.sloAlertsWrapper.sLOsIncludedFlexItemLabel', {
-                  defaultMessage: '{numOfSlos} SLOs included',
-                  values: { numOfSlos: slos.length },
-                })}
-              </EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ flexBasis: 'auto' }}>
-              <EuiLink
-                data-test-subj="o11ySloAlertsWrapperGoToAlertsLink"
-                onClick={handleGoToAlertsClick}
-              >
-                {' '}
-                <FormattedMessage
-                  id="xpack.observability.sloAlertsWrapper.goToAlertsFlexItemLabel"
-                  defaultMessage="Go to alerts"
-                />
-              </EuiLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+    <Wrapper>
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem
+          css={`
+            align-items: flex-end;
+          `}
+        >
+          <EuiLink
+            onClick={() => {
+              const trigger = deps.uiActions.getTrigger(CONTEXT_MENU_TRIGGER);
+              deps.uiActions.getAction(EDIT_SLO_ALERTS_ACTION).execute({
+                trigger,
+                embeddable,
+              } as ActionExecutionContext);
+            }}
+            data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
+          >
+            {i18n.translate('xpack.observability.sloAlertsWrapper.sLOsIncludedFlexItemLabel', {
+              defaultMessage: '{numOfSlos} SLOs included',
+              values: { numOfSlos: slos.length },
+            })}
+          </EuiLink>
         </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" style={{ margin: '10px' }} responsive={true}>
-            <EuiFlexItem>
-              <SloAlertsSummary
-                slos={slos}
-                deps={deps}
-                timeRange={timeRange}
-                onLoaded={() => setIsSummaryLoaded(true)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={true}>
-              <SloAlertsTable
-                slos={slos}
-                deps={deps}
-                timeRange={timeRange}
-                onLoaded={() => setIsTableLoaded(true)}
-                lastReloadRequestTime={lastRefreshTime}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlexItem
+          grow={false}
+          css={`
+            margin-right: 35px;
+          `}
+        >
+          <EuiLink
+            data-test-subj="o11ySloAlertsWrapperGoToAlertsLink"
+            onClick={handleGoToAlertsClick}
+          >
+            <FormattedMessage
+              id="xpack.observability.sloAlertsWrapper.goToAlertsFlexItemLabel"
+              defaultMessage="Go to alerts"
+            />
+          </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+
+      <EuiFlexGroup direction="column" style={{ margin: '10px' }} responsive={true}>
+        <EuiFlexItem>
+          <SloAlertsSummary
+            slos={slos}
+            deps={deps}
+            timeRange={timeRange}
+            onLoaded={() => setIsSummaryLoaded(true)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <SloAlertsTable
+            slos={slos}
+            deps={deps}
+            timeRange={timeRange}
+            onLoaded={() => setIsTableLoaded(true)}
+            lastReloadRequestTime={lastRefreshTime}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Wrapper>
   );
 }
+
+const Wrapper = styled.div`
+  width: 100%;
+`;
