@@ -48,9 +48,9 @@ test('downloads the url to the path', async () => {
   expect(readFileSync(TEMP_FILE, 'utf8')).toEqual(BODY);
 });
 
-test('returns the md5 hex hash of the http body', async () => {
+test('returns the sha256 hex hash of the http body', async () => {
   const BODY = 'foobar';
-  const HASH = createHash('md5').update(BODY).digest('hex');
+  const HASH = createHash('sha256').update(BODY).digest('hex');
   request.mockImplementationOnce(async () => {
     return {
       data: new ReadableOf(BODY),

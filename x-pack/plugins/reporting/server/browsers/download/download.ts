@@ -21,7 +21,7 @@ export async function download(
 ): Promise<string> {
   logger.info(`Downloading ${url} to ${path}`);
 
-  const hash = createHash('md5');
+  const hash = createHash('sha256');
 
   mkdirSync(dirname(path), { recursive: true });
   const handle = openSync(path, 'w');
