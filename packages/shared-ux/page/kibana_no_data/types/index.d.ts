@@ -49,6 +49,15 @@ export interface KibanaDependencies {
   showESQLViewLocator: {
     navigate: ({ query: { esql: string }, url: string }) => Promise<{}>;
   };
+  discover: {
+    locator: {
+      navigate: {
+        savedSearchId: string;
+        indexPatternId: string;
+      };
+      getLocation: (params: any) => KibanaLocation<{ app: string; path: string }>;
+    };
+  };
 }
 /**
  * An interface containing a collection of Kibana plugins and services required to

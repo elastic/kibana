@@ -9,7 +9,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 
-import { EuiButton, EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withSuspense } from '@kbn/shared-ux-utility';
@@ -53,16 +53,11 @@ export const NoDataViewsPrompt = ({
           {createDataViewText}
         </EuiButton>
         <EuiSpacer size="l" />
-        <EuiButton
-          onClick={onClickEsql}
-          iconType="plusInCircle"
-          fill={false}
-          data-test-subj="gotoESQLDiscover"
-        >
+        <EuiLink onClick={onClickEsql} data-test-subj="gotoESQLDiscover">
           {i18n.translate('sharedUXPackages.noDataViewsPrompt.goToESQLDiscover', {
             defaultMessage: 'Go to ES|QL-mode-Discover',
           })}
-        </EuiButton>
+        </EuiLink>
       </>
     );
   }
@@ -72,7 +67,6 @@ export const NoDataViewsPrompt = ({
       <EuiButton
         onClick={onClickCreate}
         iconType="plusInCircle"
-        // fill={true}
         color={'success'}
         data-test-subj="createDataViewButton"
       >
