@@ -58,7 +58,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Displays the test template in the list of templates', async () => {
         const templates = await testSubjects.findAll('row');
 
-        const getTemplateName = async (template) => {
+        const getTemplateName = async (template: any) => {
           const templateNameElement = await template.findByTestSubject('templateDetailsLink');
           return await templateNameElement.getVisibleText();
         };
