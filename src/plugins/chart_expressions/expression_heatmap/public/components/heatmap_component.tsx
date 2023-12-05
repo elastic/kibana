@@ -101,7 +101,7 @@ function shiftAndNormalizeStops(
       if (!Number.isFinite(result)) {
         return 1;
       }
-      return Number(result.toFixed(2));
+      return result;
     }
   );
 }
