@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SLO_RESOURCES_VERSION } from '../constants';
+import { SLO_RESOURCES_VERSION } from '../../../common/slo/constants';
 
 export const getSLOSummaryPipelineTemplate = (id: string) => ({
   id,
