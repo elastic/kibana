@@ -45,6 +45,11 @@ describe('CreateMaintenanceWindowForm', () => {
             addDanger: jest.fn(),
           },
         },
+        unifiedSearch: {
+          ui: {
+            SearchBar: <div />,
+          },
+        },
       },
     });
 
@@ -136,13 +141,13 @@ describe('CreateMaintenanceWindowForm', () => {
 
     const observabilityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-observability');
+    ).getByTestId('option-observability');
     const securityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-securitySolution');
+    ).getByTestId('option-securitySolution');
     const managementInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-management');
+    ).getByTestId('option-management');
 
     expect(observabilityInput).toBeChecked();
     expect(securityInput).toBeChecked();
@@ -176,13 +181,13 @@ describe('CreateMaintenanceWindowForm', () => {
 
     const observabilityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-observability');
+    ).getByTestId('option-observability');
     const securityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-securitySolution');
+    ).getByTestId('option-securitySolution');
     const managementInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-management');
+    ).getByTestId('option-management');
 
     expect(observabilityInput).toBeChecked();
     expect(securityInput).toBeChecked();
@@ -213,13 +218,13 @@ describe('CreateMaintenanceWindowForm', () => {
 
     const observabilityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-observability');
+    ).getByTestId('option-observability');
     const securityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-securitySolution');
+    ).getByTestId('option-securitySolution');
     const managementInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-management');
+    ).getByTestId('option-management');
 
     expect(observabilityInput).toBeChecked();
     expect(managementInput).toBeChecked();
@@ -237,13 +242,13 @@ describe('CreateMaintenanceWindowForm', () => {
 
     const observabilityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-observability');
+    ).getByTestId('option-observability');
     const securityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-securitySolution');
+    ).getByTestId('option-securitySolution');
     const managementInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-management');
+    ).getByTestId('option-management');
 
     expect(observabilityInput).toBeChecked();
     expect(securityInput).toBeChecked();

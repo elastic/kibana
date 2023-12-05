@@ -16,7 +16,10 @@ import type {
 } from '@kbn/security-solution-upselling/service';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
 import React, { lazy } from 'react';
-import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/messages';
+import {
+  UPGRADE_ALERT_ASSIGNMENTS,
+  UPGRADE_INVESTIGATION_GUIDE,
+} from '@kbn/security-solution-upselling/messages';
 import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
 const EntityAnalyticsUpsellingLazy = lazy(
@@ -106,5 +109,10 @@ export const upsellingMessages: UpsellingMessages = [
     id: 'investigation_guide',
     minimumLicenseRequired: 'platinum',
     message: UPGRADE_INVESTIGATION_GUIDE('Platinum'),
+  },
+  {
+    id: 'alert_assignments',
+    minimumLicenseRequired: 'platinum',
+    message: UPGRADE_ALERT_ASSIGNMENTS('Platinum'),
   },
 ];
