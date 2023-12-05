@@ -14,6 +14,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 
 import { Status } from '../../../../common/types/api';
@@ -79,7 +80,9 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const HeaderAction: React.FC<{}> = () => (
-    <EndpointsHeaderAction isFlyoutOpen={isFlyoutOpen} setIsFlyoutOpen={setIsFlyoutOpen} />
+    <I18nProvider>
+      <EndpointsHeaderAction isFlyoutOpen={isFlyoutOpen} setIsFlyoutOpen={setIsFlyoutOpen} />
+    </I18nProvider>
   );
 
   if (cloud && useEndpointHeaderActions) {
