@@ -151,7 +151,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables SentinelOne manual host manipulation actions
    */
   sentinelOneManualHostActionsEnabled: false,
-
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
