@@ -51,7 +51,7 @@ export const SearchLabsBanner: React.FC = () => {
       <EuiTitle>
         <h2>
           {i18n.translate('xpack.enterpriseSearch.shared.searchLabsBanner.searchLabsTitle', {
-            defaultMessage: 'Build with Elasticsearch',
+            defaultMessage: 'Get started with vector search and ML',
           })}
         </h2>
       </EuiTitle>
