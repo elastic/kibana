@@ -13,7 +13,7 @@ import { createApiKey } from '../../lib/indices/create_api_key';
 import { RouteDependencies } from '../../plugin';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
-export function registerCreateAPIKeyRoute(
+export function registerApiKeysRoutes(
   { log, router }: RouteDependencies,
   security: SecurityPluginStart
 ) {
@@ -44,5 +44,44 @@ export function registerCreateAPIKeyRoute(
         headers: { 'content-type': 'application/json' },
       });
     })
+  );
+  router.get(
+    {
+      path: '/internal/enterprise_search/api_keys',
+      validate: {},
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const user = security.authc.getCurrentUser(request);
+      if (user) {
+        const apiKeys = await client.asCurrentUser.security.getApiKey({ username: user.username });
+        const validKeys = apiKeys.api_keys.filter(({ invalidated }) => !invalidated);
+        return response.ok({ body: { api_keys: validKeys } });
+      }
+      return response.customError({
+        body: 'Could not retrieve current user, security plugin is not ready',
+        statusCode: 502,
+      });
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/api_keys',
+      validate: {
+        body: schema.any(),
+      },
+    },
+    async (context, request, response) => {
+      const result = await security.authc.apiKeys.create(request, request.body);
+      if (result) {
+        const apiKey = { ...result, beats_logstash_format: `${result.id}:${result.api_key}` };
+        return response.ok({ body: apiKey });
+      }
+      return response.customError({
+        body: 'Could not retrieve current user, security plugin is not ready',
+        statusCode: 502,
+      });
+    }
   );
 }

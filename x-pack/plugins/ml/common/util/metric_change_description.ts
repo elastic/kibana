@@ -15,8 +15,8 @@ import { i18n } from '@kbn/i18n';
 // Returns an Object containing a text message and EuiIcon type to
 // describe how the actual value compares to the typical.
 export function getMetricChangeDescription(
-  actualProp: number[] | number,
-  typicalProp: number[] | number
+  actualProp: number[] | number | undefined,
+  typicalProp: number[] | number | undefined
 ) {
   if (actualProp === undefined || typicalProp === undefined) {
     return { iconType: 'empty', message: '' };
