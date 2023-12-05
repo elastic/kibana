@@ -18,7 +18,7 @@ import {
   INDEX_QUEUED_DOCUMENTS_TASK_ID,
   INDEX_QUEUED_DOCUMENTS_TASK_TYPE,
 } from '..';
-import type { KnowledgeBaseEntry } from '../../../common/types';
+import { KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
@@ -370,15 +370,14 @@ export class KnowledgeBaseService {
                 },
               },
             }
-          : {
-              sort: [
-                {
-                  [String(sortBy)]: {
-                    order: sortDirection,
-                  },
-                },
-              ],
-            }),
+          : {}),
+        sort: [
+          {
+            [String(sortBy)]: {
+              order: sortDirection,
+            },
+          },
+        ],
         size: 500,
         _source: {
           includes: [
@@ -397,6 +396,7 @@ export class KnowledgeBaseService {
       return {
         entries: response.hits.hits.map((hit) => ({
           ...hit._source!,
+          role: hit._source!.role ?? KnowledgeBaseEntryRole.UserEntry,
           score: hit._score,
           id: hit._id,
         })),

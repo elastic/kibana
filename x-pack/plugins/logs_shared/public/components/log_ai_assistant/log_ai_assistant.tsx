@@ -27,7 +27,7 @@ export interface LogAIAssistantProps {
 }
 
 export interface LogAIAssistantDeps extends LogAIAssistantProps {
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart['service'];
 }
 
 export const LogAIAssistant = withProviders(({ doc }: LogAIAssistantProps) => {
@@ -102,7 +102,7 @@ export default LogAIAssistant;
 
 function withProviders(Component: React.FunctionComponent<LogAIAssistantProps>) {
   return function ComponentWithProviders({
-    observabilityAIAssistant: { service: observabilityAIAssistantService },
+    observabilityAIAssistant: observabilityAIAssistantService,
     ...props
   }: LogAIAssistantDeps) {
     return (
