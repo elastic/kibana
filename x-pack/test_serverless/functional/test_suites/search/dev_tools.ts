@@ -14,15 +14,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
 
   describe('Dev Tools', () => {
+    before(async () => {
+      await security.testUser.setRoles(['global_devtools_read']);
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
+
     describe('Breadcrumbs', () => {
-      before(async () => {
-        await security.testUser.setRoles(['global_devtools_read']);
-      });
-
-      after(async () => {
-        await security.testUser.restoreDefaults();
-      });
-
       it('Sets the right breadcrumb when navigating to dev tools', async () => {
         await PageObjects.common.navigateToApp('dev_tools');
 
