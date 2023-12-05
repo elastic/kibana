@@ -24,34 +24,22 @@ import { ErrorStateCallout } from '../../../shared/error_state';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SearchLabsBanner } from '../../../shared/search_labs_banner/search_labs_banner';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
-import headerImage from '../../assets/search_header.svg';
+import headerImage from '../../assets/search_header.png';
 
 import { EnterpriseSearchOverviewPageTemplate } from '../layout';
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
 import { ElasticsearchProductCard } from './elasticsearch_product_card';
-import { EnterpriseSearchProductCard } from './enterprise_search_product_card';
 import { IngestionSelector } from './ingestion_selector';
 
 import './product_selector.scss';
 import { WelcomeBanner } from './welcome_banner';
 
-interface ProductSelectorProps {
-  access: {
-    hasAppSearchAccess?: boolean;
-    hasWorkplaceSearchAccess?: boolean;
-  };
-  isWorkplaceSearchAdmin: boolean;
-}
-
-export const ProductSelector: React.FC<ProductSelectorProps> = ({
-  access,
-  isWorkplaceSearchAdmin,
-}) => {
-  const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
+export const ProductSelector: React.FC = () => {
   const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
   const { user } = useValues(KibanaLogic);
@@ -130,15 +118,9 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
             <EuiFlexItem>
               <ElasticsearchProductCard />
             </EuiFlexItem>
-            {(hasAppSearchAccess || hasWorkplaceSearchAccess) && (
-              <EuiFlexItem>
-                <EnterpriseSearchProductCard
-                  hasAppSearchAccess={hasAppSearchAccess ?? false}
-                  hasWorkplaceSearchAccess={hasWorkplaceSearchAccess ?? false}
-                  isWorkplaceSearchAdmin={isWorkplaceSearchAdmin}
-                />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem>
+              <SearchLabsBanner />
+            </EuiFlexItem>
             {!config.host && config.canDeployEntSearch && (
               <EuiFlexItem>
                 <SetupGuideCta />

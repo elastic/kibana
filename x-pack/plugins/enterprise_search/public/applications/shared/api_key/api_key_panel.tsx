@@ -17,8 +17,8 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
+  EuiSplitPanel,
   EuiText,
 } from '@elastic/eui';
 
@@ -34,7 +34,6 @@ import { FetchApiKeysAPILogic } from '../../enterprise_search_overview/api/fetch
 import { KibanaLogic } from '../kibana';
 
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
-import './api_key.scss';
 
 interface ApiKeyPanelProps {
   user: AuthenticatedUser | null;
@@ -69,144 +68,131 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ user }) => {
           username={user?.full_name || user?.username || ''}
         />
       )}
-      <EuiPanel>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" direction="row">
-          {Boolean(cloud) && (
-            <EuiFlexItem>
-              <EuiFlexGroup direction="column">
-                <EuiFlexItem>
-                  <EuiText size="s">
-                    {i18n.translate('xpack.enterpriseSearch.apiKey.elasticsearchEndpoint', {
-                      defaultMessage: 'Elasticsearch endpoint:',
-                    })}
-                  </EuiText>
-                  <EuiSpacer size="s" />
+      <EuiSplitPanel.Outer>
+        {Boolean(cloud) && (
+          <EuiSplitPanel.Inner>
+            <EuiText size="s">
+              {i18n.translate('xpack.enterpriseSearch.apiKey.elasticsearchEndpoint', {
+                defaultMessage: 'Elasticsearch endpoint:',
+              })}
+            </EuiText>
+            <EuiSpacer size="s" />
 
-                  <EuiFlexGroup direction="row">
-                    <EuiFlexItem>
-                      <EuiCode>{elasticsearchEndpoint}</EuiCode>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiCopy textToCopy={elasticsearchEndpoint || ''} afterMessage={COPIED_LABEL}>
-                        {(copy) => (
-                          <EuiButtonIcon
-                            onClick={copy}
-                            iconType="copyClipboard"
-                            aria-label={i18n.translate(
-                              'xpack.enterpriseSearch.overview.apiKey.copyApiEndpoint',
-                              {
-                                defaultMessage: 'Copy Elasticsearch endpoint to clipboard.',
-                              }
-                            )}
-                          />
-                        )}
-                      </EuiCopy>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                {cloudId && (
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      {i18n.translate('xpack.enterpriseSearch.apiKey.cloudId', {
-                        defaultMessage: 'Cloud ID:',
-                      })}
-                    </EuiText>
-                    <EuiSpacer size="s" />
-
-                    <EuiFlexGroup direction="row">
-                      <EuiFlexItem>
-                        <EuiCode>{cloudId}</EuiCode>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiCopy textToCopy={cloudId || ''} afterMessage={COPIED_LABEL}>
-                          {(copy) => (
-                            <EuiButtonIcon
-                              onClick={copy}
-                              iconType="copyClipboard"
-                              aria-label={i18n.translate(
-                                'xpack.enterpriseSearch.overview.apiKey.copyCloudID',
-                                {
-                                  defaultMessage: 'Copy cloud ID to clipboard.',
-                                }
-                              )}
-                            />
-                          )}
-                        </EuiCopy>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
+            <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem>
-                <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
-                  <EuiFlexItem>
-                    <EuiText size="xs" color="subdued">
-                      <FormattedMessage
-                        id="xpack.enterpriseSearch.apiKey.activeKeys"
-                        defaultMessage="{number} active API keys."
-                        values={{
-                          number: (
-                            <EuiBadge
-                              color={apiKeys.length > 0 ? 'success' : 'warning'}
-                              data-test-subj="api-keys-count-badge"
-                            >
-                              {apiKeys.length}
-                            </EuiBadge>
-                          ),
-                        }}
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiCode>{elasticsearchEndpoint}</EuiCode>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="m">
-                  <EuiFlexItem>
-                    <span>
-                      <EuiButton
-                        iconType="plusInCircleFilled"
-                        size="s"
-                        fill
-                        onClick={() => setIsFlyoutOpen(true)}
-                        data-test-subj="new-api-key-button"
-                      >
-                        <EuiText size="s">
-                          {i18n.translate('xpack.enterpriseSearch.apiKey.newButtonLabel', {
-                            defaultMessage: 'New',
-                          })}
-                        </EuiText>
-                      </EuiButton>
-                    </span>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <span>
-                      <EuiButton
-                        iconType="popout"
-                        size="s"
-                        onClick={() =>
-                          navigateToUrl('/app/management/security/api_keys', {
-                            shouldNotCreateHref: true,
-                          })
+                <EuiCopy textToCopy={elasticsearchEndpoint || ''} afterMessage={COPIED_LABEL}>
+                  {(copy) => (
+                    <EuiButtonIcon
+                      onClick={copy}
+                      iconType="copyClipboard"
+                      aria-label={i18n.translate(
+                        'xpack.enterpriseSearch.overview.apiKey.copyApiEndpoint',
+                        {
+                          defaultMessage: 'Copy Elasticsearch endpoint to clipboard.',
                         }
-                        target="_blank"
-                        data-test-subj="manage-api-keys-button"
-                      >
-                        {i18n.translate('xpack.enterpriseSearch.apiKey.manageLabel', {
-                          defaultMessage: 'Manage',
-                        })}
-                      </EuiButton>
-                    </span>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                      )}
+                    />
+                  )}
+                </EuiCopy>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              {i18n.translate('xpack.enterpriseSearch.apiKey.cloudId', {
+                defaultMessage: 'Cloud ID:',
+              })}
+            </EuiText>
+            <EuiSpacer size="s" />
+
+            <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem>
+                <EuiCode>{cloudId}</EuiCode>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiCopy textToCopy={cloudId || ''} afterMessage={COPIED_LABEL}>
+                  {(copy) => (
+                    <EuiButtonIcon
+                      onClick={copy}
+                      iconType="copyClipboard"
+                      aria-label={i18n.translate(
+                        'xpack.enterpriseSearch.overview.apiKey.copyCloudID',
+                        {
+                          defaultMessage: 'Copy cloud ID to clipboard.',
+                        }
+                      )}
+                    />
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiSplitPanel.Inner>
+        )}
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiFlexGroup direction="row" alignItems="center" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.apiKey.activeKeys"
+                      defaultMessage="{number} active API keys."
+                      values={{
+                        number: (
+                          <EuiBadge
+                            color={apiKeys.length > 0 ? 'success' : 'warning'}
+                            data-test-subj="api-keys-count-badge"
+                          >
+                            {apiKeys.length}
+                          </EuiBadge>
+                        ),
+                      }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span>
+                <EuiButton
+                  iconType="plusInCircleFilled"
+                  size="s"
+                  fill
+                  onClick={() => setIsFlyoutOpen(true)}
+                  data-test-subj="new-api-key-button"
+                >
+                  <EuiText size="s">
+                    {i18n.translate('xpack.enterpriseSearch.apiKey.newButtonLabel', {
+                      defaultMessage: 'New',
+                    })}
+                  </EuiText>
+                </EuiButton>
+              </span>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span>
+                <EuiButton
+                  iconType="popout"
+                  size="s"
+                  onClick={() =>
+                    navigateToUrl('/app/management/security/api_keys', {
+                      shouldNotCreateHref: true,
+                    })
+                  }
+                  target="_blank"
+                  data-test-subj="manage-api-keys-button"
+                >
+                  {i18n.translate('xpack.enterpriseSearch.apiKey.manageLabel', {
+                    defaultMessage: 'Manage',
+                  })}
+                </EuiButton>
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
     </>
   );
 };
