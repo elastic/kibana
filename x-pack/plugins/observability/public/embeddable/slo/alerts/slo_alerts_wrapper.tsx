@@ -99,12 +99,14 @@ export function SloAlertsWrapper({
 
   return (
     <Wrapper>
-      <EuiFlexGroup justifyContent="flexEnd" wrap>
-        <EuiFlexItem
-          css={`
-            align-items: flex-end;
-          `}
-        >
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+        wrap
+        css={`
+          margin: 0 35px;
+        `}
+      >
+        <EuiFlexItem grow={false}>
           <EuiLink
             onClick={() => {
               const trigger = deps.uiActions.getTrigger(CONTEXT_MENU_TRIGGER);
@@ -121,12 +123,7 @@ export function SloAlertsWrapper({
             })}
           </EuiLink>
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          css={`
-            margin-right: 35px;
-          `}
-        >
+        <EuiFlexItem grow={false}>
           <EuiLink
             data-test-subj="o11ySloAlertsWrapperGoToAlertsLink"
             onClick={handleGoToAlertsClick}
