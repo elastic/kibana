@@ -11,6 +11,7 @@ import { createAppMockRenderer } from '../../../common/mock';
 import type { FilterConfig, FilterConfigRenderParams } from './types';
 import { getCaseConfigure } from '../../../containers/configure/api';
 import { useFilterConfig } from './use_filter_config';
+import type { FilterOptions } from '../../../../common/ui';
 
 jest.mock('../../../containers/configure/api', () => {
   const originalModule = jest.requireActual('../../../containers/configure/api');
@@ -20,6 +21,18 @@ jest.mock('../../../containers/configure/api', () => {
   };
 });
 
+const emptyFilterOptions: FilterOptions = {
+  search: '',
+  searchFields: [],
+  severity: [],
+  status: [],
+  tags: [],
+  assignees: null,
+  reporters: [],
+  owner: [],
+  category: [],
+  customFields: {},
+};
 const getCaseConfigureMock = getCaseConfigure as jest.Mock;
 
 describe('useFilterConfig', () => {
@@ -67,11 +80,17 @@ describe('useFilterConfig', () => {
         systemFilterConfig: filters,
         onFilterOptionsChange,
         isSelectorView: false,
+        filterOptions: emptyFilterOptions,
       },
     });
 
     expect(onFilterOptionsChange).not.toHaveBeenCalled();
-    rerender({ systemFilterConfig: [], onFilterOptionsChange, isSelectorView: false });
+    rerender({
+      systemFilterConfig: [],
+      onFilterOptionsChange,
+      isSelectorView: false,
+      filterOptions: emptyFilterOptions,
+    });
     expect(getEmptyOptions).toHaveBeenCalledTimes(1);
     expect(onFilterOptionsChange).toHaveBeenCalledTimes(1);
     expect(onFilterOptionsChange).toHaveBeenCalledWith({
