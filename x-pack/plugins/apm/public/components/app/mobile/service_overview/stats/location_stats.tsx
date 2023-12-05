@@ -6,27 +6,23 @@
  */
 import { MetricDatum, MetricTrendShape } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
-import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
+import {
+  useFetcher,
+  isPending,
+  FETCH_STATUS,
+} from '../../../../../hooks/use_fetcher';
 import { CLIENT_GEO_COUNTRY_NAME } from '../../../../../../common/es_fields/apm';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { MetricItem } from './metric_item';
 import { usePreviousPeriodLabel } from '../../../../../hooks/use_previous_period_text';
-
-const getIcon =
-  (type: string) =>
-  ({
-    width = 20,
-    height = 20,
-    color,
-  }: {
-    width: number;
-    height: number;
-    color: string;
-  }) =>
-    <EuiIcon type={type} width={width} height={height} fill={color} />;
 
 const formatDifference = (value: number) => {
   return value > 0 ? '+' + value.toFixed(0) + '%' : value.toFixed(0) + '%';
@@ -90,6 +86,26 @@ export function MobileLocationStats({
     [start, end, environment, kuery, serviceName, locationField, offset]
   );
 
+  const getIcon = useCallback(
+    (type: string) =>
+      ({
+        width = 20,
+        height = 20,
+        color,
+      }: {
+        width: number;
+        height: number;
+        color: string;
+      }) => {
+        return locationStatsStatus === FETCH_STATUS.LOADING ? (
+          <EuiLoadingSpinner size="m" />
+        ) : (
+          <EuiIcon type={type} width={width} height={height} fill={color} />
+        );
+      },
+    [locationStatsStatus]
+  );
+
   const loadingLocationStats = isPending(locationStatsStatus);
 
   const currentPeriod = locationStatsData?.currentPeriod;
@@ -134,7 +150,7 @@ export function MobileLocationStats({
     },
     {
       color: euiTheme.eui.euiColorLightestShade,
-      title: i18n.translate('xpack.apm.mobile.location.metrics.crashes', {
+      title: i18n.translate('xpack.apm.mobile.location.metrics.mostCrashes', {
         defaultMessage: 'Most crashes',
       }),
       extra: getComparisonValueFormatter({

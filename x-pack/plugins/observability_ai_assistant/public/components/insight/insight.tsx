@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { last } from 'lodash';
+import { last, noop } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common/types';
+import { INSIGHT_FEEDBACK } from '../../analytics/schema';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { ChatState, useChat } from '../../hooks/use_chat';
@@ -21,6 +22,7 @@ import { StartChatButton } from '../buttons/start_chat_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
 import { ChatFlyout } from '../chat/chat_flyout';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
+import { FeedbackButtons } from '../feedback_buttons';
 import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
 import { MissingCredentialsCallout } from '../missing_credentials_callout';
@@ -75,6 +77,16 @@ function ChatContent({
             />
           ) : (
             <EuiFlexGroup direction="row">
+              <FeedbackButtons
+                onClickFeedback={(feedback) =>
+                  lastAssistantResponse
+                    ? chatService.analytics.reportEvent(INSIGHT_FEEDBACK, {
+                        feedback,
+                        ...lastAssistantResponse,
+                      })
+                    : noop
+                }
+              />
               <EuiFlexItem grow={false}>
                 <RegenerateResponseButton
                   onClick={() => {

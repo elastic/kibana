@@ -19,11 +19,11 @@ export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
-  cardsPerRow?: string;
+  isCompact: boolean;
   sloView: string;
 }
 
-export function SlosView({ cardsPerRow, sloList, loading, error, sloView }: Props) {
+export function SlosView({ isCompact, sloList, loading, error, sloView }: Props) {
   const sloIdsAndInstanceIds = sloList.map(
     (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
   );
@@ -46,7 +46,7 @@ export function SlosView({ cardsPerRow, sloList, loading, error, sloView }: Prop
         sloList={sloList}
         loading={loading}
         error={error}
-        cardsPerRow={cardsPerRow}
+        cardsPerRow={isCompact ? '4' : '3'}
         activeAlertsBySlo={activeAlertsBySlo}
         rulesBySlo={rulesBySlo}
       />
@@ -57,6 +57,9 @@ export function SlosView({ cardsPerRow, sloList, loading, error, sloView }: Prop
         sloList={sloList}
         activeAlertsBySlo={activeAlertsBySlo}
         rulesBySlo={rulesBySlo}
+        error={error}
+        loading={loading}
+        isCompact={isCompact}
       />
     </EuiFlexItem>
   );

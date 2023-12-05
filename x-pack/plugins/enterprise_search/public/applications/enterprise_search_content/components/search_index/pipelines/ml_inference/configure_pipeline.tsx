@@ -10,11 +10,10 @@ import React from 'react';
 import { useValues, useActions } from 'kea';
 
 import {
+  EuiCallOut,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiSuperSelect,
-  EuiSuperSelectOption,
   EuiSpacer,
   EuiTabbedContent,
   EuiTabbedContentTab,
@@ -24,16 +23,12 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { IndexNameLogic } from '../../index_name_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
 import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
-import { MlModelSelectOption } from './model_select_option';
-import { PipelineSelectOption } from './pipeline_select_option';
-import { MODEL_REDACTED_VALUE, MODEL_SELECT_PLACEHOLDER, normalizeModelName } from './utils';
-
-const MODEL_SELECT_PLACEHOLDER_VALUE = 'model_placeholder$$';
-const PIPELINE_SELECT_PLACEHOLDER_VALUE = 'pipeline_placeholder$$';
+import { ModelSelect } from './model_select';
+import { ModelSelectLogic } from './model_select_logic';
+import { PipelineSelect } from './pipeline_select';
 
 const CREATE_NEW_TAB_NAME = i18n.translate(
   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.tabs.createNew.name',
@@ -54,49 +49,14 @@ export const ConfigurePipeline: React.FC = () => {
   const {
     addInferencePipelineModal: { configuration },
     formErrors,
-    existingInferencePipelines,
-    supportedMLModels,
   } = useValues(MLInferenceLogic);
-  const { selectExistingPipeline, setInferencePipelineConfiguration } =
-    useActions(MLInferenceLogic);
+  const { setInferencePipelineConfiguration } = useActions(MLInferenceLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
-  const { indexName } = useValues(IndexNameLogic);
+  const { modelStateChangeError } = useValues(ModelSelectLogic);
 
-  const { existingPipeline, modelID, pipelineName, isPipelineNameUserSupplied } = configuration;
+  const { existingPipeline, pipelineName } = configuration;
 
   const nameError = formErrors.pipelineName !== undefined && pipelineName.length > 0;
-
-  const modelOptions: Array<EuiSuperSelectOption<string>> = [
-    {
-      disabled: true,
-      inputDisplay:
-        existingPipeline && pipelineName.length > 0
-          ? MODEL_REDACTED_VALUE
-          : MODEL_SELECT_PLACEHOLDER,
-      value: MODEL_SELECT_PLACEHOLDER_VALUE,
-    },
-    ...supportedMLModels.map((model) => ({
-      dropdownDisplay: <MlModelSelectOption model={model} />,
-      inputDisplay: model.model_id,
-      value: model.model_id,
-    })),
-  ];
-  const pipelineOptions: Array<EuiSuperSelectOption<string>> = [
-    {
-      disabled: true,
-      inputDisplay: i18n.translate(
-        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.placeholder',
-        { defaultMessage: 'Select one' }
-      ),
-      value: PIPELINE_SELECT_PLACEHOLDER_VALUE,
-    },
-    ...(existingInferencePipelines?.map((pipeline) => ({
-      disabled: pipeline.disabled,
-      dropdownDisplay: <PipelineSelectOption pipeline={pipeline} />,
-      inputDisplay: pipeline.pipelineName,
-      value: pipeline.pipelineName,
-    })) ?? []),
-  ];
 
   const inputsDisabled = configuration.existingPipeline !== false;
 
@@ -154,6 +114,22 @@ export const ConfigurePipeline: React.FC = () => {
                 }
               />
             </EuiFormRow>
+            {modelStateChangeError && (
+              <>
+                <EuiSpacer />
+                <EuiCallOut
+                  title={i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.modelStateChangeError.title',
+                    { defaultMessage: 'Error changing model state' }
+                  )}
+                  color="danger"
+                  iconType="error"
+                >
+                  {modelStateChangeError}
+                </EuiCallOut>
+                <EuiSpacer />
+              </>
+            )}
             <EuiFormRow
               fullWidth
               label={i18n.translate(
@@ -161,26 +137,7 @@ export const ConfigurePipeline: React.FC = () => {
                 { defaultMessage: 'Select a trained ML Model' }
               )}
             >
-              <EuiSuperSelect
-                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectTrainedModel`}
-                fullWidth
-                hasDividers
-                disabled={inputsDisabled}
-                itemLayoutAlign="top"
-                onChange={(value) =>
-                  setInferencePipelineConfiguration({
-                    ...configuration,
-                    inferenceConfig: undefined,
-                    modelID: value,
-                    fieldMappings: undefined,
-                    pipelineName: isPipelineNameUserSupplied
-                      ? pipelineName
-                      : indexName + '-' + normalizeModelName(value),
-                  })
-                }
-                options={modelOptions}
-                valueOfSelected={modelID === '' ? MODEL_SELECT_PLACEHOLDER_VALUE : modelID}
-              />
+              <ModelSelect />
             </EuiFormRow>
           </EuiForm>
         </>
@@ -202,15 +159,8 @@ export const ConfigurePipeline: React.FC = () => {
                 }
               )}
             >
-              <EuiSuperSelect
-                fullWidth
-                hasDividers
+              <PipelineSelect
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectExistingPipeline`}
-                valueOfSelected={
-                  pipelineName.length > 0 ? pipelineName : PIPELINE_SELECT_PLACEHOLDER_VALUE
-                }
-                options={pipelineOptions}
-                onChange={(value) => selectExistingPipeline(value)}
               />
             </EuiFormRow>
           </EuiForm>
@@ -247,6 +197,7 @@ export const ConfigurePipeline: React.FC = () => {
       <EuiTabbedContent
         tabs={tabs}
         autoFocus="selected"
+        initialSelectedTab={tabs[existingPipeline ? 1 : 0]}
         onTabClick={(tab) => {
           const isExistingPipeline = tab.id === ConfigurePipelineTabId.USE_EXISTING;
           if (isExistingPipeline !== configuration.existingPipeline) {
