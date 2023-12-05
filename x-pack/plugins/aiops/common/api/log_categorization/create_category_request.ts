@@ -69,6 +69,12 @@ export function createCategoryRequest(
   };
 }
 
+// This is a copy of the default categorization analyzer but using the 'standard' tokenizer rather than the 'ml_standard' tokenizer.
+// The 'ml_standard' tokenizer splits tokens in a way that was observed to give better categories in testing many years ago, however,
+// the downside of these better categories is then a potential failure to match the original documents when creating a filter for Discover.
+// A future enhancement would be to check which analyzer is specified in the mappings for the source field and to use
+// that instead of unconditionally using 'standard'.
+// However for an initial fix, using the standard analyzer will be more likely to match the results from the majority of searches.
 const categorizationAnalyzer: AggregationsCustomCategorizeTextAnalyzer = {
   char_filter: ['first_line_with_letters'],
   tokenizer: 'standard',
