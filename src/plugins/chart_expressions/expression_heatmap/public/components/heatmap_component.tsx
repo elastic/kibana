@@ -97,10 +97,6 @@ function shiftAndNormalizeStops(
       if (params.range === 'percent') {
         result = min + ((max - min) * value) / 100;
       }
-      // a division by zero safeguard
-      if (!Number.isFinite(result)) {
-        return 1;
-      }
       return result;
     }
   );
@@ -523,8 +519,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       const overwriteColor = overwriteColors?.[overwriteArrayIdx];
       return {
         // with the default continuity:above the every range is left-closed
-        start: Number(valueFormatter(startValue)),
-        end: Number(valueFormatter(endValue)),
+        start: Number.isFinite(startValue) ? Number(valueFormatter(startValue)) : startValue,
+        end: Number.isFinite(endValue) ? Number(valueFormatter(endValue)) : endValue,
         // the current colors array contains a duplicated color at the beginning that we need to skip
         color: overwriteColor ?? colors[index + 1],
       };
