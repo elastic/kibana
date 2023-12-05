@@ -39,8 +39,7 @@ export const CloudDetailsPanel = ({ cloudId, elasticsearchUrl }: CloudDetailsPan
   return (
     <OverviewPanel
       description={i18n.translate('xpack.serverlessSearch.cloudIdDetails.description', {
-        defaultMessage:
-          'Get ready to ingest and query your data by choosing a connection option:',
+        defaultMessage: 'Get ready to ingest and query your data by choosing a connection option:',
       })}
       leftPanelContent={
         <EuiThemeProvider colorMode="dark">
