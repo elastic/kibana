@@ -170,7 +170,7 @@ export const enhancedEsSearchStrategyProvider = (
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
       logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
-      if (request.indexType && request.indexType !== 'rollup') {
+      if (request.indexType && request.indexType !== 'rollup' && request.indexType !== 'esql') {
         throw new KbnSearchError('Unknown indexType', 400);
       }
 
