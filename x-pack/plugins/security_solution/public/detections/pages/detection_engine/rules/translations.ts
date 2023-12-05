@@ -35,6 +35,13 @@ export const UPLOAD_VALUE_LISTS_TOOLTIP = i18n.translate(
   }
 );
 
+export const UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonPrivilegesTooltip',
+  {
+    defaultMessage: 'Manage cluster privilege is required to create lists data stream',
+  }
+);
+
 export const ADD_NEW_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addNewRuleTitle',
   {
