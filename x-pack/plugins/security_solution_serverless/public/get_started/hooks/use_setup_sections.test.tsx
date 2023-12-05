@@ -7,31 +7,36 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { useSetUpSections } from './use_setup_cards';
-import type { ActiveSections, CardId, ExpandedCardSteps, StepId } from './types';
-import { GetSetUpCardId, IntroductionSteps, SectionId } from './types';
-import { ProductLine } from '../../common/product';
+import { useSetUpSections } from './use_setup_sections';
+import type { ActiveSections, CardId, ExpandedCardSteps, StepId } from '../types';
+import { CreateProjectSteps, QuickStartSectionCardsId, SectionId } from '../types';
+
+import { ProductLine } from '../../../common/product';
 
 const mockEuiTheme: EuiThemeComputed = {
   size: {
     l: '16px',
     base: '20px',
   },
+  colors: {},
+  font: { weight: { bold: 700 } },
 } as EuiThemeComputed;
 const finishedSteps = {
-  [GetSetUpCardId.introduction]: new Set<StepId>([IntroductionSteps.getToKnowElasticSecurity]),
+  [QuickStartSectionCardsId.createFirstProject]: new Set<StepId>([
+    CreateProjectSteps.createFirstProject,
+  ]),
 } as Record<CardId, Set<StepId>>;
 describe('useSetUpSections', () => {
   const onStepClicked = jest.fn();
-  const onStepButtonClicked = jest.fn();
+  const toggleTaskCompleteStatus = jest.fn();
 
   it('should return the sections', () => {
     const { result } = renderHook(() => useSetUpSections({ euiTheme: mockEuiTheme }));
 
     const activeSections = {
-      [SectionId.getSetUp]: {
-        [GetSetUpCardId.introduction]: {
-          id: GetSetUpCardId.introduction,
+      [SectionId.quickStart]: {
+        [QuickStartSectionCardsId.createFirstProject]: {
+          id: QuickStartSectionCardsId.createFirstProject,
           timeInMins: 3,
           stepsLeft: 1,
         },
@@ -42,9 +47,8 @@ describe('useSetUpSections', () => {
       activeProducts: new Set([ProductLine.security]),
       activeSections,
       expandedCardSteps: {} as ExpandedCardSteps,
-      onCardClicked: jest.fn(),
       onStepClicked,
-      onStepButtonClicked,
+      toggleTaskCompleteStatus,
       finishedSteps,
     });
 
@@ -60,9 +64,8 @@ describe('useSetUpSections', () => {
       activeSections,
       activeProducts: new Set([ProductLine.security]),
       expandedCardSteps: {} as ExpandedCardSteps,
-      onCardClicked: jest.fn(),
       onStepClicked,
-      onStepButtonClicked,
+      toggleTaskCompleteStatus,
       finishedSteps,
     });
 
