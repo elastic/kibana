@@ -174,7 +174,7 @@ export const GuideCard = ({
             </EuiTextColor>
           )}
           {isComplete && (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
               <EuiFlexItem grow={false}>
                 <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
               </EuiFlexItem>
