@@ -73,15 +73,10 @@ export class ActionsAuthorization {
           ? operationAlias[operation](authorization)
           : [authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation)];
 
-        if (operation === 'execute' && !actionTypeId) {
-          // FIXME:PT remove this after debug of test failures
-          const calledFrom: { stack: string } = { stack: '' };
-          Error.captureStackTrace(calledFrom);
-
-          throw new Error(
-            `actionTypeId required to authorize execution of actions: Called from:\n${calledFrom.stack}`
-          );
-        }
+        // FIXME:PT clean up
+        // if (operation === 'execute' && !actionTypeId) {
+        //   throw new Error('actionTypeId required to authorize execution of actions');
+        // }
 
         const { hasAllRequested } = await checkPrivileges({
           kibana: [
