@@ -35,8 +35,8 @@ import {
   guideCardsClassic,
   type GuideFilterValuesClassic,
 } from '@kbn/guided-onboarding/classic';
-import { GuideId, GuideState } from '@kbn/guided-onboarding/src/types';
-import { getServices } from '../../kibana_services';
+import { GuideId, GuideState, GuideVersion } from '@kbn/guided-onboarding/src/types';
+import { getServices, useVariation } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
 const homeBreadcrumb = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
@@ -65,6 +65,7 @@ export const GettingStarted = () => {
     i18nStart,
     docLinks,
     share,
+    cloudExperiments,
   } = getServices();
 
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
@@ -74,10 +75,10 @@ export const GettingStarted = () => {
   const { search } = useLocation();
   const query = parse(search);
   // using for A/B testing
-  const [classicGuide] = useState<boolean>(false);
+  const [guideVersion, setGuideVersion] = useState<GuideVersion>('classic');
   const useCase = query.useCase as GuideFilterValues;
   const [filter, setFilter] = useState<GuideFilterValues | GuideFilterValuesClassic>(
-    classicGuide ? useCase ?? 'all' : useCase ?? 'search'
+    guideVersion ? useCase ?? 'all' : useCase ?? 'search'
   );
 
   const history = useHistory();
@@ -155,7 +156,7 @@ export const GettingStarted = () => {
   );
 
   // filter cards for solution and based on classic or new format
-  const guide = classicGuide ? guideCardsClassic : guideCards;
+  const guide = 'classic' ? guideCardsClassic : guideCards;
   useEffect(() => {
     const tempFiltered = guide.filter(({ solution }) => solution === filter);
     setFilteredCards(tempFiltered);
@@ -214,46 +215,51 @@ export const GettingStarted = () => {
     );
   }
 
-  const setGuideFilters = classicGuide ? (
-    <GuideFiltersClassic
-      application={application}
-      activeFilter={filter}
-      setActiveFilter={setFilter}
-      data-test-subj="onboarding--guideFilters"
-    />
-  ) : (
-    <GuideFilters
-      application={application}
-      activeFilter={filter as GuideFilterValues}
-      setActiveFilter={setFilter}
-      data-test-subj="onboarding--guideFilters"
-      trackUiMetric={trackUiMetric}
-    />
-  );
+  // set up A/B testing
+  useVariation(cloudExperiments, 'guided.onboarding', guideVersion, setGuideVersion);
 
-  const setGuideCards = classicGuide ? (
-    <GuideCardsClassic
-      activateGuide={activateGuide}
-      navigateToApp={application.navigateToApp}
-      activeFilter={filter as GuideFilterValues}
-      guidesState={guidesState}
-    />
-  ) : (
-    <GuideCards
-      activateGuide={activateGuide}
-      navigateToApp={application.navigateToApp}
-      activeFilter={filter as GuideFilterValues}
-      guidesState={guidesState}
-      filteredCards={filteredCards}
-      openModal={openModal}
-      i18nStart={i18nStart}
-      theme={theme}
-      docLinks={docLinks}
-      cloud={cloud!}
-      url={share.url}
-      navigateToUrl={application.navigateToUrl}
-    />
-  );
+  const setGuideFilters =
+    guideVersion === 'classic' ? (
+      <GuideFiltersClassic
+        application={application}
+        activeFilter={filter}
+        setActiveFilter={setFilter}
+        data-test-subj="onboarding--guideFilters"
+      />
+    ) : (
+      <GuideFilters
+        application={application}
+        activeFilter={filter as GuideFilterValues}
+        setActiveFilter={setFilter}
+        data-test-subj="onboarding--guideFilters"
+        trackUiMetric={trackUiMetric}
+      />
+    );
+
+  const setGuideCards =
+    guideVersion === 'classic' ? (
+      <GuideCardsClassic
+        activateGuide={activateGuide}
+        navigateToApp={application.navigateToApp}
+        activeFilter={filter as GuideFilterValues}
+        guidesState={guidesState}
+      />
+    ) : (
+      <GuideCards
+        activateGuide={activateGuide}
+        navigateToApp={application.navigateToApp}
+        activeFilter={filter as GuideFilterValues}
+        guidesState={guidesState}
+        filteredCards={filteredCards}
+        openModal={openModal}
+        i18nStart={i18nStart}
+        theme={theme}
+        docLinks={docLinks}
+        cloud={cloud!}
+        url={share.url}
+        navigateToUrl={application.navigateToUrl}
+      />
+    );
 
   return (
     <KibanaPageTemplate panelled={false}>
@@ -280,3 +286,13 @@ export const GettingStarted = () => {
     </KibanaPageTemplate>
   );
 };
+function useVariation(
+  cloudExperiments:
+    | import('@kbn/cloud-experiments-plugin/common').CloudExperimentsPluginStart
+    | undefined,
+  arg1: string,
+  arg2: string,
+  setConfig: any
+) {
+  throw new Error('Function not implemented.');
+}

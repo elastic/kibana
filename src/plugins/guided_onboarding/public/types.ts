@@ -16,6 +16,7 @@ import type {
   GuideParams,
 } from '@kbn/guided-onboarding';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { PluginStatus, PluginState } from '../common';
 
 export interface GuidedOnboardingPluginSetup {
@@ -28,6 +29,7 @@ export interface GuidedOnboardingPluginStart {
 
 export interface AppPluginStartDependencies {
   cloud: CloudStart;
+  cloudExperiments: CloudExperimentsPluginStart;
 }
 
 export interface GuidedOnboardingApi {

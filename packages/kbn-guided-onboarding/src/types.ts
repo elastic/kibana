@@ -23,12 +23,15 @@ export type GuideStepIds = KubernetesStepIds | SiemStepIds | SearchStepIds | Tes
 
 export type GuideParams = Record<string, string>;
 
+export type GuideVersion = 'classic' | 'guide';
+
 export interface GuideState {
   guideId: GuideId;
   status: GuideStatus;
   isActive?: boolean; // Drives the current guide shown in the dropdown panel
   steps: GuideStep[];
   params?: GuideParams;
+  version: GuideVersion;
 }
 
 /**
@@ -69,6 +72,7 @@ export interface GuideConfig {
     path: string;
   };
   steps: StepConfig[];
+  version: GuideVersion;
 }
 
 /* To append a link to the description, specify its text and url in the properties.

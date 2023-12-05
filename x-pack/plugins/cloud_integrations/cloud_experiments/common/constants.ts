@@ -38,6 +38,11 @@ export enum FEATURE_FLAG_NAMES {
    * Options are: 'header' (the chat button appears as part of the kibana header) and 'bubble' (floating chat button at the bottom of the screen).
    */
   'cloud-chat.chat-variant' = 'cloud-chat.chat-variant',
+  /**
+   * Used in guided onboarding to switch between guide card versions.
+   * Options are 'classic' and 'guide'
+   */
+  'guided.onboarding' = 'guided.onboarding',
 }
 
 /**

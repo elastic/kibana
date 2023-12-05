@@ -83,4 +83,6 @@ export class ConfigService {
     const stepConfig = getInProgressStepConfig(guideConfig, guideState);
     return stepConfig ? stepConfig.integration === integration : false;
   }
+
+  public async isGuideVersionSet() {}
 }
