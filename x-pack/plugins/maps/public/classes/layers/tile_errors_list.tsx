@@ -87,7 +87,13 @@ export function TileErrorsList(props: Props) {
         <EuiButton
           color="primary" 
           onClick={() => {
-            getInspector().open(props.inspectorAdapters);
+            getInspector().open(props.inspectorAdapters, {
+              options: {
+                initialLayerId: props.layerId,
+                initialTile: selectedTileError?.tileKey,
+                initialTabs: ['response'],
+              },
+            });
           }} size="s"
         >
           {i18n.translate('xpack.maps.tileError.viewDetailsButtonLabel', {

@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Adapters } from '@kbn/inspector-plugin/public';
+import type { InspectorViewProps } from '@kbn/inspector-plugin/public';
 import { XJsonLang } from '@kbn/monaco';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiSpacer, EuiTabs, EuiTab, EuiText } from '@elastic/eui';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
@@ -20,8 +20,10 @@ import { RequestsViewCallout } from './requests_view_callout';
 const REQUEST_VIEW_ID = 'request_view';
 const RESPONSE_VIEW_ID = 'response_view';
 
-interface Props {
-  adapters: Adapters;
+interface Options {
+  initialLayerId?: string;
+  initialTile?: string;
+  initialTabs?: string[];
 }
 
 interface State {
@@ -32,7 +34,7 @@ interface State {
   layerOptions: Array<EuiComboBoxOptionOption<string>>;
 }
 
-class VectorTileInspector extends Component<Props, State> {
+class VectorTileInspector extends Component<InspectorViewProps, State> {
   private _isMounted = false;
 
   state: State = {
@@ -54,6 +56,26 @@ class VectorTileInspector extends Component<Props, State> {
     this.props.adapters.vectorTiles.removeListener('change', this._debouncedOnAdapterChange);
   }
 
+  _getDefaultLayer(layerOptions: Array<EuiComboBoxOptionOption<string>>) {
+    if (this.state.selectedLayer &&
+      layerOptions.some((layerOption) => {
+        return this.state.selectedLayer?.value === layerOption.value;
+      })) {
+      return this.state.selectedLayer;
+    }
+
+    if (this.props.options && (this.props.options as Options).initialLayerId) {
+      const initialLayer = layerOptions.find((layerOption) => {
+        return (this.props.options as Options).initialLayerId === layerOption.value;
+      })
+      if (initialLayer) {
+        return initialLayer;
+      }
+    }
+
+    return layerOptions[0];
+  }
+
   _onAdapterChange = () => {
     const layerOptions = this.props.adapters.vectorTiles.getLayerOptions() as Array<
       EuiComboBoxOptionOption<string>
@@ -68,13 +90,7 @@ class VectorTileInspector extends Component<Props, State> {
       return;
     }
 
-    const selectedLayer =
-      this.state.selectedLayer &&
-      layerOptions.some((layerOption) => {
-        return this.state.selectedLayer?.value === layerOption.value;
-      })
-        ? this.state.selectedLayer
-        : layerOptions[0];
+    const selectedLayer = this._getDefaultLayer(layerOptions);
     const tileRequests = this.props.adapters.vectorTiles.getTileRequests(selectedLayer.value);
     const selectedTileRequest =
       this.state.selectedTileRequest &&
