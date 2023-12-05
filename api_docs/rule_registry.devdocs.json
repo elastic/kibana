@@ -2045,41 +2045,41 @@
           },
           "<never> | undefined; recoveryActionGroup?: ",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
           "<never> | undefined; actionGroups: ",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
           "<\"default\">[]; defaultActionGroupId: \"default\"; producer: string; actionVariables?: { context?: ",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.ActionVariable",
             "text": "ActionVariable"
           },
           "[] | undefined; state?: ",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.ActionVariable",
             "text": "ActionVariable"
           },
           "[] | undefined; params?: ",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.ActionVariable",
             "text": "ActionVariable"
           },
