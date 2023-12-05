@@ -160,9 +160,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for data grid with hidden chart', async () => {
-      await testSubjects.click('dscToggleHistogramButton');
+      await PageObjects.discover.closeHistogramPanel();
       await a11y.testAppSnapshot();
-      await testSubjects.click('dscToggleHistogramButton');
+      await PageObjects.discover.openHistogramPanel();
     });
 
     it('a11y test for time interval panel', async () => {
