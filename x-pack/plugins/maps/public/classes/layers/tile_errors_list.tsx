@@ -91,7 +91,7 @@ export function TileErrorsList(props: Props) {
             getInspector().open(props.inspectorAdapters, {
               options: {
                 initialLayerId: props.layerId,
-                initialTile: selectedTileError?.tileKey,
+                initialTileKey: selectedTileError?.tileKey,
                 initialTab: [RESPONSE_VIEW_ID],
               },
             });

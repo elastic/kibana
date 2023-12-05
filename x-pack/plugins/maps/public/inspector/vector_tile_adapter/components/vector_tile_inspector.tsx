@@ -22,7 +22,7 @@ export const RESPONSE_VIEW_ID = 'response_view';
 
 interface Options {
   initialLayerId?: string;
-  initialTile?: string;
+  initialTileKey?: string;
   initialTab?: typeof REQUEST_VIEW_ID | typeof RESPONSE_VIEW_ID;
 }
 
@@ -79,6 +79,35 @@ class VectorTileInspector extends Component<InspectorViewProps, State> {
     return layerOptions[0];
   }
 
+  _getDefaultTileRequest(tileRequests: TileRequest[]) {
+    if (this.state.selectedTileRequest &&
+      tileRequests.some((tileRequest: TileRequest) => {
+        return (
+          this.state.selectedTileRequest?.layerId === tileRequest.layerId &&
+          this.state.selectedTileRequest?.x === tileRequest.x &&
+          this.state.selectedTileRequest?.y === tileRequest.y &&
+          this.state.selectedTileRequest?.z === tileRequest.z
+        );
+      })) {
+      return this.state.selectedTileRequest;
+    }
+
+    if (tileRequests.length === 0) {
+      return null;
+    }
+
+    if (this.props.options && (this.props.options as Options).initialTileKey) {
+      const initialTileRequest = tileRequests.find((tileRequest) => {
+        return (this.props.options as Options).initialTileKey === `${tileRequest.z}/${tileRequest.x}/${tileRequest.y}`;
+      })
+      if (initialTileRequest) {
+        return initialTileRequest;
+      }
+    }
+
+    return tileRequests[0];
+  }
+
   _onAdapterChange = () => {
     const layerOptions = this.props.adapters.vectorTiles.getLayerOptions() as Array<
       EuiComboBoxOptionOption<string>
@@ -95,24 +124,9 @@ class VectorTileInspector extends Component<InspectorViewProps, State> {
 
     const selectedLayer = this._getDefaultLayer(layerOptions);
     const tileRequests = this.props.adapters.vectorTiles.getTileRequests(selectedLayer.value);
-    const selectedTileRequest =
-      this.state.selectedTileRequest &&
-      tileRequests.some((tileRequest: TileRequest) => {
-        return (
-          this.state.selectedTileRequest?.layerId === tileRequest.layerId &&
-          this.state.selectedTileRequest?.x === tileRequest.x &&
-          this.state.selectedTileRequest?.y === tileRequest.y &&
-          this.state.selectedTileRequest?.z === tileRequest.z
-        );
-      })
-        ? this.state.selectedTileRequest
-        : tileRequests.length
-        ? tileRequests[0]
-        : null;
-
     this.setState({
       selectedLayer,
-      selectedTileRequest,
+      selectedTileRequest: this._getDefaultTileRequest(tileRequests),
       tileRequests,
       layerOptions,
     });
