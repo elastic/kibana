@@ -49,7 +49,7 @@ const configSchema = schema.object({
     thresholdRule: schema.object({
       enabled: offeringBasedSchema({
         serverless: schema.boolean({ defaultValue: true }),
-        traditional: schema.boolean({ defaultValue: true }),
+        traditional: schema.boolean({ defaultValue: false }),
       }),
     }),
   }),
@@ -71,6 +71,7 @@ export const config: PluginConfigDescriptor = {
     },
   },
   schema: configSchema,
+  deprecations: ({ unused }) => [unused('unsafe.thresholdRule.enabled', { level: 'warning' })],
 };
 
 export type ObservabilityConfig = TypeOf<typeof configSchema>;
