@@ -19,6 +19,15 @@ paths:
       x-codegen-enabled: true
       tags:
         - Fleet internals
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              nullable: true
+              properties:
+                forceRecreate:
+                  type: boolean
       responses:
         '200':
           description: OK
@@ -59,7 +68,8 @@ paths:
       operationId: PostFleetSetup
       parameters:
         - $ref: ../components/headers/kbn_xsrf.yaml#/components/schemas/XsrfHeader
-
+  
+  /agents/setup:
     get:
       summary: Get Fleet setup status
       x-codegen-enabled: true

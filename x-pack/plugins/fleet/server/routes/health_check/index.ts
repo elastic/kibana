@@ -8,7 +8,7 @@ import https from 'https';
 
 import fetch from 'node-fetch';
 
-import { FleetServerHealthCheckRequestBody } from '../../../common/api';
+import { PostHealthCheckRequestBody } from '../../../common/api';
 
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
@@ -31,7 +31,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       {
         version: API_VERSIONS.public.v1,
         validate: {
-          request: { body: buildRouteValidationWithZod(FleetServerHealthCheckRequestBody) },
+          request: { body: buildRouteValidationWithZod(PostHealthCheckRequestBody) },
         },
       },
       postHealthCheckHandler
@@ -41,7 +41,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
 export const postHealthCheckHandler: FleetRequestHandler<
   undefined,
   undefined,
-  FleetServerHealthCheckRequestBody
+  PostHealthCheckRequestBody
 > = async (context, request, response) => {
   try {
     const abortController = new AbortController();

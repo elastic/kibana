@@ -27,7 +27,7 @@ paths:
                     type: string
         '400':
           $ref: ../components/responses/error.yaml#/components/schemas/GenericError
-      operationId: FleetServerHealthCheck
+      operationId: PostHealthCheck
       parameters:
         - $ref: ../components/headers/kbn_xsrf.yaml#/components/schemas/XsrfHeader
       requestBody:
@@ -39,3 +39,4 @@ paths:
               properties:
                 host:
                   type: string
+                  format: uri

@@ -22,6 +22,14 @@ export const GetFleetStatusResponse = z.object({
   package_verification_key_id: z.string().optional(),
 });
 
+export type PostFleetSetupRequestBody = z.infer<typeof PostFleetSetupRequestBody>;
+export const PostFleetSetupRequestBody = z
+  .object({
+    forceRecreate: z.boolean().optional(),
+  })
+  .nullable();
+export type PostFleetSetupRequestBodyInput = z.input<typeof PostFleetSetupRequestBody>;
+
 export type PostFleetSetupResponse = z.infer<typeof PostFleetSetupResponse>;
 export const PostFleetSetupResponse = z.object({
   isInitialized: z.boolean(),

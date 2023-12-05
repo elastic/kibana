@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { PostFleetSetupRequestBody } from '../../../common/api';
+
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
 import { API_VERSIONS } from '../../../common/constants';
 
 import type { FleetConfigType } from '../../../common/types';
+
+import { buildRouteValidationWithZod } from '../../utils/build_validation/route_validation';
 
 import { getFleetStatusHandler, fleetSetupHandler } from './handlers';
 
@@ -25,7 +29,7 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: false,
+        validate: { request: { body: buildRouteValidationWithZod(PostFleetSetupRequestBody) } },
       },
       fleetSetupHandler
     );
