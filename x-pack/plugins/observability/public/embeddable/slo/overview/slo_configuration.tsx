@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { SloSelector } from './slo_selector';
+import { SloSelector } from '../alerts/slo_selector';
 import type { EmbeddableSloProps } from './types';
 
 interface SloConfigurationProps {
@@ -48,12 +48,10 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
             <SloSelector
               hasError={hasError}
               onSelected={(slo) => {
-                if (slo === undefined) {
-                  setHasError(true);
-                } else {
-                  setHasError(false);
+                setHasError(slo === undefined);
+                if (slo && 'id' in slo) {
+                  setSelectedSlo({ sloId: slo.id, sloInstanceId: slo.instanceId });
                 }
-                setSelectedSlo({ sloId: slo?.id, sloInstanceId: slo?.instanceId });
               }}
             />
           </EuiFlexItem>

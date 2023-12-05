@@ -24,13 +24,31 @@ interface Props {
   lastReloadRequestTime: number | undefined;
 }
 
+export const getSloInstanceFilter = (sloId: string, sloInstanceId: string) => {
+  return {
+    bool: {
+      must: [
+        {
+          term: {
+            'slo.id': sloId,
+          },
+        },
+        ...(sloInstanceId !== ALL_VALUE
+          ? [
+              {
+                term: {
+                  'slo.instanceId': sloInstanceId,
+                },
+              },
+            ]
+          : []),
+      ],
+    },
+  };
+};
+
 export const useSloAlertsQuery = (slos: SloItem[], timeRange: TimeRange) => {
   return useMemo(() => {
-    const sloInstanceIds = slos
-      .filter((slo) => slo.instanceId !== ALL_VALUE)
-      .map((slo) => slo.instanceId);
-    const sloIds = slos.filter((slo) => slo.instanceId === ALL_VALUE).map((slo) => slo.id);
-
     const query: AlertsTableStateProps['query'] = {
       bool: {
         filter: [
@@ -48,12 +66,7 @@ export const useSloAlertsQuery = (slos: SloItem[], timeRange: TimeRange) => {
           },
           {
             bool: {
-              should: [
-                ...(sloIds.length > 0 ? [{ terms: { 'slo.id': sloIds } }] : []),
-                ...(sloInstanceIds.length > 0
-                  ? [{ terms: { 'slo.instanceId': sloInstanceIds } }]
-                  : []),
-              ],
+              should: slos.map((slo) => getSloInstanceFilter(slo.id, slo.instanceId)),
             },
           },
         ],

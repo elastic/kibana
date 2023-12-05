@@ -22,6 +22,9 @@ export const COMMON_SLO_GROUPING = [
   {
     id: 'slos',
     getDisplayName: () => 'SLOs',
+    getIconType: () => {
+      return 'visGauge';
+    },
   },
 ];
 export type SloOverviewEmbeddableFactory = EmbeddableFactory;

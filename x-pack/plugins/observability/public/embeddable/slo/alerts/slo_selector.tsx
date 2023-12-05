@@ -15,15 +15,16 @@ import { SloItem } from './types';
 
 interface Props {
   initialSlos?: SloItem[];
-  onSelected: (slos: SLOWithSummaryResponse[] | undefined) => void;
+  onSelected: (slos: SLOWithSummaryResponse[] | SLOWithSummaryResponse | undefined) => void;
   hasError?: boolean;
+  singleSelection?: boolean;
 }
 
 const SLO_REQUIRED = i18n.translate('xpack.observability.sloEmbeddable.config.errors.sloRequired', {
   defaultMessage: 'SLO is required.',
 });
 
-export function SloSelector({ initialSlos, onSelected, hasError }: Props) {
+export function SloSelector({ initialSlos, onSelected, hasError, singleSelection }: Props) {
   const mapSlosToOptions = (slos: SloItem[] | SLOWithSummaryResponse[] | undefined) =>
     slos?.map((slo) => ({
       label:
@@ -92,6 +93,7 @@ export function SloSelector({ initialSlos, onSelected, hasError }: Props) {
         fullWidth
         onSearchChange={onSearchChange}
         isInvalid={hasError}
+        singleSelection={singleSelection ? { asPlainText: true } : undefined}
       />
     </EuiFormRow>
   );
