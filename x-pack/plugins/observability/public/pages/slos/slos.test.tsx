@@ -235,7 +235,7 @@ describe('SLOs Page', () => {
         expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
         fireEvent.click(screen.getByTestId('sloListViewButton'));
 
-        screen.getAllByLabelText('Actions').at(0)?.click();
+        screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();
 
@@ -263,7 +263,7 @@ describe('SLOs Page', () => {
         });
         expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
         fireEvent.click(screen.getByTestId('sloListViewButton'));
-        screen.getAllByLabelText('Actions').at(0)?.click();
+        screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();
 
@@ -289,7 +289,7 @@ describe('SLOs Page', () => {
         });
         expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
         fireEvent.click(screen.getByTestId('sloListViewButton'));
-        screen.getAllByLabelText('Actions').at(0)?.click();
+        screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();
 
@@ -316,7 +316,7 @@ describe('SLOs Page', () => {
 
         expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
         fireEvent.click(screen.getByTestId('sloListViewButton'));
-        screen.getAllByLabelText('Actions').at(0)?.click();
+        screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();
 
@@ -348,7 +348,7 @@ describe('SLOs Page', () => {
 
         expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
         fireEvent.click(screen.getByTestId('sloListViewButton'));
-        screen.getAllByLabelText('Actions').at(0)?.click();
+        screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();
 

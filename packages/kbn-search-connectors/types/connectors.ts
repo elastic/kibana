@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type ConnectorType = 'elastic-crawler' | 'connector';
-export type ConnectorMode = 'native' | 'connector_client';
 export interface SelectOption {
   label: string;
   value: string;

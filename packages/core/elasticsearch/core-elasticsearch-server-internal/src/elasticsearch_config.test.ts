@@ -45,6 +45,7 @@ test('set correct defaults', () => {
       "pingTimeout": "PT30S",
       "requestHeadersWhitelist": Array [
         "authorization",
+        "es-client-authentication",
       ],
       "requestTimeout": "PT30S",
       "serviceAccountToken": undefined,

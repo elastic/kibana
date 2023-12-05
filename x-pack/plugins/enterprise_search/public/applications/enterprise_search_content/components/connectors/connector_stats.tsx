@@ -129,7 +129,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connectorType })
               defaultMessage:
                 '{idleCount} Idle syncs  / {orphanedCount} Orphaned syncs / {errorCount} Sync errors',
               values: {
-                errorCount: data?.errors,
+                errorCount: data?.errors || 0,
                 idleCount: data?.idle,
                 orphanedCount: data?.orphaned_jobs,
               },

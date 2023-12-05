@@ -33,7 +33,11 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { INGESTION_METHOD_IDS } from '../../../../../../common/constants';
+import {
+  CONNECTOR_CLIENTS_TYPE,
+  CONNECTOR_NATIVE_TYPE,
+  INGESTION_METHOD_IDS,
+} from '../../../../../../common/constants';
 
 import connectorLogo from '../../../../../assets/source_icons/network_drive.svg';
 import { BACK_BUTTON_LABEL } from '../../../../shared/constants';
@@ -52,17 +56,31 @@ import { baseBreadcrumbs } from '../../search_indices';
 
 import { ConnectorCheckable } from './connector_checkable';
 
+export type ConnectorFilter = typeof CONNECTOR_NATIVE_TYPE | typeof CONNECTOR_CLIENTS_TYPE;
+
+export const parseConnectorFilter = (filter: string | string[] | null): ConnectorFilter | null => {
+  const temp = Array.isArray(filter) ? filter[0] : filter ?? null;
+  if (!temp) return null;
+  if (temp === CONNECTOR_CLIENTS_TYPE) {
+    return CONNECTOR_CLIENTS_TYPE;
+  }
+  if (temp === CONNECTOR_NATIVE_TYPE) {
+    return CONNECTOR_NATIVE_TYPE;
+  }
+  return null;
+};
+
 export const SelectConnector: React.FC = () => {
   const { search } = useLocation();
   const { isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const hasNativeAccess = isCloud;
   const { filter } = parseQueryParams(search);
-  const [selectedConnectorFilter, setSelectedConnectorFilter] = useState<string | null>(
-    Array.isArray(filter) ? filter[0] : filter ?? null
+  const [selectedConnectorFilter, setSelectedConnectorFilter] = useState<ConnectorFilter | null>(
+    parseConnectorFilter(filter)
   );
-  const useNativeFilter = selectedConnectorFilter === 'native';
-  const useClientsFilter = selectedConnectorFilter === 'connector_clients';
+  const useNativeFilter = selectedConnectorFilter === CONNECTOR_NATIVE_TYPE;
+  const useClientsFilter = selectedConnectorFilter === CONNECTOR_CLIENTS_TYPE;
   const [showTechPreview, setShowTechPreview] = useState(true);
   const [showBeta, setShowBeta] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -128,7 +146,9 @@ export const SelectConnector: React.FC = () => {
                 <EuiFacetButton
                   quantity={CONNECTORS.filter((connector) => connector.isNative).length}
                   isSelected={useNativeFilter}
-                  onClick={() => setSelectedConnectorFilter(!useNativeFilter ? 'native' : null)}
+                  onClick={() =>
+                    setSelectedConnectorFilter(!useNativeFilter ? CONNECTOR_NATIVE_TYPE : null)
+                  }
                 >
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.indices.selectConnector.nativeLabel',
@@ -139,7 +159,7 @@ export const SelectConnector: React.FC = () => {
                   quantity={CONNECTORS.length}
                   isSelected={useClientsFilter}
                   onClick={() =>
-                    setSelectedConnectorFilter(!useClientsFilter ? 'connector_clients' : null)
+                    setSelectedConnectorFilter(!useClientsFilter ? CONNECTOR_CLIENTS_TYPE : null)
                   }
                 >
                   {i18n.translate(
@@ -285,17 +305,19 @@ export const SelectConnector: React.FC = () => {
                   }
                   name={connector.name}
                   serviceType={connector.serviceType}
-                  onConnectorSelect={(
-                    queryParams: string = `${
-                      connector.isNative && !useClientsFilter
-                        ? 'connector_type=native'
-                        : 'connector_type=connector_client'
-                    }`
-                  ) => {
+                  onConnectorSelect={(isNative?: boolean) => {
+                    const queryParam = new URLSearchParams();
+                    queryParam.append('service_type', connector.serviceType);
+                    if (isNative !== undefined) {
+                      queryParam.append(
+                        'connector_type',
+                        isNative ? CONNECTOR_NATIVE_TYPE : CONNECTOR_CLIENTS_TYPE
+                      );
+                    }
                     KibanaLogic.values.navigateToUrl(
                       `${generateEncodedPath(NEW_INDEX_METHOD_PATH, {
                         type: INGESTION_METHOD_IDS.CONNECTOR,
-                      })}?service_type=${connector.serviceType}&${queryParams}`
+                      })}?${queryParam.toString()}`
                     );
                   }}
                   documentationUrl={connector.docsUrl}
