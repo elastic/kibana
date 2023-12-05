@@ -36,7 +36,7 @@ export interface RightPanelProps extends FlyoutPanelProps {
  * Panel to be displayed in the document details expandable flyout right section
  */
 export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
-  const { openRightPanel } = useExpandableFlyoutContext();
+  const { openRightPanel, closeFlyout } = useExpandableFlyoutContext();
   const { eventId, getFieldsData, indexName, scopeId, isPreview } = useRightPanelContext();
 
   // for 8.10, we only render the flyout in its expandable mode if the document viewed is of type signal
@@ -62,6 +62,13 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
       },
     });
   };
+
+  // If flyout is open in preview mode, do not reload with stale information
+  window.addEventListener('beforeunload', () => {
+    if (isPreview) {
+      closeFlyout();
+    }
+  });
 
   return (
     <>
