@@ -56,7 +56,7 @@ it('rewrites ftr reports with minimal changes', async () => {
   expect(createPatch('ftr.xml', FTR_REPORT, xml)).toMatchInlineSnapshot(`
     Index: ftr.xml
     ===================================================================
-    --- ftr.xml	[object Object]
+    --- ftr.xml
     +++ ftr.xml
     @@ -1,53 +1,56 @@
      ‹?xml version="1.0" encoding="utf-8"?›
@@ -152,7 +152,7 @@ it('rewrites jest reports with minimal changes', async () => {
   expect(createPatch('jest.xml', JEST_REPORT, xml)).toMatchInlineSnapshot(`
     Index: jest.xml
     ===================================================================
-    --- jest.xml	[object Object]
+    --- jest.xml
     +++ jest.xml
     @@ -3,13 +3,17 @@
        ‹testsuite name="x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts" timestamp="2019-06-07T03:42:21" time="14.504" tests="5" failures="1" skipped="0" file="/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts"›
@@ -199,7 +199,7 @@ it('rewrites mocha reports with minimal changes', async () => {
   expect(createPatch('mocha.xml', MOCHA_REPORT, xml)).toMatchInlineSnapshot(`
     Index: mocha.xml
     ===================================================================
-    --- mocha.xml	[object Object]
+    --- mocha.xml
     +++ mocha.xml
     @@ -1,13 +1,16 @@
      ‹?xml version="1.0" encoding="utf-8"?›
@@ -276,7 +276,7 @@ it('rewrites cypress reports with minimal changes', async () => {
   expect(createPatch('cypress.xml', CYPRESS_REPORT, xml)).toMatchInlineSnapshot(`
     Index: cypress.xml
     ===================================================================
-    --- cypress.xml	[object Object]
+    --- cypress.xml
     +++ cypress.xml
     @@ -1,25 +1,16 @@
     -‹?xml version="1.0" encoding="UTF-8"?›
