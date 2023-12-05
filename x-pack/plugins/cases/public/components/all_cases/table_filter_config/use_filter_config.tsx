@@ -49,7 +49,7 @@ const useActiveByFilterKeyState = ({ filterOptions }: { filterOptions: FilterOpt
   );
 
   /**
-   * Activates filters that aren't active but are have in value in the filterOptions
+   * Activates filters that aren't active but have a value in the filterOptions
    */
   const newActiveByFilterKey = [...(activeByFilterKey || [])];
   newActiveByFilterKey.forEach((filter) => {
