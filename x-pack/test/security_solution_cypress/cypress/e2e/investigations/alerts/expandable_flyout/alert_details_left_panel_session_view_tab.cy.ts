@@ -17,7 +17,7 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 // TODO enable once the visualize tabs are back
-describe.skip(
+describe(
   'Alert details expandable flyout left panel session view',
   { tags: ['@ess', '@serverless'] },
   () => {

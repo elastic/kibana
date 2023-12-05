@@ -108,7 +108,7 @@ const assertFilterControlsWithFilterObject = (
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/171890
-describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
+describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     createRule(getNewRule({ rule_id: 'custom_rule_filters' }));

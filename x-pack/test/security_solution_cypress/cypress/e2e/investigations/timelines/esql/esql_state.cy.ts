@@ -30,7 +30,7 @@ const DEFAULT_ESQL_QUERY =
   'from .alerts-security.alerts-default,apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-* | limit 10';
 
 // FLAKY: https://github.com/elastic/kibana/issues/169093
-describe.skip(
+describe(
   'Timeline Discover ESQL State',
   {
     tags: ['@ess'],

@@ -25,7 +25,7 @@ import { hostsUrl } from '../../../urls/navigation';
 // Flaky on serverless
 const defaultPageSize = 25;
 // FLAKY: https://github.com/elastic/kibana/issues/169413
-describe.skip('Pagination', { tags: ['@ess', '@serverless'] }, () => {
+describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'timeline' });
   });

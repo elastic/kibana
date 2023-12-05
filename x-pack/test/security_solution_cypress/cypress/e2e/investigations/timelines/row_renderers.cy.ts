@@ -114,7 +114,7 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
   describe('Suricata', () => {
     // This test has become very flaky over time and was blocking a lot of PRs.
     // A follw-up ticket to tackle this issue has been created.
-    it.skip('Signature tooltips do not overlap', () => {
+    it('Signature tooltips do not overlap', () => {
       // Hover the signature to show the tooltips
       cy.get(TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE).parents('.euiPopover__anchor').realHover();
 

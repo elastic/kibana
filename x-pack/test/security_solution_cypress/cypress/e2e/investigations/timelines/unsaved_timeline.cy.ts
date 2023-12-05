@@ -39,7 +39,7 @@ import {
 import { EXPLORE_URL, hostsUrl, MANAGE_URL } from '../../../urls/navigation';
 
 // FLAKY: https://github.com/elastic/kibana/issues/169588
-describe.skip('Save Timeline Prompts', { tags: ['@ess'] }, () => {
+describe('Save Timeline Prompts', { tags: ['@ess'] }, () => {
   before(() => {
     login();
     /*

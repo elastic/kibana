@@ -54,7 +54,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/169882
-  describe.skip('Update kqlMode for timeline', () => {
+  describe('Update kqlMode for timeline', () => {
     beforeEach(() => {
       login();
       visit(TIMELINES_URL);

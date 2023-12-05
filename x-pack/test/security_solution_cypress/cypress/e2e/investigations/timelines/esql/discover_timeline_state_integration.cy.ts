@@ -60,7 +60,7 @@ const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH =
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
 // FLAKY: https://github.com/elastic/kibana/issues/168745
-describe.skip(
+describe(
   'Discover Timeline State Integration',
   {
     tags: ['@ess', '@brokenInServerless'],
@@ -203,7 +203,7 @@ describe.skip(
      * Raised issue: https://github.com/elastic/kibana/issues/165913
      *
      * */
-    context.skip('saved search tags', () => {
+    context('saved search tags', () => {
       it('should save discover saved search with `Security Solution` tag', () => {
         const timelineSuffix = Date.now();
         const timelineName = `SavedObject timeline-${timelineSuffix}`;
@@ -254,7 +254,7 @@ describe.skip(
     });
 
     // Issue for enabling below tests: https://github.com/elastic/kibana/issues/165913
-    context.skip('Advanced Settings', () => {
+    context('Advanced Settings', () => {
       it('rows per page in saved search should be according to the user selected number of pages', () => {});
       it('rows per page in new search should be according to the value selected in advanced settings', () => {});
     });

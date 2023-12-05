@@ -49,7 +49,7 @@ import { createTimeline } from '../../../tasks/timelines';
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../urls/navigation';
 
 // Failing: See https://github.com/elastic/kibana/issues/172304
-describe.skip('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
+describe('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     deleteTimelines();
     login();
@@ -125,7 +125,7 @@ describe('Timelines', (): void => {
         goToQueryTab();
       });
 
-      it.skip('can be added filter', () => {
+      it('can be added filter', () => {
         addFilter(getTimeline().filter);
         cy.get(TIMELINE_FILTER(getTimeline().filter)).should('exist');
       });
@@ -142,7 +142,7 @@ describe('Timelines', (): void => {
       });
 
       // TO-DO: Issue 163398
-      it.skip('can be added notes', () => {
+      it('can be added notes', () => {
         addNotesToTimeline(getTimeline().notes);
         cy.get(TIMELINE_TAB_CONTENT_GRAPHS_NOTES)
           .find(NOTES_TEXT)
@@ -152,7 +152,7 @@ describe('Timelines', (): void => {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/172031
-  describe.skip('shows the different timeline states', () => {
+  describe('shows the different timeline states', () => {
     before(() => {
       login();
       visitWithTimeRange(OVERVIEW_URL);

@@ -34,7 +34,7 @@ import { visit } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
 
 // FLAKY: https://github.com/elastic/kibana/issues/170822
-describe.skip(
+describe(
   'Expandable flyout left panel correlations',
   { tags: ['@ess', '@serverless'] },
   () => {
