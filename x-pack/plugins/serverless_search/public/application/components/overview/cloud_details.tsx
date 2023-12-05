@@ -40,7 +40,7 @@ export const CloudDetailsPanel = ({ cloudId, elasticsearchUrl }: CloudDetailsPan
     <OverviewPanel
       description={i18n.translate('xpack.serverlessSearch.cloudIdDetails.description', {
         defaultMessage:
-          'To get ready for ingesting into and querying data from your project, choose a connection option below:',
+          'Get ready to ingest and query your data by choosing a connection option:',
       })}
       leftPanelContent={
         <EuiThemeProvider colorMode="dark">
@@ -92,7 +92,7 @@ export const CloudDetailsPanel = ({ cloudId, elasticsearchUrl }: CloudDetailsPan
           <p>
             <FormattedMessage
               id="xpack.serverlessSearch.cloudIdDetails.elasticsearchEndpoint.description"
-              defaultMessage="The common method for establishing an Elasticsearch connection is to use the unique Elasticsearch endpoint for your project."
+              defaultMessage="The most common method for establishing an Elasticsearch connection."
             />
           </p>
         </EuiText>
@@ -118,7 +118,7 @@ export const CloudDetailsPanel = ({ cloudId, elasticsearchUrl }: CloudDetailsPan
           <p>
             <FormattedMessage
               id="xpack.serverlessSearch.cloudIdDetails.cloudId.description"
-              defaultMessage="Specific client libraries and connectors can use this unique identifier specific to Elastic Cloud to connect to Elasticsearch and Kibana."
+              defaultMessage="Specific client libraries and connectors can use this unique identifier specific to Elastic Cloud."
             />
           </p>
         </EuiText>
