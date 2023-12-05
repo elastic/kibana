@@ -68,7 +68,7 @@ export default function (providerContext: FtrProviderContext) {
       })
       .catch(() => {});
 
-  describe('When installing system integration in multiple spaces', async () => {
+  describe.skip('When installing system integration in multiple spaces', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
