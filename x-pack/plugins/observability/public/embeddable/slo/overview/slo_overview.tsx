@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -24,10 +24,18 @@ import { EmbeddableSloProps } from './types';
 export function SloOverview({
   sloId,
   sloInstanceId,
-  lastReloadRequestTime,
   onRenderComplete,
+  reloadSubject,
 }: EmbeddableSloProps) {
-  const containerRef = React.useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    reloadSubject.subscribe(() => {
+      setLastRefreshTime(Date.now());
+    });
+  }, [reloadSubject]);
 
   const {
     isLoading,
@@ -53,7 +61,7 @@ export function SloOverview({
 
   useEffect(() => {
     refetch();
-  }, [lastReloadRequestTime, refetch]);
+  }, [lastRefreshTime, refetch]);
   useEffect(() => {
     if (!onRenderComplete) return;
 

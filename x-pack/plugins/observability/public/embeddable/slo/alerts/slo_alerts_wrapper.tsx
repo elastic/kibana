@@ -12,6 +12,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { IEmbeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { Subject } from 'rxjs';
 import { SloAlertsSummary } from './components/slo_alerts_summary';
 import { SloAlertsTable } from './components/slo_alerts_table';
 import type { SloItem } from './types';
@@ -26,7 +27,7 @@ interface Props {
   timeRange: TimeRange;
   embeddable: IEmbeddable<SloAlertsEmbeddableInput, EmbeddableOutput>;
   onRenderComplete?: () => void;
-  lastReloadRequestTime?: number | undefined;
+  reloadSubject: Subject<boolean>;
 }
 
 export function SloAlertsWrapper({
@@ -35,12 +36,20 @@ export function SloAlertsWrapper({
   deps,
   timeRange,
   onRenderComplete,
-  lastReloadRequestTime,
+  reloadSubject,
 }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = deps;
+
+  const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    reloadSubject.subscribe(() => {
+      setLastRefreshTime(Date.now());
+    });
+  }, [reloadSubject]);
 
   const [isSummaryLoaded, setIsSummaryLoaded] = useState(false);
   const [isTableLoaded, setIsTableLoaded] = useState(false);
@@ -125,7 +134,7 @@ export function SloAlertsWrapper({
                 deps={deps}
                 timeRange={timeRange}
                 onLoaded={() => setIsTableLoaded(true)}
-                lastReloadRequestTime={lastReloadRequestTime}
+                lastReloadRequestTime={lastRefreshTime}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
