@@ -39,7 +39,7 @@ export const startNavigation = (services: Services) => {
     serverless.setSideNavComponent(SideNavComponentWithServices);
   } else {
     projectNavigationTree.getChromeNavigationTree$().subscribe((chromeNavigationTree) => {
-      serverless.setNavigation({ navigationTree: chromeNavigationTree });
+      serverless.setNavigationDeprecated({ navigationTree: chromeNavigationTree });
     });
     serverless.setSideNavComponent(getSecuritySideNavComponent(services));
   }

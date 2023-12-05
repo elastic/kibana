@@ -31,6 +31,8 @@ import type {
   ChromeStyle,
   ChromeProjectNavigation,
   ChromeSetProjectBreadcrumbsParams,
+  ProjectNavigationDefinition,
+  AppDeepLinkId,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type {
@@ -268,10 +270,19 @@ export class ChromeService {
       projectNavigation.setProjectSideNavComponent(component);
     };
 
-    const setProjectNavigation = (config: ChromeProjectNavigation) => {
+    const setProjectNavigationDeprecated = (config: ChromeProjectNavigation) => {
       validateChromeStyle();
-      projectNavigation.setProjectNavigation(config);
+      projectNavigation.setProjectNavigationDeprecated(config);
     };
+
+    function setProjectNavigation<
+      LinkId extends AppDeepLinkId = AppDeepLinkId,
+      Id extends string = string,
+      ChildrenId extends string = Id
+    >(definition: ProjectNavigationDefinition<LinkId, Id, ChildrenId>) {
+      validateChromeStyle();
+      projectNavigation.setProjectNavigation(definition);
+    }
 
     const setProjectBreadcrumbs = (
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
@@ -526,6 +537,7 @@ export class ChromeService {
         setProjectsUrl,
         setProjectUrl,
         setProjectName,
+        setNavigationDeprecated: setProjectNavigationDeprecated,
         setNavigation: setProjectNavigation,
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,

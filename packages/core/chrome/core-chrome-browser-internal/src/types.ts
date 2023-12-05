@@ -12,8 +12,10 @@ import type {
   SideNavComponent,
   ChromeProjectBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
+  AppDeepLinkId,
+  ChromeProjectNavigationNode,
+  ProjectNavigationDefinition,
 } from '@kbn/core-chrome-browser';
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser/src';
 import type { Observable } from 'rxjs';
 
 /** @internal */
@@ -69,7 +71,15 @@ export interface InternalChromeStart extends ChromeStart {
      *
      * Use {@link ServerlessPluginStart.setNavigation} to set project navigation config.
      */
-    setNavigation(projectNavigation: ChromeProjectNavigation): void;
+    setNavigationDeprecated(projectNavigation: ChromeProjectNavigation): void;
+
+    setNavigation<
+      LinkId extends AppDeepLinkId = AppDeepLinkId,
+      Id extends string = string,
+      ChildrenId extends string = Id
+    >(
+      definition: ProjectNavigationDefinition<LinkId, Id, ChildrenId>
+    ): void;
 
     /**
      * Returns an observable of the active nodes in the project navigation.

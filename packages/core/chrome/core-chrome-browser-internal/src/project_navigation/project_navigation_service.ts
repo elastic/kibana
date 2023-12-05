@@ -15,6 +15,8 @@ import {
   ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
+  AppDeepLinkId,
+  ProjectNavigationDefinition,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
@@ -88,6 +90,17 @@ export class ProjectNavigationService {
         this.projectBreadcrumbs$.next({ breadcrumbs: [], params: { absolute: false } });
       });
 
+    function setProjectNavigation<
+      LinkId extends AppDeepLinkId = AppDeepLinkId,
+      Id extends string = string,
+      ChildrenId extends string = Id
+    >(definition: ProjectNavigationDefinition<LinkId, Id, ChildrenId>) {
+      // this.projectNavigation$.next(projectNavigation);
+      // this.projectNavigationNavTreeFlattened = flattenNav(projectNavigation.navigationTree);
+      // this.setActiveProjectNavigationNodes();
+      console.log('TODO', definition);
+    }
+
     return {
       setProjectHome: (homeHref: string) => {
         this.projectHome$.next(homeHref);
@@ -110,11 +123,12 @@ export class ProjectNavigationService {
       setProjectUrl: (projectUrl: string) => {
         this.projectUrl$.next(projectUrl);
       },
-      setProjectNavigation: (projectNavigation: ChromeProjectNavigation) => {
+      setProjectNavigationDeprecated: (projectNavigation: ChromeProjectNavigation) => {
         this.projectNavigation$.next(projectNavigation);
         this.projectNavigationNavTreeFlattened = flattenNav(projectNavigation.navigationTree);
         this.setActiveProjectNavigationNodes();
       },
+      setProjectNavigation,
       getProjectNavigation$: () => {
         return this.projectNavigation$.asObservable();
       },

@@ -8,6 +8,7 @@
 
 import type { ComponentType } from 'react';
 import type { Location } from 'history';
+import type { Observable } from 'rxjs';
 import type { EuiThemeSizes, IconType } from '@elastic/eui';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
@@ -253,3 +254,143 @@ export type NodeDefinitionWithChildren<
 > = NodeDefinition<LinkId, Id, ChildrenID> & {
   children: Required<NodeDefinition<LinkId, Id, ChildrenID>>['children'];
 };
+
+export interface RecentItem {
+  link: string;
+  label: string;
+  id: string;
+}
+
+/** The preset that can be pass to the NavigationBucket component */
+export type NavigationGroupPreset = 'analytics' | 'devtools' | 'ml' | 'management';
+
+/**
+ * @public
+ *
+ *  Definition for the "Recently accessed" section of the side navigation.
+ */
+export interface RecentlyAccessedDefinition {
+  type: 'recentlyAccessed';
+  /**
+   * Optional observable for recently accessed items. If not provided, the
+   * recently items from the Chrome service will be used.
+   */
+  recentlyAccessed$?: Observable<RecentItem[]>;
+  /**
+   * If true, the recently accessed list will be collapsed by default.
+   * @default false
+   */
+  defaultIsCollapsed?: boolean;
+}
+
+/**
+ * @public
+ *
+ * A group root item definition.
+ */
+export interface GroupDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
+  type: 'navGroup';
+  children: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
+}
+
+/**
+ * @public
+ *
+ * A group root item definition built from a specific preset.
+ */
+export interface PresetDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'children' | 'type'> {
+  type: 'preset';
+  preset: NavigationGroupPreset;
+}
+
+/**
+ * @public
+ *
+ * An item root.
+ */
+export interface ItemDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
+  type: 'navItem';
+}
+
+/**
+ * @public
+ *
+ * The navigation definition for a root item in the side navigation.
+ */
+export type RootNavigationItemDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> =
+  | RecentlyAccessedDefinition
+  | GroupDefinition<LinkId, Id, ChildrenId>
+  | PresetDefinition<LinkId, Id, ChildrenId>
+  | ItemDefinition<LinkId, Id, ChildrenId>;
+
+export type ProjectNavigationTreeDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> = Array<
+  | Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'type'>
+  | Omit<ItemDefinition<LinkId, Id, ChildrenId>, 'type'>
+>;
+
+/**
+ * @public
+ *
+ * Definition for the complete navigation tree, including body and footer
+ */
+export interface NavigationTreeDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> {
+  /**
+   * Main content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
+   * or "group" items. Be mindeful though, with great power comes great responsibility.
+   * */
+  body?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
+  /**
+   * Footer content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
+   * or "group" items. Be mindeful though, with great power comes great responsibility.
+   * */
+  footer?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
+}
+
+/**
+ * @public
+ *
+ * A project navigation definition that can be passed to the `<DefaultNavigation />` component
+ * or when calling `setNavigation()` on the serverless plugin.
+ */
+export interface ProjectNavigationDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> {
+  /**
+   * A navigation tree structure with object items containing labels, links, and sub-items
+   * for a project. Use it if you only need to configure your project navigation and leave
+   * all the other navigation items to the default (Recently viewed items, Management, etc.)
+   */
+  projectNavigationTree?: ProjectNavigationTreeDefinition<LinkId, Id, ChildrenId>;
+  /**
+   * A navigation tree structure with object items containing labels, links, and sub-items
+   * that defines a complete side navigation. This configuration overrides `projectNavigationTree`
+   * if both are provided.
+   */
+  navigationTree?: NavigationTreeDefinition<LinkId, Id, ChildrenId>;
+}
