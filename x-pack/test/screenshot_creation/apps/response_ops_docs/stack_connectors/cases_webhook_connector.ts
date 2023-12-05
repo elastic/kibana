@@ -50,6 +50,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1920,
         1400
       );
+      await testSubjects.click('casesWebhookNext');
+      await testSubjects.setValue(
+        'getIncidentUrlInput',
+        'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}'
+      );
+      await testSubjects.setValue('getIncidentResponseExternalTitleKeyText', 'key');
+      await testSubjects.setValue(
+        'viewIncidentUrlInput',
+        'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.title}}}'
+      );
+      await commonScreenshots.takeScreenshot(
+        'cases-webhook-connector-get-case',
+        screenshotDirectories,
+        1920,
+        1400
+      );
       await testSubjects.click('euiFlyoutCloseButton');
     });
   });
