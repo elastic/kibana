@@ -215,7 +215,7 @@ export class DiscoverPageObject extends FtrService {
     );
   }
 
-  public async chooseBreakdownField(field: string) {
+  public async chooseBreakdownField(field: string, value?: string) {
     await this.retry.try(async () => {
       await this.testSubjects.click('unifiedHistogramBreakdownSelectorButton');
       await this.testSubjects.existOrFail('unifiedHistogramBreakdownSelectorSelectable');
@@ -226,13 +226,15 @@ export class DiscoverPageObject extends FtrService {
     ).type(field);
 
     const option = await this.find.byCssSelector(
-      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${field}"]`
+      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${
+        value ?? field
+      }"]`
     );
     await option.click();
   }
 
   public async clearBreakdownField() {
-    await this.chooseBreakdownField('No breakdown');
+    await this.chooseBreakdownField('No breakdown', '__EMPTY_SELECTOR_OPTION__');
   }
 
   public async chooseLensChart(chart: string) {
