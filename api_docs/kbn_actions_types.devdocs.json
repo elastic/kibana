@@ -1,0 +1,147 @@
+{
+  "id": "@kbn/actions-types",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/actions-types",
+        "id": "def-common.AsApiContract",
+        "type": "Type",
+        "tags": [],
+        "label": "AsApiContract",
+        "description": [],
+        "signature": [
+          "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: K extends \"frequency\" ? ",
+          {
+            "pluginId": "@kbn/actions-types",
+            "scope": "common",
+            "docId": "kibKbnActionsTypesPluginApi",
+            "section": "def-common.AsApiContract",
+            "text": "AsApiContract"
+          },
+          "<T[K]> : T[K]; }"
+        ],
+        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/actions-types",
+        "id": "def-common.RewriteRequestCase",
+        "type": "Type",
+        "tags": [],
+        "label": "RewriteRequestCase",
+        "description": [],
+        "signature": [
+          "(requested: ",
+          {
+            "pluginId": "@kbn/actions-types",
+            "scope": "common",
+            "docId": "kibKbnActionsTypesPluginApi",
+            "section": "def-common.AsApiContract",
+            "text": "AsApiContract"
+          },
+          "<T>) => T"
+        ],
+        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/actions-types",
+            "id": "def-common.RewriteRequestCase.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "requested",
+            "description": [],
+            "signature": [
+              "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: K extends \"frequency\" ? ",
+              {
+                "pluginId": "@kbn/actions-types",
+                "scope": "common",
+                "docId": "kibKbnActionsTypesPluginApi",
+                "section": "def-common.AsApiContract",
+                "text": "AsApiContract"
+              },
+              "<T[K]> : T[K]; }"
+            ],
+            "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/actions-types",
+        "id": "def-common.RewriteResponseCase",
+        "type": "Type",
+        "tags": [],
+        "label": "RewriteResponseCase",
+        "description": [],
+        "signature": [
+          "(responded: T) => T extends (infer Item)[] ? ",
+          {
+            "pluginId": "@kbn/actions-types",
+            "scope": "common",
+            "docId": "kibKbnActionsTypesPluginApi",
+            "section": "def-common.AsApiContract",
+            "text": "AsApiContract"
+          },
+          "<Item>[] : ",
+          {
+            "pluginId": "@kbn/actions-types",
+            "scope": "common",
+            "docId": "kibKbnActionsTypesPluginApi",
+            "section": "def-common.AsApiContract",
+            "text": "AsApiContract"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/actions-types",
+            "id": "def-common.RewriteResponseCase.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "responded",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

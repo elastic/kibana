@@ -596,7 +596,7 @@ describe('rule_form', () => {
       expect(mockSetConsumer).toHaveBeenLastCalledWith('infrastructure');
     });
 
-    it('should be able to select multiple consumer', async () => {
+    it('should render multiple consumers in the dropdown and select the first one in the list if no default is specified', async () => {
       await setup({
         initialRuleOverwrite: {
           name: 'Simple rule',
@@ -660,7 +660,7 @@ describe('rule_form', () => {
         wrapper.update();
       });
 
-      expect(mockSetConsumer).toHaveBeenLastCalledWith(null);
+      expect(mockSetConsumer).toHaveBeenLastCalledWith('infrastructure');
     });
 
     it('should not display the consumer select for invalid rule types', async () => {
