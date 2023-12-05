@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { TopValuesColumnParams } from '../../attribute_builder/utils';
 
 const DEFAULT_BREAKDOWN_SIZE = 10;

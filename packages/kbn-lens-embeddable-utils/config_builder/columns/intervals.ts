@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RangeIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { RangeIndexPatternColumn } from '@kbn/lens-plugin/public';
 
 export const getIntervalsColumn = ({
   field,

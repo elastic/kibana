@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
 import { buildPartitionChart } from './partition';
 
 const dataViews: Record<string, DataView> = {

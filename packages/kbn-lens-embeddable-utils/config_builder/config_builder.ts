@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FormulaPublicApi, LensEmbeddableInput } from '@kbn/lens-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { FormulaPublicApi, LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { LensAttributes, LensConfig, LensConfigOptions } from './types';
 import {

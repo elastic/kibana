@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/text_based/types';
-import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/text_based/types';
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 
 export function getValueColumn(
   id: string,

@@ -6,11 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
-import { DataViewSpec, DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
-import { GenericIndexPatternColumn, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
-import {
+import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
+import type {
+  DataViewSpec,
+  DataView,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
+import type {
+  GenericIndexPatternColumn,
+  PersistedIndexPatternLayer,
+} from '@kbn/lens-plugin/public';
+import type {
   TextBasedLayerColumn,
   TextBasedPersistedState,
 } from '@kbn/lens-plugin/public/datasources/text_based/types';

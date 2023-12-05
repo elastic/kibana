@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import {
+import type {
   FormBasedPersistedState,
   FormulaPublicApi,
   DatatableVisualizationState,
 } from '@kbn/lens-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensTableConfig } from '../types';
 import {
   addLayerColumn,

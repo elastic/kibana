@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
+import type { PersistedIndexPatternLayer, FormulaPublicApi } from '@kbn/lens-plugin/public';
 import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 
 export type LensFormula = Parameters<FormulaPublicApi['insertOrReplaceFormulaColumn']>[1];
 

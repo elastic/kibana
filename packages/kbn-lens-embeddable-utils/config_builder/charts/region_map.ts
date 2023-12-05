@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { FormBasedPersistedState, FormulaPublicApi } from '@kbn/lens-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { ChoroplethChartState } from '@kbn/maps-plugin/public/lens/choropleth_chart/types';
+import type { FormBasedPersistedState, FormulaPublicApi } from '@kbn/lens-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { ChoroplethChartState } from '@kbn/maps-plugin/public/lens/choropleth_chart/types';
 import {
   BuildDependencies,
   DEFAULT_LAYER_ID,

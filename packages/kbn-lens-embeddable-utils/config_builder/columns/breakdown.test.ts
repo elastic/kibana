@@ -7,7 +7,7 @@
  */
 
 import { getBreakdownColumn } from './breakdown';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 const dataView = {
   fields: {

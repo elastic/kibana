@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { FormBasedPersistedState, FormulaPublicApi, TagcloudState } from '@kbn/lens-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type {
+  FormBasedPersistedState,
+  FormulaPublicApi,
+  TagcloudState,
+} from '@kbn/lens-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensTagCloudConfig } from '../types';
 import {
   addLayerColumn,

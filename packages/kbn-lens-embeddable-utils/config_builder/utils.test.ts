@@ -14,8 +14,11 @@ import {
   addLayerColumn,
   isFormulaDataset,
 } from './utils';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { GenericIndexPatternColumn, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type {
+  GenericIndexPatternColumn,
+  PersistedIndexPatternLayer,
+} from '@kbn/lens-plugin/public';
 
 const dataView = {
   id: 'test-dataview',

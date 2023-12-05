@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { FormulaPublicApi, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { FormulaPublicApi, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { Filter, Query } from '@kbn/es-query';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export const DEFAULT_LAYER_ID = 'layer_0';

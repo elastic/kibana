@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import {
+import type {
   FormBasedPersistedState,
   FormulaPublicApi,
   XYState,
   XYReferenceLineLayerConfig,
   XYDataLayerConfig,
 } from '@kbn/lens-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { XYByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
-import { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { XYByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
+import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 import {
   addLayerColumn,

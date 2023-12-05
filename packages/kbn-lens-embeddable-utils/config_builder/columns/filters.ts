@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FiltersIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { FiltersIndexPatternColumn } from '@kbn/lens-plugin/public';
 
 export const getFiltersColumn = ({
   options,
