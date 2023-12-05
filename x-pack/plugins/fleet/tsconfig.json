@@ -103,5 +103,8 @@
     "@kbn/cloud",
     "@kbn/config",
     "@kbn/core-http-server-mocks",
+    "@kbn/openapi-bundler",
+    "@kbn/openapi-generator",
+    "@kbn/zod-helpers",
   ]
 }
