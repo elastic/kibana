@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SnakeToCamelCase } from '@kbn/cases-plugin/common/types';
+import type { AssetCriticalityRecord } from '../../../common/api/entity_analytics/asset_criticality';
 import {
   RISK_ENGINE_STATUS_URL,
   RISK_SCORE_PREVIEW_URL,
@@ -13,6 +15,7 @@ import {
   RISK_ENGINE_INIT_URL,
   RISK_ENGINE_PRIVILEGES_URL,
   ASSET_CRITICALITY_PRIVILEGES_URL,
+  ASSET_CRITICALITY_URL,
 } from '../../../common/constants';
 
 import type {
@@ -110,4 +113,35 @@ export const useEntityAnalyticsRoutes = () => {
     fetchRiskEnginePrivileges,
     fetchAssetCriticalityPrivileges,
   };
+};
+
+type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;
+/**
+ * Create asset criticality
+ */
+export const createAssetCriticality = async (
+  params: Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'>
+): Promise<AssetCriticalityRecord> => {
+  return KibanaServices.get().http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_URL, {
+    version: '1',
+    method: 'POST',
+    body: JSON.stringify({
+      id_value: params.idValue,
+      id_field: params.idField,
+      criticality_level: params.criticalityLevel,
+    }),
+  });
+};
+
+/**
+ * Get asset criticality
+ */
+export const fetchAssetCriticality = async (
+  params: Pick<AssetCriticality, 'idField' | 'idValue'>
+): Promise<AssetCriticalityRecord> => {
+  return KibanaServices.get().http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_URL, {
+    version: '1',
+    method: 'GET',
+    query: { id_value: params.idValue, id_field: params.idField },
+  });
 };
