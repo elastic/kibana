@@ -19,6 +19,7 @@ import { StepContextProvider } from './context/step_context';
 import { CONTENT_WIDTH } from './helpers';
 import { WelcomeHeader } from './welcome_header';
 import { Footer } from './footer';
+import { useScrollToHash } from './hooks/use_scroll';
 
 export interface GetStartedProps {
   indicesExist?: boolean;
@@ -42,6 +43,8 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes, i
   const productTier = productTypes.find(
     (product) => product.product_line === ProductLine.security
   )?.product_tier;
+
+  useScrollToHash();
 
   return (
     <KibanaPageTemplate
