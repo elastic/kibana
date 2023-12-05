@@ -46,8 +46,16 @@ const useSloAlertsQuery = (slos: SloItem[], timeRange: TimeRange) => {
               'kibana.alert.rule.rule_type_id': 'slo.rules.burnRate',
             },
           },
-          ...(sloIds.length > 0 ? [{ terms: { 'slo.id': sloIds } }] : []),
-          ...(sloInstanceIds.length > 0 ? [{ terms: { 'slo.instanceId': sloInstanceIds } }] : []),
+          {
+            bool: {
+              should: [
+                ...(sloIds.length > 0 ? [{ terms: { 'slo.id': sloIds } }] : []),
+                ...(sloInstanceIds.length > 0
+                  ? [{ terms: { 'slo.instanceId': sloInstanceIds } }]
+                  : []),
+              ],
+            },
+          },
         ],
       },
     };
