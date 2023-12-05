@@ -36,7 +36,7 @@ import {
   type GuideFilterValuesClassic,
 } from '@kbn/guided-onboarding/classic';
 import { GuideId, GuideState, GuideVersion } from '@kbn/guided-onboarding/src/types';
-import { getServices, useVariation } from '../../kibana_services';
+import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
 const homeBreadcrumb = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
@@ -155,6 +155,9 @@ export const GettingStarted = () => {
     [guidedOnboardingService]
   );
 
+  // set up A/B testing
+  useVariation(cloudExperiments, 'guided.onboarding', guideVersion, setGuideVersion);
+
   // filter cards for solution and based on classic or new format
   const guide = 'classic' ? guideCardsClassic : guideCards;
   useEffect(() => {
@@ -214,9 +217,6 @@ export const GettingStarted = () => {
       />
     );
   }
-
-  // set up A/B testing
-  useVariation(cloudExperiments, 'guided.onboarding', guideVersion, setGuideVersion);
 
   const setGuideFilters =
     guideVersion === 'classic' ? (
