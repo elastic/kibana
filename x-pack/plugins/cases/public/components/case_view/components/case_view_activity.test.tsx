@@ -179,25 +179,29 @@ describe('Case View Page activity tab', () => {
     useCasesFeaturesMock.mockReturnValue(useGetCasesFeaturesRes);
   });
 
-  it('should render the activity content and main components', async () => {
-    appMockRender = createAppMockRenderer({ license: platinumLicense });
-    appMockRender.render(<CaseViewActivity {...caseProps} />);
+  for (let i = 0; i < 350; i = i + 1) {
+    it('should render the activity content and main components', async () => {
+      appMockRender = createAppMockRenderer({ license: platinumLicense });
+      appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-    const caseViewActivity = await screen.findByTestId('case-view-activity');
-    expect(await within(caseViewActivity).findAllByTestId('user-actions-list')).toHaveLength(2);
-    expect(
-      await within(caseViewActivity).findByTestId('case-view-status-action-button')
-    ).toBeInTheDocument();
+      const caseViewActivity = await screen.findByTestId('case-view-activity');
+      expect(await within(caseViewActivity).findAllByTestId('user-actions-list')).toHaveLength(2);
+      expect(
+        await within(caseViewActivity).findByTestId('case-view-status-action-button')
+      ).toBeInTheDocument();
 
-    expect(await screen.findByTestId('description')).toBeInTheDocument();
+      expect(await screen.findByTestId('description')).toBeInTheDocument();
 
-    const caseViewSidebar = await screen.findByTestId('case-view-page-sidebar');
-    expect(await within(caseViewSidebar).findByTestId('case-tags')).toBeInTheDocument();
-    expect(await within(caseViewSidebar).findByTestId('cases-categories')).toBeInTheDocument();
-    expect(await within(caseViewSidebar).findByTestId('connector-edit-header')).toBeInTheDocument();
+      const caseViewSidebar = await screen.findByTestId('case-view-page-sidebar');
+      expect(await within(caseViewSidebar).findByTestId('case-tags')).toBeInTheDocument();
+      expect(await within(caseViewSidebar).findByTestId('cases-categories')).toBeInTheDocument();
+      expect(
+        await within(caseViewSidebar).findByTestId('connector-edit-header')
+      ).toBeInTheDocument();
 
-    await waitForComponentToUpdate();
-  });
+      await waitForComponentToUpdate();
+    });
+  }
 
   it('should call use get user actions as per top and bottom actions list', async () => {
     appMockRender = createAppMockRenderer({ license: platinumLicense });
