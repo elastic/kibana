@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { PanelLoader } from '@kbn/panel-loader';
 import { apiFiresPhaseEvents, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelError } from './presentation_panel_error';
@@ -59,6 +60,11 @@ export const PresentationPanelInternal = <
     defaultPanelTitle: api?.defaultPanelTitle,
     parentHidePanelTitle: (api?.parentApi?.value as DefaultPresentationPanelApi)?.hidePanelTitle,
   });
+
+  const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
+  if (dataLoading === false && !initialLoadComplete) {
+    setInitialLoadComplete(true);
+  }
 
   const hideTitle =
     Boolean(hidePanelTitle) ||
@@ -117,6 +123,7 @@ export const PresentationPanelInternal = <
           <PresentationPanelError api={api} error={blockingError} />
         </EuiFlexGroup>
       )}
+      {!initialLoadComplete && <PanelLoader />}
       {!blockingError && (
         <div className="presentationPanel__content">
           <Component

@@ -72,7 +72,8 @@
     "@kbn/presentation-library",
     "@kbn/presentation-publishing",
     "@kbn/presentation-containers",
-    "@kbn/presentation-panel-plugin"
+    "@kbn/presentation-panel-plugin",
+    "@kbn/content-management-table-list-view-common"
   ],
   "exclude": ["target/**/*"]
 }

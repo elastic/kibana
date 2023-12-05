@@ -53,6 +53,7 @@ export async function executeAction({ embeddable, startDependencies, overlays, t
         size: 's',
         'data-test-subj': 'customizeLens',
         type: 'push',
+        paddingSize: 'm',
         hideCloseButton: true,
         onClose: (overlayRef) => {
           if (overlayTracker) overlayTracker.clearOverlays();

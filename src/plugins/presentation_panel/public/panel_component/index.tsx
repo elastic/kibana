@@ -8,14 +8,13 @@
 
 import './_presentation_panel.scss';
 
+import { PanelLoader } from '@kbn/panel-loader';
 import { isPromise } from '@kbn/std';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { untilPluginStartServicesReady } from '../kibana_services';
-import { PresentationPanelLoadingIndicator } from './presentation_panel_loading';
-import { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
 
-export { PresentationPanelLoadingIndicator } from './presentation_panel_loading';
+import { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
 
 export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -38,7 +37,9 @@ export const PresentationPanel = <
   }, []);
 
   if (loading || !value?.Panel || !value?.unwrappedComponent)
-    return <PresentationPanelLoadingIndicator />;
+    return (
+      <PanelLoader showShadow={props.showShadow} dataTestSubj="embeddablePanelLoadingIndicator" />
+    );
 
   return (
     <value.Panel<ApiType, PropsType> Component={value.unwrappedComponent} {...passThroughProps} />

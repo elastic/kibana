@@ -8,14 +8,12 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
+import { useObservedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_observed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { UsersType } from '../../../explore/users/store/model';
 import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import {
-  useManagedUser,
-  useObservedUser,
-} from '../../../timelines/components/side_panel/new_user_detail/hooks';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { useRiskScore } from '../../../explore/containers/risk_score';
@@ -62,7 +60,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
 
   const observedUser = useObservedUser(userName);
-  const managedUser = useManagedUser(userName);
+  const managedUser = useManagedUser(userName, observedUser);
 
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;

@@ -31,6 +31,9 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { isEqual } from 'lodash';
+import { FilterByAssigneesPopover } from '../../../common/components/filter_group/filter_by_assignees';
+import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -62,6 +65,7 @@ import {
   showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
 import {
+  buildAlertAssigneesFilter,
   buildAlertStatusFilter,
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
@@ -135,6 +139,16 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
+  const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
+  const handleSelectedAssignees = useCallback(
+    (newAssignees: AssigneesIdsSelection[]) => {
+      if (!isEqual(newAssignees, assignees)) {
+        setAssignees(newAssignees);
+      }
+    },
+    [assignees]
+  );
+
   const arePageFiltersEnabled = useIsExperimentalFeatureEnabled('alertsPageFiltersEnabled');
 
   // when arePageFiltersEnabled === false
@@ -176,8 +190,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       ...filters,
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+      ...buildAlertAssigneesFilter(assignees),
     ];
-  }, [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filters]);
+  }, [assignees, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filters]);
 
   const alertPageFilters = useMemo(() => {
     if (arePageFiltersEnabled) {
@@ -247,8 +262,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
       ...(alertPageFilters ?? []),
+      ...buildAlertAssigneesFilter(assignees),
     ],
-    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, alertPageFilters]
+    [assignees, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, alertPageFilters]
   );
 
   const { signalIndexNeedsInit, pollForSignalIndex } = useSignalHelpers();
@@ -363,16 +379,16 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         />
       ),
     [
-      topLevelFilters,
       arePageFiltersEnabled,
-      statusFilter,
+      from,
       onFilterGroupChangedCallback,
       pageFiltersUpdateHandler,
-      showUpdating,
-      from,
       query,
+      showUpdating,
+      statusFilter,
       timelinesUi,
       to,
+      topLevelFilters,
       updatedAt,
     ]
   );
@@ -448,14 +464,24 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           >
             <Display show={!globalFullScreen}>
               <HeaderPage title={i18n.PAGE_TITLE}>
-                <SecuritySolutionLinkButton
-                  onClick={goToRules}
-                  deepLinkId={SecurityPageName.rules}
-                  data-test-subj="manage-alert-detection-rules"
-                  fill
-                >
-                  {i18n.BUTTON_MANAGE_RULES}
-                </SecuritySolutionLinkButton>
+                <EuiFlexGroup gutterSize="m">
+                  <EuiFlexItem>
+                    <FilterByAssigneesPopover
+                      assignedUserIds={assignees}
+                      onSelectionChange={handleSelectedAssignees}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <SecuritySolutionLinkButton
+                      onClick={goToRules}
+                      deepLinkId={SecurityPageName.rules}
+                      data-test-subj="manage-alert-detection-rules"
+                      fill
+                    >
+                      {i18n.BUTTON_MANAGE_RULES}
+                    </SecuritySolutionLinkButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </HeaderPage>
               <EuiHorizontalRule margin="none" />
               <EuiSpacer size="l" />

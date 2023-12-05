@@ -109,6 +109,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
               key={type}
               index={index}
               showBadges={true}
+              showShadow={true}
               showNotifications={true}
               onPanelStatusChange={onPanelStatusChange}
               embeddable={() => container.untilEmbeddableLoaded(id)}

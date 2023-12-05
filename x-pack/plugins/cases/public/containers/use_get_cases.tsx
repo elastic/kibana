@@ -7,34 +7,12 @@
 
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import { casesQueriesKeys, DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
+import { casesQueriesKeys, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
 import type { CasesFindResponseUI, FilterOptions, QueryParams } from './types';
-import { SortFieldCase, StatusAll, SeverityAll } from './types';
 import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
 import { getCases } from './api';
 import type { ServerError } from '../types';
-
-const DEFAULT_SEARCH_FIELDS = ['title', 'description'];
-
-export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
-  search: '',
-  searchFields: DEFAULT_SEARCH_FIELDS,
-  severity: SeverityAll,
-  assignees: [],
-  reporters: [],
-  status: StatusAll,
-  tags: [],
-  owner: [],
-  category: [],
-};
-
-export const DEFAULT_QUERY_PARAMS: QueryParams = {
-  page: DEFAULT_TABLE_ACTIVE_PAGE,
-  perPage: DEFAULT_TABLE_LIMIT,
-  sortField: SortFieldCase.createdAt,
-  sortOrder: 'desc',
-};
 
 export const initialData: CasesFindResponseUI = {
   cases: [],

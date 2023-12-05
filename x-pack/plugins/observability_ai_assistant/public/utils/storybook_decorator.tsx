@@ -22,6 +22,11 @@ import { buildFunctionElasticsearch, buildFunctionServiceSummary } from './build
 import { ObservabilityAIAssistantChatServiceProvider } from '../context/observability_ai_assistant_chat_service_provider';
 
 const chatService: ObservabilityAIAssistantChatService = {
+  analytics: {
+    optIn: () => {},
+    reportEvent: () => {},
+    telemetryCounter$: new Observable(),
+  },
   chat: (options: { messages: Message[]; connectorId: string }) => new Observable<PendingMessage>(),
   getContexts: () => [],
   getFunctions: () => [buildFunctionElasticsearch(), buildFunctionServiceSummary()],
@@ -32,6 +37,7 @@ const chatService: ObservabilityAIAssistantChatService = {
     signal: AbortSignal;
   }): Promise<{ content?: Serializable; data?: Serializable }> => ({}),
   renderFunction: (name: string, args: string | undefined, response: {}) => (
+    // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
     <div>Hello! {name}</div>
   ),
   hasFunction: () => true,

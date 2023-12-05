@@ -13,6 +13,6 @@ export function plugin() {
 }
 
 export { getEditPanelAction } from './panel_actions';
-export { PresentationPanel, PresentationPanelLoadingIndicator } from './panel_component';
+export { PresentationPanel } from './panel_component';
 export type { PresentationPanelProps } from './panel_component/types';
 export { PresentationPanelError } from './panel_component/presentation_panel_error';

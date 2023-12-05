@@ -90,8 +90,8 @@ import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
 import { SectionLoading } from '../../components/section_loading';
 import { RuleFormConsumerSelection, VALID_CONSUMERS } from './rule_form_consumer_selection';
-import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
 import { getInitialInterval } from './get_initial_interval';
+import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 
 const ENTER_KEY = 13;
 
@@ -153,10 +153,13 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   hideGrouping?: boolean;
   hideInterval?: boolean;
   connectorFeatureId?: string;
+  selectedConsumer?: RuleCreationValidConsumer | null;
   validConsumers?: RuleCreationValidConsumer[];
   onChangeMetaData: (metadata: MetaData) => void;
   useRuleProducer?: boolean;
 }
+
+const EMPTY_ARRAY: string[] = [];
 
 export const RuleForm = ({
   rule,
@@ -168,11 +171,12 @@ export const RuleForm = ({
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   setConsumer = NOOP,
+  selectedConsumer,
   operation,
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
-  filteredRuleTypes: ruleTypeToFilter,
+  filteredRuleTypes: ruleTypeToFilter = EMPTY_ARRAY,
   hideGrouping = false,
   hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,
@@ -219,11 +223,13 @@ export const RuleForm = ({
   const [solutionsFilter, setSolutionFilter] = useState<string[]>([]);
   let hasDisabledByLicenseRuleTypes: boolean = false;
   const {
-    ruleTypes,
-    error: loadRuleTypesError,
-    ruleTypeIndex,
-    ruleTypesIsLoading,
-  } = useLoadRuleTypes({ filteredRuleTypes: ruleTypeToFilter });
+    ruleTypesState: {
+      data: ruleTypeIndex,
+      error: loadRuleTypesError,
+      isLoading: ruleTypesIsLoading,
+    },
+  } = useLoadRuleTypesQuery({ filteredRuleTypes: ruleTypeToFilter });
+  const ruleTypes = useMemo(() => [...ruleTypeIndex.values()], [ruleTypeIndex]);
 
   // load rule types
   useEffect(() => {
@@ -251,11 +257,11 @@ export const RuleForm = ({
             validConsumers,
           })
         )
-        .filter((item) => {
-          return rule.consumer === ALERTS_FEATURE_ID
+        .filter((item) =>
+          rule.consumer === ALERTS_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
-            : item.ruleType!.producer === rule.consumer;
-        });
+            : item.ruleType!.producer === rule.consumer
+        );
 
     const availableRuleTypesResult = getAvailableRuleTypes(ruleTypes);
     setAvailableRuleTypes(availableRuleTypesResult);
@@ -425,6 +431,7 @@ export const RuleForm = ({
     const selectedRuleType = availableRuleTypes.find(
       ({ ruleType: availableRuleType }) => availableRuleType.id === rule.ruleTypeId
     );
+
     if (!selectedRuleType?.ruleType?.authorizedConsumers) {
       return [];
     }
@@ -643,6 +650,23 @@ export const RuleForm = ({
     }
   };
 
+  const hasFieldsForAAD = useMemo(() => {
+    const hasAlertHasData = selectedRuleType
+      ? selectedRuleType.hasFieldsForAAD ||
+        selectedRuleType.producer === AlertConsumers.SIEM ||
+        selectedRuleType.hasAlertsMappings
+      : false;
+
+    if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule?.ruleTypeId ?? '')) {
+      return (
+        (validConsumers || VALID_CONSUMERS).includes(
+          selectedConsumer as RuleCreationValidConsumer
+        ) && hasAlertHasData
+      );
+    }
+    return hasAlertHasData;
+  }, [rule?.ruleTypeId, selectedConsumer, selectedRuleType, validConsumers]);
+
   const ruleTypeDetails = (
     <>
       <EuiHorizontalRule />
@@ -793,6 +817,7 @@ export const RuleForm = ({
               consumers={authorizedConsumers}
               onChange={setConsumer}
               errors={errors}
+              selectedConsumer={selectedConsumer}
             />
           </EuiFlexItem>
         </>
@@ -820,8 +845,12 @@ export const RuleForm = ({
             defaultActionGroupId={defaultActionGroupId}
             hasAlertsMappings={selectedRuleType.hasAlertsMappings}
             featureId={connectorFeatureId}
-            producerId={selectedRuleType.producer}
-            hasFieldsForAAD={selectedRuleType.hasFieldsForAAD}
+            producerId={
+              MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule.ruleTypeId)
+                ? selectedConsumer ?? rule.consumer
+                : selectedRuleType.producer
+            }
+            hasFieldsForAAD={hasFieldsForAAD}
             ruleTypeId={rule.ruleTypeId}
             isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
               isActionGroupDisabledForActionType(selectedRuleType, actionGroupId, actionTypeId)
@@ -897,8 +926,16 @@ export const RuleForm = ({
           <EuiFormRow
             fullWidth
             label={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.tagsFieldLabel', {
-              defaultMessage: 'Tags (optional)',
+              defaultMessage: 'Tags',
             })}
+            labelAppend={
+              <EuiText color="subdued" size="xs">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleForm.tagsFieldOptional"
+                  defaultMessage="Optional"
+                />
+              </EuiText>
+            }
           >
             <EuiComboBox
               noSuggestions
@@ -928,94 +965,98 @@ export const RuleForm = ({
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiSpacer size="m" />
-      {ruleTypeModel ? (
-        <>{ruleTypeDetails}</>
-      ) : availableRuleTypes.length ? (
-        <>
-          <EuiHorizontalRule />
-          <EuiFormRow
-            fullWidth
-            labelAppend={
-              hasDisabledByLicenseRuleTypes && (
+      <div data-test-subj="ruleGroupTypeSelectContainer">
+        {ruleTypeModel ? (
+          <>{ruleTypeDetails}</>
+        ) : availableRuleTypes.length ? (
+          <>
+            <EuiHorizontalRule />
+            <EuiFormRow
+              fullWidth
+              labelAppend={
+                hasDisabledByLicenseRuleTypes && (
+                  <EuiTitle size="xxs">
+                    <EuiLink
+                      href={VIEW_LICENSE_OPTIONS_LINK}
+                      target="_blank"
+                      external
+                      className="actActionForm__getMoreActionsLink"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Get more rule types"
+                        id="xpack.triggersActionsUI.sections.actionForm.getMoreRuleTypesTitle"
+                      />
+                    </EuiLink>
+                  </EuiTitle>
+                )
+              }
+              label={
                 <EuiTitle size="xxs">
-                  <EuiLink
-                    href={VIEW_LICENSE_OPTIONS_LINK}
-                    target="_blank"
-                    external
-                    className="actActionForm__getMoreActionsLink"
-                  >
+                  <h5>
                     <FormattedMessage
-                      defaultMessage="Get more rule types"
-                      id="xpack.triggersActionsUI.sections.actionForm.getMoreRuleTypesTitle"
+                      id="xpack.triggersActionsUI.sections.ruleForm.ruleTypeSelectLabel"
+                      defaultMessage="Select rule type"
                     />
-                  </EuiLink>
+                  </h5>
                 </EuiTitle>
-              )
-            }
-            label={
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.ruleForm.ruleTypeSelectLabel"
-                    defaultMessage="Select rule type"
-                  />
-                </h5>
-              </EuiTitle>
-            }
-          >
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
-                <EuiFieldSearch
-                  fullWidth
-                  data-test-subj="ruleSearchField"
-                  onChange={(e) => {
-                    setInputText(e.target.value);
-                    if (e.target.value === '') {
-                      setSearchText('');
-                    }
-                  }}
-                  onKeyUp={(e) => {
-                    if (e.keyCode === ENTER_KEY) {
-                      setSearchText(inputText);
-                    }
-                  }}
-                  placeholder={i18n.translate(
-                    'xpack.triggersActionsUI.sections.ruleForm.searchPlaceholderTitle',
-                    { defaultMessage: 'Search' }
-                  )}
-                />
-              </EuiFlexItem>
-              {solutions ? (
-                <EuiFlexItem grow={false}>
-                  <SolutionFilter
-                    key="solution-filter"
-                    solutions={solutions}
-                    onChange={(selectedSolutions: string[]) => setSolutionFilter(selectedSolutions)}
+              }
+            >
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>
+                  <EuiFieldSearch
+                    fullWidth
+                    data-test-subj="ruleSearchField"
+                    onChange={(e) => {
+                      setInputText(e.target.value);
+                      if (e.target.value === '') {
+                        setSearchText('');
+                      }
+                    }}
+                    onKeyUp={(e) => {
+                      if (e.keyCode === ENTER_KEY) {
+                        setSearchText(inputText);
+                      }
+                    }}
+                    placeholder={i18n.translate(
+                      'xpack.triggersActionsUI.sections.ruleForm.searchPlaceholderTitle',
+                      { defaultMessage: 'Search' }
+                    )}
                   />
                 </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          </EuiFormRow>
-          <EuiSpacer />
-          {errors.ruleTypeId.length >= 1 && rule.ruleTypeId !== undefined ? (
-            <>
-              <EuiSpacer />
-              <EuiCallOut color="danger" size="s" title={errors.ruleTypeId} />
-              <EuiSpacer />
-            </>
-          ) : null}
-          {ruleTypeNodes}
-        </>
-      ) : ruleTypeIndex && !ruleTypesIsLoading ? (
-        <NoAuthorizedRuleTypes operation={operation} />
-      ) : (
-        <SectionLoading>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.ruleForm.loadingRuleTypesDescription"
-            defaultMessage="Loading rule types…"
-          />
-        </SectionLoading>
-      )}
+                {solutions ? (
+                  <EuiFlexItem grow={false}>
+                    <SolutionFilter
+                      key="solution-filter"
+                      solutions={solutions}
+                      onChange={(selectedSolutions: string[]) =>
+                        setSolutionFilter(selectedSolutions)
+                      }
+                    />
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            </EuiFormRow>
+            <EuiSpacer />
+            {errors.ruleTypeId.length >= 1 && rule.ruleTypeId !== undefined ? (
+              <>
+                <EuiSpacer />
+                <EuiCallOut color="danger" size="s" title={errors.ruleTypeId} />
+                <EuiSpacer />
+              </>
+            ) : null}
+            {ruleTypeNodes}
+          </>
+        ) : ruleTypeIndex && !ruleTypesIsLoading ? (
+          <NoAuthorizedRuleTypes operation={operation} />
+        ) : (
+          <SectionLoading>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.ruleForm.loadingRuleTypesDescription"
+              defaultMessage="Loading rule types…"
+            />
+          </SectionLoading>
+        )}
+      </div>
     </EuiForm>
   );
 };

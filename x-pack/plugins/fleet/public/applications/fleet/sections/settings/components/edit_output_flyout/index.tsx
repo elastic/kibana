@@ -55,6 +55,7 @@ import { useOutputForm } from './use_output_form';
 import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
 import { AdvancedOptionsSection } from './advanced_options_section';
 import { OutputFormRemoteEsSection } from './output_form_remote_es';
+import { OutputHealth } from './output_health';
 
 export interface EditOutputFlyoutProps {
   output?: Output;
@@ -272,7 +273,13 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const renderRemoteElasticsearchSection = () => {
     if (isRemoteESOutputEnabled) {
-      return <OutputFormRemoteEsSection inputs={inputs} />;
+      return (
+        <OutputFormRemoteEsSection
+          inputs={inputs}
+          useSecretsStorage={useSecretsStorage}
+          onUsePlainText={onUsePlainText}
+        />
+      );
     }
     return null;
   };
@@ -322,7 +329,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
         case outputType.Elasticsearch:
           return i18n.translate('xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout', {
             defaultMessage:
-              'This output type does not support connectivity to a remote Elasticsearch cluster, please the Remote Elasticsearch type for that.',
+              'This output type does not support connectivity to a remote Elasticsearch cluster, please use the Remote Elasticsearch type for that.',
           });
       }
     };
@@ -335,7 +342,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             defaultMessage="Enter your output hosts, service token for your remote cluster, and any advanced YAML configuration. Learn more about how to use these parameters in {doc}."
             values={{
               doc: (
-                <EuiLink href={docLinks.links.fleet.guide} target="_blank">
+                <EuiLink href={docLinks.links.fleet.remoteESOoutput} target="_blank">
                   {i18n.translate('xpack.fleet.settings.editOutputFlyout.docLabel', {
                     defaultMessage: 'our documentation',
                   })}
@@ -570,6 +577,9 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           <EuiSpacer size="l" />
           <AdvancedOptionsSection enabled={form.isShipperEnabled} inputs={inputs} />
         </EuiForm>
+        {output?.id && output.type === 'remote_elasticsearch' ? (
+          <OutputHealth output={output} />
+        ) : null}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

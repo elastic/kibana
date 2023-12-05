@@ -51,7 +51,12 @@ const IndexMappingsDocsLink: FunctionComponent<{ docLinks: CoreStart['docLinks']
         </p>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiLink href={docLinks.links.enterpriseSearch.ingestPipelines} target="_blank" external>
+      <EuiLink
+        data-test-subj="serverlessSearchIndexMappingsDocsLinkLearnMoreAboutIngestPipelinesLink"
+        href={docLinks.links.enterpriseSearch.ingestPipelines}
+        target="_blank"
+        external
+      >
         <FormattedMessage
           id="xpack.serverlessSearch.indexMappings.ingestPipelinesDocs.linkLabel"
           defaultMessage="Learn more about ingest pipelines"
