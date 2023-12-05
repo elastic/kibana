@@ -697,6 +697,7 @@ export function registerEncryptedSavedObjects(
       'timeout',
       'broker_timeout',
       'required_acks',
+      'secrets',
     ]),
   });
   // Encrypted saved objects
