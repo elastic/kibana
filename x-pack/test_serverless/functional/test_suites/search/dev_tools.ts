@@ -42,7 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('Sets the right breadcrumb when navigating to search profiler app', async () => {
-        await PageObjects.common.navigateToApp('dev_tools', { hash: '/searchProfiler' });
+        await PageObjects.common.navigateToApp('dev_tools', { hash: '/searchprofiler' });
 
         const lastBreadcrumbdcrumb = await testSubjects.getVisibleText(
           'breadcrumb breadcrumb-deepLinkId-dev_tools:console last'

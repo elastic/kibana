@@ -44,7 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('Sets the right breadcrumb when navigating to grok debugger app', async () => {
-      await PageObjects.common.navigateToApp('dev_tools', { hash: '/grokDebugger' });
+      await PageObjects.common.navigateToApp('dev_tools', { hash: '/grokdebugger' });
 
       const lastBreadcrumbdcrumb = await testSubjects.getVisibleText(
         'breadcrumb breadcrumb-deepLinkId-dev_tools last'
@@ -53,7 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('Sets the right breadcrumb when navigating to search profiler app', async () => {
-      await PageObjects.common.navigateToApp('dev_tools', { hash: '/searchProfiler' });
+      await PageObjects.common.navigateToApp('dev_tools', { hash: '/searchprofiler' });
 
       const lastBreadcrumbdcrumb = await testSubjects.getVisibleText(
         'breadcrumb breadcrumb-deepLinkId-dev_tools last'
@@ -62,7 +62,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('Sets the right breadcrumb when navigating to painless lab app', async () => {
-      await PageObjects.common.navigateToApp('dev_tools', { hash: '/painlessLab' });
+      await PageObjects.common.navigateToApp('dev_tools', { hash: '/painless_lab' });
 
       const lastBreadcrumbdcrumb = await testSubjects.getVisibleText(
         'breadcrumb breadcrumb-deepLinkId-dev_tools last'
