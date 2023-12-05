@@ -238,6 +238,7 @@ function SpanFlyoutBody({
       ? [
           {
             id: 'stack-trace',
+            'data-test-subj': 'spanStacktraceTab',
             name: i18n.translate(
               'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
               {
