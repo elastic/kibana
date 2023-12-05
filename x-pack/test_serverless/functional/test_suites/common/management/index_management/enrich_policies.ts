@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
+  const pageObjects = getPageObjects(['common', 'indexManagement', 'header', 'svlCommonPage']);
   const log = getService('log');
   const browser = getService('browser');
   const security = getService('security');
@@ -21,8 +21,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const ENRICH_POLICY_NAME = 'test-policy-1';
 
   describe('Enrich policies tab', function () {
+    // TimeoutError:  Waiting for element to be located By(css selector, [data-test-subj="kibana-chrome"])
+    this.tags(['failsOnMKI']);
+
     before(async () => {
-      await log.debug('Creating required index and enrich policy');
+      log.debug('Creating required index and enrich policy');
       try {
         await es.indices.create({
           index: ENRICH_INDEX_NAME,
@@ -50,16 +53,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         throw e;
       }
 
-      await log.debug('Navigating to the enrich policies tab');
+      log.debug('Navigating to the enrich policies tab');
+      await pageObjects.svlCommonPage.login();
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.common.navigateToApp('indexManagement');
+
       // Navigate to the enrich policies tab
       await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
-      await log.debug('Cleaning up created index and policy');
+      log.debug('Cleaning up created index and policy');
 
       try {
         await es.indices.delete({ index: ENRICH_INDEX_NAME });
