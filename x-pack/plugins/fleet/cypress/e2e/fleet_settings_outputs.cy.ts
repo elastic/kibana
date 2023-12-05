@@ -92,7 +92,7 @@ describe('Outputs', () => {
 
       for (const type of ['elasticsearch', 'remote_elasticsearch']) {
         for (const testCase of cases) {
-          describe(`When type is ${type} and preset is ${testCase.name}`, () => {
+          describe(`When type is ${type} and preset is ${testCase.preset}`, () => {
             it('successfully creates output', () => {
               if (type === 'elasticsearch') {
                 selectESOutput();
@@ -100,11 +100,15 @@ describe('Outputs', () => {
                 selectRemoteESOutput();
               }
 
-              cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).type(testCase.name);
+              cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).type(`${type} - ${testCase.name}`);
               cy.get(`[placeholder="Specify host URL"]`).type(
                 `http://${testCase.preset}.elasticsearch.com:9200`
               );
               cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT).select(testCase.preset);
+
+              if (type === 'remote_elasticsearch') {
+                cy.getBySel('serviceTokenSecretInput').type('secret');
+              }
 
               cy.intercept('POST', '**/api/fleet/outputs').as('saveOutput');
               cy.getBySel(SETTINGS_SAVE_BTN).click();
@@ -114,7 +118,10 @@ describe('Outputs', () => {
                 cy.visit(`/app/fleet/settings/outputs/${responseBody?.item?.id}`);
               });
 
-              cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).should('have.value', testCase.name);
+              cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).should(
+                'have.value',
+                `${type} - ${testCase.name}`
+              );
               cy.get(`[placeholder="Specify host URL"]`).should(
                 'have.value',
                 `http://${testCase.preset}.elasticsearch.com:9200`
