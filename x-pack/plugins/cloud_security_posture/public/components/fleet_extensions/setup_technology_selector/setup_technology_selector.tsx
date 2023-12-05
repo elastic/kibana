@@ -20,9 +20,11 @@ import {
 } from '@elastic/eui';
 
 export const SetupTechnologySelector = ({
+  disabled,
   setupTechnology,
   onSetupTechnologyChange,
 }: {
+  disabled: boolean;
   setupTechnology: SetupTechnology;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
 }) => {
@@ -87,9 +89,11 @@ export const SetupTechnologySelector = ({
     <>
       <EuiSpacer size="l" />
       <EuiAccordion
+        isDisabled={disabled}
+        initialIsOpen={disabled}
         id={useGeneratedHtmlId({ prefix: 'setup-type' })}
         buttonContent={
-          <EuiLink>
+          <EuiLink disabled={disabled}>
             <FormattedMessage
               id="xpack.csp.fleetIntegration.setupTechnology.advancedOptionsLabel"
               defaultMessage="Advanced options"
@@ -108,6 +112,7 @@ export const SetupTechnologySelector = ({
           }
         >
           <EuiSuperSelect
+            disabled={disabled}
             options={options}
             valueOfSelected={setupTechnology}
             placeholder={

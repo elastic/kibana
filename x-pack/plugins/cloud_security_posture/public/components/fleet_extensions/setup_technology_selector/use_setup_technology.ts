@@ -15,21 +15,31 @@ export const useSetupTechnology = ({
   agentPolicy,
   agentlessPolicy,
   handleSetupTechnologyChange,
+  isEditPage,
 }: {
   input: NewPackagePolicyInput;
   agentPolicy?: AgentPolicy;
   agentlessPolicy?: AgentPolicy;
   handleSetupTechnologyChange?: (value: SetupTechnology) => void;
+  isEditPage: boolean;
 }) => {
-  const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(
-    SetupTechnology.AGENT_BASED
-  );
   const isCspmAws = input.type === CLOUDBEAT_AWS;
   const isAgentlessAvailable = Boolean(isCspmAws && agentlessPolicy);
   const agentPolicyId = agentPolicy?.id;
   const agentlessPolicyId = agentlessPolicy?.id;
+  const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(() => {
+    if (isEditPage && agentPolicyId === SetupTechnology.AGENTLESS) {
+      return SetupTechnology.AGENTLESS;
+    }
+
+    return SetupTechnology.AGENT_BASED;
+  });
 
   useEffect(() => {
+    if (isEditPage) {
+      return;
+    }
+
     if (agentPolicyId && agentPolicyId !== agentlessPolicyId) {
       /*
         handle case when agent policy is coming from outside,
@@ -45,13 +55,17 @@ export const useSetupTechnology = ({
     } else {
       setSetupTechnology(SetupTechnology.AGENT_BASED);
     }
-  }, [agentPolicyId, agentlessPolicyId, isAgentlessAvailable]);
+  }, [agentPolicyId, agentlessPolicyId, isAgentlessAvailable, isEditPage]);
 
   useEffect(() => {
+    if (isEditPage) {
+      return;
+    }
+
     if (handleSetupTechnologyChange) {
       handleSetupTechnologyChange(setupTechnology);
     }
-  }, [handleSetupTechnologyChange, setupTechnology]);
+  }, [handleSetupTechnologyChange, isEditPage, setupTechnology]);
 
   return {
     isAgentlessAvailable,

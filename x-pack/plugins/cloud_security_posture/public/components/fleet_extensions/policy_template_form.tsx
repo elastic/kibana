@@ -21,6 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
@@ -531,7 +532,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       agentPolicy,
       agentlessPolicy,
       handleSetupTechnologyChange,
+      isEditPage,
     });
+    const shouldRenderAgentlessSelector =
+      (isAgentlessAvailable && !isEditPage) ||
+      (isEditPage && setupTechnology === SetupTechnology.AGENTLESS);
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy) => {
@@ -590,6 +595,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
     // TODO: get rid of useEffect in favor of directly setting aws.credentials.type
     useEffect(() => {
+      if (isEditPage) {
+        return;
+      }
+
       setEnabledPolicyInput(input.type);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setupTechnology]);
@@ -731,8 +740,9 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
         />
 
-        {isAgentlessAvailable && (
+        {shouldRenderAgentlessSelector && (
           <SetupTechnologySelector
+            disabled={isEditPage}
             setupTechnology={setupTechnology}
             onSetupTechnologyChange={setSetupTechnology}
           />
