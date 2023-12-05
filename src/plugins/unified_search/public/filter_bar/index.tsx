@@ -10,7 +10,7 @@ import React from 'react';
 
 export type { FilterItemsProps } from './filter_item/filter_items';
 
-const Fallback = () => <div className="WHAT WHAT" />;
+const Fallback = () => <div />;
 
 const LazyFilterBar = React.lazy(() => import('./filter_bar'));
 export const FilterBar = (props: React.ComponentProps<typeof LazyFilterBar>) => (

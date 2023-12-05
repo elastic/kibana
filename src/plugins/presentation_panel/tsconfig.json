@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "../../../typings/**/*"],
+  "include": ["*.ts", "common/**/*", "public/**/*", "../../../typings/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/ui-actions-plugin",

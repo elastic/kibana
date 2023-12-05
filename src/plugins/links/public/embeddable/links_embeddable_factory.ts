@@ -58,7 +58,6 @@ export class LinksFactoryDefinition
     | undefined;
   migrations?: MigrateFunctionsObject | GetMigrationFunctionObjectFn | undefined;
   grouping?: UiActionsPresentableGrouping<unknown> | undefined;
-
   public readonly type = CONTENT_ID;
 
   public readonly isContainerType = false;

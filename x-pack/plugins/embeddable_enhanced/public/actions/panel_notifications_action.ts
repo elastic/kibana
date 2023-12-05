@@ -35,7 +35,7 @@ export class PanelNotificationsAction implements ActionDefinition<EnhancedEmbedd
   public readonly id = ACTION_PANEL_NOTIFICATIONS;
 
   private getEventCount(embeddable: EnhancedEmbeddable): number {
-    return embeddable?.enhancements.dynamicActions.state.get().events.length;
+    return embeddable.enhancements.dynamicActions.state.get().events.length;
   }
 
   public readonly getDisplayName = ({ embeddable }: EnhancedEmbeddableContext) => {
