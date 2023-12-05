@@ -102,16 +102,13 @@ export class ObservabilityAIAssistantPlugin
       enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
     }));
 
-    service.register(async ({ signal, registerContext, registerFunction }) => {
+    service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./functions');
 
       return mod.registerFunctions({
         service,
-        signal,
         pluginsStart,
-        coreStart,
-        registerContext,
-        registerFunction,
+        registerRenderFunction,
       });
     });
 

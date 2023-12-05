@@ -74,7 +74,7 @@ export function ChatBody({
   modelsManagementHref: string;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   startedFrom?: StartedFrom;
-  onConversationUpdate: (conversation: Conversation) => void;
+  onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');

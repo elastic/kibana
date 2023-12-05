@@ -4,19 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import datemath from '@elastic/datemath';
 import { notImplemented } from '@hapi/boom';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { omit } from 'lodash';
-import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import {
-  ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
-} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
+import { ContextDefinition, FunctionDefinition } from '../../../common/types';
 import type { RecalledEntry } from '../../service/kb_service';
+import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
+
+const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'GET /internal/observability_ai_assistant/functions',
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (
+    resources
+  ): Promise<{
+    functionDefinitions: FunctionDefinition[];
+    contextDefinitions: ContextDefinition[];
+  }> => {
+    const { service, request } = resources;
+
+    const controller = new AbortController();
+    request.events.aborted$.subscribe(() => {
+      controller.abort();
+    });
+
+    const client = await service.getClient({ request });
+
+    const functionClient = await service.getFunctionClient({
+      signal: controller.signal,
+      resources,
+      client,
+    });
+
+    return {
+      functionDefinitions: functionClient.getFunctions().map((fn) => fn.definition),
+      contextDefinitions: functionClient.getContexts(),
+    };
+  },
+});
 
 const functionElasticsearchRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/elasticsearch',
@@ -52,105 +78,6 @@ const functionElasticsearchRoute = createObservabilityAIAssistantServerRoute({
     });
 
     return response;
-  },
-});
-
-const OMITTED_ALERT_FIELDS = [
-  'tags',
-  'event.action',
-  'event.kind',
-  'kibana.alert.rule.execution.uuid',
-  'kibana.alert.rule.revision',
-  'kibana.alert.rule.tags',
-  'kibana.alert.rule.uuid',
-  'kibana.alert.workflow_status',
-  'kibana.space_ids',
-  'kibana.alert.time_range',
-  'kibana.version',
-] as const;
-
-const functionAlertsRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/functions/alerts',
-  options: {
-    tags: ['access:ai_assistant'],
-  },
-  params: t.type({
-    body: t.intersection([
-      t.type({
-        featureIds: t.array(t.string),
-        start: t.string,
-        end: t.string,
-      }),
-      t.partial({
-        filter: t.string,
-        includeRecovered: toBooleanRt,
-      }),
-    ]),
-  }),
-  handler: async (
-    resources
-  ): Promise<{
-    content: {
-      total: number;
-      alerts: ParsedTechnicalFields[];
-    };
-  }> => {
-    const {
-      featureIds,
-      start: startAsDatemath,
-      end: endAsDatemath,
-      filter,
-      includeRecovered,
-    } = resources.params.body;
-
-    const racContext = await resources.context.rac;
-    const alertsClient = await racContext.getAlertsClient();
-
-    const start = datemath.parse(startAsDatemath)!.valueOf();
-    const end = datemath.parse(endAsDatemath)!.valueOf();
-
-    const kqlQuery = !filter ? [] : [toElasticsearchQuery(fromKueryExpression(filter))];
-
-    const response = await alertsClient.find({
-      featureIds,
-
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                },
-              },
-            },
-            ...kqlQuery,
-            ...(!includeRecovered
-              ? [
-                  {
-                    term: {
-                      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-                    },
-                  },
-                ]
-              : []),
-          ],
-        },
-      },
-    });
-
-    // trim some fields
-    const alerts = response.hits.hits.map((hit) =>
-      omit(hit._source, ...OMITTED_ALERT_FIELDS)
-    ) as unknown as ParsedTechnicalFields[];
-
-    return {
-      content: {
-        total: (response.hits as { total: { value: number } }).total.value,
-        alerts,
-      },
-    };
   },
 });
 
@@ -349,11 +276,11 @@ const functionGetDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
 });
 
 export const functionRoutes = {
+  ...getFunctionsRoute,
   ...functionElasticsearchRoute,
   ...functionRecallRoute,
   ...functionSummariseRoute,
   ...setupKnowledgeBaseRoute,
   ...getKnowledgeBaseStatus,
-  ...functionAlertsRoute,
   ...functionGetDatasetInfoRoute,
 };

@@ -172,12 +172,12 @@ function mapFunctions({
   selectedFunctionName: string | undefined;
 }) {
   return functions
-    .filter((func) => func.options.visibility !== FunctionVisibility.System)
+    .filter((func) => func.visibility !== FunctionVisibility.System)
     .map((func) => ({
-      label: func.options.name,
-      searchableLabel: func.options.descriptionForUser || func.options.description,
+      label: func.name,
+      searchableLabel: func.descriptionForUser || func.description,
       checked:
-        func.options.name === selectedFunctionName
+        func.name === selectedFunctionName
           ? ('on' as EuiSelectableOptionCheckedType)
           : ('off' as EuiSelectableOptionCheckedType),
     }));

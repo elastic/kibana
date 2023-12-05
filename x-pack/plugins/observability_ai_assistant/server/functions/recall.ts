@@ -7,15 +7,16 @@
 
 import type { Serializable } from '@kbn/utility-types';
 import { omit } from 'lodash';
-import { MessageRole, RegisterFunctionDefinition } from '../../common/types';
-import type { ObservabilityAIAssistantService } from '../types';
+import { MessageRole } from '../../common';
+import { ObservabilityAIAssistantClient } from '../service/client';
+import { RegisterFunction } from '../service/types';
 
 export function registerRecallFunction({
-  service,
+  client,
   registerFunction,
 }: {
-  service: ObservabilityAIAssistantService;
-  registerFunction: RegisterFunctionDefinition;
+  client: ObservabilityAIAssistantClient;
+  registerFunction: RegisterFunction;
 }) {
   registerFunction(
     {
@@ -79,15 +80,11 @@ export function registerRecallFunction({
 
       const queriesWithUserPrompt = userPrompt ? [userPrompt, ...queries] : queries;
 
-      return service
-        .callApi('POST /internal/observability_ai_assistant/functions/recall', {
-          params: {
-            body: {
-              queries: queriesWithUserPrompt,
-              contexts,
-            },
-          },
-          signal,
+      return client
+        .recall({
+          queries: queriesWithUserPrompt,
+          contexts,
+          // signal,
         })
         .then((response): { content: Serializable } => ({
           content: response.entries.map((entry) =>

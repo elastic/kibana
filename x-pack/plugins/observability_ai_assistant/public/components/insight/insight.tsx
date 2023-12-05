@@ -43,6 +43,7 @@ function ChatContent({
     chatService,
     connectorId,
     initialMessages,
+    persist: false,
   });
 
   const lastAssistantResponse = last(

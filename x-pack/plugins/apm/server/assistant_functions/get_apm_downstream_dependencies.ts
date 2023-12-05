@@ -6,14 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { callApmApi } from '../services/rest/create_call_apm_api';
+import { FunctionRegistrationParameters } from '.';
+import { getAssistantDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
 
 export function registerGetApmDownstreamDependenciesFunction({
+  apmEventClient,
   registerFunction,
-}: {
-  registerFunction: RegisterFunctionDefinition;
-}) {
+}: FunctionRegistrationParameters) {
   registerFunction(
     {
       name: 'get_apm_downstream_dependencies',
@@ -57,15 +56,12 @@ export function registerGetApmDownstreamDependenciesFunction({
       } as const,
     },
     async ({ arguments: args }, signal) => {
-      return callApmApi(
-        'GET /internal/apm/assistant/get_downstream_dependencies',
-        {
-          signal,
-          params: {
-            query: args,
-          },
-        }
-      );
+      return {
+        content: await getAssistantDownstreamDependencies({
+          arguments: args,
+          apmEventClient,
+        }),
+      };
     }
   );
 }
