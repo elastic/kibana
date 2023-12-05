@@ -28,7 +28,7 @@ import { act } from 'react-dom/test-utils';
 import { HeatmapRenderProps, HeatmapArguments } from '../../common';
 import HeatmapComponent from './heatmap_component';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -110,6 +110,10 @@ const uiState = {
   emit: jest.fn(),
   setSilent: jest.fn(),
 } as any;
+
+function toPrecisionWithoutRounding(v: number, digits: number) {
+  return Math.trunc(v * Math.pow(10, digits)) / Math.pow(10, digits);
+}
 
 describe('HeatmapComponent', function () {
   let wrapperProps: HeatmapRenderProps;
@@ -376,6 +380,132 @@ describe('HeatmapComponent', function () {
         ],
         type: 'bands',
       });
+    });
+  });
+
+  it('should respect the value format with 5 digits when computing ranges', () => {
+    const newData: Datatable = {
+      type: 'datatable',
+      rows: [{ 'col-0-1': 3 }],
+      columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
+    };
+    const newProps = {
+      ...wrapperProps,
+      formatFactory: ((format: { id: string }) =>
+        format?.id === 'string'
+          ? ({ convert: (v: string) => String(v) } as unknown as FieldFormat)
+          : ({
+              convert: (v: number) => toPrecisionWithoutRounding(v, 5),
+            } as unknown as FieldFormat)) as unknown as FormatFactory,
+      data: newData,
+      args: {
+        ...wrapperProps.args,
+        palette: {
+          params: {
+            colors: ['#6092c0', '#a8bfda', '#ebeff5', '#ecb385', '#e7664c'],
+            stops: [19.98123, 39.88, 60, 80, 100],
+            range: 'number',
+            gradient: true,
+            continuity: 'above',
+            rangeMin: 0,
+            rangeMax: null,
+          },
+        },
+      },
+    } as unknown as HeatmapRenderProps;
+    const component = mountWithIntl(<HeatmapComponent {...newProps} />);
+    expect(component.find(Heatmap).prop('colorScale')).toEqual({
+      bands: [
+        {
+          start: 0,
+          end: 19.98123,
+          color: '#6092c0',
+        },
+        {
+          start: 19.98123,
+          end: 39.88,
+          color: '#a8bfda',
+        },
+        {
+          start: 39.88,
+          end: 60,
+          color: '#ebeff5',
+        },
+        {
+          start: 60,
+          end: 80,
+          color: '#ecb385',
+        },
+        {
+          start: 80,
+          end: Infinity,
+          color: '#e7664c',
+        },
+      ],
+      type: 'bands',
+    });
+  });
+
+  it('should respect the value format with 0 digits when computing ranges', () => {
+    const newData: Datatable = {
+      type: 'datatable',
+      rows: [{ 'col-0-1': 3 }],
+      columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
+    };
+    const newProps = {
+      ...wrapperProps,
+      formatFactory: ((format: { id: string }) =>
+        format?.id === 'string'
+          ? ({ convert: (v: string) => String(v) } as unknown as FieldFormat)
+          : ({
+              convert: (v: number) => toPrecisionWithoutRounding(v, 0),
+            } as unknown as FieldFormat)) as unknown as FormatFactory,
+      data: newData,
+      args: {
+        ...wrapperProps.args,
+        palette: {
+          params: {
+            colors: ['#6092c0', '#a8bfda', '#ebeff5', '#ecb385', '#e7664c'],
+            stops: [19.98123, 39.88, 60, 80, 100],
+            range: 'number',
+            gradient: true,
+            continuity: 'above',
+            rangeMin: 0,
+            rangeMax: null,
+          },
+        },
+      },
+    } as unknown as HeatmapRenderProps;
+    const component = mountWithIntl(<HeatmapComponent {...newProps} />);
+    expect(component.find(Heatmap).prop('colorScale')).toEqual({
+      bands: [
+        {
+          start: 0,
+          end: 19,
+          color: '#6092c0',
+        },
+        {
+          start: 19,
+          end: 39,
+          color: '#a8bfda',
+        },
+        {
+          start: 39,
+          end: 60,
+          color: '#ebeff5',
+        },
+        {
+          start: 60,
+          end: 80,
+          color: '#ecb385',
+        },
+        {
+          start: 80,
+          end: Infinity,
+          color: '#e7664c',
+        },
+      ],
+      type: 'bands',
     });
   });
 
