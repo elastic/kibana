@@ -134,7 +134,7 @@ cat << EOF | buildkite-agent annotate --style "info" --context cloud
 
   Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
 
-  Credentials: \`vault read $VAULT_PATH_PREFIX/$CLOUD_DEPLOYMENT_NAME\`
+  Credentials: \`vault read $VAULT_PATH_PREFIX/cloud-deploy/$CLOUD_DEPLOYMENT_NAME\`
 
   Kibana image: \`$KIBANA_CLOUD_IMAGE\`
 
