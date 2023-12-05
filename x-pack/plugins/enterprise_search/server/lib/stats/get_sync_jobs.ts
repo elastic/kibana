@@ -7,7 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX, ConnectorType } from '@kbn/search-connectors';
+import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '@kbn/search-connectors';
 
 import { SyncJobsStats } from '../../../common/stats';
 
@@ -23,7 +23,7 @@ import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 export const fetchSyncJobsStats = async (
   client: IScopedClusterClient,
-  connectorType?: ConnectorType
+  isCrawler?: boolean
 ): Promise<SyncJobsStats> => {
   try {
     const connectorIdsResult = await client.asCurrentUser.search({
@@ -34,32 +34,32 @@ export const fetchSyncJobsStats = async (
     const ids = connectorIdsResult.hits.hits.map((hit) => hit._id);
     const orphanedJobsCountResponse = await client.asCurrentUser.count({
       index: CONNECTORS_JOBS_INDEX,
-      query: getOrphanedJobsCountQuery(ids, connectorType),
+      query: getOrphanedJobsCountQuery(ids, isCrawler),
     });
 
     const inProgressJobsCountResponse = await client.asCurrentUser.count({
       index: CONNECTORS_JOBS_INDEX,
-      query: getInProgressJobsCountQuery(connectorType),
+      query: getInProgressJobsCountQuery(isCrawler),
     });
 
     const idleJobsCountResponse = await client.asCurrentUser.count({
       index: CONNECTORS_JOBS_INDEX,
-      query: getIdleJobsCountQuery(connectorType),
+      query: getIdleJobsCountQuery(isCrawler),
     });
 
     const errorResponse = await client.asCurrentUser.count({
       index: CONNECTORS_INDEX,
-      query: getErrorCountQuery(connectorType),
+      query: getErrorCountQuery(isCrawler),
     });
 
     const connectedResponse = await client.asCurrentUser.count({
       index: CONNECTORS_INDEX,
-      query: getConnectedCountQuery(connectorType),
+      query: getConnectedCountQuery(isCrawler),
     });
 
     const incompleteResponse = await client.asCurrentUser.count({
       index: CONNECTORS_INDEX,
-      query: getIncompleteCountQuery(connectorType),
+      query: getIncompleteCountQuery(isCrawler),
     });
 
     const response = {

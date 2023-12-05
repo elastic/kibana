@@ -95,8 +95,8 @@ const parseIsNativeParam = (queryString: string | string[] | null): boolean | un
   return undefined;
 };
 
-const getConnectorModeBadge = (connectorMode?: ConnectorMode) => {
-  if (connectorMode === 'native') {
+const getConnectorModeBadge = (isNative?: boolean) => {
+  if (isNative) {
     return (
       <EuiBadge iconSide="right">
         <FormattedMessage
@@ -106,7 +106,7 @@ const getConnectorModeBadge = (connectorMode?: ConnectorMode) => {
       </EuiBadge>
     );
   }
-  if (connectorMode === 'connector_client') {
+  if (!isNative) {
     return (
       <EuiBadge iconSide="right">
         {i18n.translate('xpack.enterpriseSearch.getConnectorTypeBadge.connectorClientBadgeLabel', {
@@ -147,7 +147,7 @@ export const NewSearchIndexPage: React.FC = () => {
               <EuiIcon type={getIngestionMethodIconType(type)} size="xxl" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{getTitle(type, serviceType)}</EuiFlexItem>
-            <EuiFlexItem grow={false}>{getConnectorModeBadge(connectorMode)}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{getConnectorModeBadge(isNative)}</EuiFlexItem>
           </EuiFlexGroup>
         ),
       }}

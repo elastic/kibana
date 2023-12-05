@@ -65,7 +65,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
         ? {
             onClick: () => {
               if (isDisabled) return;
-              onConnectorSelect();
+              onConnectorSelect(showNativeBadge);
             },
           }
         : {})}

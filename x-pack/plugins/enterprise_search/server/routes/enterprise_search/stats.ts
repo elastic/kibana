@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isConnectorType } from '@kbn/search-connectors';
 
 import { fetchSyncJobsStats } from '../../lib/stats/get_sync_jobs';
 import { RouteDependencies } from '../../plugin';
@@ -22,19 +21,14 @@ export function registerStatsRoutes({
       path: '/internal/enterprise_search/stats/sync_jobs',
       validate: {
         query: schema.object({
-          connector_type: schema.maybe(schema.string()),
+          isCrawler: schema.maybe(schema.boolean()),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const { connector_type } = request.query;
-      let connectorType;
-      if (isConnectorType(connector_type)) {
-        connectorType = connector_type;
-      }
-
-      const body = await fetchSyncJobsStats(client, connectorType);
+      const { isCrawler } = request.query;
+      const body = await fetchSyncJobsStats(client, isCrawler);
       return response.ok({ body });
     })
   );

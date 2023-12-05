@@ -20,20 +20,18 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorType } from '@kbn/search-connectors';
-
 import { FetchSyncJobsStatsApiLogic } from '../../api/stats/fetch_sync_jobs_stats_api_logic';
 
 export interface ConnectorStatsProps {
-  connectorType: ConnectorType;
+  isCrawler: boolean;
 }
 
-export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connectorType }) => {
+export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => {
   const { makeRequest } = useActions(FetchSyncJobsStatsApiLogic);
   const { data } = useValues(FetchSyncJobsStatsApiLogic);
 
   useEffect(() => {
-    makeRequest({ connectorType });
+    makeRequest({ isCrawler });
   }, []);
 
   return (
@@ -45,7 +43,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connectorType })
               <EuiFlexItem>
                 <EuiTitle size="xxxs">
                   <h4>
-                    {connectorType === 'connector'
+                    {!isCrawler
                       ? i18n.translate(
                           'xpack.enterpriseSearch.connectorStats.h4.connectorSummaryLabel',
                           { defaultMessage: 'Connector summary' }
@@ -59,7 +57,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connectorType })
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText>
-                  {connectorType === 'connector'
+                  {!isCrawler
                     ? i18n.translate('xpack.enterpriseSearch.connectorStats.connectorsTextLabel', {
                         defaultMessage: '{count} connectors',
                         values: {

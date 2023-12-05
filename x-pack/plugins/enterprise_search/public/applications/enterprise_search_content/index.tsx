@@ -78,10 +78,10 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
         <SearchIndicesRouter />
       </Route>
       <Route path={CONNECTORS_PATH}>
-        <Connectors type="connector" />
+        <Connectors isCrawler={false} />
       </Route>
       <Route path={CRAWLERS_PATH}>
-        <Connectors type="elastic-crawler" />
+        <Connectors isCrawler />
       </Route>
       <Route path={SETTINGS_PATH}>
         <Settings />

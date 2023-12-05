@@ -311,7 +311,9 @@ export const SelectConnector: React.FC = () => {
                     if (isNative !== undefined) {
                       queryParam.append(
                         'connector_type',
-                        isNative ? CONNECTOR_NATIVE_TYPE : CONNECTOR_CLIENTS_TYPE
+                        isNative && !useClientsFilter
+                          ? CONNECTOR_NATIVE_TYPE
+                          : CONNECTOR_CLIENTS_TYPE
                       );
                     }
                     KibanaLogic.values.navigateToUrl(

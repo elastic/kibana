@@ -7,10 +7,10 @@
 
 import moment from 'moment';
 
-import { ConnectorStatus, ConnectorType, SyncStatus } from '@kbn/search-connectors';
+import { ConnectorStatus, CRAWLER_SERVICE_TYPE, SyncStatus } from '@kbn/search-connectors';
 
-export const getOrphanedJobsCountQuery = (ids: string[], connectorType?: ConnectorType) => {
-  if (!connectorType) {
+export const getOrphanedJobsCountQuery = (ids: string[], isCrawler?: boolean) => {
+  if (isCrawler === undefined) {
     return {
       bool: {
         must_not: [
@@ -24,13 +24,13 @@ export const getOrphanedJobsCountQuery = (ids: string[], connectorType?: Connect
     };
   }
 
-  if (connectorType === 'elastic-crawler') {
+  if (isCrawler) {
     return {
       bool: {
         must: [
           {
             term: {
-              'connector.service_type': 'elastic-crawler',
+              'connector.service_type': CRAWLER_SERVICE_TYPE,
             },
           },
         ],
@@ -55,7 +55,7 @@ export const getOrphanedJobsCountQuery = (ids: string[], connectorType?: Connect
         },
         {
           term: {
-            'connector.service_type': 'elastic-crawler',
+            'connector.service_type': CRAWLER_SERVICE_TYPE,
           },
         },
       ],
@@ -63,8 +63,8 @@ export const getOrphanedJobsCountQuery = (ids: string[], connectorType?: Connect
   };
 };
 
-export const getInProgressJobsCountQuery = (connectorType?: ConnectorType) => {
-  if (!connectorType) {
+export const getInProgressJobsCountQuery = (isCrawler?: boolean) => {
+  if (isCrawler === undefined) {
     return {
       bool: {
         must: [
@@ -78,7 +78,7 @@ export const getInProgressJobsCountQuery = (connectorType?: ConnectorType) => {
     };
   }
 
-  if (connectorType === 'elastic-crawler') {
+  if (isCrawler) {
     return {
       bool: {
         must: [
@@ -93,7 +93,7 @@ export const getInProgressJobsCountQuery = (connectorType?: ConnectorType) => {
             bool: {
               must: {
                 term: {
-                  'connector.service_type': 'elastic-crawler',
+                  'connector.service_type': CRAWLER_SERVICE_TYPE,
                 },
               },
             },
@@ -116,7 +116,7 @@ export const getInProgressJobsCountQuery = (connectorType?: ConnectorType) => {
           bool: {
             must_not: {
               term: {
-                'connector.service_type': 'elastic-crawler',
+                'connector.service_type': CRAWLER_SERVICE_TYPE,
               },
             },
           },
@@ -126,8 +126,8 @@ export const getInProgressJobsCountQuery = (connectorType?: ConnectorType) => {
   };
 };
 
-export const getIdleJobsCountQuery = (connectorType?: ConnectorType) => {
-  if (!connectorType) {
+export const getIdleJobsCountQuery = (isCrawler?: boolean) => {
+  if (isCrawler === undefined) {
     return {
       bool: {
         filter: [
@@ -148,7 +148,7 @@ export const getIdleJobsCountQuery = (connectorType?: ConnectorType) => {
     };
   }
 
-  if (connectorType === 'elastic-crawler') {
+  if (isCrawler) {
     return {
       bool: {
         filter: [
@@ -159,7 +159,7 @@ export const getIdleJobsCountQuery = (connectorType?: ConnectorType) => {
           },
           {
             term: {
-              'connector.service_type': 'elastic-crawler',
+              'connector.service_type': CRAWLER_SERVICE_TYPE,
             },
           },
           {
@@ -186,7 +186,7 @@ export const getIdleJobsCountQuery = (connectorType?: ConnectorType) => {
           bool: {
             must_not: {
               term: {
-                'connector.service_type': 'elastic-crawler',
+                'connector.service_type': CRAWLER_SERVICE_TYPE,
               },
             },
           },
@@ -203,8 +203,8 @@ export const getIdleJobsCountQuery = (connectorType?: ConnectorType) => {
   };
 };
 
-export const getErrorCountQuery = (connectorType?: ConnectorType) => {
-  if (!connectorType) {
+export const getErrorCountQuery = (isCrawler?: boolean) => {
+  if (isCrawler === undefined) {
     return {
       bool: {
         must: [
@@ -218,7 +218,7 @@ export const getErrorCountQuery = (connectorType?: ConnectorType) => {
     };
   }
 
-  if (connectorType === 'elastic-crawler') {
+  if (isCrawler) {
     return {
       bool: {
         must: [
@@ -231,7 +231,7 @@ export const getErrorCountQuery = (connectorType?: ConnectorType) => {
         filter: [
           {
             term: {
-              service_type: 'elastic-crawler',
+              service_type: CRAWLER_SERVICE_TYPE,
             },
           },
         ],
@@ -253,7 +253,7 @@ export const getErrorCountQuery = (connectorType?: ConnectorType) => {
           bool: {
             must_not: {
               term: {
-                service_type: 'elastic-crawler',
+                service_type: CRAWLER_SERVICE_TYPE,
               },
             },
           },
@@ -263,8 +263,8 @@ export const getErrorCountQuery = (connectorType?: ConnectorType) => {
   };
 };
 
-export const getConnectedCountQuery = (connectorType?: ConnectorType) => {
-  if (connectorType) {
+export const getConnectedCountQuery = (isCrawler?: boolean) => {
+  if (isCrawler === undefined) {
     return {
       bool: {
         filter: [
@@ -284,7 +284,7 @@ export const getConnectedCountQuery = (connectorType?: ConnectorType) => {
       },
     };
   }
-  if (connectorType === 'elastic-crawler') {
+  if (isCrawler) {
     return {
       bool: {
         filter: [
@@ -295,7 +295,7 @@ export const getConnectedCountQuery = (connectorType?: ConnectorType) => {
           },
           {
             term: {
-              'connector.service_type': 'elastic-crawler',
+              'connector.service_type': CRAWLER_SERVICE_TYPE,
             },
           },
           {
@@ -321,7 +321,7 @@ export const getConnectedCountQuery = (connectorType?: ConnectorType) => {
           bool: {
             must_not: {
               term: {
-                'connector.service_type': 'elastic-crawler',
+                'connector.service_type': CRAWLER_SERVICE_TYPE,
               },
             },
           },
@@ -338,8 +338,8 @@ export const getConnectedCountQuery = (connectorType?: ConnectorType) => {
   };
 };
 
-export const getIncompleteCountQuery = (connectorType?: ConnectorType) => {
-  if (!connectorType) {
+export const getIncompleteCountQuery = (isCrawler?: boolean) => {
+  if (isCrawler === undefined) {
     return {
       bool: {
         should: [
@@ -363,7 +363,7 @@ export const getIncompleteCountQuery = (connectorType?: ConnectorType) => {
       },
     };
   }
-  if (connectorType === 'elastic-crawler') {
+  if (isCrawler) {
     return {
       bool: {
         should: [
@@ -387,7 +387,7 @@ export const getIncompleteCountQuery = (connectorType?: ConnectorType) => {
         filter: [
           {
             term: {
-              service_type: 'elastic-crawler',
+              service_type: CRAWLER_SERVICE_TYPE,
             },
           },
         ],
@@ -419,7 +419,7 @@ export const getIncompleteCountQuery = (connectorType?: ConnectorType) => {
           bool: {
             must_not: {
               term: {
-                service_type: 'elastic-crawler',
+                service_type: CRAWLER_SERVICE_TYPE,
               },
             },
           },
