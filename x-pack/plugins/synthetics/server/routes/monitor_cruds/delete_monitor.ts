@@ -20,7 +20,6 @@ import {
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import {
   formatTelemetryDeleteEvent,
   sendErrorTelemetryEvents,
@@ -40,7 +39,9 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
   validation: {
     request: {
       body: schema.object({
-        ids: schema.arrayOf(schema.string()),
+        ids: schema.arrayOf(schema.string(), {
+          minSize: 1,
+        }),
       }),
     },
   },
@@ -50,7 +51,7 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
 
     const { ids } = request.body;
 
-    const result: Array<{ id: string; deleted: boolean }> = [];
+    const result: Array<{ id: string; deleted: boolean; error?: string }> = [];
 
     await pMap(ids, async (id) => {
       try {
@@ -71,10 +72,10 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
         result.push({ id, deleted: true });
       } catch (getErr) {
         if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-          return getMonitorNotFoundResponse(response, id);
+          result.push({ id, deleted: false, error: `Monitor id ${id} not found!` });
+        } else {
+          throw getErr;
         }
-
-        throw getErr;
       }
     });
 

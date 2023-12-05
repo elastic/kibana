@@ -41,8 +41,9 @@ export default function ({ getService }: FtrProviderContext) {
       const res = await supertest
         .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
-        .send(monitor)
-        .expect(200);
+        .send(monitor);
+
+      expect(res.status).to.eql(200, JSON.stringify(res.body));
 
       return res.body;
     };
@@ -58,6 +59,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       _httpMonitorJson = getFixtureJson('http_monitor');
+
+      await kibanaServer.savedObjects.cleanStandardList();
+
       await testPrivateLocations.installSyntheticsPackage();
 
       const testPolicyName = 'Fleet test server policy' + Date.now();
@@ -75,18 +79,26 @@ export default function ({ getService }: FtrProviderContext) {
 
       const deleteResponse = await deleteMonitor(monitorId);
 
-      expect(deleteResponse.body).eql(monitorId);
+      expect(deleteResponse.body).eql([{ id: monitorId, deleted: true }]);
 
       // Hit get endpoint and expect 404 as well
       await supertest.get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId).expect(404);
     });
     it('deletes multiple monitors by id', async () => {
       const { id: monitorId } = await saveMonitor(httpMonitorJson as MonitorFields);
-      const { id: monitorId2 } = await saveMonitor(httpMonitorJson as MonitorFields);
+      const { id: monitorId2 } = await saveMonitor({
+        ...httpMonitorJson,
+        name: 'another -2',
+      } as MonitorFields);
 
       const deleteResponse = await deleteMonitor([monitorId2, monitorId]);
 
-      expect(deleteResponse.body).eql(monitorId);
+      expect(deleteResponse.body.sort((a, b) => a.id - b.id)).eql(
+        [
+          { id: monitorId2, deleted: true },
+          { id: monitorId, deleted: true },
+        ].sort((a, b) => a.id - b.id)
+      );
 
       // Hit get endpoint and expect 404 as well
       await supertest.get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId).expect(404);
@@ -98,18 +110,19 @@ export default function ({ getService }: FtrProviderContext) {
 
       const deleteResponse = await deleteMonitor(invalidMonitorId);
 
-      expect(deleteResponse.status).eql(404);
-      expect(deleteResponse.body.message).eql(expected404Message);
+      expect(deleteResponse.status).eql(200);
+      expect(deleteResponse.body).eql([
+        {
+          id: invalidMonitorId,
+          deleted: false,
+          error: expected404Message,
+        },
+      ]);
     });
 
     it('validates empty monitor id', async () => {
       await deleteMonitor(undefined, 400);
-    });
-
-    it('validates param length', async () => {
-      const veryLargeMonId = new Array(1050).fill('1').join('');
-
-      await deleteMonitor(veryLargeMonId, 400);
+      await deleteMonitor([], 400);
     });
 
     it.skip('handles private location errors and does not delete the monitor if integration policy is unable to be deleted', async () => {
