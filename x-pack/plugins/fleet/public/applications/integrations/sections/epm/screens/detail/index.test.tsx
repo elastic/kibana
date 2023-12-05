@@ -9,11 +9,12 @@ import React, { lazy, memo } from 'react';
 import { Route } from '@kbn/shared-ux-router';
 import { act, cleanup } from '@testing-library/react';
 
+import type { GetFleetStatusResponse } from '../../../../../../../common';
+
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import type {
   CheckPermissionsResponse,
   GetAgentPoliciesResponse,
-  GetFleetStatusResponse,
   GetInfoResponse,
   GetPackagePoliciesResponse,
   GetStatsResponse,

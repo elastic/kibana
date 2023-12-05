@@ -30,7 +30,6 @@ export type {
   Settings,
   ActionStatus,
   CurrentUpgrade,
-  GetFleetStatusResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,

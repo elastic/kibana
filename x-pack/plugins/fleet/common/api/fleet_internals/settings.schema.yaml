@@ -36,6 +36,7 @@ paths:
                   description: Protocol and path must be the same for each URL
                   items:
                     type: string
+                    format: uri
                 has_seen_add_data_notice:
                   type: boolean
                 additional_yaml_config:
