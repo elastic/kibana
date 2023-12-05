@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import yaml from 'js-yaml';
+
+import { getFlattenedObject } from '@kbn/std';
+
 import type { AgentPolicy, OutputType, ValueOf } from '../types';
 import {
   FLEET_APM_PACKAGE,
@@ -37,7 +41,14 @@ export function getAllowedOutputTypeForPolicy(agentPolicy: AgentPolicy) {
 }
 
 export function outputYmlIncludesReservedPerformanceKey(configYml: string) {
-  return RESERVED_CONFIG_YML_KEYS.some((key) => configYml.includes(key));
+  if (!configYml || configYml === '') {
+    return false;
+  }
+
+  const parsedYml = yaml.safeLoad(configYml);
+  const flattenedYml = getFlattenedObject(parsedYml);
+
+  return RESERVED_CONFIG_YML_KEYS.some((key) => Object.keys(flattenedYml).includes(key));
 }
 
 export function getDefaultPresetForEsOutput(configYaml: string): 'balanced' | 'custom' {
