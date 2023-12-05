@@ -82,7 +82,7 @@ export async function getMalformedDocsPaginated(options: {
   const malformedDocs = [...prevResults, ...currMalformedDocs];
 
   if (response.aggregations?.datasets.after_key) {
-    return await getMalformedDocsPaginated({
+    return getMalformedDocsPaginated({
       esClient,
       type,
       start,

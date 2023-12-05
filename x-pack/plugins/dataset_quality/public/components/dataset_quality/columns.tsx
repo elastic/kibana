@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSkeletonRectangle,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -58,26 +59,24 @@ const malformedDocsColumnTooltip = (
       ),
       visualQueue: (
         <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
+          <EuiFlexItem>
+            <EuiText>
               <QualityIndicator quality="poor" />
-            </EuiFlexItem>
-            <EuiFlexItem>{malformedDocsDescription(POOR_QUALITY_MINIMUM_PERCENTAGE)}</EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
+              {` ${malformedDocsDescription(POOR_QUALITY_MINIMUM_PERCENTAGE)}`}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
               <QualityIndicator quality="degraded" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {malformedDocsDescription(DEGRADED_QUALITY_MINIMUM_PERCENTAGE)}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
+              {` ${malformedDocsDescription(DEGRADED_QUALITY_MINIMUM_PERCENTAGE)}`}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
               <QualityIndicator quality="good" />
-            </EuiFlexItem>
-            <EuiFlexItem>0%</EuiFlexItem>
-          </EuiFlexGroup>
+              {' 0%'}
+            </EuiText>
+          </EuiFlexItem>
         </EuiFlexGroup>
       ),
     }}
