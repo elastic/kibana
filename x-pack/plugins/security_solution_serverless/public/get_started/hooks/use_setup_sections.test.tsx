@@ -11,8 +11,6 @@ import { useSetUpSections } from './use_setup_sections';
 import type { ActiveSections, CardId, ExpandedCardSteps, StepId } from '../types';
 import { CreateProjectSteps, QuickStartSectionCardsId, SectionId } from '../types';
 
-import { ProductLine } from '../../../common/product';
-
 const mockEuiTheme: EuiThemeComputed = {
   size: {
     l: '16px',
