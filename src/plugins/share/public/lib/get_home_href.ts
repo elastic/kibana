@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { GuideCards } from './guide_cards';
-export { GuideFilters } from './guide_filters';
-export type { GuideFilterValues } from './guide_filters';
+import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+
+export function getHomeHref(http: HttpSetup, uiSettings: IUiSettingsClient) {
+  return http.basePath.prepend(uiSettings.get('defaultRoute'));
+}

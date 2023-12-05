@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { ReactNode } from 'react';
-import { GuideId } from '../../..';
+import { GuideId } from '../../../..';
 import { GuideCardSolutions } from './guide_cards';
 
 export interface GuideCardConstants {
@@ -28,9 +28,21 @@ export interface GuideCardConstants {
   telemetryId: string;
   order: number;
   icon: string;
+  // the guide will open a specific modal ESApiModal
+  openEndpointModal?: boolean;
 }
 
 export const guideCards: GuideCardConstants[] = [
+  {
+    solution: 'search',
+    icon: 'pivot',
+    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.elasticsearchApi.title', {
+      defaultMessage: 'Connect to the Elasticsearch API',
+    }),
+    telemetryId: 'onboarding--search--elasticsearchEndpointApi',
+    order: 1,
+    openEndpointModal: true,
+  },
   {
     solution: 'search',
     icon: 'database',
