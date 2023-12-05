@@ -172,7 +172,17 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
   );
 
   useEffect(() => {
+    /** Handle landing on the page without hash
+     ** e.g.: https://localhost:5601/app/security/get_started
+     ** If there is no expanded card step in storage, do nothing.
+     ** If there is expanded card step in storage, sync it to the url.
+     **/
     if (!stepIdFromHash) {
+      // If all steps are collapsed, do nothing
+      if (Object.values(state.expandedCardSteps).every((c) => !c.isExpanded)) {
+        return;
+      }
+
       syncExpandedCardStepsFromStorageToURL(
         expandedCardsInitialStates,
         ({ matchedStep }: { matchedStep: Step | null }) => {
@@ -184,10 +194,18 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
         }
       );
     }
-  }, [expandedCardsInitialStates, getAllExpandedCardStepsFromStorage, navigateTo, stepIdFromHash]);
+  }, [
+    expandedCardsInitialStates,
+    getAllExpandedCardStepsFromStorage,
+    navigateTo,
+    state.expandedCardSteps,
+    stepIdFromHash,
+  ]);
 
   useEffect(() => {
-    // handle hash change and expand the step
+    /** Handle hash change and expand the target step.
+     ** e.g.: https://localhost:5601/app/security/get_started#create_your_first_project
+     **/
     if (stepIdFromHash) {
       const { matchedCard, matchedStep, matchedSection } = findCardSectionByStepId(stepIdFromHash);
       const hasStepContent = matchedStep && matchedStep.description;
