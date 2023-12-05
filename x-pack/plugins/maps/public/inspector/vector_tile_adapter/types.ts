@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { TileMetaFeature } from '../../../common/descriptor_types';
+
 export interface TileRequest {
   layerId: string;
   tileUrl: string;
-  tileMetaFeature: TileMetaFeature | undefined;
+  tileMetaFeature?: TileMetaFeature;
   x: number;
   y: number;
   z: number;

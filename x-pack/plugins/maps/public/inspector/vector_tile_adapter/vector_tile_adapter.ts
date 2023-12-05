@@ -8,6 +8,7 @@
 // @ts-expect-error
 import turfCenterOfMass from '@turf/center-of-mass';
 import { LAT_INDEX, LON_INDEX } from '../../../common/constants';
+import type { TileMetaFeature } from '../../../common/descriptor_types';
 import { EventEmitter } from 'events';
 import { TileRequest } from './types';
 import { isPointInTile } from '../../classes/util/geo_tile_utils';

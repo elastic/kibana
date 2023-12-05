@@ -10,7 +10,7 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import { XJsonLang } from '@kbn/monaco';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiForm, EuiFormRow, EuiSpacer, EuiTabs, EuiTab, EuiText } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiSpacer, EuiTabs, EuiTab, EuiText } from '@elastic/eui';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { EmptyPrompt } from './empty_prompt';
 import type { TileRequest } from '../types';
@@ -27,7 +27,7 @@ interface Props {
 interface State {
   selectedLayer: EuiComboBoxOptionOption<string> | null;
   selectedTileRequest: TileRequest | null;
-  selectedView: REQUEST_VIEW_ID | RESPONSE_VIEW_ID;
+  selectedView: typeof REQUEST_VIEW_ID | typeof RESPONSE_VIEW_ID;
   tileRequests: TileRequest[];
   layerOptions: Array<EuiComboBoxOptionOption<string>>;
 }
@@ -124,14 +124,14 @@ class VectorTileInspector extends Component<Props, State> {
     });
   };
 
-  _onTileSelect = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+  _onTileSelect = (selectedOptions: Array<EuiComboBoxOptionOption<TileRequest>>) => {
     if (selectedOptions.length === 0) {
       this.setState({ selectedTileRequest: null });
       return;
     }
 
     this.setState({
-      selectedTileRequest: selectedOptions[0].value,
+      selectedTileRequest: selectedOptions[0].value ? selectedOptions[0].value : null,
     });
   }
 
