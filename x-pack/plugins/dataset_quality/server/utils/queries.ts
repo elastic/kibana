@@ -5,10 +5,7 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-
-function isUndefinedOrNull(value: any): value is undefined | null {
-  return value === undefined || value === null;
-}
+import { isUndefinedOrNull } from '@kbn/observability-plugin/server/utils/queries';
 
 export function wildcardQuery<T extends string>(
   field: T,
