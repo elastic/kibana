@@ -12,7 +12,11 @@ import { useLocation, useParams } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
+import {
+  CONNECTOR_CLIENTS_TYPE,
+  CONNECTOR_NATIVE_TYPE,
+  INGESTION_METHOD_IDS,
+} from '../../../../../common/constants';
 import { parseQueryParams } from '../../../shared/query_params';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
@@ -83,17 +87,32 @@ function getDescription(method: string): string {
   }
 }
 
+const parseIsNativeParam = (queryString: string | string[] | null): boolean | undefined => {
+  const parsedStr = Array.isArray(queryString) ? queryString[0] : queryString;
+  if (parsedStr === CONNECTOR_NATIVE_TYPE) return true;
+  if (parsedStr === CONNECTOR_CLIENTS_TYPE) return false;
+  return undefined;
+};
+
 export const NewSearchIndexPage: React.FC = () => {
   const type = decodeURIComponent(useParams<{ type: string }>().type);
   const { search } = useLocation();
-  const { service_type: inputServiceType } = parseQueryParams(search);
+  const { service_type: inputServiceType, connector_type: inputConnectorType } =
+    parseQueryParams(search);
   const serviceType = Array.isArray(inputServiceType)
     ? inputServiceType[0]
     : inputServiceType || '';
 
+  const isNative = parseIsNativeParam(inputConnectorType);
+
   return (
     <EnterpriseSearchContentPageTemplate
-      pageChrome={[...baseBreadcrumbs, 'New search index']}
+      pageChrome={[
+        ...baseBreadcrumbs,
+        i18n.translate('xpack.enterpriseSearch.content.new_index.breadcrumbs', {
+          defaultMessage: 'New search index',
+        }),
+      ]}
       pageViewTelemetry="New Index"
       isLoading={false}
       pageHeader={{
@@ -112,7 +131,9 @@ export const NewSearchIndexPage: React.FC = () => {
         <>
           {type === INGESTION_METHOD_IDS.CRAWLER && <MethodCrawler />}
           {type === INGESTION_METHOD_IDS.API && <MethodApi />}
-          {type === INGESTION_METHOD_IDS.CONNECTOR && <MethodConnector serviceType={serviceType} />}
+          {type === INGESTION_METHOD_IDS.CONNECTOR && (
+            <MethodConnector serviceType={serviceType} isNative={isNative} />
+          )}
         </>
       }
     </EnterpriseSearchContentPageTemplate>

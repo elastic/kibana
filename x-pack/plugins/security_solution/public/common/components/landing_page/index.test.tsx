@@ -12,6 +12,9 @@ const mockUseContractComponents = jest.fn(() => ({}));
 jest.mock('../../hooks/use_contract_component', () => ({
   useContractComponents: () => mockUseContractComponents(),
 }));
+jest.mock('../../containers/sourcerer', () => ({
+  useSourcererDataView: jest.fn().mockReturnValue({ indicesExist: false }),
+}));
 
 describe('LandingPageComponent', () => {
   beforeEach(() => {

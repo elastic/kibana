@@ -11,78 +11,103 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiBadge,
-  useEuiTheme,
-  EuiButtonEmpty,
-  useEuiBackgroundColorCSS,
+  EuiButtonIcon,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 
 import classnames from 'classnames';
-import type { CardId, OnStepButtonClicked, OnStepClicked, SectionId, StepId } from '../types';
-import icon_step from '../images/icon_step.svg';
-import icon_cross from '../images/icon_cross.svg';
-import { UNDO_MARK_AS_DONE_TITLE, MARK_AS_DONE_TITLE } from '../translations';
-import { getStepsByActiveProduct } from '../helpers';
-import type { ProductLine } from '../../../common/product';
-import { getProductBadges } from '../badge';
+import { useNavigateTo, SecurityPageName } from '@kbn/security-solution-navigation';
+
+import type {
+  CardId,
+  OnStepClicked,
+  ToggleTaskCompleteStatus,
+  SectionId,
+  StepId,
+  Step,
+} from '../types';
+import {
+  ALL_DONE_TEXT,
+  COLLAPSE_STEP_BUTTON_LABEL,
+  EXPAND_STEP_BUTTON_LABEL,
+} from '../translations';
+
 import { StepContent } from './step_content';
+import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
+import { useStepContext } from '../context/step_context';
+import { useCardStepStyles } from '../styles/card_step.styles';
 
 const CardStepComponent: React.FC<{
-  activeProducts: Set<ProductLine>;
   cardId: CardId;
   expandedSteps: Set<StepId>;
-  finishedStepsByCard: Set<StepId>;
-  onStepButtonClicked: OnStepButtonClicked;
+  finishedSteps: Set<StepId>;
+  toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
   onStepClicked: OnStepClicked;
   sectionId: SectionId;
-  stepId: StepId;
+  step: Step;
 }> = ({
-  activeProducts,
   cardId,
   expandedSteps,
-  finishedStepsByCard = new Set(),
-  onStepButtonClicked,
+  finishedSteps = new Set(),
+  toggleTaskCompleteStatus,
   onStepClicked,
   sectionId,
-  stepId,
+  step,
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const backgroundColorStyles = useEuiBackgroundColorCSS();
-  const isExpandedStep = expandedSteps.has(stepId);
-  const steps = useMemo(
-    () => getStepsByActiveProduct({ activeProducts, cardId, sectionId }),
-    [activeProducts, cardId, sectionId]
-  );
-  const { title, productLineRequired, description, splitPanel } =
-    steps?.find((step) => step.id === stepId) ?? {};
+  const { navigateTo } = useNavigateTo();
 
-  const badges = useMemo(() => getProductBadges(productLineRequired), [productLineRequired]);
+  const isExpandedStep = expandedSteps.has(step.id);
+
+  const { id: stepId, title, description, splitPanel, icon, autoCheckIfStepCompleted } = step;
+  const hasStepContent = description != null || splitPanel != null;
+  const { indicesExist } = useStepContext();
+
+  useCheckStepCompleted({
+    autoCheckIfStepCompleted,
+    cardId,
+    indicesExist,
+    sectionId,
+    stepId,
+    stepTitle: title,
+    toggleTaskCompleteStatus,
+  });
+
+  const isDone = finishedSteps.has(stepId);
 
   const toggleStep = useCallback(
     (e) => {
       e.preventDefault();
-      const newState = !isExpandedStep;
-      onStepClicked({ stepId, cardId, sectionId, isExpanded: newState });
+
+      if (hasStepContent) {
+        // Toggle step and sync the expanded card step to storage & reducer
+        onStepClicked({ stepId, cardId, sectionId, isExpanded: !isExpandedStep });
+
+        navigateTo({
+          deepLinkId: SecurityPageName.landing,
+          path: `#${stepId}`,
+        });
+      }
     },
-    [cardId, isExpandedStep, onStepClicked, sectionId, stepId]
+    [hasStepContent, onStepClicked, stepId, cardId, sectionId, isExpandedStep, navigateTo]
   );
 
-  const isDone = finishedStepsByCard.has(stepId);
-
-  const hasStepContent = description != null || splitPanel != null;
-
-  const handleStepButtonClicked = useCallback(
-    (e) => {
-      e.preventDefault();
-      onStepButtonClicked({ stepId, cardId, sectionId, undo: isDone ? true : false });
-    },
-    [cardId, isDone, onStepButtonClicked, sectionId, stepId]
-  );
+  const {
+    stepPanelStyles,
+    stepIconStyles,
+    stepTitleStyles,
+    allDoneTextStyles,
+    toggleButtonStyles,
+    getStepGroundStyles,
+    stepItemStyles,
+  } = useCardStepStyles();
+  const stepGroundStyles = getStepGroundStyles({ hasStepContent });
 
   const panelClassNames = classnames({
     'step-panel-collapsed': !isExpandedStep,
-    'step-panel-expanded': isExpandedStep,
+  });
+
+  const stepIconClassNames = classnames('step-icon', {
+    'step-icon-done': isDone,
   });
 
   return (
@@ -93,108 +118,54 @@ const CardStepComponent: React.FC<{
       borderRadius="none"
       paddingSize="none"
       className={panelClassNames}
-      css={css`
-        padding: ${euiTheme.size.base};
-        margin: 0 ${euiTheme.size.s} 0;
-
-        &.step-panel-collapsed:hover {
-          ${backgroundColorStyles.primary};
-          border-radius: ${euiTheme.border.radius.medium};
-        }
-      `}
+      id={stepId}
+      css={stepPanelStyles}
     >
-      <EuiFlexGroup
-        gutterSize="s"
-        css={css`
-          cursor: pointer;
-        `}
-      >
-        <EuiFlexItem grow={false} onClick={toggleStep}>
-          <EuiIcon
-            data-test-subj={`${stepId}-icon`}
-            type={isDone ? 'checkInCircleFilled' : icon_step}
-            size="l"
-            color={euiTheme.colors.success}
-          />
+      <EuiFlexGroup gutterSize="none" css={stepGroundStyles}>
+        <EuiFlexItem grow={false} onClick={toggleStep} css={stepItemStyles}>
+          <span className={stepIconClassNames} css={stepIconStyles}>
+            {icon && <EuiIcon {...icon} size="l" className="eui-alignMiddle" />}
+          </span>
         </EuiFlexItem>
-        <EuiFlexItem grow={1} onClick={toggleStep}>
-          <strong>
-            <span
-              css={css`
-                padding-right: ${euiTheme.size.m};
-                line-height: ${euiTheme.size.l};
-                font-size: ${euiTheme.size.m};
-                vertical-align: middle;
-              `}
-            >
-              {title}
-            </span>
-            {badges.map((badge) => (
-              <EuiBadge
-                key={`${stepId}-badge-${badge.id}`}
-                color="hollow"
-                css={css`
-                  margin: 0 ${euiTheme.size.s} 0 0;
-                `}
-              >
-                {badge.name}
-              </EuiBadge>
-            ))}
-          </strong>
+        <EuiFlexItem grow={1} onClick={toggleStep} css={stepItemStyles}>
+          <span className="step-title" css={stepTitleStyles}>
+            {title}
+          </span>
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            align-items: end;
-          `}
-        >
+        <EuiFlexItem grow={false} css={stepItemStyles}>
           <div>
-            {isExpandedStep && (
-              <EuiButtonEmpty
-                color="primary"
-                iconType={isDone ? icon_cross : 'checkInCircleFilled'}
-                size="xs"
-                css={css`
-                  border-radius: ${euiTheme.border.radius.medium};
-                  border: 1px solid ${euiTheme.colors.lightShade};
-                  .euiIcon {
-                    inline-size: ${euiTheme.size.m};
-                  }
-                `}
-                onClick={handleStepButtonClicked}
-              >
-                {isDone ? UNDO_MARK_AS_DONE_TITLE : MARK_AS_DONE_TITLE}
-              </EuiButtonEmpty>
+            {isDone && (
+              <EuiBadge className="all-done-badge" css={allDoneTextStyles} color="success">
+                {ALL_DONE_TEXT}
+              </EuiBadge>
             )}
-            {/* Use button here to avoid styles added by EUI*/}
-            <button
-              className="eui-displayInlineBlock"
-              css={css`
-                padding: ${euiTheme.size.xs} ${euiTheme.base * 0.375}px;
-                margin-left: ${euiTheme.base * 0.375}px;
-                border-radius: ${euiTheme.border.radius.medium};
-                color: ${euiTheme.colors.darkShade};
-                .step-panel-expanded &:hover,
-                .step-panel-expanded &:active,
-                .step-panel-expanded &:focus {
-                  ${backgroundColorStyles.primary};
-                }
-              `}
+            <EuiButtonIcon
+              className="eui-displayInlineBlock toggle-button"
+              color="primary"
               onClick={toggleStep}
-              type="button"
-            >
-              <EuiIcon size="s" type={isExpandedStep ? 'arrowDown' : 'arrowRight'} />
-            </button>
+              iconType={isExpandedStep ? 'arrowUp' : 'arrowDown'}
+              aria-label={isExpandedStep ? COLLAPSE_STEP_BUTTON_LABEL : EXPAND_STEP_BUTTON_LABEL}
+              size="xs"
+              css={toggleButtonStyles}
+              isDisabled={!hasStepContent}
+            />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <StepContent
-        description={description}
-        hasStepContent={hasStepContent}
-        isExpandedStep={isExpandedStep}
-        splitPanel={splitPanel}
-        stepId={stepId}
-      />
+      {hasStepContent && (
+        <div className="stepContentWrapper">
+          <div className="stepContent">
+            <StepContent
+              autoCheckIfStepCompleted={isExpandedStep ? autoCheckIfStepCompleted : undefined}
+              cardId={cardId}
+              indicesExist={indicesExist}
+              sectionId={sectionId}
+              step={step}
+              toggleTaskCompleteStatus={toggleTaskCompleteStatus}
+            />
+          </div>
+        </div>
+      )}
     </EuiPanel>
   );
 };
