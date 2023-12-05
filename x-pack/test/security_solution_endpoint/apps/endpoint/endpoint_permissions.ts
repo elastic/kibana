@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -17,9 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/171649
-  // FLAKY: https://github.com/elastic/kibana/issues/171650
-  describe.skip('Endpoint permissions:', function () {
+  describe('Endpoint permissions:', function () {
     targetTags(this, ['@ess']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
