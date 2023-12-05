@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { format } from 'url';
-import supertest from 'supertest';
-import request from 'superagent';
 import type {
-  APIReturnType,
   APIClientRequestParamsOf,
+  APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { APIEndpoint } from '@kbn/apm-plugin/server';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 import { formatRequest } from '@kbn/server-route-repository';
+import request from 'superagent';
+import { format } from 'url';
 
-export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
+export function createApmApiClient(st: FtrSupertest) {
   return async <TEndpoint extends APIEndpoint>(
     options: {
       type?: 'form-data';

@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -27,7 +26,7 @@ interface UpdateTestDefinition {
   tests: UpdateTests;
 }
 
-export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function updateTestSuiteFactory(esArchiver: any, supertest: FtrSupertest) {
   const expectRbacForbidden = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,

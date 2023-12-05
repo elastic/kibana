@@ -6,18 +6,18 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { UserAtSpaceScenarios } from '../../../scenarios';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
+import { UserAtSpaceScenarios } from '../../../scenarios';
 
 const findTestUtils = (
   describeType: 'internal' | 'public',
   objectRemover: ObjectRemover,
-  supertest: SuperTest<Test>,
-  supertestWithoutAuth: any
+  supertest: FtrSupertest,
+  supertestWithoutAuth: FtrSupertest
 ) => {
   describe(describeType, () => {
     afterEach(() => objectRemover.removeAll());
@@ -72,7 +72,7 @@ const findTestUtils = (
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.status).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: `Unauthorized to find rules for any rule types`,
@@ -84,7 +84,7 @@ const findTestUtils = (
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(200);
+              expect(response.status).to.eql(200);
               expect(response.body.page).to.equal(1);
               expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
@@ -195,7 +195,7 @@ const findTestUtils = (
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.status).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: `Unauthorized to find rules for any rule types`,
@@ -204,7 +204,7 @@ const findTestUtils = (
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(200);
+              expect(response.status).to.eql(200);
               expect(response.body.page).to.equal(1);
               expect(response.body.per_page).to.be.equal(perPage);
               expect(response.body.total).to.be.equal(6);
@@ -221,7 +221,7 @@ const findTestUtils = (
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(200);
+              expect(response.status).to.eql(200);
               expect(response.body.page).to.equal(1);
               expect(response.body.per_page).to.be.equal(perPage);
               expect(response.body.total).to.be.equal(8);
@@ -291,7 +291,7 @@ const findTestUtils = (
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.status).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: `Unauthorized to find rules for any rule types`,
@@ -303,7 +303,7 @@ const findTestUtils = (
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(200);
+              expect(response.status).to.eql(200);
               expect(response.body.page).to.equal(1);
               expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
@@ -400,7 +400,7 @@ const findTestUtils = (
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.status).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: `Unauthorized to find rules for any rule types`,
@@ -409,13 +409,13 @@ const findTestUtils = (
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(200);
+              expect(response.status).to.eql(200);
               expect(response.body.data).to.eql([]);
               break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(200);
+              expect(response.status).to.eql(200);
               expect(response.body.page).to.equal(1);
               expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
@@ -483,7 +483,7 @@ const findTestUtils = (
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.status).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: `Unauthorized to find rules for any rule types`,
@@ -492,13 +492,13 @@ const findTestUtils = (
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(200);
+              expect(response.status).to.eql(200);
               expect(response.body.data).to.eql([]);
               break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(200);
+              expect(response.status).to.eql(200);
               expect(response.body.page).to.equal(1);
               expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
@@ -549,7 +549,7 @@ const findTestUtils = (
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(403);
+              expect(response.status).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: `Unauthorized to find rules for any rule types`,
@@ -558,7 +558,7 @@ const findTestUtils = (
               break;
             case 'global_read at space1':
             case 'superuser at space1':
-              expect(response.statusCode).to.eql(200);
+              expect(response.status).to.eql(200);
               expect(response.body).to.eql({
                 page: 1,
                 per_page: 10,

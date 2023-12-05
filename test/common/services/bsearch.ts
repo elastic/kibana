@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
-import request from 'superagent';
-import type SuperTest from 'supertest';
-import { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { IEsSearchResponse } from '@kbn/data-plugin/common';
+import expect from '@kbn/expect';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
+import request from 'superagent';
 import { FtrService } from '../ftr_provider_context';
 
 /**
@@ -40,7 +40,7 @@ const getSpaceUrlPrefix = (spaceId?: string): string => {
  * Options for the send method
  */
 interface SendOptions {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: FtrSupertest;
   options: object;
   strategy: string;
   space?: string;

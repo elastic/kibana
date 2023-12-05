@@ -6,13 +6,13 @@
  */
 
 import { Client, errors } from '@elastic/elasticsearch';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import pRetry from 'p-retry';
-import type { SuperTest, Test } from 'supertest';
-import { ApmRuleType } from '@kbn/rule-data-utils';
-import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
+import { ApmRuleType } from '@kbn/rule-data-utils';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import pRetry from 'p-retry';
 import { ApmApiClient } from '../../../common/config';
 
 export const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-*';
@@ -25,7 +25,7 @@ export async function createApmRule<T extends ApmRuleType>({
   params,
   actions = [],
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   ruleTypeId: T;
   name: string;
   params: ApmRuleParamsType[T];
@@ -110,7 +110,7 @@ export async function runRuleSoon({
   supertest,
 }: {
   ruleId: string;
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
 }): Promise<Record<string, any>> {
   return pRetry(
     async () => {
@@ -142,13 +142,13 @@ export async function deleteRuleById({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   ruleId: string;
 }) {
   await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
 }
 
-export async function deleteApmRules(supertest: SuperTest<Test>) {
+export async function deleteApmRules(supertest: FtrSupertest) {
   const res = await supertest.get(
     `/api/alerting/rules/_find?filter=alert.attributes.consumer:apm&per_page=10000`
   );
@@ -185,7 +185,7 @@ export async function createIndexConnector({
   supertest,
   name,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   name: string;
 }) {
   const { body } = await supertest
@@ -233,7 +233,7 @@ export async function deleteAllActionConnectors({
   supertest,
   es,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   es: Client;
 }): Promise<any> {
   const res = await supertest.get(`/api/actions/connectors`);
@@ -250,7 +250,7 @@ async function deleteActionConnector({
   supertest,
   actionId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   actionId: string;
 }) {
   return supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');

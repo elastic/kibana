@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 import { User } from '../authentication/types';
 
 export const getSpaceUrlPrefix = (spaceId: string | undefined | null) => {
@@ -17,10 +17,10 @@ export const setupAuth = ({
   headers,
   auth,
 }: {
-  apiCall: SuperTest.Test;
+  apiCall: FtrSupertest;
   headers: Record<string, unknown>;
   auth?: { user: User; space: string | null } | null;
-}): SuperTest.Test => {
+}) => {
   if (!Object.hasOwn(headers, 'Cookie') && auth != null) {
     return apiCall.auth(auth.user.username, auth.user.password);
   }

@@ -6,21 +6,21 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
-import { UserAtSpaceScenarios } from '../../../scenarios';
-import {
-  getUrlPrefix,
-  getTestRuleData,
-  ObjectRemover,
-  getUnauthorizedErrorMessage,
-} from '../../../../common/lib';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  getTestRuleData,
+  getUnauthorizedErrorMessage,
+  getUrlPrefix,
+  ObjectRemover,
+} from '../../../../common/lib';
+import { UserAtSpaceScenarios } from '../../../scenarios';
 
 const getTestUtils = (
   describeType: 'internal' | 'public',
   objectRemover: ObjectRemover,
-  supertest: SuperTest<Test>,
-  supertestWithoutAuth: any
+  supertest: FtrSupertest,
+  supertestWithoutAuth: FtrSupertest
 ) => {
   describe(describeType, () => {
     afterEach(() => objectRemover.removeAll());
@@ -46,7 +46,7 @@ const getTestUtils = (
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.status).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
@@ -58,7 +58,7 @@ const getTestUtils = (
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(200);
+              expect(response.status).to.eql(200);
               expect(response.body).to.eql({
                 id: createdAlert.id,
                 name: 'abc',
@@ -130,7 +130,7 @@ const getTestUtils = (
             case 'space_1_all at space2':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
+              expect(response.status).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getUnauthorizedErrorMessage(
@@ -144,7 +144,7 @@ const getTestUtils = (
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(200);
+              expect(response.status).to.eql(200);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -175,7 +175,7 @@ const getTestUtils = (
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.status).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getUnauthorizedErrorMessage(
@@ -191,7 +191,7 @@ const getTestUtils = (
             case 'superuser at space1':
             case 'global_read at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(200);
+              expect(response.status).to.eql(200);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -222,7 +222,7 @@ const getTestUtils = (
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.status).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getUnauthorizedErrorMessage('get', 'test.restricted-noop', 'alerts'),
@@ -231,7 +231,7 @@ const getTestUtils = (
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
+              expect(response.status).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getUnauthorizedErrorMessage(
@@ -245,7 +245,7 @@ const getTestUtils = (
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(200);
+              expect(response.status).to.eql(200);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -268,7 +268,7 @@ const getTestUtils = (
             )
             .auth(user.username, user.password);
 
-          expect(response.statusCode).to.eql(404);
+          expect(response.status).to.eql(404);
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
@@ -301,7 +301,7 @@ const getTestUtils = (
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.status).to.eql(404);
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',

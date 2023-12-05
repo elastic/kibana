@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import supertest from 'supertest';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 import { getUrlPrefix } from './space_test_utils';
 
 async function delay(millis: number): Promise<void> {
@@ -13,7 +13,7 @@ async function delay(millis: number): Promise<void> {
 }
 
 export function createWaitForExecutionCount(
-  st: supertest.SuperTest<supertest.Test>,
+  st: FtrSupertest,
   spaceId?: string,
   delayMs: number = 3000
 ) {

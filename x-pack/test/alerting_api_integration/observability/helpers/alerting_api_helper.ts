@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SuperTest, Test } from 'supertest';
 import expect from '@kbn/expect';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 
 export async function createIndexConnector({
@@ -14,7 +14,7 @@ export async function createIndexConnector({
   name,
   indexName,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   name: string;
   indexName: string;
 }) {
@@ -42,7 +42,7 @@ export async function createRule<Params = ThresholdParams>({
   schedule,
   consumer,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   ruleTypeId: string;
   name: string;
   params: Params;

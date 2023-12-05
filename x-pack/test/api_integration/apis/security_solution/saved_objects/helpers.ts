@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
-import { v4 as uuidv4 } from 'uuid';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 import { TimelineType } from '@kbn/security-solution-plugin/common/api/timeline';
+import { v4 as uuidv4 } from 'uuid';
 
-export const createBasicTimeline = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  titleToSaved: string
-) =>
+export const createBasicTimeline = async (supertest: FtrSupertest, titleToSaved: string) =>
   await supertest
     .post('/api/timeline')
     .set('kbn-xsrf', 'true')
@@ -24,10 +21,7 @@ export const createBasicTimeline = async (
       },
     });
 
-export const createBasicTimelineTemplate = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  titleToSaved: string
-) =>
+export const createBasicTimelineTemplate = async (supertest: FtrSupertest, titleToSaved: string) =>
   await supertest
     .post('/api/timeline')
     .set('kbn-xsrf', 'true')

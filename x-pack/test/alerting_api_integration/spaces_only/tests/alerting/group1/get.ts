@@ -6,15 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
-import { Spaces } from '../../../scenarios';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
+import { Spaces } from '../../../scenarios';
 
 const getTestUtils = (
   describeType: 'internal' | 'public',
   objectRemover: ObjectRemover,
-  supertest: SuperTest<Test>
+  supertest: FtrSupertest
 ) => {
   describe(describeType, () => {
     afterEach(() => objectRemover.removeAll());

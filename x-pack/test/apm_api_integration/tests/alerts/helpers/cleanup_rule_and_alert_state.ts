@@ -6,14 +6,14 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { FtrSupertest } from '@kbn/ftr-common-functional-services';
 import { ToolingLog } from '@kbn/tooling-log';
-import type { SuperTest, Test } from 'supertest';
 import {
   clearKibanaApmEventLog,
-  deleteApmRules,
-  deleteApmAlerts,
   deleteActionConnectorIndex,
   deleteAllActionConnectors,
+  deleteApmAlerts,
+  deleteApmRules,
 } from './alerting_api_helper';
 
 export async function cleanupRuleAndAlertState({
@@ -22,7 +22,7 @@ export async function cleanupRuleAndAlertState({
   logger,
 }: {
   es: Client;
-  supertest: SuperTest<Test>;
+  supertest: FtrSupertest;
   logger: ToolingLog;
 }) {
   try {
