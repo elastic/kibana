@@ -53,7 +53,7 @@ it('rewrites ftr reports with minimal changes', async () => {
     reportPath: Path.resolve(__dirname, './__fixtures__/ftr_report.xml'),
   });
 
-  expect(createPatch('ftr.xml', FTR_REPORT, xml, { context: 0 })).toMatchInlineSnapshot(`
+  expect(createPatch('ftr.xml', FTR_REPORT, xml)).toMatchInlineSnapshot(`
     Index: ftr.xml
     ===================================================================
     --- ftr.xml	[object Object]
@@ -149,7 +149,7 @@ it('rewrites jest reports with minimal changes', async () => {
     reportPath: Path.resolve(__dirname, './__fixtures__/jest_report.xml'),
   });
 
-  expect(createPatch('jest.xml', JEST_REPORT, xml, { context: 0 })).toMatchInlineSnapshot(`
+  expect(createPatch('jest.xml', JEST_REPORT, xml)).toMatchInlineSnapshot(`
     Index: jest.xml
     ===================================================================
     --- jest.xml	[object Object]
@@ -196,7 +196,7 @@ it('rewrites mocha reports with minimal changes', async () => {
     reportPath: Path.resolve(__dirname, './__fixtures__/mocha_report.xml'),
   });
 
-  expect(createPatch('mocha.xml', MOCHA_REPORT, xml, { context: 0 })).toMatchInlineSnapshot(`
+  expect(createPatch('mocha.xml', MOCHA_REPORT, xml)).toMatchInlineSnapshot(`
     Index: mocha.xml
     ===================================================================
     --- mocha.xml	[object Object]
@@ -273,7 +273,7 @@ it('rewrites cypress reports with minimal changes', async () => {
     reportPath: Path.resolve(__dirname, './__fixtures__/cypress_report.xml'),
   });
 
-  expect(createPatch('cypress.xml', CYPRESS_REPORT, xml, { context: 0 })).toMatchInlineSnapshot(`
+  expect(createPatch('cypress.xml', CYPRESS_REPORT, xml)).toMatchInlineSnapshot(`
     Index: cypress.xml
     ===================================================================
     --- cypress.xml	[object Object]
