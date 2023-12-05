@@ -308,7 +308,7 @@ describe('UnifiedDataTable', () => {
         columns: ['message'],
       });
 
-      expect(component.find(EuiDataGrid).prop('sorting')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
         Object {
           "columns": Array [
             Object {
@@ -332,7 +332,7 @@ describe('UnifiedDataTable', () => {
         columns: ['bytes', 'message'],
       });
 
-      expect(component.find(EuiDataGrid).prop('sorting')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
         Object {
           "columns": Array [
             Object {

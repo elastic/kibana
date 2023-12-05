@@ -104,30 +104,26 @@ Array [
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiPopover emotion-euiPopover"
+                class="euiPopover emotion-euiPopover-inline-block"
               >
-                <div
-                  class="euiPopover__anchor css-16vtueo-render"
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                 >
-                  <span
-                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                  <button
+                    aria-label="Update assignees"
+                    class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
+                    data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"
+                    disabled=""
+                    type="button"
                   >
-                    <button
-                      aria-label="Update assignees"
-                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
-                      data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"
-                      disabled=""
-                      type="button"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="euiButtonIcon__icon"
-                        color="inherit"
-                        data-euiicon-type="plusInCircle"
-                      />
-                    </button>
-                  </span>
-                </div>
+                    <span
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="plusInCircle"
+                    />
+                  </button>
+                </span>
               </div>
             </div>
           </div>
@@ -294,30 +290,26 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiPopover emotion-euiPopover"
+                  class="euiPopover emotion-euiPopover-inline-block"
                 >
-                  <div
-                    class="euiPopover__anchor css-16vtueo-render"
+                  <span
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                   >
-                    <span
-                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    <button
+                      aria-label="Update assignees"
+                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
+                      data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"
+                      disabled=""
+                      type="button"
                     >
-                      <button
-                        aria-label="Update assignees"
-                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
-                        data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"
-                        disabled=""
-                        type="button"
-                      >
-                        <span
-                          aria-hidden="true"
-                          class="euiButtonIcon__icon"
-                          color="inherit"
-                          data-euiicon-type="plusInCircle"
-                        />
-                      </button>
-                    </span>
-                  </div>
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="plusInCircle"
+                      />
+                    </button>
+                  </span>
                 </div>
               </div>
             </div>
