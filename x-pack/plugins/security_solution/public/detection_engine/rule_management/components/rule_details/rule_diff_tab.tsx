@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { omit } from 'lodash';
 import stringify from 'json-stable-stringify';
 import {
   EuiSpacer,
@@ -29,7 +30,13 @@ interface RuleDiffTabProps {
 
 export const RuleDiffTab = ({ oldRule, newRule }: RuleDiffTabProps) => {
   const [oldSource, newSource] = useMemo(() => {
-    return [sortAndStringifyJson(oldRule), sortAndStringifyJson(newRule)];
+    const visibleOldRuleProperties = omit(oldRule, 'revision');
+    const visibleNewRuleProperties = omit(newRule, 'revision');
+
+    return [
+      sortAndStringifyJson(visibleOldRuleProperties),
+      sortAndStringifyJson(visibleNewRuleProperties),
+    ];
   }, [oldRule, newRule]);
 
   return (
