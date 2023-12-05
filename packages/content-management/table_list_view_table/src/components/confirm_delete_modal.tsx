@@ -63,6 +63,14 @@ function getI18nTexts(items: unknown[], entityName: string, entityNamePlural: st
         },
       }
     ),
+    titleColumnName: i18n.translate(
+      'contentManagement.tableList.listing.deleteSelectedItemsConfirmModal.titleColumnName',
+      { defaultMessage: 'Name' }
+    ),
+    spacesColumnName: i18n.translate(
+      'contentManagement.tableList.listing.deleteSelectedItemsConfirmModal.spacesColumnName',
+      { defaultMessage: 'Spaces' }
+    ),
   };
 }
 
@@ -99,6 +107,8 @@ export function ConfirmDeleteModal<T extends UserContentCommonSchema>({
     description,
     cancelBtnLabel,
     sharedItemsCallout,
+    titleColumnName,
+    spacesColumnName,
   } = useMemo(
     () => getI18nTexts(items, entityName, entityNamePlural),
     [entityName, entityNamePlural, items]
@@ -118,7 +128,7 @@ export function ConfirmDeleteModal<T extends UserContentCommonSchema>({
     const columns: Array<EuiTableFieldDataColumnType<T>> = [
       {
         field: 'attributes.title',
-        name: entityName,
+        name: titleColumnName,
         sortable: true,
       },
     ];
@@ -127,7 +137,7 @@ export function ConfirmDeleteModal<T extends UserContentCommonSchema>({
       const SpacesList = spacesApi!.ui.components.getSpaceList;
       columns.push({
         field: 'namespaces',
-        name: 'Spaces',
+        name: spacesColumnName,
         sortable: true,
         width: '100px',
         align: 'left',
@@ -168,12 +178,13 @@ export function ConfirmDeleteModal<T extends UserContentCommonSchema>({
     );
   }, [
     description,
-    entityName,
     hasSharedItemsSelected,
     hasSpaces,
     items,
     sharedItemsCallout,
     spacesApi,
+    spacesColumnName,
+    titleColumnName,
   ]);
 
   return (
