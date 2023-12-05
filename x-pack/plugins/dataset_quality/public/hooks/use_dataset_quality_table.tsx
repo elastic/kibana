@@ -6,7 +6,7 @@
  */
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { find, merge, orderBy } from 'lodash';
+import { find, orderBy } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
@@ -79,9 +79,10 @@ export const useDatasetQualityTable = () => {
     const mergedData = data.map((dataStream) => {
       const malformedDocs = find(malformedStats, { dataset: dataStream.name });
 
-      return malformedDocs
-        ? merge({}, dataStream, { malformedDocs: malformedDocs.percentage })
-        : dataStream;
+      return {
+        ...dataStream,
+        malformedDocs: malformedDocs?.percentage,
+      };
     });
 
     const sortedItems = orderBy(mergedData, overridenSortingField, sortDirection);
