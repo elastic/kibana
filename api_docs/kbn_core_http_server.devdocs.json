@@ -3722,6 +3722,10 @@
               },
               {
                 "plugin": "assetManager",
+                "path": "x-pack/plugins/asset_manager/server/routes/assets/index.ts"
+              },
+              {
+                "plugin": "assetManager",
                 "path": "x-pack/plugins/asset_manager/server/routes/assets/hosts.ts"
               },
               {

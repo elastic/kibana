@@ -103,7 +103,6 @@
     "@kbn/expect",
     "@kbn/share-plugin",
     "@kbn/analytics",
-    "@kbn/observability-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/doc-links",
     "@kbn/react-field",
@@ -184,5 +183,6 @@
     "@kbn/zod-helpers",
     "@kbn/core-http-common",
     "@kbn/search-errors",
+    "@kbn/stack-connectors-plugin"
   ]
 }
