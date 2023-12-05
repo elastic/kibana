@@ -33,6 +33,7 @@ import { SelectConnector } from '../new_index/select_connector/select_connector'
 import { ConnectorStats } from './connector_stats';
 import { ConnectorsLogic } from './connectors_logic';
 import { ConnectorsTable } from './connectors_table';
+import { CrawlerEmptyState } from './crawler_empty_state';
 
 export const baseBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.connectors.breadcrumb', {
@@ -57,7 +58,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ type }) => {
     fetchConnectors({ ...searchParams, connectorType: type, searchQuery });
   }, [type, searchParams.from, searchParams.size, searchQuery]);
 
-  return !isLoading && isEmpty ? (
+  return !isLoading && isEmpty && type === 'connector' ? (
     <SelectConnector />
   ) : (
     <EnterpriseSearchContentPageTemplate
@@ -145,58 +146,64 @@ export const Connectors: React.FC<ConnectorsProps> = ({ type }) => {
       <EuiSpacer />
 
       <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <EuiTitle>
-            <h2>
-              {type !== 'elastic-crawler' ? (
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.connectorsTable.h2.availableConnectorsLabel"
-                  defaultMessage="Available connectors"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.connectorsTable.h2.availableCrawlersLabel"
-                  defaultMessage="Available web crawlers"
-                />
-              )}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSearchBar
-            query={searchQuery}
-            box={{
-              incremental: true,
-              placeholder:
-                type === 'connector'
-                  ? i18n.translate(
-                      'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterConnectorsPlaceholder',
-                      { defaultMessage: 'Filter connectors' }
-                    )
-                  : i18n.translate(
-                      'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterCrawlersPlaceholder',
-                      { defaultMessage: 'Filter web crawlers' }
-                    ),
-            }}
-            aria-label={
-              type === 'connector'
-                ? i18n.translate(
-                    'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterConnectorsLabel',
-                    { defaultMessage: 'Filter connectors' }
-                  )
-                : i18n.translate(
-                    'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterCrawlersLabel',
-                    { defaultMessage: 'Filter web crawlers' }
-                  )
-            }
-            onChange={(event) => setSearchValue(event.queryText)}
-          />
-        </EuiFlexItem>
-        <ConnectorsTable
-          items={connectors || []}
-          meta={data?.meta}
-          onChange={handlePageChange(onPaginate)}
-        />
+        {isEmpty && type === 'elastic-crawler' ? (
+          <CrawlerEmptyState />
+        ) : (
+          <>
+            <EuiFlexItem>
+              <EuiTitle>
+                <h2>
+                  {type !== 'elastic-crawler' ? (
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.connectorsTable.h2.availableConnectorsLabel"
+                      defaultMessage="Available connectors"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.connectorsTable.h2.availableCrawlersLabel"
+                      defaultMessage="Available web crawlers"
+                    />
+                  )}
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSearchBar
+                query={searchQuery}
+                box={{
+                  incremental: true,
+                  placeholder:
+                    type === 'connector'
+                      ? i18n.translate(
+                          'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterConnectorsPlaceholder',
+                          { defaultMessage: 'Filter connectors' }
+                        )
+                      : i18n.translate(
+                          'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterCrawlersPlaceholder',
+                          { defaultMessage: 'Filter web crawlers' }
+                        ),
+                }}
+                aria-label={
+                  type === 'connector'
+                    ? i18n.translate(
+                        'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterConnectorsLabel',
+                        { defaultMessage: 'Filter connectors' }
+                      )
+                    : i18n.translate(
+                        'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterCrawlersLabel',
+                        { defaultMessage: 'Filter web crawlers' }
+                      )
+                }
+                onChange={(event) => setSearchValue(event.queryText)}
+              />
+            </EuiFlexItem>
+            <ConnectorsTable
+              items={connectors || []}
+              meta={data?.meta}
+              onChange={handlePageChange(onPaginate)}
+            />
+          </>
+        )}
       </EuiFlexGroup>
     </EnterpriseSearchContentPageTemplate>
   );
