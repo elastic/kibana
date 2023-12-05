@@ -6,6 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
+import { useSloAlertsQuery } from './slo_alerts_table';
 import { getAlertSummaryTimeRange } from '../../../../utils/alert_summary_widget';
 import { observabilityAlertFeatureIds } from '../../../../../common/constants';
 import { useTimeBuckets } from '../../../../hooks/use_time_buckets';
@@ -13,7 +14,6 @@ import { calculateTimeRangeBucketSize } from '../../../../pages/overview/helpers
 import { SloEmbeddableDeps } from '../slo_alerts_embeddable';
 import { SloItem } from '../types';
 
-type SloIdAndInstanceId = [string, string];
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 
@@ -30,35 +30,7 @@ export function SloAlertsSummary({ slos, deps, timeRange, onLoaded }: Props) {
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
   } = deps;
 
-  const slosWithoutName = slos.map((slo) => ({
-    id: slo.id,
-    instanceId: slo.instanceId,
-  }));
-  const sloIdsAndInstanceIds = slosWithoutName.map(Object.values) as SloIdAndInstanceId[];
-  const esQuery = {
-    bool: {
-      filter: [
-        {
-          range: {
-            '@timestamp': {
-              gte: timeRange.from,
-            },
-          },
-        },
-        {
-          term: {
-            'kibana.alert.rule.rule_type_id': 'slo.rules.burnRate',
-          },
-        },
-      ],
-      should: sloIdsAndInstanceIds.map(([sloId, instanceId]) => ({
-        bool: {
-          filter: [{ term: { 'slo.id': sloId } }, { term: { 'slo.instanceId': instanceId } }],
-        },
-      })),
-      minimum_should_match: 1,
-    },
-  };
+  const esQuery = useSloAlertsQuery(slos, timeRange);
   const timeBuckets = useTimeBuckets();
   const bucketSize = useMemo(
     () =>

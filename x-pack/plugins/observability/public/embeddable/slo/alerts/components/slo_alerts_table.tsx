@@ -24,11 +24,7 @@ interface Props {
   lastReloadRequestTime: number | undefined;
 }
 
-const useSloAlertsQuery = (
-  slos: SloItem[],
-  timeRange: TimeRange,
-  lastReloadRequestTime?: number
-) => {
+export const useSloAlertsQuery = (slos: SloItem[], timeRange: TimeRange) => {
   return useMemo(() => {
     const sloInstanceIds = slos
       .filter((slo) => slo.instanceId !== ALL_VALUE)
@@ -75,7 +71,7 @@ export function SloAlertsTable({ slos, deps, timeRange, onLoaded, lastReloadRequ
 
   return (
     <AlertsStateTable
-      query={useSloAlertsQuery(slos, timeRange, lastReloadRequestTime)}
+      query={useSloAlertsQuery(slos, timeRange)}
       alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
       configurationId={SLO_ALERTS_TABLE_CONFID}
       featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
