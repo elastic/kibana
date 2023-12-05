@@ -78,8 +78,8 @@ export function SloAlertsSummary({ slos, deps, timeRange, onLoaded }: Props) {
           from: timeRange.from,
           to: timeRange.to,
         },
-        bucketSize?.intervalString || DEFAULT_INTERVAL,
-        bucketSize?.dateFormat || DEFAULT_DATE_FORMAT
+        bucketSize?.intervalString ?? DEFAULT_INTERVAL,
+        bucketSize?.dateFormat ?? DEFAULT_DATE_FORMAT
       ),
     [timeRange.from, timeRange.to, bucketSize]
   );

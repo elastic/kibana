@@ -49,12 +49,16 @@ const getRenderValue = (mappedNonEcsValue: any) => {
 
   if (!isEmpty(value)) {
     if (typeof value === 'object') {
-      return JSON.stringify(value);
+      try {
+        return JSON.stringify(value);
+      } catch (e) {
+        return 'Error: Unable to parse JSON value.';
+      }
     }
     return value;
   }
 
-  return '—';
+  return '—-';
 };
 
 /**
