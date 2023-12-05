@@ -17,8 +17,7 @@
   .kbnDocViewer__buttons {
     opacity: 0;
     visibility: hidden;
-    // slower transition on hover leave in case the user accidentally stops hover
-    transition: visibility $euiAnimSpeedSlow, opacity $euiAnimSpeedSlow;
+    transition: visibility $euiAnimSpeedFast, opacity $euiAnimSpeedFast;
 
     position: absolute;
     left: $euiSizeXS;
