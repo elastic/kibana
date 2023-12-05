@@ -6,8 +6,6 @@
  */
 
 import { services as kibanaFunctionalServices } from '../../../../test/functional/services';
-import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
-import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
 import { ReportingFunctionalProvider } from '../../reporting_functional/services';
 
@@ -77,9 +75,6 @@ export const services = {
   ...kibanaFunctionalServices,
   ...commonServices,
 
-  supertest: kibanaApiIntegrationServices.supertest,
-  supertestWithoutAuth: kibanaXPackApiIntegrationServices.supertestWithoutAuth,
-  esSupertest: kibanaApiIntegrationServices.esSupertest,
   monitoringNoData: MonitoringNoDataProvider,
   monitoringClusterList: MonitoringClusterListProvider,
   monitoringClusterOverview: MonitoringClusterOverviewProvider,
