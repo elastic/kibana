@@ -224,7 +224,7 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | cypress:explore:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/explore` directory in headless mode |
 | cypress:rule_management:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/rule_management` excluding `e2e/detection_response/rule_management/prebuilt_rules` directory in headless mode |
 | cypress:rule_management:prebuilt_rules:run:serverless | Runs all tests tagged as ESS in the `e2e/detection_response/rule_management/prebuilt_rules` directory in headless mode |
-| cypress:ai_assistant:run:serverless | Runs all tests tagged as ESS in the `e2e/ai_assistant` directory in headless mode |
+| cypress:ai_assistant:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/ai_assistant` directory in headless mode |
 
 Please note that all the headless mode commands do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
 
