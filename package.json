@@ -902,6 +902,7 @@
     "css-box-model": "^1.2.1",
     "css.escape": "^1.5.1",
     "cuid": "^2.1.8",
+    "cypress-data-session": "^2.7.0",
     "cytoscape": "^3.10.0",
     "cytoscape-dagre": "^2.2.2",
     "d3": "3.5.17",
