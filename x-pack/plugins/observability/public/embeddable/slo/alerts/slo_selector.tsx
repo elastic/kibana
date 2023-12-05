@@ -37,6 +37,7 @@ export function SloSelector({ initialSlos, onSelected, hasError }: Props) {
   const [searchValue, setSearchValue] = useState<string>('');
   const { isLoading, data: sloList } = useFetchSloList({
     kqlQuery: `slo.name: ${searchValue.replaceAll(' ', '*')}*`,
+    perPage: 100,
   });
 
   useEffect(() => {
