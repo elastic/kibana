@@ -11,6 +11,12 @@ import type { HttpResponseOptions } from '@kbn/core/server';
 
 import { pick } from 'lodash';
 
+import type {
+  GetBulkAssetsRequestBody,
+  GetBulkAssetsResponse,
+  GetVerificationKeyIdResponse,
+} from '../../../common/api';
+
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
@@ -27,8 +33,6 @@ import type {
   IBulkInstallPackageHTTPError,
   GetStatsResponse,
   UpdatePackageResponse,
-  GetVerificationKeyIdResponse,
-  GetBulkAssetsResponse,
   GetInstalledPackagesResponse,
   GetEpmDataStreamsResponse,
   AssetSOObject,
@@ -47,7 +51,6 @@ import type {
   FleetRequestHandler,
   UpdatePackageRequestSchema,
   GetLimitedPackagesRequestSchema,
-  GetBulkAssetsRequestSchema,
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
 } from '../../types';
@@ -235,7 +238,7 @@ export const getInfoHandler: FleetRequestHandler<
 export const getBulkAssetsHandler: FleetRequestHandler<
   undefined,
   undefined,
-  TypeOf<typeof GetBulkAssetsRequestSchema.body>
+  GetBulkAssetsRequestBody
 > = async (context, request, response) => {
   try {
     const { assetIds } = request.body;

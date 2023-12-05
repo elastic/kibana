@@ -14,22 +14,22 @@ servers:
     description: local
 paths:
   # Fleet internals
-  /health_check:
-    $ref: paths/health_check.yaml
-  /setup:
-    $ref: paths/setup.yaml
-  /settings:
-    $ref: paths/settings.yaml
-  /service-tokens:
-    $ref: paths/service_tokens_deprecated.yaml
-  /service_tokens:
-    $ref: paths/service_tokens.yaml
+  # /health_check:
+  #   $ref: paths/health_check.yaml
+  # /setup:
+  #   $ref: paths/setup.yaml
+  # /settings:
+  #   $ref: paths/settings.yaml
+  # /service-tokens:
+  #   $ref: paths/service_tokens_deprecated.yaml
+  # /service_tokens:
+  #   $ref: paths/service_tokens.yaml
 
   # EPM / integrations endpoints
-  /epm/verification_key_id:
-    $ref: paths/epm@verification_key_id.yaml
-  /epm/bulk_assets:
-    $ref: paths/epm@bulk_assets.yaml
+  # /epm/verification_key_id:
+  #   $ref: paths/epm@verification_key_id.yaml
+  # /epm/bulk_assets:
+  #   $ref: paths/epm@bulk_assets.yaml
   /epm/categories:
     $ref: paths/epm@categories.yaml
   /epm/packages/limited:

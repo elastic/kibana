@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './fleet_internals';
-export * from './epm';
+export * from './verification_key_id.gen';
+export * from './bulk_assets.gen';

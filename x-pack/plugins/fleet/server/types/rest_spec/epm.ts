@@ -89,12 +89,6 @@ export const GetInfoRequestSchema = {
   }),
 };
 
-export const GetBulkAssetsRequestSchema = {
-  body: schema.object({
-    assetIds: schema.arrayOf(schema.object({ id: schema.string(), type: schema.string() })),
-  }),
-};
-
 export const GetInfoRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),

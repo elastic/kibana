@@ -115,7 +115,6 @@ export type {
   UpgradePackagePolicyDryRunResponseItem,
   BulkGetPackagePoliciesResponse,
   BulkGetAgentPoliciesResponse,
-  GetBulkAssetsResponse,
   // Models
   Agent,
   AgentStatus,

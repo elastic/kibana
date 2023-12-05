@@ -11,6 +11,12 @@ import { useState } from 'react';
 
 import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
+import type {
+  GetBulkAssetsRequestBody,
+  GetBulkAssetsResponse,
+  GetVerificationKeyIdResponse,
+} from '../../../common/api';
+
 import { epmRouteService, isVerificationError } from '../../services';
 import type {
   GetCategoriesRequest,
@@ -23,9 +29,6 @@ import type {
   DeletePackageResponse,
   UpdatePackageRequest,
   UpdatePackageResponse,
-  GetBulkAssetsRequest,
-  GetBulkAssetsResponse,
-  GetVerificationKeyIdResponse,
   GetInputsTemplatesRequest,
   GetInputsTemplatesResponse,
 } from '../../types';
@@ -308,7 +311,7 @@ export const sendUpdatePackage = (
   });
 };
 
-export const sendGetBulkAssets = (body: GetBulkAssetsRequest['body']) => {
+export const sendGetBulkAssets = (body: GetBulkAssetsRequestBody) => {
   return sendRequest<GetBulkAssetsResponse>({
     path: epmRouteService.getBulkAssetsPath(),
     method: 'post',

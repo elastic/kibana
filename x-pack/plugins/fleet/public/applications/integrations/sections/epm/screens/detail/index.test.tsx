@@ -9,6 +9,8 @@ import React, { lazy, memo } from 'react';
 import { Route } from '@kbn/shared-ux-router';
 import { act, cleanup } from '@testing-library/react';
 
+import type { GetVerificationKeyIdResponse } from '../../../../../../../common/api';
+
 import type { GetFleetStatusResponse } from '../../../../../../../common';
 
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
@@ -19,7 +21,6 @@ import type {
   GetPackagePoliciesResponse,
   GetStatsResponse,
   GetSettingsResponse,
-  GetVerificationKeyIdResponse,
 } from '../../../../../../../common/types/rest_spec';
 import type { KibanaAssetType } from '../../../../../../../common/types/models';
 import {

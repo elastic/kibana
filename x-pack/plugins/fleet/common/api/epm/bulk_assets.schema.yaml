@@ -1,0 +1,99 @@
+openapi: 3.0.0
+tags: []
+info:
+  title: Fleet
+  description: OpenAPI schema for Fleet API endpoints
+  version: '2023-10-31'
+paths:
+  /epm/bulk_assets:
+    post:
+      summary: Bulk get assets
+      tags:
+        - Elastic Package Manager (EPM)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkAssetsResponse'
+
+        '400':
+          $ref: ../components/responses/error.yaml#/components/schemas/GenericError
+      operationId: GetBulkAssets
+      x-codegen-enabled: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assetIds:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      id:
+                        type: string
+                  description: list of items necessary to fetch assets
+              required:
+                - assetIds
+
+components:
+  schemas:
+    BulkAssetsResponse:
+      title: Bulk get assets response
+      type: object
+      deprecated: true
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                title: Saved Object type
+                oneOf:
+                  - type: string
+                    enum:
+                      - index
+                      - component_template
+                      - ingest_pipeline
+                      - index_template
+                      - ilm_policy
+                      - transform
+                      - data_stream_ilm_policy
+                      - ml_model
+                  - type: string
+                    enum:
+                      - dashboard
+                      - visualization
+                      - search
+                      - index-pattern
+                      - map
+                      - lens
+                      - security-rule
+                      - csp-rule-template
+                      - ml-module
+                      - tag
+                      - osquery-pack-asset
+                      - osquery-saved-query
+              updatedAt:
+                type: string
+              attributes:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  description:
+                    type: string
+            required:
+              - id
+              - type
+              - attributes
+      required:
+        - items

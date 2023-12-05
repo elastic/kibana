@@ -7,6 +7,8 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
+import { GetBulkAssetsRequestBody } from '../../../common/api';
+
 import { API_VERSIONS, INTERNAL_API_ACCESS } from '../../../common/constants';
 
 import type { FleetAuthz } from '../../../common';
@@ -34,7 +36,6 @@ import {
   GetFileRequestSchema,
   GetInfoRequestSchema,
   GetInfoRequestSchemaDeprecated,
-  GetBulkAssetsRequestSchema,
   InstallPackageFromRegistryRequestSchema,
   InstallPackageFromRegistryRequestSchemaDeprecated,
   InstallPackageByUploadRequestSchema,
@@ -49,6 +50,8 @@ import {
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
 } from '../../types';
+
+import { buildRouteValidationWithZod } from '../../utils/build_validation/route_validation';
 
 import {
   getCategoriesHandler,
@@ -317,7 +320,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetBulkAssetsRequestSchema },
+        validate: { request: { body: buildRouteValidationWithZod(GetBulkAssetsRequestBody) } },
       },
       getBulkAssetsHandler
     );

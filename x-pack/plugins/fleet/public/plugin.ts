@@ -63,6 +63,8 @@ import type { CheckPermissionsResponse, FleetConfigType } from '../common/types'
 
 import { API_VERSIONS } from '../common/constants';
 
+import type { GetBulkAssetsRequestBody, GetBulkAssetsResponse } from '../common/api';
+
 import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import type { RequestError } from './hooks';
 import { licenseService, sendGetBulkAssets } from './hooks';
@@ -71,12 +73,7 @@ import { createPackageSearchProvider } from './search_provider';
 import { TutorialDirectoryHeaderLink, TutorialModuleNotice } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import { ExperimentalFeaturesService } from './services/experimental_features';
-import type {
-  GetBulkAssetsRequest,
-  GetBulkAssetsResponse,
-  UIExtensionRegistrationCallback,
-  UIExtensionsStorage,
-} from './types';
+import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from './types';
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
 import { getFleetDeepLinks } from './deep_links';
@@ -99,7 +96,7 @@ export interface FleetStart {
   hooks: {
     epm: {
       getBulkAssets: (
-        body: GetBulkAssetsRequest['body']
+        body: GetBulkAssetsRequestBody
       ) => Promise<SendRequestResponse<GetBulkAssetsResponse, RequestError>>;
     };
   };
