@@ -18,12 +18,12 @@ import { TileRequestTab } from './tile_request_tab';
 import { RequestsViewCallout } from './requests_view_callout';
 
 const REQUEST_VIEW_ID = 'request_view';
-const RESPONSE_VIEW_ID = 'response_view';
+export const RESPONSE_VIEW_ID = 'response_view';
 
 interface Options {
   initialLayerId?: string;
   initialTile?: string;
-  initialTabs?: string[];
+  initialTab?: typeof REQUEST_VIEW_ID | typeof RESPONSE_VIEW_ID;
 }
 
 interface State {
@@ -37,13 +37,16 @@ interface State {
 class VectorTileInspector extends Component<InspectorViewProps, State> {
   private _isMounted = false;
 
-  state: State = {
-    selectedLayer: null,
-    selectedTileRequest: null,
-    selectedView: REQUEST_VIEW_ID,
-    tileRequests: [],
-    layerOptions: [],
-  };
+  constructor(props: InspectorViewProps) {
+    super(props);
+    this.state = {
+      selectedLayer: null,
+      selectedTileRequest: null,
+      selectedView: props.options && (props.options as Options).initialTab ? (props.options as Options).initialTab! : REQUEST_VIEW_ID,
+      tileRequests: [],
+      layerOptions: [],
+    };
+  }
 
   componentDidMount() {
     this._isMounted = true;

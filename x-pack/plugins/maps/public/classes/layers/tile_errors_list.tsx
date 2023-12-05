@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiButtonEmpty, EuiCodeBlock, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { TileError } from '../../../common/descriptor_types';
 import { getInspector } from '../../kibana_services';
+import { RESPONSE_VIEW_ID } from '../../inspector/vector_tile_adapter/components/vector_tile_inspector';
 
 interface Props {
   inspectorAdapters: Adapters;
@@ -91,7 +92,7 @@ export function TileErrorsList(props: Props) {
               options: {
                 initialLayerId: props.layerId,
                 initialTile: selectedTileError?.tileKey,
-                initialTabs: ['response'],
+                initialTab: [RESPONSE_VIEW_ID],
               },
             });
           }} size="s"
