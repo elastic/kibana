@@ -32,5 +32,4 @@ export const registerSpecDefinitionsRoute = ({ router, services }: RouteDependen
   };
 
   router.get({ path: '/api/console/api_server', validate: false }, handler);
-  router.post({ path: '/api/console/api_server', validate: false }, handler);
 };

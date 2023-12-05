@@ -100,7 +100,7 @@ export const CisKubernetesIcons = ({
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiToolTip content="Center for Internet Security">
-        <EuiIcon type={cisLogoIcon} size="xxl" />
+        <EuiIcon type={cisLogoIcon} size="xl" />
       </EuiToolTip>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>

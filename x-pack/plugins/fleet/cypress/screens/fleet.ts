@@ -144,7 +144,7 @@ export const SETTINGS_OUTPUTS_KAFKA = {
   AUTHENTICATION_SSL_OPTION: 'kafkaAuthenticationSSLRadioButton',
   AUTHENTICATION_KERBEROS_OPTION: 'kafkaAuthenticationKerberosRadioButton',
   AUTHENTICATION_USERNAME_INPUT: 'settingsOutputsFlyout.kafkaUsernameInput',
-  AUTHENTICATION_PASSWORD_INPUT: 'settingsOutputsFlyout.kafkaPasswordInput',
+  AUTHENTICATION_PASSWORD_INPUT: 'settingsOutputsFlyout.kafkaPasswordSecretInput',
   AUTHENTICATION_VERIFICATION_MODE_INPUT: 'settingsOutputsFlyout.kafkaVerificationModeInput',
   AUTHENTICATION_CONNECTION_TYPE_SELECT: 'settingsOutputsFlyout.kafkaConnectionTypeRadioInput',
   AUTHENTICATION_CONNECTION_TYPE_PLAIN_OPTION: 'kafkaConnectionTypePlaintextRadioButton',
