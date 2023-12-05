@@ -67,15 +67,10 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
+
         const { monitors } = response.body;
         if (monitors[0]?.config_id) {
-          await supertest
-            .delete(
-              `/s/${space}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitors[0].config_id}`
-            )
-            .set('kbn-xsrf', 'true')
-            .send(projectMonitors)
-            .expect(200);
+          await monitorTestService.deleteMonitor(monitors[0].config_id, 200, space);
         }
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -84,6 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set('kbn-xsrf', 'true')

@@ -49,12 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     const deleteMonitor = async (monitorId?: string | string[], statusCode = 200) => {
-      const deleteResponse = await supertest
-        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-        .send({ ids: Array.isArray(monitorId) ? monitorId : [monitorId] })
-        .set('kbn-xsrf', 'true');
-      expect(deleteResponse.status).to.eql(statusCode);
-      return deleteResponse;
+      return monitorTestService.deleteMonitor(monitorId, statusCode);
     };
 
     before(async () => {

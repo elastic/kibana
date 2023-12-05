@@ -149,8 +149,6 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.CONFIG_HASH]: '',
   [ConfigKey.MONITOR_QUERY_ID]: '',
   [ConfigKey.PARAMS]: '',
-  [ConfigKey.ORIGINAL_SPACE]: '',
-  [ConfigKey.PROJECT_ID]: '',
   [ConfigKey.MAX_ATTEMPTS]: 2,
   revision: 1,
 };

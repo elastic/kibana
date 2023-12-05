@@ -15,19 +15,19 @@ import { flattenAndFormatObject } from '../../synthetics_service/project_monitor
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import {
   BrowserFieldsCodec,
-  ProjectMonitorCodec,
-  ProjectMonitor,
-  ConfigKey,
-  MonitorTypeEnum,
-  MonitorTypeCodec,
-  HTTPFieldsCodec,
-  MonitorFields,
-  TCPFieldsCodec,
-  SyntheticsMonitor,
-  Locations,
   CodeEditorMode,
-  ICMPFieldsCodec,
+  ConfigKey,
   FormMonitorType,
+  HTTPFieldsCodec,
+  ICMPFieldsCodec,
+  Locations,
+  MonitorFields,
+  MonitorTypeCodec,
+  MonitorTypeEnum,
+  ProjectMonitor,
+  ProjectMonitorCodec,
+  SyntheticsMonitor,
+  TCPFieldsCodec,
 } from '../../../common/runtime_types';
 
 import {
@@ -178,6 +178,8 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     host: rawHost,
     inline_script: inlineScript,
     custom_heartbeat_id: _customHeartbeatId,
+    original_space: _originalSpace,
+    project_id: _projectId,
     ...rawConfig
   } = flattenedConfig;
   if (rawUrl) {
@@ -199,6 +201,9 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     // urls isn't supported for browser but is needed for SO AAD
     supportedKeys = supportedKeys.filter((key) => key !== ConfigKey.URLS);
   }
+  // needed for SO AAD
+  supportedKeys.push(ConfigKey.PROJECT_ID, ConfigKey.ORIGINAL_SPACE);
+
   const unsupportedKeys = Object.keys(rawConfig).filter((key) => !supportedKeys.includes(key));
 
   const result = omit(rawConfig, unsupportedKeys);

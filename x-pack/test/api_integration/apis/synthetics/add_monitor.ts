@@ -28,6 +28,7 @@ import {
 } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
+import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export const addMonitorAPIHelper = async (supertestAPI: any, monitor: any, statusCode = 200) => {
   const result = await supertestAPI
@@ -64,12 +65,21 @@ export default function ({ getService }: FtrProviderContext) {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const security = getService('security');
     const kibanaServer = getService('kibanaServer');
+    const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
 
     const addMonitorAPI = async (monitor: any, statusCode = 200) => {
       return addMonitorAPIHelper(supertestAPI, monitor, statusCode);
+    };
+
+    const deleteMonitor = async (
+      monitorId?: string | string[],
+      statusCode = 200,
+      spaceId?: string
+    ) => {
+      return monitorTestService.deleteMonitor(monitorId, statusCode, spaceId);
     };
 
     before(async () => {
@@ -334,10 +344,7 @@ export default function ({ getService }: FtrProviderContext) {
         monitorId = apiResponse.body.id;
         expect(apiResponse.body[ConfigKey.NAMESPACE]).eql(EXPECTED_NAMESPACE);
       } finally {
-        await supertestAPI
-          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        await deleteMonitor(monitorId, 200, SPACE_ID);
       }
     });
 
@@ -361,10 +368,7 @@ export default function ({ getService }: FtrProviderContext) {
         monitorId = apiResponse.body.id;
         expect(apiResponse.body[ConfigKey.NAMESPACE]).eql('default');
       } finally {
-        await supertestAPI
-          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        await deleteMonitor(monitorId, 200, SPACE_ID);
       }
     });
 
@@ -385,10 +389,7 @@ export default function ({ getService }: FtrProviderContext) {
         monitorId = apiResponse.body.id;
         expect(apiResponse.body[ConfigKey.NAMESPACE]).eql(monitor[ConfigKey.NAMESPACE]);
       } finally {
-        await supertestAPI
-          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        await deleteMonitor(monitorId, 200, SPACE_ID);
       }
     });
   });

@@ -37,8 +37,11 @@ export default function ({ getService }: FtrProviderContext) {
     const deleteMonitor = async (id: string) => {
       try {
         await supertest
-          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`)
+          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .set('kbn-xsrf', 'true')
+          .send({
+            ids: [id],
+          })
           .expect(200);
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -51,6 +54,8 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
         .set('kbn-xsrf', 'true')
         .send(monitor);
+
+      expect(res.status).eql(200, JSON.stringify(res.body));
 
       return res.body as EncryptedSyntheticsSavedMonitor;
     };
