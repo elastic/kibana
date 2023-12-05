@@ -188,7 +188,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
 
   const isThresholdRule = getIsThresholdRule(ruleType);
-  const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression');
+  const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
 
   const { getFields, reset, setFieldValue } = form;
 

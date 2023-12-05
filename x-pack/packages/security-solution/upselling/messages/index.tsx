@@ -23,14 +23,18 @@ export const UPGRADE_ALERT_ASSIGNMENTS = (requiredLicense: string) =>
     },
   });
 
-export const ALERT_SUPPRESSION = (requiredLicense: 'Platinum') =>
-  i18n.translate(
-    'sxpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppression.upsell',
-    {
-      defaultMessage:
-        'Alert suppression is enabled with {requiredLicense} license or above [Upsell]',
-      values: {
-        requiredLicense,
-      },
-    }
-  );
+export const ALERT_SUPPRESSION_RULE_FORM = (requiredLicense: 'Platinum') =>
+  i18n.translate('securitySolutionPackages.alertSuppressionRuleForm.upsell', {
+    defaultMessage: 'Alert suppression is enabled with {requiredLicense} license or above',
+    values: {
+      requiredLicense,
+    },
+  });
+
+export const ALERT_SUPPRESSION_RULE_DETAILS = i18n.translate(
+  'securitySolutionPackages.alertSuppressionRuleDetails.upsell',
+  {
+    defaultMessage:
+      'Alert suppression is configured but will not be applied due to insufficient licensing',
+  }
+);

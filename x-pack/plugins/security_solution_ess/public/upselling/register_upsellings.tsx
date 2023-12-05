@@ -19,7 +19,8 @@ import React, { lazy } from 'react';
 import {
   UPGRADE_ALERT_ASSIGNMENTS,
   UPGRADE_INVESTIGATION_GUIDE,
-  ALERT_SUPPRESSION,
+  ALERT_SUPPRESSION_RULE_FORM,
+  ALERT_SUPPRESSION_RULE_DETAILS,
 } from '@kbn/security-solution-upselling/messages';
 import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
@@ -117,8 +118,13 @@ export const upsellingMessages: UpsellingMessages = [
     message: UPGRADE_ALERT_ASSIGNMENTS('Platinum'),
   },
   {
-    id: 'alert_suppression',
+    id: 'alert_suppression_rule_form',
     minimumLicenseRequired: 'platinum',
-    message: ALERT_SUPPRESSION('Platinum'),
+    message: ALERT_SUPPRESSION_RULE_FORM('Platinum'),
+  },
+  {
+    id: 'alert_suppression_rule_details',
+    minimumLicenseRequired: 'platinum',
+    message: ALERT_SUPPRESSION_RULE_DETAILS,
   },
 ];
