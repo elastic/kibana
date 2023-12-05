@@ -55,7 +55,11 @@ export const PresentationPanelTitle = ({
 
   const describedPanelTitleElement = useMemo(() => {
     if (!panelDescription)
-      return <span className="presentationPanel__titleInner">{panelTitleElement}</span>;
+      return (
+        <span data-test-subj="presentationPanelTitle" className="presentationPanel__titleInner">
+          {panelTitleElement}
+        </span>
+      );
     return (
       <EuiToolTip
         content={panelDescription}
@@ -63,12 +67,12 @@ export const PresentationPanelTitle = ({
         position="top"
         anchorClassName="presentationPanel__titleTooltipAnchor"
       >
-        <span className="presentationPanel__titleInner">
+        <span data-test-subj="presentationPanelTitle" className="presentationPanel__titleInner">
           {panelTitleElement}{' '}
           <EuiIcon
             type="iInCircle"
             color="subdued"
-            data-test-subj="presentationPanelTitleDescriptionIcon"
+            data-test-subj="embeddablePanelTitleDescriptionIcon"
           />
         </span>
       </EuiToolTip>

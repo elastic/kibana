@@ -29,10 +29,7 @@ export const embeddableInputToSubject = <T extends unknown = unknown>(
   key: keyof CommonLegacyInput,
   useExplicitInput = false
 ) => {
-  // if (key === 'filters') {
-  //   debugger;
-  // }
-  const subject = new BehaviorSubject<T | undefined>(embeddable.getExplicitInput()[key] as T);
+  const subject = new BehaviorSubject<T | undefined>(embeddable.getExplicitInput()?.[key] as T);
   if (useExplicitInput && embeddable.parent) {
     subscription.add(
       embeddable.parent
@@ -44,18 +41,18 @@ export const embeddableInputToSubject = <T extends unknown = unknown>(
             ];
             const currentValue = (
               current.panels[embeddable.id]?.explicitInput as CommonLegacyInput
-            )[key];
+            )?.[key];
             return deepEqual(previousValue, currentValue);
           })
         )
-        .subscribe(() => subject.next(embeddable.getExplicitInput()[key] as T))
+        .subscribe(() => subject.next(embeddable.getExplicitInput()?.[key] as T))
     );
   } else {
     subscription.add(
       embeddable
         .getInput$()
         .pipe(distinctUntilKeyChanged(key))
-        .subscribe(() => subject.next(embeddable.getInput()[key] as T))
+        .subscribe(() => subject.next(embeddable.getInput()?.[key] as T))
     );
   }
   return subject;

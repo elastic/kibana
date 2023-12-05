@@ -12,7 +12,9 @@ import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
 import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import React, { useImperativeHandle } from 'react';
 import { setKibanaServices } from './kibana_services';
+import { DefaultPresentationPanelApi, PanelCompatibleComponent } from './panel_component/types';
 
 export const setStubKibanaServices = () => {
   const core = coreMock.createStart();
@@ -26,3 +28,19 @@ export const setStubKibanaServices = () => {
     savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
   });
 };
+
+// export const defaultApi:
+
+export const getMockPresentationPanelCompatibleComponent = <
+  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
+>(
+  api?: ApiType
+): Promise<PanelCompatibleComponent> =>
+  Promise.resolve(
+    React.forwardRef((_, apiRef) => {
+      useImperativeHandle(apiRef, () => api ?? {});
+      return (
+        <div data-test-subj="testPresentationPanelInternalComponent">This is a test component</div>
+      );
+    })
+  );

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
+import type { Filter, Query } from '@kbn/es-query';
 import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
@@ -34,8 +35,8 @@ class MockEmbeddable {
   constructor(type: string) {
     this.type = type;
   }
-  getFilters() {}
-  getQuery() {}
+  localFilters = new BehaviorSubject<Filter[] | undefined>([]);
+  localQuery = new BehaviorSubject<Query | undefined>(undefined);
 }
 
 const lensEmbeddable = new MockEmbeddable(LENS_EMBEDDABLE_TYPE) as unknown as IEmbeddable;

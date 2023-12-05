@@ -9,9 +9,6 @@
 import React from 'react';
 import { EmbeddableComponent } from './types';
 
-/**
- *
- */
 export const CreateEmbeddableComponent: <ApiType extends unknown = unknown>(
   component: (
     ref: React.ForwardedRef<ApiType>

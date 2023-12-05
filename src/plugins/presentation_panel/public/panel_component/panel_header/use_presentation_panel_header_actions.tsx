@@ -121,7 +121,7 @@ export const usePresentationPanelHeaderActions = <
         iconType={badge.getIconType({ embeddable: api, trigger: panelBadgeTrigger })}
         onClick={() => badge.execute({ embeddable: api, trigger: panelBadgeTrigger })}
         onClickAriaLabel={badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
-        data-test-subj={`presentationPanelBadge-${badge.id}`}
+        data-test-subj={`embeddablePanelBadge-${badge.id}`}
       >
         {badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
       </EuiBadge>

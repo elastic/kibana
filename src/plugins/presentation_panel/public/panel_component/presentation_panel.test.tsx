@@ -5,630 +5,202 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export {};
 
-// import React from 'react';
-// import { act } from 'react-dom/test-utils';
-// import { ReactWrapper, mount } from 'enzyme';
-// import { I18nProvider } from '@kbn/i18n-react';
-// import { nextTick } from '@kbn/test-jest-helpers';
-// import { findTestSubject } from '@elastic/eui/lib/test';
-// import { Action, UiActionsStart, ActionInternal, Trigger } from '@kbn/ui-actions-plugin/public';
-
-// import {
-//   ContactCardEmbeddable,
-//   CONTACT_CARD_EMBEDDABLE,
-//   ContactCardEmbeddableInput,
-//   ContactCardEmbeddableOutput,
-//   ContactCardEmbeddableFactory,
-//   CONTACT_CARD_EMBEDDABLE_REACT,
-//   createEditModeActionDefinition,
-//   ContactCardEmbeddableReactFactory,
-//   HelloWorldContainer,
-// } from '../lib/test_samples';
-// import { EuiBadge, EuiNotificationBadge } from '@elastic/eui';
-// import { embeddablePluginMock } from '../mocks';
-// import { EmbeddablePanel } from './embeddable_panel';
-// import { core, inspector } from '../kibana_services';
-// import { CONTEXT_MENU_TRIGGER, ViewMode } from '..';
-// import { UnwrappedEmbeddablePanelProps } from './types';
-// import {
-//   DESCRIPTIVE_CONTACT_CARD_EMBEDDABLE,
-//   DescriptiveContactCardEmbeddableFactory,
-// } from '../lib/test_samples/embeddables/contact_card/descriptive_contact_card_embeddable_factory';
-
-// const actionRegistry = new Map<string, Action>();
-// const triggerRegistry = new Map<string, Trigger>();
-
-// const { setup, doStart } = embeddablePluginMock.createInstance();
-
-// const editModeAction = createEditModeActionDefinition();
-// const trigger: Trigger = {
-//   id: CONTEXT_MENU_TRIGGER,
-// };
-// const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-// const embeddableReactFactory = new ContactCardEmbeddableReactFactory(
-//   (() => null) as any,
-//   {} as any
-// );
-// const descriptiveEmbeddableFactory = new DescriptiveContactCardEmbeddableFactory(
-//   (() => null) as any
-// );
-
-// actionRegistry.set(editModeAction.id, new ActionInternal(editModeAction));
-// triggerRegistry.set(trigger.id, trigger);
-// setup.registerEmbeddableFactory(embeddableFactory.type, embeddableFactory);
-// setup.registerEmbeddableFactory(embeddableReactFactory.type, embeddableReactFactory);
-// setup.registerEmbeddableFactory(descriptiveEmbeddableFactory.type, descriptiveEmbeddableFactory);
-
-// const start = doStart();
-// const getEmbeddableFactory = start.getEmbeddableFactory;
-
-// const renderEmbeddableInPanel = async (
-//   props: UnwrappedEmbeddablePanelProps
-// ): Promise<ReactWrapper> => {
-//   let wrapper: ReactWrapper;
-//   await act(async () => {
-//     wrapper = mount(
-//       <I18nProvider>
-//         <EmbeddablePanel {...props} />
-//       </I18nProvider>
-//     );
-//   });
-//   return wrapper!;
-// };
-
-// const setupContainerAndEmbeddable = async (
-//   embeddableType: string,
-//   viewMode: ViewMode = ViewMode.VIEW,
-//   hidePanelTitles?: boolean
-// ) => {
-//   const container = new HelloWorldContainer(
-//     { id: '123', panels: {}, viewMode: viewMode ?? ViewMode.VIEW, hidePanelTitles },
-//     {
-//       getEmbeddableFactory,
-//     } as any
-//   );
-
-//   const embeddable = await container.addNewEmbeddable<
-//     ContactCardEmbeddableInput,
-//     ContactCardEmbeddableOutput,
-//     ContactCardEmbeddable
-//   >(embeddableType, {
-//     firstName: 'Jack',
-//     lastName: 'Orange',
-//   });
-
-//   return { container, embeddable };
-// };
-
-// const renderInEditModeAndOpenContextMenu = async ({
-//   embeddableInputs,
-//   getActions = () => Promise.resolve([]),
-//   showNotifications = true,
-//   showBadges = true,
-// }: {
-//   embeddableInputs: any;
-//   getActions?: UiActionsStart['getTriggerCompatibleActions'];
-//   showNotifications?: boolean;
-//   showBadges?: boolean;
-// }) => {
-//   const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
-//     getEmbeddableFactory,
-//   } as any);
-
-//   const embeddable = await container.addNewEmbeddable<
-//     ContactCardEmbeddableInput,
-//     ContactCardEmbeddableOutput,
-//     ContactCardEmbeddable
-//   >(CONTACT_CARD_EMBEDDABLE, embeddableInputs);
-
-//   let component: ReactWrapper;
-//   await act(async () => {
-//     component = mount(
-//       <I18nProvider>
-//         <EmbeddablePanel
-//           embeddable={embeddable}
-//           getActions={getActions}
-//           showNotifications={showNotifications}
-//           showBadges={showBadges}
-//         />
-//       </I18nProvider>
-//     );
-//   });
-
-//   findTestSubject(component!, 'embeddablePanelToggleMenuIcon').simulate('click');
-//   await nextTick();
-//   component!.update();
-
-//   return { component: component! };
-// };
-
-// describe('Error states', () => {
-//   let component: ReactWrapper<unknown>;
-//   let embeddable: ContactCardEmbeddable;
-
-//   beforeEach(async () => {
-//     const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
-//       getEmbeddableFactory,
-//     } as any);
-
-//     embeddable = (await container.addNewEmbeddable<
-//       ContactCardEmbeddableInput,
-//       ContactCardEmbeddableOutput,
-//       ContactCardEmbeddable
-//     >(CONTACT_CARD_EMBEDDABLE, {})) as ContactCardEmbeddable;
-
-//     await act(async () => {
-//       component = mount(
-//         <I18nProvider>
-//           <EmbeddablePanel embeddable={embeddable} />
-//         </I18nProvider>
-//       );
-//     });
-
-//     jest.spyOn(embeddable, 'catchError');
-//   });
-
-//   test('renders a custom error', () => {
-//     act(() => {
-//       embeddable.triggerError(new Error('something'));
-//       component.update();
-//       component.mount();
-//     });
-
-//     const embeddableError = findTestSubject(component, 'embeddableError');
-
-//     expect(embeddable.catchError).toHaveBeenCalledWith(
-//       new Error('something'),
-//       expect.any(HTMLElement)
-//     );
-//     expect(embeddableError).toHaveProperty('length', 1);
-//     expect(embeddableError.text()).toBe('something');
-//   });
-
-//   test('renders a custom fatal error', () => {
-//     act(() => {
-//       embeddable.triggerError(new Error('something'));
-//       component.update();
-//       component.mount();
-//     });
-
-//     const embeddableError = findTestSubject(component, 'embeddableError');
-
-//     expect(embeddable.catchError).toHaveBeenCalledWith(
-//       new Error('something'),
-//       expect.any(HTMLElement)
-//     );
-//     expect(embeddableError).toHaveProperty('length', 1);
-//     expect(embeddableError.text()).toBe('something');
-//   });
-
-//   test('destroys previous error', () => {
-//     const { catchError } = embeddable as Required<typeof embeddable>;
-//     let destroyError: jest.MockedFunction<ReturnType<typeof catchError>>;
-
-//     (embeddable.catchError as jest.MockedFunction<typeof catchError>).mockImplementationOnce(
-//       (...args) => {
-//         destroyError = jest.fn(catchError(...args));
-
-//         return destroyError;
-//       }
-//     );
-//     act(() => {
-//       embeddable.triggerError(new Error('something'));
-//       component.update();
-//       component.mount();
-//     });
-//     act(() => {
-//       embeddable.triggerError(new Error('another error'));
-//       component.update();
-//       component.mount();
-//     });
-
-//     const embeddableError = findTestSubject(component, 'embeddableError');
-
-//     expect(embeddableError).toHaveProperty('length', 1);
-//     expect(embeddableError.text()).toBe('another error');
-//     expect(destroyError!).toHaveBeenCalledTimes(1);
-//   });
-
-//   test('renders a default error', async () => {
-//     embeddable.catchError = undefined;
-//     act(() => {
-//       embeddable.triggerError(new Error('something'));
-//       component.update();
-//       component.mount();
-//     });
-
-//     const embeddableError = findTestSubject(component, 'embeddableError');
-
-//     expect(embeddableError).toHaveProperty('length', 1);
-//     expect(embeddableError.children.length).toBeGreaterThan(0);
-//   });
-
-//   test('renders a React node', () => {
-//     (embeddable.catchError as jest.Mock).mockReturnValueOnce(<div>Something</div>);
-//     act(() => {
-//       embeddable.triggerError(new Error('something'));
-//       component.update();
-//       component.mount();
-//     });
-
-//     const embeddableError = findTestSubject(component, 'embeddableError');
-
-//     expect(embeddableError).toHaveProperty('length', 1);
-//     expect(embeddableError.text()).toBe('Something');
-//   });
-// });
-
-// test('Render method is called on Embeddable', async () => {
-//   const { embeddable } = await setupContainerAndEmbeddable(CONTACT_CARD_EMBEDDABLE);
-//   jest.spyOn(embeddable, 'render');
-//   await renderEmbeddableInPanel({ embeddable });
-//   expect(embeddable.render).toHaveBeenCalledTimes(1);
-// });
-
-// test('Actions which are disabled via disabledActions are hidden', async () => {
-//   const action = {
-//     id: 'FOO',
-//     type: 'FOO',
-//     getIconType: () => undefined,
-//     getDisplayName: () => 'foo',
-//     isCompatible: async () => true,
-//     execute: async () => {},
-//     order: 10,
-//     getHref: () => {
-//       return Promise.resolve(undefined);
-//     },
-//   };
-//   const getActions = () => Promise.resolve([action]);
-
-//   const { component: component1 } = await renderInEditModeAndOpenContextMenu({
-//     embeddableInputs: {
-//       firstName: 'Bob',
-//     },
-//     getActions,
-//   });
-//   const { component: component2 } = await renderInEditModeAndOpenContextMenu({
-//     embeddableInputs: {
-//       firstName: 'Bob',
-//       disabledActions: ['FOO'],
-//     },
-//     getActions,
-//   });
-
-//   const fooContextMenuActionItem1 = findTestSubject(component1, 'embeddablePanelAction-FOO');
-//   const fooContextMenuActionItem2 = findTestSubject(component2, 'embeddablePanelAction-FOO');
-
-//   expect(fooContextMenuActionItem1.length).toBe(1);
-//   expect(fooContextMenuActionItem2.length).toBe(0);
-// });
-
-// test('Badges which are disabled via disabledActions are hidden', async () => {
-//   const action = {
-//     id: 'BAR',
-//     type: 'BAR',
-//     getIconType: () => undefined,
-//     getDisplayName: () => 'bar',
-//     isCompatible: async () => true,
-//     execute: async () => {},
-//     order: 10,
-//     getHref: () => {
-//       return Promise.resolve(undefined);
-//     },
-//   };
-//   const getActions = () => Promise.resolve([action]);
-
-//   const { component: component1 } = await renderInEditModeAndOpenContextMenu({
-//     embeddableInputs: {
-//       firstName: 'Bob',
-//     },
-//     getActions,
-//   });
-//   const { component: component2 } = await renderInEditModeAndOpenContextMenu({
-//     embeddableInputs: {
-//       firstName: 'Bob',
-//       disabledActions: ['BAR'],
-//     },
-//     getActions,
-//   });
-
-//   expect(component1.find(EuiBadge).length).toBe(1);
-//   expect(component2.find(EuiBadge).length).toBe(0);
-// });
-
-// test('Badges are not shown when hideBadges is true', async () => {
-//   const action = {
-//     id: 'BAR',
-//     type: 'BAR',
-//     getIconType: () => undefined,
-//     getDisplayName: () => 'bar',
-//     isCompatible: async () => true,
-//     execute: async () => {},
-//     order: 10,
-//     getHref: () => {
-//       return Promise.resolve(undefined);
-//     },
-//   };
-//   const getActions = () => Promise.resolve([action]);
-
-//   const { component } = await renderInEditModeAndOpenContextMenu({
-//     embeddableInputs: {
-//       firstName: 'Bob',
-//     },
-//     getActions,
-//     showBadges: false,
-//   });
-//   expect(component.find(EuiBadge).length).toBe(0);
-//   expect(component.find(EuiNotificationBadge).length).toBe(1);
-// });
-
-// test('Notifications are not shown when hideNotifications is true', async () => {
-//   const action = {
-//     id: 'BAR',
-//     type: 'BAR',
-//     getIconType: () => undefined,
-//     getDisplayName: () => 'bar',
-//     isCompatible: async () => true,
-//     execute: async () => {},
-//     order: 10,
-//     getHref: () => {
-//       return Promise.resolve(undefined);
-//     },
-//   };
-//   const getActions = () => Promise.resolve([action]);
-
-//   const { component } = await renderInEditModeAndOpenContextMenu({
-//     embeddableInputs: {
-//       firstName: 'Bob',
-//     },
-//     getActions,
-//     showNotifications: false,
-//   });
-
-//   expect(component.find(EuiBadge).length).toBe(1);
-//   expect(component.find(EuiNotificationBadge).length).toBe(0);
-// });
-
-// test('Edit mode actions are hidden if parent is in view mode', async () => {
-//   const { embeddable } = await setupContainerAndEmbeddable(CONTACT_CARD_EMBEDDABLE);
-
-//   const component = await renderEmbeddableInPanel({ embeddable });
-
-//   await act(async () => {
-//     findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-//     await nextTick();
-//     component.update();
-//   });
-//   expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
-//   await nextTick();
-//   component.update();
-//   expect(findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`).length).toBe(0);
-// });
-
-// test('Edit mode actions are shown in edit mode', async () => {
-//   const { container, embeddable } = await setupContainerAndEmbeddable(CONTACT_CARD_EMBEDDABLE);
-
-//   const component = await renderEmbeddableInPanel({ embeddable });
-
-//   const button = findTestSubject(component, 'embeddablePanelToggleMenuIcon');
-
-//   expect(button.length).toBe(1);
-//   await act(async () => {
-//     findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-//     await nextTick();
-//     component.update();
-//   });
-//   expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
-//   await nextTick();
-//   act(() => {
-//     component.update();
-//   });
-//   expect(findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`).length).toBe(0);
-
-//   await act(async () => {
-//     container.updateInput({ viewMode: ViewMode.EDIT });
-//     await nextTick();
-//     component.update();
-//   });
-
-//   // Need to close and re-open to refresh. It doesn't update automatically.
-//   await act(async () => {
-//     findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-//     await nextTick();
-//     findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-//     await nextTick();
-//     component.update();
-//   });
-//   expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(1);
-
-//   await act(async () => {
-//     container.updateInput({ viewMode: ViewMode.VIEW });
-//     await nextTick();
-//     component.update();
-//   });
-
-//   // TODO: Fix this.
-//   // const action = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
-//   // expect(action.length).toBe(1);
-// });
-
-// test('Panel title customize link does not exist in view mode', async () => {
-//   const { embeddable } = await setupContainerAndEmbeddable(
-//     CONTACT_CARD_EMBEDDABLE,
-//     ViewMode.VIEW,
-//     false
-//   );
-
-//   const component = await renderEmbeddableInPanel({ embeddable });
-
-//   const titleLink = findTestSubject(component, 'embeddablePanelTitleLink');
-//   expect(titleLink.length).toBe(0);
-// });
-
-// test('Runs customize panel action on title click when in edit mode', async () => {
-//   // spy on core openFlyout to check that the flyout is opened correctly.
-//   core.overlays.openFlyout = jest.fn();
-
-//   const { embeddable } = await setupContainerAndEmbeddable(
-//     CONTACT_CARD_EMBEDDABLE,
-//     ViewMode.EDIT,
-//     false
-//   );
-
-//   const component = await renderEmbeddableInPanel({ embeddable });
-
-//   const titleLink = findTestSubject(component, 'embeddablePanelTitleLink');
-//   expect(titleLink.length).toBe(1);
-//   act(() => {
-//     titleLink.simulate('click');
-//   });
-//   await nextTick();
-//   expect(core.overlays.openFlyout).toHaveBeenCalledTimes(1);
-//   expect(core.overlays.openFlyout).toHaveBeenCalledWith(
-//     expect.any(Function),
-//     expect.objectContaining({ 'data-test-subj': 'customizePanel' })
-//   );
-// });
-
-// test('Updates when hidePanelTitles is toggled', async () => {
-//   const { container, embeddable } = await setupContainerAndEmbeddable(
-//     CONTACT_CARD_EMBEDDABLE,
-//     ViewMode.VIEW,
-//     false
-//   );
-//   /**
-//    * panel title will always show if a description is set so we explictily set the panel
-//    * description so the embeddable description is not used
-//    */
-//   embeddable.updateInput({ description: '' });
-//   const component = await renderEmbeddableInPanel({ embeddable });
-
-//   await component.update();
-//   let title = findTestSubject(component, `embeddablePanelHeading-HelloJackOrange`);
-//   expect(title.length).toBe(1);
-
-//   await act(async () => {
-//     await container.updateInput({ hidePanelTitles: true });
-//   });
-
-//   await nextTick();
-//   await component.update();
-//   title = findTestSubject(component, `embeddablePanelHeading-HelloJackOrange`);
-//   expect(title.length).toBe(0);
-
-//   await act(async () => {
-//     await container.updateInput({ hidePanelTitles: false });
-//     await nextTick();
-//     component.update();
-//   });
-
-//   title = findTestSubject(component, `embeddablePanelHeading-HelloJackOrange`);
-//   expect(title.length).toBe(1);
-// });
-
-// test('Respects options from SelfStyledEmbeddable', async () => {
-//   const { container, embeddable } = await setupContainerAndEmbeddable(
-//     CONTACT_CARD_EMBEDDABLE,
-//     ViewMode.VIEW,
-//     false
-//   );
-
-//   const selfStyledEmbeddable = embeddablePluginMock.mockSelfStyledEmbeddable(embeddable, {
-//     hideTitle: true,
-//   });
-
-//   // make sure the title is being hidden because of the self styling, not the container
-//   container.updateInput({ hidePanelTitles: false });
-
-//   const component = await renderEmbeddableInPanel({ embeddable: selfStyledEmbeddable });
-
-//   const title = findTestSubject(component, `embeddablePanelHeading-HelloJackOrange`);
-//   expect(title.length).toBe(0);
-// });
-
-// test('Shows icon in panel title when the embeddable has a description', async () => {
-//   const { embeddable } = await setupContainerAndEmbeddable(
-//     DESCRIPTIVE_CONTACT_CARD_EMBEDDABLE,
-//     ViewMode.VIEW,
-//     false
-//   );
-//   const component = await renderEmbeddableInPanel({ embeddable });
-
-//   const descriptionIcon = findTestSubject(component, 'embeddablePanelTitleDescriptionIcon');
-//   expect(descriptionIcon.length).toBe(1);
-// });
-
-// test('Does not hide header when parent hide header option is false', async () => {
-//   const { embeddable } = await setupContainerAndEmbeddable(
-//     CONTACT_CARD_EMBEDDABLE,
-//     ViewMode.VIEW,
-//     false
-//   );
-
-//   const component = await renderEmbeddableInPanel({ embeddable });
-
-//   const title = findTestSubject(component, `embeddablePanelHeading-HelloJackOrange`);
-//   expect(title.length).toBe(1);
-// });
-
-// test('Hides title when parent hide header option is true', async () => {
-//   const { embeddable } = await setupContainerAndEmbeddable(
-//     CONTACT_CARD_EMBEDDABLE,
-//     ViewMode.VIEW,
-//     true
-//   );
-
-//   const component = await renderEmbeddableInPanel({ embeddable });
-
-//   const title = findTestSubject(component, `embeddablePanelHeading-HelloJackOrange`);
-//   expect(title.length).toBe(0);
-// });
-
-// test('Should work in minimal way rendering only the inspector action', async () => {
-//   inspector.isAvailable = jest.fn(() => true);
-
-//   const { embeddable } = await setupContainerAndEmbeddable(
-//     CONTACT_CARD_EMBEDDABLE,
-//     ViewMode.VIEW,
-//     true
-//   );
-
-//   const component = await renderEmbeddableInPanel({ embeddable });
-
-//   await act(async () => {
-//     findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-//     await nextTick();
-//     component.update();
-//   });
-
-//   expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
-//   await act(async () => {
-//     await nextTick();
-//     component.update();
-//   });
-//   expect(findTestSubject(component, `embeddablePanelAction-openInspector`).length).toBe(1);
-//   const action = findTestSubject(component, `embeddablePanelAction-ACTION_CUSTOMIZE_PANEL`);
-//   expect(action.length).toBe(0);
-// });
-
-// test('Renders an embeddable returning a React node', async () => {
-//   const container = new HelloWorldContainer(
-//     { id: '123', panels: {}, viewMode: ViewMode.VIEW, hidePanelTitles: false },
-//     { getEmbeddableFactory } as any
-//   );
-
-//   const embeddable = await container.addNewEmbeddable<
-//     ContactCardEmbeddableInput,
-//     ContactCardEmbeddableOutput,
-//     ContactCardEmbeddable
-//   >(CONTACT_CARD_EMBEDDABLE_REACT, {
-//     firstName: 'Bran',
-//     lastName: 'Stark',
-//   });
-
-//   const component = await renderEmbeddableInPanel({ embeddable });
-
-//   expect(component.find('.embPanel__titleText').text()).toBe('Hello Bran Stark');
-// });
+import { render, screen, waitFor } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { BehaviorSubject } from 'rxjs';
+import { PresentationPanel } from '.';
+import { uiActions } from '../kibana_services';
+import { getMockPresentationPanelCompatibleComponent } from '../mocks';
+import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
+import { ViewMode } from '@kbn/presentation-publishing';
+
+const mockCustomizePanelAction = { execute: jest.fn() };
+jest.mock('../panel_actions/panel_actions', () => ({
+  customizePanelAction: mockCustomizePanelAction,
+}));
+
+describe('Presentation panel', () => {
+  const renderPresentationPanel = async ({
+    props,
+    api,
+  }: {
+    props?: Omit<PresentationPanelInternalProps, 'Component'>;
+    api?: DefaultPresentationPanelApi;
+  }) => {
+    render(
+      <PresentationPanel {...props} Component={getMockPresentationPanelCompatibleComponent(api)} />
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('embeddablePanelToggleMenuIcon')).toBeInTheDocument();
+    });
+  };
+
+  it('renders internal component', async () => {
+    render(<PresentationPanel Component={getMockPresentationPanelCompatibleComponent()} />);
+    await waitFor(() =>
+      expect(screen.getByTestId('testPresentationPanelInternalComponent')).toBeInTheDocument()
+    );
+  });
+
+  it('renders a blocking error when one is present', async () => {
+    const api: DefaultPresentationPanelApi = {
+      blockingError: new BehaviorSubject<Error | undefined>(new Error('UH OH')),
+    };
+    render(<PresentationPanel Component={getMockPresentationPanelCompatibleComponent(api)} />);
+    await waitFor(() => expect(screen.getByTestId('embeddableStackError')).toBeInTheDocument());
+  });
+
+  describe('actions', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const mockAction = (id: string) => ({
+      isCompatible: jest.fn().mockResolvedValue(true),
+      getDisplayName: () => id,
+      getIconType: jest.fn(),
+      execute: jest.fn(),
+      id,
+    });
+
+    it('gets compatible actions for the given API', async () => {
+      const api: DefaultPresentationPanelApi = {
+        panelTitle: new BehaviorSubject<string | undefined>('superTest'),
+      };
+      await renderPresentationPanel({ api });
+      expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('CONTEXT_MENU_TRIGGER', {
+        embeddable: api,
+      });
+      expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('PANEL_BADGE_TRIGGER', {
+        embeddable: api,
+      });
+      expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith(
+        'PANEL_NOTIFICATION_TRIGGER',
+        { embeddable: api }
+      );
+    });
+
+    it('calls the custom getActions function when one is provided', async () => {
+      const getActions = jest.fn().mockReturnValue([]);
+      await renderPresentationPanel({ props: { getActions } });
+      expect(getActions).toHaveBeenCalledTimes(3);
+      expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledTimes(0);
+    });
+
+    it('does not show actions which are disabled by the API', async () => {
+      const api: DefaultPresentationPanelApi = {
+        disabledActionIds: new BehaviorSubject<string[] | undefined>(['actionA']),
+      };
+      const getActions = jest.fn().mockReturnValue([mockAction('actionA'), mockAction('actionB')]);
+      await renderPresentationPanel({ api, props: { getActions } });
+      userEvent.click(screen.getByTestId('embeddablePanelToggleMenuIcon'));
+      await waitForEuiPopoverOpen();
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelContextMenuOpen')).toBeInTheDocument();
+        expect(screen.getByTestId('presentationPanelContextMenuItems')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('embeddablePanelAction-actionB')).toBeInTheDocument();
+      expect(screen.queryByTestId('embeddablePanelAction-actionA')).not.toBeInTheDocument();
+    });
+
+    it('shows badges and notifications', async () => {
+      const testAction = mockAction('testAction');
+      const getActions = jest.fn().mockReturnValue([testAction]);
+      await renderPresentationPanel({ props: { getActions } });
+      expect(screen.queryByTestId('embeddablePanelBadge-testAction')).toBeInTheDocument();
+      expect(screen.queryByTestId('embeddablePanelNotification-testAction')).toBeInTheDocument();
+    });
+
+    it('does not show badges when showBadges is false', async () => {
+      const testAction = mockAction('testAction');
+      const getActions = jest.fn().mockReturnValue([testAction]);
+      await renderPresentationPanel({ props: { getActions, showBadges: false } });
+      expect(screen.queryByTestId('embeddablePanelBadge-testAction')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('embeddablePanelNotification-testAction')).toBeInTheDocument();
+    });
+
+    it('does not show notifications when showNotifications is false', async () => {
+      const testAction = mockAction('testAction');
+      const getActions = jest.fn().mockReturnValue([testAction]);
+      await renderPresentationPanel({ props: { getActions, showNotifications: false } });
+      expect(screen.queryByTestId('embeddablePanelBadge-testAction')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('embeddablePanelNotification-testAction')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('titles', () => {
+    it('renders the panel title from the api', async () => {
+      const api: DefaultPresentationPanelApi = {
+        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+      };
+      await renderPresentationPanel({ api });
+      await waitFor(() => {
+        expect(screen.getByTestId('presentationPanelTitle')).toHaveTextContent('SUPER TITLE');
+      });
+    });
+
+    it('renders an info icon when the api provides a panel description', async () => {
+      const api: DefaultPresentationPanelApi = {
+        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        panelDescription: new BehaviorSubject<string | undefined>('SUPER DESCRIPTION'),
+      };
+      await renderPresentationPanel({ api });
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitleDescriptionIcon')).toBeInTheDocument();
+      });
+    });
+
+    it('runs customize panel action on title click when in edit mode', async () => {
+      const api: DefaultPresentationPanelApi = {
+        panelTitle: new BehaviorSubject<string | undefined>('TITLE'),
+        viewMode: new BehaviorSubject<ViewMode>('edit'),
+      };
+      await renderPresentationPanel({ api });
+      await waitFor(() => {
+        expect(screen.getByTestId('presentationPanelTitle')).toHaveTextContent('TITLE');
+      });
+      expect(screen.queryByTestId('presentationPanelTitleLink')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('presentationPanelTitleLink'));
+      expect(mockCustomizePanelAction.execute).toHaveBeenCalled();
+    });
+
+    it('does not show title customize link in view mode', async () => {
+      const api: DefaultPresentationPanelApi = {
+        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        viewMode: new BehaviorSubject<ViewMode>('view'),
+      };
+      await renderPresentationPanel({ api });
+      await waitFor(() => {
+        expect(screen.getByTestId('presentationPanelTitle')).toHaveTextContent('SUPER TITLE');
+      });
+      expect(screen.queryByTestId('presentationPanelTitleLink')).not.toBeInTheDocument();
+    });
+
+    it('hides title when API hide title option is true', async () => {
+      const api: DefaultPresentationPanelApi = {
+        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        hidePanelTitle: new BehaviorSubject<boolean | undefined>(true),
+        viewMode: new BehaviorSubject<ViewMode>('view'),
+      };
+      await renderPresentationPanel({ api });
+      expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
+    });
+
+    it('hides title when parent hide title option is true', async () => {
+      const api: DefaultPresentationPanelApi = {
+        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        viewMode: new BehaviorSubject<ViewMode>('view'),
+        parentApi: new BehaviorSubject<unknown>({
+          hidePanelTitle: new BehaviorSubject<boolean | undefined>(true),
+        }),
+      };
+      await renderPresentationPanel({ api });
+      expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
+    });
+  });
+});

@@ -373,12 +373,16 @@ export class DashboardContainer
   public savedObjectId: BehaviorSubject<string | undefined>;
   public expandedPanelId: BehaviorSubject<string | undefined>;
 
-  public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
+  public async replacePanel(
+    idToRemove: string,
+    { panelType, initialState }: PanelPackage,
+    generateNewId?: boolean
+  ) {
     const newId = await this.replaceEmbeddable(
       idToRemove,
       initialState as Partial<EmbeddableInput>,
       panelType,
-      true
+      generateNewId
     );
     if (this.getExpandedPanelId() !== undefined) {
       this.setExpandedPanelId(newId);

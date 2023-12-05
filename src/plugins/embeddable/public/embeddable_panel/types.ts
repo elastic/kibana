@@ -11,6 +11,7 @@ import { MaybePromise } from '@kbn/utility-types';
 import { ReactNode } from 'react';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../lib';
 import { LegacyEmbeddableAPI } from '../lib/embeddables/i_embeddable';
+import { EmbeddableComponent } from '../registry/types';
 
 export type LegacyCompatibleEmbeddable = IEmbeddable<
   EmbeddableInput,
@@ -26,6 +27,4 @@ export type UnwrappedEmbeddablePanelProps = Omit<EmbeddablePanelProps, 'embeddab
   embeddable: LegacyCompatibleEmbeddable;
 };
 
-export type LegacyEmbeddableCompatibilityComponent = React.ForwardRefExoticComponent<
-  React.RefAttributes<LegacyEmbeddableAPI>
->;
+export type LegacyEmbeddableCompatibilityComponent = EmbeddableComponent<LegacyEmbeddableAPI>;

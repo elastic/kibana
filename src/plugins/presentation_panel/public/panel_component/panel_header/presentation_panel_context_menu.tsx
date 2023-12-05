@@ -161,7 +161,11 @@ export const PresentationPanelContextMenu = ({
           </EuiContextMenuItem>
         </EuiContextMenuPanel>
       ) : (
-        <EuiContextMenu initialPanelId="mainMenu" panels={contextMenuPanels} />
+        <EuiContextMenu
+          data-test-subj="presentationPanelContextMenuItems"
+          initialPanelId="mainMenu"
+          panels={contextMenuPanels}
+        />
       )}
     </EuiPopover>
   );

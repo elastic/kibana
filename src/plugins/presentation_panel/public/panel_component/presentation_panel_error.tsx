@@ -28,7 +28,7 @@ interface EmbeddablePanelErrorProps {
 export const PresentationPanelError = ({ api, error }: EmbeddablePanelErrorProps) => {
   const [isEditable, setIsEditable] = useState(false);
   const handleErrorClick = useMemo(
-    () => (isEditable ? () => editPanelAction.execute({ embeddable: api }) : undefined),
+    () => (isEditable ? () => editPanelAction?.execute({ embeddable: api }) : undefined),
     [api, isEditable]
   );
   const label = useMemo(() => editPanelAction?.getDisplayName({ embeddable: api }), [api]);
@@ -41,17 +41,17 @@ export const PresentationPanelError = ({ api, error }: EmbeddablePanelErrorProps
 
   // Get initial editable state from action and subscribe to changes.
   useEffect(() => {
-    if (!editPanelAction.couldBecomeCompatible({ embeddable: api })) return;
+    if (!editPanelAction?.couldBecomeCompatible({ embeddable: api })) return;
 
     let canceled = false;
     const subscription = new Subscription();
     (async () => {
-      const initiallyCompatible = await editPanelAction.isCompatible({ embeddable: api });
+      const initiallyCompatible = await editPanelAction?.isCompatible({ embeddable: api });
       if (canceled) return;
       setIsEditable(initiallyCompatible);
 
       subscription.add(
-        editPanelAction.subscribeToCompatibilityChanges({ embeddable: api }, (isCompatible) => {
+        editPanelAction?.subscribeToCompatibilityChanges({ embeddable: api }, (isCompatible) => {
           if (!canceled) setIsEditable(isCompatible);
         })
       );

@@ -249,7 +249,7 @@ export abstract class Embeddable<
 
   public getExplicitInput() {
     const root = this.getRoot();
-    if (root.getIsContainer()) {
+    if (root?.getIsContainer?.()) {
       return (
         (root.getInput().panels?.[this.id]?.explicitInput as TEmbeddableInput) ?? this.getInput()
       );
