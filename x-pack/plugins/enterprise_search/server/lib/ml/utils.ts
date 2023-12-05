@@ -90,8 +90,7 @@ export const E5_MODEL_PLACEHOLDER: MlModel = {
       'E5 is an NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model performs best for non-English language documents and queries.',
   }),
   licenseType: 'mit',
-  licensePageUrl: 'https://huggingface.co/elastic/multilingual-e5-small-optimized',
-  modelDetailsPageUrl: 'https://huggingface.co/intfloat/multilingual-e5-small',
+  modelDetailsPageUrl: 'https://ela.st/multilingual-e5-small',
   isPlaceholder: true,
 };
 
@@ -99,4 +98,5 @@ export const E5_LINUX_OPTIMIZED_MODEL_PLACEHOLDER = {
   ...E5_MODEL_PLACEHOLDER,
   modelId: E5_LINUX_OPTIMIZED_MODEL_ID,
   title: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
+  modelDetailsPageUrl: 'https://ela.st/multilingual-e5-small-linux-x86-64',
 };

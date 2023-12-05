@@ -5,18 +5,34 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { AddAndValidateYourDataCardsId, AddIntegrationsSteps } from '../types';
+import { useStepContext } from '../context/step_context';
+import { AddIntegrationCallout } from './add_integration_callout';
+import { ADD_ELASTIC_RULES, ADD_ELASTIC_RULES_CALLOUT_TITLE } from './translations';
 
-const AddElasticRulesButtonComponent = () => (
-  <LinkButton id={SecurityPageName.rules} fill>
-    <FormattedMessage
-      id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step4.description2.button"
-      defaultMessage="Add Elastic rules"
-    />
-  </LinkButton>
-);
+const AddElasticRulesButtonComponent = () => {
+  const { finishedSteps } = useStepContext();
+  const isIntegrationsStepComplete = finishedSteps[
+    AddAndValidateYourDataCardsId.addIntegrations
+  ]?.has(AddIntegrationsSteps.connectToDataSources);
+  return (
+    <>
+      {!isIntegrationsStepComplete && (
+        <AddIntegrationCallout stepName={ADD_ELASTIC_RULES_CALLOUT_TITLE} />
+      )}
+      <LinkButton
+        id={SecurityPageName.rules}
+        fill
+        className="step-paragraph"
+        disabled={!isIntegrationsStepComplete}
+      >
+        {ADD_ELASTIC_RULES}
+      </LinkButton>
+    </>
+  );
+};
 
 export const AddElasticRulesButton = React.memo(AddElasticRulesButtonComponent);

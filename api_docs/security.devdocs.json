@@ -1240,7 +1240,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>) => ",
+              "<unknown, unknown, unknown, any>, headerName?: string) => ",
               {
                 "pluginId": "security",
                 "scope": "server",
@@ -1272,6 +1272,23 @@
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "security",
+                "id": "def-server.HTTPAuthorizationHeader.parseFromRequest.$2",
+                "type": "string",
+                "tags": [],
+                "label": "headerName",
+                "description": [
+                  "Optional name of the HTTP header to extract authentication information from. By default, the\nauthentication information is extracted from the `Authorization` HTTP header."
+                ],
+                "signature": [
+                  "string"
                 ],
                 "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
                 "deprecated": false,

@@ -71,14 +71,12 @@
     "@kbn/react-kibana-context-render",
     "@kbn/unified-data-table",
     "@kbn/no-data-page-plugin",
-    "@kbn/rule-data-utils",
     "@kbn/global-search-plugin",
     "@kbn/resizable-layout",
     "@kbn/unsaved-changes-badge",
+    "@kbn/rule-data-utils",
     "@kbn/core-chrome-browser",
     "@kbn/core-plugins-server"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

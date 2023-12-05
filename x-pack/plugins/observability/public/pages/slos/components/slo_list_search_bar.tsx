@@ -66,6 +66,8 @@ const SORT_OPTIONS: Array<Item<SortField>> = [
   },
 ];
 
+export type ViewMode = 'default' | 'compact';
+
 export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initialState }: Props) {
   const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
     useKibana().services;
@@ -89,7 +91,7 @@ export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initial
   };
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="s">
+    <EuiFlexGroup direction="row" gutterSize="s" responsive>
       <EuiFlexItem grow>
         <QueryStringInput
           appName="Observability"
@@ -122,44 +124,48 @@ export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initial
         />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={true} style={{ maxWidth: 280 }}>
-        <EuiFilterGroup>
-          <EuiPopover
-            button={
-              <EuiFilterButton
-                disabled={loading}
-                iconType="arrowDown"
-                onClick={handleToggleSortButton}
-                isSelected={isSortPopoverOpen}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" gutterSize="s" responsive>
+          <EuiFlexItem style={{ maxWidth: 250 }}>
+            <EuiFilterGroup>
+              <EuiPopover
+                button={
+                  <EuiFilterButton
+                    disabled={loading}
+                    iconType="arrowDown"
+                    onClick={handleToggleSortButton}
+                    isSelected={isSortPopoverOpen}
+                  >
+                    {i18n.translate('xpack.observability.slo.list.sortByType', {
+                      defaultMessage: 'Sort by {type}',
+                      values: { type: selectedSort?.label.toLowerCase() ?? '' },
+                    })}
+                  </EuiFilterButton>
+                }
+                isOpen={isSortPopoverOpen}
+                closePopover={handleToggleSortButton}
+                panelPaddingSize="none"
+                anchorPosition="downCenter"
               >
-                {i18n.translate('xpack.observability.slo.list.sortByType', {
-                  defaultMessage: 'Sort by {type}',
-                  values: { type: selectedSort?.label.toLowerCase() ?? '' },
-                })}
-              </EuiFilterButton>
-            }
-            isOpen={isSortPopoverOpen}
-            closePopover={handleToggleSortButton}
-            panelPaddingSize="none"
-            anchorPosition="downCenter"
-          >
-            <div style={{ width: 300 }}>
-              <EuiPopoverTitle paddingSize="s">
-                {i18n.translate('xpack.observability.slo.list.sortBy', {
-                  defaultMessage: 'Sort by',
-                })}
-              </EuiPopoverTitle>
-              <EuiSelectable<Item<SortField>>
-                singleSelection="always"
-                options={sortOptions}
-                onChange={handleChangeSort}
-                isLoading={loading}
-              >
-                {(list) => list}
-              </EuiSelectable>
-            </div>
-          </EuiPopover>
-        </EuiFilterGroup>
+                <div style={{ width: 250 }}>
+                  <EuiPopoverTitle paddingSize="s">
+                    {i18n.translate('xpack.observability.slo.list.sortBy', {
+                      defaultMessage: 'Sort by',
+                    })}
+                  </EuiPopoverTitle>
+                  <EuiSelectable<Item<SortField>>
+                    singleSelection="always"
+                    options={sortOptions}
+                    onChange={handleChangeSort}
+                    isLoading={loading}
+                  >
+                    {(list) => list}
+                  </EuiSelectable>
+                </div>
+              </EuiPopover>
+            </EuiFilterGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

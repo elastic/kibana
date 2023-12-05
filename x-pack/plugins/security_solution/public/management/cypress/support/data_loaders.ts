@@ -11,7 +11,11 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
+import {
+  getHostVmClient,
+  createVm,
+  generateVmName,
+} from '../../../../scripts/endpoint/common/vm_services';
 import { setupStackServicesUsingCypressConfig } from './common';
 import type { KibanaKnownUserAccounts } from '../common/constants';
 import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
@@ -57,6 +61,17 @@ import type { IndexedHostsAndAlertsResponse } from '../../../../common/endpoint/
 import { deleteIndexedHostsAndAlerts } from '../../../../common/endpoint/index_data';
 import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
 import { deleteIndexedCase, indexCase } from '../../../../common/endpoint/data_loaders/index_case';
+import {
+  installSentinelOneAgent,
+  S1Client,
+} from '../../../../scripts/endpoint/sentinelone_host/common';
+import {
+  addSentinelOneIntegrationToAgentPolicy,
+  deleteAgentPolicy,
+  fetchAgentPolicyEnrollmentKey,
+  getOrCreateDefaultAgentPolicy,
+} from '../../../../scripts/endpoint/common/fleet_services';
+import { startElasticAgentWithDocker } from '../../../../scripts/endpoint/common/elastic_agent_service';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
   deleteIndexedFleetEndpointPolicies,
@@ -291,6 +306,87 @@ export const dataLoadersForRealEndpoints = (
   const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
 
   on('task', {
+    createSentinelOneHost: async () => {
+      if (!process.env.CYPRESS_SENTINELONE_URL || !process.env.CYPRESS_SENTINELONE_TOKEN) {
+        throw new Error('CYPRESS_SENTINELONE_URL and CYPRESS_SENTINELONE_TOKEN must be set');
+      }
+
+      const { log } = await stackServicesPromise;
+      const s1Client = new S1Client({
+        url: process.env.CYPRESS_SENTINELONE_URL,
+        apiToken: process.env.CYPRESS_SENTINELONE_TOKEN,
+        log,
+      });
+
+      const vmName = generateVmName('sentinelone');
+
+      const hostVm = await createVm({
+        type: 'multipass',
+        name: vmName,
+        log,
+        memory: '2G',
+        disk: '10G',
+      });
+
+      const s1Info = await installSentinelOneAgent({
+        hostVm,
+        log,
+        s1Client,
+      });
+
+      // wait 30s before running malicious action
+      await new Promise((resolve) => setTimeout(resolve, 30000));
+
+      // nslookup triggers an alert on S1
+      await getHostVmClient(vmName).exec('nslookup amazon.com');
+
+      log.info(`Done!
+
+${hostVm.info()}
+
+SentinelOne Agent Status:
+${s1Info.status}
+`);
+
+      return hostVm;
+    },
+
+    createSentinelOneAgentPolicy: async () => {
+      if (!process.env.CYPRESS_SENTINELONE_URL || !process.env.CYPRESS_SENTINELONE_TOKEN) {
+        throw new Error('CYPRESS_SENTINELONE_URL and CYPRESS_SENTINELONE_TOKEN must be set');
+      }
+
+      const { log, kbnClient } = await stackServicesPromise;
+      const agentPolicyId = (await getOrCreateDefaultAgentPolicy({ kbnClient, log })).id;
+
+      await addSentinelOneIntegrationToAgentPolicy({
+        kbnClient,
+        log,
+        agentPolicyId,
+        consoleUrl: process.env.CYPRESS_SENTINELONE_URL,
+        apiToken: process.env.CYPRESS_SENTINELONE_TOKEN,
+      });
+
+      const enrollmentToken = await fetchAgentPolicyEnrollmentKey(kbnClient, agentPolicyId);
+
+      const elasticAgent = await startElasticAgentWithDocker({
+        kbnClient,
+        logger: log,
+        enrollmentToken,
+      });
+
+      return {
+        ...elasticAgent,
+        policyId: agentPolicyId,
+      };
+    },
+
+    deleteAgentPolicy: async (agentPolicyId: string) => {
+      const { kbnClient } = await stackServicesPromise;
+
+      await deleteAgentPolicy(kbnClient, agentPolicyId);
+    },
+
     createEndpointHost: async (
       options: Omit<CreateAndEnrollEndpointHostCIOptions, 'log' | 'kbnClient'>
     ): Promise<CreateAndEnrollEndpointHostCIResponse> => {
