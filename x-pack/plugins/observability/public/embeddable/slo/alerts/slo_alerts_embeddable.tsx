@@ -35,7 +35,6 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 
 import { Subject, Subscription } from 'rxjs';
-import { TimeRange } from '@kbn/es-query';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 import type { SloAlertsEmbeddableInput } from './types';
 export const SLO_ALERTS_EMBEDDABLE = 'SLO_ALERTS_EMBEDDABLE';
@@ -63,7 +62,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
   EmbeddableOutput
 > {
   public readonly type = SLO_ALERTS_EMBEDDABLE;
-  private reloadSubject: Subject<TimeRange | undefined>;
+  private reloadSubject: Subject<SloAlertsEmbeddableInput | undefined>;
   private node?: HTMLElement;
   kibanaVersion: string;
   private subscription: Subscription;
@@ -77,11 +76,10 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
     super(initialInput, {}, parent);
     this.deps = deps;
     this.kibanaVersion = kibanaVersion;
-    this.reloadSubject = new Subject<TimeRange | undefined>();
+    this.reloadSubject = new Subject<SloAlertsEmbeddableInput | undefined>();
 
     this.subscription = this.getInput$().subscribe((input) => {
-      const { timeRange = { from: 'now-15m/m', to: 'now' } } = input;
-      this.reloadSubject.next(timeRange);
+      this.reloadSubject.next(input);
     });
 
     this.setTitle(
