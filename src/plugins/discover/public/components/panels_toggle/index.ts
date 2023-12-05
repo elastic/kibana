@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { PanelsToggle } from './panels_toggle';
+export { PanelsToggle, type PanelsToggleProps } from './panels_toggle';

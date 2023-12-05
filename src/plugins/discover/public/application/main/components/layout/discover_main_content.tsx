@@ -21,6 +21,7 @@ import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
+import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 
 const DROP_PROPS = {
   value: {
@@ -44,7 +45,7 @@ export interface DiscoverMainContentProps {
   onFieldEdited: () => Promise<void>;
   onDropFieldToTable?: () => void;
   columns: string[];
-  panelsToggle?: ReactElement;
+  panelsToggle: ReactElement<PanelsToggleProps>;
 }
 
 export const DiscoverMainContent = ({
@@ -87,7 +88,7 @@ export const DiscoverMainContent = ({
         setDiscoverViewMode={setDiscoverViewMode}
         prepend={
           React.isValidElement(panelsToggle)
-            ? React.cloneElement(panelsToggle, { isChartAvailable })
+            ? React.cloneElement(panelsToggle, { renderedFor: 'tabs', isChartAvailable })
             : undefined
         }
       />

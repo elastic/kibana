@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, ReactElement } from 'react';
 import { EuiPage, EuiPageBody, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -46,7 +46,7 @@ import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { ESQLTechPreviewCallout } from './esql_tech_preview_callout';
-import { PanelsToggle } from '../../../../components/panels_toggle';
+import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -195,9 +195,14 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
 
-  const panelsToggle = useMemo(() => {
+  const panelsToggle: ReactElement<PanelsToggleProps> = useMemo(() => {
     return (
-      <PanelsToggle stateContainer={stateContainer} sidebarToggleState$={sidebarToggleState$} />
+      <PanelsToggle
+        stateContainer={stateContainer}
+        sidebarToggleState$={sidebarToggleState$}
+        renderedFor="root"
+        isChartAvailable={undefined}
+      />
     );
   }, [stateContainer, sidebarToggleState$]);
 
@@ -311,26 +316,36 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             mainPanel={
               <div className="dscPageContent__wrapper">
                 {resultState === 'none' ? (
-                  dataState.error ? (
-                    <ErrorCallout
-                      title={i18n.translate(
-                        'discover.noResults.searchExamples.noResultsErrorTitle',
-                        {
-                          defaultMessage: 'Unable to retrieve search results',
-                        }
-                      )}
-                      error={dataState.error}
-                    />
-                  ) : (
-                    <DiscoverNoResults
-                      stateContainer={stateContainer}
-                      isTimeBased={isTimeBased}
-                      query={globalQueryState.query}
-                      filters={globalQueryState.filters}
-                      dataView={dataView}
-                      onDisableFilters={onDisableFilters}
-                    />
-                  )
+                  <>
+                    {React.isValidElement(panelsToggle) ? (
+                      <div className="dscPageContent__panelsToggleWhenNoResults">
+                        {React.cloneElement(panelsToggle, {
+                          renderedFor: 'prompt',
+                          isChartAvailable: false,
+                        })}
+                      </div>
+                    ) : null}
+                    {dataState.error ? (
+                      <ErrorCallout
+                        title={i18n.translate(
+                          'discover.noResults.searchExamples.noResultsErrorTitle',
+                          {
+                            defaultMessage: 'Unable to retrieve search results',
+                          }
+                        )}
+                        error={dataState.error}
+                      />
+                    ) : (
+                      <DiscoverNoResults
+                        stateContainer={stateContainer}
+                        isTimeBased={isTimeBased}
+                        query={globalQueryState.query}
+                        filters={globalQueryState.filters}
+                        dataView={dataView}
+                        onDisableFilters={onDisableFilters}
+                      />
+                    )}
+                  </>
                 ) : (
                   <EuiPanel
                     role="main"

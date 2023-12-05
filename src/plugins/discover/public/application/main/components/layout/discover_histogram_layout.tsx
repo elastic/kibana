@@ -40,7 +40,13 @@ export const DiscoverHistogramLayout = ({
     isPlainRecord,
   });
 
-  const renderCustomChartToggleActions = useCallback(() => panelsToggle, [panelsToggle]);
+  const renderCustomChartToggleActions = useCallback(
+    () =>
+      React.isValidElement(panelsToggle)
+        ? React.cloneElement(panelsToggle, { renderedFor: 'histogram' })
+        : panelsToggle,
+    [panelsToggle]
+  );
 
   // Initialized when the first search has been requested or
   // when in text-based mode since search sessions are not supported

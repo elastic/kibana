@@ -70,10 +70,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail('dscPanelsToggleInHistogram');
           await testSubjects.existOrFail('dscHideHistogramButton');
 
-          await testSubjects.missingOrFail('dscPanelsToggleInTabs');
+          await testSubjects.missingOrFail('dscPanelsToggleInPage');
           await testSubjects.missingOrFail('dscShowHistogramButton');
         } else {
-          await testSubjects.existOrFail('dscPanelsToggleInTabs');
+          await testSubjects.existOrFail('dscPanelsToggleInPage');
           await testSubjects.existOrFail('dscShowHistogramButton');
 
           await testSubjects.missingOrFail('dscPanelsToggleInHistogram');
@@ -86,9 +86,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('dscShowHistogramButton');
 
         if (shouldSidebarBeOpen) {
-          await testSubjects.missingOrFail('dscPanelsToggleInTabs');
+          await testSubjects.missingOrFail('dscPanelsToggleInPage');
         } else {
-          await testSubjects.existOrFail('dscPanelsToggleInTabs');
+          await testSubjects.existOrFail('dscPanelsToggleInPage');
         }
       }
     }

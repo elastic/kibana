@@ -18,12 +18,22 @@ import { SidebarToggleState } from '../../application/types';
 export interface PanelsToggleProps {
   stateContainer: DiscoverStateContainer;
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
-  isChartAvailable?: boolean; // it will be injected in `DiscoverMainContent` when rendering view mode tabs
+  renderedFor: 'histogram' | 'prompt' | 'tabs' | 'root';
+  isChartAvailable: boolean | undefined; // it will be injected in `DiscoverMainContent` when rendering View mode tabs or in `DiscoverLayout` when rendering No results or Error prompt
 }
 
+/**
+ * An element of this component is created in DiscoverLayout
+ * @param stateContainer
+ * @param sidebarToggleState$
+ * @param renderedIn
+ * @param isChartAvailable
+ * @constructor
+ */
 export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   stateContainer,
   sidebarToggleState$,
+  renderedFor,
   isChartAvailable,
 }) => {
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
@@ -35,12 +45,12 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   const sidebarToggleState = useObservable(sidebarToggleState$);
   const isSidebarCollapsed = sidebarToggleState?.isCollapsed ?? false;
 
-  const isInsideHistogram = typeof isChartAvailable === 'undefined';
-  const isInsideTabs = typeof isChartAvailable === 'boolean';
+  const isInsideHistogram = renderedFor === 'histogram';
+  const isInsideDiscoverContent = !isInsideHistogram;
 
   const buttons = [
     ...((isInsideHistogram && isSidebarCollapsed) ||
-    (isInsideTabs && isSidebarCollapsed && (isChartHidden || !isChartAvailable))
+    (isInsideDiscoverContent && isSidebarCollapsed && (isChartHidden || !isChartAvailable))
       ? [
           {
             label: i18n.translate('discover.panelsToggle.showSidebarButton', {
@@ -52,7 +62,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
           },
         ]
       : []),
-    ...(isInsideHistogram || (isInsideTabs && isChartAvailable && isChartHidden)
+    ...(isInsideHistogram || (isInsideDiscoverContent && isChartAvailable && isChartHidden)
       ? [
           {
             label: isChartHidden
@@ -76,7 +86,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
 
   return (
     <IconButtonGroup
-      data-test-subj={`dscPanelsToggle${isInsideHistogram ? 'InHistogram' : 'InTabs'}`}
+      data-test-subj={`dscPanelsToggle${isInsideHistogram ? 'InHistogram' : 'InPage'}`}
       legend={i18n.translate('discover.panelsToggle.panelsVisibilityLegend', {
         defaultMessage: 'Panels visibility',
       })}
