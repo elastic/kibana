@@ -115,7 +115,6 @@ export function SloOverview({
           slo={slo}
           rules={rules}
           activeAlerts={activeAlerts}
-          handleCreateRule={() => {}}
           hasGroupBy={hasGroupBy}
         />
       </SloCardBadgesPortal>
