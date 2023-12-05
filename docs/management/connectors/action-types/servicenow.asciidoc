@@ -122,12 +122,56 @@ creating a new {sn-itsm} connector or
 
 . Install
 https://store.servicenow.com/sn_appstore_store.do#!/store/application/7148dbc91bf1f450ced060a7234bcb88[Elastic for ITSM]
-from the {sn} Store.
+from the {sn} store.
+. <<servicenow-itsm-connector-privileges,Assign cross-scope privileges for the Elastic for ITSM app>>.
 . <<servicenow-itsm-connector-prerequisites-integration-user,Create a {sn} integration user and assign it the appropriate roles>>.
 . <<servicenow-itsm-connector-prerequisites-cors-rule,Create a Cross-Origin Resource Sharing (CORS) rule>>.
 . If you use open authorization (OAuth), you must also:
 .. <<servicenow-itsm-connector-prerequisites-rsa-key,Create an RSA keypair and add an X.509 Certificate>>.
 .. <<servicenow-itsm-connector-prerequisites-endpoint,Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map>>.
+
+[float]
+[[servicenow-itsm-connector-privileges]]
+==== Assign cross-scope privileges
+
+The Elastic for ITSM app requires specific cross-scope privilege records to run successfully:
+
+|===
+|Source scope|Target scope|Target name|Operation|Status
+
+.6+|Elastic for ITSM
+.6+|Global
+|GlideRecord.insert
+|Execute API
+|Allowed
+
+|GlideRecord.setValue
+|Execute API
+|Allowed
+
+|GlideRecordSecure.getValue
+|Execute API
+|Allowed
+
+|Incident
+|Read
+|Allowed
+
+|ScriptableServiceResultBuilder.setBody
+|Execute API
+|Allowed
+
+|ScopedGlideElement
+|Execute API
+|Allowed
+|===
+
+To access the cross scope privileges table:
+
+1. Log into {sn} and set your application scope to Elastic for ITSM.
+2. Click *All* and search for `sys_scope_privilege`.
+
+For more details, refer to the https://docs.servicenow.com/[{sn} product documentation].
 
 [float]
 [[servicenow-itsm-connector-prerequisites-integration-user]]
@@ -273,7 +317,7 @@ To update a deprecated connector:
 . Select the deprecated connector to open the *Edit connector* flyout.
 . In the warning message, click *Update this connector*.
 . Complete the guided steps in the *Edit connector* flyout.
-.. Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/7148dbc91bf1f450ced060a7234bcb88[Elastic for ITSM] and complete the <<servicenow-itsm-connector-prerequisites, required prerequisites>>.
+.. Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/7148dbc91bf1f450ced060a7234bcb88[Elastic for ITSM] and complete the <<servicenow-itsm-connector-prerequisites,required prerequisites>>.
 .. Enter the URL of your {sn} instance.
 .. Enter the username and password of your {sn} instance.
 . Click *Update*.
