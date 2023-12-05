@@ -528,7 +528,7 @@ describe('Cases API', () => {
       });
     });
 
-    it.only('should set all owners when no owner is provided', async () => {
+    it('should set all owners when no owner is provided', async () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
@@ -539,14 +539,15 @@ describe('Cases API', () => {
         initialOptions: { owner: [...OWNERS] },
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          body: expect.objectContaining({
-            owner: OWNERS,
-          }),
-        })
-      );
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
+        method: 'POST',
+        body: JSON.stringify({
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          owner: [...OWNERS],
+          ...DEFAULT_QUERY_PARAMS,
+        }),
+        signal: abortCtrl.signal,
+      });
     });
   });
 
