@@ -20,6 +20,7 @@ interface SLOListParams {
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
   shouldRefetch?: boolean;
+  perPage?: number;
 }
 
 export interface UseFetchSloListResponse {
@@ -37,6 +38,7 @@ export function useFetchSloList({
   sortBy = 'status',
   sortDirection = 'desc',
   shouldRefetch,
+  perPage,
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,
@@ -56,6 +58,7 @@ export function useFetchSloList({
           ...(sortBy && { sortBy }),
           ...(sortDirection && { sortDirection }),
           ...(page && { page }),
+          ...(perPage && { perPage }),
         },
         signal,
       });
