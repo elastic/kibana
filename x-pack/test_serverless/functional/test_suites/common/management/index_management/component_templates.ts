@@ -53,8 +53,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                   number_of_shards: 1,
                 },
               },
-            }
-          }
+            },
+          },
         });
       });
 
