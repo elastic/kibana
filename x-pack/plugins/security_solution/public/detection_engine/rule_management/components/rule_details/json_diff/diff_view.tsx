@@ -113,31 +113,13 @@ const convertToDiffFile = (oldSource: string, newSource: string) => {
 
   /*
     "parseDiff" converts a unified diff string into a gitdiff-parser File object.
+
+    File object contains some metadata and the "hunks" property - an array of Hunk objects.
+    Hunks represent changed lines of code plus a few unchanged lines above and below for context.
   */
   const [diffFile] = parseDiff(unifiedDiff, {
     nearbySequences: 'zip',
   });
-  /*
-    File object contains some metadata and the "hunks" property - an array of Hunk objects.
-    At this stage Hunks represent changed lines of code plus a few unchanged lines above and below for context.
-    Hunk objects look like this:
-    [
-      ...
-      {
-        content: '  "from": "now-9m",'
-        isInsert: true,
-        lineNumber: 14,
-        type: "insert"
-      },
-      {
-        content: '  "from": "now-540s",'
-        isDelete: true,
-        lineNumber: 15,
-        type: "delete"
-      },
-      ...
-      ]
-    */
 
   return diffFile;
 };
