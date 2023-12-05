@@ -11,7 +11,11 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { appContextService } from '../../app_context';
 
-import { getBundledPackageByPkgKey, getBundledPackages } from './bundled_packages';
+import {
+  getBundledPackageByPkgKey,
+  getBundledPackages,
+  _purgeBundledPackagesCache,
+} from './bundled_packages';
 
 jest.mock('fs/promises');
 jest.mock('../../app_context');
@@ -26,9 +30,14 @@ describe('bundledPackages', () => {
     jest.mocked(appContextService.getLogger).mockReturnValue(loggingSystemMock.createLogger());
   });
   beforeEach(() => {
+    _purgeBundledPackagesCache();
     jest.mocked(fs.stat).mockResolvedValue({} as any);
-    jest.mocked(fs.readdir).mockResolvedValue(['apm-8.8.0.zip', 'test-1.0.0.zip'] as any);
-    jest.mocked(fs.readFile).mockResolvedValue(Buffer.from('TEST'));
+    jest
+      .mocked(fs.readdir)
+      .mockReset()
+      .mockResolvedValue(['apm-8.8.0.zip', 'test-1.0.0.zip'] as any);
+
+    jest.mocked(fs.readFile).mockReset().mockResolvedValue(Buffer.from('TEST'));
   });
 
   afterEach(() => {
@@ -55,6 +64,13 @@ describe('bundledPackages', () => {
           buffer: Buffer.from('TEST'),
         },
       ]);
+    });
+
+    it('should use cache if called multiple time', async () => {
+      const packagesRes1 = await getBundledPackages();
+      const packagesRes2 = await getBundledPackages();
+      expect(packagesRes1).toEqual(packagesRes2);
+      expect(fs.readdir).toBeCalledTimes(1);
     });
   });
   describe('getBundledPackageByPkgKey', () => {

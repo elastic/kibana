@@ -13,7 +13,17 @@ import { BundledPackageLocationNotFoundError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import { splitPkgKey, pkgToPkgKey } from '../registry';
 
+let CACHE_BUNDLED_PACKAGES: BundledPackage[] | undefined;
+
+export function _purgeBundledPackagesCache() {
+  CACHE_BUNDLED_PACKAGES = undefined;
+}
+
 export async function getBundledPackages(): Promise<BundledPackage[]> {
+  if (CACHE_BUNDLED_PACKAGES) {
+    return CACHE_BUNDLED_PACKAGES;
+  }
+
   const config = appContextService.getConfig();
 
   const bundledPackageLocation = config?.developer?.bundledPackageLocation;
@@ -49,6 +59,8 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
         };
       })
     );
+
+    CACHE_BUNDLED_PACKAGES = result;
 
     return result;
   } catch (err) {
