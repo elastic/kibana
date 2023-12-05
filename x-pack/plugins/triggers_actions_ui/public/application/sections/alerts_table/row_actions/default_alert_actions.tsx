@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ViewRuleDetailsAlertAction } from './view_rule_details_alert_action';
-import { AlertActionsProps } from './types';
+import type { AlertActionsProps } from '../../../../types';
 import { ViewAlertDetailsAlertAction } from './view_alert_details_alert_action';
 import { MuteAlertAction } from './mute_alert_action';
 import { MarkAsUntrackedAlertAction } from './mark_as_untracked_alert_action';

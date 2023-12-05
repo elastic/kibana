@@ -9,7 +9,7 @@ import { act } from '@testing-library/react-hooks';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { AlertActions, AlertActionsProps } from './alert_actions';
+import { AlertActions, ObservabilityAlertActionsProps } from './alert_actions';
 import { inventoryThresholdAlertEs } from '../../../rules/fixtures/example_alerts';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import { createObservabilityRuleTypeRegistryMock } from '../../../rules/observability_rule_type_registry_mock';
@@ -94,7 +94,7 @@ describe('ObservabilityActions component', () => {
       },
     });
 
-    const props: AlertActionsProps = {
+    const props: ObservabilityAlertActionsProps = {
       config,
       alert: inventoryThresholdAlertEs,
       ecsAlert: [],

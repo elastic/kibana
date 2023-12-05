@@ -12,7 +12,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/row_actions/types';
+import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { getAlertsTableDefaultAlertActionsLazy } from '@kbn/triggers-actions-ui-plugin/public/common/get_alerts_table_default_row_actions';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 

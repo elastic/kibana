@@ -13,6 +13,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+
 import type {
   IconType,
   RecursivePartial,
@@ -553,6 +554,11 @@ export type AlertsTableProps = {
 
 export type SetFlyoutAlert = (alertId: string) => void;
 
+export interface TimelineNonEcsData {
+  field: string;
+  value?: string[] | null;
+}
+
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
 export type GetRenderCellValue<T = unknown> = ({
   setFlyoutAlert,
@@ -560,7 +566,9 @@ export type GetRenderCellValue<T = unknown> = ({
 }: {
   setFlyoutAlert: SetFlyoutAlert;
   context?: T;
-}) => (...args: unknown[]) => React.ReactNode;
+}) => (
+  props: EuiDataGridCellValueElementProps & { data: TimelineNonEcsData[] }
+) => React.ReactNode | JSX.Element | null | string;
 
 export type PreFetchPageContext<T = unknown> = ({
   alerts,
@@ -652,6 +660,19 @@ export interface RenderCustomActionsRowArgs {
   setIsActionLoading?: (isLoading: boolean) => void;
   refresh: () => void;
   clearSelection: () => void;
+}
+
+export interface AlertActionsProps extends RenderCustomActionsRowArgs {
+  onActionExecuted?: () => void;
+  isAlertDetailsEnabled?: boolean;
+  /**
+   * Implement this to resolve your app's specific rule page path, return null to avoid showing the link
+   */
+  resolveRulePagePath?: (ruleId: string, currentPageId: string) => string | null;
+  /**
+   * Implement this to resolve your app's specific alert page path, return null to avoid showing the link
+   */
+  resolveAlertPagePath?: (alertId: string, currentPageId: string) => string | null;
 }
 
 export type UseActionsColumnRegistry = () => {

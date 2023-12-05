@@ -14,7 +14,7 @@ import {
   ALERT_STATUS_ACTIVE,
   AlertConsumers,
 } from '@kbn/rule-data-utils';
-import { AlertActionsProps } from './types';
+import type { AlertActionsProps } from '../../../../types';
 import { useBulkUntrackAlerts } from '../../../..';
 
 /**

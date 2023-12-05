@@ -18,7 +18,6 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { get } from 'lodash';
 import {
-  GetRenderCellValue,
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -29,7 +28,7 @@ import {
   AlertTableFlyoutComponent,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
-import { EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGridColumn } from '@elastic/eui';
 
 export interface TriggersActionsUiExamplePublicSetupDeps {
   alerting: AlertingSetup;
@@ -139,16 +138,15 @@ export class TriggersActionsUiExamplePlugin
       id: 'observabilityCases',
       columns,
       useInternalFlyout,
-      getRenderCellValue: () =>
-        ((props: EuiDataGridCellValueElementProps & { data: any[] }) => {
-          const value = props.data.find((d) => d.field === props.columnId)?.value ?? [];
+      getRenderCellValue: () => (props) => {
+        const value = props.data.find((d) => d.field === props.columnId)?.value ?? [];
 
-          if (Array.isArray(value)) {
-            return <>{value.length ? value.join() : '--'}</>;
-          }
+        if (Array.isArray(value)) {
+          return <>{value.length ? value.join() : '--'}</>;
+        }
 
-          return <>{value}</>;
-        }) as ReturnType<GetRenderCellValue>,
+        return <>{value}</>;
+      },
       sort,
     };
 

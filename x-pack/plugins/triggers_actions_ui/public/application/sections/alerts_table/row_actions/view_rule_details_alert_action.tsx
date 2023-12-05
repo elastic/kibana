@@ -11,7 +11,7 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import styled from '@emotion/styled';
 import { useKibana } from '../../../../common/lib/kibana';
-import { AlertActionsProps } from './types';
+import type { AlertActionsProps } from '../../../../types';
 
 const MenuItem = styled(EuiContextMenuItem)`
   &:hover {

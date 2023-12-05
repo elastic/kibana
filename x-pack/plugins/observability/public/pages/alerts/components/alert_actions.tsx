@@ -20,17 +20,17 @@ import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import { AlertActionsProps as CustomActionsProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/row_actions/types';
-import { useKibana } from '../../../utils/kibana_react';
+import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import { paths } from '../../../../common/locators/paths';
-import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
+import { useKibana } from '../../../utils/kibana_react';
 import { parseAlert } from '../helpers/parse_alert';
 import { observabilityFeatureId, ObservabilityRuleTypeRegistry } from '../../..';
 import type { ConfigSchema } from '../../../plugin';
 import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/alert_details';
 
-export interface AlertActionsProps extends CustomActionsProps {
+export interface ObservabilityAlertActionsProps extends AlertActionsProps {
   config: ConfigSchema;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }
@@ -39,7 +39,7 @@ export function AlertActions({
   config,
   observabilityRuleTypeRegistry,
   ...customActionsProps
-}: AlertActionsProps) {
+}: ObservabilityAlertActionsProps) {
   const { alert, refresh } = customActionsProps;
   const {
     cases: {
@@ -79,10 +79,11 @@ export function AlertActions({
   const observabilityAlert = parseObservabilityAlert(alert);
 
   useEffect(() => {
+    const alertLink = alert.link as unknown as string;
     if (!alert.hasBasePath) {
-      setViewInAppUrl(prepend(alert.link ?? ''));
+      setViewInAppUrl(prepend(alertLink ?? ''));
     } else {
-      setViewInAppUrl(alert.link);
+      setViewInAppUrl(alertLink);
     }
   }, [alert.hasBasePath, alert.link, prepend]);
 
