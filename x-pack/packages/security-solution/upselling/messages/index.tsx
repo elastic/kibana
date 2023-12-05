@@ -22,3 +22,15 @@ export const UPGRADE_ALERT_ASSIGNMENTS = (requiredLicense: string) =>
       requiredLicense,
     },
   });
+
+export const ALERT_SUPPRESSION = (requiredLicense: 'Platinum') =>
+  i18n.translate(
+    'sxpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppression.upsell',
+    {
+      defaultMessage:
+        'Alert suppression is enabled with {requiredLicense} license or above [Upsell]',
+      values: {
+        requiredLicense,
+      },
+    }
+  );
