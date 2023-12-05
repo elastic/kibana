@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { WebElementWrapper } from '../../../../../../../test/functional/services/lib/web_element_wrapper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
@@ -58,7 +59,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Displays the test template in the list of templates', async () => {
         const templates = await testSubjects.findAll('row');
 
-        const getTemplateName = async (template: any) => {
+        const getTemplateName = async (template: WebElementWrapper) => {
           const templateNameElement = await template.findByTestSubject('templateDetailsLink');
           return await templateNameElement.getVisibleText();
         };
