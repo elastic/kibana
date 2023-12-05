@@ -50,7 +50,6 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
               defaultMessage="Service Token"
             />
           }
-          data-test
           {...inputs.serviceTokenInput.formRowProps}
         >
           <EuiFieldText

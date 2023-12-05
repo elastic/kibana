@@ -9,6 +9,8 @@ import yaml from 'js-yaml';
 
 import { getFlattenedObject } from '@kbn/std';
 
+import { isObject } from 'lodash';
+
 import type { AgentPolicy, OutputType, ValueOf } from '../types';
 import {
   FLEET_APM_PACKAGE,
@@ -46,7 +48,12 @@ export function outputYmlIncludesReservedPerformanceKey(configYml: string) {
   }
 
   const parsedYml = yaml.safeLoad(configYml);
-  const flattenedYml = getFlattenedObject(parsedYml);
+
+  if (!isObject(parsedYml)) {
+    return RESERVED_CONFIG_YML_KEYS.some((key) => parsedYml.includes(key));
+  }
+
+  const flattenedYml = isObject(parsedYml) ? getFlattenedObject(parsedYml) : {};
 
   return RESERVED_CONFIG_YML_KEYS.some((key) => Object.keys(flattenedYml).includes(key));
 }

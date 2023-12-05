@@ -85,4 +85,18 @@ describe('outputYmlIncludesReservedPerformanceKey', () => {
       expect(outputYmlIncludesReservedPerformanceKey(configYml)).toBe(false);
     });
   });
+
+  describe('plain string', () => {
+    it('returns false when no reserved key is present', () => {
+      const configYml = `bulk_max_size`;
+
+      expect(outputYmlIncludesReservedPerformanceKey(configYml)).toBe(true);
+    });
+
+    it('returns true when reserved key is present', () => {
+      const configYml = `just a string`;
+
+      expect(outputYmlIncludesReservedPerformanceKey(configYml)).toBe(false);
+    });
+  });
 });
