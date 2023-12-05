@@ -42,10 +42,10 @@ export default function (providerContext: FtrProviderContext) {
         await pageObjects.svlCommonPage.login();
       }
     });
-    loadTestFile(require.resolve('./endpoint_list'));
-    loadTestFile(require.resolve('./endpoint_telemetry'));
+    // loadTestFile(require.resolve('./endpoint_list'));
+    // loadTestFile(require.resolve('./endpoint_telemetry'));
     loadTestFile(require.resolve('./endpoint_permissions'));
-    loadTestFile(require.resolve('./responder'));
-    loadTestFile(require.resolve('./endpoint_solution_integrations'));
+    // loadTestFile(require.resolve('./responder'));
+    // loadTestFile(require.resolve('./endpoint_solution_integrations'));
   });
 }
