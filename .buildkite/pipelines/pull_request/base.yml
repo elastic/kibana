@@ -141,7 +141,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-    - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
+  - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
     label: 'Serverless AI Assistant - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
