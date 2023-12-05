@@ -62,7 +62,9 @@ export function AlertTimeTable({ windows, slo }: AlertTimeTableProps) {
     },
     ...windows.map((windowDef, index) => ({
       field: `column_${index + 1}`,
-      name: `${windowDef.longWindow.value}h @ ${windowDef.burnRateThreshold}x`,
+      name: `${windowDef.longWindow.value}h @ ${numeral(windowDef.burnRateThreshold).format(
+        '0[.0]'
+      )}x`,
       align: 'right' as HorizontalAlignment,
       render: (time: number | null) => (time ? formatTime(time) : '-'),
     })),
