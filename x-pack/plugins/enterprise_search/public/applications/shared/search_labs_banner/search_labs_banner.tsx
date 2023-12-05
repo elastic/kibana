@@ -63,7 +63,7 @@ export const SearchLabsBanner: React.FC = () => {
               'xpack.enterpriseSearch.shared.searchLabsBanner.searchLabsDescription',
               {
                 defaultMessage:
-                  "You shouldn't need a doctorate to use a machine learning in your application's searches. Let's show you how easy and quick it can be to dive into the world of vector searches with Elastic.",
+                  'Elastic Search Labs contains a range of technical content for building search experiences powered by Elasticsearch’s vector search capabilities and generative AI.  Dive straight into the code with our sample apps and executable Python notebooks.',
               }
             )}
           </EuiText>
