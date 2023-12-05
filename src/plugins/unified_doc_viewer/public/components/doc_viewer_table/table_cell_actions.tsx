@@ -215,7 +215,6 @@ export const TableActions = ({
                 data-test-subj={item['data-test-subj']}
                 aria-label={item['aria-label']}
                 iconType={item.icon}
-                iconSize="s"
                 disabled={item.disabled}
                 onClick={item.onClick}
               />
