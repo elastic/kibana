@@ -24,14 +24,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { betaBadgeProps } from '../beta_badge_props';
 import { EditConnectorTabs } from '../../../../types';
-import { useKibana } from '../../../../common/lib/kibana';
-import { hasExecuteActionsCapability } from '../../../lib/capabilities';
 
 const FlyoutHeaderComponent: React.FC<{
   isExperimental?: boolean;
   isPreconfigured: boolean;
   connectorName: string;
-  connectorTypeId: string;
   connectorTypeDesc: string;
   selectedTab: EditConnectorTabs;
   setTab: () => void;
@@ -41,17 +38,11 @@ const FlyoutHeaderComponent: React.FC<{
   isExperimental = false,
   isPreconfigured,
   connectorName,
-  connectorTypeId,
   connectorTypeDesc,
   selectedTab,
   setTab,
 }) => {
-  const {
-    application: { capabilities },
-  } = useKibana().services;
-
   const { euiTheme } = useEuiTheme();
-  const canExecute = hasExecuteActionsCapability(capabilities, connectorTypeId);
 
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="edit-connector-flyout-header">
@@ -145,17 +136,15 @@ const FlyoutHeaderComponent: React.FC<{
             defaultMessage: 'Configuration',
           })}
         </EuiTab>
-        {canExecute && (
-          <EuiTab
-            onClick={setTab}
-            data-test-subj="testConnectorTab"
-            isSelected={EditConnectorTabs.Test === selectedTab}
-          >
-            {i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.tabText', {
-              defaultMessage: 'Test',
-            })}
-          </EuiTab>
-        )}
+        <EuiTab
+          onClick={setTab}
+          data-test-subj="testConnectorTab"
+          isSelected={EditConnectorTabs.Test === selectedTab}
+        >
+          {i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.tabText', {
+            defaultMessage: 'Test',
+          })}
+        </EuiTab>
       </EuiTabs>
     </EuiFlyoutHeader>
   );

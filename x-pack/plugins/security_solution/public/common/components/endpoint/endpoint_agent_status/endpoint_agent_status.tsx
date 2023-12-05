@@ -29,15 +29,15 @@ import { useGetEndpointDetails } from '../../../../management/hooks';
 import { getAgentStatusText } from '../agent_status_text';
 
 const TOOLTIP_CONTENT_STYLES: React.CSSProperties = Object.freeze({ width: 150 });
-export const ISOLATING_LABEL = i18n.translate(
+const ISOLATING_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.agentAndActionsStatus.isIsolating',
   { defaultMessage: 'Isolating' }
 );
-export const RELEASING_LABEL = i18n.translate(
+const RELEASING_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.agentAndActionsStatus.isUnIsolating',
   { defaultMessage: 'Releasing' }
 );
-export const ISOLATED_LABEL = i18n.translate(
+const ISOLATED_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.agentAndActionsStatus.isolated',
   { defaultMessage: 'Isolated' }
 );

@@ -9,8 +9,8 @@ import { executeAction } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../../../../common/lib/kibana/kibana_react';
 
-export interface UseSubActionParams<P, R> {
-  connectorId?: string;
+export interface UseSubActionParams<P> {
+  connectorId: string;
   subAction: string;
   subActionParams?: P;
   disabled?: boolean;
@@ -22,14 +22,14 @@ export const useSubAction = <P, R>({
   subActionParams,
   disabled = false,
   ...rest
-}: UseSubActionParams<P, R>) => {
+}: UseSubActionParams<P>) => {
   const { http } = useKibana().services;
 
   return useQuery({
     queryKey: ['useSubAction', connectorId, subAction, subActionParams],
     queryFn: ({ signal }) =>
       executeAction<R>({
-        id: connectorId as string,
+        id: connectorId,
         params: {
           subAction,
           subActionParams,

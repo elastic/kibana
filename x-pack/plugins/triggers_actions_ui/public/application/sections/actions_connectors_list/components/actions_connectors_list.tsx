@@ -90,6 +90,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     docLinks,
   } = useKibana().services;
   const canDelete = hasDeleteActionsCapability(capabilities);
+  const canExecute = hasExecuteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
@@ -316,7 +317,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
       name: '',
       render: (item: ActionConnectorTableItem) => {
         return (
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
             <DeleteOperation canDelete={canDelete} item={item} onDelete={() => onDelete([item])} />
             {item.isMissingSecrets ? (
               <>
@@ -346,13 +347,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
               </>
             ) : (
               <RunOperation
-                canExecute={
-                  !!(
-                    hasExecuteActionsCapability(capabilities, item.actionTypeId) &&
-                    actionTypesIndex &&
-                    actionTypesIndex[item.actionTypeId]
-                  )
-                }
+                canExecute={canExecute && actionTypesIndex && actionTypesIndex[item.actionTypeId]}
                 item={item}
                 onRun={() => editItem(item, EditConnectorTabs.Test)}
               />

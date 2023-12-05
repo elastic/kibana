@@ -27,15 +27,7 @@ describe(
       // `internal/kibana/settings` is not accessible in serverless
       '@brokenInServerless',
     ],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'sentinelOneManualHostActionsEnabled',
-          ])}`,
-        ],
-      },
-    },
+    env: { ftrConfig: { enableExperimental: ['protectionUpdatesEnabled'] } },
   },
   () => {
     describe('Protection updates', () => {

@@ -9,8 +9,3 @@ import OpenAILogo from '../connector_types/openai/logo';
 
 export { OPENAI_CONNECTOR_ID, OpenAiProviderType } from '../../common/openai/constants';
 export { OpenAILogo };
-
-import SentinelOneLogo from '../connector_types/sentinelone/logo';
-
-export { SENTINELONE_CONNECTOR_ID, SUB_ACTION } from '../../common/sentinelone/constants';
-export { SentinelOneLogo };

@@ -68,7 +68,7 @@ const SentinelOneParamsFields: React.FunctionComponent<
   } = useSubAction<SentinelOneGetAgentsParams, SentinelOneGetAgentsResponse>({
     connectorId,
     subAction: SUB_ACTION.GET_AGENTS,
-    disabled: !isTest,
+    disabled: isTest,
   });
 
   const agentOptions = useMemo(
@@ -221,11 +221,11 @@ const SentinelOneParamsFields: React.FunctionComponent<
       inputDisplay: i18n.KILL_PROCESS_ACTION_LABEL,
     },
     {
-      value: SUB_ACTION.ISOLATE_HOST,
+      value: SUB_ACTION.ISOLATE_AGENT,
       inputDisplay: i18n.ISOLATE_AGENT_ACTION_LABEL,
     },
     {
-      value: SUB_ACTION.RELEASE_HOST,
+      value: SUB_ACTION.RELEASE_AGENT,
       inputDisplay: i18n.RELEASE_AGENT_ACTION_LABEL,
     },
   ];

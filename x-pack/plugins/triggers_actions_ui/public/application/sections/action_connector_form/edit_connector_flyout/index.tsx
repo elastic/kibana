@@ -228,7 +228,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         <FlyoutHeader
           isPreconfigured={connector.isPreconfigured}
           connectorName={connector.name}
-          connectorTypeId={connector.actionTypeId}
           connectorTypeDesc={actionTypeModel?.selectMessage}
           setTab={handleSetTab}
           selectedTab={selectedTab}
