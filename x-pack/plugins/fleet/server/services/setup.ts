@@ -99,39 +99,39 @@ async function createSetupSideEffects(
   const policies = policiesOrUndefined ?? [];
   let packages = packagesOrUndefined ?? [];
 
-  logger.debug('Setting Fleet server config');
+  logger.info('Setting Fleet server config');
   await migrateSettingsToFleetServerHost(soClient);
-  logger.debug('Setting up Fleet download source');
+  logger.info('Setting up Fleet download source');
   const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
   // Need to be done before outputs and fleet server hosts as these object can reference a proxy
-  logger.debug('Setting up Proxy');
+  logger.info('Setting up Proxy');
   await ensurePreconfiguredFleetProxies(
     soClient,
     esClient,
     getPreconfiguredFleetProxiesFromConfig(appContextService.getConfig())
   );
 
-  logger.debug('Setting up Fleet Sever Hosts');
+  logger.info('Setting up Fleet Sever Hosts');
   await ensurePreconfiguredFleetServerHosts(
     soClient,
     esClient,
     getPreconfiguredFleetServerHostFromConfig(appContextService.getConfig())
   );
 
-  logger.debug('Setting up Fleet outputs');
+  logger.info('Setting up Fleet outputs');
   await Promise.all([
     ensurePreconfiguredOutputs(
       soClient,
       esClient,
       getPreconfiguredOutputFromConfig(appContextService.getConfig())
     ),
-
     settingsService.settingsSetup(soClient),
   ]);
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
+  logger.debug(`Default output set: ${defaultOutput}`);
 
-  logger.debug('Setting up Fleet Elasticsearch assets');
+  logger.info('Setting up Fleet Elasticsearch assets');
   let stepSpan = apm.startSpan('Install Fleet global assets', 'preconfiguration');
   await ensureFleetGlobalEsAssets(soClient, esClient);
   stepSpan?.end();
@@ -155,7 +155,7 @@ async function createSetupSideEffects(
     ...autoUpdateablePackages.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
   ];
 
-  logger.debug('Setting up initial Fleet packages');
+  logger.info('Setting up initial Fleet packages');
 
   stepSpan = apm.startSpan('Install preconfigured packages and policies', 'preconfiguration');
   const { nonFatalErrors: preconfiguredPackagesNonFatalErrors } =
@@ -225,7 +225,7 @@ async function createSetupSideEffects(
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Set up enrollment keys for preconfigured policies', 'preconfiguration');
-  logger.debug('Setting up Fleet enrollment keys');
+  logger.debug('Setting up Fleet enrollment keys for preconfigured policies');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
   stepSpan?.end();
 
@@ -263,7 +263,7 @@ export async function ensureFleetGlobalEsAssets(
 ) {
   const logger = appContextService.getLogger();
   // Ensure Global Fleet ES assets are installed
-  logger.debug('Creating Fleet component template and ingest pipeline');
+  logger.info('Creating Fleet component template and ingest pipeline');
   const globalAssetsRes = await Promise.all([
     ensureDefaultComponentTemplates(esClient, logger), // returns an array
     ensureFleetFinalPipelineIsInstalled(esClient, logger),

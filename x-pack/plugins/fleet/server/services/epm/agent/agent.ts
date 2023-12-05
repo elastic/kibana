@@ -7,17 +7,21 @@
 
 import Handlebars from 'handlebars';
 import { safeLoad, safeDump } from 'js-yaml';
+import type { Logger } from '@kbn/core/server';
 
 import type { PackagePolicyConfigRecord } from '../../../../common/types';
 import { toCompiledSecretRef } from '../../secrets';
 import { PackageInvalidArchiveError } from '../../../errors';
+import { appContextService } from '../..';
 
 const handlebars = Handlebars.create();
 
 export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
-  const { vars, yamlValues } = buildTemplateVariables(variables);
+  const logger = appContextService.getLogger();
+  const { vars, yamlValues } = buildTemplateVariables(logger, variables);
   let compiledTemplate: string;
   try {
+    logger.debug(`Compiling agent template: ${templateStr}`);
     const template = handlebars.compile(templateStr, { noEscape: true });
     compiledTemplate = template(vars);
   } catch (err) {
@@ -65,12 +69,13 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
-function buildTemplateVariables(variables: PackagePolicyConfigRecord) {
+function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRecord) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
     // support variables with . like key.patterns
     const keyParts = key.split('.');
     const lastKeyPart = keyParts.pop();
+    logger.debug(`Building agent template variables`);
 
     if (!lastKeyPart || !isValidKey(lastKeyPart)) {
       throw new PackageInvalidArchiveError(

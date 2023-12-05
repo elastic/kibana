@@ -80,6 +80,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   const packagesToInstall = packages.map((pkg) =>
     pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
   );
+  logger.debug(`Installing preconfigured packages ${packagesToInstall}`);
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({
     savedObjectsClient: soClient,
@@ -116,6 +117,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   await ensurePackagesCompletedInstall(soClient, esClient);
 
   // Create policies specified in Kibana config
+  logger.debug(`Creating preconfigured policies`);
   const preconfiguredPolicies = await Promise.allSettled(
     policies.map(async (preconfiguredAgentPolicy) => {
       if (preconfiguredAgentPolicy.id) {
@@ -218,6 +220,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             const rejectedPackage = rejectedPackages.find((rp) => rp.package?.name === pkg.name);
 
             if (rejectedPackage) {
+              // Add typed error
               throw new Error(
                 i18n.translate('xpack.fleet.preconfiguration.packageRejectedError', {
                   defaultMessage: `[{agentPolicyName}] could not be added. [{pkgName}] could not be installed due to error: [{errorMessage}]`,
@@ -229,7 +232,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
                 })
               );
             }
-
+            // Add typed error
             throw new Error(
               i18n.translate('xpack.fleet.preconfiguration.packageMissingError', {
                 defaultMessage:
@@ -254,7 +257,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             packagePolicy.name === installablePackagePolicy.name
         );
       });
-
+      logger.debug(`Adding preconfigured package policies ${packagePoliciesToAdd}`);
       const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
       await addPreconfiguredPolicyPackages(
         soClient,

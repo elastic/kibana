@@ -28,6 +28,8 @@ import type {
 } from '../types';
 import { FleetServerHostUnauthorizedError } from '../errors';
 
+import { appContextService } from './app_context';
+
 import { agentPolicyService } from './agent_policy';
 import { escapeSearchQueryPhrase } from './saved_object';
 
@@ -46,6 +48,7 @@ export async function createFleetServerHost(
   data: NewFleetServerHost,
   options?: { id?: string; overwrite?: boolean; fromPreconfiguration?: boolean }
 ): Promise<FleetServerHost> {
+  const logger = appContextService.getLogger();
   if (data.is_default) {
     const defaultItem = await getDefaultFleetServerHost(soClient);
     if (defaultItem && defaultItem.id !== options?.id) {
@@ -61,7 +64,7 @@ export async function createFleetServerHost(
   if (data.host_urls) {
     data.host_urls = data.host_urls.map(normalizeHostsForAgents);
   }
-
+  logger.debug(`Creating fleet server host ${data}`);
   const res = await soClient.create<FleetServerHostSOAttributes>(
     FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
     data,
