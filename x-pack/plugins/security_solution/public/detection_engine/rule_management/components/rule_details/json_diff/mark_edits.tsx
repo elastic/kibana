@@ -6,11 +6,18 @@
  */
 
 import { findIndex, flatMap, flatten } from 'lodash';
-import type { Diff } from 'diff-match-patch';
 import * as diff from 'diff';
 import type { Change } from 'diff';
 import { isDelete, isInsert, isNormal, pickRanges } from 'react-diff-view';
 import type { ChangeData, HunkData, RangeTokenNode, TokenizeEnhancer } from 'react-diff-view';
+
+enum DmpChangeType {
+  DELETE = -1,
+  EQUAL = 0,
+  INSERT = 1,
+}
+
+type Diff = [DmpChangeType, string];
 
 type StringDiffFn = (oldString: string, newString: string) => Change[];
 
@@ -36,10 +43,6 @@ export enum DiffMethod {
   CSS = 'diffCss',
 }
 
-const DMP_DIFF_EQUAL = 0;
-const DMP_DIFF_DELETE = -1;
-const DMP_DIFF_INSERT = 1;
-
 function findChangeBlocks(changes: ChangeData[]): ChangeData[][] {
   const start = findIndex(changes, (change) => !isNormal(change));
 
@@ -63,10 +66,10 @@ function groupDiffs(diffs: Diff[]): [Diff[], Diff[]] {
       const [type] = diff;
 
       switch (type) {
-        case DMP_DIFF_INSERT:
+        case DmpChangeType.INSERT:
           newDiffs.push(diff);
           break;
-        case DMP_DIFF_DELETE:
+        case DmpChangeType.DELETE:
           oldDiffs.push(diff);
           break;
         default:
@@ -106,7 +109,7 @@ function diffsToEdits(diffs: Diff[], lineNumber: number): RangeTokenNode[] {
     (output, diff) => {
       const [edits, start] = output;
       const [type, value] = diff;
-      if (type !== DMP_DIFF_EQUAL) {
+      if (type !== DmpChangeType.EQUAL) {
         const edit: RangeTokenNode = {
           type: 'edit',
           lineNumber,
