@@ -99,7 +99,7 @@ export function SloAlertsWrapper({
 
   return (
     <Wrapper>
-      <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexGroup justifyContent="flexEnd" wrap>
         <EuiFlexItem
           css={`
             align-items: flex-end;
