@@ -106,9 +106,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     const actionSendResponse = await this.connectorActionsClient.execute(executeOptions);
 
-    this.log.debug(`Response:\n${dump(actionSendResponse)}`);
-
     if (actionSendResponse.status === 'error') {
+      this.log.error(dump(actionSendResponse));
+
       throw new ResponseActionsClientError(
         `Attempt to send [${actionType}] to SentinelOne failed: ${
           actionSendResponse.serviceMessage || actionSendResponse.message
@@ -118,6 +118,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
     }
 
+    this.log.debug(`Response:\n${dump(actionSendResponse)}`);
+
     return actionSendResponse;
   }
 
@@ -125,7 +127,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     const agentUUID = options.endpoint_ids[0];
     // TODO:PT will we support multiple agent IDs? and does S1 even support that? code above needs updating
 
-    await this.sendAction(SUB_ACTION.ISOLATE_AGENT, {
+    await this.sendAction(SUB_ACTION.ISOLATE_HOST, {
       uuid: agentUUID,
     });
 
