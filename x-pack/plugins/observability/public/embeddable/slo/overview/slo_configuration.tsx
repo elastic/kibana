@@ -46,6 +46,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
         <EuiFlexGroup>
           <EuiFlexItem grow>
             <SloSelector
+              singleSelection={true}
               hasError={hasError}
               onSelected={(slo) => {
                 setHasError(slo === undefined);

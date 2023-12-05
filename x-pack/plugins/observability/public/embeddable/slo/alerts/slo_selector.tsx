@@ -58,7 +58,7 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
             opts.find((opt) => opt.value === `${slo.id}-${slo.instanceId}`)
           )
         : undefined;
-    onSelected(selectedSlos);
+    onSelected(singleSelection ? selectedSlos?.[0] : selectedSlos);
   };
 
   const onSearchChange = useMemo(
