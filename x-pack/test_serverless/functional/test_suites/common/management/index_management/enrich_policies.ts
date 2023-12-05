@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
-  const toasts = getService('toasts');
   const log = getService('log');
   const browser = getService('browser');
   const security = getService('security');
