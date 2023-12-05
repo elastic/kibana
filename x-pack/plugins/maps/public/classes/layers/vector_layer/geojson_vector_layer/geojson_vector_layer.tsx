@@ -7,6 +7,7 @@
 
 import _ from 'lodash';
 import React from 'react';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 import { Feature, FeatureCollection } from 'geojson';
@@ -158,8 +159,8 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     );
   }
 
-  getErrors(): LayerMessage[] {
-    const errors = super.getErrors();
+  getErrors(inspectorAdapters: Adapters): LayerMessage[] {
+    const errors = super.getErrors(inspectorAdapters);
 
     this.getValidJoins().forEach((join) => {
       const joinDescriptor = join.toDescriptor();

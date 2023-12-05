@@ -135,20 +135,6 @@ class VectorTileInspector extends Component<Props, State> {
     });
   }
 
-  _getTileResponse() {
-    if (this.state.selectedTileRequest.tileError?.error) {
-      return {
-        error: this.state.selectedTileRequest.tileError.error
-      };
-    }
-
-    return this.state.selectedTileRequest.tileMetaFeature
-      ? { 
-          meta: this.state.selectedTileRequest.tileMetaFeature.properties
-        }
-      : undefined;
-  }
-
   _renderTileRequest() {
     if (!this.state.selectedTileRequest) {
       return null;
@@ -163,7 +149,7 @@ class VectorTileInspector extends Component<Props, State> {
       );
     }
 
-    const tileResponse = this._getTileResponse();
+    const tileResponse = getTileResponse(this.state.selectedTileRequest);
     
     return tileResponse
       ? (
@@ -279,6 +265,20 @@ class VectorTileInspector extends Component<Props, State> {
       </>
     );
   }
+}
+
+function getTileResponse(tileRequest: TileRequest) {
+  if (tileRequest.tileError?.error) {
+    return {
+      error: tileRequest.tileError.error
+    };
+  }
+
+  return tileRequest.tileMetaFeature
+    ? { 
+        meta: tileRequest.tileMetaFeature.properties
+      }
+    : undefined;
 }
 
 // default export required for React.Lazy

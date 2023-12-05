@@ -6,11 +6,16 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiCodeBlock, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { TileError } from '../../../common/descriptor_types';
+import { getInspector } from '../../kibana_services';
 
 interface Props {
+  inspectorAdapters: Adapters;
+  isESSource: boolean;
+  layerId: string;
   tileErrors: TileError[];
 }
 
@@ -75,7 +80,21 @@ export function TileErrorsList(props: Props) {
       >
         <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
       </EuiPopover>
-      <p>{getDescription(selectedTileError)}</p>
+      <EuiCodeBlock isCopyable={true} paddingSize="s">
+        {getDescription(selectedTileError)}
+      </EuiCodeBlock>
+      {props.isESSource && 
+        <EuiButton
+          color="primary" 
+          onClick={() => {
+            getInspector().open(props.inspectorAdapters);
+          }} size="s"
+        >
+          {i18n.translate('xpack.maps.tileError.viewDetailsButtonLabel', {
+            defaultMessage: 'View details',
+          })}
+        </EuiButton>
+      }
     </>
   );
 }
