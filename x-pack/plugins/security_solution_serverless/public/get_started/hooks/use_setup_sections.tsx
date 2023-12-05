@@ -6,39 +6,31 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import type {
   ActiveSections,
   CardId,
   ExpandedCardSteps,
-  OnCardClicked,
-  OnStepButtonClicked,
+  ToggleTaskCompleteStatus,
   OnStepClicked,
   SectionId,
   StepId,
-} from './types';
+} from '../types';
 
-import { CardItem } from './card_item';
-import { getSections } from './sections';
-import type { ProductLine } from '../../common/product';
+import { CardItem } from '../card_item';
+import { getSections } from '../sections';
+import type { ProductLine } from '../../../common/product';
 
-export const useSetUpSections = ({
-  euiTheme,
-  shadow = '',
-}: {
-  euiTheme: EuiThemeComputed;
-  shadow?: string;
-}) => {
+export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => {
   const setUpCards = useCallback(
     ({
       activeProducts,
       activeSections,
       expandedCardSteps,
       finishedSteps,
-      onCardClicked,
-      onStepButtonClicked,
+      toggleTaskCompleteStatus,
       onStepClicked,
       sectionId,
     }: {
@@ -46,8 +38,7 @@ export const useSetUpSections = ({
       activeSections: ActiveSections | null;
       expandedCardSteps: ExpandedCardSteps;
       finishedSteps: Record<CardId, Set<StepId>>;
-      onCardClicked: OnCardClicked;
-      onStepButtonClicked: OnStepButtonClicked;
+      toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
       onStepClicked: OnStepClicked;
       sectionId: SectionId;
     }) => {
@@ -56,26 +47,20 @@ export const useSetUpSections = ({
         ? Object.values(section)?.map<React.ReactNode>((cardItem) => (
             <EuiFlexItem key={cardItem.id}>
               <CardItem
-                activeProducts={activeProducts}
                 activeStepIds={cardItem.activeStepIds}
                 cardId={cardItem.id}
                 data-test-subj={cardItem.id}
                 expandedCardSteps={expandedCardSteps}
-                euiTheme={euiTheme}
-                finishedSteps={finishedSteps}
-                onCardClicked={onCardClicked}
-                onStepButtonClicked={onStepButtonClicked}
+                finishedSteps={finishedSteps[cardItem.id]}
+                toggleTaskCompleteStatus={toggleTaskCompleteStatus}
                 onStepClicked={onStepClicked}
                 sectionId={sectionId}
-                shadow={shadow}
-                stepsLeft={cardItem.stepsLeft}
-                timeInMins={cardItem.timeInMins}
               />
             </EuiFlexItem>
           ))
         : null;
     },
-    [euiTheme, shadow]
+    []
   );
 
   const setUpSections = useCallback(
@@ -84,16 +69,14 @@ export const useSetUpSections = ({
       activeSections,
       expandedCardSteps,
       finishedSteps,
-      onCardClicked,
-      onStepButtonClicked,
+      toggleTaskCompleteStatus,
       onStepClicked,
     }: {
       activeProducts: Set<ProductLine>;
       activeSections: ActiveSections | null;
       expandedCardSteps: ExpandedCardSteps;
       finishedSteps: Record<CardId, Set<StepId>>;
-      onCardClicked: OnCardClicked;
-      onStepButtonClicked: OnStepButtonClicked;
+      toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
       onStepClicked: OnStepClicked;
     }) =>
       getSections().reduce<React.ReactNode[]>((acc, currentSection) => {
@@ -102,8 +85,7 @@ export const useSetUpSections = ({
           activeSections,
           expandedCardSteps,
           finishedSteps,
-          onCardClicked,
-          onStepButtonClicked,
+          toggleTaskCompleteStatus,
           onStepClicked,
           sectionId: currentSection.id,
         });
@@ -119,14 +101,21 @@ export const useSetUpSections = ({
               css={css`
                 margin: ${euiTheme.size.l} 0;
                 padding-top: 4px;
+                background-color: ${euiTheme.colors.lightestShade};
               `}
               key={currentSection.id}
+              id={currentSection.id}
               data-test-subj={`section-${currentSection.id}`}
             >
-              <EuiTitle size="xxs">
-                <span>{currentSection.title}</span>
-              </EuiTitle>
-              <EuiSpacer size="m" />
+              <span
+                css={css`
+                  font-size: ${euiTheme.base * 1.375}px;
+                  font-weight: ${euiTheme.font.weight.bold};
+                `}
+              >
+                {currentSection.title}
+              </span>
+              <EuiSpacer size="l" />
               <EuiFlexGroup
                 gutterSize="m"
                 direction="column"
@@ -141,7 +130,14 @@ export const useSetUpSections = ({
         }
         return acc;
       }, []),
-    [euiTheme.size.base, euiTheme.size.l, setUpCards]
+    [
+      euiTheme.base,
+      euiTheme.colors.lightestShade,
+      euiTheme.font.weight.bold,
+      euiTheme.size.base,
+      euiTheme.size.l,
+      setUpCards,
+    ]
   );
 
   return { setUpSections };
