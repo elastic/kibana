@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { SetStateAction } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { merge } from 'lodash';
+import { merge, isEqual, isEmpty } from 'lodash';
 import type { FilterOptions } from '../../../../common/ui';
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import type { FilterConfig, FilterConfigState } from './types';
@@ -28,6 +29,45 @@ const mergeSystemAndCustomFieldConfigs = ({
   );
 
   return newFilterConfig;
+};
+
+const shouldBeActive = ({
+  filter,
+  filterOptions,
+}: {
+  filter: FilterConfigState;
+  filterOptions: FilterOptions;
+}) => {
+  return !filter.isActive && !isEmpty(filterOptions[filter.key as keyof FilterOptions]);
+};
+
+const useActiveByFilterKeyState = ({ filterOptions }: { filterOptions: FilterOptions }) => {
+  const { appId } = useCasesContext();
+  const [activeByFilterKey, setActiveByFilterKey] = useLocalStorage<FilterConfigState[]>(
+    `${appId}.${LOCAL_STORAGE_KEYS.casesTableFiltersConfig}`,
+    []
+  );
+
+  /**
+   * Activates filters that aren't active but have a value in the filterOptions
+   */
+  const newActiveByFilterKey = [...(activeByFilterKey || [])];
+  newActiveByFilterKey.forEach((filter) => {
+    if (shouldBeActive({ filter, filterOptions })) {
+      const currentIndex = newActiveByFilterKey.findIndex((_filter) => filter.key === _filter.key);
+      newActiveByFilterKey.splice(currentIndex, 1);
+      newActiveByFilterKey.push({ key: filter.key, isActive: true });
+    }
+  });
+
+  if (!isEqual(newActiveByFilterKey, activeByFilterKey)) {
+    setActiveByFilterKey(newActiveByFilterKey);
+  }
+
+  return [newActiveByFilterKey, setActiveByFilterKey] as [
+    FilterConfigState[],
+    (value: SetStateAction<FilterConfigState[]>) => void
+  ];
 };
 
 const deactivateNonExistingFilters = ({
@@ -57,25 +97,22 @@ export const useFilterConfig = ({
   isSelectorView,
   onFilterOptionsChange,
   systemFilterConfig,
+  filterOptions,
 }: {
   isSelectorView: boolean;
   onFilterOptionsChange: (params: Partial<FilterOptions>) => void;
   systemFilterConfig: FilterConfig[];
+  filterOptions: FilterOptions;
 }) => {
-  const { appId } = useCasesContext();
-  const { customFieldsFilterConfig } = useCustomFieldsFilterConfig({
-    isSelectorView,
-    onFilterOptionsChange,
-  });
-
   /**
    * Initially we won't save any order, it will use the default config as it is defined in the system.
    * Once the user adds/removes a filter, we start saving the order and the visible state.
    */
-  const [activeByFilterKey, setActiveByFilterKey] = useLocalStorage<FilterConfigState[]>(
-    `${appId}.${LOCAL_STORAGE_KEYS.casesTableFiltersConfig}`,
-    []
-  );
+  const [activeByFilterKey, setActiveByFilterKey] = useActiveByFilterKeyState({ filterOptions });
+  const { customFieldsFilterConfig } = useCustomFieldsFilterConfig({
+    isSelectorView,
+    onFilterOptionsChange,
+  });
 
   const filterConfigs = mergeSystemAndCustomFieldConfigs({
     systemFilterConfig,

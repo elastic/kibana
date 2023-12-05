@@ -12,20 +12,11 @@ import { EuiCallOut } from '@elastic/eui';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { MaintenanceWindowStatus, KibanaServices } from './types';
 import { useFetchActiveMaintenanceWindows } from './use_fetch_active_maintenance_windows';
-
-const MAINTENANCE_WINDOW_FEATURE_ID = 'maintenanceWindow';
-const MAINTENANCE_WINDOW_RUNNING_DESCRIPTION = i18n.translate(
-  'alertsUIShared.maintenanceWindowCallout.maintenanceWindowActiveDescription',
-  {
-    defaultMessage: 'Rule notifications are stopped while maintenance windows are running.',
-  }
-);
-const MAINTENANCE_WINDOW_NO_CATEGORY_TITLE = i18n.translate(
-  'alertsUIShared.maintenanceWindowCallout.maintenanceWindowActiveNoCategories',
-  {
-    defaultMessage: 'One or more maintenance windows are running',
-  }
-);
+import { MAINTENANCE_WINDOW_FEATURE_ID } from './constants';
+import {
+  MAINTENANCE_WINDOW_NO_CATEGORY_TITLE,
+  MAINTENANCE_WINDOW_RUNNING_DESCRIPTION,
+} from './translations';
 
 const maintenanceWindowTwoCategoryNames = (names: string[]) =>
   i18n.translate('alertsUIShared.maintenanceWindowCallout.maintenanceWindowTwoCategoryNames', {
