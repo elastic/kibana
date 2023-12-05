@@ -15,7 +15,7 @@ export function getAnomalyDescription(anomaly: MlAnomaliesTableRecordExtended): 
 } {
   const source = anomaly.source;
 
-  let anomalyDescription = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyInLabel', {
+  let anomalyDescription = i18n.translate('xpack.ml.anomalyDescription.anomalyInLabel', {
     defaultMessage: '{anomalySeverity} anomaly in {anomalyDetector}',
     values: {
       anomalySeverity: capitalize(getSeverity(anomaly.severity).label),
@@ -24,7 +24,7 @@ export function getAnomalyDescription(anomaly: MlAnomaliesTableRecordExtended): 
   });
 
   if (anomaly.entityName !== undefined) {
-    anomalyDescription += i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.foundForLabel', {
+    anomalyDescription += i18n.translate('xpack.ml.anomalyDescription.foundForLabel', {
       defaultMessage: ' found for {anomalyEntityName} {anomalyEntityValue}',
       values: {
         anomalyEntityName: anomaly.entityName,
@@ -37,7 +37,7 @@ export function getAnomalyDescription(anomaly: MlAnomaliesTableRecordExtended): 
     source.partition_field_name !== undefined &&
     source.partition_field_name !== anomaly.entityName
   ) {
-    anomalyDescription += i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.detectedInLabel', {
+    anomalyDescription += i18n.translate('xpack.ml.anomalyDescription.detectedInLabel', {
       defaultMessage: ' detected in {sourcePartitionFieldName} {sourcePartitionFieldValue}',
       values: {
         sourcePartitionFieldName: source.partition_field_name,
@@ -50,19 +50,16 @@ export function getAnomalyDescription(anomaly: MlAnomaliesTableRecordExtended): 
   // where the record is anomalous due to relationship with another 'by' field value.
   let mvDescription: string = '';
   if (source.correlated_by_field_value !== undefined) {
-    mvDescription = i18n.translate(
-      'xpack.ml.anomaliesTable.anomalyDetails.multivariateDescription',
-      {
-        defaultMessage:
-          'multivariate correlations found in {sourceByFieldName}; ' +
-          '{sourceByFieldValue} is considered anomalous given {sourceCorrelatedByFieldValue}',
-        values: {
-          sourceByFieldName: source.by_field_name,
-          sourceByFieldValue: source.by_field_value,
-          sourceCorrelatedByFieldValue: source.correlated_by_field_value,
-        },
-      }
-    );
+    mvDescription = i18n.translate('xpack.ml.anomalyDescription.multivariateDescription', {
+      defaultMessage:
+        'multivariate correlations found in {sourceByFieldName}; ' +
+        '{sourceByFieldValue} is considered anomalous given {sourceCorrelatedByFieldValue}',
+      values: {
+        sourceByFieldName: source.by_field_name,
+        sourceByFieldValue: source.by_field_value,
+        sourceCorrelatedByFieldValue: source.correlated_by_field_value,
+      },
+    });
   }
 
   return {
