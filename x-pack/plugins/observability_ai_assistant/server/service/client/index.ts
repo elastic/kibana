@@ -299,7 +299,7 @@ export class ObservabilityAIAssistantClient {
         }
 
         const updatedConversation = await this.update(
-          merge({}, conversation._source, { messages: nextMessages })
+          merge({}, omit(conversation._source, 'messages'), { messages: nextMessages })
         );
         await write({
           type: StreamingChatResponseEventType.ConversationUpdate,
@@ -392,42 +392,7 @@ export class ObservabilityAIAssistantClient {
         })
     );
 
-    // add recalled information to system message, so the LLM considers it more important
-
-    const recallMessages = messagesForOpenAI.filter((message) => message.name === 'recall');
-
-    const recalledDocuments: Map<string, { id: string; text: string }> = new Map();
-
-    recallMessages.forEach((message) => {
-      const entries = message.content
-        ? (JSON.parse(message.content) as Array<{ id: string; text: string }>)
-        : [];
-
-      const ids: string[] = [];
-
-      entries.forEach((entry) => {
-        const id = entry.id;
-        if (!recalledDocuments.has(id)) {
-          recalledDocuments.set(id, entry);
-        }
-        ids.push(id);
-      });
-
-      message.content = `The following documents, present in the system message, were recalled: ${ids.join(
-        ', '
-      )}`;
-    });
-
-    const systemMessage = messagesForOpenAI.find((message) => message.role === MessageRole.System);
-
-    if (systemMessage && recalledDocuments.size > 0) {
-      systemMessage.content += `The "recall" function is not available. Do not attempt to execute it. Recalled documents: ${JSON.stringify(
-        Array.from(recalledDocuments.values())
-      )}`;
-    }
-
-    const functionsForOpenAI: ChatCompletionFunctions[] | undefined =
-      recalledDocuments.size > 0 ? functions?.filter((fn) => fn.name !== 'recall') : functions;
+    const functionsForOpenAI: ChatCompletionFunctions[] | undefined = functions;
 
     const request: Omit<CreateChatCompletionRequest, 'model'> & { model?: string } = {
       messages: messagesForOpenAI,

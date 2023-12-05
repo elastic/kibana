@@ -305,10 +305,8 @@ export class ObservabilityAIAssistantService {
         definition.name,
         // new Validator(definition.parameters as Schema, '2020-12', true)
         {
-          validate: () => {
-            return { valid: true, errors: [] };
-          },
-        } as unknown as IValidator
+          validate: () => ({ valid: true, errors: [] }),
+        } as any as IValidator
       );
       functionHandlerRegistry.set(definition.name, { definition, respond });
     };

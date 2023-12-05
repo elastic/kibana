@@ -14,6 +14,7 @@ import { registerElasticsearchFunction } from './elasticsearch';
 import { registerEsqlFunction } from './esql';
 import { registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerLensFunction } from './lens';
+import { registerKibanaFunction } from './kibana';
 
 export type FunctionRegistrationParameters = Omit<
   Parameters<ChatRegistrationFunction>[0],
@@ -74,6 +75,7 @@ export const registerFunctions: ChatRegistrationFunction = async ({
     }
 
     registerElasticsearchFunction(registrationParameters);
+    registerKibanaFunction(registrationParameters);
     registerEsqlFunction(registrationParameters);
     registerAlertsFunction(registrationParameters);
     registerGetDatasetInfoFunction(registrationParameters);
