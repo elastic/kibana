@@ -68,6 +68,7 @@ describe('Save dashboard state', () => {
     );
     expect(allServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
       title: `Dashboard 'BOO' was saved`,
+      className: 'eui-textBreakWord',
       'data-test-subj': 'saveDashboardSuccess',
     });
   });
