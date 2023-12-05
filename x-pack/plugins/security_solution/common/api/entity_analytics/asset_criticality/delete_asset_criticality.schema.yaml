@@ -7,8 +7,8 @@ paths:
     delete:
       summary: Delete Criticality Record
       parameters:
-        - $ref: '#/components/parameters/id_value'
-        - $ref: '#/components/parameters/id_field'
+        - $ref: './common.schema.yaml#/components/parameters/id_value'
+        - $ref: './common.schema.yaml#/components/parameters/id_field'
       responses:
         '200':
           description: Successful response

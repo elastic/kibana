@@ -7,15 +7,15 @@ paths:
     get:
       summary: Get Criticality Record
       parameters:
-        - $ref: '#/components/parameters/id_value'
-        - $ref: '#/components/parameters/id_field'
+        - $ref: './common.schema.yaml#/components/parameters/id_value'
+        - $ref: './common.schema.yaml#/components/parameters/id_field'
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SingleAssetCriticality'
+                $ref: './common.schema.yaml#/components/schemas/AssetCriticalityRecord'
         '400':
           description: Invalid request
         '404':

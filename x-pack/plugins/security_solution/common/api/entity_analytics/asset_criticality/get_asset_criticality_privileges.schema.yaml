@@ -12,7 +12,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EntityAnalyticsPrivileges'
+                $ref: '../common/common.schema.yaml#/components/schemas/EntityAnalyticsPrivileges'
               example:
                 elasticsearch:
                   index:
