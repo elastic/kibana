@@ -7956,7 +7956,10 @@
             "type": "string",
             "enum": [
               "balanced",
-              "custom"
+              "custom",
+              "throughput",
+              "scale",
+              "latency"
             ]
           },
           "config_yaml": {
@@ -8453,7 +8456,10 @@
             "type": "string",
             "enum": [
               "balanced",
-              "custom"
+              "custom",
+              "throughput",
+              "scale",
+              "latency"
             ]
           },
           "config_yaml": {

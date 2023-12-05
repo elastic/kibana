@@ -24,7 +24,7 @@ properties:
     type: object
   preset:
     type: string
-    enum: ['balanced', 'custom']
+    enum: ['balanced', 'custom', 'throughput', 'scale', 'latency']
   config_yaml:
     type: string
   ssl:

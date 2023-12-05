@@ -5135,6 +5135,9 @@ components:
           enum:
             - balanced
             - custom
+            - throughput
+            - scale
+            - latency
         config_yaml:
           type: string
         ssl:
@@ -5461,6 +5464,9 @@ components:
           enum:
             - balanced
             - custom
+            - throughput
+            - scale
+            - latency
         config_yaml:
           type: string
         ssl:
