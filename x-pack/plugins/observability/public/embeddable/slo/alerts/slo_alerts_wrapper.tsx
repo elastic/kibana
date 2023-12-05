@@ -50,8 +50,8 @@ export function SloAlertsWrapper({
 
   useEffect(() => {
     reloadSubject?.subscribe((nTimeRange) => {
-      setLastRefreshTime(Date.now());
       setTimeRange(nTimeRange);
+      setLastRefreshTime(Date.now());
     });
   }, [reloadSubject]);
 
