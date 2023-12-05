@@ -18,7 +18,6 @@ export const FieldItemDragHandle: React.FC = () => {
       className="unifiedFieldListItemDragHandle"
       css={css`
         pointer-events: none;
-        flex-shrink: 0;
         margin-right: ${euiTheme.size.s};
         width: ${euiTheme.size.base};
         height: 100%;
