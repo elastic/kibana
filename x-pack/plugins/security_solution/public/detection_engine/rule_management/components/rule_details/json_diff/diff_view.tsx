@@ -74,9 +74,7 @@ const renderGutter: RenderGutter = ({ change }) => {
     return <span>{'-'}</span>;
   }
 
-  if (change.type === 'normal') {
-    return null;
-  }
+  return null;
 };
 
 const convertToDiffFile = (oldSource: string, newSource: string) => {
