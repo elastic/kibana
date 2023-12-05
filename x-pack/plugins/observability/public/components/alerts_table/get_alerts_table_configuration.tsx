@@ -10,7 +10,6 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   AlertsTableConfigurationRegistry,
-  GetRenderCellValue,
   RenderCustomActionsRowArgs,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { casesFeatureId, observabilityFeatureId } from '../../../common';
@@ -32,7 +31,7 @@ export const getAlertsTableConfiguration = (
     getRenderCellValue({
       observabilityRuleTypeRegistry,
       setFlyoutAlert,
-    }) as ReturnType<GetRenderCellValue>,
+    }),
   sort: [
     {
       [TIMESTAMP]: {

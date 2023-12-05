@@ -139,16 +139,15 @@ export class TriggersActionsUiExamplePlugin
       id: 'observabilityCases',
       columns,
       useInternalFlyout,
-      getRenderCellValue: () =>
-        ((props: EuiDataGridCellValueElementProps & { data: any[] }) => {
-          const value = props.data.find((d) => d.field === props.columnId)?.value ?? [];
+      getRenderCellValue: () => (props) => {
+        const value = props.data.find((d) => d.field === props.columnId)?.value ?? [];
 
-          if (Array.isArray(value)) {
-            return <>{value.length ? value.join() : '--'}</>;
-          }
+        if (Array.isArray(value)) {
+          return <>{value.length ? value.join() : '--'}</>;
+        }
 
-          return <>{value}</>;
-        }) as ReturnType<GetRenderCellValue>,
+        return <>{value}</>;
+      },
       sort,
     };
 

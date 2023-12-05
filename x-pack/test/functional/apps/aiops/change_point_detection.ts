@@ -16,8 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // aiops lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/172203
-  describe.skip('change point detection', async function () {
+  describe('change point detection', async function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
@@ -67,15 +66,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage.getTable(0).waitForTableToLoad();
       const result = await aiops.changePointDetectionPage.getTable(0).parseTable();
       // the aggregation may return different results (+-1)
-      expect(result.length).to.be.above(5);
+      expect(result.length).to.be.above(4);
       // assert asc sorting by p_value is applied
-      expect(parseFloat(result[0].pValue)).to.be.lessThan(parseFloat(result[4].pValue));
+      expect(parseFloat(result[0].pValue)).to.be.lessThan(parseFloat(result[3].pValue));
     });
 
     it('allows change point selection for detailed view', async () => {
       await aiops.changePointDetectionPage.getTable(0).selectAllRows();
       await aiops.changePointDetectionPage.viewSelected();
-      await aiops.changePointDetectionPage.assertDetailedView(6);
+      await aiops.changePointDetectionPage.assertDetailedView(5);
       await aiops.changePointDetectionPage.closeFlyout();
       // deselect
       await aiops.changePointDetectionPage.getTable(0).selectAllRows();

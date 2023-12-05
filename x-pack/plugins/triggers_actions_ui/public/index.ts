@@ -14,6 +14,7 @@ export type {
   RuleAction,
   Rule,
   RuleType,
+  RuleTypeIndex,
   RuleTypeModel,
   RuleStatusFilterProps,
   RuleStatus,
@@ -124,7 +125,7 @@ export {
   deprecatedMessage,
 } from './common';
 
-export { useLoadRuleTypes, useSubAction } from './application/hooks';
+export { useLoadRuleTypesQuery, useSubAction } from './application/hooks';
 
 export type {
   TriggersAndActionsUIPublicPluginSetup,
