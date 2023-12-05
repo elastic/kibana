@@ -28,7 +28,7 @@ interface Props {
   timeRange: TimeRange;
   embeddable: IEmbeddable<SloAlertsEmbeddableInput, EmbeddableOutput>;
   onRenderComplete?: () => void;
-  reloadSubject: Subject<TimeRange>;
+  reloadSubject: Subject<TimeRange | undefined>;
 }
 
 export function SloAlertsWrapper({
@@ -50,10 +50,15 @@ export function SloAlertsWrapper({
 
   useEffect(() => {
     reloadSubject?.subscribe((nTimeRange) => {
-      setTimeRange(nTimeRange);
+      if (nTimeRange && (nTimeRange.from !== timeRange.from || nTimeRange.to !== timeRange.to)) {
+        setTimeRange(nTimeRange);
+      }
       setLastRefreshTime(Date.now());
     });
-  }, [reloadSubject]);
+    return () => {
+      reloadSubject?.unsubscribe();
+    };
+  }, [reloadSubject, timeRange.from, timeRange.to]);
 
   useEffect(() => {
     setTimeRange(initialTimeRange);

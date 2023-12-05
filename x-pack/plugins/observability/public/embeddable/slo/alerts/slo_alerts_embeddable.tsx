@@ -34,7 +34,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { TimeRange } from '@kbn/es-query';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 import type { SloAlertsEmbeddableInput } from './types';
@@ -63,9 +63,10 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
   EmbeddableOutput
 > {
   public readonly type = SLO_ALERTS_EMBEDDABLE;
-  private reloadSubject: Subject<TimeRange>;
+  private reloadSubject: Subject<TimeRange | undefined>;
   private node?: HTMLElement;
   kibanaVersion: string;
+  private subscription: Subscription;
 
   constructor(
     private readonly deps: SloEmbeddableDeps,
@@ -76,9 +77,9 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
     super(initialInput, {}, parent);
     this.deps = deps;
     this.kibanaVersion = kibanaVersion;
-    this.reloadSubject = new Subject<TimeRange>();
+    this.reloadSubject = new Subject<TimeRange | undefined>();
 
-    this.getInput$().subscribe((input) => {
+    this.subscription = this.getInput$().subscribe((input) => {
       const { timeRange = { from: 'now-15m/m', to: 'now' } } = input;
       this.reloadSubject.next(timeRange);
     });
@@ -140,13 +141,12 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
   }
 
   public reload() {
-    const { timeRange = { from: 'now-15m/m', to: 'now' } } = this.getInput();
-
-    this.reloadSubject?.next(timeRange);
+    this.reloadSubject?.next(undefined);
   }
 
   public destroy() {
     super.destroy();
+    this.subscription.unsubscribe();
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }

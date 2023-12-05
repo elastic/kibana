@@ -35,6 +35,9 @@ export function SloOverview({
     reloadSubject?.subscribe(() => {
       setLastRefreshTime(Date.now());
     });
+    return () => {
+      reloadSubject?.unsubscribe();
+    };
   }, [reloadSubject]);
 
   const {
