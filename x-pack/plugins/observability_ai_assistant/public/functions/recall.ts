@@ -275,7 +275,10 @@ async function scoreSuggestions({
     return [];
   }
 
+  const suggestionIds = suggestions.map((document) => document.id);
+
   const relevantDocumentIds = scores
+    .filter((document) => suggestionIds.includes(document.id)) // Remove hallucinated documents
     .filter((document) => document.score > 4)
     .sort((a, b) => b.score - a.score)
     .slice(0, 5)
