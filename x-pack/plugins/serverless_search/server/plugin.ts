@@ -95,15 +95,15 @@ export class ServerlessSearchPlugin
       registerIndicesRoutes(dependencies);
     });
 
-    getStartServices().then(([coreStart]) => {
-      if (usageCollection) {
+    if (usageCollection) {
+      getStartServices().then(([coreStart]) => {
         registerTelemetryUsageCollector(
           usageCollection,
           coreStart.elasticsearch.client,
           this.logger
         );
-      }
-    });
+      });
+    }
 
     serverless.setupProjectSettings(SEARCH_PROJECT_SETTINGS);
     return {};
