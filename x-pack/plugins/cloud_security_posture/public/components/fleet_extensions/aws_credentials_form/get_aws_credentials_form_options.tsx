@@ -111,8 +111,7 @@ const getAwsCredentialsTypeSelectorOptions = (
 export const getAwsCredentialsFormManualOptions = (): AwsCredentialsTypeOptions =>
   getAwsCredentialsTypeSelectorOptions(({ value }) => value !== 'cloud_formation');
 
-// TODO: move strings to constants
-export const getAwsCredentialsFormManualOptionsAgentless = (): AwsCredentialsTypeOptions =>
+export const getAwsCredentialsFormAgentlessOptions = (): AwsCredentialsTypeOptions =>
   getAwsCredentialsTypeSelectorOptions(
     ({ value }) => value === 'direct_access_keys' || value === 'temporary_keys'
   );

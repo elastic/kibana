@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
-  getAwsCredentialsFormManualOptionsAgentless,
+  getAwsCredentialsFormAgentlessOptions,
   getAwsCredentialsFormOptions,
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
@@ -49,7 +49,7 @@ export const AwsCredentialsFormAgentless = ({ input, newPolicy, updatePolicy }: 
           defaultMessage: 'Preferred method',
         })}
         type={awsCredentialsType}
-        options={getAwsCredentialsFormManualOptionsAgentless()}
+        options={getAwsCredentialsFormAgentlessOptions()}
         onChange={(optionId) => {
           updatePolicy(
             getPosturePolicy(newPolicy, input.type, {
