@@ -39,6 +39,7 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
         }
       },
     }),
+    prerelease: schema.maybe(schema.boolean()),
   }),
   {
     defaultValue: [],
