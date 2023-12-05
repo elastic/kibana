@@ -11,6 +11,7 @@ import type { SortUsersField } from '../../../../common/search_strategy/security
 export enum UsersType {
   page = 'page',
   details = 'details',
+  flyout = 'flyout',
 }
 
 export enum UsersTableType {
@@ -26,6 +27,11 @@ export enum UsersDetailsTableType {
   anomalies = 'anomalies',
   risk = 'userRisk',
   events = 'events',
+}
+
+export enum UserAssetTableType {
+  assetEntra = 'userAssetEntra',
+  assetOkta = 'userAssetOkta',
 }
 
 export interface BasicQueryPaginated {
@@ -47,6 +53,10 @@ export interface UsersAnomaliesQuery {
   intervalSelection: string;
 }
 
+export interface UserAssetQuery {
+  fields: string[];
+}
+
 export interface UsersQueries {
   [UsersTableType.allUsers]: AllUsersQuery;
   [UsersTableType.authentications]: BasicQueryPaginated;
@@ -60,6 +70,11 @@ export interface UserDetailsQueries {
   [UsersTableType.events]: BasicQueryPaginated;
 }
 
+export interface UserFlyoutQueries {
+  [UserAssetTableType.assetEntra]: UserAssetQuery;
+  [UserAssetTableType.assetOkta]: UserAssetQuery;
+}
+
 export interface UsersPageModel {
   queries: UsersQueries;
 }
@@ -68,7 +83,12 @@ export interface UserDetailsPageModel {
   queries: UserDetailsQueries;
 }
 
+export interface UserFlyoutModel {
+  queries: UserFlyoutQueries;
+}
+
 export interface UsersModel {
   [UsersType.page]: UsersPageModel;
   [UsersType.details]: UserDetailsPageModel;
+  [UsersType.flyout]: UserFlyoutModel;
 }

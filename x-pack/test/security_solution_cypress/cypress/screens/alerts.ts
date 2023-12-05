@@ -33,6 +33,9 @@ export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.sev
 
 export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 
+export const ALERT_TABLE_ROW = (rowIndex: number) =>
+  `[data-grid-row-index="${rowIndex}"] [data-test-subj="dataGridRowCell"]`;
+
 export const ALERT_DATA_GRID_ROW = `${ALERT_DATA_GRID} .euiDataGridRow`;
 
 export const ALERTS_COUNT = '[data-test-subj="toolbar-alerts-count"]';
@@ -204,6 +207,9 @@ export const COVERAGE_OVERVIEW_SOURCE_FILTER_BUTTON =
 export const COVERAGE_OVERVIEW_FILTER_LIST = '[data-test-subj="coverageOverviewFilterList"]';
 
 export const COVERAGE_OVERVIEW_SEARCH_BAR = '[data-test-subj="coverageOverviewFilterSearchBar"]';
+
+export const SECURITY_SOLUTION_USERS_AVATAR = (user: string) =>
+  `[data-test-subj="securitySolutionUsersAvatar-${user}"]`;
 
 export const ALERT_USERS_PROFILES_SELECTABLE_MENU_ITEM = '.euiSelectableListItem';
 export const ALERT_USERS_PROFILES_CLEAR_SEARCH_BUTTON = '[data-test-subj="clearSearchButton"]';
