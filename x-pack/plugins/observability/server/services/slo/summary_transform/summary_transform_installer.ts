@@ -10,7 +10,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   SLO_SUMMARY_TRANSFORMS_VERSION,
   SLO_SUMMARY_TRANSFORM_NAME_PREFIX,
-} from '../../../assets/constants';
+} from '../../../../common/slo/constants';
 import { retryTransientEsErrors } from '../../../utils/retry';
 import { ALL_TRANSFORM_TEMPLATES } from './templates';
 

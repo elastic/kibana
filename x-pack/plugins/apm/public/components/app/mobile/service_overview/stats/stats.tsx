@@ -130,7 +130,7 @@ export function MobileStats({
         Number.isNaN(value)
           ? NOT_AVAILABLE_LABEL
           : valueFormatter(Number(value.toFixed(1)), 'ms'),
-      trend: data?.currentPeriod?.launchTimes?.timeseries,
+      trend: data?.currentPeriod?.launchTimes?.timeseries ?? [],
       extra: getComparisonValueFormatter(
         data?.previousPeriod.launchTimes?.value?.toFixed(1)
       ),
@@ -145,7 +145,7 @@ export function MobileStats({
       value: data?.currentPeriod?.sessions?.value ?? NaN,
       valueFormatter: (value: number) =>
         Number.isNaN(value) ? NOT_AVAILABLE_LABEL : valueFormatter(value),
-      trend: data?.currentPeriod?.sessions?.timeseries,
+      trend: data?.currentPeriod?.sessions?.timeseries ?? [],
       extra: getComparisonValueFormatter(data?.previousPeriod.sessions?.value),
       trendShape: MetricTrendShape.Area,
     },
