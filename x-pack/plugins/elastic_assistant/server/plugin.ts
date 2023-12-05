@@ -7,17 +7,16 @@
 
 import {
   PluginInitializerContext,
-  CoreSetup,
   CoreStart,
   Plugin,
   Logger,
-  IContextProvider,
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { once } from 'lodash';
 
 import {
+  ElasticAssistantPluginCoreSetupDependencies,
   ElasticAssistantPluginSetup,
   ElasticAssistantPluginSetupDependencies,
   ElasticAssistantPluginStart,
@@ -32,6 +31,14 @@ import {
   postEvaluateRoute,
   postKnowledgeBaseRoute,
 } from './routes';
+import { AIAssistantService } from './ai_assistant_service';
+import { assistantPromptsType, assistantAnonimizationFieldsType } from './saved_object';
+import {
+  DataStreamAdapter,
+  getDataStreamAdapter,
+} from './ai_assistant_service/lib/create_datastream';
+import { RequestContextFactory } from './routes/request_context_factory';
+import { PLUGIN_ID } from '../common/constants';
 
 export class ElasticAssistantPlugin
   implements
@@ -43,39 +50,50 @@ export class ElasticAssistantPlugin
     >
 {
   private readonly logger: Logger;
+  private assistantService: AIAssistantService | undefined;
+  private dataStreamAdapter: DataStreamAdapter;
+  private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.dataStreamAdapter = getDataStreamAdapter();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  private createRouteHandlerContext = (
-    core: CoreSetup<ElasticAssistantPluginStart, unknown>,
-    logger: Logger
-  ): IContextProvider<ElasticAssistantRequestHandlerContext, 'elasticAssistant'> => {
-    return async function elasticAssistantRouteHandlerContext(context, request) {
-      const [_, pluginsStart] = await core.getStartServices();
-
-      return {
-        actions: pluginsStart.actions,
-        logger,
-      };
-    };
-  };
-
-  public setup(core: CoreSetup, plugins: ElasticAssistantPluginSetupDependencies) {
+  public setup(
+    core: ElasticAssistantPluginCoreSetupDependencies,
+    plugins: ElasticAssistantPluginSetupDependencies
+  ) {
     this.logger.debug('elasticAssistant: Setup');
-    const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
 
-    core.http.registerRouteHandlerContext<
-      ElasticAssistantRequestHandlerContext,
-      'elasticAssistant'
-    >(
-      'elasticAssistant',
-      this.createRouteHandlerContext(
-        core as CoreSetup<ElasticAssistantPluginStart, unknown>,
-        this.logger
-      )
+    this.assistantService = new AIAssistantService({
+      logger: this.logger.get('service'),
+      taskManager: plugins.taskManager,
+      kibanaVersion: this.kibanaVersion,
+      dataStreamAdapter: this.dataStreamAdapter,
+      elasticsearchClientPromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+    });
+
+    const requestContextFactory = new RequestContextFactory({
+      logger: this.logger,
+      core,
+      plugins,
+      kibanaVersion: this.kibanaVersion,
+      assistantService: this.assistantService,
+    });
+
+    const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
+    core.http.registerRouteHandlerContext<ElasticAssistantRequestHandlerContext, typeof PLUGIN_ID>(
+      PLUGIN_ID,
+      (context, request) => requestContextFactory.create(context, request)
     );
+
+    core.savedObjects.registerType(assistantPromptsType);
+    core.savedObjects.registerType(assistantAnonimizationFieldsType);
+
+    // this.assistantService registerKBTask
 
     const getElserId: GetElser = once(
       async (request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) => {
@@ -92,6 +110,8 @@ export class ElasticAssistantPlugin
     postActionsConnectorExecuteRoute(router, getElserId);
     // Evaluate
     postEvaluateRoute(router, getElserId);
+    // Conversations
+
     return {
       actions: plugins.actions,
     };
