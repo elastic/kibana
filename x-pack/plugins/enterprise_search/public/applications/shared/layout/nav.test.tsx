@@ -42,6 +42,12 @@ const baseNavItems = [
         name: 'Indices',
       },
       {
+        href: '/app/enterprise_search/content/connectors',
+        id: 'connectors',
+        items: undefined,
+        name: 'Connectors',
+      },
+      {
         href: '/app/enterprise_search/content/settings',
         id: 'settings',
         items: undefined,
