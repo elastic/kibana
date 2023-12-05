@@ -78,8 +78,8 @@ export const ResponseActionsResults = React.memo(
 ResponseActionsResults.displayName = 'ResponseActionsResults';
 
 const isOsquery = (item: LogsEndpointAction | LogsOsqueryAction): item is LogsOsqueryAction => {
-  return item && 'input_type' in item && item?.input_type === 'osquery';
+  return !!(item && 'input_type' in item && item?.input_type === 'osquery');
 };
 const isEndpoint = (item: LogsEndpointAction | LogsOsqueryAction): item is LogsEndpointAction => {
-  return item && 'EndpointActions' in item && item?.EndpointActions.input_type === 'endpoint';
+  return !!(item && 'EndpointActions' in item && item?.EndpointActions?.input_type === 'endpoint');
 };

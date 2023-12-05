@@ -23,7 +23,7 @@ export const dotnetDefinition: LanguageDefinition = {
   installClient: 'dotnet add package Elastic.Clients.Elasticsearch.Serverless',
   configureClient: ({ apiKey, cloudId }) => `using System;
 using Elastic.Clients.Elasticsearch.Serverless;
-using Elastic.Clients.Elasticsearch.QueryDsl;
+using Elastic.Clients.Elasticsearch.Serverless.QueryDsl;
 
 var client = new ElasticsearchClient("${cloudId}", new ApiKey("${apiKey}"));`,
   testConnection: `var info = await client.InfoAsync();`,

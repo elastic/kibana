@@ -59,6 +59,7 @@ export const LogRateAnalysisPage: FC = () => {
             'share',
             'storage',
             'theme',
+            'uiActions',
             'uiSettings',
             'unifiedSearch',
           ])}

@@ -104,10 +104,11 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }
   const promotedVisTypes = getSortedVisTypesByGroup(VisGroups.PROMOTED);
   const aggsBasedVisTypes = getSortedVisTypesByGroup(VisGroups.AGGBASED);
   const toolVisTypes = getSortedVisTypesByGroup(VisGroups.TOOLS);
-  const visTypeAliases = getVisTypeAliases().sort(
-    ({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
+  const visTypeAliases = getVisTypeAliases()
+    .sort(({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
       a === b ? 0 : a ? -1 : 1
-  );
+    )
+    .filter(({ disableCreate }: VisTypeAlias) => !disableCreate);
 
   const factories = unwrappedEmbeddableFactories.filter(
     ({ isEditable, factory: { type, canCreateNew, isContainerType } }) =>

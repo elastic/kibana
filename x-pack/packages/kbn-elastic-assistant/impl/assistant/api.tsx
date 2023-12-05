@@ -20,12 +20,17 @@ export interface FetchConnectorExecuteAction {
   http: HttpSetup;
   messages: Message[];
   signal?: AbortSignal | undefined;
+  assistantStreamingEnabled: boolean;
 }
 
 export interface FetchConnectorExecuteResponse {
   response: string | ReadableStreamDefaultReader<Uint8Array>;
   isError: boolean;
   isStream: boolean;
+  traceData?: {
+    transactionId: string;
+    traceId: string;
+  };
 }
 
 export const fetchConnectorExecuteAction = async ({
@@ -34,6 +39,7 @@ export const fetchConnectorExecuteAction = async ({
   messages,
   apiConfig,
   signal,
+  assistantStreamingEnabled,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
   const outboundMessages = messages.map((msg) => ({
     role: msg.role,
@@ -58,7 +64,7 @@ export const fetchConnectorExecuteAction = async ({
   // tracked here: https://github.com/elastic/security-team/issues/7363
   // In part 3 I will make enhancements to langchain to introduce streaming
   // Once implemented, invokeAI can be removed
-  const isStream = !assistantLangChain;
+  const isStream = assistantStreamingEnabled && !assistantLangChain;
   const requestBody = isStream
     ? {
         params: {
@@ -112,6 +118,10 @@ export const fetchConnectorExecuteAction = async ({
       status: string;
       data: string;
       service_message?: string;
+      trace_data?: {
+        transaction_id: string;
+        trace_id: string;
+      };
     }>(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
       method: 'POST',
       body: JSON.stringify(requestBody),
@@ -133,10 +143,21 @@ export const fetchConnectorExecuteAction = async ({
         isStream: false,
       };
     }
+
+    // Only add traceData if it exists in the response
+    const traceData =
+      response.trace_data?.trace_id != null && response.trace_data?.transaction_id != null
+        ? {
+            traceId: response.trace_data?.trace_id,
+            transactionId: response.trace_data?.transaction_id,
+          }
+        : undefined;
+
     return {
       response: assistantLangChain ? getFormattedMessageContent(response.data) : response.data,
       isError: false,
       isStream: false,
+      traceData,
     };
   } catch (error) {
     const reader = error?.response?.body?.getReader();
@@ -281,6 +302,7 @@ export interface PostEvaluationParams {
 }
 
 export interface PostEvaluationResponse {
+  evaluationId: string;
   success: boolean;
 }
 
@@ -302,11 +324,14 @@ export const postEvaluation = async ({
   try {
     const path = `/internal/elastic_assistant/evaluate`;
     const query = {
-      models: evalParams?.models.sort()?.join(','),
       agents: evalParams?.agents.sort()?.join(','),
+      datasetName: evalParams?.datasetName,
       evaluationType: evalParams?.evaluationType.sort()?.join(','),
       evalModel: evalParams?.evalModel.sort()?.join(','),
       outputIndex: evalParams?.outputIndex,
+      models: evalParams?.models.sort()?.join(','),
+      projectName: evalParams?.projectName,
+      runName: evalParams?.runName,
     };
 
     const response = await http.fetch(path, {

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiFlexGroup, EuiIcon, EuiSideNavItemType } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiSideNavItemType, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -34,6 +34,21 @@ export const useEnterpriseSearchNav = () => {
   if (!isSidebarEnabled) return undefined;
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
+    {
+      id: 'home',
+      name: (
+        <EuiText size="s">
+          {i18n.translate('xpack.enterpriseSearch.nav.homeTitle', {
+            defaultMessage: 'Home',
+          })}
+        </EuiText>
+      ),
+      ...generateNavLink({
+        shouldNotCreateHref: true,
+        shouldShowActiveForSubroutes: true,
+        to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+      }),
+    },
     {
       id: 'content',
       items: [
@@ -98,13 +113,6 @@ export const useEnterpriseSearchNav = () => {
     },
     {
       id: 'es_getting_started',
-      name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle', {
-        defaultMessage: 'Getting started',
-      }),
-      ...generateNavLink({
-        shouldNotCreateHref: true,
-        to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
-      }),
       items: [
         {
           id: 'elasticsearch',
@@ -135,6 +143,9 @@ export const useEnterpriseSearchNav = () => {
           }),
         },
       ],
+      name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle', {
+        defaultMessage: 'Getting started',
+      }),
     },
     ...(productAccess.hasAppSearchAccess || productAccess.hasWorkplaceSearchAccess
       ? [

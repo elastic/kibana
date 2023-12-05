@@ -43,7 +43,8 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-logging-server-mocks",
-    "@kbn/serverless"
+    "@kbn/serverless",
+    "@kbn/actions-types"
   ],
   "exclude": [
     "target/**/*",

@@ -68,7 +68,7 @@
     "@kbn/core-notifications-browser",
     "@kbn/ebt-tools",
     "@kbn/ml-chi2test",
-    "@kbn/field-utils"
+    "@kbn/field-utils",
   ],
   "exclude": [
     "target/**/*",

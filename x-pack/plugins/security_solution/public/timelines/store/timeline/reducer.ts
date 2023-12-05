@@ -58,7 +58,10 @@ import {
   clearEventsDeleted,
   clearEventsLoading,
   updateSavedSearchId,
+  updateSavedSearch,
+  initializeSavedSearch,
   setIsDiscoverSavedSearchLoaded,
+  setDataProviderVisibility,
   setChanged,
 } from './actions';
 
@@ -520,6 +523,26 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       },
     },
   }))
+  .case(initializeSavedSearch, (state, { id, savedSearch }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        savedSearch,
+      },
+    },
+  }))
+  .case(updateSavedSearch, (state, { id, savedSearch }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        savedSearch,
+      },
+    },
+  }))
   .case(setIsDiscoverSavedSearchLoaded, (state, { id, isDiscoverSavedSearchLoaded }) => ({
     ...state,
     timelineById: {
@@ -530,6 +553,18 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       },
     },
   }))
+  .case(setDataProviderVisibility, (state, { id, isDataProviderVisible }) => {
+    return {
+      ...state,
+      timelineById: {
+        ...state.timelineById,
+        [id]: {
+          ...state.timelineById[id],
+          isDataProviderVisible,
+        },
+      },
+    };
+  })
   .case(setChanged, (state, { id, changed }) => ({
     ...state,
     timelineById: {
