@@ -22,6 +22,7 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 import { AppNavLinkStatus } from '@kbn/core/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { setServices } from './application/kibana_services';
 import { ConfigSchema } from '../config';
@@ -44,6 +45,7 @@ export interface HomePluginStartDependencies {
   guidedOnboarding?: GuidedOnboardingPluginStart;
   cloud: CloudStart;
   share: SharePluginStart;
+  cloudExperiments: CloudExperimentsPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -82,8 +84,10 @@ export class HomePublicPlugin
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')
           : () => {};
-        const [coreStart, { dataViews, urlForwarding: urlForwardingStart, guidedOnboarding }] =
-          await core.getStartServices();
+        const [
+          coreStart,
+          { dataViews, urlForwarding: urlForwardingStart, guidedOnboarding, cloudExperiments },
+        ] = await core.getStartServices();
 
         setServices({
           share,
@@ -112,6 +116,7 @@ export class HomePublicPlugin
           openModal: coreStart.overlays.openModal,
           theme: core.theme,
           i18nStart: coreStart.i18n,
+          cloudExperiments,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
