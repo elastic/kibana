@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getKueryWithMobileFilters } from './get_kuery_with_mobile_filters';
+import {
+  getKueryWithMobileFilters,
+  getKueryWithMobileCrashFilter,
+  getKueryWithMobileErrorFilter,
+} from './get_kuery_with_mobile_filters';
 describe('getKueryWithMobileFilters', () => {
   it('should handle empty and undefined values', () => {
     const result = getKueryWithMobileFilters({
@@ -67,6 +71,71 @@ describe('getKueryWithMobileFilters', () => {
 
     expect(result).toBe(
       'foo.bar.test: test and device.model.identifier: foo\\>. and host.os.version: bar\\*\\* and service.version: 1.0\\(\\)\\: and network.connection.type: fooBar\\)45'
+    );
+  });
+});
+
+describe('getKueryWithMobileCrashFilter', () => {
+  it('should handle empty and undefined values', () => {
+    const result = getKueryWithMobileCrashFilter({
+      groupId: undefined,
+      kuery: '',
+    });
+    expect(result).toBe('error.type: crash');
+  });
+  it('should return kuery and crash filter when groupId is empty', () => {
+    const result = getKueryWithMobileCrashFilter({
+      groupId: undefined,
+      kuery: 'foo.bar: test',
+    });
+    expect(result).toBe('foo.bar: test and error.type: crash');
+  });
+  it('should return crash filter and groupId when kuery is empty', () => {
+    const result = getKueryWithMobileCrashFilter({
+      groupId: '1',
+      kuery: '',
+    });
+    expect(result).toBe('error.type: crash and error.grouping_key: 1');
+  });
+  it('should return crash filter, groupId, and kuery in kql format', () => {
+    const result = getKueryWithMobileCrashFilter({
+      groupId: '1',
+      kuery: 'foo.bar: test',
+    });
+    expect(result).toBe(
+      'foo.bar: test and error.type: crash and error.grouping_key: 1'
+    );
+  });
+});
+describe('getKueryWithMobileErrorFilter', () => {
+  it('should handle empty and undefined values', () => {
+    const result = getKueryWithMobileErrorFilter({
+      groupId: undefined,
+      kuery: '',
+    });
+    expect(result).toBe('NOT error.type: crash');
+  });
+  it('should return kuery and error filter when groupId is empty', () => {
+    const result = getKueryWithMobileErrorFilter({
+      kuery: 'foo.bar: test',
+      groupId: undefined,
+    });
+    expect(result).toBe('foo.bar: test and NOT error.type: crash');
+  });
+  it('should return error filter and groupId when kuery is empty', () => {
+    const result = getKueryWithMobileErrorFilter({
+      groupId: '1',
+      kuery: '',
+    });
+    expect(result).toBe('NOT error.type: crash and error.grouping_key: 1');
+  });
+  it('should return error filter, groupId, and kuery in kql format', () => {
+    const result = getKueryWithMobileErrorFilter({
+      groupId: '1',
+      kuery: 'foo.bar: test',
+    });
+    expect(result).toBe(
+      'foo.bar: test and NOT error.type: crash and error.grouping_key: 1'
     );
   });
 });

@@ -12,18 +12,15 @@ import type { FormattedRelative } from '@kbn/i18n-react';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
-import { ContentEditorKibanaProvider } from '@kbn/content-management-content-editor';
+import {
+  ContentEditorKibanaProvider,
+  type SavedObjectsReference,
+} from '@kbn/content-management-content-editor';
 
 import { TAG_MANAGEMENT_APP_URL } from './constants';
 import type { Tag } from './types';
 
 type NotifyFn = (title: JSX.Element, text?: string) => void;
-
-export interface SavedObjectsReference {
-  id: string;
-  name: string;
-  type: string;
-}
 
 export type SavedObjectsFindOptionsReference = Omit<SavedObjectsReference, 'name'>;
 

@@ -71,6 +71,7 @@
     "@kbn/rison",
     "@kbn/io-ts-utils",
     "@kbn/observability-alert-details",
+    "@kbn/observability-get-padded-alert-time-range-util",
     "@kbn/ui-actions-plugin",
     "@kbn/field-types",
     "@kbn/safer-lodash-set",

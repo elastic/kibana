@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, copyToClipboard, EuiTextTruncate } from '@elastic/eui';
 import React, { ReactNode, useMemo, useState } from 'react';
-import { HoverAction, HoverActionType } from './hover_action';
+import { ValuesType } from 'utility-types';
 import {
   flyoutHoverActionFilterForText,
   flyoutHoverActionFilterOutText,
@@ -16,13 +16,15 @@ import {
   flyoutHoverActionCopyToClipboardText,
 } from '../translations';
 import { useDiscoverActionsContext } from '../../../hooks/use_discover_action';
+import { HoverActionPopover, HoverActionType } from './hover_popover_action';
+import { LogDocument } from '../types';
 
 interface HighlightFieldProps {
   field: string;
   formattedValue: string;
   icon?: ReactNode;
   label: string | ReactNode;
-  value: unknown;
+  value: ValuesType<LogDocument['flattened']>;
   width: number;
 }
 
@@ -89,6 +91,7 @@ export function HighlightField({
     ],
     [filterForText, filterOutText, actions, field, value, columnAdded]
   );
+
   return formattedValue ? (
     <EuiFlexGroup direction="column" gutterSize="none" {...props}>
       <EuiFlexItem>
@@ -97,7 +100,7 @@ export function HighlightField({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        <HoverAction actions={hoverActions}>
+        <HoverActionPopover actions={hoverActions} title={value as string}>
           <EuiFlexGroup
             responsive={false}
             alignItems="center"
@@ -109,6 +112,7 @@ export function HighlightField({
               <EuiTextTruncate text={formattedValue} truncation="end" width={width}>
                 {(truncatedText: string) => (
                   <EuiText
+                    size="s"
                     // Value returned from formatFieldValue is always sanitized
                     dangerouslySetInnerHTML={{ __html: truncatedText }}
                   />
@@ -116,7 +120,7 @@ export function HighlightField({
               </EuiTextTruncate>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </HoverAction>
+        </HoverActionPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : null;
