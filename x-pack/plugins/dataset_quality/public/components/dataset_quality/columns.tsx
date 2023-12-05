@@ -38,7 +38,7 @@ const sizeColumnName = i18n.translate('xpack.datasetQuality.sizeColumnName', {
 });
 
 const malformedDocsColumnName = i18n.translate('xpack.datasetQuality.malformedDocsColumnName', {
-  defaultMessage: 'Malformed Docs',
+  defaultMessage: 'Degraded Docs',
 });
 
 const malformedDocsDescription = (minimimPercentage: number) =>
@@ -50,7 +50,7 @@ const malformedDocsDescription = (minimimPercentage: number) =>
 const malformedDocsColumnTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.malformedDocsColumnTooltip"
-    defaultMessage="The percentage of malformed documents -documents with the {ignoredProperty} property- in your dataset. {visualQueue}"
+    defaultMessage="The percentage of degraded documents —documents with the {ignoredProperty} property— in your dataset. {visualQueue}"
     values={{
       ignoredProperty: (
         <EuiCode language="json" transparentBackground>
