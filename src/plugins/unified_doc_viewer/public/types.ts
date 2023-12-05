@@ -7,5 +7,21 @@
  */
 
 export type { JsonCodeEditorProps } from './components';
-export type { EsDocSearchProps, UnifiedDocViewerServices } from './hooks';
+export type { EsDocSearchProps } from './hooks';
 export type { UnifiedDocViewerSetup, UnifiedDocViewerStart } from './plugin';
+
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { UnifiedDocViewerStart } from './plugin';
+
+export interface UnifiedDocViewerServices {
+  analytics: AnalyticsServiceStart;
+  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  storage: Storage;
+  uiSettings: IUiSettingsClient;
+  unifiedDocViewer: UnifiedDocViewerStart;
+}

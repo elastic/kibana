@@ -9,7 +9,9 @@ import {
   QueryDslQueryContainer,
   SearchRequest,
   SearchTotalHits,
+  AggregationsAggregationContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { BoolQuery } from '@kbn/es-query';
 import {
   ALERT_END,
   ALERT_INSTANCE_ID,
@@ -17,6 +19,7 @@ import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
   ALERT_START,
+  ALERT_UUID,
   EVENT_ACTION,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
@@ -28,9 +31,12 @@ import {
   GetAlertsQueryParams,
   GetQueryByExecutionUuidParams,
   GetQueryByTimeRangeParams,
+  GetQueryByScopedQueriesParams,
+  GetMaintenanceWindowAlertsQueryParams,
+  ScopedQueryAggregationResult,
   SearchResult,
 } from '../types';
-import { SummarizedAlertsChunk } from '../..';
+import { SummarizedAlertsChunk, ScopedQueryAlerts } from '../..';
 import { FormatAlert } from '../../types';
 import { expandFlattenedAlert } from './format_alert';
 
@@ -270,6 +276,71 @@ const getQueryByTimeRange = ({
   };
 };
 
+export const getQueryByScopedQueries = ({
+  executionUuid,
+  ruleId,
+  action,
+  maintenanceWindows,
+}: GetQueryByScopedQueriesParams): SearchRequest['body'] => {
+  const filters: QueryDslQueryContainer[] = [
+    {
+      term: {
+        [ALERT_RULE_EXECUTION_UUID]: executionUuid,
+      },
+    },
+    {
+      term: {
+        [ALERT_RULE_UUID]: ruleId,
+      },
+    },
+  ];
+
+  if (action) {
+    filters.push({
+      term: {
+        [EVENT_ACTION]: action,
+      },
+    });
+  }
+
+  const aggs: Record<string, AggregationsAggregationContainer> = {};
+
+  maintenanceWindows.forEach(({ id, scopedQuery }) => {
+    if (!scopedQuery) {
+      return;
+    }
+
+    const scopedQueryFilter = generateAlertsFilterDSL({
+      query: scopedQuery as AlertsFilter['query'],
+    })[0] as { bool: BoolQuery };
+
+    aggs[id] = {
+      filter: {
+        bool: {
+          ...scopedQueryFilter.bool,
+          filter: [...(scopedQueryFilter.bool?.filter || []), ...filters],
+        },
+      },
+      aggs: {
+        alertId: {
+          top_hits: {
+            size: 1,
+            _source: {
+              includes: [ALERT_UUID],
+            },
+          },
+        },
+      },
+    };
+  });
+
+  return {
+    size: 0,
+    track_total_hits: true,
+    aggs: { ...aggs },
+  };
+};
+
 const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryContainer[] => {
   const filter: QueryDslQueryContainer[] = [];
 
@@ -354,6 +425,20 @@ const getHitsWithCount = <AlertData extends RuleAlertData>(
   };
 };
 
+const getScopedQueryHitsWithIds = <AlertData extends RuleAlertData>(
+  aggregationsResult: SearchResult<AlertData, ScopedQueryAggregationResult>['aggregations']
+): ScopedQueryAlerts => {
+  return Object.entries(aggregationsResult || {}).reduce<ScopedQueryAlerts>(
+    (result, [maintenanceWindowId, aggregation]) => {
+      result[maintenanceWindowId] = (aggregation.alertId?.hits?.hits || []).map(
+        (hit) => hit._source[ALERT_UUID]
+      );
+      return result;
+    },
+    {}
+  );
+};
+
 const getLifecycleAlertsQueries = ({
   executionUuid,
   start,
@@ -412,4 +497,24 @@ const getContinualAlertsQuery = ({
   return queryBody;
 };
 
-export { getHitsWithCount, getLifecycleAlertsQueries, getContinualAlertsQuery };
+const getMaintenanceWindowAlertsQuery = ({
+  executionUuid,
+  ruleId,
+  action,
+  maintenanceWindows,
+}: GetMaintenanceWindowAlertsQueryParams): SearchRequest['body'] => {
+  return getQueryByScopedQueries({
+    executionUuid,
+    ruleId,
+    action,
+    maintenanceWindows,
+  });
+};
+
+export {
+  getHitsWithCount,
+  getLifecycleAlertsQueries,
+  getContinualAlertsQuery,
+  getMaintenanceWindowAlertsQuery,
+  getScopedQueryHitsWithIds,
+};

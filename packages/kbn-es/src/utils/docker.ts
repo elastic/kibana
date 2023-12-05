@@ -508,11 +508,11 @@ export function resolveEsArgs(
     );
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name`,
-      MOCK_IDP_ATTRIBUTE_EMAIL
+      MOCK_IDP_ATTRIBUTE_NAME
     );
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail`,
-      MOCK_IDP_ATTRIBUTE_NAME
+      MOCK_IDP_ATTRIBUTE_EMAIL
     );
   }
 

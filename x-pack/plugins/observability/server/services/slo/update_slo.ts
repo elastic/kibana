@@ -13,7 +13,7 @@ import {
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_TEMP_INDEX_NAME,
-} from '../../assets/constants';
+} from '../../../common/slo/constants';
 import { SLO } from '../../domain/models';
 import { validateSLO } from '../../domain/services';
 import { SLORepository } from './slo_repository';
