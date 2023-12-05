@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const testIndex = 'test-index';
 const testQuery = {
@@ -16,7 +16,7 @@ const testQuery = {
   },
 };
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'searchProfiler']);
+  const PageObjects = getPageObjects(['svlCommonPage', 'common', 'searchProfiler']);
   const retry = getService('retry');
   const security = getService('security');
   const es = getService('es');
@@ -25,6 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Search Profiler Editor', () => {
     before(async () => {
       await security.testUser.setRoles(['global_devtools_read']);
+      await PageObjects.svlCommonPage.login();
       await PageObjects.common.navigateToApp('searchProfiler');
       expect(await PageObjects.searchProfiler.editorExists()).to.be(true);
     });
