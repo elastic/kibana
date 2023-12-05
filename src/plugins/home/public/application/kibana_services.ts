@@ -63,7 +63,6 @@ export interface HomeKibanaServices {
   openModal: OverlayStart['openModal'];
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
-  cloudExperiments: CloudExperimentsPluginStart;
 }
 
 let services: HomeKibanaServices | null = null;
