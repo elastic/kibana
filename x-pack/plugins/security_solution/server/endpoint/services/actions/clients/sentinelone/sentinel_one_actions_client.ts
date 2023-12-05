@@ -136,7 +136,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       command: 'isolate',
     });
 
-    // FIXME:PT Write response for this action
+    await this.writeActionResponseToEndpointIndex({
+      actionId: actionRequestDoc.EndpointActions.action_id,
+      agentId: actionRequestDoc.agent.id,
+      data: {
+        command: actionRequestDoc.EndpointActions.data.command,
+      },
+    });
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }

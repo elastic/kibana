@@ -11,7 +11,6 @@ import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
-import { catchAndWrapError } from '../../utils';
 import { APP_ID } from '../../../../common';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../services';
@@ -262,18 +261,50 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
   /**
    * Writes a Response Action response document to the Endpoint index
-   * @param doc
+   * @param options
    * @protected
    */
-  protected async writeActionResponseToEndpointIndex(
-    doc: LogsEndpointActionResponse
-  ): Promise<LogsEndpointActionResponse> {
+  protected async writeActionResponseToEndpointIndex<TOutputContent extends object = object>({
+    actionId,
+    error,
+    agentId,
+    data,
+  }: {
+    agentId: LogsEndpointActionResponse['agent']['id'];
+    actionId: string;
+  } & Pick<LogsEndpointActionResponse, 'error'> &
+    Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>): Promise<
+    LogsEndpointActionResponse<TOutputContent>
+  > {
+    const timestamp = new Date().toISOString();
+    const doc: LogsEndpointActionResponse<TOutputContent> = {
+      '@timestamp': timestamp,
+      agent: {
+        id: agentId,
+      },
+      EndpointActions: {
+        action_id: actionId,
+        started_at: timestamp,
+        completed_at: timestamp,
+        data,
+      },
+      error,
+    };
+
+    this.log.debug(`Writing response action response:\n${dump(doc)}`);
+
     await this.options.esClient
       .index<LogsEndpointActionResponse>({
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
         document: doc,
       })
-      .catch(catchAndWrapError);
+      .catch((err) => {
+        throw new ResponseActionsClientError(
+          `Failed to create action response document: ${err.message}`,
+          500,
+          err
+        );
+      });
 
     return doc;
   }
