@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { EuiLink } from '@elastic/eui';
+import { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import {
   ALERT_DURATION,
@@ -14,12 +15,10 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_REASON,
   TIMESTAMP,
+  ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
-import type {
-  DeprecatedCellValueElementProps,
-  TimelineNonEcsData,
-} from '@kbn/timelines-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 
 import { asDuration } from '../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../alert_severity_badge';
@@ -27,7 +26,6 @@ import { AlertStatusIndicator } from '../alert_status_indicator';
 import { TimestampTooltip } from './timestamp_tooltip';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
-import type { TopAlert } from '../../typings/alerts';
 
 export const getMappedNonEcsValue = ({
   data,
@@ -67,10 +65,10 @@ export const getRenderCellValue = ({
   setFlyoutAlert,
   observabilityRuleTypeRegistry,
 }: {
-  setFlyoutAlert: (data: TopAlert) => void;
+  setFlyoutAlert: (alertId: string) => void;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-}) => {
-  return ({ columnId, data }: DeprecatedCellValueElementProps) => {
+}): ReturnType<GetRenderCellValue> => {
+  return ({ columnId, data }) => {
     if (!data) return null;
     const mappedNonEcsValue = getMappedNonEcsValue({
       data,
@@ -101,7 +99,7 @@ export const getRenderCellValue = ({
           <EuiLink
             data-test-subj="o11yGetRenderCellValueLink"
             css={{ display: 'contents' }}
-            onClick={() => setFlyoutAlert && setFlyoutAlert(alert)}
+            onClick={() => setFlyoutAlert && setFlyoutAlert(alert.fields[ALERT_UUID])}
           >
             {alert.reason}
           </EuiLink>
