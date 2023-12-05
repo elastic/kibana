@@ -485,8 +485,7 @@ export class SettingsPageObject extends FtrService {
 
   async refreshDataViewFieldList(dataViewName?: string) {
     if (dataViewName) {
-      await this.navigateTo();
-      await this.clickKibanaIndexPatterns();
+      await this.common.navigateToApp('management/kibana/dataViews');
       await this.header.waitUntilLoadingHasFinished();
       await this.testSubjects.click(`detail-link-${dataViewName}`);
     }
