@@ -106,7 +106,6 @@ export type {
   BulkInstallPackagesResponse,
   FleetErrorResponse,
   CheckPermissionsResponse,
-  PostFleetSetupResponse,
   IBulkInstallPackageHTTPError,
   BulkInstallPackageInfo,
   GetInfoResponse,
@@ -199,3 +198,4 @@ export type {
 } from './types';
 
 export { ElasticsearchAssetType } from './types';
+export { PostFleetSetupResponse } from './api';

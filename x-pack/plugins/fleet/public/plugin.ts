@@ -50,7 +50,7 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
-import type { FleetAuthz } from '../common';
+import type { FleetAuthz, PostFleetSetupResponse } from '../common';
 import { appRoutesService, INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, setupRouteService } from '../common';
 import {
   calculateAuthz,
@@ -59,11 +59,7 @@ import {
 } from '../common/authz';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
-import type {
-  CheckPermissionsResponse,
-  FleetConfigType,
-  PostFleetSetupResponse,
-} from '../common/types';
+import type { CheckPermissionsResponse, FleetConfigType } from '../common/types';
 
 import { API_VERSIONS } from '../common/constants';
 

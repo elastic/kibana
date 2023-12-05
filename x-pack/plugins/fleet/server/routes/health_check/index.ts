@@ -8,7 +8,7 @@ import https from 'https';
 
 import fetch from 'node-fetch';
 
-import { FleetServerHealthCheckRequestBody } from '../../../common/api/fleet_internals/health_check.gen';
+import { FleetServerHealthCheckRequestBody } from '../../../common/api';
 
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';

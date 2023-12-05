@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PutSettingsRequestBody } from '../../../common/api/fleet_internals/settings.gen';
+import { PutSettingsRequestBody } from '../../../common/api';
 
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
