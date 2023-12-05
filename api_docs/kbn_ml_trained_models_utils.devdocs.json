@@ -22,10 +22,10 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/ml-trained-models-utils",
-        "id": "def-common.GetElserOptions",
+        "id": "def-common.GetModelDownloadConfigOptions",
         "type": "Interface",
         "tags": [],
-        "label": "GetElserOptions",
+        "label": "GetModelDownloadConfigOptions",
         "description": [],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
@@ -33,7 +33,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-trained-models-utils",
-            "id": "def-common.GetElserOptions.version",
+            "id": "def-common.GetModelDownloadConfigOptions.version",
             "type": "CompoundType",
             "tags": [],
             "label": "version",
@@ -69,11 +69,14 @@
           {
             "parentPluginId": "@kbn/ml-trained-models-utils",
             "id": "def-common.ModelDefinition.modelName",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "modelName",
             "description": [
               "\nModel name, e.g. elser"
+            ],
+            "signature": [
+              "\"elser\" | \"e5\""
             ],
             "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
@@ -186,6 +189,34 @@
             "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-trained-models-utils",
+            "id": "def-common.ModelDefinition.license",
+            "type": "string",
+            "tags": [],
+            "label": "license",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-trained-models-utils",
+            "id": "def-common.ModelDefinition.type",
+            "type": "Object",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -267,6 +298,21 @@
       },
       {
         "parentPluginId": "@kbn/ml-trained-models-utils",
+        "id": "def-common.ElasticCuratedModelName",
+        "type": "Type",
+        "tags": [],
+        "label": "ElasticCuratedModelName",
+        "description": [],
+        "signature": [
+          "\"elser\" | \"e5\""
+        ],
+        "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-trained-models-utils",
         "id": "def-common.ElasticModelId",
         "type": "Type",
         "tags": [],
@@ -325,7 +371,7 @@
             "section": "def-common.ModelDefinition",
             "text": "ModelDefinition"
           },
-          " & { name: string; }"
+          " & { model_id: string; }"
         ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
