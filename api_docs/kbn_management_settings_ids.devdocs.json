@@ -1601,6 +1601,23 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER",
+        "description": [
+          "This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer"
+        ],
+        "signature": [
+          "\"securitySolution:excludeColdAndFrozenTiersInAnalyzer\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.SECURITY_SOLUTION_IP_REPUTATION_LINKS_ID",
         "type": "string",
         "tags": [],
