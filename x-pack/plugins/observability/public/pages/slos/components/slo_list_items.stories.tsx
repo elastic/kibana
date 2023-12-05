@@ -24,6 +24,8 @@ const Template: ComponentStory<typeof Component> = (props: Props) => <Component 
 const defaultProps: Props = {
   sloList: sloList.results,
   activeAlertsBySlo: new ActiveAlerts(),
+  loading: false,
+  error: false,
 };
 
 export const SloListItems = Template.bind({});
