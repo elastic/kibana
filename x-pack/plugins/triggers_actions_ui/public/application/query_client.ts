@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { useSubAction } from './use_sub_action';
-export { useLoadRuleTypesQuery } from './use_load_rule_types_query';
+import { QueryClient } from '@tanstack/react-query';
+
+/**
+ * The main query client for the triggers_actions_ui app
+ */
+export const queryClient = new QueryClient();

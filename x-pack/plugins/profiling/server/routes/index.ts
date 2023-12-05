@@ -47,6 +47,8 @@ export interface RouteRegisterParameters {
   };
 }
 
+export const IDLE_SOCKET_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+
 export function registerRoutes(params: RouteRegisterParameters) {
   registerFlameChartSearchRoute(params);
   registerTopNFunctionsSearchRoute(params);
