@@ -87,7 +87,7 @@ const createSLORoute = createObservabilityServerRoute({
     await assertPlatinumLicense(context);
 
     const spaceId =
-      dependencies.pluginsSetup.spaces?.spacesService?.getSpaceId(request) ?? 'default';
+      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
@@ -125,7 +125,7 @@ const updateSLORoute = createObservabilityServerRoute({
     await assertPlatinumLicense(context);
 
     const spaceId =
-      dependencies.pluginsSetup.spaces?.spacesService?.getSpaceId(request) ?? 'default';
+      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
 
@@ -284,7 +284,7 @@ const resetSLORoute = createObservabilityServerRoute({
     await assertPlatinumLicense(context);
 
     const spaceId =
-      dependencies.pluginsSetup.spaces?.spacesService?.getSpaceId(request) ?? 'default';
+      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
@@ -322,7 +322,7 @@ const findSLORoute = createObservabilityServerRoute({
     await assertPlatinumLicense(context);
 
     const spaceId =
-      dependencies.pluginsSetup.spaces?.spacesService?.getSpaceId(request) ?? 'default';
+      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;

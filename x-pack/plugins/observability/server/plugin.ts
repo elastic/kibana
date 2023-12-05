@@ -64,14 +64,14 @@ interface PluginSetup {
   guidedOnboarding?: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
-  spaces: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   cloud?: CloudSetup;
 }
 
 interface PluginStart {
   alerting: PluginStartContract;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
@@ -347,6 +347,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             ...plugins,
             core,
           },
+          spaces: pluginStart.spaces,
           ruleDataService,
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
         },
