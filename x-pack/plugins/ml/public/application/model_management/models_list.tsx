@@ -45,6 +45,7 @@ import {
 } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { useStorage } from '@kbn/ml-local-storage';
+import { AddModelFlyout } from './add_model_flyout';
 import { getModelStateColor } from './get_model_state_color';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
@@ -79,10 +80,17 @@ export type ModelItem = TrainedModelConfigResponse & {
   type?: string[];
   stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
   pipelines?: ModelPipelines['pipelines'] | null;
+  origin_job_exists?: boolean;
   deployment_ids: string[];
   putModelConfig?: object;
   state: ModelState;
   recommended?: boolean;
+  /**
+   * Model name, e.g. elser
+   */
+  modelName?: string;
+  os?: string;
+  arch?: string;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -152,7 +160,7 @@ export const ModelsList: FC<Props> = ({
 
   const trainedModelsApiService = useTrainedModelsApiService();
 
-  const { displayErrorToast } = useToastNotificationService();
+  const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -165,6 +173,7 @@ export const ModelsList: FC<Props> = ({
   );
   const [modelToTest, setModelToTest] = useState<ModelItem | null>(null);
   const [dfaModelToTest, setDfaModelToTest] = useState<ModelItem | null>(null);
+  const [isAddModelFlyoutVisible, setIsAddModelFlyoutVisible] = useState(false);
 
   const isBuiltInModel = useCallback(
     (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG),
@@ -253,21 +262,24 @@ export const ModelsList: FC<Props> = ({
         );
         const forDownload = await trainedModelsApiService.getTrainedModelDownloads();
         const notDownloaded: ModelItem[] = forDownload
-          .filter(({ name, hidden, recommended }) => {
-            if (recommended && idMap.has(name)) {
-              idMap.get(name)!.recommended = true;
+          .filter(({ model_id: modelId, hidden, recommended }) => {
+            if (recommended && idMap.has(modelId)) {
+              idMap.get(modelId)!.recommended = true;
             }
-            return !idMap.has(name) && !hidden;
+            return !idMap.has(modelId) && !hidden;
           })
           .map<ModelItem>((modelDefinition) => {
             return {
-              model_id: modelDefinition.name,
-              type: [ELASTIC_MODEL_TYPE],
-              tags: [ELASTIC_MODEL_TAG],
+              model_id: modelDefinition.model_id,
+              type: modelDefinition.type,
+              tags: modelDefinition.type?.includes(ELASTIC_MODEL_TAG) ? [ELASTIC_MODEL_TAG] : [],
               putModelConfig: modelDefinition.config,
               description: modelDefinition.description,
               state: MODEL_STATE.NOT_DOWNLOADED,
               recommended: !!modelDefinition.recommended,
+              modelName: modelDefinition.modelName,
+              os: modelDefinition.os,
+              arch: modelDefinition.arch,
             } as ModelItem;
           });
         resultItems = [...resultItems, ...notDownloaded];
@@ -405,6 +417,33 @@ export const ModelsList: FC<Props> = ({
     [existingModels]
   );
 
+  const onModelDownloadRequest = useCallback(
+    async (modelId: string) => {
+      try {
+        setIsLoading(true);
+        await trainedModelsApiService.installElasticTrainedModelConfig(modelId);
+        displaySuccessToast(
+          i18n.translate('xpack.ml.trainedModels.modelsList.downloadSuccess', {
+            defaultMessage: '"{modelId}" model download has been started successfully.',
+            values: { modelId },
+          })
+        );
+        // Need to fetch model state updates
+        await fetchModelsData();
+      } catch (e) {
+        displayErrorToast(
+          e,
+          i18n.translate('xpack.ml.trainedModels.modelsList.downloadFailed', {
+            defaultMessage: 'Failed to download "{modelId}"',
+            values: { modelId },
+          })
+        );
+        setIsLoading(true);
+      }
+    },
+    [displayErrorToast, displaySuccessToast, fetchModelsData, trainedModelsApiService]
+  );
+
   /**
    * Table actions
    */
@@ -417,6 +456,7 @@ export const ModelsList: FC<Props> = ({
     onModelDeployRequest: setModelToDeploy,
     onLoading: setIsLoading,
     modelAndDeploymentIds,
+    onModelDownloadRequest,
   });
 
   const toggleDetails = async (item: ModelItem) => {
@@ -688,13 +728,24 @@ export const ModelsList: FC<Props> = ({
     <>
       <SavedObjectsWarning onCloseFlyout={fetchModelsData} forceRefresh={isLoading} />
       <EuiFlexGroup justifyContent="spaceBetween">
-        {modelsStats && (
-          <>
-            <EuiFlexItem grow={false}>
-              <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
-            </EuiFlexItem>
-          </>
-        )}
+        {modelsStats ? (
+          <EuiFlexItem grow={false}>
+            <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
+          </EuiFlexItem>
+        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            iconType={'plusInCircle'}
+            color={'primary'}
+            onClick={setIsAddModelFlyoutVisible.bind(null, true)}
+          >
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.addModelButtonLabel"
+              defaultMessage="Add trained model"
+            />
+          </EuiButton>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
@@ -773,6 +824,16 @@ export const ModelsList: FC<Props> = ({
         <AddInferencePipelineFlyout
           onClose={setModelToDeploy.bind(null, undefined)}
           model={modelToDeploy}
+        />
+      ) : null}
+      {isAddModelFlyoutVisible ? (
+        <AddModelFlyout
+          modelDownloads={items.filter((i) => i.state === MODEL_STATE.NOT_DOWNLOADED)}
+          onClose={setIsAddModelFlyoutVisible.bind(null, false)}
+          onSubmit={(modelId) => {
+            onModelDownloadRequest(modelId);
+            setIsAddModelFlyoutVisible(false);
+          }}
         />
       ) : null}
     </>

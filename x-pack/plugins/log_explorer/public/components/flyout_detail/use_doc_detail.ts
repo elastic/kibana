@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { formatFieldValue } from '@kbn/discover-utils';
-import he from 'he';
 import * as constants from '../../../common/constants';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { FlyoutDoc, FlyoutProps, LogDocument } from './types';
@@ -16,9 +15,7 @@ export function useDocDetail(
 ): FlyoutDoc {
   const { services } = useKibanaContextForPlugin();
 
-  const formatField = <F extends keyof LogDocument['flattened']>(
-    field: F
-  ): LogDocument['flattened'][F] => {
+  const formatField = <F extends keyof LogDocument['flattened']>(field: F) => {
     return (
       doc.flattened[field] &&
       formatFieldValue(
@@ -32,10 +29,11 @@ export function useDocDetail(
   };
 
   // Flyout Headers
-  const level = formatField(constants.LOG_LEVEL_FIELD)?.toLowerCase();
+  const levelArray = doc.flattened[constants.LOG_LEVEL_FIELD];
+  const level = levelArray && levelArray.length ? levelArray[0]?.toLowerCase() : undefined;
+  const messageArray = doc.flattened[constants.MESSAGE_FIELD];
+  const message = messageArray && messageArray.length ? messageArray[0] : undefined;
   const timestamp = formatField(constants.TIMESTAMP_FIELD);
-  const formattedMessage = formatField(constants.MESSAGE_FIELD);
-  const message = formattedMessage ? he.decode(formattedMessage) : undefined;
 
   // Service Highlights
   const serviceName = formatField(constants.SERVICE_NAME_FIELD);

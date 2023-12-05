@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import {
-  CLOSE_TIMELINE_BUTTON,
-  TIMELINE_TOGGLE_BUTTON,
-  TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON,
-} from '../screens/security_main';
+import { CLOSE_TIMELINE_BUTTON, TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON } from '../screens/security_main';
 import { TIMELINE_EXIT_FULL_SCREEN_BUTTON, TIMELINE_FULL_SCREEN_BUTTON } from '../screens/timeline';
 
 export const openTimelineUsingToggle = () => {
   cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).click();
-};
-
-export const closeTimelineUsingToggle = () => {
-  cy.get(TIMELINE_TOGGLE_BUTTON).filter(':visible').click();
 };
 
 export const closeTimelineUsingCloseButton = () => {

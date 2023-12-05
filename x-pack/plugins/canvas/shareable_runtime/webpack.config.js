@@ -162,7 +162,7 @@ module.exports = {
         loader: 'expose-loader?jQuery!expose-loader?$',
       },
       {
-        test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
+        test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
         loader: 'url-loader',
         sideEffects: false,
       },

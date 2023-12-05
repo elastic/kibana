@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableServerPlugin, EmbeddableSetup, EmbeddableStart } from './plugin';
+import { EmbeddableSetup, EmbeddableStart } from './plugin';
 
 export type { EmbeddableSetup, EmbeddableStart };
 
@@ -14,4 +14,7 @@ export type { EnhancementRegistryDefinition } from './types';
 
 export type { EmbeddableRegistryDefinition } from '../common';
 
-export const plugin = () => new EmbeddableServerPlugin();
+export const plugin = async () => {
+  const { EmbeddableServerPlugin } = await import('./plugin');
+  return new EmbeddableServerPlugin();
+};

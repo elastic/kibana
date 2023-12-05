@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { createStaticDataView } from './create_static_data_view';
-import * as HistoricalAgentData from '../historical_data/has_historical_agent_data';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
-import { APMCore } from '../typings';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { Logger } from '@kbn/core/server';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
+import * as HistoricalAgentData from '../historical_data/has_historical_agent_data';
+import { APMCore } from '../typings';
+import { createStaticDataView } from './create_static_data_view';
 
 function getMockedDataViewService(existingDataViewTitle: string) {
   return {
     get: jest.fn(() => ({
-      title: existingDataViewTitle,
+      getIndexPattern: () => existingDataViewTitle,
     })),
     createAndSave: jest.fn(),
+    delete: () => {},
   } as unknown as DataViewsService;
 }
 
@@ -35,6 +37,10 @@ const coreMock = {
     };
   },
 } as unknown as APMCore;
+
+const logger = {
+  info: jest.fn,
+} as unknown as Logger;
 
 const apmEventClientMock = {
   search: jest.fn(),
@@ -55,6 +61,8 @@ describe('createStaticDataView', () => {
         config: { autoCreateApmDataView: false },
       } as APMRouteHandlerResources,
       dataViewService,
+      spaceId: 'default',
+      logger,
     });
     expect(dataViewService.createAndSave).not.toHaveBeenCalled();
   });
@@ -73,6 +81,8 @@ describe('createStaticDataView', () => {
         config: { autoCreateApmDataView: false },
       } as APMRouteHandlerResources,
       dataViewService,
+      spaceId: 'default',
+      logger,
     });
     expect(dataViewService.createAndSave).not.toHaveBeenCalled();
   });
@@ -92,6 +102,8 @@ describe('createStaticDataView', () => {
         config: { autoCreateApmDataView: true },
       } as APMRouteHandlerResources,
       dataViewService,
+      spaceId: 'default',
+      logger,
     });
 
     expect(dataViewService.createAndSave).toHaveBeenCalled();
@@ -114,6 +126,8 @@ describe('createStaticDataView', () => {
         config: { autoCreateApmDataView: true },
       } as APMRouteHandlerResources,
       dataViewService,
+      spaceId: 'default',
+      logger,
     });
 
     expect(dataViewService.get).toHaveBeenCalled();
@@ -143,6 +157,8 @@ describe('createStaticDataView', () => {
         config: { autoCreateApmDataView: true },
       } as APMRouteHandlerResources,
       dataViewService,
+      spaceId: 'default',
+      logger,
     });
 
     expect(dataViewService.get).toHaveBeenCalled();

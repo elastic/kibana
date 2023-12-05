@@ -676,7 +676,7 @@
         "label": "GetPreviewDataParams",
         "description": [],
         "signature": [
-          "{ indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; }"
+          "{ indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; range: { start: number; end: number; }; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -691,7 +691,7 @@
         "label": "GetPreviewDataResponse",
         "description": [],
         "signature": [
-          "{ date: string; sliValue: number; }[]"
+          "({ date: string; sliValue: number; } & { events?: { good: number; bad: number; total: number; } | undefined; })[]"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -3306,7 +3306,13 @@
           "PartialC",
           "<{ filter: ",
           "StringC",
-          "; }>]>; }>]>; }>; }>"
+          "; }>]>; }>]>; range: ",
+          "TypeC",
+          "<{ start: ",
+          "NumberC",
+          "; end: ",
+          "NumberC",
+          "; }>; }>; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -3323,12 +3329,24 @@
         "signature": [
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ date: ",
           "Type",
           "<Date, string, unknown>; sliValue: ",
           "NumberC",
-          "; }>>"
+          "; }>, ",
+          "PartialC",
+          "<{ events: ",
+          "TypeC",
+          "<{ good: ",
+          "NumberC",
+          "; bad: ",
+          "NumberC",
+          "; total: ",
+          "NumberC",
+          "; }>; }>]>>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -4861,12 +4879,24 @@
         "label": "previewDataSchema",
         "description": [],
         "signature": [
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ date: ",
           "Type",
           "<Date, string, unknown>; sliValue: ",
           "NumberC",
-          "; }>"
+          "; }>, ",
+          "PartialC",
+          "<{ events: ",
+          "TypeC",
+          "<{ good: ",
+          "NumberC",
+          "; bad: ",
+          "NumberC",
+          "; total: ",
+          "NumberC",
+          "; }>; }>]>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,

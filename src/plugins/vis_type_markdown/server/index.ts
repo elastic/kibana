@@ -17,7 +17,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   ],
 };
 
-export const plugin = () => ({
+export const plugin = async () => ({
   setup() {},
   start() {},
 });

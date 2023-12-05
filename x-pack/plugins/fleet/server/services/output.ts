@@ -33,6 +33,7 @@ import {
   DEFAULT_OUTPUT,
   DEFAULT_OUTPUT_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
+  OUTPUT_HEALTH_DATA_STREAM,
 } from '../constants';
 import {
   SO_SEARCH_LIMIT,
@@ -419,7 +420,12 @@ class OutputService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     output: NewOutput,
-    options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
+    options?: {
+      id?: string;
+      fromPreconfiguration?: boolean;
+      overwrite?: boolean;
+      secretHashes?: Record<string, any>;
+    }
   ): Promise<Output> {
     const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
     if (output.type === outputType.RemoteElasticsearch) {
@@ -555,6 +561,7 @@ class OutputService {
       const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
         output,
         esClient,
+        secretHashes: output.is_preconfigured ? options?.secretHashes : undefined,
       });
 
       if (outputWithSecrets.secrets) data.secrets = outputWithSecrets.secrets;
@@ -716,7 +723,10 @@ class OutputService {
     esClient: ElasticsearchClient,
     id: string,
     data: Partial<Output>,
-    { fromPreconfiguration = false }: { fromPreconfiguration: boolean } = {
+    {
+      fromPreconfiguration = false,
+      secretHashes,
+    }: { fromPreconfiguration: boolean; secretHashes?: Record<string, any> } = {
       fromPreconfiguration: false,
     }
   ) {
@@ -747,6 +757,7 @@ class OutputService {
         oldOutput: originalOutput,
         outputUpdate: data,
         esClient,
+        secretHashes: data.is_preconfigured ? secretHashes : undefined,
       });
 
       updateData.secrets = secretsRes.outputUpdate.secrets;
@@ -952,6 +963,34 @@ class OutputService {
       }
     }
   }
+
+  async getLatestOutputHealth(esClient: ElasticsearchClient, id: string): Promise<OutputHealth> {
+    const response = await esClient.search({
+      index: OUTPUT_HEALTH_DATA_STREAM,
+      query: { bool: { filter: { term: { output: id } } } },
+      sort: { '@timestamp': 'desc' },
+      size: 1,
+    });
+    if (response.hits.hits.length === 0) {
+      return {
+        state: 'UNKOWN',
+        message: '',
+        timestamp: '',
+      };
+    }
+    const latestHit = response.hits.hits[0]._source as any;
+    return {
+      state: latestHit.state,
+      message: latestHit.message ?? '',
+      timestamp: latestHit['@timestamp'],
+    };
+  }
+}
+
+interface OutputHealth {
+  state: string;
+  message: string;
+  timestamp: string;
 }
 
 export const outputService = new OutputService();

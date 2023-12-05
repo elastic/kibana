@@ -127,6 +127,10 @@
             {
               "plugin": "stackAlerts",
               "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/index.ts"
+            },
+            {
+              "plugin": "stackAlerts",
+              "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/index.ts"
             }
           ],
           "children": [
@@ -1388,6 +1392,56 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.sanitizeBulkErrorResponse",
+        "type": "Function",
+        "tags": [],
+        "label": "sanitizeBulkErrorResponse",
+        "description": [],
+        "signature": [
+          "(response: ",
+          "BulkResponse",
+          " | ",
+          "TransportResult",
+          "<",
+          "BulkResponse",
+          ", unknown>) => ",
+          "BulkResponse",
+          " | ",
+          "TransportResult",
+          "<",
+          "BulkResponse",
+          ", unknown>"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_client/lib/sanitize_bulk_response.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.sanitizeBulkErrorResponse.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "BulkResponse",
+              " | ",
+              "TransportResult",
+              "<",
+              "BulkResponse",
+              ", unknown>"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_client/lib/sanitize_bulk_response.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -1400,15 +1454,15 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
           "<ActionGroupIds>"
         ],
-        "path": "x-pack/plugins/alerting/common/rule_type.ts",
+        "path": "packages/kbn-alerting-types/action_group_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1422,7 +1476,7 @@
             "signature": [
               "ActionGroupIds"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/action_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1433,7 +1487,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/action_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2728,7 +2782,7 @@
             "label": "actions",
             "description": [],
             "signature": [
-              "Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; state$?: Readonly<{} & { store: string; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 7 | 6 | 5 | 4 | 3 | 1)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; } & { id: string; params: Record<string, any>; actionTypeId: string; group: string; }>[]"
+              "Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: \"appState\" | \"globalState\"; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 7 | 6 | 5 | 4 | 3 | 1)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { id: string; params: Record<string, any>; actionTypeId: string; group: string; }>[]"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -3433,11 +3487,11 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/server/lib/rules/slo_burn_rate/executor.ts"
+                "path": "x-pack/plugins/observability/server/lib/rules/custom_threshold/custom_threshold_executor.ts"
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/server/lib/rules/custom_threshold/custom_threshold_executor.ts"
+                "path": "x-pack/plugins/observability/server/lib/rules/slo_burn_rate/executor.ts"
               },
               {
                 "plugin": "ml",
@@ -4008,9 +4062,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.ActionGroup",
                 "text": "ActionGroup"
               },
@@ -4043,9 +4097,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.ActionGroup",
                 "text": "ActionGroup"
               },
@@ -4141,25 +4195,25 @@
             "signature": [
               "{ context?: ",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.ActionVariable",
                 "text": "ActionVariable"
               },
               "[] | undefined; state?: ",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.ActionVariable",
                 "text": "ActionVariable"
               },
               "[] | undefined; params?: ",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.ActionVariable",
                 "text": "ActionVariable"
               },
@@ -4463,23 +4517,23 @@
         "signature": [
           "T extends ",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
           "<infer groups> ? groups : T extends Readonly<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
           "<infer groups>> ? groups : never"
         ],
-        "path": "x-pack/plugins/alerting/common/rule_type.ts",
+        "path": "packages/kbn-alerting-types/rule_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4691,11 +4745,35 @@
         "signature": [
           "{ getContext: () => Context; getState: () => State; getUuid: () => string; getStart: () => string | null; hasContext: () => boolean; replaceState: (state: State) => ",
           "Alert",
-          "<State, Context, ActionGroupIds>; scheduleActions: (actionGroup: ActionGroupIds, context?: Context) => ",
+          "<State, Context, ActionGroupIds, ",
+          {
+            "pluginId": "@kbn/alerts-as-data-utils",
+            "scope": "common",
+            "docId": "kibKbnAlertsAsDataUtilsPluginApi",
+            "section": "def-common.AADAlert",
+            "text": "AADAlert"
+          },
+          ">; scheduleActions: (actionGroup: ActionGroupIds, context?: Context) => ",
           "Alert",
-          "<State, Context, ActionGroupIds>; setContext: (context: Context) => ",
+          "<State, Context, ActionGroupIds, ",
+          {
+            "pluginId": "@kbn/alerts-as-data-utils",
+            "scope": "common",
+            "docId": "kibKbnAlertsAsDataUtilsPluginApi",
+            "section": "def-common.AADAlert",
+            "text": "AADAlert"
+          },
+          ">; setContext: (context: Context) => ",
           "Alert",
-          "<State, Context, ActionGroupIds>; }"
+          "<State, Context, ActionGroupIds, ",
+          {
+            "pluginId": "@kbn/alerts-as-data-utils",
+            "scope": "common",
+            "docId": "kibKbnAlertsAsDataUtilsPluginApi",
+            "section": "def-common.AADAlert",
+            "text": "AADAlert"
+          },
+          ">; }"
         ],
         "path": "x-pack/plugins/alerting/server/alert/alert.ts",
         "deprecated": false,
@@ -4981,9 +5059,9 @@
           },
           "; getAuditLogger: () => ",
           {
-            "pluginId": "security",
+            "pluginId": "@kbn/security-plugin-types-server",
             "scope": "server",
-            "docId": "kibSecurityPluginApi",
+            "docId": "kibKbnSecurityPluginTypesServerPluginApi",
             "section": "def-server.AuditLogger",
             "text": "AuditLogger"
           },
@@ -5032,6 +5110,21 @@
           "{ [x: string]: unknown; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.ScopedQueryAlerts",
+        "type": "Type",
+        "tags": [],
+        "label": "ScopedQueryAlerts",
+        "description": [],
+        "signature": [
+          "{ [x: string]: string[]; }"
+        ],
+        "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5378,17 +5471,17 @@
         "signature": [
           "(customRecoveryGroup: ",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
           "<RecoveryActionGroupId> | undefined) => [",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
@@ -5415,9 +5508,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.ActionGroup",
                 "text": "ActionGroup"
               },
@@ -5666,6 +5759,39 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.getScopedQueryErrorMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "getScopedQueryErrorMessage",
+        "description": [],
+        "signature": [
+          "(errorMessage: string) => string"
+        ],
+        "path": "x-pack/plugins/alerting/common/maintenance_window_scoped_query_error_message.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.getScopedQueryErrorMessage.$1",
+            "type": "string",
+            "tags": [],
+            "label": "errorMessage",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/alerting/common/maintenance_window_scoped_query_error_message.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.isActionGroupDisabledForActionTypeId",
         "type": "Function",
         "tags": [],
@@ -5704,6 +5830,39 @@
               "string"
             ],
             "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.isScopedQueryError",
+        "type": "Function",
+        "tags": [],
+        "label": "isScopedQueryError",
+        "description": [],
+        "signature": [
+          "(errorMessage: string) => boolean"
+        ],
+        "path": "x-pack/plugins/alerting/common/maintenance_window_scoped_query_error_message.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.isScopedQueryError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "errorMessage",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/alerting/common/maintenance_window_scoped_query_error_message.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -5918,15 +6077,15 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
           "<ActionGroupIds>"
         ],
-        "path": "x-pack/plugins/alerting/common/rule_type.ts",
+        "path": "packages/kbn-alerting-types/action_group_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5940,7 +6099,7 @@
             "signature": [
               "ActionGroupIds"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/action_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5951,7 +6110,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/action_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5965,7 +6124,7 @@
         "tags": [],
         "label": "ActionVariable",
         "description": [],
-        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "path": "packages/kbn-alerting-types/rule_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5976,7 +6135,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5987,7 +6146,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6001,7 +6160,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6015,7 +6174,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6029,7 +6188,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7382,12 +7541,15 @@
         "parentPluginId": "alerting",
         "id": "def-common.MaintenanceWindowSOProperties",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "MaintenanceWindowSOProperties",
         "description": [],
         "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "alerting",
@@ -7493,6 +7655,27 @@
             "description": [],
             "signature": [
               "string[] | null | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MaintenanceWindowSOProperties.scopedQuery",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scopedQuery",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.ScopedQueryAttributes",
+                "text": "ScopedQueryAttributes"
+              },
+              " | null | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
             "deprecated": false,
@@ -8156,6 +8339,20 @@
                 "text": "AlertsFilter"
               },
               " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleAction.useAlertDataForTemplate",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useAlertDataForTemplate",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -9223,15 +9420,15 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RuleType",
             "text": "RuleType"
           },
           "<ActionGroupIds, RecoveryActionGroupId>"
         ],
-        "path": "x-pack/plugins/alerting/common/rule_type.ts",
+        "path": "packages/kbn-alerting-types/rule_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -9242,7 +9439,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9253,7 +9450,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9266,15 +9463,15 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.ActionGroup",
                 "text": "ActionGroup"
               },
               "<ActionGroupIds>[]"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9287,15 +9484,15 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.ActionGroup",
                 "text": "ActionGroup"
               },
               "<RecoveryActionGroupId>"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9307,9 +9504,33 @@
             "label": "actionVariables",
             "description": [],
             "signature": [
-              "{ context: ActionVariable[]; state: ActionVariable[]; params: ActionVariable[]; }"
+              "{ context: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.ActionVariable",
+                "text": "ActionVariable"
+              },
+              "[]; state: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.ActionVariable",
+                "text": "ActionVariable"
+              },
+              "[]; params: ",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.ActionVariable",
+                "text": "ActionVariable"
+              },
+              "[]; }"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9323,7 +9544,7 @@
             "signature": [
               "ActionGroupIds"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9334,7 +9555,7 @@
             "tags": [],
             "label": "category",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9345,7 +9566,7 @@
             "tags": [],
             "label": "producer",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9359,7 +9580,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9370,7 +9591,7 @@
             "tags": [],
             "label": "isExportable",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9384,7 +9605,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9398,7 +9619,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9412,7 +9633,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9423,7 +9644,7 @@
             "tags": [],
             "label": "enabledInLicense",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -9437,7 +9658,7 @@
             "signature": [
               "{ [x: string]: ConsumerPrivileges; }"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_type.ts",
+            "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9512,6 +9733,60 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.ScopedQueryAttributes",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScopedQueryAttributes",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.ScopedQueryAttributes.kql",
+            "type": "string",
+            "tags": [],
+            "label": "kql",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.ScopedQueryAttributes.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              "ScopeQueryFilter",
+              "[]"
+            ],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.ScopedQueryAttributes.dsl",
+            "type": "string",
+            "tags": [],
+            "label": "dsl",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9622,23 +9897,23 @@
         "signature": [
           "T extends ",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
           "<infer groups> ? groups : T extends Readonly<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
           "<infer groups>> ? groups : never"
         ],
-        "path": "x-pack/plugins/alerting/common/rule_type.ts",
+        "path": "packages/kbn-alerting-types/rule_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -9818,7 +10093,7 @@
         "signature": [
           "\"default\""
         ],
-        "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
+        "path": "packages/kbn-alerting-types/builtin_action_groups_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10149,7 +10424,9 @@
         "parentPluginId": "alerting",
         "id": "def-common.MaintenanceWindow",
         "type": "Type",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "MaintenanceWindow",
         "description": [],
         "signature": [
@@ -10179,8 +10456,94 @@
           "; eventStartTime: string | null; eventEndTime: string | null; id: string; }"
         ],
         "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/tooltip_content.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/tooltip_content.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/cell.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/cell.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/cell.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/cell.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/hooks/apis/bulk_get_maintenance_windows.ts"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/hooks/apis/bulk_get_maintenance_windows.ts"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/hooks/apis/bulk_get_maintenance_windows.ts"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/hooks/apis/bulk_get_maintenance_windows.ts"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/hooks/apis/bulk_get_maintenance_windows.ts"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/hooks/use_bulk_get_maintenance_windows.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/hooks/use_bulk_get_maintenance_windows.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/rule_alert_list.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/rule_alert_list.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/rule_alert_list.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/rule_alert_list.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/index.mock.ts"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/index.mock.ts"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10199,7 +10562,15 @@
             "section": "def-common.RRuleParams",
             "text": "RRuleParams"
           },
-          "; categoryIds?: string[] | null | undefined; }"
+          "; categoryIds?: string[] | null | undefined; scopedQuery?: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ScopedQueryAttributes",
+            "text": "ScopedQueryAttributes"
+          },
+          " | null | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
         "deprecated": false,
@@ -10225,7 +10596,9 @@
         "parentPluginId": "alerting",
         "id": "def-common.MaintenanceWindowSOAttributes",
         "type": "Type",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "MaintenanceWindowSOAttributes",
         "description": [],
         "signature": [
@@ -10246,8 +10619,9 @@
           }
         ],
         "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -10439,7 +10813,7 @@
         "signature": [
           "\"recovered\""
         ],
-        "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
+        "path": "packages/kbn-alerting-types/builtin_action_groups_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13503,7 +13877,7 @@
         "signature": [
           "{ readonly id: \"recovered\"; readonly name: string; }"
         ],
-        "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
+        "path": "packages/kbn-alerting-types/builtin_action_groups_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

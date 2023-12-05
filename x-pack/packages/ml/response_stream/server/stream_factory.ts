@@ -22,13 +22,13 @@ function isCompressedSream(arg: unknown): arg is zlib.Gzip {
 const FLUSH_KEEP_ALIVE_INTERVAL_MS = 500;
 const FLUSH_PAYLOAD_SIZE = 4 * 1024;
 
-class UncompressedResponseStream extends Stream.PassThrough {}
+export class UncompressedResponseStream extends Stream.PassThrough {}
 
 const DELIMITER = '\n';
 
 type StreamType = 'string' | 'ndjson';
 
-interface StreamFactoryReturnType<T = unknown> {
+export interface StreamFactoryReturnType<T = unknown> {
   DELIMITER: string;
   end: () => void;
   push: (d: T, drain?: boolean) => void;

@@ -7,11 +7,12 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core/public';
+import { ILM_POLICY_NAME } from '@kbn/reporting-common';
 
-import { ILM_POLICY_NAME } from '../../../common/constants';
 import { LocatorPublic, SerializableRecord } from '../../shared_imports';
 
 interface Props {

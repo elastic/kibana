@@ -32,7 +32,8 @@ const requestPreferenceOptionLabels = {
 };
 
 export function getUiSettings(
-  docLinks: DocLinksServiceSetup
+  docLinks: DocLinksServiceSetup,
+  enableValidations: boolean
 ): Record<string, UiSettingsParams<unknown>> {
   return {
     [UI_SETTINGS.META_FIELDS]: {
@@ -463,13 +464,22 @@ export function getUiSettings(
             '</a>',
         },
       }),
-      schema: schema.arrayOf(
-        schema.object({
-          from: schema.string(),
-          to: schema.string(),
-          display: schema.string(),
-        })
-      ),
+      schema: enableValidations
+        ? schema.arrayOf(
+            schema.object({
+              from: schema.string(),
+              to: schema.string(),
+              display: schema.string(),
+            }),
+            { maxSize: 10 }
+          )
+        : schema.arrayOf(
+            schema.object({
+              from: schema.string(),
+              to: schema.string(),
+              display: schema.string(),
+            })
+          ),
     },
     [UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT]: {
       name: i18n.translate('data.advancedSettings.pinFiltersTitle', {

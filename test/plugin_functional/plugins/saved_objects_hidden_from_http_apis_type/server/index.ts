@@ -8,4 +8,4 @@
 
 import { SavedObjectsHiddenFromHttpApisTypePlugin } from './plugin';
 
-export const plugin = () => new SavedObjectsHiddenFromHttpApisTypePlugin();
+export const plugin = async () => new SavedObjectsHiddenFromHttpApisTypePlugin();

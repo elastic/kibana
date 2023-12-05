@@ -28,13 +28,12 @@ import { DataRequestContext } from '../../../../actions';
 import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
 import { ISource } from '../../../sources/source';
 import { IVectorSource } from '../../../sources/vector_source';
-import { AbstractLayer, LayerError, LayerIcon } from '../../layer';
+import { AbstractLayer, LayerMessage, LayerIcon } from '../../layer';
 import {
   AbstractVectorLayer,
   noResultsIcon,
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
 } from '../vector_layer';
-import { DataRequestAbortError } from '../../../util/data_request';
 import { getFeatureCollectionBounds } from '../../../util/get_feature_collection_bounds';
 import { syncGeojsonSourceData } from './geojson_source_data';
 import { performInnerJoins } from './perform_inner_joins';
@@ -158,7 +157,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     );
   }
 
-  getErrors(): LayerError[] {
+  getErrors(): LayerMessage[] {
     const errors = super.getErrors();
 
     this.getValidJoins().forEach((join) => {
@@ -168,7 +167,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
           title: i18n.translate('xpack.maps.geojsonVectorLayer.joinErrorTitle', {
             defaultMessage: `An error occurred when adding join metrics to layer features`,
           }),
-          error: joinDescriptor.error,
+          body: joinDescriptor.error,
         });
       }
     });
@@ -313,9 +312,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
         syncContext.setJoinError
       );
     } catch (error) {
-      if (!(error instanceof DataRequestAbortError)) {
-        throw error;
-      }
+      // Error used to stop execution flow. Error state stored in data request and displayed to user in layer legend.
     }
   }
 

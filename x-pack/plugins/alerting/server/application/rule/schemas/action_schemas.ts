@@ -7,22 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { notifyWhenSchema } from './notify_when_schema';
+import { alertsFilterQuerySchema } from '../../alerts_filter_query/schemas';
 
 export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
-
-const actionAlertsFilterQueryFiltersSchema = schema.arrayOf(
-  schema.object({
-    query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    meta: schema.recordOf(schema.string(), schema.any()),
-    state$: schema.maybe(schema.object({ store: schema.string() })),
-  })
-);
-
-const actionDomainAlertsFilterQuerySchema = schema.object({
-  kql: schema.string(),
-  filters: actionAlertsFilterQueryFiltersSchema,
-  dsl: schema.maybe(schema.string()),
-});
 
 const actionAlertsFilterTimeFrameSchema = schema.object({
   days: schema.arrayOf(
@@ -44,7 +31,7 @@ const actionAlertsFilterTimeFrameSchema = schema.object({
 });
 
 const actionDomainAlertsFilterSchema = schema.object({
-  query: schema.maybe(actionDomainAlertsFilterQuerySchema),
+  query: schema.maybe(alertsFilterQuerySchema),
   timeframe: schema.maybe(actionAlertsFilterTimeFrameSchema),
 });
 
@@ -68,17 +55,8 @@ export const actionDomainSchema = schema.object({
   useAlertDataAsTemplate: schema.maybe(schema.boolean()),
 });
 
-/**
- * Sanitized (non-domain) action schema, returned by rules clients for other solutions
- */
-const actionAlertsFilterQuerySchema = schema.object({
-  kql: schema.string(),
-  filters: actionAlertsFilterQueryFiltersSchema,
-  dsl: schema.maybe(schema.string()),
-});
-
 export const actionAlertsFilterSchema = schema.object({
-  query: schema.maybe(actionAlertsFilterQuerySchema),
+  query: schema.maybe(alertsFilterQuerySchema),
   timeframe: schema.maybe(actionAlertsFilterTimeFrameSchema),
 });
 

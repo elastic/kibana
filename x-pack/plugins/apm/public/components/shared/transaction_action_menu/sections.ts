@@ -55,6 +55,7 @@ export const getSections = ({
   allDatasetsLocator,
   logsLocator,
   nodeLogsLocator,
+  dataViewId,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
@@ -68,6 +69,7 @@ export const getSections = ({
   allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>;
   logsLocator: LocatorPublic<LogsLocatorParams>;
   nodeLogsLocator: LocatorPublic<NodeLogsLocatorParams>;
+  dataViewId: string;
 }) => {
   if (!transaction) return [];
 
@@ -271,6 +273,7 @@ export const getSections = ({
         basePath,
         query: getDiscoverQuery(transaction),
         location,
+        dataViewId,
       }),
       condition: true,
     },

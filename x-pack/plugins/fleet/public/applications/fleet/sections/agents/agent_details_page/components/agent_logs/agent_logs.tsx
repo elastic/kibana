@@ -4,21 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import url from 'url';
-import { stringify } from 'querystring';
-
 import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import { encode } from '@kbn/rison';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
   EuiFilterGroup,
   EuiPanel,
-  EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
@@ -42,6 +35,7 @@ import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
 import { buildQuery } from './build_query';
 import { SelectLogLevel } from './select_log_level';
+import { ViewLogsButton } from './view_logs_button';
 
 const WrapperFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -118,7 +112,7 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
 
 export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
   ({ agent, agentPolicy, state }) => {
-    const { data, application, http, cloud } = useStartServices();
+    const { data, application, cloud } = useStartServices();
     const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();
     const isLogsUIAvailable = !cloud?.isServerlessEnabled;
 
@@ -217,37 +211,6 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
         }),
       [agent.id, state.datasets, state.logLevels, state.query]
     );
-
-    // Generate URL to pass page state to Logs UI
-    const viewInLogsUrl = useMemo(
-      () =>
-        http.basePath.prepend(
-          url.format({
-            pathname: '/app/logs/stream',
-            search: stringify({
-              logPosition: encode({
-                start: state.start,
-                end: state.end,
-                streamLive: false,
-              }),
-              logFilter: encode({
-                expression: logStreamQuery,
-                kind: 'kuery',
-              }),
-            }),
-          })
-        ),
-      [http.basePath, state.start, state.end, logStreamQuery]
-    );
-
-    const viewInDiscoverUrl = useMemo(() => {
-      const index = 'logs-*';
-      const datasetQuery = 'data_stream.dataset:elastic_agent';
-      const agentIdQuery = `elastic_agent.id:${agent.id}`;
-      return http.basePath.prepend(
-        `/app/discover#/?_a=(index:'${index}',query:(language:kuery,query:'${datasetQuery}%20AND%20${agentIdQuery}'))`
-      );
-    }, [http.basePath, agent.id]);
 
     const agentVersion = agent.local_metadata?.elastic?.agent?.version;
     const isLogFeatureAvailable = useMemo(() => {
@@ -357,30 +320,12 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
                   application,
                 }}
               >
-                {isLogsUIAvailable ? (
-                  <EuiButtonEmpty
-                    href={viewInLogsUrl}
-                    iconType="popout"
-                    flush="both"
-                    data-test-subj="viewInLogsBtn"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.agentLogs.openInLogsUiLinkText"
-                      defaultMessage="Open in Logs"
-                    />
-                  </EuiButtonEmpty>
-                ) : (
-                  <EuiButton
-                    href={viewInDiscoverUrl}
-                    iconType="popout"
-                    data-test-subj="viewInDiscoverBtn"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.agentLogs.openInDiscoverUiLinkText"
-                      defaultMessage="Open in Discover"
-                    />
-                  </EuiButton>
-                )}
+                <ViewLogsButton
+                  viewInLogs={isLogsUIAvailable}
+                  logStreamQuery={logStreamQuery}
+                  startTime={state.start}
+                  endTime={state.end}
+                />
               </RedirectAppLinks>
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -22,11 +22,25 @@ export interface ProfilingESClient {
   profilingStacktraces({}: {
     query: QueryDslQueryContainer;
     sampleSize: number;
+    durationSeconds: number;
+    co2PerKWH?: number;
+    datacenterPUE?: number;
+    pervCPUWattX86?: number;
+    pervCPUWattArm64?: number;
+    awsCostDiscountRate?: number;
+    costPervCPUPerHour?: number;
   }): Promise<StackTraceResponse>;
   profilingStatus(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;
   profilingFlamegraph({}: {
     query: QueryDslQueryContainer;
     sampleSize: number;
+    durationSeconds: number;
+    co2PerKWH?: number;
+    datacenterPUE?: number;
+    pervCPUWattX86?: number;
+    pervCPUWattArm64?: number;
+    awsCostDiscountRate?: number;
+    costPervCPUPerHour?: number;
   }): Promise<BaseFlameGraph>;
 }
