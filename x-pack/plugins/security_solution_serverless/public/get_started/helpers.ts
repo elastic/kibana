@@ -7,7 +7,17 @@
 
 import type { ProductLine } from '../../common/product';
 import { getSections } from './sections';
-import type { ActiveCard, ActiveSections, CardId, SectionId, Step, StepId } from './types';
+import type { ActiveCard, ActiveSections, Card, CardId, SectionId, Step, StepId } from './types';
+import { CreateProjectSteps, QuickStartSectionCardsId } from './types';
+
+export const CONTENT_WIDTH = 1150;
+
+export const defaultFinishedSteps: Partial<Record<CardId, StepId[]>> = {
+  [QuickStartSectionCardsId.createFirstProject]: [CreateProjectSteps.createFirstProject],
+};
+
+export const isDefaultFinishedCardStep = (cardId: CardId, stepId: StepId) =>
+  !!defaultFinishedSteps[cardId]?.includes(stepId);
 
 export const getCardTimeInMinutes = (activeSteps: Step[] | undefined, stepsDone: Set<StepId>) =>
   activeSteps?.reduce(
@@ -41,6 +51,16 @@ const getfinishedActiveSteps = (
   }, [] as StepId[]);
 
   return new Set(finishedActiveSteps);
+};
+
+export const findCardByStepId = (
+  stepId: string
+): { matchedCard: Card | null; matchedStep: Step | null } => {
+  const cards = getSections().flatMap((s) => s.cards);
+  const matchedStep: Step | null = null;
+  const matchedCard = cards.find((c) => !!c.steps?.find((step) => stepId === step.id)) ?? null;
+
+  return { matchedCard, matchedStep };
 };
 
 export const getCard = ({ cardId, sectionId }: { cardId: CardId; sectionId: SectionId }) => {
