@@ -55,12 +55,6 @@ export const GetDataStreamsRequestSchema = {
   }),
 };
 
-export const GetLimitedPackagesRequestSchema = {
-  query: schema.object({
-    prerelease: schema.maybe(schema.boolean()),
-  }),
-};
-
 export const GetFileRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),

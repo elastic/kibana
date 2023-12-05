@@ -111,7 +111,6 @@ export type {
   GetCategoriesRequest,
   GetPackagesRequest,
   GetPackagesResponse,
-  GetLimitedPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,

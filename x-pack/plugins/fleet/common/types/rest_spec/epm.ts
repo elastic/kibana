@@ -62,11 +62,6 @@ export interface GetEpmDataStreamsResponse {
     name: string;
   }>;
 }
-export interface GetLimitedPackagesResponse {
-  items: string[];
-  // deprecated in 8.0
-  response?: string[];
-}
 
 export interface GetFileRequest {
   params: {

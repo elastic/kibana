@@ -15,6 +15,7 @@ import type {
   GetBulkAssetsRequestBody,
   GetBulkAssetsResponse,
   GetCategoriesResponse,
+  GetLimitedPackagesResponse,
   GetVerificationKeyIdResponse,
 } from '../../../common/api';
 
@@ -23,7 +24,6 @@ import type {
   GetCategoriesRequest,
   GetPackagesRequest,
   GetPackagesResponse,
-  GetLimitedPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,

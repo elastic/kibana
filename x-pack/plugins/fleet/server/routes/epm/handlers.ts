@@ -16,6 +16,8 @@ import type {
   GetBulkAssetsResponse,
   GetCategoriesRequestQuery,
   GetCategoriesResponse,
+  GetLimitedPackagesRequestQuery,
+  GetLimitedPackagesResponse,
   GetVerificationKeyIdResponse,
 } from '../../../common/api';
 
@@ -28,7 +30,6 @@ import type {
   InstallPackageResponse,
   DeletePackageResponse,
   GetPackagesResponse,
-  GetLimitedPackagesResponse,
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
   IBulkInstallPackageHTTPError,
@@ -50,7 +51,6 @@ import type {
   GetStatsRequestSchema,
   FleetRequestHandler,
   UpdatePackageRequestSchema,
-  GetLimitedPackagesRequestSchema,
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
 } from '../../types';
@@ -180,7 +180,7 @@ export const getDataStreamsHandler: FleetRequestHandler<
 
 export const getLimitedListHandler: FleetRequestHandler<
   undefined,
-  TypeOf<typeof GetLimitedPackagesRequestSchema.query>,
+  GetLimitedPackagesRequestQuery,
   undefined
 > = async (context, request, response) => {
   try {
@@ -191,7 +191,6 @@ export const getLimitedListHandler: FleetRequestHandler<
     });
     const body: GetLimitedPackagesResponse = {
       items: res,
-      response: res,
     };
     return response.ok({
       body,

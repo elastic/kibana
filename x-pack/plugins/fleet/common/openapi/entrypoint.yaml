@@ -32,8 +32,8 @@ paths:
   #   $ref: paths/epm@bulk_assets.yaml
   # /epm/categories:
   #   $ref: paths/epm@categories.yaml
-  /epm/packages/limited:
-    $ref: paths/epm@limited_list.yaml
+  # /epm/packages/limited:
+  #   $ref: paths/epm@limited_list.yaml
   /epm/packages:
     $ref: paths/epm@packages.yaml
   /epm/packages/_bulk:
