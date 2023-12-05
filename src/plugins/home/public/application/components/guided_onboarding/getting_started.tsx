@@ -36,7 +36,7 @@ import {
   type GuideFilterValuesClassic,
 } from '@kbn/guided-onboarding/classic';
 import { GuideId, GuideState, GuideVersion } from '@kbn/guided-onboarding/src/types';
-import { getServices } from '../../kibana_services';
+import { getServices, useVariation } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
 const homeBreadcrumb = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
@@ -75,7 +75,7 @@ export const GettingStarted = () => {
   const { search } = useLocation();
   const query = parse(search);
   // using for A/B testing
-  const [guideVersion, setGuideVersion] = useState<GuideVersion>('classic');
+  const [guideVersion, setGuideVersion] = useState<GuideVersion>('guide');
   const useCase = query.useCase as GuideFilterValues;
   const [filter, setFilter] = useState<GuideFilterValues | GuideFilterValuesClassic>(
     guideVersion ? useCase ?? 'all' : useCase ?? 'search'
@@ -156,7 +156,7 @@ export const GettingStarted = () => {
   );
 
   // set up A/B testing
-  useVariation(cloudExperiments, 'guided.onboarding', guideVersion, setGuideVersion);
+  useVariation(cloudExperiments!, 'guided.onboarding', guideVersion, setGuideVersion);
 
   // filter cards for solution and based on classic or new format
   const guide = 'classic' ? guideCardsClassic : guideCards;
@@ -286,13 +286,3 @@ export const GettingStarted = () => {
     </KibanaPageTemplate>
   );
 };
-function useVariation(
-  cloudExperiments:
-    | import('@kbn/cloud-experiments-plugin/common').CloudExperimentsPluginStart
-    | undefined,
-  arg1: string,
-  arg2: string,
-  setConfig: any
-) {
-  throw new Error('Function not implemented.');
-}
