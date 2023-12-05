@@ -85,11 +85,6 @@ const ServerlessTopNav = ({
             selectedTab="log-explorer"
           />
         </EuiHeaderSectionItem>
-        <EuiHeaderSectionItem css={{ marginLeft: euiThemeVars.euiSizeM }}>
-          <EuiHeaderLinks gutterSize="xs">
-            <DiscoverLink services={services} state$={state$} />
-          </EuiHeaderLinks>
-        </EuiHeaderSectionItem>
       </EuiHeaderSection>
       <EuiHeaderSection
         side="right"
@@ -107,7 +102,10 @@ const ServerlessTopNav = ({
           />
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
-          <FeedbackLink />
+          <EuiHeaderLinks gutterSize="xs">
+            <DiscoverLink services={services} state$={state$} />
+            <FeedbackLink />
+          </EuiHeaderLinks>
           <VerticalRule />
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
@@ -203,7 +201,6 @@ const DiscoverLink = React.memo(
       <EuiHeaderLink
         {...discoverLinkProps}
         color="primary"
-        iconType="discoverApp"
         data-test-subj="logExplorerDiscoverFallbackLink"
       >
         {discoverLinkTitle}
