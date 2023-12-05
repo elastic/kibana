@@ -43,7 +43,11 @@ describe(
     tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
-        enableExperimental: ['alertSuppressionForThresholdRuleEnabled'],
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'alertSuppressionForThresholdRuleEnabled',
+          ])}`,
+        ],
       },
     },
   },
