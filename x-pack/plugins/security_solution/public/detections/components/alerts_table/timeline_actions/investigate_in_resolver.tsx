@@ -14,7 +14,7 @@ export const useIsInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
   const sentinelOneDataInAnalyzerEnabled = useIsExperimentalFeatureEnabled(
     'sentinelOneDataInAnalyzerEnabled'
   );
-  const [isValidEventType, hasEntityId] = useMemo(() => {
+  return useMemo(() => {
     const fileBeatModules = [
       ...(sentinelOneDataInAnalyzerEnabled ? ['sentinel_one_cloud_funnel', 'sentinel_one'] : []),
     ] as const;
@@ -30,13 +30,11 @@ export const useIsInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
     const agentTypeIsEndpoint = agentType === 'endpoint';
     const agentTypeIsWinlogBeat = agentType === 'winlogbeat' && eventModule === 'sysmon';
     const agentTypeIsFilebeat = agentType === 'filebeat' && fileBeatModules.includes(eventModule);
-    const isEndpointOrSysmonFromWinlogBeat =
+    const isAcceptedAgentType =
       agentTypeIsEndpoint || agentTypeIsWinlogBeat || datasetIncludesSysmon || agentTypeIsFilebeat;
     const hasProcessEntityId =
       processEntityIds != null && processEntityIds.length === 1 && firstProcessEntityId !== '';
 
-    return [isEndpointOrSysmonFromWinlogBeat, hasProcessEntityId];
+    return isAcceptedAgentType && hasProcessEntityId;
   }, [ecsData, sentinelOneDataInAnalyzerEnabled]);
-
-  return isValidEventType && hasEntityId;
 };
