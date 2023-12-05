@@ -79,16 +79,13 @@ const CardStepComponent: React.FC<{
       e.preventDefault();
 
       if (hasStepContent) {
-        // Toggle step and sync the expanded card step to storage & reducer
-        onStepClicked({ stepId, cardId, sectionId, isExpanded: !isExpandedStep });
-
         navigateTo({
           deepLinkId: SecurityPageName.landing,
           path: `#${stepId}`,
         });
       }
     },
-    [hasStepContent, onStepClicked, stepId, cardId, sectionId, isExpandedStep, navigateTo]
+    [hasStepContent, stepId, navigateTo]
   );
 
   const {

@@ -27,10 +27,10 @@ import type {
   Switch,
 } from '../types';
 import { GetStartedPageActions } from '../types';
-import { findCardByStepId } from '../helpers';
+import { findCardSectionByStepId } from '../helpers';
 
 const syncExpandedCardStepsToStorageFromURL = (maybeStepId: string) => {
-  const { matchedCard, matchedStep } = findCardByStepId(maybeStepId);
+  const { matchedCard, matchedStep } = findCardSectionByStepId(maybeStepId);
   const hasStepContent = matchedStep && matchedStep.description;
 
   if (matchedCard && matchedStep && hasStepContent) {
@@ -54,7 +54,9 @@ const syncExpandedCardStepsFromStorageToURL = (
   );
 
   if (expandedCardStep?.expandedSteps[0]) {
-    const { matchedCard, matchedStep } = findCardByStepId(expandedCardStep?.expandedSteps[0]);
+    const { matchedCard, matchedStep } = findCardSectionByStepId(
+      expandedCardStep?.expandedSteps[0]
+    );
 
     callback?.({ matchedCard, matchedStep });
   }
@@ -114,28 +116,6 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     return getAllExpandedCardStepsFromStorage();
   }, [getAllExpandedCardStepsFromStorage, stepIdFromHash]);
 
-  useEffect(() => {
-    syncExpandedCardStepsFromStorageToURL(
-      expandedCardsInitialStates,
-      ({ matchedStep }: { matchedStep: Step | null }) => {
-        if (!matchedStep) return;
-        navigateTo({
-          deepLinkId: SecurityPageName.landing,
-          path: `#${matchedStep.id}`,
-        });
-      }
-    );
-  }, [expandedCardsInitialStates, getAllExpandedCardStepsFromStorage, navigateTo]);
-
-  const [state, dispatch] = useReducer(reducer, {
-    activeProducts: activeProductsInitialStates,
-    activeSections: activeSectionsInitialStates,
-    expandedCardSteps: expandedCardsInitialStates,
-    finishedSteps: finishedStepsInitialStates,
-    totalActiveSteps: totalActiveStepsInitialStates,
-    totalStepsLeft: totalStepsLeftInitialStates,
-  });
-
   const onStepClicked: OnStepClicked = useCallback(
     ({ stepId, cardId, isExpanded }) => {
       dispatch({
@@ -156,6 +136,15 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
       resetAllExpandedCardStepsToStorage,
     ]
   );
+
+  const [state, dispatch] = useReducer(reducer, {
+    activeProducts: activeProductsInitialStates,
+    activeSections: activeSectionsInitialStates,
+    expandedCardSteps: expandedCardsInitialStates,
+    finishedSteps: finishedStepsInitialStates,
+    totalActiveSteps: totalActiveStepsInitialStates,
+    totalStepsLeft: totalStepsLeftInitialStates,
+  });
 
   const toggleTaskCompleteStatus: ToggleTaskCompleteStatus = useCallback(
     ({ stepId, cardId, sectionId, undo }) => {
@@ -181,6 +170,47 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     },
     [toggleActiveProductsInStorage]
   );
+
+  useEffect(() => {
+    if (!stepIdFromHash) {
+      syncExpandedCardStepsFromStorageToURL(
+        expandedCardsInitialStates,
+        ({ matchedStep }: { matchedStep: Step | null }) => {
+          if (!matchedStep) return;
+          navigateTo({
+            deepLinkId: SecurityPageName.landing,
+            path: `#${matchedStep.id}`,
+          });
+        }
+      );
+    }
+  }, [expandedCardsInitialStates, getAllExpandedCardStepsFromStorage, navigateTo, stepIdFromHash]);
+
+  useEffect(() => {
+    // handle hash change and expand the step
+    if (stepIdFromHash) {
+      const { matchedCard, matchedStep, matchedSection } = findCardSectionByStepId(stepIdFromHash);
+      const hasStepContent = matchedStep && matchedStep.description;
+      if (hasStepContent && matchedCard && matchedStep && matchedSection) {
+        // If the step is already expanded, do nothing
+        if (state.expandedCardSteps[matchedCard.id]?.expandedSteps.includes(matchedStep.id)) {
+          return;
+        }
+        // Toggle step and sync the expanded card step to storage & reducer
+        onStepClicked({
+          stepId: matchedStep.id,
+          cardId: matchedCard.id,
+          sectionId: matchedSection.id,
+          isExpanded: true,
+        });
+
+        navigateTo({
+          deepLinkId: SecurityPageName.landing,
+          path: `#${matchedStep.id}`,
+        });
+      }
+    }
+  }, [navigateTo, onStepClicked, state.expandedCardSteps, stepIdFromHash]);
 
   return { state, onStepClicked, toggleTaskCompleteStatus, onProductSwitchChanged };
 };
