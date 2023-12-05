@@ -165,7 +165,6 @@ export function registerRoutes({
               _inspect: inspectableEsQueriesMap.get(request),
             }
           : { ...data };
-
         if (!options.disableTelemetry && telemetryUsageCounter) {
           telemetryUsageCounter.incrementCounter({
             counterName: `${method.toUpperCase()} ${pathname}`,

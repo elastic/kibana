@@ -349,6 +349,13 @@ export interface DocLinks {
     readonly privileges: string;
     readonly manageDetectionRules: string;
     readonly createEsqlRuleType: string;
+    readonly entityAnalytics: {
+      readonly riskScorePrerequisites: string;
+      readonly hostRiskScore: string;
+      readonly userRiskScore: string;
+      readonly entityRiskScoring: string;
+    };
+    readonly detectionEngineOverview: string;
   };
   readonly query: {
     readonly eql: string;
@@ -467,6 +474,7 @@ export interface DocLinks {
   readonly security: Readonly<{
     apiKeyServiceSettings: string;
     clusterPrivileges: string;
+    definingRoles: string;
     elasticsearchSettings: string;
     elasticsearchEnableSecurity: string;
     elasticsearchEnableApiKeys: string;

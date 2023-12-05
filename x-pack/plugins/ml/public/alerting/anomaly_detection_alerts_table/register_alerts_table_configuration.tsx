@@ -124,21 +124,8 @@ export function registerAlertsTableConfiguration(
     getRenderCellValue: getRenderCellValue(fieldFormats),
     sort,
     useActionsColumn: () => ({
-      renderCustomActionsRow: ({
-        alert,
-        id,
-        setFlyoutAlert,
-        refresh,
-      }: RenderCustomActionsRowArgs) => {
-        return (
-          <AlertActions
-            alert={alert}
-            ecsData={{ _id: alert._id, _index: alert._index }}
-            id={id}
-            setFlyoutAlert={setFlyoutAlert}
-            refresh={refresh}
-          />
-        );
+      renderCustomActionsRow: (props: RenderCustomActionsRowArgs) => {
+        return <AlertActions {...props} />;
       },
     }),
   };

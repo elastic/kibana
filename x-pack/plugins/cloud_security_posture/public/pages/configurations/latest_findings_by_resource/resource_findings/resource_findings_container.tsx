@@ -95,6 +95,9 @@ const getResourceFindingSharedValues = (sharedValues: {
   },
 ];
 
+/**
+ * @deprecated: This component is deprecated and will be removed in the next release.
+ */
 export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const params = useParams<{ resourceId: string }>();
   const decodedResourceId = decodeURIComponent(params.resourceId);
