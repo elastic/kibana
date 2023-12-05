@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
@@ -15,6 +15,9 @@ import { useRightPanelContext } from '../context';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 
+/**
+ * Displays info about who last updated the alert's workflow status and when.
+ */
 export const AlertStatus: FC = () => {
   const { searchHit } = useRightPanelContext();
   const statusUpdatedBy = searchHit.fields?.['kibana.alert.workflow_user'] as string;
@@ -29,12 +32,13 @@ export const AlertStatus: FC = () => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiSpacer size="m" />
       <EuiFlexItem data-test-subj={WORKFLOW_STATUS_TITLE_TEST_ID}>
         <EuiTitle size="xxs">
           <h5>
             <FormattedMessage
               id="xpack.securitySolution.flyout.right.about.status.statusHistoryTitle"
-              defaultMessage="Last Alert Status Change"
+              defaultMessage="Last alert status change"
             />
           </h5>
         </EuiTitle>

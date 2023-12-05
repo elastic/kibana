@@ -41,7 +41,6 @@ export const AboutSection: VFC<AboutSectionProps> = ({ expanded = true }) => {
       <Description />
       <EuiSpacer size="m" />
       <Reason />
-      <EuiSpacer size="m" />
       <MitreAttack />
       <AlertStatus />
     </ExpandableSection>
