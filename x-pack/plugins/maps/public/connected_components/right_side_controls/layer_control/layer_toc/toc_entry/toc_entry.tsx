@@ -339,7 +339,10 @@ export class TOCEntry extends Component<Props, State> {
             className="mapTocEntry__layerDetails"
             data-test-subj={`mapLayerTOCDetails${escapeLayerName(this.state.displayName)}`}
           >
-            <LegendDetails inspectorAdapters={this.props.inspectorAdapters} layer={this.props.layer} />
+            <LegendDetails
+              inspectorAdapters={this.props.inspectorAdapters}
+              layer={this.props.layer}
+            />
           </div>
         ) : null}
 

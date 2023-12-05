@@ -10,7 +10,15 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { InspectorViewProps } from '@kbn/inspector-plugin/public';
 import { XJsonLang } from '@kbn/monaco';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiSpacer, EuiTabs, EuiTab, EuiText } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTabs,
+  EuiTab,
+  EuiText,
+} from '@elastic/eui';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { EmptyPrompt } from './empty_prompt';
 import type { TileRequest } from '../types';
@@ -42,7 +50,10 @@ class VectorTileInspector extends Component<InspectorViewProps, State> {
     this.state = {
       selectedLayer: null,
       selectedTileRequest: null,
-      selectedView: props.options && (props.options as Options).initialTab ? (props.options as Options).initialTab! : REQUEST_VIEW_ID,
+      selectedView:
+        props.options && (props.options as Options).initialTab
+          ? (props.options as Options).initialTab!
+          : REQUEST_VIEW_ID,
       tileRequests: [],
       layerOptions: [],
     };
@@ -60,17 +71,19 @@ class VectorTileInspector extends Component<InspectorViewProps, State> {
   }
 
   _getDefaultLayer(layerOptions: Array<EuiComboBoxOptionOption<string>>) {
-    if (this.state.selectedLayer &&
+    if (
+      this.state.selectedLayer &&
       layerOptions.some((layerOption) => {
         return this.state.selectedLayer?.value === layerOption.value;
-      })) {
+      })
+    ) {
       return this.state.selectedLayer;
     }
 
     if (this.props.options && (this.props.options as Options).initialLayerId) {
       const initialLayer = layerOptions.find((layerOption) => {
         return (this.props.options as Options).initialLayerId === layerOption.value;
-      })
+      });
       if (initialLayer) {
         return initialLayer;
       }
@@ -80,7 +93,8 @@ class VectorTileInspector extends Component<InspectorViewProps, State> {
   }
 
   _getDefaultTileRequest(tileRequests: TileRequest[]) {
-    if (this.state.selectedTileRequest &&
+    if (
+      this.state.selectedTileRequest &&
       tileRequests.some((tileRequest: TileRequest) => {
         return (
           this.state.selectedTileRequest?.layerId === tileRequest.layerId &&
@@ -88,7 +102,8 @@ class VectorTileInspector extends Component<InspectorViewProps, State> {
           this.state.selectedTileRequest?.y === tileRequest.y &&
           this.state.selectedTileRequest?.z === tileRequest.z
         );
-      })) {
+      })
+    ) {
       return this.state.selectedTileRequest;
     }
 
@@ -98,8 +113,11 @@ class VectorTileInspector extends Component<InspectorViewProps, State> {
 
     if (this.props.options && (this.props.options as Options).initialTileKey) {
       const initialTileRequest = tileRequests.find((tileRequest) => {
-        return (this.props.options as Options).initialTileKey === `${tileRequest.z}/${tileRequest.x}/${tileRequest.y}`;
-      })
+        return (
+          (this.props.options as Options).initialTileKey ===
+          `${tileRequest.z}/${tileRequest.x}/${tileRequest.y}`
+        );
+      });
       if (initialTileRequest) {
         return initialTileRequest;
       }
@@ -166,7 +184,7 @@ class VectorTileInspector extends Component<InspectorViewProps, State> {
     this.setState({
       selectedTileRequest: selectedOptions[0].value ? selectedOptions[0].value : null,
     });
-  }
+  };
 
   _renderTileRequest() {
     if (!this.state.selectedTileRequest) {
@@ -183,36 +201,34 @@ class VectorTileInspector extends Component<InspectorViewProps, State> {
     }
 
     const tileResponse = getTileResponse(this.state.selectedTileRequest);
-    
-    return tileResponse
-      ? (
-        <CodeEditor
-          languageId={XJsonLang.ID}
-          value={JSON.stringify(tileResponse, null, 2)}
-          options={{
-            readOnly: true,
-            lineNumbers: 'off',
-            fontSize: 12,
-            minimap: {
-              enabled: false,
-            },
-            folding: true,
-            scrollBeyondLastLine: false,
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-            automaticLayout: true,
-          }}
-        />
-      )
-      : (
-        <EuiText>
-          <p>
-            {i18n.translate('xpack.maps.inspector.vectorTile.tileMetaFeatureNotAvailable', {
-              defaultMessage: 'Not available',
-            })}
-          </p>
-        </EuiText>
-      )
+
+    return tileResponse ? (
+      <CodeEditor
+        languageId={XJsonLang.ID}
+        value={JSON.stringify(tileResponse, null, 2)}
+        options={{
+          readOnly: true,
+          lineNumbers: 'off',
+          fontSize: 12,
+          minimap: {
+            enabled: false,
+          },
+          folding: true,
+          scrollBeyondLastLine: false,
+          wordWrap: 'on',
+          wrappingIndent: 'indent',
+          automaticLayout: true,
+        }}
+      />
+    ) : (
+      <EuiText>
+        <p>
+          {i18n.translate('xpack.maps.inspector.vectorTile.tileMetaFeatureNotAvailable', {
+            defaultMessage: 'Not available',
+          })}
+        </p>
+      </EuiText>
+    );
   }
 
   render() {
@@ -246,24 +262,28 @@ class VectorTileInspector extends Component<InspectorViewProps, State> {
         <EuiFormRow
           display="columnCompressed"
           label={i18n.translate('xpack.maps.inspector.vectorTile.layerSelectLabel', {
-          defaultMessage: 'Tile',
-        })}
+            defaultMessage: 'Tile',
+          })}
         >
           <EuiComboBox
             fullWidth
             singleSelection={true}
-            options={this.state.tileRequests.map(tileRequest => {
+            options={this.state.tileRequests.map((tileRequest) => {
               return {
                 label: `${tileRequest.z}/${tileRequest.x}/${tileRequest.y}`,
-                value: tileRequest
-              }
+                value: tileRequest,
+              };
             })}
-            selectedOptions={this.state.selectedTileRequest
-              ? [{ 
-                  label: `${this.state.selectedTileRequest.z}/${this.state.selectedTileRequest.x}/${this.state.selectedTileRequest.y}`,
-                  value: this.state.selectedTileRequest
-                }] 
-              : []}
+            selectedOptions={
+              this.state.selectedTileRequest
+                ? [
+                    {
+                      label: `${this.state.selectedTileRequest.z}/${this.state.selectedTileRequest.x}/${this.state.selectedTileRequest.y}`,
+                      value: this.state.selectedTileRequest,
+                    },
+                  ]
+                : []
+            }
             onChange={this._onTileSelect}
             isClearable={false}
           />
@@ -303,13 +323,13 @@ class VectorTileInspector extends Component<InspectorViewProps, State> {
 function getTileResponse(tileRequest: TileRequest) {
   if (tileRequest.tileError?.error) {
     return {
-      error: tileRequest.tileError.error
+      error: tileRequest.tileError.error,
     };
   }
 
   return tileRequest.tileMetaFeature
-    ? { 
-        meta: tileRequest.tileMetaFeature.properties
+    ? {
+        meta: tileRequest.tileMetaFeature.properties,
       }
     : undefined;
 }

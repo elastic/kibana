@@ -444,7 +444,7 @@ export class AbstractLayer implements ILayer {
             inspectorAdapters={inspectorAdapters}
             isESSource={!isLayerGroup(this) && this.getSource().isESSource()}
             layerId={this.getId()}
-            tileErrors={this._descriptor.__tileErrors} 
+            tileErrors={this._descriptor.__tileErrors}
           />
         ),
       });

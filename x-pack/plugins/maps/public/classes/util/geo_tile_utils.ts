@@ -184,4 +184,3 @@ export function isPointInTile(lat: number, lon: number, x: number, y: number, z:
   const latY = latitudeToTile(lat, tileCount);
   return latY === y;
 }
-

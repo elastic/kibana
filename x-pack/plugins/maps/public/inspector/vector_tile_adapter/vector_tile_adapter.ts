@@ -7,9 +7,9 @@
 
 // @ts-expect-error
 import turfCenterOfMass from '@turf/center-of-mass';
+import { EventEmitter } from 'events';
 import { LAT_INDEX, LON_INDEX } from '../../../common/constants';
 import type { TileError, TileMetaFeature } from '../../../common/descriptor_types';
-import { EventEmitter } from 'events';
 import { TileRequest } from './types';
 import { isPointInTile } from '../../classes/util/geo_tile_utils';
 
@@ -43,7 +43,11 @@ export class VectorTileAdapter extends EventEmitter {
     this._onChange();
   }
 
-  public setTileResults(layerId: string, tileMetaFeatures?: TileMetaFeature[], tileErrors?: TileError[]) {
+  public setTileResults(
+    layerId: string,
+    tileMetaFeatures?: TileMetaFeature[],
+    tileErrors?: TileError[]
+  ) {
     if (!this._layers[layerId]) {
       return;
     }
@@ -52,7 +56,7 @@ export class VectorTileAdapter extends EventEmitter {
       ...this._layers[layerId],
       tileErrors,
       tileMetaFeatures,
-    }
+    };
     this._onChange();
   }
 
@@ -87,14 +91,26 @@ export class VectorTileAdapter extends EventEmitter {
   }
 }
 
-function getTileMetaFeature(layerId: string, x: number, y: number, z: number, tileMetaFeatures?: TileMetaFeature[]) {
+function getTileMetaFeature(
+  layerId: string,
+  x: number,
+  y: number,
+  z: number,
+  tileMetaFeatures?: TileMetaFeature[]
+) {
   if (!tileMetaFeatures || tileMetaFeatures.length === 0) {
     return;
   }
 
-  return tileMetaFeatures.find(tileMetaFeature => {
+  return tileMetaFeatures.find((tileMetaFeature) => {
     const centerGeometry = turfCenterOfMass(tileMetaFeature).geometry;
-    return isPointInTile(centerGeometry.coordinates[LAT_INDEX], centerGeometry.coordinates[LON_INDEX], x, y, z);
+    return isPointInTile(
+      centerGeometry.coordinates[LAT_INDEX],
+      centerGeometry.coordinates[LON_INDEX],
+      x,
+      y,
+      z
+    );
   });
 }
 
@@ -105,8 +121,7 @@ function getTileError(layerId: string, x: number, y: number, z: number, tileErro
 
   const tileKey = `${z}/${x}/${y}`;
 
-  return tileErrors.find(tileError => {
+  return tileErrors.find((tileError) => {
     return tileError.tileKey === tileKey;
   });
 }
-

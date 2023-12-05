@@ -11,7 +11,7 @@ import type { ISource } from './source';
 
 export type SourceRegistryEntry = {
   ConstructorFunction: new (
-    sourceDescriptor: any, // this is the source-descriptor that corresponds specifically to the particular ISource instance
+    sourceDescriptor: any // this is the source-descriptor that corresponds specifically to the particular ISource instance
   ) => ISource;
   type: string;
 };

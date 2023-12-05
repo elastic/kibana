@@ -827,7 +827,11 @@ export function setTileState(
     });
 
     if (!isLayerGroup(layer) && layer.getSource().isESSource()) {
-      getInspectorAdapters(getState()).vectorTiles.setTileResults(layerId, tileMetaFeatures, tileErrors);
+      getInspectorAdapters(getState()).vectorTiles.setTileResults(
+        layerId,
+        tileMetaFeatures,
+        tileErrors
+      );
     }
 
     if (!tileMetaFeatures && !layer.getDescriptor().__tileMetaFeatures) {

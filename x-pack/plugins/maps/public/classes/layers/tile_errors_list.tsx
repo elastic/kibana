@@ -84,9 +84,9 @@ export function TileErrorsList(props: Props) {
       <EuiCodeBlock isCopyable={true} paddingSize="s">
         {getDescription(selectedTileError)}
       </EuiCodeBlock>
-      {props.isESSource && 
+      {props.isESSource && (
         <EuiButton
-          color="primary" 
+          color="primary"
           onClick={() => {
             getInspector().open(props.inspectorAdapters, {
               options: {
@@ -95,13 +95,14 @@ export function TileErrorsList(props: Props) {
                 initialTab: [RESPONSE_VIEW_ID],
               },
             });
-          }} size="s"
+          }}
+          size="s"
         >
           {i18n.translate('xpack.maps.tileError.viewDetailsButtonLabel', {
             defaultMessage: 'View details',
           })}
         </EuiButton>
-      }
+      )}
     </>
   );
 }
