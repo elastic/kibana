@@ -515,18 +515,16 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       let overwriteArrayIdx;
 
       if (endValue === Number.POSITIVE_INFINITY) {
-        overwriteArrayIdx = `≥ ${metricFormatter.convert(startValue)}`;
+        overwriteArrayIdx = `≥ ${valueFormatter(startValue)}`;
       } else {
-        overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(
-          endValue
-        )}`;
+        overwriteArrayIdx = `${valueFormatter(start)} - ${valueFormatter(endValue)}`;
       }
 
       const overwriteColor = overwriteColors?.[overwriteArrayIdx];
       return {
         // with the default continuity:above the every range is left-closed
-        start: startValue,
-        end: endValue,
+        start: Number(valueFormatter(startValue)),
+        end: Number(valueFormatter(endValue)),
         // the current colors array contains a duplicated color at the beginning that we need to skip
         color: overwriteColor ?? colors[index + 1],
       };
