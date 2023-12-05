@@ -12,7 +12,7 @@ const deploymentsListJson = execSync('ecctl deployment list --output json').toSt
 const { deployments } = JSON.parse(deploymentsListJson);
 const secretBasePath = process.env.VAULT_ADDR?.match(/secrets\.elastic\.co/g)
   ? 'secret/kibana-issues/dev'
-  : 'secret/ci/elastic-kibana/migrated';
+  : 'secret/ci/elastic-kibana';
 
 const prDeployments = deployments.filter((deployment: any) =>
   deployment.name.startsWith('kibana-pr-')

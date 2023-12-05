@@ -176,7 +176,7 @@ vault_get() {
   path=$1
   field=$2
 
-  fullPath="secret/ci/elastic-kibana/migrated/$path"
+  fullPath="secret/ci/elastic-kibana/$path"
   if [[ "$VAULT_ADDR" == *"secrets.elastic.co"* ]]; then
     fullPath="secret/kibana-issues/dev/$path"
   fi
@@ -193,7 +193,7 @@ vault_set() {
   shift
   fields=("$@")
 
-  fullPath="secret/ci/elastic-kibana/migrated/$path"
+  fullPath="secret/ci/elastic-kibana/$path"
   if [[ "$VAULT_ADDR" == *"secrets.elastic.co"* ]]; then
     fullPath="secret/kibana-issues/dev/$path"
   fi
