@@ -91,7 +91,10 @@ export const fetchUxOverviewDate = async (
     CORE_WEB_VITALS_DEFAULTS;
   const inpData = transformINPResponse(inpResponse);
   return {
-    coreWebVitals: { ...data, inp: inpData.inp, inpRanks: inpData.inpRanks },
+    coreWebVitals: {
+      ...data,
+      ...(inpData ? { inp: inpData?.inp, inpRanks: inpData?.inpRanks } : {}),
+    },
     appLink: `/app/ux?rangeFrom=${params.relativeTime.start}&rangeTo=${params.relativeTime.end}`,
   };
 };
