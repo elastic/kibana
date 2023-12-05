@@ -76,6 +76,7 @@
     "@kbn/logging",
     "@kbn/search-response-warnings",
     "@kbn/calculate-width-from-char-count",
+    "@kbn/content-management-table-list-view-common",
   ],
   "exclude": [
     "target/**/*",
