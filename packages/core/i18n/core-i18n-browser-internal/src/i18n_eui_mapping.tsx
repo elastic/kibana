@@ -167,6 +167,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
           'ARIA label and tooltip content describing a button that expands an actions menu',
       }
     ),
+    'euiCollapsedItemActions.allActionsDisabled': i18n.translate(
+      'core.euiCollapsedItemActions.allActionsDisabled',
+      {
+        defaultMessage: 'Individual item actions are disabled when rows are being selected.',
+        description: 'Title content when the actions popover toggle is disabled',
+      }
+    ),
     'euiCollapsibleNavBeta.ariaLabel': i18n.translate('core.euiCollapsibleNavBeta.ariaLabel', {
       defaultMessage: 'Site menu',
     }),
@@ -252,16 +259,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnSelector.searchcolumns': i18n.translate('core.euiColumnSelector.searchcolumns', {
       defaultMessage: 'Search columns',
     }),
-    'euiColumnSelector.buttonActiveSingular': ({ numberOfHiddenFields }: EuiValues) =>
-      i18n.translate('core.euiColumnSelector.buttonActiveSingular', {
-        defaultMessage: '{numberOfHiddenFields} column hidden',
-        values: { numberOfHiddenFields },
-      }),
-    'euiColumnSelector.buttonActivePlural': ({ numberOfHiddenFields }: EuiValues) =>
-      i18n.translate('core.euiColumnSelector.buttonActivePlural', {
-        defaultMessage: '{numberOfHiddenFields} columns hidden',
-        values: { numberOfHiddenFields },
-      }),
     'euiColumnSorting.clearAll': i18n.translate('core.euiColumnSorting.clearAll', {
       defaultMessage: 'Clear sorting',
     }),
@@ -280,11 +277,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnSorting.button': i18n.translate('core.euiColumnSorting.button', {
       defaultMessage: 'Sort fields',
     }),
-    'euiColumnSorting.buttonActive': ({ numberOfSortedFields }: EuiValues) =>
-      i18n.translate('core.euiColumnSorting.buttonActive', {
-        defaultMessage: '{numberOfSortedFields, plural, one {# field} other {# fields}} sorted',
-        values: { numberOfSortedFields },
-      }),
     'euiColumnSortingDraggable.activeSortLabel': ({ display }: EuiValues) =>
       i18n.translate('core.euiColumnSortingDraggable.activeSortLabel', {
         defaultMessage: '{display} is sorting this data grid',
@@ -673,6 +665,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Descending size label',
       }
     ),
+    'euiDataGridToolbarControl.badgeAriaLabel': ({ count }: EuiValues) =>
+      i18n.translate('core.euiDataGridToolbarControl.badgeAriaLabel', {
+        defaultMessage: 'Active: {count}',
+        values: { count },
+      }),
     'euiDatePopoverButton.invalidTitle': ({ title }: EuiValues) =>
       i18n.translate('core.euiDatePopoverButton.invalidTitle', {
         defaultMessage: 'Invalid date: {title}',
@@ -830,11 +827,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiInlineEditForm.saveButtonAriaLabel',
       { defaultMessage: 'Save edit' }
     ),
-    'euiLink.external.ariaLabel': i18n.translate('core.euiLink.external.ariaLabel', {
+    'euiExternalLinkIcon.ariaLabel': i18n.translate('core.euiExternalLinkIcon.ariaLabel', {
       defaultMessage: 'External link',
     }),
-    'euiLink.newTarget.screenReaderOnlyText': i18n.translate(
-      'core.euiLink.newTarget.screenReaderOnlyText',
+    'euiExternalLinkIcon.newTarget.screenReaderOnlyText': i18n.translate(
+      'core.euiExternalLinkIcon.newTarget.screenReaderOnlyText',
       {
         defaultMessage: '(opens in a new tab or window)',
       }
