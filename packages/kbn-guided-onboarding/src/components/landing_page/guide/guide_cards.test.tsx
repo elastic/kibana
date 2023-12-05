@@ -31,6 +31,7 @@ const defaultProps: Omit<GuideCardsProps, 'activeFilter'> = {
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/172595
+// FLAKY: https://github.com/elastic/kibana/issues/172596
 describe.skip('guide cards', () => {
   describe('snapshots', () => {
     test('should render search cards', async () => {
