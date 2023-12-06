@@ -23,7 +23,10 @@
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/field-formats-plugin",
-    "@kbn/field-types"
+    "@kbn/field-types",
+    "@kbn/io-ts-utils",
+    "@kbn/observability-plugin",
+    "@kbn/es-types"
   ],
   "exclude": [
     "target/**/*",

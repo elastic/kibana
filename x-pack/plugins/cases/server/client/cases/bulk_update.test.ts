@@ -50,6 +50,8 @@ describe('update', () => {
       clientArgs.services.caseService.patchCases.mockResolvedValue({
         saved_objects: [{ ...mockCases[0], attributes: { assignees: cases.cases[0].assignees } }],
       });
+
+      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
     });
 
     it('notifies an assignee', async () => {
@@ -326,6 +328,7 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
+      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
     });
 
     it(`does not throw error when category is non empty string less than ${MAX_CATEGORY_LENGTH} characters`, async () => {
@@ -459,6 +462,7 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
+      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
     });
 
     it(`does not throw error when title is non empty string less than ${MAX_TITLE_LENGTH} characters`, async () => {
@@ -593,6 +597,7 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
+      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
     });
 
     it(`does not throw error when description is non empty string less than ${MAX_DESCRIPTION_LENGTH} characters`, async () => {
@@ -718,6 +723,150 @@ describe('update', () => {
     });
   });
 
+  describe('Total comments and alerts', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+
+      const caseCommentsStats = new Map();
+      caseCommentsStats.set(mockCases[0].id, { userComments: 1, alerts: 2 });
+      caseCommentsStats.set(mockCases[1].id, { userComments: 3, alerts: 4 });
+      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(
+        caseCommentsStats
+      );
+    });
+
+    it('calls the attachment service with the right params and returns the expected comments and alerts', async () => {
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }, { ...mockCases[1] }],
+      });
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                description: 'New updated description!!',
+              },
+              {
+                id: mockCases[1].id,
+                version: mockCases[1].version ?? '',
+                description: 'New updated description!!',
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "assignees": Array [],
+            "category": null,
+            "closed_at": null,
+            "closed_by": null,
+            "comments": Array [],
+            "connector": Object {
+              "fields": null,
+              "id": "none",
+              "name": "none",
+              "type": ".none",
+            },
+            "created_at": "2019-11-25T21:54:48.952Z",
+            "created_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "customFields": Array [],
+            "description": "This is a brand new case of a bad meanie defacing data",
+            "duration": null,
+            "external_service": null,
+            "id": "mock-id-1",
+            "owner": "securitySolution",
+            "settings": Object {
+              "syncAlerts": true,
+            },
+            "severity": "low",
+            "status": "open",
+            "tags": Array [
+              "defacement",
+            ],
+            "title": "Super Bad Security Issue",
+            "totalAlerts": 2,
+            "totalComment": 1,
+            "updated_at": "2019-11-25T21:54:48.952Z",
+            "updated_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "version": "WzAsMV0=",
+          },
+          Object {
+            "assignees": Array [],
+            "category": null,
+            "closed_at": null,
+            "closed_by": null,
+            "comments": Array [],
+            "connector": Object {
+              "fields": null,
+              "id": "none",
+              "name": "none",
+              "type": ".none",
+            },
+            "created_at": "2019-11-25T22:32:00.900Z",
+            "created_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "customFields": Array [],
+            "description": "Oh no, a bad meanie destroying data!",
+            "duration": null,
+            "external_service": null,
+            "id": "mock-id-2",
+            "owner": "securitySolution",
+            "settings": Object {
+              "syncAlerts": true,
+            },
+            "severity": "low",
+            "status": "open",
+            "tags": Array [
+              "Data Destruction",
+            ],
+            "title": "Damaging Data Destruction Detected",
+            "totalAlerts": 4,
+            "totalComment": 3,
+            "updated_at": "2019-11-25T22:32:00.900Z",
+            "updated_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "version": "WzQsMV0=",
+          },
+        ]
+      `);
+
+      expect(clientArgs.services.attachmentService.getter.getCaseCommentStats).toHaveBeenCalledWith(
+        expect.objectContaining({
+          caseIds: [mockCases[0].id, mockCases[1].id],
+        })
+      );
+    });
+  });
+
   describe('Tags', () => {
     const clientArgs = createCasesClientMockArgs();
 
@@ -730,6 +879,7 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
+      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
     });
 
     it('does not throw error when tags array is empty', async () => {
@@ -932,6 +1082,7 @@ describe('update', () => {
           ],
         },
       ]);
+      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
     });
 
     it('can update customFields', async () => {
@@ -1197,6 +1348,9 @@ describe('update', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      clientArgsMock.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it(`throws an error when trying to update more than ${MAX_CASES_TO_UPDATE} cases`, async () => {
