@@ -21,7 +21,7 @@ return total;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'console', 'header']);
+  const PageObjects = getPageObjects(['common', 'console', 'header', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
 
