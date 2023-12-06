@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -22,6 +22,9 @@ export const PipelineSelect: React.FC = () => {
   const { selectExistingPipeline } = useActions(MLInferenceLogic);
 
   const { pipelineName } = configuration;
+
+  const rowHeight: number = useIsWithinMaxBreakpoint('s') ? 120 : 90;
+  const [height, setHeight] = useState(4.5 * rowHeight);
 
   const getPipelineOptions = (
     pipelineOptions: MLInferencePipelineOption[]
@@ -59,14 +62,20 @@ export const PipelineSelect: React.FC = () => {
       listProps={{
         activeOptionIndex: getActiveOptionIndex(),
         bordered: true,
-        rowHeight: useIsWithinMaxBreakpoint('s') ? 120 : 90,
         showIcons: true,
         onFocusBadge: false,
+        rowHeight,
+      }}
+      searchProps={{
+        onChange: (_, matchingOptions) => {
+          setHeight(Math.min(4.5, matchingOptions.length) * rowHeight);
+        },
       }}
       searchable
       singleSelection="always"
       onChange={onChange}
       renderOption={renderPipelineOption}
+      height={height}
     >
       {(list, search) => (
         <>
