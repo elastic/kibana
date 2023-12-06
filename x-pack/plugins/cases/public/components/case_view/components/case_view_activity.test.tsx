@@ -141,7 +141,16 @@ const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
 
 describe('Case View Page activity tab', () => {
+  let appMockRender: AppMockRenderer;
   const caseConnectors = getCaseConnectorsMockResponse();
+  const platinumLicense = licensingMock.createLicense({
+    license: { type: 'platinum' },
+  });
+  const basicLicense = licensingMock.createLicense({
+    license: { type: 'basic' },
+  });
+  // eslint-disable-next-line prefer-object-spread
+  const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
 
   beforeAll(() => {
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
@@ -160,15 +169,36 @@ describe('Case View Page activity tab', () => {
       isLoading: false,
       useOnUpdateField: jest.fn,
     });
-  });
-  let appMockRender: AppMockRenderer;
 
-  const platinumLicense = licensingMock.createLicense({
-    license: { type: 'platinum' },
+    Object.defineProperty(window, 'getComputedStyle', {
+      value: (el: HTMLElement) => {
+        /**
+         * This is based on the jsdom implementation of getComputedStyle
+         * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+         *
+         * It is missing global style parsing and will only return styles applied directly to an element.
+         * Will not return styles that are global or from emotion
+         */
+        const declaration = new CSSStyleDeclaration();
+        const { style } = el;
+
+        Array.prototype.forEach.call(style, (property: string) => {
+          declaration.setProperty(
+            property,
+            style.getPropertyValue(property),
+            style.getPropertyPriority(property)
+          );
+        });
+
+        return declaration;
+      },
+      configurable: true,
+      writable: true,
+    });
   });
 
-  const basicLicense = licensingMock.createLicense({
-    license: { type: 'basic' },
+  afterAll(() => {
+    Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
   });
 
   beforeEach(() => {
@@ -179,29 +209,25 @@ describe('Case View Page activity tab', () => {
     useCasesFeaturesMock.mockReturnValue(useGetCasesFeaturesRes);
   });
 
-  for (let i = 0; i < 350; i = i + 1) {
-    it('should render the activity content and main components', async () => {
-      appMockRender = createAppMockRenderer({ license: platinumLicense });
-      appMockRender.render(<CaseViewActivity {...caseProps} />);
+  it('should render the activity content and main components', async () => {
+    appMockRender = createAppMockRenderer({ license: platinumLicense });
+    appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-      const caseViewActivity = await screen.findByTestId('case-view-activity');
-      expect(await within(caseViewActivity).findAllByTestId('user-actions-list')).toHaveLength(2);
-      expect(
-        await within(caseViewActivity).findByTestId('case-view-status-action-button')
-      ).toBeInTheDocument();
+    const caseViewActivity = await screen.findByTestId('case-view-activity');
+    expect(await within(caseViewActivity).findAllByTestId('user-actions-list')).toHaveLength(2);
+    expect(
+      await within(caseViewActivity).findByTestId('case-view-status-action-button')
+    ).toBeInTheDocument();
 
-      expect(await screen.findByTestId('description')).toBeInTheDocument();
+    expect(await screen.findByTestId('description')).toBeInTheDocument();
 
-      const caseViewSidebar = await screen.findByTestId('case-view-page-sidebar');
-      expect(await within(caseViewSidebar).findByTestId('case-tags')).toBeInTheDocument();
-      expect(await within(caseViewSidebar).findByTestId('cases-categories')).toBeInTheDocument();
-      expect(
-        await within(caseViewSidebar).findByTestId('connector-edit-header')
-      ).toBeInTheDocument();
+    const caseViewSidebar = await screen.findByTestId('case-view-page-sidebar');
+    expect(await within(caseViewSidebar).findByTestId('case-tags')).toBeInTheDocument();
+    expect(await within(caseViewSidebar).findByTestId('cases-categories')).toBeInTheDocument();
+    expect(await within(caseViewSidebar).findByTestId('connector-edit-header')).toBeInTheDocument();
 
-      await waitForComponentToUpdate();
-    });
-  }
+    await waitForComponentToUpdate();
+  });
 
   it('should call use get user actions as per top and bottom actions list', async () => {
     appMockRender = createAppMockRenderer({ license: platinumLicense });
