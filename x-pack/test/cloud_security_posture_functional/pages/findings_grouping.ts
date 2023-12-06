@@ -17,13 +17,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
 
+  const cspmResourceId = chance.guid();
+  const cspmResourceName = 'gcp-resource';
+  const cspmResourceSubType = 'gcp-monitoring';
+
   // We need to use a dataset for the tests to run
   // We intentionally make some fields start with a capital letter to test that the query bar is case-insensitive/case-sensitive
   const data = [
     {
       '@timestamp': new Date().toISOString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
-      result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
+      result: { evaluation: 'failed' },
       orchestrator: {
         cluster: {
           id: '1',
@@ -41,16 +45,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
         type: 'process',
       },
-      cluster_id: 'Upper case cluster id',
     },
     {
       '@timestamp': new Date().toISOString(),
       resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
-      result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
-      cloud: {
-        account: {
+      result: { evaluation: 'passed' },
+      orchestrator: {
+        cluster: {
           id: '1',
-          name: 'Account 1',
+          name: 'Cluster 2',
         },
       },
       rule: {
@@ -64,11 +67,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
         type: 'process',
       },
-      cluster_id: 'Another Upper case cluster id',
     },
     {
       '@timestamp': new Date().toISOString(),
-      resource: { id: chance.guid(), name: `process`, sub_type: 'another lower case type' },
+      resource: { id: cspmResourceId, name: cspmResourceName, sub_type: cspmResourceSubType },
       result: { evaluation: 'passed' },
       cloud: {
         account: {
@@ -80,18 +82,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         name: 'Another upper case rule name',
         section: 'lower case section',
         benchmark: {
-          id: 'cis_k8s',
-          posture_type: 'kspm',
-          name: 'CIS Kubernetes V1.23',
-          version: 'v1.0.0',
+          id: 'cis_gcp',
+          posture_type: 'cspm',
+          name: 'CIS Google Cloud Platform Foundation',
+          version: 'v2.0.0',
         },
         type: 'process',
       },
-      cluster_id: 'lower case cluster id',
     },
     {
       '@timestamp': new Date().toISOString(),
-      resource: { id: chance.guid(), name: `process`, sub_type: 'Upper case type again' },
+      resource: { id: cspmResourceId, name: cspmResourceName, sub_type: cspmResourceSubType },
       result: { evaluation: 'failed' },
       cloud: {
         account: {
@@ -103,14 +104,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         name: 'some lower case rule name',
         section: 'another lower case section',
         benchmark: {
-          id: 'cis_k8s',
-          posture_type: 'kspm',
-          name: 'CIS Kubernetes V1.23',
-          version: 'v1.0.0',
+          id: 'cis_gcp',
+          posture_type: 'cspm',
+          name: 'CIS Google Cloud Platform Foundation',
+          version: 'v2.0.0',
         },
         type: 'process',
       },
-      cluster_id: 'another lower case cluster id',
     },
   ];
 
@@ -143,19 +143,57 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Default Grouping', async () => {
-      it('groups findings by resource and sort case sensitive asc', async () => {
+      it('groups findings by resource and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
         await groupSelector.setValue('Resource');
 
         const grouping = await findings.findingsGrouping();
 
-        const resourceOrder = ['Pod', 'kubelet', 'process'];
+        const resourceOrder = [
+          {
+            resourceName: 'kubelet',
+            resourceId: data[0].resource.id,
+            resourceSubType: data[0].resource.sub_type,
+            findingsCount: '1',
+            complianceScore: '0%',
+          },
+          {
+            resourceName: cspmResourceName,
+            resourceId: cspmResourceId,
+            resourceSubType: cspmResourceSubType,
+            findingsCount: '2',
+            complianceScore: '50%',
+          },
+          {
+            resourceName: 'Pod',
+            resourceId: data[1].resource.id,
+            resourceSubType: data[1].resource.sub_type,
+            findingsCount: '1',
+            complianceScore: '100%',
+          },
+        ];
 
-        await asyncForEach(resourceOrder, async (resourceName, index) => {
-          const groupName = await grouping.getRowAtIndex(index);
-          expect(await groupName.getVisibleText()).to.be(resourceName);
-        });
+        await asyncForEach(
+          resourceOrder,
+          async (
+            { resourceName, resourceId, resourceSubType, findingsCount, complianceScore },
+            index
+          ) => {
+            const groupRow = await grouping.getRowAtIndex(index);
+            expect(await groupRow.getVisibleText()).to.contain(resourceName);
+            expect(await groupRow.getVisibleText()).to.contain(resourceId);
+            expect(await groupRow.getVisibleText()).to.contain(resourceSubType);
+            expect(
+              await (
+                await groupRow.findByTestSubject('cloudSecurityFindingsComplianceScore')
+              ).getVisibleText()
+            ).to.be(complianceScore);
+            expect(
+              await (await groupRow.findByTestSubject('findings_grouping_counter')).getVisibleText()
+            ).to.be(findingsCount);
+          }
+        );
 
         const groupCount = await grouping.getGroupCount();
         expect(groupCount).to.be('3 groups');
@@ -163,7 +201,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
       });
-      it('groups findings by rule name and sort case sensitive asc', async () => {
+      it('groups findings by rule name and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
         await groupSelector.setValue('Rule name');
@@ -177,18 +215,50 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(unitCount).to.be('4 findings');
 
         const ruleNameOrder = [
-          'Another upper case rule name',
-          'Upper case rule name',
-          'lower case rule name',
-          'some lower case rule name',
+          {
+            ruleName: 'Upper case rule name',
+            findingsCount: '1',
+            complianceScore: '0%',
+            benchmarkName: data[0].rule.benchmark.name,
+          },
+          {
+            ruleName: 'some lower case rule name',
+            findingsCount: '1',
+            complianceScore: '0%',
+            benchmarkName: data[3].rule.benchmark.name,
+          },
+          {
+            ruleName: 'Another upper case rule name',
+            findingsCount: '1',
+            complianceScore: '100%',
+            benchmarkName: data[2].rule.benchmark.name,
+          },
+          {
+            ruleName: 'lower case rule name',
+            findingsCount: '1',
+            complianceScore: '100%',
+            benchmarkName: data[1].rule.benchmark.name,
+          },
         ];
 
-        await asyncForEach(ruleNameOrder, async (resourceName, index) => {
-          const groupName = await grouping.getRowAtIndex(index);
-          expect(await groupName.getVisibleText()).to.be(resourceName);
-        });
+        await asyncForEach(
+          ruleNameOrder,
+          async ({ ruleName, benchmarkName, findingsCount, complianceScore }, index) => {
+            const groupRow = await grouping.getRowAtIndex(index);
+            expect(await groupRow.getVisibleText()).to.contain(ruleName);
+            expect(await groupRow.getVisibleText()).to.contain(benchmarkName);
+            expect(
+              await (
+                await groupRow.findByTestSubject('cloudSecurityFindingsComplianceScore')
+              ).getVisibleText()
+            ).to.be(complianceScore);
+            expect(
+              await (await groupRow.findByTestSubject('findings_grouping_counter')).getVisibleText()
+            ).to.be(findingsCount);
+          }
+        );
       });
-      it('groups findings by cloud account and sort case sensitive asc', async () => {
+      it('groups findings by cloud account and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
 
         await groupSelector.setValue('Cloud account');
@@ -201,31 +271,98 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
 
-        const cloudNameOrder = ['Account 1', 'Account 2', '—'];
+        const cloudNameOrder = [
+          {
+            cloudName: 'Account 2',
+            findingsCount: '1',
+            complianceScore: '0%',
+            benchmarkName: data[3].rule.benchmark.name,
+          },
+          {
+            cloudName: 'Account 1',
+            findingsCount: '1',
+            complianceScore: '100%',
+            benchmarkName: data[2].rule.benchmark.name,
+          },
+          {
+            cloudName: 'No cloud account',
+            findingsCount: '2',
+            complianceScore: '50%',
+            benchmarkName: data[0].rule.benchmark.name,
+          },
+        ];
 
-        await asyncForEach(cloudNameOrder, async (resourceName, index) => {
-          const groupName = await grouping.getRowAtIndex(index);
-          expect(await groupName.getVisibleText()).to.be(resourceName);
-        });
+        await asyncForEach(
+          cloudNameOrder,
+          async ({ cloudName, complianceScore, findingsCount, benchmarkName }, index) => {
+            const groupRow = await grouping.getRowAtIndex(index);
+            expect(await groupRow.getVisibleText()).to.contain(cloudName);
+
+            if (cloudName !== 'No cloud account') {
+              expect(await groupRow.getVisibleText()).to.contain(benchmarkName);
+            }
+
+            expect(
+              await (
+                await groupRow.findByTestSubject('cloudSecurityFindingsComplianceScore')
+              ).getVisibleText()
+            ).to.be(complianceScore);
+            expect(
+              await (await groupRow.findByTestSubject('findings_grouping_counter')).getVisibleText()
+            ).to.be(findingsCount);
+          }
+        );
       });
-      it('groups findings by Kubernetes cluster and sort case sensitive asc', async () => {
+      it('groups findings by Kubernetes cluster and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
         await groupSelector.setValue('Kubernetes cluster');
 
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('2 groups');
+        expect(groupCount).to.be('3 groups');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
 
-        const cloudNameOrder = ['Cluster 1', '—'];
+        const kubernetesOrder = [
+          {
+            clusterName: 'Cluster 1',
+            findingsCount: '1',
+            complianceScore: '0%',
+            benchmarkName: data[0].rule.benchmark.name,
+          },
+          {
+            clusterName: 'Cluster 2',
+            findingsCount: '1',
+            complianceScore: '100%',
+            benchmarkName: data[1].rule.benchmark.name,
+          },
+          {
+            clusterName: 'No Kubernetes cluster',
+            findingsCount: '2',
+            complianceScore: '50%',
+          },
+        ];
 
-        await asyncForEach(cloudNameOrder, async (resourceName, index) => {
-          const groupName = await grouping.getRowAtIndex(index);
-          expect(await groupName.getVisibleText()).to.be(resourceName);
-        });
+        await asyncForEach(
+          kubernetesOrder,
+          async ({ clusterName, complianceScore, findingsCount, benchmarkName }, index) => {
+            const groupRow = await grouping.getRowAtIndex(index);
+            expect(await groupRow.getVisibleText()).to.contain(clusterName);
+            if (clusterName !== 'No Kubernetes cluster') {
+              expect(await groupRow.getVisibleText()).to.contain(benchmarkName);
+            }
+            expect(
+              await (
+                await groupRow.findByTestSubject('cloudSecurityFindingsComplianceScore')
+              ).getVisibleText()
+            ).to.be(complianceScore);
+            expect(
+              await (await groupRow.findByTestSubject('findings_grouping_counter')).getVisibleText()
+            ).to.be(findingsCount);
+          }
+        );
       });
     });
     describe('SearchBar', () => {
@@ -239,12 +376,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const grouping = await findings.findingsGrouping();
 
-        const resourceOrder = ['kubelet'];
-
-        await asyncForEach(resourceOrder, async (resourceName, index) => {
-          const groupName = await grouping.getRowAtIndex(index);
-          expect(await groupName.getVisibleText()).to.be(resourceName);
-        });
+        const groupRow = await grouping.getRowAtIndex(0);
+        expect(await groupRow.getVisibleText()).to.contain(data[0].resource.name);
 
         const groupCount = await grouping.getGroupCount();
         expect(groupCount).to.be('1 group');
@@ -272,12 +405,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const grouping = await findings.findingsGrouping();
 
-        const resourceOrder = ['kubelet'];
-
-        await asyncForEach(resourceOrder, async (resourceName, index) => {
-          const groupName = await grouping.getRowAtIndex(index);
-          expect(await groupName.getVisibleText()).to.be(resourceName);
-        });
+        const groupRow = await grouping.getRowAtIndex(0);
+        expect(await groupRow.getVisibleText()).to.contain(data[0].resource.name);
 
         const groupCount = await grouping.getGroupCount();
         expect(groupCount).to.be('1 group');
@@ -300,7 +429,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await (await firstRow.findByCssSelector('button')).click();
         const latestFindingsTable = findings.createDataTableObject('latest_findings_table');
         expect(await latestFindingsTable.getRowsCount()).to.be(1);
-        expect(await latestFindingsTable.hasColumnValue('rule.name', 'lower case rule name')).to.be(
+        expect(await latestFindingsTable.hasColumnValue('rule.name', data[0].rule.name)).to.be(
           true
         );
       });
