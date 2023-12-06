@@ -9,24 +9,23 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common']);
+  const pageObjects = getPageObjects(['svlCommonPage', 'common']);
   const testSubjects = getService('testSubjects');
-  const security = getService('security');
 
   describe('Breadcrumbs', function () {
     // The dev tools breadcrumbs are slightly different in the Search project
     this.tags('skipSvlSearch');
 
     before(async () => {
-      await security.testUser.setRoles(['global_devtools_read']);
+      await pageObjects.svlCommonPage.login();
     });
 
     after(async () => {
-      await security.testUser.restoreDefaults();
+      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('Sets the right breadcrumb when navigating to dev tools', async () => {
-      await PageObjects.common.navigateToApp('dev_tools');
+      await pageObjects.common.navigateToApp('dev_tools');
 
       const lastBreadcrumbdcrumb = await testSubjects.getVisibleText(
         'breadcrumb breadcrumb-deepLinkId-dev_tools last'
@@ -35,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('Sets the right breadcrumb when navigating to console app', async () => {
-      await PageObjects.common.navigateToApp('dev_tools', { hash: '/console' });
+      await pageObjects.common.navigateToApp('dev_tools', { hash: '/console' });
 
       const lastBreadcrumbdcrumb = await testSubjects.getVisibleText(
         'breadcrumb breadcrumb-deepLinkId-dev_tools last'
@@ -44,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('Sets the right breadcrumb when navigating to grok debugger app', async () => {
-      await PageObjects.common.navigateToApp('dev_tools', { hash: '/grokdebugger' });
+      await pageObjects.common.navigateToApp('dev_tools', { hash: '/grokdebugger' });
 
       const lastBreadcrumbdcrumb = await testSubjects.getVisibleText(
         'breadcrumb breadcrumb-deepLinkId-dev_tools last'
@@ -53,7 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('Sets the right breadcrumb when navigating to search profiler app', async () => {
-      await PageObjects.common.navigateToApp('dev_tools', { hash: '/searchprofiler' });
+      await pageObjects.common.navigateToApp('dev_tools', { hash: '/searchprofiler' });
 
       const lastBreadcrumbdcrumb = await testSubjects.getVisibleText(
         'breadcrumb breadcrumb-deepLinkId-dev_tools last'
@@ -62,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('Sets the right breadcrumb when navigating to painless lab app', async () => {
-      await PageObjects.common.navigateToApp('dev_tools', { hash: '/painless_lab' });
+      await pageObjects.common.navigateToApp('dev_tools', { hash: '/painless_lab' });
 
       const lastBreadcrumbdcrumb = await testSubjects.getVisibleText(
         'breadcrumb breadcrumb-deepLinkId-dev_tools last'
