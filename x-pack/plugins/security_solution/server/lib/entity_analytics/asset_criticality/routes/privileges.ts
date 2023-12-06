@@ -32,13 +32,13 @@ export const assetCriticalityPrivilegesRoute = (
         validate: false,
       },
       async (context, request, response) => {
-        await checkAndInitAssetCriticalityResources(context, logger);
         const siemResponse = buildSiemResponse(response);
-
-        const [_, { security }] = await getStartServices();
-        const body = await getUserAssetCriticalityPrivileges(request, security);
-
         try {
+          await checkAndInitAssetCriticalityResources(context, logger);
+
+          const [_, { security }] = await getStartServices();
+          const body = await getUserAssetCriticalityPrivileges(request, security);
+
           return response.ok({
             body,
           });
