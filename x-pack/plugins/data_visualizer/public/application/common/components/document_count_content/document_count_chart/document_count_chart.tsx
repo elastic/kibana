@@ -81,11 +81,6 @@ export const DocumentCountChart: FC<Props> = ({
     }
   );
 
-  const xDomain = {
-    min: timeRangeEarliest,
-    max: timeRangeLatest,
-  };
-
   const adjustedChartPoints = useMemo(() => {
     // Display empty chart when no data in range
     if (chartPoints.length < 1) return [{ time: timeRangeEarliest, value: 0 }];
@@ -149,7 +144,6 @@ export const DocumentCountChart: FC<Props> = ({
           }}
         >
           <Settings
-            xDomain={xDomain}
             onBrushEnd={onBrushEnd as BrushEndListener}
             onElementClick={onElementClick}
             theme={chartTheme}
