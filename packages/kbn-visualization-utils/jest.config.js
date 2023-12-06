@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { getTimezone } from './get_timezone';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-visualization-utils'],
+};

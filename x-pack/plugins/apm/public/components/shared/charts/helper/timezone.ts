@@ -34,6 +34,7 @@ export const getDomainTZ = (min: number, max: number): [number, number] => {
   return [xMinZone, xMaxZone];
 };
 
+// TODO: Can be potentially replaced with getTimeZone from @kbn/visualization-utils
 export function getTimeZone(uiSettings?: IUiSettingsClient) {
   const kibanaTimeZone = uiSettings?.get<'Browser' | string>(
     UI_SETTINGS.DATEFORMAT_TZ

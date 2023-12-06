@@ -54,6 +54,7 @@ const customTheme = () => {
   };
 };
 
+// TODO: Can be potentially replaced with getTimeZone from @kbn/visualization-utils
 const getTimezone = (uiSettings: IUiSettingsClient) => {
   const config = uiSettings;
   const DATE_FORMAT_CONFIG_KEY = 'dateFormat:tz';

@@ -24,7 +24,7 @@ import {
   BarStyleAccessor,
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
-
+import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core/public';
 import {
@@ -144,16 +144,6 @@ const BADGE_WIDTH = 75;
 enum VIEW_MODE {
   ZOOM = 'zoom',
   BRUSH = 'brush',
-}
-
-function getTimezone(uiSettings: IUiSettingsClient) {
-  if (uiSettings.isDefault('dateFormat:tz')) {
-    const detectedTimezone = moment.tz.guess();
-    if (detectedTimezone) return detectedTimezone;
-    else return moment().format('Z');
-  } else {
-    return uiSettings.get('dateFormat:tz', 'Browser');
-  }
 }
 
 function getBaselineBadgeOverflow(
@@ -297,7 +287,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     timefilterUpdateHandler({ from, to });
   };
 
-  const timeZone = getTimezone(uiSettings);
+  const timeZone = getTimeZone(uiSettings);
 
   const [originalWindowParameters, setOriginalWindowParameters] = useState<
     WindowParameters | undefined

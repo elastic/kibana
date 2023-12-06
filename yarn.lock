@@ -6327,6 +6327,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/visualization-utils@link:packages/kbn-visualization-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/visualizations-plugin@link:src/plugins/visualizations":
   version "0.0.0"
   uid ""
