@@ -373,7 +373,7 @@ export class Plugin
         map((value) => {
           const deepLinks = value(app)?.deepLinks ?? [];
 
-          const overviewLink = Boolean(pluginsSetup.serverless)
+          const overviewLink = !Boolean(pluginsSetup.serverless)
             ? [
                 {
                   label: i18n.translate('xpack.observability.overviewLinkTitle', {
