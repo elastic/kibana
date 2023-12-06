@@ -261,7 +261,7 @@ class VectorTileInspector extends Component<InspectorViewProps, State> {
 
         <EuiFormRow
           display="columnCompressed"
-          label={i18n.translate('xpack.maps.inspector.vectorTile.layerSelectLabel', {
+          label={i18n.translate('xpack.maps.inspector.vectorTile.tileSelectLabel', {
             defaultMessage: 'Tile',
           })}
         >
@@ -307,7 +307,7 @@ class VectorTileInspector extends Component<InspectorViewProps, State> {
               }}
               isSelected={this.state.selectedView === RESPONSE_VIEW_ID}
             >
-              {i18n.translate('xpack.maps.inspector.vectorTile.requestTabLabel', {
+              {i18n.translate('xpack.maps.inspector.vectorTile.responseTabLabel', {
                 defaultMessage: 'Response',
               })}
             </EuiTab>
