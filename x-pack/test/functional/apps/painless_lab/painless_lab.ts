@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_SCRIPT_RESULT = 45;
 const TEST_SCRIPT = `
