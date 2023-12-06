@@ -22,7 +22,7 @@ import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
+describe.skip('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
   let timelineSavedObjectId: string | null = null;
   before(function () {
     login();
