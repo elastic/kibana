@@ -8,7 +8,12 @@ import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
-import { ALERT_EVALUATION_VALUE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+  ALERT_URL,
+} from '@kbn/rule-data-utils';
 
 import { ComparatorFns } from '../../../common';
 import {
@@ -161,6 +166,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_TITLE]: actionContext.title,
         [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
+        ...(params.threshold?.length === 1
+          ? { [ALERT_EVALUATION_THRESHOLD]: params.threshold[0] }
+          : {}),
       },
     });
     if (!isGroupAgg) {
@@ -211,6 +219,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_TITLE]: recoveryContext.title,
         [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${recoveryContext.value}`,
+        ...(params.threshold?.length === 1
+          ? { [ALERT_EVALUATION_THRESHOLD]: params.threshold[0] }
+          : {}),
       },
     });
   }

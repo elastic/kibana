@@ -6,7 +6,7 @@
  */
 import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
 import { StackAlert } from '@kbn/alerts-as-data-utils';
-import { ALERT_EVALUATION_VALUE } from '@kbn/rule-data-utils';
+import { ALERT_EVALUATION_THRESHOLD, ALERT_EVALUATION_VALUE } from '@kbn/rule-data-utils';
 import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
 
 export const STACK_AAD_INDEX_NAME = 'stack';
@@ -22,6 +22,11 @@ export const STACK_ALERTS_AAD_CONFIG: IRuleTypeAlerts<StackAlert> = {
       [ALERT_TITLE]: { type: 'keyword', array: false, required: false },
       [ALERT_EVALUATION_CONDITIONS]: { type: 'keyword', array: false, required: false },
       [ALERT_EVALUATION_VALUE]: { type: 'keyword', array: false, required: false },
+      [ALERT_EVALUATION_THRESHOLD]: {
+        type: 'scaled_float',
+        scaling_factor: 100,
+        required: false,
+      },
     },
   },
   shouldWrite: true,
