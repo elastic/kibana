@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { safeLoad } from 'js-yaml';
+import { isObject } from 'lodash';
 
 import { getFlattenedObject } from '@kbn/std';
-
-import { isObject } from 'lodash';
 
 import type { AgentPolicy, OutputType, ValueOf } from '../types';
 import {
@@ -42,7 +40,11 @@ export function getAllowedOutputTypeForPolicy(agentPolicy: AgentPolicy) {
   return Object.values(outputType);
 }
 
-export function outputYmlIncludesReservedPerformanceKey(configYml: string) {
+export function outputYmlIncludesReservedPerformanceKey(
+  configYml: string,
+  // Dependency injection for `safeLoad` prevents bundle size issues 🤷‍♀️
+  safeLoad: (yml: string) => any
+) {
   if (!configYml || configYml === '') {
     return false;
   }
@@ -58,8 +60,11 @@ export function outputYmlIncludesReservedPerformanceKey(configYml: string) {
   return RESERVED_CONFIG_YML_KEYS.some((key) => Object.keys(flattenedYml).includes(key));
 }
 
-export function getDefaultPresetForEsOutput(configYaml: string): 'balanced' | 'custom' {
-  if (outputYmlIncludesReservedPerformanceKey(configYaml)) {
+export function getDefaultPresetForEsOutput(
+  configYaml: string,
+  safeLoad: (yml: string) => any
+): 'balanced' | 'custom' {
+  if (outputYmlIncludesReservedPerformanceKey(configYaml, safeLoad)) {
     return 'custom';
   }
 

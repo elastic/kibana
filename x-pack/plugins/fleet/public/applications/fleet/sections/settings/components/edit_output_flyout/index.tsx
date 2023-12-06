@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { safeLoad } from 'js-yaml';
 
 import {
   EuiFlyout,
@@ -583,7 +584,8 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                     disabled={
                       inputs.presetInput.props.disabled ||
                       outputYmlIncludesReservedPerformanceKey(
-                        inputs.additionalYamlConfigInput.value
+                        inputs.additionalYamlConfigInput.value,
+                        safeLoad
                       )
                     }
                     options={[
@@ -600,7 +602,10 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           )}
 
           {supportsPresets &&
-            outputYmlIncludesReservedPerformanceKey(inputs.additionalYamlConfigInput.value) && (
+            outputYmlIncludesReservedPerformanceKey(
+              inputs.additionalYamlConfigInput.value,
+              safeLoad
+            ) && (
               <>
                 <EuiSpacer size="s" />
                 <EuiCallOut
@@ -650,7 +655,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             <YamlCodeEditorWithPlaceholder
               value={inputs.additionalYamlConfigInput.value}
               onChange={(value) => {
-                if (outputYmlIncludesReservedPerformanceKey(value)) {
+                if (outputYmlIncludesReservedPerformanceKey(value, safeLoad)) {
                   inputs.presetInput.setValue('custom');
                 }
 

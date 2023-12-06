@@ -448,7 +448,7 @@ class OutputService {
     if (outputTypeSupportPresets(data.type)) {
       if (
         data.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '')
+        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', safeLoad)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -524,7 +524,7 @@ class OutputService {
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
-      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '');
+      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', safeLoad);
     }
 
     if (output.config_yaml) {
@@ -783,7 +783,7 @@ class OutputService {
     if (updateData.type && outputTypeSupportPresets(updateData.type)) {
       if (
         updateData.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '')
+        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', safeLoad)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -969,7 +969,7 @@ class OutputService {
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
-      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '');
+      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', safeLoad);
     }
 
     // Remove the shipper data if the shipper is not enabled from the yaml config
@@ -1021,7 +1021,7 @@ class OutputService {
     await pMap(
       outputs.items.filter((output) => outputTypeSupportPresets(output.type) && !output.preset),
       async (output) => {
-        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '');
+        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', safeLoad);
 
         await outputService.update(soClient, esClient, output.id, { preset });
         await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id);
