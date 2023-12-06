@@ -7,7 +7,7 @@
 
 import { findIndex, flatMap, flatten } from 'lodash';
 import * as diff from 'diff';
-import type { Change } from 'diff';
+import type { Change as DiffJsChange } from 'diff';
 import { isDelete, isInsert, isNormal, pickRanges } from 'react-diff-view';
 import type { ChangeData, HunkData, RangeTokenNode, TokenizeEnhancer } from 'react-diff-view';
 
@@ -19,7 +19,7 @@ enum DmpChangeType {
 
 type Diff = [DmpChangeType, string];
 
-type StringDiffFn = (oldString: string, newString: string) => Change[];
+type StringDiffFn = (oldString: string, newString: string) => DiffJsChange[];
 
 interface JsDiff {
   diffChars: StringDiffFn;
@@ -43,6 +43,19 @@ export enum DiffMethod {
   CSS = 'diffCss',
 }
 
+/**
+ * @param {ChangeData[]} changes - An array representing the changes in the block.
+ * Each hunk represents a section of a string and includes information about the changes in that section.
+ * Sections normally span multiple lines.
+ * @param {DiffMethod} diffMethod - Diffing algorithm to use for token extraction. For example, "diffWords" will tokenize the string into words.
+ *
+ * @returns {TokenizeEnhancer} A react-diff-view plugin that processes diff hunks and returns an array of tokens.
+ * Tokens are then used to render "added" / "removed" diff highlighting.
+ *
+ * @description
+ * Converts the given ChangeData array to two strings representing the old source and new source of a change block.
+ * The format of the strings is as follows:
+ */
 function findChangeBlocks(changes: ChangeData[]): ChangeData[][] {
   const start = findIndex(changes, (change) => !isNormal(change));
 
@@ -84,6 +97,10 @@ function groupDiffs(diffs: Diff[]): [Diff[], Diff[]] {
   );
 }
 
+/**
+ * @param {Diff[]} diffs An array of changes in the diff-match-patch format
+ * @returns {Diff[][]} An array of arrays, where changes are grouped by a line number.
+ */
 function splitDiffToLines(diffs: Diff[]): Diff[][] {
   return diffs.reduce<Diff[][]>(
     (lines, [type, value]) => {
@@ -103,6 +120,12 @@ function splitDiffToLines(diffs: Diff[]): Diff[][] {
   );
 }
 
+/**
+ * @param {Diff[]} diffs An array of changes within a single line in the diff-match-patch format
+ * @param {number} lineNumber Line number where the changes are found
+ * @returns {RangeTokenNode[]} Array of "edit" objects where each item contains
+ * info about line number and start / end character positions.
+ */
 function diffsToEdits(diffs: Diff[], lineNumber: number): RangeTokenNode[] {
   const output = diffs.reduce<[RangeTokenNode[], number]>(
     // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -127,18 +150,38 @@ function diffsToEdits(diffs: Diff[], lineNumber: number): RangeTokenNode[] {
   return output[0];
 }
 
-function convertToLinesOfEdits(linesOfDiffs: Diff[][], startLineNumber: number) {
+/**
+ * @param {Diff[][]} linesOfDiffs - Changes in a diff-match-patch format, grouped by a line number.
+ * @param {number} startLineNumber - Line number of the first line.
+ * @returns {RangeTokenNode[]} Flattened array of "edit" objects where each item contains
+ * info about line number and start / end character positions.
+ */
+function convertToLinesOfEdits(linesOfDiffs: Diff[][], startLineNumber: number): RangeTokenNode[] {
   return flatMap(linesOfDiffs, (diffs, i) => diffsToEdits(diffs, startLineNumber + i));
 }
 
+/**
+ * @param {DiffMethod} diffMethod - Diffing algorithm to use for token extraction.
+ * @param {string} oldSource - A substring of the original source string.
+ * @param {string} newSource - A corresponding substring of the new source string.
+ * @returns {[Diff[], Diff[]]} Two arrays of changes in the diff-match-patch format.
+ * Every item is a tuple of two values: [<change type: addition, deletion or unchanged>, <substring>].
+ *
+ * @description Runs two strings through the chosen diffing algorithm using the "diff" library to determine
+ * which parts of the original string were added / removed / unchanged. Then returns an array of changes in
+ * the diff-match-patch diff format.
+ */
 function diffBy(diffMethod: DiffMethod, oldSource: string, newSource: string): [Diff[], Diff[]] {
-  const jsDiffChanges: Change[] = jsDiff[diffMethod](oldSource, newSource);
+  /* Diff two substrings using the "diff" library */
+  const jsDiffChanges: DiffJsChange[] = jsDiff[diffMethod](oldSource, newSource);
+  /* Convert the result to the diff-match-patch format, because that's the format react-diff-view methods expect */
   const diffs: Diff[] = diff.convertChangesToDMP(jsDiffChanges);
 
   if (diffs.length <= 1) {
     return [[], []];
   }
 
+  /* Split diff-match-patch formatted diffs into two arrays: one for the old source and one for the new source */
   return groupDiffs(diffs);
 }
 
@@ -150,32 +193,39 @@ const getLineNumber = (change: ChangeData | undefined) => {
   return change.lineNumber;
 };
 
+/**
+ * @param {ChangeData[]} changes - An array of сhange objects. Each change object represents changes in a single line.
+ * @param {DiffMethod} diffMethod - Diffing algorithm to use for token extraction.
+ * @returns {[RangeTokenNode[], RangeTokenNode[]]} A tuple containing two arrays of RangeTokenNodes - one for
+ * the old source and another one for the new source. Each RangeTokenNode contains information about line numbers
+ * and character positions of changes.
+ *
+ * @description This function processes change objects and determines exactly which segments of the orginal string changed.
+ * It diffs old and new substrings and computes at which character position each change starts and ends,
+ * taking the diffing algorithm into account (by char, by word, by sentence, etc.)
+ */
 function diffChangeBlock(
   changes: ChangeData[],
   diffMethod: DiffMethod
 ): [RangeTokenNode[], RangeTokenNode[]] {
-  /* Convert ChangeData array to two strings representing old source and new source of a change block, like
-  
-  "created_at": "2023-11-20T16:47:52.801Z",
-  "created_by": "elastic",
-  ...
-  
-  and
-
-  "created_at": "1970-01-01T00:00:00.000Z",
-  "created_by": "",
-  ...
+  /*
+    Convert an array of change objects into two strings representing the old source and the new source of a change block.
+    Basically, recreate parts of the original strings from change objects so we can pass these strings to the text diffing library.
   */
-  const [oldSource, newSource] = changes.reduce(
+  const [oldSourceSnippet, newSourceSnippet] = changes.reduce(
     // eslint-disable-next-line @typescript-eslint/no-shadow
-    ([oldSource, newSource], change) =>
+    ([oldSourceSnippet, newSourceSnippet], change) =>
       isDelete(change)
-        ? [oldSource + (oldSource ? '\n' : '') + change.content, newSource]
-        : [oldSource, newSource + (newSource ? '\n' : '') + change.content],
+        ? [oldSourceSnippet + (oldSourceSnippet ? '\n' : '') + change.content, newSourceSnippet]
+        : [oldSourceSnippet, newSourceSnippet + (newSourceSnippet ? '\n' : '') + change.content],
     ['', '']
   );
 
-  const [oldDiffs, newDiffs] = diffBy(diffMethod, oldSource, newSource);
+  /*
+   * Run the chosen diffing algorithm with an "old" and a "new" substrings as input.
+   * The result is an array of changes in the diff-match-patch format.
+   */
+  const [oldDiffs, newDiffs] = diffBy(diffMethod, oldSourceSnippet, newSourceSnippet);
 
   if (oldDiffs.length === 0 && newDiffs.length === 0) {
     return [[], []];
@@ -188,13 +238,34 @@ function diffChangeBlock(
     throw new Error('Could not find start line number for edit');
   }
 
+  /*
+   * Group changes by a line number they are found in, then determine start / end character
+   * positions of each change.
+   */
   const oldEdits = convertToLinesOfEdits(splitDiffToLines(oldDiffs), oldStartLineNumber);
   const newEdits = convertToLinesOfEdits(splitDiffToLines(newDiffs), newStartLineNumber);
 
   return [oldEdits, newEdits];
 }
 
+/**
+ * @param {HunkData[]} hunks - An array of hunk objects.
+ * Each hunk represents a section of a string and includes information about the changes in that section.
+ * Sections normally span multiple lines.
+ * @param {DiffMethod} diffMethod - Diffing algorithm to use for token extraction. For example, "diffWords" will tokenize the string into words.
+ *
+ * @returns {TokenizeEnhancer} A react-diff-view plugin that processes diff hunks and returns an array of tokens.
+ * Tokens are then used to render "added" / "removed" diff highlighting.
+ *
+ * @description
+ * Converts the given ChangeData array to two strings representing the old source and new source of a change block.
+ * The format of the strings is as follows:
+ */
 export function markEdits(hunks: HunkData[], diffMethod: DiffMethod): TokenizeEnhancer {
+  /* 
+    changeBlocks is an array that contains information about the lines that have changes (additions or deletions).
+    Unchanged lines are not included.
+  */
   const changeBlocks = flatMap(
     hunks.map((hunk) => hunk.changes),
     findChangeBlocks
