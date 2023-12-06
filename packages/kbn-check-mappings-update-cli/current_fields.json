@@ -966,5 +966,14 @@
     "kuery",
     "serviceEnvironmentFilterEnabled",
     "serviceNameFilterEnabled"
+  ],
+  "cases-oracle": [
+    "cases",
+    "cases.id",
+    "counter",
+    "createdAt",
+    "rules",
+    "rules.id",
+    "updatedAt"
   ]
 }
