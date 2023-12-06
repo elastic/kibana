@@ -259,9 +259,10 @@ export async function extractAndUpdateSecrets(opts: {
 
   const { toCreate, toDelete, noChange } = diffSecretPaths(oldSecretPaths, updatedSecretPaths);
 
+  const secretsToCreate = toCreate.filter((secretPath) => !!secretPath.value.value);
   const createdSecrets = await createSecrets({
     esClient,
-    values: toCreate.map((secretPath) => secretPath.value.value),
+    values: secretsToCreate.map((secretPath) => secretPath.value.value),
   });
 
   const policyWithSecretRefs = JSON.parse(JSON.stringify(packagePolicyUpdate));
