@@ -172,7 +172,8 @@
   ],
   "query": [
     "description",
-    "title"
+    "title",
+    "titleKeyword"
   ],
   "kql-telemetry": [],
   "search-session": [
