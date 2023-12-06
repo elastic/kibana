@@ -11,7 +11,6 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_REASON,
   ALERT_STATUS,
-  AlertConsumers,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -21,6 +20,7 @@ import { getDefaultAlertFlyout } from './alerts_flyout/default_alerts_flyout';
 import { AlertActionsCell } from './row_actions/alert_actions_cell';
 import { AlertsTableConfigurationRegistry, RenderCustomActionsRowArgs } from '../../../types';
 import { getAlertFormatters, getRenderCellValue } from './cells/render_cell_value';
+import { ALERT_TABLE_GENERIC_CONFIG_ID } from '../../../../common';
 
 const columns = [
   {
@@ -77,7 +77,7 @@ export const getAlertsTableConfiguration = (
   fieldFormats: FieldFormatsRegistry
 ): AlertsTableConfigurationRegistry => {
   return {
-    id: AlertConsumers.STACK_ALERTS,
+    id: ALERT_TABLE_GENERIC_CONFIG_ID,
     columns,
     getRenderCellValue: getRenderCellValue(fieldFormats),
     useInternalFlyout: getDefaultAlertFlyout(columns, getAlertFormatters(fieldFormats)),

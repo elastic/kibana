@@ -8,7 +8,7 @@
 import React, { lazy, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic/eui';
-import { AlertStatusValues } from '@kbn/alerting-plugin/common';
+import { AlertStatusValues, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID, AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertTableConfigRegistry } from '../../../alert_table_config_registry';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -102,7 +102,11 @@ export function RuleComponent({
           alertsTableConfigurationRegistry={
             alertsTableConfigurationRegistry as AlertTableConfigRegistry
           }
-          featureIds={[rule.consumer] as AlertConsumers[]}
+          featureIds={
+            (rule.consumer === ALERTS_FEATURE_ID
+              ? [ruleType.producer]
+              : [rule.consumer]) as AlertConsumers[]
+          }
           query={{ bool: { filter: { term: { [ALERT_RULE_UUID]: rule.id } } } }}
           showAlertStatusWithFlapping
         />
@@ -125,6 +129,7 @@ export function RuleComponent({
     rule.id,
     ruleType.hasAlertsMappings,
     ruleType.hasFieldsForAAD,
+    ruleType.producer,
   ]);
 
   const tabs = [
