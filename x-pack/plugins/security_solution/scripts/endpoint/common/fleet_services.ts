@@ -9,20 +9,20 @@ import { map, memoize, pick } from 'lodash';
 import type { Client, estypes } from '@elastic/elasticsearch';
 import type {
   Agent,
+  AgentPolicy,
   AgentStatus,
+  CreateAgentPolicyRequest,
+  CreateAgentPolicyResponse,
+  CreatePackagePolicyRequest,
+  CreatePackagePolicyResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
   GetAgentsResponse,
-  GetPackagePoliciesRequest,
-  GetPackagePoliciesResponse,
-  CreateAgentPolicyRequest,
-  AgentPolicy,
-  CreateAgentPolicyResponse,
-  CreatePackagePolicyResponse,
-  CreatePackagePolicyRequest,
-  PackagePolicy,
   GetInfoResponse,
   GetOneAgentPolicyResponse,
+  GetPackagePoliciesRequest,
+  GetPackagePoliciesResponse,
+  PackagePolicy,
   PostFleetSetupResponse,
 } from '@kbn/fleet-plugin/common';
 import {
@@ -47,18 +47,19 @@ import {
   outputRoutesService,
 } from '@kbn/fleet-plugin/common/services';
 import type {
+  DeleteAgentPolicyResponse,
   EnrollmentAPIKey,
+  GenerateServiceTokenResponse,
   GetAgentsRequest,
   GetEnrollmentAPIKeysResponse,
-  PostAgentUnenrollResponse,
-  GenerateServiceTokenResponse,
   GetOutputsResponse,
-  DeleteAgentPolicyResponse,
+  PostAgentUnenrollResponse,
 } from '@kbn/fleet-plugin/common/types';
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
 import { userInfo } from 'os';
+import { metadataCurrentIndexPattern } from '../../../common/endpoint/constants';
 import { fetchEndpointMetadataList } from './endpoint_metadata_services';
 import type { HostInfo } from '../../../common/endpoint/types';
 import { isFleetServerRunning } from './fleet_server/fleet_server_services';
@@ -163,6 +164,7 @@ export const fetchFleetAgents = async (
  * @param log
  * @param hostname
  * @param timeoutMs
+ * @param esClient
  * @param awaitMetadata
  */
 export const waitForHostToEnroll = async (
@@ -170,6 +172,7 @@ export const waitForHostToEnroll = async (
   log: ToolingLog,
   hostname: string,
   timeoutMs: number = 30000,
+  esClient: Client | undefined = undefined,
   awaitMetadata = false
 ): Promise<Agent> => {
   log.info(`Waiting for host [${hostname}] to enroll with fleet`);
@@ -219,6 +222,20 @@ export const waitForHostToEnroll = async (
   if (!awaitMetadata) {
     return found;
   }
+  log.info('Querying indicies');
+
+  log.info(
+    JSON.stringify(
+      await esClient?.indices.getSettings({
+        index: [
+          '.fleet-agents',
+          metadataCurrentIndexPattern,
+          '.metrics-endpoint.metadata_united_default',
+        ],
+      })
+    )
+  );
+  log.info('Succesfully queries indicies.');
 
   log.info(`Awaiting host to show up in Metadata`);
 
@@ -448,9 +465,7 @@ export const getAgentFileName = (agentVersion: string): string => {
   const downloadArch =
     { arm64: 'arm64', x64: 'x86_64' }[process.arch as string] ??
     `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
-  const fileName = `elastic-agent-${agentVersion}-linux-${downloadArch}`;
-
-  return fileName;
+  return `elastic-agent-${agentVersion}-linux-${downloadArch}`;
 };
 
 interface ElasticArtifactSearchResponse {
@@ -607,8 +622,7 @@ export const unEnrollFleetAgent = async (
  * Un-enrolls a Fleet agent
  *
  * @param kbnClient
- * @param agentId
- * @param force
+ * @param policyId
  */
 export const getAgentPolicyEnrollmentKey = async (
   kbnClient: KbnClient,
