@@ -4,20 +4,31 @@
       "repoOwner": "elastic",
       "repoName": "kibana",
       "pipelineSlug": "kibana-pull-request",
-
       "enabled": true,
       "allow_org_users": true,
-      "allowed_repo_permissions": ["admin", "write"],
-      "allowed_list": ["barlowm", "renovate[bot]"],
+      "allowed_repo_permissions": [
+        "admin",
+        "write"
+      ],
+      "allowed_list": [
+        "barlowm",
+        "renovate[bot]"
+      ],
       "set_commit_status": true,
       "commit_status_context": "kibana-ci",
       "build_on_commit": true,
       "build_on_comment": true,
-      "build_drafts": false,
       "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))|^\/ci$",
       "always_trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))|^\/ci$",
-      "skip_ci_labels": ["skip-ci", "jenkins-ci"],
-      "skip_target_branches": ["6.8", "7.11", "7.12"],
+      "skip_ci_labels": [
+        "skip-ci",
+        "jenkins-ci"
+      ],
+      "skip_target_branches": [
+        "6.8",
+        "7.11",
+        "7.12"
+      ],
       "enable_skippable_commits": true,
       "skip_ci_on_only_changed": [
         "^dev_docs/",
@@ -43,7 +54,10 @@
       ],
       "kibana_versions_check": true,
       "kibana_build_reuse": true,
-      "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge"],
+      "kibana_build_reuse_pipeline_slugs": [
+        "kibana-pull-request",
+        "kibana-on-merge"
+      ],
       "kibana_build_reuse_regexes": [
         "^test/",
         "^x-pack/test/",
@@ -55,11 +69,16 @@
       "repoOwner": "elastic",
       "repoName": "kibana",
       "pipelineSlug": "kibana-kme-test",
-
       "enabled": true,
       "allow_org_users": true,
-      "allowed_repo_permissions": ["admin", "write"],
-      "allowed_list": ["barlowm", "renovate[bot]"],
+      "allowed_repo_permissions": [
+        "admin",
+        "write"
+      ],
+      "allowed_list": [
+        "barlowm",
+        "renovate[bot]"
+      ],
       "set_commit_status": true,
       "commit_status_context": "kibana-ci-test",
       "build_on_commit": true,
@@ -67,8 +86,14 @@
       "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))",
       "always_trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))",
       "skip_ci_labels": [],
-      "labels": ["kme-test"],
-      "skip_target_branches": ["6.8", "7.11", "7.12"],
+      "labels": [
+        "kme-test"
+      ],
+      "skip_target_branches": [
+        "6.8",
+        "7.11",
+        "7.12"
+      ],
       "enable_skippable_commits": true,
       "skip_ci_on_only_changed": [
         "^dev_docs/",
@@ -95,7 +120,10 @@
       ],
       "kibana_versions_check": true,
       "kibana_build_reuse": true,
-      "kibana_build_reuse_pipeline_slugs": ["kibana-kme-test", "kibana-on-merge"],
+      "kibana_build_reuse_pipeline_slugs": [
+        "kibana-kme-test",
+        "kibana-on-merge"
+      ],
       "kibana_build_reuse_regexes": [
         "^test/",
         "^x-pack/test/",
