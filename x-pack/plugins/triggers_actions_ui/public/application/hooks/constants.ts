@@ -9,6 +9,7 @@ export const triggersActionsUiQueriesKeys = {
   all: ['triggersActionsUi'] as const,
   alertsTable: () => [...triggersActionsUiQueriesKeys.all, 'alertsTable'] as const,
   cases: () => [...triggersActionsUiQueriesKeys.alertsTable(), 'cases'] as const,
+  mutedAlerts: () => [...triggersActionsUiQueriesKeys.alertsTable(), 'mutedAlerts'] as const,
   casesBulkGet: (caseIds: string[]) =>
     [...triggersActionsUiQueriesKeys.cases(), 'bulkGet', caseIds] as const,
   maintenanceWindows: () =>

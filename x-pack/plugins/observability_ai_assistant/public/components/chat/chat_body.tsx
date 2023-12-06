@@ -35,6 +35,8 @@ import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { InitialSetupPanel } from './initial_setup_panel';
 import { ChatActionClickType } from './types';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
+import { Feedback } from '../feedback_buttons';
+import { MESSAGE_FEEDBACK } from '../../analytics/schema';
 
 const timelineClassName = css`
   overflow-y: auto;
@@ -60,7 +62,6 @@ export function ChatBody({
   connectors,
   knowledgeBase,
   connectorsManagementHref,
-  modelsManagementHref,
   currentUser,
   startedFrom,
   onConversationUpdate,
@@ -71,7 +72,6 @@ export function ChatBody({
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
   connectorsManagementHref: string;
-  modelsManagementHref: string;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   startedFrom?: StartedFrom;
   onConversationUpdate: (conversation: Conversation) => void;
@@ -112,6 +112,11 @@ export function ChatBody({
 
   const isAtBottom = (parent: HTMLElement) =>
     parent.scrollTop + parent.clientHeight >= parent.scrollHeight;
+
+  const handleFeedback = (message: Message, feedback: Feedback) => {
+    const feedbackEvent = { ...message, feedback };
+    chatService.analytics.reportEvent(MESSAGE_FEEDBACK, feedbackEvent);
+  };
 
   useEffect(() => {
     const parent = timelineContainerRef.current?.parentElement;
@@ -208,7 +213,7 @@ export function ChatBody({
                   const indexOf = messages.indexOf(editedMessage);
                   next(messages.slice(0, indexOf).concat(newMessage));
                 }}
-                onFeedback={(message, feedback) => {}}
+                onFeedback={handleFeedback}
                 onRegenerate={(message) => {
                   const indexOf = messages.indexOf(message);
                   next(messages.slice(0, indexOf));
@@ -326,7 +331,6 @@ export function ChatBody({
               : undefined
           }
           connectorsManagementHref={connectorsManagementHref}
-          modelsManagementHref={modelsManagementHref}
           knowledgeBase={knowledgeBase}
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}

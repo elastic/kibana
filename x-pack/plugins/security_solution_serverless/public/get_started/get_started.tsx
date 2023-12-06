@@ -5,37 +5,30 @@
  * 2.0.
  */
 
-import { EuiTitle, useEuiTheme, useEuiShadow, EuiSpacer } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
-import { WelcomePanel } from './welcome_panel';
 import { TogglePanel } from './toggle_panel';
-import {
-  GET_STARTED_PAGE_DESCRIPTION,
-  GET_STARTED_PAGE_SUBTITLE,
-  GET_STARTED_PAGE_TITLE,
-} from './translations';
-import type { SecurityProductTypes } from '../../common/config';
-import { ProductSwitch } from './product_switch';
-import { useTogglePanel } from './use_toggle_panel';
-import { ProductLine } from '../../common/product';
 
-const CONTENT_WIDTH = 1150;
+import type { SecurityProductTypes } from '../../common/config';
+import { useTogglePanel } from './hooks/use_toggle_panel';
+import { ProductLine } from '../../common/product';
+import { Progress } from './progress_bar';
+import { StepContextProvider } from './context/step_context';
+import { CONTENT_WIDTH } from './helpers';
+import { WelcomeHeader } from './welcome_header';
 
 export interface GetStartedProps {
+  indicesExist?: boolean;
   productTypes: SecurityProductTypes;
 }
 
-export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes }) => {
+export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes, indicesExist }) => {
   const { euiTheme } = useEuiTheme();
-  const shadow = useEuiShadow('s');
-
   const {
-    onProductSwitchChanged,
-    onCardClicked,
     onStepClicked,
-    onStepButtonClicked,
+    toggleTaskCompleteStatus,
     state: {
       activeProducts,
       activeSections,
@@ -65,85 +58,54 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
         position: absolute;
       `}
     >
-      <KibanaPageTemplate.Header
+      <KibanaPageTemplate.Section
         restrictWidth={CONTENT_WIDTH}
+        paddingSize="xl"
         css={css`
-          padding: 0 ${euiTheme.base * 2.25}px;
+          padding: 0 ${euiTheme.size.xxl};
         `}
-        pageTitle={
-          <EuiTitle
-            size="l"
-            css={css`
-              padding-left: ${euiTheme.size.xs};
-              padding-bottom: ${euiTheme.size.l};
-            `}
-          >
-            <span>{GET_STARTED_PAGE_TITLE}</span>
-          </EuiTitle>
-        }
-        description={
-          <>
-            <strong
-              css={css`
-                font-size: ${euiTheme.base * 1.37}px;
-              `}
-              className="eui-displayBlock"
-            >
-              {GET_STARTED_PAGE_SUBTITLE}
-            </strong>
-            <EuiSpacer size="m" />
-            <span className="eui-displayBlock">{GET_STARTED_PAGE_DESCRIPTION}</span>
-          </>
-        }
       >
-        <WelcomePanel
+        <WelcomeHeader productTier={productTier} />
+      </KibanaPageTemplate.Section>
+      <KibanaPageTemplate.Section
+        restrictWidth={CONTENT_WIDTH}
+        paddingSize="none"
+        css={css`
+          background-color: ${euiTheme.colors.lightestShade};
+          padding: ${euiTheme.size.xxl} ${euiTheme.size.xxl} ${euiTheme.size.m};
+        `}
+      >
+        <Progress
           totalActiveSteps={totalActiveSteps}
           totalStepsLeft={totalStepsLeft}
           productTier={productTier}
         />
-      </KibanaPageTemplate.Header>
-      <KibanaPageTemplate.Section
-        bottomBorder={false}
-        grow={true}
-        restrictWidth={CONTENT_WIDTH}
-        paddingSize="none"
-        css={css`
-          ${shadow};
-          z-index: 1;
-          flex-grow: 0;
-          padding: 0 ${euiTheme.base * 2.25}px;
-        `}
-      >
-        <ProductSwitch
-          onProductSwitchChanged={onProductSwitchChanged}
-          activeProducts={activeProducts}
-          euiTheme={euiTheme}
-        />
       </KibanaPageTemplate.Section>
+
       <KibanaPageTemplate.Section
         bottomBorder="extended"
         grow={true}
         restrictWidth={CONTENT_WIDTH}
         paddingSize="none"
         css={css`
-          padding: 0 ${euiTheme.base * 2.25}px;
+          padding: 0 ${euiTheme.size.xxl} ${euiTheme.base * 3.5}px;
+          background-color: ${euiTheme.colors.lightestShade};
         `}
       >
-        <TogglePanel
-          finishedSteps={finishedSteps}
-          activeSections={activeSections}
-          activeProducts={activeProducts}
+        <StepContextProvider
           expandedCardSteps={expandedCardSteps}
+          finishedSteps={finishedSteps}
+          indicesExist={!!indicesExist}
           onStepClicked={onStepClicked}
-          onCardClicked={onCardClicked}
-          onStepButtonClicked={onStepButtonClicked}
-        />
+          toggleTaskCompleteStatus={toggleTaskCompleteStatus}
+        >
+          <TogglePanel activeProducts={activeProducts} activeSections={activeSections} />
+        </StepContextProvider>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
 };
 
-GetStartedComponent.displayName = 'GetStartedComponent';
 export const GetStarted = React.memo(GetStartedComponent);
 
 // eslint-disable-next-line import/no-default-export
