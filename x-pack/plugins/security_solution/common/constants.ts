@@ -443,6 +443,7 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.11',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
+  TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =

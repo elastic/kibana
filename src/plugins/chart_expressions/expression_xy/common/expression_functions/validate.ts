@@ -109,6 +109,11 @@ export const errors = {
         defaultMessage: '`minTimeBarInterval` argument is applicable only for time bar charts.',
       }
     ),
+  invalidMinBarHeightError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.invalidMinBarHeightError', {
+      defaultMessage:
+        'The min bar height should be a positive integer, representing pixel height of the bar.',
+    }),
   axisIsNotAssignedError: (axisId: string) =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.axisIsNotAssignedError', {
       defaultMessage:
@@ -295,5 +300,11 @@ export const validateMinTimeBarInterval = (
     if (!hasBar || !isTimeChart(dataLayers)) {
       throw new Error(errors.minTimeBarIntervalNotForTimeBarChartError());
     }
+  }
+};
+
+export const validateMinBarHeight = (minBarHeight?: number) => {
+  if (minBarHeight !== undefined && minBarHeight < 0) {
+    throw new Error(errors.invalidMinBarHeightError());
   }
 };
