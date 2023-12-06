@@ -369,7 +369,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async dismissDatePickerTooltip() {
       const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`, {
-        timeout: 1000,
+        timeout: 3000,
       });
 
       if (isTooltipOpen) {
