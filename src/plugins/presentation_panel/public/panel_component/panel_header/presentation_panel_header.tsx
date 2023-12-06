@@ -86,7 +86,7 @@ export const PresentationPanelHeader = <
   return (
     <figcaption
       className={headerClasses}
-      data-test-subj={`presentationPanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
+      data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
     >
       <h2 data-test-subj="dashboardPanelTitle" className={titleClasses}>
         {ariaLabelElement}

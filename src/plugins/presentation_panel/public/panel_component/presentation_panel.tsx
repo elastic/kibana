@@ -117,7 +117,7 @@ export const PresentationPanelInternal = <
         <EuiFlexGroup
           alignItems="center"
           className="eui-fullHeight presentationPanel__error"
-          data-test-subj="presentationPanelError"
+          data-test-subj="embeddableError"
           justifyContent="center"
         >
           <PresentationPanelError api={api} error={blockingError} />
