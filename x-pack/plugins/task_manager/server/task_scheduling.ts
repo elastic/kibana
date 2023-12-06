@@ -171,17 +171,50 @@ export class TaskScheduling {
   }
 
   public async bulkEnable(taskIds: string[], runSoon: boolean = true) {
+    const taskScheduleMapper = (
+      mapFn: (task: ConcreteTaskInstance, runAt: Date) => ConcreteTaskInstance
+    ) => {
+      const TASKS_PER_WINDOW = 100;
+      const WINDOW_SIZE = 1000 * 60;
+
+      const scheduledTasks = new Map();
+      const now = Date.now();
+
+      const getRunAtTimestamp: (maximumRunAt: number, windowSize?: number) => number = (
+        maximumRunAt,
+        windowSize = WINDOW_SIZE
+      ) => {
+        let runAtTimestamp = now;
+        while ((scheduledTasks.get(runAtTimestamp) ?? 0) >= TASKS_PER_WINDOW) {
+          runAtTimestamp += windowSize;
+          if (runAtTimestamp > maximumRunAt) {
+            if (windowSize / 2 < 1) return now;
+            return getRunAtTimestamp(maximumRunAt, Math.floor(windowSize / 2));
+          }
+        }
+        return runAtTimestamp;
+      };
+
+      return (task: ConcreteTaskInstance) => {
+        const maxmimumRunAt = now + parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
+        const runAtTimestamp = getRunAtTimestamp(maxmimumRunAt);
+        scheduledTasks.set(runAtTimestamp, (scheduledTasks.get(runAtTimestamp) ?? 0) + 1);
+        const runAt = new Date(runAtTimestamp);
+        return mapFn(task, runAt);
+      };
+    };
+
     return await retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) => !task.enabled,
-      map: (task) => {
+      map: taskScheduleMapper((task, runAt) => {
         if (runSoon) {
-          return { ...task, enabled: true, scheduledAt: new Date(), runAt: new Date() };
+          return { ...task, enabled: true, scheduledAt: runAt, runAt };
         }
         return { ...task, enabled: true };
-      },
+      }),
       validate: false,
     });
   }
