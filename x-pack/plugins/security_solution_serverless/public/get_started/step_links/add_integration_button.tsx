@@ -10,8 +10,8 @@ import React from 'react';
 import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { ExternalPageName } from '../../navigation/links/constants';
 
-const AddIntegrationButtonComponent = () => (
-  <LinkButton id={ExternalPageName.integrationsSecurity} fill>
+const AddIntegrationButtonComponent: React.FC = () => (
+  <LinkButton id={ExternalPageName.integrationsSecurity} fill className="step-paragraph">
     <FormattedMessage
       id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.description2.button"
       defaultMessage="Add integrations"
