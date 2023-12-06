@@ -1477,6 +1477,7 @@ x-pack/plugins/security_solution/public/overview/components/entity_analytics
 x-pack/plugins/security_solution/server/lib/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/server/lib/risk_score @elastic/security-entity-analytics
 x-pack/test/security_solution_api_integration/test_suites/entity_analytics @elastic/security-entity-analytics
+x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
 x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
 /x-pack/plugins/security_solution/public/entity_analytics @elastic/security-entity-analytics
