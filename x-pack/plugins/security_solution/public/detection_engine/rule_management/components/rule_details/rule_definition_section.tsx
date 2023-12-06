@@ -40,7 +40,6 @@ import * as descriptionStepI18n from '../../../../detections/components/rules/de
 import { RelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
 import { AlertSuppressionTechnicalPreviewBadge } from '../../../../detections/components/rules/description_step/alert_suppression_technical_preview_badge';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
-import { useLicense } from '../../../../common/hooks/use_license';
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
 import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
 import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
@@ -357,9 +356,7 @@ interface AlertSuppressionTitleProps {
 }
 
 const AlertSuppressionTitle = ({ title }: AlertSuppressionTitleProps) => {
-  const license = useLicense();
-
-  return <AlertSuppressionTechnicalPreviewBadge label={title} license={license} />;
+  return <AlertSuppressionTechnicalPreviewBadge label={title} />;
 };
 
 interface SuppressAlertsByFieldProps {

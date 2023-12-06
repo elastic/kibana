@@ -10,7 +10,7 @@ import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { SlosView } from './slos_view';
-import { SLO_CARD_VIEW_PER_ROW_SIZE } from './card_view/cards_per_row';
+import { SLO_LIST_IS_COMPACT } from './slo_view_settings';
 import { SLOViewType, ToggleSLOView } from './toggle_slo_view';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
@@ -26,7 +26,6 @@ export function SloList({ autoRefresh }: Props) {
   const [query, setQuery] = useState(state.kqlQuery);
   const [sort, setSort] = useState<SortField>(state.sort.by);
   const [direction] = useState<'asc' | 'desc'>(state.sort.direction);
-
   const [sloView, setSLOView] = useState<SLOViewType>('cardView');
 
   const {
@@ -48,7 +47,8 @@ export function SloList({ autoRefresh }: Props) {
   const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
   const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
-  const [cardsPerRow, setCardsPerRow] = useLocalStorage(SLO_CARD_VIEW_PER_ROW_SIZE, '4');
+  const [isCompact, setIsCompact] = useLocalStorage<'true' | 'false'>(SLO_LIST_IS_COMPACT, 'true');
+  const isCompactView = isCompact === 'true';
 
   const handlePageClick = (pageNumber: number) => {
     setPage(pageNumber);
@@ -78,13 +78,20 @@ export function SloList({ autoRefresh }: Props) {
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ToggleSLOView sloView={sloView} setSLOView={setSLOView} setCardsPerRow={setCardsPerRow} />
+        <ToggleSLOView
+          sloView={sloView}
+          setSLOView={setSLOView}
+          toggleCompactView={() =>
+            isCompact === 'true' ? setIsCompact('false') : setIsCompact('true')
+          }
+          isCompact={isCompactView}
+        />
       </EuiFlexItem>
       <SlosView
         sloList={results}
         loading={isLoading || isRefetching}
         error={isError}
-        cardsPerRow={cardsPerRow}
+        isCompact={isCompactView}
         sloView={sloView}
       />
 
