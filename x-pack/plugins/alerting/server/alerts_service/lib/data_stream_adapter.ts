@@ -30,11 +30,11 @@ export interface IndexTemplateFields {
 }
 
 export interface GetDataStreamAdapterOpts {
-  useDataStreamForAlerts: boolean;
+  useDataStream: boolean;
 }
 
 export function getDataStreamAdapter(opts: GetDataStreamAdapterOpts): DataStreamAdapter {
-  if (opts.useDataStreamForAlerts) {
+  if (opts.useDataStream) {
     return new DataStreamImplementation();
   } else {
     return new AliasImplementation();

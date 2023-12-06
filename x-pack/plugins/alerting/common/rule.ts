@@ -288,6 +288,7 @@ export interface RuleMonitoring {
 }
 
 export interface RuleExecutionGap {
+  _id?: string;
   gapStart: string;
   gapEnd: string;
   gapDuration: number;

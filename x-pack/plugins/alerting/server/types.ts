@@ -500,6 +500,10 @@ export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter
 export const AdHocRuleRunStatuses = ['Pending', 'Running', 'Error', 'Timeout'];
 export type AdHocRuleRunStatus = typeof AdHocRuleRunStatuses[number];
 
+export interface AdHocRuleRunSchedule {
+  start: string;
+  end: string;
+}
 export interface SanitizedAdHocRuleRunParams extends Record<string, unknown> {
   apiKeyId: string;
   createdAt: string;
@@ -528,6 +532,7 @@ export interface SanitizedAdHocRuleRunParams extends Record<string, unknown> {
   spaceId: string;
   start: string;
   status: AdHocRuleRunStatus;
+  schedule: AdHocRuleRunSchedule[];
 }
 
 export type AdHocRuleRunParams = SanitizedAdHocRuleRunParams & { apiKeyToUse: string };

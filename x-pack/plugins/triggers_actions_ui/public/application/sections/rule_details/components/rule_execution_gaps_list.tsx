@@ -8,14 +8,20 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RuleExecutionGap } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RuleDurationFormat } from '../../rules_list/components/rule_duration_format';
 import { scheduleBackfill } from '../../../lib/rule_api/schedule_backfill';
 
+export interface GapItem {
+  _id: string;
+  start: string;
+  end: string;
+  duration: number;
+  rule_id: string;
+}
 interface RuleExecutionGapsListProps {
   ruleId: string;
-  items: RuleExecutionGap[];
+  items: GapItem[];
 }
 
 const getRowProps = () => ({
@@ -30,8 +36,13 @@ export const RuleExecutionGapsList = (props: RuleExecutionGapsListProps) => {
   const { items, ruleId } = props;
   const { http } = useKibana().services;
   const onScheduleBackfillClick = useCallback(
-    async (gap: RuleExecutionGap) => {
-      await scheduleBackfill({ http, ruleId, gap });
+    async (gap: GapItem) => {
+      await scheduleBackfill({
+        http,
+        ruleId,
+        docId: gap._id,
+        gap: { gapStart: gap.start, gapEnd: gap.end, gapDuration: gap.duration },
+      });
     },
     [http, ruleId]
   );
@@ -39,7 +50,7 @@ export const RuleExecutionGapsList = (props: RuleExecutionGapsListProps) => {
   const executionGapsTableColumns = useMemo(
     () => [
       {
-        field: 'gapStart',
+        field: 'start',
         name: i18n.translate(
           'xpack.triggersActionsUI.sections.ruleDetails.executionGapsList.columns.start',
           {
@@ -55,7 +66,7 @@ export const RuleExecutionGapsList = (props: RuleExecutionGapsListProps) => {
         },
       },
       {
-        field: 'gapEnd',
+        field: 'end',
         name: i18n.translate(
           'xpack.triggersActionsUI.sections.ruleDetails.executionGapsList.columns.end',
           {
@@ -70,7 +81,7 @@ export const RuleExecutionGapsList = (props: RuleExecutionGapsListProps) => {
         'data-test-subj': 'executionGapsTableCell-end',
       },
       {
-        field: 'gapDuration',
+        field: 'duration',
         width: '190px',
         render: (value: number) => {
           return <RuleDurationFormat duration={value} />;
@@ -94,7 +105,7 @@ export const RuleExecutionGapsList = (props: RuleExecutionGapsListProps) => {
             defaultMessage: 'Schedule backfill',
           }
         ),
-        render: (gap: RuleExecutionGap) => {
+        render: (gap: GapItem) => {
           return (
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
               <EuiFlexItem grow={false} data-test-subj="ruleExecutionGapSchedule">
@@ -127,7 +138,7 @@ export const RuleExecutionGapsList = (props: RuleExecutionGapsListProps) => {
   );
 
   return (
-    <EuiBasicTable<RuleExecutionGap>
+    <EuiBasicTable<GapItem>
       items={items}
       rowProps={getRowProps}
       cellProps={getCellProps}

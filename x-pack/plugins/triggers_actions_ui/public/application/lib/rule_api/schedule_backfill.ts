@@ -10,14 +10,20 @@ import { INTERNAL_BASE_ALERTING_API_PATH, RuleExecutionGap } from '@kbn/alerting
 export async function scheduleBackfill({
   http,
   ruleId,
+  docId,
   gap,
 }: {
   http: HttpSetup;
   ruleId: string;
+  docId: string;
   gap: RuleExecutionGap;
 }): Promise<string | null> {
   const res = await http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill/_schedule`, {
-    body: JSON.stringify({ rule_ids: [ruleId], start: gap.gapStart, end: gap.gapEnd }),
+    body: JSON.stringify({
+      ids: [{ rule_id: ruleId, doc_id: docId }],
+      start: gap.gapStart,
+      end: gap.gapEnd,
+    }),
   });
   const resultForRule = res.find((r) => r.rule_id === ruleId);
   return resultForRule.backfill_id ?? null;

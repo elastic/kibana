@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
+import React, { lazy, useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic/eui';
 import { AlertStatusValues } from '@kbn/alerting-plugin/common';
@@ -30,6 +30,8 @@ import {
   rulesLastRunOutcomeTranslationMapping,
   rulesStatusesTranslationsMapping,
 } from '../../rules_list/translations';
+import { loadExecutionGaps } from '../../../lib/rule_api/load_execution_gaps';
+import { GapItem } from './rule_execution_gaps_list';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
@@ -67,7 +69,8 @@ export function RuleComponent({
   durationEpoch = Date.now(),
   isLoadingChart,
 }: RuleComponentProps) {
-  const { ruleTypeRegistry, actionTypeRegistry } = useKibana().services;
+  const { ruleTypeRegistry, http, actionTypeRegistry } = useKibana().services;
+  const [gaps, setGaps] = useState<GapItem[]>([]);
 
   const alerts = Object.entries(ruleSummary.alerts)
     .map(([alertId, alert]) => alertToListItem(durationEpoch, alertId, alert))
@@ -88,6 +91,22 @@ export function RuleComponent({
     executionStatusTranslations: rulesStatusesTranslationsMapping,
   });
 
+  const loadGaps = useCallback(async () => {
+    try {
+      const executionGaps = await loadExecutionGaps({
+        id: rule.id,
+        http,
+      });
+      setGaps(executionGaps);
+    } catch (e) {
+      console.log(e);
+    }
+  }, [rule.id, http]);
+
+  useEffect(() => {
+    loadGaps();
+  }, [loadGaps]);
+
   const renderRuleAlertList = () => {
     return suspendedComponentWithProps(
       RuleAlertList,
@@ -104,7 +123,7 @@ export function RuleComponent({
       RuleExecutionGapsList,
       'xl'
     )({
-      items: rule.executionGaps!,
+      items: gaps,
       ruleId: rule.id,
     });
   };
@@ -146,7 +165,7 @@ export function RuleComponent({
     },
   ];
 
-  if (rule.executionGaps && rule.executionGaps.length > 0) {
+  if (gaps.length > 0) {
     tabs.push({
       id: EXECUTION_GAP_LIST_TAB,
       name: i18n.translate(

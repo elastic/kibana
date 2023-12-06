@@ -6,9 +6,15 @@
  */
 import { schema } from '@kbn/config-schema';
 
+export const backfillRunsSchema = schema.object({
+  start: schema.string(),
+  end: schema.string(),
+});
+
 export const scheduleBackfillResultSchema = schema.object({
   ruleId: schema.string(),
   backfillId: schema.nullable(schema.string()),
+  backfillRuns: schema.arrayOf(backfillRunsSchema),
 });
 
 export const scheduleBackfillResultsSchema = schema.arrayOf(scheduleBackfillResultSchema);

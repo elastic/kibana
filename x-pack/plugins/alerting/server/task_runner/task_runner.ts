@@ -376,7 +376,7 @@ export class TaskRunner<
       state: this.taskInstance.state,
       validatedParams: params,
     });
-    this.ruleMonitoringAndGaps.addGap(gap);
+    this.context.backfillClient.writeGap(ruleId, gap);
 
     const executionHandler = new ExecutionHandler({
       rule,

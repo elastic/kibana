@@ -8,5 +8,9 @@
 import type { ScheduleBackfillResults } from '../../../../../../../application/rule/methods/backfill/schedule/types';
 
 export const transformResponse = (result: ScheduleBackfillResults) => {
-  return result.map(({ ruleId, backfillId }) => ({ rule_id: ruleId, backfill_id: backfillId }));
+  return result.map(({ ruleId, backfillId, backfillRuns }) => ({
+    rule_id: ruleId,
+    backfill_id: backfillId,
+    backfill_runs: backfillRuns,
+  }));
 };

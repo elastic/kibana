@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { RewriteRequestCase } from '@kbn/actions-plugin/common';
+import { RewriteRequestCase } from '../../../../../../lib';
 import { ScheduleBackfillOptions } from '../../../../../../../application/rule/methods/backfill/schedule/types';
 
 export const transformRequest: RewriteRequestCase<ScheduleBackfillOptions> = ({
-  rule_ids: ruleIds,
+  ids,
   start,
   end,
 }) => ({
-  ruleIds,
   start,
+  ids: ids.map(({ rule_id: ruleId, doc_id: docId }) => ({ ruleId, ...(docId ? { docId } : {}) })),
   ...(end ? { end } : {}),
 });

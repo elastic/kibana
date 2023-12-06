@@ -52,6 +52,7 @@ import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_sto
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { AlertsService } from '../alerts_service';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
+import { BackfillClient } from '../backfill_client/backfill_client';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -157,6 +158,7 @@ export interface TaskRunnerContext {
   actionsConfigMap: ActionsConfigMap;
   cancelAlertsOnRuleTimeout: boolean;
   usageCounter?: UsageCounter;
+  backfillClient: BackfillClient;
   getRulesSettingsClientWithRequest(request: KibanaRequest): RulesSettingsClientApi;
   getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
 }

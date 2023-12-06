@@ -245,7 +245,7 @@ export class AlertingPlugin {
     this.security = plugins.security;
 
     const useDataStreamForAlerts = !!plugins.serverless;
-    this.dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts });
+    this.dataStreamAdapter = getDataStreamAdapter({ useDataStream: useDataStreamForAlerts });
 
     core.capabilities.registerProvider(() => {
       return {
@@ -273,6 +273,10 @@ export class AlertingPlugin {
     this.backfillClient = new BackfillClient({
       taskManager: plugins.taskManager,
       logger: this.logger,
+      elasticsearchClientPromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      pluginStop$: this.pluginStop$,
       taskRunnerFactory: this.taskRunnerFactory,
       coreStartServices: core.getStartServices(),
     });
@@ -579,6 +583,7 @@ export class AlertingPlugin {
       usageCounter: this.usageCounter,
       getRulesSettingsClientWithRequest,
       getMaintenanceWindowClientWithRequest,
+      backfillClient: this.backfillClient!,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {

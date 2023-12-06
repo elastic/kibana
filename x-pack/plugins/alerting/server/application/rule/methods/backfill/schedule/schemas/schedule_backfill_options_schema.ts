@@ -7,7 +7,13 @@
 import { schema } from '@kbn/config-schema';
 
 export const scheduleBackfillOptionsSchema = schema.object({
-  ruleIds: schema.arrayOf(schema.string(), { minSize: 1 }),
+  ids: schema.arrayOf(
+    schema.object({
+      ruleId: schema.string(),
+      docId: schema.maybe(schema.string()),
+    }),
+    { minSize: 1, maxSize: 10 }
+  ),
   start: schema.string(),
   end: schema.maybe(schema.string()),
 });

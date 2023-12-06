@@ -143,7 +143,7 @@ export class ObservabilityAIAssistantService {
           name: `${conversationAliasName}-000001`,
           template: this.resourceNames.indexTemplate.conversations,
         },
-        dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
+        dataStreamAdapter: getDataStreamAdapter({ useDataStream: false }),
       });
 
       await esClient.cluster.putComponentTemplate({
@@ -200,7 +200,7 @@ export class ObservabilityAIAssistantService {
           name: `${kbAliasName}-000001`,
           template: this.resourceNames.indexTemplate.kb,
         },
-        dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
+        dataStreamAdapter: getDataStreamAdapter({ useDataStream: false }),
       });
 
       this.kbService = new KnowledgeBaseService({

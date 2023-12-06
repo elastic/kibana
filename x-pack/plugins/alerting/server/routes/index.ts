@@ -49,6 +49,7 @@ import { updateFlappingSettingsRoute } from './update_flapping_settings';
 import { getRuleTagsRoute } from './rule/apis/tags/get_rule_tags';
 import { getScheduleFrequencyRoute } from './rule/apis/get_schedule_frequency';
 import { bulkUntrackAlertRoute } from './rule/apis/bulk_untrack';
+import { getRuleExecutionGapsRoute } from './get_rule_execution_gaps';
 
 import { createMaintenanceWindowRoute } from './maintenance_window/apis/create/create_maintenance_window_route';
 import { getMaintenanceWindowRoute } from './maintenance_window/apis/get/get_maintenance_window_route';
@@ -140,6 +141,8 @@ export function defineRoutes(opts: RouteOptions) {
   bulkUntrackAlertRoute(router, licenseState);
   getQueryDelaySettingsRoute(router, licenseState);
   updateQueryDelaySettingsRoute(router, licenseState);
+
+  getRuleExecutionGapsRoute(router, licenseState);
 
   // backfill rule runs
   scheduleBackfillRoute(router, licenseState);

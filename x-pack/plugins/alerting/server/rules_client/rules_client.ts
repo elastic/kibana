@@ -77,6 +77,7 @@ import { getBackfill } from '../application/rule/methods/backfill/get';
 import { deleteBackfill } from '../application/rule/methods/backfill/delete';
 import { FindBackfillsOptions } from '../application/rule/methods/backfill/find/types';
 import { findBackfills } from '../application/rule/methods/backfill/find';
+import { getRuleExecutionGaps } from './methods/get_execution_gaps';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -156,6 +157,7 @@ export class RulesClient {
     getActionErrorLog(this.context, params);
   public getActionErrorLogWithAuth = (params: GetActionErrorLogByIdParams) =>
     getActionErrorLogWithAuth(this.context, params);
+  public getRuleExecutionGaps = (id: string) => getRuleExecutionGaps(this.context, id);
 
   public bulkDeleteRules = (options: BulkDeleteRulesRequestBody) =>
     bulkDeleteRules(this.context, options);

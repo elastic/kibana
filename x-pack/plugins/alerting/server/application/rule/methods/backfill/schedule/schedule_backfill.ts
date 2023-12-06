@@ -34,7 +34,8 @@ export async function scheduleBackfill(
   }
 
   // Get the rule SOs
-  const kueryNodeFilter = convertRuleIdsToKueryNode(options.ruleIds);
+  const ruleIds = options.ids.map((id) => id.ruleId);
+  const kueryNodeFilter = convertRuleIdsToKueryNode(ruleIds);
   let authorizationTuple;
   try {
     authorizationTuple = await context.authorization.getFindAuthorizationFilter(
@@ -77,7 +78,7 @@ export async function scheduleBackfill(
 
   const buckets = aggregations?.alertTypeId.buckets;
   if (buckets === undefined || !buckets.length) {
-    throw Boom.badRequest(`No rules matching ids ${options.ruleIds} found to schedule backfill`);
+    throw Boom.badRequest(`No rules matching ids ${ruleIds} found to schedule backfill`);
   }
 
   const lifecycleRuleTypes = buckets.filter(
