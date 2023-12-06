@@ -16,7 +16,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
-  // const settings = getPageObject('settings');
+  const settings = getPageObject('settings');
 
   describe('persistable attachment', () => {
     before(async () => {
@@ -34,10 +34,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
 
-        /*
-        await settings.refreshDataViewFieldList('log*');
-        await settings.refreshDataViewFieldList('logstash-*');
-        */
+        await settings.refreshDataViewFieldList('default:all-data');
 
         await svlSearchNavigation.navigateToLandingPage();
 
