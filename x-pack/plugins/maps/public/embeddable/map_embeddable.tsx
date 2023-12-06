@@ -357,7 +357,7 @@ export class MapEmbeddable
   }
   public localFilters;
 
-  public getQuery(): Query | AggregateQuery | undefined {
+  public getQuery(): Query | undefined {
     const embeddableSearchContext = getEmbeddableSearchContext(
       this._savedMap.getStore().getState()
     );

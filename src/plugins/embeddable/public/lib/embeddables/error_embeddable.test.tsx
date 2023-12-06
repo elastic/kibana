@@ -7,11 +7,13 @@
  */
 
 import React from 'react';
+import { setStubKibanaServices as setPresentationPanelMocks } from '@kbn/presentation-panel-plugin/public/mocks';
 import { waitFor, render } from '@testing-library/react';
 import { ErrorEmbeddable } from './error_embeddable';
 import { EmbeddableRoot } from './embeddable_root';
 
 test('ErrorEmbeddable renders an embeddable', async () => {
+  setPresentationPanelMocks();
   const embeddable = new ErrorEmbeddable('some error occurred', { id: '123', title: 'Error' });
   const { getByTestId, getByText } = render(<EmbeddableRoot embeddable={embeddable} />);
 
@@ -21,6 +23,7 @@ test('ErrorEmbeddable renders an embeddable', async () => {
 });
 
 test('ErrorEmbeddable renders an embeddable with markdown message', async () => {
+  setPresentationPanelMocks();
   const error = '[some link](http://localhost:5601/takeMeThere)';
   const embeddable = new ErrorEmbeddable(error, { id: '123', title: 'Error' });
   const { getByTestId, getByText } = render(<EmbeddableRoot embeddable={embeddable} />);
