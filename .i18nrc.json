@@ -1,6 +1,8 @@
 {
   "paths": {
     "advancedSettings": "src/plugins/advanced_settings",
+    "aiAssistantManagementSelection": "src/plugins/ai_assistant_management/selection",
+    "aiAssistantManagementObservability": "src/plugins/ai_assistant_management/observability",
     "alerts": "packages/kbn-alerts/src",
     "alertsUIShared": "packages/kbn-alerts-ui-shared/src",
     "alertingTypes": "packages/kbn-alerting-types",
@@ -100,6 +102,7 @@
     "share": "src/plugins/share",
     "sharedUXPackages": "packages/shared-ux",
     "searchApiPanels": "packages/kbn-search-api-panels/",
+    "searchIndexDocuments": "packages/kbn-search-index-documents",
     "searchResponseWarnings": "packages/kbn-search-response-warnings",
     "securitySolutionPackages": "x-pack/packages/security-solution",
     "serverlessPackages": "packages/serverless",
