@@ -17,8 +17,8 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import { createAnalytics } from '@kbn/analytics-client';
 import { createService } from './service/create_service';
+import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import type {
   ConfigSchema,
   ObservabilityAIAssistantPluginSetup,
@@ -90,6 +90,9 @@ export class ObservabilityAIAssistantPlugin
         };
       },
     });
+
+    coreSetup.analytics.registerEventType<MessageFeedback>(MESSAGE_FEEDBACK_SCHEMA);
+
     return {};
   }
 
@@ -98,11 +101,12 @@ export class ObservabilityAIAssistantPlugin
     pluginsStart: ObservabilityAIAssistantPluginStartDependencies
   ): ObservabilityAIAssistantPluginStart {
     const service = (this.service = createService({
+      analytics: coreStart.analytics,
       coreStart,
-      securityStart: pluginsStart.security,
-      licenseStart: pluginsStart.licensing,
-      shareStart: pluginsStart.share,
       enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
+      licenseStart: pluginsStart.licensing,
+      securityStart: pluginsStart.security,
+      shareStart: pluginsStart.share,
     }));
 
     service.register(async ({ signal, registerContext, registerFunction }) => {
@@ -118,6 +122,6 @@ export class ObservabilityAIAssistantPlugin
       });
     });
 
-    return service;
+    return { service, useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service) };
   }
 }

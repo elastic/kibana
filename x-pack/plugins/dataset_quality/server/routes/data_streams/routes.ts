@@ -7,11 +7,14 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
-import { dataStreamTypesRt } from '../../../common/data_streams';
-import { DataStreamsStatResponse } from '../../types/data_stream';
+import { DataStreamStat } from '../../types/data_stream';
+import { dataStreamTypesRt, rangeRt } from '../../types/default_api_types';
+import { Integration } from '../../types/integration';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
+import { getMalformedDocsPaginated } from './get_malformed_docs';
+import { MalformedDocs } from '../../../common/api_types';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -26,7 +29,10 @@ const statsRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
-  async handler(resources): Promise<DataStreamsStatResponse> {
+  async handler(resources): Promise<{
+    dataStreamsStats: DataStreamStat[];
+    integrations: Integration[];
+  }> {
     const { context, params, plugins } = resources;
     const coreContext = await context.core;
 
@@ -66,6 +72,40 @@ const statsRoute = createDatasetQualityServerRoute({
   },
 });
 
+const malformedDocsRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/malformed_docs',
+  params: t.type({
+    query: t.intersection([
+      rangeRt,
+      dataStreamTypesRt,
+      t.partial({
+        datasetQuery: t.string,
+      }),
+    ]),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<{
+    malformedDocs: MalformedDocs[];
+  }> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const malformedDocs = await getMalformedDocsPaginated({
+      esClient,
+      ...params.query,
+    });
+
+    return {
+      malformedDocs,
+    };
+  },
+});
+
 export const dataStreamsRouteRepository = {
   ...statsRoute,
+  ...malformedDocsRoute,
 };

@@ -9,14 +9,15 @@ import { RootSchema } from '@kbn/analytics-client';
 import { Message } from '../../common';
 import type { Feedback } from '../components/feedback_buttons';
 
-export const MESSAGE_FEEDBACK = 'message_feedback';
+export const MESSAGE_FEEDBACK = 'observability_ai_assistant_chat_message_feedback' as const;
+export const INSIGHT_FEEDBACK = 'observability_ai_assistant_chat_insight_feedback' as const;
 
-export interface MessageFeedback extends Omit<Message, '@timestamp'> {
+export interface MessageFeedback extends Message {
   feedback: Feedback;
 }
 
 export interface TelemetryEvent {
-  eventType: typeof MESSAGE_FEEDBACK;
+  eventType: typeof MESSAGE_FEEDBACK | typeof INSIGHT_FEEDBACK;
   schema: RootSchema<MessageFeedback>;
 }
 
@@ -76,12 +77,6 @@ export const MESSAGE_FEEDBACK_SCHEMA: TelemetryEvent = {
             },
           },
         },
-      },
-    },
-    feedback: {
-      type: 'text',
-      _meta: {
-        description: 'Whether the user has deemed this response useful or not',
       },
     },
   },

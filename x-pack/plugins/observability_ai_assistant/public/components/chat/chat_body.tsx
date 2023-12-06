@@ -36,7 +36,6 @@ import { InitialSetupPanel } from './initial_setup_panel';
 import { ChatActionClickType } from './types';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { Feedback } from '../feedback_buttons';
-import { useKibana } from '../../hooks/use_kibana';
 import { MESSAGE_FEEDBACK } from '../../analytics/schema';
 
 const timelineClassName = css`
@@ -63,7 +62,6 @@ export function ChatBody({
   connectors,
   knowledgeBase,
   connectorsManagementHref,
-  modelsManagementHref,
   currentUser,
   startedFrom,
   onConversationUpdate,
@@ -74,7 +72,6 @@ export function ChatBody({
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
   connectorsManagementHref: string;
-  modelsManagementHref: string;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   startedFrom?: StartedFrom;
   onConversationUpdate: (conversation: Conversation) => void;
@@ -119,7 +116,8 @@ export function ChatBody({
     parent.scrollTop + parent.clientHeight >= parent.scrollHeight;
 
   const handleFeedback = (message: Message, feedback: Feedback) => {
-    analytics.reportEvent(MESSAGE_FEEDBACK, { ...message.message, feedback });
+    const feedbackEvent = { ...message, feedback };
+    chatService.analytics.reportEvent(MESSAGE_FEEDBACK, feedbackEvent);
   };
 
   useEffect(() => {
@@ -335,7 +333,6 @@ export function ChatBody({
               : undefined
           }
           connectorsManagementHref={connectorsManagementHref}
-          modelsManagementHref={modelsManagementHref}
           knowledgeBase={knowledgeBase}
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}

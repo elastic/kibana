@@ -325,7 +325,7 @@ const startFleetServerWithDocker = async ({
       if (isServerless) {
         log.info(`Waiting for server [${hostname}] to register with Elasticsearch`);
 
-        await waitForFleetServerToRegisterWithElasticsearch(kbnClient, hostname, 120000);
+        await waitForFleetServerToRegisterWithElasticsearch(kbnClient, hostname, 180000);
       } else {
         await waitForHostToEnroll(kbnClient, log, hostname, 120000);
       }
@@ -743,7 +743,7 @@ const waitForFleetServerToRegisterWithElasticsearch = async (
 
   if (!found) {
     throw new Error(
-      `Timed out waiting for fleet server [${fleetServerHostname}] to register with Elasticsarch`
+      `Timed out waiting for fleet server [${fleetServerHostname}] to register with Elasticsearch`
     );
   }
 };

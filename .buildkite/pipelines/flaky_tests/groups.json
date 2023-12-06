@@ -42,6 +42,30 @@
       "name": "[Serverless] Security Solution Rule Management - Prebuilt Rules - Cypress"
     },
     {
+      "key": "cypress/security_solution_detection_engine",
+      "name": "Security Solution Detection Engine - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_detection_engine",
+      "name": "[Serverless] Security Solution Detection Engine - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_detection_engine_exceptions",
+      "name": "Security Solution Detection Engine - Exceptions - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_detection_engine_exceptions",
+      "name": "[Serverless] Security Solution Detection Engine - Exceptions - Cypress"
+    },
+    {
+      "key": "cypress/security_solution_ai_assistant",
+      "name": "Security Solution AI Assistant - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_ai_assistant",
+      "name": "[Serverless] Security Solution AI Assistant - Cypress"
+    },
+    {
       "key": "cypress/defend_workflows",
       "name": "Security Solution Defend Workflows - Cypress"
     },
