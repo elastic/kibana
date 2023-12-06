@@ -20,11 +20,10 @@ export function _purgeBundledPackagesCache() {
 }
 
 export async function getBundledPackages(): Promise<BundledPackage[]> {
-  if (CACHE_BUNDLED_PACKAGES) {
+  const config = appContextService.getConfig();
+  if (config?.developer?.disableBundledPackagesCache !== true && CACHE_BUNDLED_PACKAGES) {
     return CACHE_BUNDLED_PACKAGES;
   }
-
-  const config = appContextService.getConfig();
 
   const bundledPackageLocation = config?.developer?.bundledPackageLocation;
 

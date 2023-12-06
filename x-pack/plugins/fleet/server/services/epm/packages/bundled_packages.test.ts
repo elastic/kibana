@@ -21,15 +21,13 @@ jest.mock('fs/promises');
 jest.mock('../../app_context');
 
 describe('bundledPackages', () => {
-  beforeAll(() => {
+  beforeEach(() => {
     jest.mocked(appContextService.getConfig).mockReturnValue({
       developer: {
         bundledPackageLocation: '/tmp/test',
       },
     } as any);
     jest.mocked(appContextService.getLogger).mockReturnValue(loggingSystemMock.createLogger());
-  });
-  beforeEach(() => {
     _purgeBundledPackagesCache();
     jest.mocked(fs.stat).mockResolvedValue({} as any);
     jest
@@ -72,6 +70,18 @@ describe('bundledPackages', () => {
       const packagesRes2 = await getBundledPackages();
       expect(packagesRes1).toEqual(packagesRes2);
       expect(fs.readdir).toBeCalledTimes(1);
+    });
+
+    it('should not use cache if called multiple time and cache is disabled', async () => {
+      jest.mocked(appContextService.getConfig).mockReturnValue({
+        developer: {
+          bundledPackageLocation: '/tmp/test',
+          disableBundledPackagesCache: true,
+        },
+      } as any);
+      await getBundledPackages();
+      await getBundledPackages();
+      expect(fs.readdir).toBeCalledTimes(2);
     });
   });
   describe('getBundledPackageByPkgKey', () => {
