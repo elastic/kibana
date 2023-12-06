@@ -6,7 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { CheckPrivilegesPayload, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  CheckPrivilegesPayload,
+  CheckPrivilegesResponse,
+  SecurityPluginStart,
+} from '@kbn/security-plugin/server';
 import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics/common';
 const groupPrivilegesByName = <PrivilegeName extends string>(
   privileges: Array<{
@@ -18,6 +22,34 @@ const groupPrivilegesByName = <PrivilegeName extends string>(
     acc[privilege] = authorized;
     return acc;
   }, {});
+};
+
+export const _formatPrivileges = (
+  privileges: CheckPrivilegesResponse['privileges']
+): EntityAnalyticsPrivileges['privileges'] => {
+  const clusterPrivilegesByPrivilege = groupPrivilegesByName(privileges.elasticsearch.cluster);
+
+  const indexPrivilegesByIndex = Object.entries(privileges.elasticsearch.index).reduce<
+    Record<string, Record<string, boolean>>
+  >((acc, [index, indexPrivileges]) => {
+    acc[index] = groupPrivilegesByName(indexPrivileges);
+    return acc;
+  }, {});
+
+  return {
+    elasticsearch: {
+      ...(Object.keys(indexPrivilegesByIndex).length > 0
+        ? {
+            index: indexPrivilegesByIndex,
+          }
+        : {}),
+      ...(Object.keys(clusterPrivilegesByPrivilege).length > 0
+        ? {
+            cluster: clusterPrivilegesByPrivilege,
+          }
+        : {}),
+    },
+  };
 };
 
 interface CheckAndFormatPrivilegesOpts {
@@ -34,27 +66,8 @@ export async function checkAndFormatPrivileges({
   const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
   const { privileges, hasAllRequested } = await checkPrivileges(privilegesToCheck);
 
-  const clusterPrivilegesByPrivilege = groupPrivilegesByName(privileges.elasticsearch.cluster);
-
-  const indexPrivilegesByIndex = Object.entries(privileges.elasticsearch.index).reduce<
-    Record<string, Record<string, boolean>>
-  >((acc, [index, indexPrivileges]) => {
-    acc[index] = groupPrivilegesByName(indexPrivileges);
-    return acc;
-  }, {});
-
   return {
-    privileges: {
-      elasticsearch: {
-        index: indexPrivilegesByIndex,
-        // only add cluster privileges if there are any
-        ...(Object.keys(clusterPrivilegesByPrivilege).length > 0
-          ? {
-              cluster: clusterPrivilegesByPrivilege,
-            }
-          : {}),
-      },
-    },
+    privileges: _formatPrivileges(privileges),
     has_all_required: hasAllRequested,
   };
 }
