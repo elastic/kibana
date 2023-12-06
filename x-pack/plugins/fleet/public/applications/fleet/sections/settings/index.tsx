@@ -158,11 +158,13 @@ export const SettingsApp = withConfirmModalProvider(() => {
 
             return (
               <EuiPortal>
-                <EditOutputFlyout
-                  proxies={proxies.data?.items ?? []}
-                  onClose={onCloseCallback}
-                  output={output}
-                />
+                <Suspense fallback={<EuiLoadingSpinner />}>
+                  <EditOutputFlyout
+                    proxies={proxies.data?.items ?? []}
+                    onClose={onCloseCallback}
+                    output={output}
+                  />
+                </Suspense>
               </EuiPortal>
             );
           }}
