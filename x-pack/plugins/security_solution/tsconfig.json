@@ -84,6 +84,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/ecs-data-quality-dashboard",
     "@kbn/elastic-assistant",
+    "@kbn/elastic-assistant-plugin",
     "@kbn/data-views-plugin",
     "@kbn/datemath",
     "@kbn/ui-theme",
@@ -103,7 +104,6 @@
     "@kbn/expect",
     "@kbn/share-plugin",
     "@kbn/analytics",
-    "@kbn/observability-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/doc-links",
     "@kbn/react-field",
@@ -183,6 +183,6 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/zod-helpers",
     "@kbn/core-http-common",
-    "@kbn/elastic-assistant-plugin"
+    "@kbn/stack-connectors-plugin"
   ]
 }

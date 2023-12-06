@@ -9,7 +9,8 @@ import { login } from '../../tasks/login';
 import { visitPolicyDetailsPage } from '../../screens/policy_details';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/170666
+describe.skip(
   'When displaying the Policy Details in Security Essentials PLI',
   {
     tags: ['@serverless'],

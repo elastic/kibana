@@ -15,7 +15,7 @@ import { routes } from './routes';
 import type { NetworkState } from './network/store';
 import { initialNetworkState, networkReducer } from './network/store';
 import { getDataTablesInStorageByIds } from '../timelines/containers/local_storage';
-import { initialUsersState, usersReducer } from './users/store';
+import { makeUsersReducer, getInitialUsersState } from './users/store';
 import { hostsReducer, initialHostsState } from './hosts/store';
 
 export interface ExploreState {
@@ -51,10 +51,10 @@ export class Explore {
       store: {
         initialState: {
           network: initialNetworkState,
-          users: initialUsersState,
+          users: getInitialUsersState(storage),
           hosts: initialHostsState,
         },
-        reducer: { network: networkReducer, users: usersReducer, hosts: hostsReducer },
+        reducer: { network: networkReducer, users: makeUsersReducer(storage), hosts: hostsReducer },
       },
     };
   }
