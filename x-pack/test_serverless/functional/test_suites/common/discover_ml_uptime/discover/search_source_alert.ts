@@ -238,6 +238,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openAlertResults = async (value: string, type: 'id' | 'name' = 'name') => {
+    await PageObjects.common.navigateToApp('discover');
     await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.discover.clickNewSearchButton(); // reset params
 
@@ -447,7 +448,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should navigate to alert results via link provided in notification', async () => {
       await PageObjects.settings.refreshDataViewFieldList(OUTPUT_DATA_VIEW);
-      await PageObjects.common.navigateToApp('discover');
       await openAlertResults(RULE_NAME);
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
     });
