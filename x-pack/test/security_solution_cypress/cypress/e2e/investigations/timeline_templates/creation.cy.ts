@@ -56,7 +56,7 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
     cy.intercept('PATCH', '/api/timeline').as('timeline');
   });
 
-  it.skip('Creates a timeline template', () => {
+  it('Creates a timeline template', () => {
     visit(TIMELINES_URL);
     openTimelineUsingToggle();
     createNewTimelineTemplate();

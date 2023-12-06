@@ -34,7 +34,7 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 const text = 'system_indices_superuser';
 const link = 'https://www.elastic.co/';
 
-describe.skip('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
+describe('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     login();
     visit(TIMELINES_URL);

@@ -63,7 +63,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
       selectCountTable();
     });
 
-    it.skip('Open one alert when more than one closed alerts are selected', () => {
+    it('Open one alert when more than one closed alerts are selected', () => {
       waitForAlertsToPopulate();
       cy.get(ALERTS_COUNT)
         .invoke('text')
@@ -167,7 +167,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
       waitForAlertsToPopulate();
       selectCountTable();
     });
-    it.skip('Closes and opens alerts', () => {
+    it('Closes and opens alerts', () => {
       const numberOfAlertsToBeClosed = 3;
       cy.get(ALERTS_COUNT)
         .invoke('text')

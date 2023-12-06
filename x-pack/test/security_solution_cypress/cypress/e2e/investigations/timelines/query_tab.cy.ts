@@ -27,7 +27,7 @@ import {
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe.skip('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
+describe('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     login();
     visit(TIMELINES_URL);
@@ -66,7 +66,7 @@ describe.skip('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     // TO-DO: Issue 163398
-    it.skip('should be able to add event note', () => {
+    it('should be able to add event note', () => {
       cy.get(NOTE_CARD_CONTENT).should('contain', 'event note');
     });
 

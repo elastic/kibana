@@ -32,7 +32,7 @@ import { scrollToBottom } from '../../../tasks/common';
 
 // Failing in serverless
 // FLAKY: https://github.com/elastic/kibana/issues/169396
-describe.skip('timeline data providers', { tags: ['@ess', '@serverless'] }, () => {
+describe('timeline data providers', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));

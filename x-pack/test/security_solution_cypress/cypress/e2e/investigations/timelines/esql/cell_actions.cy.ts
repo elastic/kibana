@@ -23,7 +23,7 @@ const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 const TIMESTAMP_COLUMN_NAME = '@timestamp';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165650
-describe.skip(
+describe(
   `ESQL Datagrid Cell Actions`,
   {
     tags: ['@ess'],
@@ -40,7 +40,7 @@ describe.skip(
     // @TODO: copy is incredibly flaky although it is written same strategy as above tests
     // Need to see what is the reaosn for that. Trusting that above tests prove that `Copy`
     // will also work correctly.
-    it.skip('Copy', () => {
+    it('Copy', () => {
       grantClipboardReadPerm();
       cy.get(GET_DISCOVER_DATA_GRID_CELL(TIMESTAMP_COLUMN_NAME, 0)).then((sub) => {
         const selectedTimestamp = sub.text();
