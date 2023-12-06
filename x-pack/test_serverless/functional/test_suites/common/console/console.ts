@@ -25,18 +25,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'console', 'header']);
+  const PageObjects = getPageObjects(['svlCommonPage', 'common', 'console', 'header']);
   const security = getService('security');
   const testSubjects = getService('testSubjects');
 
   describe('console app', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
+      await PageObjects.svlCommonPage.login();
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('dev_tools', { hash: '/console' });
     });
+
     beforeEach(async () => {
       await PageObjects.console.closeHelpIfExists();
+    });
+
+    after(async () => {
+      await PageObjects.svlCommonPage.forceLogout();
     });
 
     it('should show the default request', async () => {
