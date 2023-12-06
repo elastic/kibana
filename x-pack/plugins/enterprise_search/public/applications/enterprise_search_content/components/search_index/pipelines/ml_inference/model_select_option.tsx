@@ -12,7 +12,6 @@ import { useActions, useValues } from 'kea';
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
@@ -86,14 +85,14 @@ export const DeployModelButton: React.FC<{ onClick: () => void; disabled: boolea
   disabled,
 }) => {
   return (
-    <EuiButtonEmpty onClick={onClick} disabled={disabled} iconType="download" size="s">
+    <EuiButton onClick={onClick} disabled={disabled} color="text" iconType="download" size="s">
       {i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.modelSelectOption.deployButton.label',
         {
           defaultMessage: 'Deploy',
         }
       )}
-    </EuiButtonEmpty>
+    </EuiButton>
   );
 };
 
