@@ -81,7 +81,7 @@ describe('OpsgenieParamFields', () => {
   it('renders the create alert component', async () => {
     render(<OpsgenieParamFields {...defaultCreateAlertProps} />);
 
-    expect(screen.getByText('Message (required)')).toBeInTheDocument();
+    expect(screen.getByText('Message')).toBeInTheDocument();
     expect(screen.getByText('Alias')).toBeInTheDocument();
     expect(screen.getByTestId('opsgenie-subActionSelect'));
 
@@ -93,7 +93,7 @@ describe('OpsgenieParamFields', () => {
     render(<OpsgenieParamFields {...defaultCloseAlertProps} />);
 
     expect(screen.queryByText('Message')).not.toBeInTheDocument();
-    expect(screen.getByText('Alias (required)')).toBeInTheDocument();
+    expect(screen.getByText('Alias')).toBeInTheDocument();
     expect(screen.getByTestId('opsgenie-subActionSelect'));
 
     expect(screen.queryByDisplayValue('hello')).not.toBeInTheDocument();
@@ -108,7 +108,7 @@ describe('OpsgenieParamFields', () => {
       />
     );
 
-    expect(screen.getByText('Message (required)')).toBeInTheDocument();
+    expect(screen.getByText('Message')).toBeInTheDocument();
     expect(screen.getByText('Alias')).toBeInTheDocument();
     expect(screen.queryByTestId('opsgenie-subActionSelect')).not.toBeInTheDocument();
 
