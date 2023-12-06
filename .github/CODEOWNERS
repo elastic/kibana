@@ -851,6 +851,7 @@ src/plugins/vis_types/vega @elastic/kibana-visualizations
 src/plugins/vis_types/vislib @elastic/kibana-visualizations
 src/plugins/vis_types/xy @elastic/kibana-visualizations
 packages/kbn-visualization-ui-components @elastic/kibana-visualizations
+packages/kbn-visualization-utils @elastic/kibana-visualizations
 src/plugins/visualizations @elastic/kibana-visualizations
 x-pack/plugins/watcher @elastic/platform-deployment-management
 packages/kbn-web-worker-stub @elastic/kibana-operations
