@@ -5,10 +5,6 @@ Object {
   "debug": Array [
     Array [
       "[.my-so-index] INIT RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] INIT -> LEGACY_REINDEX. took: 0ms.",
@@ -142,10 +138,6 @@ Object {
     ],
     Array [
       "[.my-so-index] LEGACY_REINDEX RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE. took: 0ms.",
@@ -283,10 +275,6 @@ Object {
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE -> LEGACY_DELETE. took: 0ms.",
@@ -428,10 +416,6 @@ Object {
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE -> DONE. took: 0ms.",
@@ -615,10 +599,6 @@ Object {
   "debug": Array [
     Array [
       "[.my-so-index] INIT RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] INIT -> LEGACY_DELETE. took: 0ms.",
@@ -763,10 +743,6 @@ Object {
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE -> FATAL. took: 0ms.",
