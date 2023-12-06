@@ -6,16 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { readFile as fsReadFileAsync} from 'fs/promises';
+import { readFile } from 'fs';
 import { resolve } from 'path';
 import { coerce } from 'semver';
 import { snakeCase } from 'lodash';
 import { isConfigPath, PackageInfo } from '@kbn/config';
 import { PluginType } from '@kbn/core-base-common';
 import { PluginManifest } from '@kbn/core-plugins-server';
+import { promisify } from 'util';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { isCamelCase } from './is_camel_case';
 
+const fsReadFileAsync = promisify(readFile);
 /**
  * Name of the JSON manifest file that should be located in the plugin directory.
  */
