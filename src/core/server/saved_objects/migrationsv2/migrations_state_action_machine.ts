@@ -69,7 +69,7 @@ const logActionResponse = (
   state: State,
   res: unknown
 ) => {
-  logger.debug(logMessagePrefix + `${state.controlState} RESPONSE`, res as LogMeta);
+  logger.debug(logMessagePrefix + `${state.controlState} RESPONSE`);
 };
 
 /**
