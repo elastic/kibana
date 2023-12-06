@@ -182,6 +182,7 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/zod-helpers",
     "@kbn/core-http-common",
-    "@kbn/stack-connectors-plugin"
+    "@kbn/stack-connectors-plugin",
+    "@kbn/core-elasticsearch-server-mocks"
   ]
 }
