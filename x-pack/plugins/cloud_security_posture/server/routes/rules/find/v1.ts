@@ -45,15 +45,15 @@ export const findRuleHandler = async (
     filter: getBenchmarkFilter(benchmarkId, options.section),
   });
 
-  const cspRulesTemplates = cspCspBenchmarkRulesSo.saved_objects.map(
-    (cspRule) => cspRule.attributes
+  const cspBenchmarkRules = cspCspBenchmarkRulesSo.saved_objects.map(
+    (cspBenchmarkRule) => cspBenchmarkRule.attributes
   );
 
   // Semantic version sorting using semver for valid versions and custom comparison for invalid versions
-  const sortedCspRulesTemplates = getSortedCspBenchmarkRulesTemplates(cspRulesTemplates);
+  const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules);
 
   return {
-    items: sortedCspRulesTemplates,
+    items: sortedCspBenchmarkRules,
     total: cspCspBenchmarkRulesSo.total,
     page: options.page,
     perPage: options.perPage,

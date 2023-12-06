@@ -10,7 +10,7 @@ import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/type
 
 describe('getSortedCspBenchmarkRules', () => {
   it('sorts by metadata.benchmark.rule_number, invalid semantic version still should still get sorted and empty values should be sorted last', () => {
-    const cspRulesTemplates = [
+    const cspBenchmarkRules = [
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
       { metadata: { benchmark: { rule_number: '2.0.0' } } },
       { metadata: { benchmark: { rule_number: '1.1.0' } } },
@@ -20,9 +20,9 @@ describe('getSortedCspBenchmarkRules', () => {
       { metadata: { benchmark: {} } },
     ] as CspBenchmarkRule[];
 
-    const sortedCspRulesTemplates = getSortedCspBenchmarkRulesTemplates(cspRulesTemplates);
+    const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules);
 
-    expect(sortedCspRulesTemplates).toEqual([
+    expect(sortedCspBenchmarkRules).toEqual([
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
       { metadata: { benchmark: { rule_number: '1.0.1' } } },
       { metadata: { benchmark: { rule_number: '1.1.0' } } },
@@ -34,36 +34,36 @@ describe('getSortedCspBenchmarkRules', () => {
   });
 
   it('edge case - returns empty array if input is empty', () => {
-    const cspRulesTemplates: CspBenchmarkRule[] = [];
+    const cspBenchmarkRules: CspBenchmarkRule[] = [];
 
-    const sortedCspRulesTemplates = getSortedCspBenchmarkRulesTemplates(cspRulesTemplates);
+    const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules);
 
-    expect(sortedCspRulesTemplates).toEqual([]);
+    expect(sortedCspBenchmarkRules).toEqual([]);
   });
 
   it('edge case - returns sorted array even if input only has one element', () => {
-    const cspRulesTemplates = [
+    const cspBenchmarkRules = [
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
     ] as CspBenchmarkRule[];
 
-    const sortedCspRulesTemplates = getSortedCspBenchmarkRulesTemplates(cspRulesTemplates);
+    const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules);
 
-    expect(sortedCspRulesTemplates).toEqual([
+    expect(sortedCspBenchmarkRules).toEqual([
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
     ]);
   });
 
   it('returns sorted array even with undefined or null properties', () => {
-    const cspRulesTemplates = [
+    const cspBenchmarkRules = [
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
       { metadata: { benchmark: { rule_number: undefined } } },
       { metadata: { benchmark: { rule_number: '2.0.0' } } },
       { metadata: { benchmark: { rule_number: null } } },
     ] as CspBenchmarkRule[];
 
-    const sortedCspRulesTemplates = getSortedCspBenchmarkRulesTemplates(cspRulesTemplates);
+    const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules);
 
-    expect(sortedCspRulesTemplates).toEqual([
+    expect(sortedCspBenchmarkRules).toEqual([
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
       { metadata: { benchmark: { rule_number: '2.0.0' } } },
       { metadata: { benchmark: { rule_number: null } } },
@@ -72,15 +72,15 @@ describe('getSortedCspBenchmarkRules', () => {
   });
 
   it('returns sorted array with invalid semantic versions', () => {
-    const cspRulesTemplates = [
+    const cspBenchmarkRules = [
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
       { metadata: { benchmark: { rule_number: '2.0' } } },
       { metadata: { benchmark: { rule_number: '3.0.0' } } },
     ] as CspBenchmarkRule[];
 
-    const sortedCspRulesTemplates = getSortedCspBenchmarkRulesTemplates(cspRulesTemplates);
+    const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules);
 
-    expect(sortedCspRulesTemplates).toEqual([
+    expect(sortedCspBenchmarkRules).toEqual([
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
       { metadata: { benchmark: { rule_number: '2.0' } } },
       { metadata: { benchmark: { rule_number: '3.0.0' } } },

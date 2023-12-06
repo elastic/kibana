@@ -20,8 +20,8 @@ import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common
 const chance = new Chance();
 
 jest.mock('./use_csp_rules', () => ({
-  useFindCspRule: jest.fn(),
-  useBulkUpdateCspRule: jest.fn(),
+  useFindCspBenchmarkRule: jest.fn(),
+  useBulkUpdateCspBenchmarkRule: jest.fn(),
 }));
 
 jest.mock('react-router-dom', () => ({
