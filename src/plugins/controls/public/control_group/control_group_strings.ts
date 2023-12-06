@@ -35,10 +35,6 @@ export const ControlGroupStrings = {
         i18n.translate('controls.controlGroup.manageControl.dataSource.dataViewTitle', {
           defaultMessage: 'Data view',
         }),
-      noControlTypeMessage: () =>
-        i18n.translate('controls.controlGroup.manageControl.dataSource.noControlTypeMessage', {
-          defaultMessage: 'No field selected yet',
-        }),
       getFieldTitle: () =>
         i18n.translate('controls.controlGroup.manageControl.dataSource.fieldTitle', {
           defaultMessage: 'Field',
@@ -231,6 +227,7 @@ export const ControlGroupStrings = {
             'Selections in one control narrow down available options in the next. Controls are chained from left to right.',
         }),
     },
+    /** TODO: These translations aren't used but they will be once https://github.com/elastic/kibana/issues/162985 is resolved */
     querySync: {
       getQuerySettingsTitle: () =>
         i18n.translate('controls.controlGroup.management.query.searchSettingsTitle', {

@@ -151,7 +151,8 @@ export const OptionsListEditorOptions = ({
   }, [fieldType, onChange, state.sortBy]);
 
   useEffect(() => {
-    // when field type changes, ensure that the selected search technique is still valid
+    // when field type changes, ensure that the selected search technique is still valid;
+    // if the selected search technique **isn't** valid, reset to the default
     const searchTechnique =
       initialInput?.searchTechnique &&
       compatibleSearchTechniques.includes(initialInput.searchTechnique)
