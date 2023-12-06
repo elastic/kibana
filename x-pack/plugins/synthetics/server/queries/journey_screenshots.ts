@@ -9,7 +9,7 @@ import {
   getJourneyScreenshot,
   ScreenshotReturnTypesUnion,
 } from '../legacy_uptime/lib/requests/get_journey_screenshot';
-import { isFullScreenshot, isRefResult, RefResult } from '../../common/runtime_types';
+import { isRefResult, RefResult } from '../../common/runtime_types';
 import { RouteContext, UptimeRouteContext } from '../routes/types';
 
 export type ClientContract = Buffer | { screenshotRef: RefResult };
@@ -35,15 +35,7 @@ export const journeyScreenshotHandler = async ({
     stepIndex,
   });
 
-  if (isFullScreenshot(result) && typeof result.synthetics?.blob !== 'undefined') {
-    return response.ok({
-      body: Buffer.from(result.synthetics.blob, 'base64'),
-      headers: {
-        'content-type': result.synthetics.blob_mime || 'image/png', // falls back to 'image/png' for earlier versions of synthetics
-        ...getSharedHeaders(result.synthetics.step.name, result.totalSteps),
-      },
-    });
-  } else if (isRefResult(result)) {
+  if (isRefResult(result)) {
     return response.ok({
       body: {
         screenshotRef: result,
