@@ -72,7 +72,6 @@ export interface GuideConfig {
     path: string;
   };
   steps: StepConfig[];
-  version: GuideVersion;
 }
 
 /* To append a link to the description, specify its text and url in the properties.
