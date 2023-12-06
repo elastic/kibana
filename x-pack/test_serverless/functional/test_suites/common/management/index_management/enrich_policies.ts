@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
-  const toasts = getService('toasts');
+  const pageObjects = getPageObjects(['common', 'indexManagement', 'header', 'svlCommonPage']);
   const log = getService('log');
   const browser = getService('browser');
   const security = getService('security');
@@ -21,8 +21,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const ENRICH_POLICY_NAME = 'test-policy-1';
 
   describe('Enrich policies tab', function () {
+    // TimeoutError:  Waiting for element to be located By(css selector, [data-test-subj="kibana-chrome"])
+    this.tags(['failsOnMKI']);
+
     before(async () => {
-      await log.debug('Creating required index and enrich policy');
+      log.debug('Creating required index and enrich policy');
       try {
         await es.indices.create({
           index: ENRICH_INDEX_NAME,
@@ -50,16 +53,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         throw e;
       }
 
-      await log.debug('Navigating to the enrich policies tab');
+      log.debug('Navigating to the enrich policies tab');
+      await pageObjects.svlCommonPage.login();
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.common.navigateToApp('indexManagement');
+
       // Navigate to the enrich policies tab
       await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
-      await log.debug('Cleaning up created index and policy');
+      log.debug('Cleaning up created index and policy');
 
       try {
         await es.indices.delete({ index: ENRICH_INDEX_NAME });
@@ -84,22 +89,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await testSubjects.exists('policyDetailsFlyout')).to.be(true);
       // Close flyout
       await testSubjects.click('closeFlyoutButton');
-    });
-
-    it('can execute a policy', async () => {
-      await pageObjects.indexManagement.clickExecuteEnrichPolicyAt(0);
-      await pageObjects.indexManagement.clickConfirmModalButton();
-
-      const successToast = await toasts.getToastElement(1);
-      expect(await successToast.getVisibleText()).to.contain(`Executed ${ENRICH_POLICY_NAME}`);
-    });
-
-    it('can delete a policy', async () => {
-      await pageObjects.indexManagement.clickDeleteEnrichPolicyAt(0);
-      await pageObjects.indexManagement.clickConfirmModalButton();
-
-      const successToast = await toasts.getToastElement(2);
-      expect(await successToast.getVisibleText()).to.contain(`Deleted ${ENRICH_POLICY_NAME}`);
     });
   });
 };

@@ -17,9 +17,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
-  const TEST_TEMPLATE = 'a_test_template';
+  const TEST_COMPONENT_TEMPLATE = '.a_test_component_template';
 
-  describe('Index Templates', function () {
+  describe('Index component templates', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
       // Navigate to the index management page
@@ -29,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('indexManagement');
       // Navigate to the index templates tab
-      await pageObjects.indexManagement.changeTabs('templatesTab');
+      await pageObjects.indexManagement.changeTabs('component_templatesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
@@ -37,55 +37,66 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.svlCommonPage.forceLogout();
     });
 
-    it('renders the index templates tab', async () => {
+    it('renders the component templates tab', async () => {
       const url = await browser.getCurrentUrl();
-      expect(url).to.contain(`/templates`);
+      expect(url).to.contain(`/component_templates`);
     });
 
-    describe('Index template list', () => {
+    describe('Component templates list', () => {
       before(async () => {
-        await es.indices.putIndexTemplate({
-          name: TEST_TEMPLATE,
+        await es.cluster.putComponentTemplate({
+          name: TEST_COMPONENT_TEMPLATE,
           body: {
-            index_patterns: ['test*'],
+            template: {
+              settings: {
+                index: {
+                  number_of_shards: 1,
+                },
+              },
+            },
           },
         });
       });
 
       after(async () => {
-        await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE });
+        await es.cluster.deleteComponentTemplate(
+          { name: TEST_COMPONENT_TEMPLATE },
+          { ignore: [404] }
+        );
       });
 
-      it('Displays the test template in the list of templates', async () => {
-        const templates = await testSubjects.findAll('row');
+      it('Displays the test component template in the list', async () => {
+        const templates = await testSubjects.findAll('componentTemplateTableRow');
 
         const getTemplateName = async (template: WebElementWrapper) => {
           const templateNameElement = await template.findByTestSubject('templateDetailsLink');
           return await templateNameElement.getVisibleText();
         };
 
-        const templatesList = await Promise.all(
+        const componentTemplateList = await Promise.all(
           templates.map((template) => getTemplateName(template))
         );
 
-        const newTemplateExists = Boolean(
-          templatesList.find((templateName) => templateName === TEST_TEMPLATE)
+        const newComponentTemplateExists = Boolean(
+          componentTemplateList.find((templateName) => templateName === TEST_COMPONENT_TEMPLATE)
         );
 
-        expect(newTemplateExists).to.be(true);
+        expect(newComponentTemplateExists).to.be(true);
       });
     });
 
-    describe('Create index template', () => {
+    describe('Create component template', () => {
       after(async () => {
-        await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE });
+        await es.cluster.deleteComponentTemplate(
+          { name: TEST_COMPONENT_TEMPLATE },
+          { ignore: [404] }
+        );
       });
 
-      it('Creates index template', async () => {
-        await testSubjects.click('createTemplateButton');
+      it('Creates component template', async () => {
+        await testSubjects.click('createPipelineButton');
 
-        await testSubjects.setValue('nameField', TEST_TEMPLATE);
-        await testSubjects.setValue('indexPatternsField', 'test*');
+        await testSubjects.setValue('nameField', TEST_COMPONENT_TEMPLATE);
 
         // Finish wizard flow
         await testSubjects.click('nextButton');
@@ -93,9 +104,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('nextButton');
         await testSubjects.click('nextButton');
         await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
 
-        expect(await testSubjects.getVisibleText('title')).to.contain(TEST_TEMPLATE);
+        expect(await testSubjects.getVisibleText('title')).to.contain(TEST_COMPONENT_TEMPLATE);
       });
     });
   });
