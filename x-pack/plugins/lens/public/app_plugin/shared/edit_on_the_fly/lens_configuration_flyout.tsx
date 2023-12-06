@@ -73,7 +73,9 @@ export function LensEditConfigurationFlyout({
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
-  const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
+  const { datasourceStates, visualization, isLoading, annotationGroups } = useLensSelector(
+    (state) => state.lens
+  );
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
   const suggestsLimitedColumns = activeDatasource?.suggestsLimitedColumns?.(datasourceState);
 
@@ -113,10 +115,33 @@ export function LensEditConfigurationFlyout({
         : false;
 
     const visualizationState = visualization.state;
-    return (
-      !isEqual(visualizationState, previousAttrs.state.visualization) || !datasourceStatesAreSame
-    );
-  }, [attributes.references, datasourceId, datasourceMap, datasourceStates, visualization.state]);
+    const customIsEqual = visualizationMap[previousAttrs.visualizationType]?.isEqual;
+    const visualizationStateIsEqual = customIsEqual
+      ? (() => {
+          try {
+            return customIsEqual(
+              previousAttrs.state.visualization,
+              previousAttrs.references,
+              visualizationState,
+              attributes.references,
+              annotationGroups
+            );
+          } catch (err) {
+            return false;
+          }
+        })()
+      : isEqual(visualizationState, previousAttrs.state.visualization);
+
+    return !visualizationStateIsEqual || !datasourceStatesAreSame;
+  }, [
+    attributes.references,
+    datasourceId,
+    datasourceMap,
+    datasourceStates,
+    visualizationMap,
+    annotationGroups,
+    visualization.state,
+  ]);
 
   const onCancel = useCallback(() => {
     const previousAttrs = previousAttributes.current;
