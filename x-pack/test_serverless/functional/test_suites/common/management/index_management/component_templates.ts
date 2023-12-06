@@ -59,7 +59,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await es.cluster.deleteComponentTemplate({ name: TEST_COMPONENT_TEMPLATE });
+        await es.cluster.deleteComponentTemplate(
+          { name: TEST_COMPONENT_TEMPLATE },
+          { ignore: [404] }
+        );
       });
 
       it('Displays the test component template in the list', async () => {
@@ -84,7 +87,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Create component template', () => {
       after(async () => {
-        await es.cluster.deleteComponentTemplate({ name: TEST_COMPONENT_TEMPLATE });
+        await es.cluster.deleteComponentTemplate(
+          { name: TEST_COMPONENT_TEMPLATE },
+          { ignore: [404] }
+        );
       });
 
       it('Creates component template', async () => {
