@@ -44,6 +44,7 @@ interface Props {
   helpText?: JSX.Element;
   onBlur?: () => void;
   showButtonTitle?: boolean;
+  dataTestSubj?: string;
   euiCodeEditorProps?: { [key: string]: any };
 }
 
@@ -66,6 +67,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   helpText,
   onBlur,
   showButtonTitle,
+  dataTestSubj,
   euiCodeEditorProps = {},
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
@@ -154,7 +156,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
 
   return (
     <EuiFormRow
-      data-test-subj="actionJsonEditor"
+      data-test-subj={dataTestSubj}
       fullWidth
       error={errors}
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
