@@ -85,53 +85,56 @@ export const renderApp = ({
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
+  const PresentationContextProvider = plugins.presentationUtil?.ContextProvider ?? React.Fragment;
 
   ReactDOM.render(
-    <EuiErrorBoundary>
-      <ApplicationUsageTrackingProvider>
-        <KibanaThemeProvider {...{ theme: { theme$ } }}>
-          <CloudProvider>
-            <KibanaContextProvider
-              services={{
-                ...core,
-                ...plugins,
-                storage: new Storage(localStorage),
-                isDev,
-                kibanaVersion,
-                isServerless,
-              }}
-            >
-              <ObservabilityAIAssistantProvider value={plugins.observabilityAIAssistant.service}>
-                <PluginContext.Provider
-                  value={{
-                    config,
-                    appMountParameters,
-                    observabilityRuleTypeRegistry,
-                    ObservabilityPageTemplate,
-                  }}
-                >
-                  <Router history={history}>
-                    <EuiThemeProvider darkMode={isDarkMode}>
-                      <i18nCore.Context>
-                        <RedirectAppLinks
-                          coreStart={core}
-                          data-test-subj="observabilityMainContainer"
-                        >
-                          <QueryClientProvider client={queryClient}>
-                            <App />
-                            <HideableReactQueryDevTools />
-                          </QueryClientProvider>
-                        </RedirectAppLinks>
-                      </i18nCore.Context>
-                    </EuiThemeProvider>
-                  </Router>
-                </PluginContext.Provider>
-              </ObservabilityAIAssistantProvider>
-            </KibanaContextProvider>
-          </CloudProvider>
-        </KibanaThemeProvider>
-      </ApplicationUsageTrackingProvider>
-    </EuiErrorBoundary>,
+    <PresentationContextProvider>
+      <EuiErrorBoundary>
+        <ApplicationUsageTrackingProvider>
+          <KibanaThemeProvider {...{ theme: { theme$ } }}>
+            <CloudProvider>
+              <KibanaContextProvider
+                services={{
+                  ...core,
+                  ...plugins,
+                  storage: new Storage(localStorage),
+                  isDev,
+                  kibanaVersion,
+                  isServerless,
+                }}
+              >
+                <ObservabilityAIAssistantProvider value={plugins.observabilityAIAssistant.service}>
+                  <PluginContext.Provider
+                    value={{
+                      config,
+                      appMountParameters,
+                      observabilityRuleTypeRegistry,
+                      ObservabilityPageTemplate,
+                    }}
+                  >
+                    <Router history={history}>
+                      <EuiThemeProvider darkMode={isDarkMode}>
+                        <i18nCore.Context>
+                          <RedirectAppLinks
+                            coreStart={core}
+                            data-test-subj="observabilityMainContainer"
+                          >
+                            <QueryClientProvider client={queryClient}>
+                              <App />
+                              <HideableReactQueryDevTools />
+                            </QueryClientProvider>
+                          </RedirectAppLinks>
+                        </i18nCore.Context>
+                      </EuiThemeProvider>
+                    </Router>
+                  </PluginContext.Provider>
+                </ObservabilityAIAssistantProvider>
+              </KibanaContextProvider>
+            </CloudProvider>
+          </KibanaThemeProvider>
+        </ApplicationUsageTrackingProvider>
+      </EuiErrorBoundary>
+    </PresentationContextProvider>,
     element
   );
   return () => {

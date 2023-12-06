@@ -7,18 +7,22 @@
 
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
-
+import { SLO_EMBEDDABLE } from '../../../embeddable/slo/overview/slo_embeddable';
+import { useKibana } from '../../../utils/kibana_react';
 export function useSloListActions({
   slo,
   setIsAddRuleFlyoutOpen,
   setIsActionsPopoverOpen,
   setDeleteConfirmationModalOpen,
+  setDashboardAttachmentReady,
 }: {
   slo: SLOWithSummaryResponse;
   setIsActionsPopoverOpen: (val: boolean) => void;
   setIsAddRuleFlyoutOpen: (val: boolean) => void;
   setDeleteConfirmationModalOpen: (val: boolean) => void;
+  setDashboardAttachmentReady: (val: boolean) => void;
 }) {
+  const { embeddable } = useKibana().services;
   const { mutate: deleteSlo } = useDeleteSlo();
 
   const handleDeleteConfirm = () => {
@@ -34,9 +38,32 @@ export function useSloListActions({
     setIsAddRuleFlyoutOpen(true);
   };
 
+  function handleAttachToDashboardSave({ dashboardId, newTitle, newDescription }) {
+    const stateTransfer = embeddable!.getStateTransfer();
+    const embeddableInput = {
+      title: newTitle,
+      description: newDescription,
+      sloId: slo.id,
+      sloInstanceId: slo.instanceId,
+    };
+
+    const state = {
+      input: embeddableInput,
+      type: SLO_EMBEDDABLE,
+    };
+
+    const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
+
+    stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+      state,
+      path,
+    });
+  }
+
   return {
     handleDeleteConfirm,
     handleDeleteCancel,
     handleCreateRule,
+    handleAttachToDashboardSave,
   };
 }
