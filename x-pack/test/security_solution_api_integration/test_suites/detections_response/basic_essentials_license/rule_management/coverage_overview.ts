@@ -23,13 +23,13 @@ import {
   installPrebuiltRules,
   getCustomQueryRuleParams,
 } from '../../utils';
+import { createNonSecurityRule } from '../../utils/rules/create_non_security_rule';
 import { getCoverageOverview } from '../../utils/rules/get_coverage_overview';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  const alertingApi = getService('alertingApi');
 
   describe('@serverless @ess coverage_overview', () => {
     beforeEach(async () => {
@@ -38,21 +38,32 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('does NOT error when there exist some stack rules in addition to security detection rules', async () => {
       // Creates a non-security type rule
-      await alertingApi.createRule({
-        consumer: 'security',
-        name: 'Threshold rule',
-        ruleTypeId: 'observability.rules.custom_threshold',
-        params: {
-          criteria: [],
-          searchConfiguration: {
-            query: {
-              query: '',
-              language: 'kuery',
-            },
-            index: 'data-view-id',
-          },
-        },
-      });
+      // await supertest
+      //   .post(`/api/alerting/rule`)
+      //   .set('kbn-xsrf', 'foo')
+      //   .set('x-elastic-internal-origin', 'foo')
+      //   .send({
+      //     params: {
+      //       criteria: [],
+      //       searchConfiguration: {
+      //         query: {
+      //           query: '',
+      //           language: 'kuery',
+      //         },
+      //         index: 'data-view-id',
+      //       },
+      //     },
+      //     consumer: 'security',
+      //     schedule: {
+      //       interval: '5m',
+      //     },
+      //     name: 'Threshold rule',
+      //     rule_type_id: 'observability.rules.custom_threshold',
+      //   })
+      //   .expect(200);
+
+      await createNonSecurityRule(supertest);
+
       const rule1 = await createRule(
         supertest,
         log,

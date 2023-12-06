@@ -7,7 +7,6 @@
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, kbnTestConfig, kibanaTestUser } from '@kbn/test';
-import { AlertingApiProvider } from '../../../../test_serverless/api_integration/services/alerting_api';
 import { services } from '../../../api_integration/services';
 
 interface CreateTestConfigOptions {
@@ -50,10 +49,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
     return {
       testFiles,
       servers,
-      services: {
-        ...services,
-        alertingApi: AlertingApiProvider,
-      },
+      services,
       junit: {
         reportName: 'X-Pack Detection Engine API Integration Tests',
       },

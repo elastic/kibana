@@ -36,7 +36,7 @@ export const getIndexPatterns = (): string[] => [
 
 export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
 
-export const getMitre1 = (): Threat => ({
+const getMitre1 = (): Threat => ({
   framework: 'MITRE ATT&CK',
   tactic: {
     name: getMockThreatData().tactic.name,

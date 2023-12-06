@@ -6,6 +6,7 @@
  */
 
 import { getMockThreatData } from '@kbn/security-solution-plugin/public/detections/mitre/mitre_tactics_techniques';
+import { Threat } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON,
   COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES,
@@ -15,7 +16,7 @@ import { createRule } from '../../../../tasks/api_calls/rules';
 import { visit } from '../../../../tasks/navigation';
 import { RULES_COVERAGE_OVERVIEW_URL } from '../../../../urls/rules_management';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
-import { getMitre1, getNewRule } from '../../../../objects/rule';
+import { getNewRule } from '../../../../objects/rule';
 import {
   createAndInstallMockedPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
@@ -32,6 +33,35 @@ import {
   selectCoverageOverviewActivityFilterOption,
   selectCoverageOverviewSourceFilterOption,
 } from '../../../../tasks/rules_coverage_overview';
+
+export const getMitre1 = (): Threat => ({
+  framework: 'MITRE ATT&CK',
+  tactic: {
+    name: getMockThreatData().tactic.name,
+    id: getMockThreatData().tactic.id,
+    reference: getMockThreatData().tactic.reference,
+  },
+  technique: [
+    {
+      id: getMockThreatData().technique.id,
+      reference: getMockThreatData().technique.reference,
+      name: getMockThreatData().technique.name,
+      subtechnique: [
+        {
+          id: getMockThreatData().subtechnique.id,
+          name: getMockThreatData().subtechnique.name,
+          reference: getMockThreatData().subtechnique.reference,
+        },
+      ],
+    },
+    {
+      name: getMockThreatData().technique.name,
+      id: getMockThreatData().technique.id,
+      reference: getMockThreatData().technique.reference,
+      subtechnique: [],
+    },
+  ],
+});
 
 const prebuiltRules = [
   createRuleAssetSavedObject({
