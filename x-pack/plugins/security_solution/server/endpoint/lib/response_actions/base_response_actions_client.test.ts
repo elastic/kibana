@@ -25,6 +25,7 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 import { ResponseActionsNotSupportedError } from '../../services/actions/clients/errors';
 import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
+import type { CasesByAlertIDParams } from '@kbn/cases-plugin/server/client/cases/get';
 
 describe('`ResponseActionsClientImpl` class', () => {
   let esClient: ElasticsearchClientMock;
@@ -69,19 +70,69 @@ describe('`ResponseActionsClientImpl` class', () => {
   });
 
   describe('#updateCases()', () => {
-    // TODO:PT implement
+    const KNOWN_ALERT_ID_1 = 'alert-1';
+    const KNOWN_ALERT_ID_2 = 'alert-2';
+    const KNOWN_ALERT_ID_3 = 'alert-3';
+
+    beforeEach(async () => {
+      (casesClient.cases.getCasesByAlertID as jest.Mock).mockImplementation(
+        async ({ alertID }: CasesByAlertIDParams) => {
+          if (alertID === KNOWN_ALERT_ID_1) {
+            return [{ id: 'case-1' }, { id: 'case-2' }, { id: 'case-3' }];
+          }
+
+          if (alertID === KNOWN_ALERT_ID_2) {
+            return [{ id: 'case-3' }];
+          }
+
+          if (alertID === KNOWN_ALERT_ID_3) {
+            return [];
+          }
+
+          throw new Error('test: alert id not found');
+        }
+      );
+    });
+
+    it.todo('should do nothing if no caseIds nor alertIds are provided');
+
+    it.todo('should do nothing if no hosts were provided');
+
+    it.todo('should do nothing if cases client was not provided');
+
+    it.todo('should retrieve case IDs from alerts if alertIds was provided');
+
+    it.todo('should not error is retrieving case id for alert fails');
+
+    it.todo('should do nothing if alertIDs were not associated with any cases');
+
+    it.todo('should update cases with an attachment for each host');
+
+    it.todo('should not error if update to a case fails');
   });
 
   describe('#fetchActionDetails()', () => {
-    // TODO:PT Implement
+    it.todo('should retrieve action details');
   });
 
   describe('#writeActionRequestToEndpointIndex()', () => {
-    // TODO:PT Implement
+    it.todo('should return indexed record on success');
+
+    it.todo('should include alert_ids if any were provided');
+
+    it.todo('should included hosts if any where provided');
+
+    it.todo('should include Rule information if rule_id and rule_name were provided');
+
+    it.todo('should error if index of document did not return a 201');
+
+    it.todo('should throw ResponseActionsClientError if operation fails');
   });
 
   describe('#writeActionResponseToEndpointIndex()', () => {
-    // TODO:PT implement
+    it.todo('should return indexed record on success');
+
+    it.todo('should throw ResponseActionsClientError if operation fails');
   });
 });
 
