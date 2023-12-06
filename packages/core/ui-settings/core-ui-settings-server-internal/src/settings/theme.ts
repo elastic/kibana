@@ -22,7 +22,7 @@ function parseThemeTags() {
 function getThemeInfo(options: GetThemeSettingsOptions) {
   if (options?.isDist ?? true) {
     return {
-      defaultDarkMode: false,
+      defaultDarkMode: true,
     };
   }
 
