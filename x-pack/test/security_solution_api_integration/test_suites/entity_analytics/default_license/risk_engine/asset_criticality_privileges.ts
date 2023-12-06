@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { ROLES as SERVERLESS_USERNAMES } from '@kbn/security-solution-plugin/common/test';
 import { assetCriticalityRouteHelpersFactoryNoAuth } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { usersAndRolesFactory } from '../../utils/users_and_roles';
 
 const USER_PASSWORD = 'changeme';
 const ROLES = [
@@ -63,84 +64,88 @@ const USERNAME_TO_ROLES = {
 };
 
 export default ({ getService }: FtrProviderContext) => {
-  describe('@ess Entity Analytics - Asset Criticality Privileges API', () => {
-    const supertestWithoutAuth = getService('supertestWithoutAuth');
-    const assetCriticalityRoutesNoAuth =
-      assetCriticalityRouteHelpersFactoryNoAuth(supertestWithoutAuth);
-    const security = getService('security');
+  describe('Entity Analytics - Asset Criticality Privileges API', () => {
+    describe('@ess Asset Criticality Privileges API', () => {
+      const supertestWithoutAuth = getService('supertestWithoutAuth');
+      const assetCriticalityRoutesNoAuth =
+        assetCriticalityRouteHelpersFactoryNoAuth(supertestWithoutAuth);
+      const userHelper = usersAndRolesFactory(getService('security'));
 
-    const createRole = async ({ name, privileges }: { name: string; privileges: any }) => {
-      return await security.role.create(name, privileges);
-    };
+      async function createPrivilegeTestUsers() {
+        const rolePromises = ROLES.map((role) => userHelper.createRole(role));
 
-    const createUser = async ({
-      username,
-      password,
-      roles,
-    }: {
-      username: string;
-      password: string;
-      roles: string[];
-    }) => {
-      return await security.user.create(username, {
-        password,
-        roles,
-        full_name: username.replace('_', ' '),
-        email: `${username}@elastic.co`,
+        await Promise.all(rolePromises);
+        const userPromises = Object.entries(USERNAME_TO_ROLES).map(([username, roles]) =>
+          userHelper.createUser({ username, roles, password: USER_PASSWORD })
+        );
+
+        return Promise.all(userPromises);
+      }
+
+      const getPrivilegesForUsername = async (username: string) =>
+        assetCriticalityRoutesNoAuth.privilegesForUser({
+          username,
+          password: USER_PASSWORD,
+        });
+      before(async () => {
+        await createPrivilegeTestUsers();
       });
-    };
 
-    async function createPrivilegeTestUsers() {
-      const rolePromises = ROLES.map((role) => createRole(role));
-
-      await Promise.all(rolePromises);
-      const userPromises = Object.entries(USERNAME_TO_ROLES).map(([username, roles]) =>
-        createUser({ username, roles, password: USER_PASSWORD })
-      );
-
-      return Promise.all(userPromises);
-    }
-
-    const getPrivilegesForUsername = async (username: string) =>
-      assetCriticalityRoutesNoAuth.privilegesForUser({
-        username,
-        password: USER_PASSWORD,
+      describe('Asset Criticality privileges API', () => {
+        it('should return has_all_required true for user with all risk engine privileges', async () => {
+          const { body } = await getPrivilegesForUsername('all');
+          expect(body.has_all_required).to.eql(true);
+          expect(body.privileges).to.eql({
+            elasticsearch: {
+              index: {
+                '.asset-criticality.asset-criticality-*': {
+                  read: true,
+                  write: true,
+                },
+              },
+            },
+          });
+        });
+        it('should return has_all_required false for user without asset criticality index read', async () => {
+          const { body } = await getPrivilegesForUsername('no_asset_criticality_index_read');
+          expect(body.has_all_required).to.eql(false);
+          expect(body.privileges).to.eql({
+            elasticsearch: {
+              index: {
+                '.asset-criticality.asset-criticality-*': {
+                  read: false,
+                  write: true,
+                },
+              },
+            },
+          });
+        });
+        it('should return has_all_required false for user without asset criticality index write', async () => {
+          const { body } = await getPrivilegesForUsername('no_asset_criticality_index_write');
+          expect(body.has_all_required).to.eql(false);
+          expect(body.privileges).to.eql({
+            elasticsearch: {
+              index: {
+                '.asset-criticality.asset-criticality-*': {
+                  read: true,
+                  write: false,
+                },
+              },
+            },
+          });
+        });
       });
-    before(async () => {
-      await createPrivilegeTestUsers();
     });
 
-    describe('Asset Criticality privileges API', () => {
-      it('should return has_all_required true for user with all risk engine privileges', async () => {
-        const { body } = await getPrivilegesForUsername('all');
-        expect(body.has_all_required).to.eql(true);
-        expect(body.privileges).to.eql({
-          elasticsearch: {
-            index: {
-              '.asset-criticality.asset-criticality-*': {
-                read: true,
-                write: true,
-              },
-            },
-          },
+    describe('@serverless Asset Criticality Privileges API', () => {
+      const supertestWithoutAuth = getService('supertestWithoutAuth');
+      const assetCriticalityRoutesNoAuth =
+        assetCriticalityRouteHelpersFactoryNoAuth(supertestWithoutAuth);
+      it('should return that t1_analyst only has read privileges', async () => {
+        const { body } = await assetCriticalityRoutesNoAuth.privilegesForUser({
+          username: SERVERLESS_USERNAMES.t1_analyst,
+          password: USER_PASSWORD,
         });
-      });
-      it('should return has_all_required false for user without asset criticality index read', async () => {
-        const { body } = await getPrivilegesForUsername('no_asset_criticality_index_read');
-        expect(body.has_all_required).to.eql(false);
-        expect(body.privileges).to.eql({
-          elasticsearch: {
-            index: {
-              '.asset-criticality.asset-criticality-*': {
-                read: false,
-                write: true,
-              },
-            },
-          },
-        });
-      });
-      it('should return has_all_required false for user without asset criticality index write', async () => {
-        const { body } = await getPrivilegesForUsername('no_asset_criticality_index_write');
         expect(body.has_all_required).to.eql(false);
         expect(body.privileges).to.eql({
           elasticsearch: {
@@ -153,46 +158,23 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
       });
-    });
-  });
 
-  describe('@serverless privileges_apis', () => {
-    const supertestWithoutAuth = getService('supertestWithoutAuth');
-    const assetCriticalityRoutesNoAuth =
-      assetCriticalityRouteHelpersFactoryNoAuth(supertestWithoutAuth);
-    it('should return that t1_analyst only has read privileges', async () => {
-      const { body } = await assetCriticalityRoutesNoAuth.privilegesForUser({
-        username: SERVERLESS_USERNAMES.t1_analyst,
-        password: USER_PASSWORD,
-      });
-      expect(body.has_all_required).to.eql(false);
-      expect(body.privileges).to.eql({
-        elasticsearch: {
-          index: {
-            '.asset-criticality.asset-criticality-*': {
-              read: true,
-              write: false,
+      it('should return that t2_analyst only has all privileges', async () => {
+        const { body } = await assetCriticalityRoutesNoAuth.privilegesForUser({
+          username: SERVERLESS_USERNAMES.t2_analyst,
+          password: USER_PASSWORD,
+        });
+        expect(body.has_all_required).to.eql(true);
+        expect(body.privileges).to.eql({
+          elasticsearch: {
+            index: {
+              '.asset-criticality.asset-criticality-*': {
+                read: true,
+                write: true,
+              },
             },
           },
-        },
-      });
-    });
-
-    it('should return that t2_analyst only has all privileges', async () => {
-      const { body } = await assetCriticalityRoutesNoAuth.privilegesForUser({
-        username: SERVERLESS_USERNAMES.t2_analyst,
-        password: USER_PASSWORD,
-      });
-      expect(body.has_all_required).to.eql(true);
-      expect(body.privileges).to.eql({
-        elasticsearch: {
-          index: {
-            '.asset-criticality.asset-criticality-*': {
-              read: true,
-              write: true,
-            },
-          },
-        },
+        });
       });
     });
   });
