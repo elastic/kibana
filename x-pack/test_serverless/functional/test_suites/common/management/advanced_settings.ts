@@ -38,6 +38,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   let INITIAL_CSV_QUOTE_VALUES_SETTING_VALUE: any;
 
   describe('Common advanced settings', function () {
+    // the suite is flaky on MKI
+    this.tags(['failsOnMKI']);
     before(async () => {
       // We need kibana_admin role in order to update settings
       await security.testUser.setRoles(['kibana_admin']);
