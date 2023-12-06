@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AggTypes } from '../../common';
 
@@ -42,4 +43,31 @@ const totalAggregations = [
   },
 ];
 
-export { totalAggregations };
+const sortNullsLast = (
+  rows: DatatableRow[],
+  direction: 'asc' | 'desc',
+  id: string
+): DatatableRow[] => {
+  return rows.sort((row1, row2) => {
+    const rowA = row1[id];
+    const rowB = row2[id];
+
+    if (rowA === null) {
+      return 1;
+    }
+    if (rowB === null) {
+      return -1;
+    }
+    if (rowA === rowB) {
+      return 0;
+    }
+
+    if (direction === 'desc') {
+      return rowA < rowB ? 1 : -1;
+    } else {
+      return rowA < rowB ? -1 : 1;
+    }
+  });
+};
+
+export { totalAggregations, sortNullsLast };
