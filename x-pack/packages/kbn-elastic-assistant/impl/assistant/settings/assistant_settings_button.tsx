@@ -7,8 +7,8 @@
 
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+
 import { Conversation } from '../../..';
 import { AssistantSettings, CONVERSATIONS_TAB } from './assistant_settings';
 import * as i18n from './translations';
@@ -37,7 +37,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     selectedConversation,
     setSelectedConversationId,
   }) => {
-    const { setSelectedSettingsTab } = useAssistantContext();
+    const { toasts, setSelectedSettingsTab } = useAssistantContext();
 
     // Modal control functions
     const cleanupAndCloseModal = useCallback(() => {
@@ -50,7 +50,11 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
 
     const handleSave = useCallback(() => {
       cleanupAndCloseModal();
-    }, [cleanupAndCloseModal]);
+      toasts?.addSuccess({
+        iconType: 'check',
+        title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
+      });
+    }, [cleanupAndCloseModal, toasts]);
 
     const handleShowConversationSettings = useCallback(() => {
       setSelectedSettingsTab(CONVERSATIONS_TAB);
