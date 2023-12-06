@@ -90,9 +90,10 @@ export class SAMLSessionManager {
     }
 
     let session: Session;
-    const kbnVersion = await this.kbnClient.version.get();
+
     if (this.isCloud) {
       this.log.debug(`new SAML authentication with '${role}' role`);
+      const kbnVersion = await this.kbnClient.version.get();
       const { email, password } = this.getCloudUserByRole(role);
       session = await createCloudSAMLSession({
         email,
