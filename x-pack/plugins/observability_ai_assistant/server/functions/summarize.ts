@@ -6,6 +6,7 @@
  */
 
 import type { FunctionRegistrationParameters } from '.';
+import { KnowledgeBaseEntryRole } from '../../common';
 
 export function registerSummarizationFunction({
   client,
@@ -62,8 +63,10 @@ export function registerSummarizationFunction({
       signal
     ) => {
       return client
-        .summarize({
+        .createKnowledgeBaseEntry({
           entry: {
+            doc_id: id,
+            role: KnowledgeBaseEntryRole.AssistantSummarization,
             id,
             text,
             is_correction: isCorrection,

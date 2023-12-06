@@ -42,6 +42,7 @@ const mockService: MockedService = {
   getLicenseManagementLocator: jest.fn(),
   isEnabled: jest.fn(),
   start: jest.fn(),
+  register: jest.fn(),
 };
 
 const mockChatService = createMockChatService();

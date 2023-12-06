@@ -1408,6 +1408,21 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ALERT_WORKFLOW_STATUS_UPDATED_AT",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_WORKFLOW_STATUS_UPDATED_AT",
+        "description": [],
+        "signature": [
+          "\"kibana.alert.workflow_status_updated_at\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/legacy_alerts_as_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.ALERT_WORKFLOW_TAGS",
         "type": "string",
         "tags": [],

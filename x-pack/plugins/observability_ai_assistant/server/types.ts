@@ -20,11 +20,20 @@ import type {
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { ObservabilityAIAssistantService } from './service';
 
-/* eslint-disable @typescript-eslint/no-empty-interface*/
-export interface ObservabilityAIAssistantPluginStart {}
 export interface ObservabilityAIAssistantPluginSetup {
+  /**
+   * Returns a Observability AI Assistant service instance
+   */
   service: ObservabilityAIAssistantService;
 }
+
+export interface ObservabilityAIAssistantPluginStart {
+  /**
+   * Returns a Observability AI Assistant service instance
+   */
+  service: ObservabilityAIAssistantService;
+}
+
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
   security: SecurityPluginSetup;

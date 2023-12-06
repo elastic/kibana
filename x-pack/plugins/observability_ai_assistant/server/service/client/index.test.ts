@@ -17,7 +17,7 @@ import { MessageRole, type Message } from '../../../common';
 import { StreamingChatResponseEventType } from '../../../common/conversation_complete';
 import type { CreateChatCompletionResponseChunk } from '../../../public/types';
 import type { ChatFunctionClient } from '../chat_function_client';
-import type { KnowledgeBaseService } from '../kb_service';
+import type { KnowledgeBaseService } from '../knowledge_base_service';
 
 type ChunkDelta = CreateChatCompletionResponseChunk['choices'][number]['delta'];
 

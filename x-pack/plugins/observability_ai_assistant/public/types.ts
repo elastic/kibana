@@ -37,6 +37,7 @@ import type {
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { PendingMessage } from '../common/types';
 import type { StreamingChatResponseEvent } from '../common/conversation_complete';
+import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -74,6 +75,7 @@ export interface ObservabilityAIAssistantService {
   getLicense: () => Observable<ILicense>;
   getLicenseManagementLocator: () => SharePluginStart;
   start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
+  register: (fn: ChatRegistrationRenderFunction) => void;
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
@@ -90,8 +92,9 @@ export type ChatRegistrationRenderFunction = ({}: {
   registerRenderFunction: RegisterRenderFunctionDefinition;
 }) => Promise<void>;
 
-export interface ObservabilityAIAssistantPluginStart extends ObservabilityAIAssistantService {
-  register: (fn: ChatRegistrationRenderFunction) => void;
+export interface ObservabilityAIAssistantPluginStart {
+  service: ObservabilityAIAssistantService;
+  useGenAIConnectors: () => UseGenAIConnectorsResult;
 }
 
 export interface ObservabilityAIAssistantPluginSetup {}

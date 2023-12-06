@@ -14,13 +14,17 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
-import { ContextRegistry, RegisterContextDefinition } from '../../common/types';
+import {
+  ContextRegistry,
+  KnowledgeBaseEntryRole,
+  RegisterContextDefinition,
+} from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ChatFunctionClient } from './chat_function_client';
 import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
 import { kbComponentTemplate } from './kb_component_template';
-import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './kb_service';
+import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './knowledge_base_service';
 import type {
   ChatRegistrationFunction,
   FunctionHandlerRegistry,
@@ -327,13 +331,14 @@ export class ObservabilityAIAssistantService {
             const entryWithSystemProperties = {
               ...entry,
               '@timestamp': new Date().toISOString(),
+              doc_id: entry.id,
               public: true,
               confidence: 'high' as const,
               is_correction: false,
               labels: {
                 ...entry.labels,
-                document_id: entry.id,
               },
+              role: KnowledgeBaseEntryRole.Elastic,
             };
 
             const operations =

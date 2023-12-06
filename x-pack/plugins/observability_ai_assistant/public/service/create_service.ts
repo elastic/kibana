@@ -26,7 +26,7 @@ export function createService({
   licenseStart: LicensingPluginStart;
   securityStart: SecurityPluginStart;
   shareStart: SharePluginStart;
-}): ObservabilityAIAssistantService & { register: (fn: ChatRegistrationRenderFunction) => void } {
+}): ObservabilityAIAssistantService {
   const client = createCallObservabilityAIAssistantAPI(coreStart);
 
   const registrations: ChatRegistrationRenderFunction[] = [];

@@ -28,6 +28,12 @@ export enum MessageRole {
   Elastic = 'elastic',
 }
 
+export enum KnowledgeBaseEntryRole {
+  AssistantSummarization = 'assistant_summarization',
+  UserEntry = 'user_entry',
+  Elastic = 'elastic',
+}
+
 export interface PendingMessage {
   message: Message['message'];
   aborted?: boolean;
@@ -78,10 +84,12 @@ export interface KnowledgeBaseEntry {
   '@timestamp': string;
   id: string;
   text: string;
+  doc_id: string;
   confidence: 'low' | 'medium' | 'high';
   is_correction: boolean;
   public: boolean;
   labels: Record<string, string>;
+  role: KnowledgeBaseEntryRole;
 }
 
 export type CompatibleJSONSchema = Exclude<JSONSchema, boolean>;
