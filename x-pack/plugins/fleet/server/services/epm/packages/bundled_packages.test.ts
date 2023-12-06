@@ -53,17 +53,18 @@ describe('bundledPackages', () => {
     it('return packages in bundled directory', async () => {
       const packages = await getBundledPackages();
       expect(packages).toEqual([
-        {
+        expect.objectContaining({
           name: 'apm',
           version: '8.8.0',
-          buffer: Buffer.from('TEST'),
-        },
-        {
+        }),
+        expect.objectContaining({
           name: 'test',
           version: '1.0.0',
-          buffer: Buffer.from('TEST'),
-        },
+        }),
       ]);
+
+      expect(await packages[0]?.getBuffer()).toEqual(Buffer.from('TEST'));
+      expect(await packages[1]?.getBuffer()).toEqual(Buffer.from('TEST'));
     });
 
     it('should use cache if called multiple time', async () => {
@@ -78,22 +79,28 @@ describe('bundledPackages', () => {
       const pkg = await getBundledPackageByPkgKey('apm');
 
       expect(pkg).toBeDefined();
-      expect(pkg).toEqual({
-        name: 'apm',
-        version: '8.8.0',
-        buffer: Buffer.from('TEST'),
-      });
+      expect(pkg).toEqual(
+        expect.objectContaining({
+          name: 'apm',
+          version: '8.8.0',
+        })
+      );
+
+      expect(await pkg?.getBuffer()).toEqual(Buffer.from('TEST'));
     });
 
     it('should return package by name and version if version is provided', async () => {
       const pkg = await getBundledPackageByPkgKey('apm-8.8.0');
 
       expect(pkg).toBeDefined();
-      expect(pkg).toEqual({
-        name: 'apm',
-        version: '8.8.0',
-        buffer: Buffer.from('TEST'),
-      });
+      expect(pkg).toEqual(
+        expect.objectContaining({
+          name: 'apm',
+          version: '8.8.0',
+        })
+      );
+
+      expect(await pkg?.getBuffer()).toEqual(Buffer.from('TEST'));
     });
 
     it('should return package by name and version if version is provided and do not exists', async () => {
