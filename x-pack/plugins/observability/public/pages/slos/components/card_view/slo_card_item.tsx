@@ -41,7 +41,7 @@ export interface Props {
   cardsPerRow: number;
 }
 
-const useCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
+export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
   const colors = {
     DEGRADING: useEuiBackgroundColor('warning'),
     VIOLATED: useEuiBackgroundColor('danger'),
@@ -57,22 +57,12 @@ const getSubTitle = (slo: SLOWithSummaryResponse, cardsPerRow: number) => {
 };
 
 export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cardsPerRow }: Props) {
-  const {
-    application: { navigateToUrl },
-  } = useKibana().services;
-
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
-
-  const { sliValue, sloTarget, sloDetailsUrl } = useSloFormattedSummary(slo);
-
-  const cardColor = useCardColor(slo.summary.status);
-
-  const subTitle = getSubTitle(slo, cardsPerRow);
 
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
@@ -105,45 +95,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
         }}
         title={slo.summary.status}
       >
-        <Chart>
-          <Settings
-            baseTheme={DARK_THEME}
-            onElementClick={([d]) => {
-              if (isMetricElementEvent(d)) {
-                navigateToUrl(sloDetailsUrl);
-              }
-            }}
-            locale={i18n.getLocale()}
-          />
-          <Metric
-            id={`${slo.id}-${slo.instanceId}`}
-            data={[
-              [
-                {
-                  title: slo.name,
-                  subtitle: subTitle,
-                  value: sliValue,
-                  trendShape: MetricTrendShape.Area,
-                  trend: historicalSliData?.map((d) => ({
-                    x: d.key as number,
-                    y: d.value as number,
-                  })),
-                  extra: (
-                    <FormattedMessage
-                      id="xpack.observability.sLOGridItem.targetFlexItemLabel"
-                      defaultMessage="Target {target}"
-                      values={{
-                        target: sloTarget,
-                      }}
-                    />
-                  ),
-                  icon: () => <EuiIcon type="visGauge" size="l" />,
-                  color: cardColor,
-                },
-              ],
-            ]}
-          />
-        </Chart>
+        <SloCardChart slo={slo} historicalSliData={historicalSliData} cardsPerRow={cardsPerRow} />
         {(isMouseOver || isActionsPopoverOpen) && (
           <SloCardItemActions
             slo={slo}
@@ -178,5 +130,65 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
         />
       ) : null}
     </>
+  );
+}
+
+export function SloCardChart({
+  slo,
+  cardsPerRow,
+  historicalSliData,
+}: {
+  slo: SLOWithSummaryResponse;
+  cardsPerRow: number;
+  historicalSliData?: Array<{ key?: number; value?: number }>;
+}) {
+  const {
+    application: { navigateToUrl },
+  } = useKibana().services;
+
+  const cardColor = useSloCardColor(slo.summary.status);
+  const subTitle = getSubTitle(slo, cardsPerRow);
+  const { sliValue, sloTarget, sloDetailsUrl } = useSloFormattedSummary(slo);
+
+  return (
+    <Chart>
+      <Settings
+        baseTheme={DARK_THEME}
+        onElementClick={([d]) => {
+          if (isMetricElementEvent(d)) {
+            navigateToUrl(sloDetailsUrl);
+          }
+        }}
+        locale={i18n.getLocale()}
+      />
+      <Metric
+        id={`${slo.id}-${slo.instanceId}`}
+        data={[
+          [
+            {
+              title: slo.name,
+              subtitle: subTitle,
+              value: sliValue,
+              trendShape: MetricTrendShape.Area,
+              trend: historicalSliData?.map((d) => ({
+                x: d.key as number,
+                y: d.value as number,
+              })),
+              extra: (
+                <FormattedMessage
+                  id="xpack.observability.sLOGridItem.targetFlexItemLabel"
+                  defaultMessage="Target {target}"
+                  values={{
+                    target: sloTarget,
+                  }}
+                />
+              ),
+              icon: () => <EuiIcon type="visGauge" size="l" />,
+              color: cardColor,
+            },
+          ],
+        ]}
+      />
+    </Chart>
   );
 }

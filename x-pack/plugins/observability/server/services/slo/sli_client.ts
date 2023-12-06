@@ -20,7 +20,7 @@ import {
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { DateRange, Duration, IndicatorData, SLO } from '../../domain/models';
 import { InternalQueryError } from '../../errors';
 import { getDelayInSecondsFromSLO } from '../../domain/services/get_delay_in_seconds_from_slo';

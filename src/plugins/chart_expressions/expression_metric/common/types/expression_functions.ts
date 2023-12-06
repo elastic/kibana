@@ -37,7 +37,7 @@ export interface MetricArguments {
   trendline?: TrendlineResult;
   subtitle?: string;
   secondaryPrefix?: string;
-  progressDirection: LayoutDirection;
+  progressDirection?: LayoutDirection;
   color?: string;
   icon?: string;
   palette?: PaletteOutput<CustomPaletteState>;
