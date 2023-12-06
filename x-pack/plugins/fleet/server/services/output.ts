@@ -48,6 +48,7 @@ import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
   OutputUnauthorizedError,
+  FleetError,
 } from '../errors';
 
 import type { OutputType } from '../types';
@@ -427,6 +428,9 @@ class OutputService {
       secretHashes?: Record<string, any>;
     }
   ): Promise<Output> {
+    const logger = appContextService.getLogger();
+    logger.info(`Creating new output`);
+
     const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
     if (output.type === outputType.RemoteElasticsearch) {
       if (data.is_default) {
@@ -577,7 +581,7 @@ class OutputService {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
       id,
     });
-
+    logger.info(`Created new output ${id}`);
     return outputSavedObjectToOutput(newSo);
   }
 
@@ -667,7 +671,7 @@ class OutputService {
     });
 
     if (outputSO.error) {
-      throw new Error(outputSO.error.message);
+      throw new FleetError(outputSO.error.message);
     }
 
     return outputSavedObjectToOutput(outputSO);
@@ -680,6 +684,9 @@ class OutputService {
       fromPreconfiguration: false,
     }
   ) {
+    const logger = appContextService.getLogger();
+    logger.info(`Deleting output ${id}`);
+
     const originalOutput = await this.get(soClient, id);
 
     if (originalOutput.is_preconfigured && !fromPreconfiguration) {
@@ -714,7 +721,7 @@ class OutputService {
       esClient: appContextService.getInternalUserESClient(),
       output: originalOutput,
     });
-
+    logger.info(`Deleted output ${id}`);
     return soDeleteResult;
   }
 
@@ -730,6 +737,9 @@ class OutputService {
       fromPreconfiguration: false,
     }
   ) {
+    const logger = appContextService.getLogger();
+    logger.info(`Updating output ${id}`);
+
     if (data.type === outputType.RemoteElasticsearch) {
       if (data.is_default) {
         throw new OutputInvalidError(
@@ -950,18 +960,17 @@ class OutputService {
     );
 
     if (outputSO.error) {
-      throw new Error(outputSO.error.message);
+      throw new FleetError(outputSO.error.message);
     }
 
     if (secretsToDelete.length) {
       try {
         await deleteSecrets({ esClient, ids: secretsToDelete.map((s) => s.id) });
       } catch (err) {
-        appContextService
-          .getLogger()
-          .warn(`Error cleaning up secrets for output ${id}: ${err.message}`);
+        logger.warn(`Error cleaning up secrets for output ${id}: ${err.message}`);
       }
     }
+    logger.info(`Updated output ${id}`);
   }
 
   async getLatestOutputHealth(esClient: ElasticsearchClient, id: string): Promise<OutputHealth> {

@@ -26,6 +26,8 @@ import type { PreconfigurationError } from '../../common/constants';
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common/constants';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
 
+import { FleetError } from '../errors';
+
 import { escapeSearchQueryPhrase } from './saved_object';
 import { pkgToPkgKey } from './epm/registry';
 import { getInstallation, getPackageInfo } from './epm/packages';
@@ -67,7 +69,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       .map(([, versions]) => versions.map((v) => pkgToPkgKey(v)).join(', '))
       .join('; ');
 
-    throw new Error(
+    throw new FleetError(
       i18n.translate('xpack.fleet.preconfiguration.duplicatePackageError', {
         defaultMessage: 'Duplicate packages specified in configuration: {duplicateList}',
         values: {
@@ -142,7 +144,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         !preconfiguredAgentPolicy.is_default &&
         !preconfiguredAgentPolicy.is_default_fleet_server
       ) {
-        throw new Error(
+        throw new FleetErrorError(
           i18n.translate('xpack.fleet.preconfiguration.missingIDError', {
             defaultMessage:
               '{agentPolicyName} is missing an `id` field. `id` is required, except for policies marked is_default or is_default_fleet_server.',
@@ -223,8 +225,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             const rejectedPackage = rejectedPackages.find((rp) => rp.package?.name === pkg.name);
 
             if (rejectedPackage) {
-              // Add typed error
-              throw new Error(
+              throw new FleetError(
                 i18n.translate('xpack.fleet.preconfiguration.packageRejectedError', {
                   defaultMessage: `[{agentPolicyName}] could not be added. [{pkgName}] could not be installed due to error: [{errorMessage}]`,
                   values: {
@@ -235,8 +236,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
                 })
               );
             }
-            // Add typed error
-            throw new Error(
+            throw new FleetError(
               i18n.translate('xpack.fleet.preconfiguration.packageMissingError', {
                 defaultMessage:
                   '[{agentPolicyName}] could not be added. [{pkgName}] is not installed, add [{pkgName}] to [{packagesConfigValue}] or remove it from [{packagePolicyName}].',

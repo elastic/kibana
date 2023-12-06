@@ -805,6 +805,9 @@ class AgentPolicyService {
     id: string,
     options?: { force?: boolean; removeFleetServerDocuments?: boolean; user?: AuthenticatedUser }
   ): Promise<DeleteAgentPolicyResponse> {
+    const logger = appContextService.getLogger();
+    logger.info(`Deleting agent policy ${id}`);
+
     auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
       id,
@@ -866,7 +869,7 @@ class AgentPolicyService {
     if (options?.removeFleetServerDocuments) {
       await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
     }
-
+    logger.info(`Deleted agent policy ${id}`);
     return {
       id,
       name: agentPolicy.name,

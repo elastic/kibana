@@ -1061,6 +1061,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const result: PostDeletePackagePoliciesResponse = [];
     const logger = appContextService.getLogger();
+    logger.info(`Deleting package policies ${ids}`);
 
     const packagePolicies = await this.getByIDs(soClient, ids, { ignoreMissing: true });
     if (!packagePolicies) {
@@ -1205,6 +1206,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         context,
         request
       );
+      logger.info(`Deleted package policies ${ids}`);
     } catch (error) {
       logger.error(`An error occurred executing "packagePolicyPostDelete" callback: ${error}`);
       logger.error(error);

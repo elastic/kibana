@@ -64,13 +64,13 @@ export async function createFleetServerHost(
   if (data.host_urls) {
     data.host_urls = data.host_urls.map(normalizeHostsForAgents);
   }
-  logger.debug(`Creating fleet server host ${data}`);
+  logger.info(`Creating fleet server host with ${data}`);
   const res = await soClient.create<FleetServerHostSOAttributes>(
     FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
     data,
     { id: options?.id, overwrite: options?.overwrite }
   );
-
+  logger.info(`Created fleet server host ${options?.id}`);
   return savedObjectToFleetServerHost(res);
 }
 
@@ -125,6 +125,9 @@ export async function deleteFleetServerHost(
   id: string,
   options?: { fromPreconfiguration?: boolean }
 ) {
+  const logger = appContextService.getLogger();
+  logger.info(`Deleting fleet server host ${id}`);
+
   const fleetServerHost = await getFleetServerHost(soClient, id);
 
   if (fleetServerHost.is_preconfigured && !options?.fromPreconfiguration) {
@@ -150,6 +153,9 @@ export async function updateFleetServerHost(
   data: Partial<FleetServerHost>,
   options?: { fromPreconfiguration?: boolean }
 ) {
+  const logger = appContextService.getLogger();
+  logger.info(`Updating fleet server host ${id}`);
+
   const originalItem = await getFleetServerHost(soClient, id);
 
   if (data.is_preconfigured && !options?.fromPreconfiguration) {
@@ -177,7 +183,7 @@ export async function updateFleetServerHost(
   }
 
   await soClient.update<FleetServerHostSOAttributes>(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, id, data);
-
+  logger.info(`Updated fleet server host ${id}`);
   return {
     ...originalItem,
     ...data,
