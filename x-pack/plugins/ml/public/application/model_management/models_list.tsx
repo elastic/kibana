@@ -262,17 +262,17 @@ export const ModelsList: FC<Props> = ({
         );
         const forDownload = await trainedModelsApiService.getTrainedModelDownloads();
         const notDownloaded: ModelItem[] = forDownload
-          .filter(({ name, hidden, recommended }) => {
-            if (recommended && idMap.has(name)) {
-              idMap.get(name)!.recommended = true;
+          .filter(({ model_id: modelId, hidden, recommended }) => {
+            if (recommended && idMap.has(modelId)) {
+              idMap.get(modelId)!.recommended = true;
             }
-            return !idMap.has(name) && !hidden;
+            return !idMap.has(modelId) && !hidden;
           })
           .map<ModelItem>((modelDefinition) => {
             return {
-              model_id: modelDefinition.name,
-              type: [ELASTIC_MODEL_TYPE],
-              tags: [ELASTIC_MODEL_TAG],
+              model_id: modelDefinition.model_id,
+              type: modelDefinition.type,
+              tags: modelDefinition.type?.includes(ELASTIC_MODEL_TAG) ? [ELASTIC_MODEL_TAG] : [],
               putModelConfig: modelDefinition.config,
               description: modelDefinition.description,
               state: MODEL_STATE.NOT_DOWNLOADED,

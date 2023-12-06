@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiLink, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import type { Message } from '../../../common/types';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
@@ -15,7 +15,6 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
-import { getModelsManagementHref } from '../../utils/get_models_management_href';
 import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { ChatBody } from './chat_body';
 
@@ -28,25 +27,17 @@ const bodyClassName = css`
 `;
 
 export function ChatFlyout({
-  title,
-  messages,
-  conversationId,
+  initialTitle,
+  initialMessages,
+  onClose,
   isOpen,
   startedFrom,
-  onClose,
-  onChatUpdate,
-  onChatComplete,
-  onChatTitleSave,
 }: {
-  title: string;
-  messages: Message[];
-  conversationId?: string;
+  initialTitle: string;
+  initialMessages: Message[];
   isOpen: boolean;
   startedFrom: StartedFrom;
   onClose: () => void;
-  onChatUpdate: (messages: Message[]) => void;
-  onChatComplete: (messages: Message[]) => void;
-  onChatTitleSave: (title: string) => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const {
@@ -60,6 +51,8 @@ export function ChatFlyout({
   const router = useObservabilityAIAssistantRouter();
 
   const knowledgeBase = useKnowledgeBase();
+
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
 
   return isOpen ? (
     <EuiFlyout onClose={onClose}>
@@ -101,28 +94,15 @@ export function ChatFlyout({
         </EuiFlexItem>
         <EuiFlexItem grow className={bodyClassName}>
           <ChatBody
-            loading={false}
             connectors={connectors}
-            title={title}
-            messages={messages}
+            initialTitle={initialTitle}
+            initialMessages={initialMessages}
             currentUser={currentUser}
             connectorsManagementHref={getConnectorsManagementHref(http)}
-            modelsManagementHref={getModelsManagementHref(http)}
-            conversationId={conversationId}
             knowledgeBase={knowledgeBase}
             startedFrom={startedFrom}
-            onChatUpdate={(nextMessages) => {
-              if (onChatUpdate) {
-                onChatUpdate(nextMessages);
-              }
-            }}
-            onChatComplete={(nextMessages) => {
-              if (onChatComplete) {
-                onChatComplete(nextMessages);
-              }
-            }}
-            onSaveTitle={(newTitle) => {
-              onChatTitleSave(newTitle);
+            onConversationUpdate={(conversation) => {
+              setConversationId(conversation.conversation.id);
             }}
           />
         </EuiFlexItem>

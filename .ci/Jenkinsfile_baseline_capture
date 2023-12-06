@@ -21,7 +21,7 @@ kibanaPipeline(timeoutMinutes: 210) {
               runErrorReporter: false,
               bootstrapped: false
             ) {
-              withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
+              withGcpServiceAccount.fromVaultSecret('secret/ci/elastic-kibana/ci-artifacts-key', 'value') {
                 withEnv([
                   'DISABLE_BOOTSTRAP_VALIDATION=true',
                 ]) {

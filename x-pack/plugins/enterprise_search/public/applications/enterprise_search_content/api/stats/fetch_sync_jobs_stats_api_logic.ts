@@ -12,9 +12,14 @@ import { HttpLogic } from '../../../shared/http';
 
 export type FetchSyncJobsStatsResponse = SyncJobsStats;
 
-export const fetchSyncJobsStats = async () => {
+export interface FetchSyncJobsStatsApiLogicArgs {
+  isCrawler?: boolean;
+}
+
+export const fetchSyncJobsStats = async ({ isCrawler }: FetchSyncJobsStatsApiLogicArgs) => {
   const route = '/internal/enterprise_search/stats/sync_jobs';
-  return await HttpLogic.values.http.get<FetchSyncJobsStatsResponse>(route);
+  const options = isCrawler !== undefined ? { query: { isCrawler } } : undefined;
+  return await HttpLogic.values.http.get<FetchSyncJobsStatsResponse>(route, options);
 };
 
 export const FetchSyncJobsStatsApiLogic = createApiLogic(
