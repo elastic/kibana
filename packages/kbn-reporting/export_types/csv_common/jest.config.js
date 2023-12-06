@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-export interface ClientConfigType {
-  csv: { scroll: { duration: string; size: number } };
-  poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
-  roles: { enabled: boolean };
-  export_types: { pdf: { enabled: boolean }; png: { enabled: boolean }; csv: { enabled: boolean } };
-  statefulSettings: { enabled: boolean };
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/kbn-reporting/export_types/csv_common'],
+};
