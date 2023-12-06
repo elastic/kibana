@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { QueryClientProvider } from '@tanstack/react-query';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { queryClient } from '@kbn/osquery-plugin/public/query_client';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-
+import { QueryClientProvider } from '@tanstack/react-query';
+import { act } from 'react-dom/test-utils';
 import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import Expressions from './custom_threshold_rule_expression';
+import { CustomThresholdPreFillOptions } from './types';
 
 jest.mock('../../utils/kibana_react');
 jest.mock('./components/preview_chart/preview_chart', () => ({
@@ -38,7 +38,10 @@ describe('Expression', () => {
     mockKibana();
   });
 
-  async function setup() {
+  async function setup(
+    currentOptions?: CustomThresholdPreFillOptions,
+    customRuleParams?: Record<string, unknown>
+  ) {
     const ruleParams = {
       criteria: [],
       groupBy: undefined,
@@ -50,6 +53,7 @@ describe('Expression', () => {
           language: 'kuery',
         },
       },
+      ...customRuleParams,
     };
     const wrapper = mountWithIntl(
       <QueryClientProvider client={queryClient}>
@@ -62,6 +66,7 @@ describe('Expression', () => {
           setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
           setRuleProperty={() => {}}
           metadata={{
+            currentOptions,
             adHocDataViewList: [],
           }}
           dataViews={dataViewMock}
@@ -90,6 +95,41 @@ describe('Expression', () => {
             name: 'A',
             aggType: Aggregators.COUNT,
           },
+        ],
+        comparator: Comparator.GT,
+        threshold: [100],
+        timeSize: 1,
+        timeUnit: 'm',
+      },
+    ]);
+  });
+
+  it('should prefill the rule using the context metadata', async () => {
+    const index = 'changedMockedIndex';
+    const currentOptions: CustomThresholdPreFillOptions = {
+      groupBy: ['host.hostname'],
+      filterQuery: 'foo',
+      searchConfiguration: { index },
+      criteria: [
+        {
+          metrics: [
+            { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.load.1' },
+            { name: 'B', aggType: Aggregators.CARDINALITY, field: 'system.cpu.user.pct' },
+          ],
+        },
+      ],
+    };
+
+    const { ruleParams } = await setup(currentOptions, { searchConfiguration: undefined });
+
+    expect(ruleParams.groupBy).toEqual(['host.hostname']);
+    expect(ruleParams.searchConfiguration.query.query).toBe('foo');
+    expect(ruleParams.searchConfiguration.index).toBe(index);
+    expect(ruleParams.criteria).toEqual([
+      {
+        metrics: [
+          { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.load.1' },
+          { name: 'B', aggType: Aggregators.CARDINALITY, field: 'system.cpu.user.pct' },
         ],
         comparator: Comparator.GT,
         threshold: [100],
