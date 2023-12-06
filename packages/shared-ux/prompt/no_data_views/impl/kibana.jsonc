@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/shared-ux-prompt-no-data-views",
   "owner": "@elastic/appex-sharedux"
 }

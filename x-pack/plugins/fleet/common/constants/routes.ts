@@ -94,6 +94,7 @@ export const OUTPUT_API_ROUTES = {
   UPDATE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   DELETE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   CREATE_PATTERN: `${API_ROOT}/outputs`,
+  GET_OUTPUT_HEALTH_PATTERN: `${API_ROOT}/outputs/{outputId}/health`,
   LOGSTASH_API_KEY_PATTERN: `${API_ROOT}/logstash_api_keys`,
 };
 

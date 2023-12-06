@@ -56,7 +56,8 @@
     "@kbn/licensing-plugin",
     "@kbn/expressions-plugin",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/serverless"
+    "@kbn/serverless",
+    "@kbn/triggers-actions-ui-types"
   ],
   "exclude": ["target/**/*"]
 }
