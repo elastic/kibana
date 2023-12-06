@@ -10,10 +10,10 @@ import {
   COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON,
   COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES,
   COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES,
-} from '../../../../screens/alerts';
+} from '../../../../screens/rules_coverage_overview';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { visit } from '../../../../tasks/navigation';
-import { COVERAGE_OVERVIEW_URL } from '../../../../urls/rules_management';
+import { RULES_COVERAGE_OVERVIEW_URL } from '../../../../urls/rules_management';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import { getMitre1, getNewRule } from '../../../../objects/rule';
 import {
@@ -31,7 +31,7 @@ import {
   openTechniquePanel,
   selectCoverageOverviewActivityFilterOption,
   selectCoverageOverviewSourceFilterOption,
-} from '../../../../tasks/alerts';
+} from '../../../../tasks/rules_coverage_overview';
 
 const prebuiltRules = [
   createRuleAssetSavedObject({
@@ -43,6 +43,7 @@ const prebuiltRules = [
   createRuleAssetSavedObject({
     name: `Disabled prebuilt rule`,
     rule_id: `disabled_prebuilt_rule`,
+    enabled: false,
     threat: [getMitre1()],
   }),
 ];
@@ -60,7 +61,7 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
     createRule(
       getNewRule({ rule_id: 'disabled_custom_rule', name: 'Disabled custom rule', enabled: false })
     );
-    visit(COVERAGE_OVERVIEW_URL);
+    visit(RULES_COVERAGE_OVERVIEW_URL);
   });
 
   it('technique panel renders custom and prebuilt rule data on page load', () => {

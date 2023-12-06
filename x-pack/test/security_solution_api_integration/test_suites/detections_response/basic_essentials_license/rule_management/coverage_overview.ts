@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
-    it('does NOT error when there are no security rules', async () => {
+    it('does NOT error when there exist some stack rules in addition to security detection rules', async () => {
       // Creates a non-security type rule
       await alertingApi.createRule({
         consumer: 'security',
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('without filters', () => {
+    describe('base cases', () => {
       it('returns an empty response if there are no rules', async () => {
         const body = await getCoverageOverview(supertest);
 
@@ -407,6 +407,53 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
         });
+
+        it('returns all rules if neither enabled and disabled filters are specified in the request', async () => {
+          const expectedRule1 = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              rule_id: 'rule-1',
+              enabled: false,
+              name: 'Disabled rule',
+              threat: generateThreatArray(1),
+            })
+          );
+          const expectedRule2 = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              rule_id: 'rule-2',
+              enabled: true,
+              name: 'Enabled rule',
+              threat: generateThreatArray(2),
+            })
+          );
+
+          const body = await getCoverageOverview(supertest);
+
+          expect(body).to.eql({
+            coverage: {
+              T001: [expectedRule1.id],
+              TA001: [expectedRule1.id],
+              'T001.001': [expectedRule1.id],
+              T002: [expectedRule2.id],
+              TA002: [expectedRule2.id],
+              'T002.002': [expectedRule2.id],
+            },
+            unmapped_rule_ids: [],
+            rules_data: {
+              [expectedRule1.id]: {
+                activity: 'disabled',
+                name: 'Disabled rule',
+              },
+              [expectedRule2.id]: {
+                activity: 'enabled',
+                name: 'Enabled rule',
+              },
+            },
+          });
+        });
       });
 
       describe('source', () => {
@@ -504,6 +551,49 @@ export default ({ getService }: FtrProviderContext): void => {
           const body = await getCoverageOverview(supertest, {
             source: [CoverageOverviewRuleSource.Prebuilt, CoverageOverviewRuleSource.Custom],
           });
+
+          expect(body).to.eql({
+            coverage: {
+              T001: [expectedPrebuiltRule.id],
+              TA001: [expectedPrebuiltRule.id],
+              'T001.001': [expectedPrebuiltRule.id],
+              T002: [expectedCustomRule.id],
+              TA002: [expectedCustomRule.id],
+              'T002.002': [expectedCustomRule.id],
+            },
+            unmapped_rule_ids: [],
+            rules_data: {
+              [expectedPrebuiltRule.id]: {
+                activity: 'disabled',
+                name: 'Query with a rule id',
+              },
+              [expectedCustomRule.id]: {
+                activity: 'disabled',
+                name: 'Custom query rule',
+              },
+            },
+          });
+        });
+
+        it('returns all rules if neither custom and prebuilt filters are specified in the request', async () => {
+          await createPrebuiltRuleAssetSavedObjects(es, [
+            createRuleAssetSavedObject({
+              rule_id: 'prebuilt-rule-1',
+              threat: generateThreatArray(1),
+            }),
+          ]);
+          const {
+            results: { created },
+          } = await installPrebuiltRules(es, supertest);
+          const expectedPrebuiltRule = created[0];
+
+          const expectedCustomRule = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-1', threat: generateThreatArray(2) })
+          );
+
+          const body = await getCoverageOverview(supertest);
 
           expect(body).to.eql({
             coverage: {
