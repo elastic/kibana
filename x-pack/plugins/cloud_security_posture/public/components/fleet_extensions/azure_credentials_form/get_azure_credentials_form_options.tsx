@@ -131,18 +131,4 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       },
     },
   },
-  manual: {
-    label: i18n.translate('xpack.csp.azureIntegration.credentialType.manualLabel', {
-      defaultMessage: 'Manual',
-    }),
-    info: (
-      <EuiText color="subdued" size="s">
-        <FormattedMessage
-          id="xpack.csp.azureIntegration.credentialType.manualInfo"
-          defaultMessage="Ensure the agent is deployed on a resource that supports managed identities (e.g., Azure Virtual Machines). No explicit credentials need to be provided; Azure handles the authentication."
-        />
-      </EuiText>
-    ),
-    fields: {},
-  },
 });
