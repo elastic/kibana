@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { safeLoad } from 'js-yaml';
 
 import { getFlattenedObject } from '@kbn/std';
 
@@ -47,7 +47,7 @@ export function outputYmlIncludesReservedPerformanceKey(configYml: string) {
     return false;
   }
 
-  const parsedYml = yaml.safeLoad(configYml);
+  const parsedYml = safeLoad(configYml);
 
   if (!isObject(parsedYml)) {
     return RESERVED_CONFIG_YML_KEYS.some((key) => parsedYml.includes(key));
