@@ -7,7 +7,12 @@
 
 import { merge, uniqueId } from 'lodash';
 import { DeepPartial } from 'utility-types';
-import { Conversation, FunctionDefinition, Message, MessageRole } from '../../common/types';
+import {
+  type Conversation,
+  type FunctionDefinition,
+  type Message,
+  MessageRole,
+} from '../../common/types';
 import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
 
 type BuildMessageProps = DeepPartial<Message> & {

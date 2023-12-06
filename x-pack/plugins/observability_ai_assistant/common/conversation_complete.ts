@@ -59,12 +59,12 @@ export type ConversationUpdateEvent = StreamingChatResponseEventBase<
   }
 >;
 
-type MessageAddEvent = StreamingChatResponseEventBase<
+export type MessageAddEvent = StreamingChatResponseEventBase<
   StreamingChatResponseEventType.MessageAdd,
   { message: Message; id: string }
 >;
 
-type ConversationCompletionErrorEvent = StreamingChatResponseEventBase<
+export type ConversationCompletionErrorEvent = StreamingChatResponseEventBase<
   StreamingChatResponseEventType.ConversationCompletionError,
   { error: { message: string; stack?: string; code?: ChatCompletionErrorCode } }
 >;

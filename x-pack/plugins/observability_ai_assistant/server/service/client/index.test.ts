@@ -161,21 +161,13 @@ describe('Observability AI Assistant service', () => {
         .mockImplementationOnce(() => {
           return new Promise((resolve, reject) => {
             titleLlmPromiseResolve = (title: string) => {
-              const response = {
-                object: 'chat.completion',
-                choices: [
-                  {
-                    message: {
-                      role: MessageRole.Assistant,
-                      content: title,
-                    },
-                  },
-                ],
-              };
+              const titleLlmSimulator = createLlmSimulator();
+              titleLlmSimulator.next({ content: title });
+              titleLlmSimulator.complete();
               resolve({
                 actionId: '',
                 status: 'ok',
-                data: response,
+                data: titleLlmSimulator.stream,
               });
             };
             titleLlmPromiseReject = reject;
@@ -222,9 +214,10 @@ describe('Observability AI Assistant service', () => {
           {
             actionId: 'foo',
             params: {
-              subAction: 'run',
+              subAction: 'stream',
               subActionParams: {
                 body: expect.any(String),
+                stream: true,
               },
             },
           },

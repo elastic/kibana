@@ -26,7 +26,7 @@ import {
 import {
   ChatCompletionErrorCode,
   ConversationCompletionError,
-  StreamingChatResponseEvent,
+  type StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '../../common/conversation_complete';
 import {

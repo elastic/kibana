@@ -169,7 +169,7 @@ export function registerGetDatasetInfoFunction({
                   fields: string[];
                 }
               ).fields
-                .filter((field) => fieldNames.includes(field))
+                .filter((field) => fieldsInChunk.includes(field))
                 .map((field) => {
                   const fieldDescriptors = groupedFields[field];
                   return `${field}:${fieldDescriptors

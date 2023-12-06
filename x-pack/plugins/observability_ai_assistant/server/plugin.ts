@@ -111,7 +111,7 @@ export class ObservabilityAIAssistantPlugin
       taskManager: plugins.taskManager,
     }));
 
-    service.registration(registerFunctions);
+    service.register(registerFunctions);
 
     addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
 

@@ -377,7 +377,7 @@ export class ObservabilityAIAssistantService {
     );
   }
 
-  registration(fn: ChatRegistrationFunction) {
+  register(fn: ChatRegistrationFunction) {
     this.registrations.push(fn);
   }
 }

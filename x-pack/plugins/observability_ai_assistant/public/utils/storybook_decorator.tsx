@@ -10,7 +10,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import React, { ComponentType } from 'react';
 import { Observable } from 'rxjs';
-import { StreamingChatResponseEvent } from '../../common/conversation_complete';
+import type { StreamingChatResponseEvent } from '../../common/conversation_complete';
 import { ObservabilityAIAssistantAPIClient } from '../api';
 import { ObservabilityAIAssistantChatServiceProvider } from '../context/observability_ai_assistant_chat_service_provider';
 import { ObservabilityAIAssistantProvider } from '../context/observability_ai_assistant_provider';

@@ -12,12 +12,11 @@ import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { compact, isEmpty, last, merge, omit, pick } from 'lodash';
 import type {
-  ChatCompletionFunctions,
   ChatCompletionRequestMessage,
   CreateChatCompletionRequest,
   CreateChatCompletionResponse,
 } from 'openai';
-import { isObservable } from 'rxjs';
+import { isObservable, lastValueFrom } from 'rxjs';
 import { PassThrough, Readable } from 'stream';
 import { v4 } from 'uuid';
 import {
@@ -36,6 +35,7 @@ import {
   type KnowledgeBaseEntry,
   type Message,
 } from '../../../common/types';
+import { concatenateOpenAiChunks } from '../../../common/utils/concatenate_openai_chunks';
 import { processOpenAiStream } from '../../../common/utils/process_openai_stream';
 import type { ChatFunctionClient } from '../chat_function_client';
 import {
@@ -396,7 +396,7 @@ export class ObservabilityAIAssistantClient {
         })
     );
 
-    const functionsForOpenAI: ChatCompletionFunctions[] | undefined = functions;
+    const functionsForOpenAI = functions;
 
     const request: Omit<CreateChatCompletionRequest, 'model'> & { model?: string } = {
       messages: messagesForOpenAI,
@@ -491,12 +491,12 @@ export class ObservabilityAIAssistantClient {
     connectorId: string;
     signal: AbortSignal;
   }) => {
-    const response = await this.chat({
+    const stream = await this.chat({
       messages: [
         {
           '@timestamp': new Date().toISOString(),
           message: {
-            role: MessageRole.Assistant,
+            role: MessageRole.User,
             content: messages.slice(1).reduce((acc, curr) => {
               return `${acc} ${curr.message.role}: ${curr.message.content}`;
             }, 'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. Here is the content:'),
@@ -504,24 +504,25 @@ export class ObservabilityAIAssistantClient {
         },
       ],
       connectorId,
-      stream: false,
+      stream: true,
       signal,
     });
 
-    if ('object' in response && response.object === 'chat.completion') {
-      const input = response.choices[0].message?.content || '';
+    const response = await lastValueFrom(
+      streamIntoObservable(stream).pipe(processOpenAiStream(), concatenateOpenAiChunks())
+    );
 
-      // This regular expression captures a string enclosed in single or double quotes.
-      // It extracts the string content without the quotes.
-      // Example matches:
-      // - "Hello, World!" => Captures: Hello, World!
-      // - 'Another Example' => Captures: Another Example
-      // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
-      const match = input.match(/^["']?([^"']+)["']?$/);
-      const title = match ? match[1] : input;
-      return title;
-    }
-    return undefined;
+    const input = response.message?.content || '';
+
+    // This regular expression captures a string enclosed in single or double quotes.
+    // It extracts the string content without the quotes.
+    // Example matches:
+    // - "Hello, World!" => Captures: Hello, World!
+    // - 'Another Example' => Captures: Another Example
+    // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
+    const match = input.match(/^["']?([^"']+)["']?$/);
+    const title = match ? match[1] : input;
+    return title;
   };
 
   setTitle = async ({ conversationId, title }: { conversationId: string; title: string }) => {

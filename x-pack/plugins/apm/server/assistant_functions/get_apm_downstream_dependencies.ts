@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FunctionRegistrationParameters } from '.';
+import type { FunctionRegistrationParameters } from '.';
 import { getAssistantDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
 
 export function registerGetApmDownstreamDependenciesFunction({

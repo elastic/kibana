@@ -67,6 +67,7 @@ export const registerFunctions: ChatRegistrationFunction = async ({
       description += `Here are principles you MUST adhere to, in order:
         - DO NOT make any assumptions about where and how users have stored their data. ALWAYS first call get_dataset_info function with empty string to get information about available indices. Once you know about available indices you MUST use this function again to get a list of available fields for specific index. If user provides an index name make sure its a valid index first before using it to retrieve the field list by calling this function with an empty string!
         `;
+
       registerSummarizationFunction(registrationParameters);
       registerRecallFunction(registrationParameters);
       registerLensFunction(registrationParameters);

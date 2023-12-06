@@ -12,7 +12,7 @@ import type { LensEmbeddableInput, LensPublicStart } from '@kbn/lens-plugin/publ
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { Assign } from 'utility-types';
-import { LensFunctionArguments } from '../../common/functions/lens';
+import type { LensFunctionArguments } from '../../common/functions/lens';
 import type {
   ObservabilityAIAssistantPluginStartDependencies,
   ObservabilityAIAssistantService,
