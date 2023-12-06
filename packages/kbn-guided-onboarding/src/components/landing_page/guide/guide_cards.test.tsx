@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen, within, waitForElementToBeRemoved } from '@testing-library/react';
 
 import { GuideCards, GuideCardsProps } from './guide_cards';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
@@ -36,19 +35,19 @@ const defaultProps: Omit<GuideCardsProps, 'activeFilter'> = {
 describe.skip('guide cards', () => {
   describe('snapshots', () => {
     test('should render search cards', async () => {
-      const component = mount(
+      const component = render(
         <GuideCards {...defaultProps} activeFilter={'search' as GuideCardSolutions} />
       );
       expect(component).toMatchSnapshot();
     });
     test('should render security cards', async () => {
-      const component = mount(
+      const component = render(
         <GuideCards {...defaultProps} activeFilter={'security' as GuideCardSolutions} />
       );
       expect(component).toMatchSnapshot();
     });
     test('should render observability cards', async () => {
-      const component = mount(
+      const component = render(
         <GuideCards {...defaultProps} activeFilter={'observability' as GuideCardSolutions} />
       );
       expect(component).toMatchSnapshot();
