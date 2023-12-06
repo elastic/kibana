@@ -7,8 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { calcAutoIntervalNear, UI_SETTINGS } from '@kbn/data-plugin/common';
+import { calcAutoIntervalNear, getAbsoluteTimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { partition } from 'lodash';
+import {
+  buildExpressionFunction,
+  buildExpression,
+  ExpressionFunctionDefinitions,
+  ExpressionFunctionDefinition,
+} from '@kbn/expressions-plugin/common';
+import { TimeRange } from '@kbn/es-query';
 import type {
   DateHistogramIndexPatternColumn,
   FormBasedLayer,
@@ -58,13 +65,39 @@ export interface TimeRangeIndexPatternColumn extends ReferenceBasedIndexPatternC
   operationType: 'time_range';
 }
 
-function getTimeRangeFromContext({ dateRange }: ContextValues) {
-  return dateRange ? moment(dateRange.toDate).diff(moment(dateRange.fromDate)) : 0;
-}
+const timeRangeHelp = i18n.translate('lens.formula.timeRange.help', {
+  defaultMessage: 'The specified time range, in milliseconds (ms).',
+});
+
+export type ExpressionFunctionFormulaTimeRange = ExpressionFunctionDefinition<
+  'formula_time_range',
+  undefined,
+  object,
+  number
+>;
+
+const getTimeRangeAsNumber = (timeRange: TimeRange | undefined) => {
+  if (!timeRange) return 0;
+  const absoluteTimeRange = getAbsoluteTimeRange(timeRange); // TODO - do we need to use the NowProvider with forceNow here?
+  return timeRange ? moment(absoluteTimeRange.to).diff(moment(absoluteTimeRange.from)) : 0;
+};
+
+export const formulaTimeRangeFn: ExpressionFunctionFormulaTimeRange = {
+  name: 'formula_time_range',
+
+  help: timeRangeHelp,
+
+  args: {},
+
+  fn(_input, _args, { getSearchContext }) {
+    const { timeRange } = getSearchContext() as { timeRange: TimeRange };
+    return getTimeRangeAsNumber(timeRange);
+  },
+};
 
 function getTimeRangeErrorMessages(
-  layer: FormBasedLayer,
-  columnId: string,
+  _layer: FormBasedLayer,
+  _columnId: string,
   indexPattern: IndexPattern,
   dateRange?: DateRange | undefined
 ) {
@@ -89,22 +122,39 @@ function getTimeRangeErrorMessages(
 export const timeRangeOperation = createContextValueBasedOperation<TimeRangeIndexPatternColumn>({
   type: 'time_range',
   label: 'Time range',
-  description: i18n.translate('xpack.lens.indexPattern.timeRange.documentation.markdown', {
-    defaultMessage: `
-The specified time range, in milliseconds (ms).
-    `,
-  }),
-  getContextValue: getTimeRangeFromContext,
+  description: timeRangeHelp,
+  getExpressionFunction: (_context: ContextValues) =>
+    buildExpressionFunction<ExpressionFunctionFormulaTimeRange>('formula_time_range', {}),
   getErrorMessage: getTimeRangeErrorMessages,
 });
+
+const nowHelp = i18n.translate('lens.formula.now.help', {
+  defaultMessage: 'The current now moment used in Kibana expressed in milliseconds (ms).',
+});
+
+export type ExpressionFunctionFormulaNow = ExpressionFunctionDefinition<
+  'formula_now',
+  undefined,
+  object,
+  number
+>;
+
+export const formulaNowFn: ExpressionFunctionFormulaNow = {
+  name: 'formula_now',
+
+  help: nowHelp,
+
+  args: {},
+
+  fn(_input, _args) {
+    return Date.now();
+  },
+};
 
 export interface NowIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'now';
 }
 
-function getNowFromContext({ now }: ContextValues) {
-  return now == null ? Date.now() : +now;
-}
 function getNowErrorMessage() {
   return undefined;
 }
@@ -112,23 +162,52 @@ function getNowErrorMessage() {
 export const nowOperation = createContextValueBasedOperation<NowIndexPatternColumn>({
   type: 'now',
   label: 'Current now',
-  description: i18n.translate('xpack.lens.indexPattern.now.documentation.markdown', {
-    defaultMessage: `
-  The current now moment used in Kibana expressed in milliseconds (ms).
-      `,
-  }),
-  getContextValue: getNowFromContext,
+  description: nowHelp,
+  getExpressionFunction: (_context: ContextValues) =>
+    buildExpressionFunction<ExpressionFunctionFormulaNow>('formula_now', {}),
   getErrorMessage: getNowErrorMessage,
 });
 
+const intervalHelp = i18n.translate('lens.formula.interval.help', {
+  defaultMessage: 'The specified minimum interval for the date histogram, in milliseconds (ms).',
+});
+
+export type ExpressionFunctionFormulaInterval = ExpressionFunctionDefinition<
+  'formula_interval',
+  undefined,
+  {
+    targetBars?: number;
+  },
+  number
+>;
+
+export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
+  name: 'formula_interval',
+
+  help: intervalHelp,
+
+  args: {
+    targetBars: {
+      types: ['number'],
+      help: i18n.translate('lens.formula.interval.targetBars.help', {
+        defaultMessage: 'The target number of bars for the date histogram.',
+      }),
+    },
+  },
+
+  fn(_input, args, { getSearchContext }) {
+    const context = getSearchContext();
+    return context.timeRange && args.targetBars
+      ? calcAutoIntervalNear(
+          args.targetBars,
+          getTimeRangeAsNumber(context.timeRange as TimeRange)
+        ).asMilliseconds()
+      : 0;
+  },
+};
+
 export interface IntervalIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'interval';
-}
-
-function getIntervalFromContext(context: ContextValues) {
-  return context.dateRange && context.targetBars
-    ? calcAutoIntervalNear(context.targetBars, getTimeRangeFromContext(context)).asMilliseconds()
-    : 0;
 }
 
 function getIntervalErrorMessages(
@@ -174,12 +253,11 @@ function getIntervalErrorMessages(
 export const intervalOperation = createContextValueBasedOperation<IntervalIndexPatternColumn>({
   type: 'interval',
   label: 'Date histogram interval',
-  description: i18n.translate('xpack.lens.indexPattern.interval.documentation.markdown', {
-    defaultMessage: `
-The specified minimum interval for the date histogram, in milliseconds (ms).
-      `,
-  }),
-  getContextValue: getIntervalFromContext,
+  description: intervalHelp,
+  getExpressionFunction: ({ targetBars }: ContextValues) =>
+    buildExpressionFunction<ExpressionFunctionFormulaInterval>('formula_interval', {
+      targetBars,
+    }),
   getErrorMessage: getIntervalErrorMessages,
 });
 
@@ -191,14 +269,14 @@ export type ConstantsIndexPatternColumn =
 function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatternColumn>({
   label,
   type,
-  getContextValue,
+  getExpressionFunction,
   getErrorMessage,
   description,
 }: {
   label: string;
   type: ColumnType['operationType'];
   description: string;
-  getContextValue: (context: ContextValues) => number;
+  getExpressionFunction: (context: ContextValues) => ReturnType<typeof buildExpressionFunction>;
   getErrorMessage: OperationDefinition<ColumnType, 'managedReference'>['getErrorMessage'];
 }): OperationDefinition<ColumnType, 'managedReference'> {
   return {
@@ -233,15 +311,11 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
     toExpression: (layer, columnId, _, context = {}) => {
       const column = layer.columns[columnId] as ColumnType;
       return [
-        {
-          type: 'function',
-          function: 'mathColumn',
-          arguments: {
-            id: [columnId],
-            name: [column.label],
-            expression: [String(getContextValue(context))],
-          },
-        },
+        buildExpressionFunction<ExpressionFunctionDefinitions['math_column']>('mathColumn', {
+          id: columnId,
+          name: column.label,
+          expression: buildExpression([getExpressionFunction(context)]),
+        }).toAst(),
       ];
     },
     createCopy(layers, source, target) {

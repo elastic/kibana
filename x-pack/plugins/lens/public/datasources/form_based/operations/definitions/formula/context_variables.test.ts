@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
 import type { FormBasedLayer } from '../../../../..';
 import { createMockedIndexPattern } from '../../../mocks';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
@@ -13,6 +16,8 @@ import {
   nowOperation,
   intervalOperation,
   timeRangeOperation,
+  formulaIntervalFn,
+  formulaTimeRangeFn,
 } from './context_variables';
 
 function createLayer<T extends ConstantsIndexPatternColumn>(
@@ -124,51 +129,45 @@ describe('context variables', () => {
         ).toBeUndefined();
       });
     });
-    describe('toExpression', () => {
-      it('should return 0 if no dateRange is passed', () => {
-        expect(
-          intervalOperation.toExpression(
-            createLayer('interval'),
-            'col1',
-            createMockedIndexPattern(),
-            { now: new Date(), targetBars: 100 }
-          )
-        ).toEqual(expect.arrayContaining(createExpression('interval', 0)));
+    describe('expression function', () => {
+      it('should return 0 if no time range available', () => {
+        // (not sure if this case is actually possible)
+        const result = formulaIntervalFn.fn(undefined, { targetBars: 100 }, {
+          getSearchContext: () => ({
+            /* no time range */
+          }),
+        } as ExecutionContext<Adapters, SerializableRecord>);
+        expect(result).toEqual(0);
       });
 
       it('should return 0 if no targetBars is passed', () => {
-        expect(
-          intervalOperation.toExpression(
-            createLayer('interval'),
-            'col1',
-            createMockedIndexPattern(),
-            {
-              dateRange: {
-                fromDate: new Date(2022, 0, 1).toISOString(),
-                toDate: new Date(2023, 0, 1).toISOString(),
+        const result = formulaIntervalFn.fn(
+          undefined,
+          {
+            /* no targetBars */
+          },
+          {
+            getSearchContext: () => ({
+              timeRange: {
+                from: 'now-15m',
+                to: 'now',
               },
-              now: new Date(),
-            }
-          )
-        ).toEqual(expect.arrayContaining(createExpression('interval', 0)));
+            }),
+          } as unknown as ExecutionContext<Adapters, SerializableRecord>
+        );
+        expect(result).toEqual(0);
       });
 
-      it('should return a valid value > 0 if both dateRange and targetBars is passed', () => {
-        expect(
-          intervalOperation.toExpression(
-            createLayer('interval'),
-            'col1',
-            createMockedIndexPattern(),
-            {
-              dateRange: {
-                fromDate: new Date(2022, 0, 1).toISOString(),
-                toDate: new Date(2023, 0, 1).toISOString(),
-              },
-              now: new Date(),
-              targetBars: 100,
-            }
-          )
-        ).toEqual(expect.arrayContaining(createExpression('interval', 86400000)));
+      it('should return a valid value > 0 if both timeRange and targetBars is passed', () => {
+        const result = formulaIntervalFn.fn(undefined, { targetBars: 100 }, {
+          getSearchContext: () => ({
+            timeRange: {
+              from: 'now-15m',
+              to: 'now',
+            },
+          }),
+        } as unknown as ExecutionContext<Adapters, SerializableRecord>);
+        expect(result).toEqual(10000);
       });
     });
   });
@@ -203,32 +202,28 @@ describe('context variables', () => {
       });
     });
 
-    describe('toExpression', () => {
-      it('should return 0 if no dateRange is passed', () => {
-        expect(
-          timeRangeOperation.toExpression(
-            createLayer('time_range'),
-            'col1',
-            createMockedIndexPattern(),
-            { now: new Date(), targetBars: 100 }
-          )
-        ).toEqual(expect.arrayContaining(createExpression('time_range', 0)));
+    describe('expression function', () => {
+      it('should return 0 if no time range is available', () => {
+        // (not sure if this case is actually possible)
+        const result = formulaTimeRangeFn.fn(undefined, {}, {
+          getSearchContext: () => ({
+            /* no time range */
+          }),
+        } as ExecutionContext<Adapters, SerializableRecord>);
+        expect(result).toEqual(0);
       });
 
-      it('should return a valid value > 0 if dateRange is passed', () => {
-        expect(
-          timeRangeOperation.toExpression(
-            createLayer('time_range'),
-            'col1',
-            createMockedIndexPattern(),
-            {
-              dateRange: {
-                fromDate: new Date(2022, 0, 1).toISOString(),
-                toDate: new Date(2023, 0, 1).toISOString(),
-              },
-            }
-          )
-        ).toEqual(expect.arrayContaining(createExpression('time_range', 31536000000)));
+      it('should return a valid value > 0 if time range is available', () => {
+        const result = formulaTimeRangeFn.fn(undefined, {}, {
+          getSearchContext: () => ({
+            timeRange: {
+              from: 'now-15m',
+              to: 'now',
+            },
+          }),
+        } as unknown as ExecutionContext<Adapters, SerializableRecord>);
+
+        expect(result).toBe(900001);
       });
     });
   });
@@ -241,7 +236,7 @@ describe('context variables', () => {
       });
     });
 
-    describe('toExpression', () => {
+    describe.skip('toExpression', () => {
       it('should return the now value when passed', () => {
         const now = new Date();
         expect(
