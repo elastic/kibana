@@ -7,20 +7,19 @@
  */
 
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { ControlsThemeService } from './types';
+import { ControlsCoreService } from './types';
 import { ControlsPluginStartDeps } from '../../types';
 
-export type ThemeServiceFactory = KibanaPluginServiceFactory<
-  ControlsThemeService,
+export type CoreServiceFactory = KibanaPluginServiceFactory<
+  ControlsCoreService,
   ControlsPluginStartDeps
 >;
 
-export const themeServiceFactory: ThemeServiceFactory = ({ coreStart }) => {
-  const {
-    theme: { theme$ },
-  } = coreStart;
+export const coreServiceFactory: CoreServiceFactory = ({ coreStart }) => {
+  const { theme, i18n } = coreStart;
 
   return {
-    theme$,
+    theme,
+    i18n,
   };
 };
