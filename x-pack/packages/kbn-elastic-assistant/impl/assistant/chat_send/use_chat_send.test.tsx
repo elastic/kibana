@@ -13,6 +13,7 @@ import { defaultSystemPrompt, mockSystemPrompt } from '../../mock/system_prompt'
 import { useChatSend, UseChatSendProps } from './use_chat_send';
 import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
+import { TestProviders } from '../../mock/test_providers/test_providers';
 
 jest.mock('../use_send_messages');
 jest.mock('../use_conversation');
@@ -61,7 +62,9 @@ describe('use chat send', () => {
     });
   });
   it('handleOnChatCleared clears the conversation', () => {
-    const { result } = renderHook(() => useChatSend(testProps));
+    const { result } = renderHook(() => useChatSend(testProps), {
+      wrapper: TestProviders,
+    });
     result.current.handleOnChatCleared();
     expect(clearConversation).toHaveBeenCalled();
     expect(setPromptTextPreview).toHaveBeenCalledWith('');
@@ -71,14 +74,18 @@ describe('use chat send', () => {
     expect(setEditingSystemPromptId).toHaveBeenCalledWith(defaultSystemPrompt.id);
   });
   it('handlePromptChange updates prompt successfully', () => {
-    const { result } = renderHook(() => useChatSend(testProps));
+    const { result } = renderHook(() => useChatSend(testProps), {
+      wrapper: TestProviders,
+    });
     result.current.handlePromptChange('new prompt');
     expect(setPromptTextPreview).toHaveBeenCalledWith('new prompt');
     expect(setUserPrompt).toHaveBeenCalledWith('new prompt');
   });
   it('handleButtonSendMessage sends message with context prompt when a valid prompt text is provided', async () => {
     const promptText = 'prompt text';
-    const { result } = renderHook(() => useChatSend(testProps));
+    const { result } = renderHook(() => useChatSend(testProps), {
+      wrapper: TestProviders,
+    });
     result.current.handleButtonSendMessage(promptText);
     expect(setUserPrompt).toHaveBeenCalledWith('');
 
@@ -96,8 +103,11 @@ describe('use chat send', () => {
   });
   it('handleButtonSendMessage sends message with only provided prompt text and context already exists in convo history', async () => {
     const promptText = 'prompt text';
-    const { result } = renderHook(() =>
-      useChatSend({ ...testProps, currentConversation: welcomeConvo })
+    const { result } = renderHook(
+      () => useChatSend({ ...testProps, currentConversation: welcomeConvo }),
+      {
+        wrapper: TestProviders,
+      }
     );
 
     result.current.handleButtonSendMessage(promptText);
@@ -109,8 +119,11 @@ describe('use chat send', () => {
     });
   });
   it('handleRegenerateResponse removes the last message of the conversation, resends the convo to GenAI, and appends the message received', async () => {
-    const { result } = renderHook(() =>
-      useChatSend({ ...testProps, currentConversation: welcomeConvo })
+    const { result } = renderHook(
+      () => useChatSend({ ...testProps, currentConversation: welcomeConvo }),
+      {
+        wrapper: TestProviders,
+      }
     );
 
     result.current.handleRegenerateResponse();

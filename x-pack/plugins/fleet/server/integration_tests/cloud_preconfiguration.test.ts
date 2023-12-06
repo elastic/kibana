@@ -333,6 +333,7 @@ describe('Fleet cloud preconfiguration', () => {
               'es-containerhost': {
                 hosts: ['https://cloudinternales:9200'],
                 type: 'elasticsearch',
+                preset: 'balanced',
               },
             },
             revision: 5,
