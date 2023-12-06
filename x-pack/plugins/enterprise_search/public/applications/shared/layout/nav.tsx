@@ -24,7 +24,12 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 import { SEARCH_APPLICATIONS_PATH, SearchApplicationViewTabs } from '../../applications/routes';
-import { SEARCH_INDICES_PATH, SETTINGS_PATH } from '../../enterprise_search_content/routes';
+import {
+  CONNECTORS_PATH,
+  CRAWLERS_PATH,
+  SEARCH_INDICES_PATH,
+  SETTINGS_PATH,
+} from '../../enterprise_search_content/routes';
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
@@ -61,6 +66,28 @@ export const useEnterpriseSearchNav = () => {
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: true,
             to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SEARCH_INDICES_PATH,
+          }),
+        },
+        {
+          id: 'connectors',
+          name: i18n.translate('xpack.enterpriseSearch.nav.connectorsTitle', {
+            defaultMessage: 'Connectors',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + CONNECTORS_PATH,
+          }),
+        },
+        {
+          id: 'crawlers',
+          name: i18n.translate('xpack.enterpriseSearch.nav.crawlersTitle', {
+            defaultMessage: 'Web crawlers',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + CRAWLERS_PATH,
           }),
         },
         ...(productFeatures.hasDefaultIngestPipeline
