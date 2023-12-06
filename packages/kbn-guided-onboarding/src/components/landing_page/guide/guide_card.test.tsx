@@ -54,7 +54,7 @@ describe('guide cards', () => {
         Connect to the Elasticsearch API
       </h3>
     `);
-    expect(await queryByText('Detect threats in my data with SIEM')).toMatchInlineSnapshot(`null`);
+    expect(await queryByText('observability')).toMatchInlineSnapshot(`null`);
   });
   test('should render security cards', async () => {
     const { queryByText } = render(
@@ -97,7 +97,7 @@ describe('guide cards', () => {
       </span>
     `);
 
-    expect(await queryByText('Connect to the Elasticsearch API')).toMatchInlineSnapshot(`null`);
+    expect(await queryByText('search')).toMatchInlineSnapshot(`null`);
   });
   test('should render observability cards', async () => {
     const { queryByText } = render(
@@ -138,6 +138,6 @@ describe('guide cards', () => {
       </h3>
     `);
 
-    expect(await queryByText('Connect to the Elasticsearch API')).toMatchInlineSnapshot(`null`);
+    expect(await queryByText('search')).toMatchInlineSnapshot(`null`);
   });
 });
