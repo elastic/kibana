@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { safeLoad } from 'js-yaml';
+
 import {
   getAllowedOutputTypeForPolicy,
   outputYmlIncludesReservedPerformanceKey,
@@ -54,13 +56,13 @@ describe('outputYmlIncludesReservedPerformanceKey', () => {
     it('returns true when reserved key is present', () => {
       const configYml = `queue.mem.events: 1000`;
 
-      expect(outputYmlIncludesReservedPerformanceKey(configYml)).toBe(true);
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, safeLoad)).toBe(true);
     });
 
     it('returns false when no reserved key is present', () => {
       const configYml = `some.random.key: 1000`;
 
-      expect(outputYmlIncludesReservedPerformanceKey(configYml)).toBe(false);
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, safeLoad)).toBe(false);
     });
   });
 
@@ -72,7 +74,7 @@ describe('outputYmlIncludesReservedPerformanceKey', () => {
             events: 1000
     `;
 
-      expect(outputYmlIncludesReservedPerformanceKey(configYml)).toBe(true);
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, safeLoad)).toBe(true);
     });
 
     it('returns false when no reserved key is present', () => {
@@ -82,7 +84,7 @@ describe('outputYmlIncludesReservedPerformanceKey', () => {
             key: 1000
       `;
 
-      expect(outputYmlIncludesReservedPerformanceKey(configYml)).toBe(false);
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, safeLoad)).toBe(false);
     });
   });
 
@@ -90,13 +92,13 @@ describe('outputYmlIncludesReservedPerformanceKey', () => {
     it('returns true when reserved key is present', () => {
       const configYml = `bulk_max_size`;
 
-      expect(outputYmlIncludesReservedPerformanceKey(configYml)).toBe(true);
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, safeLoad)).toBe(true);
     });
 
     it('returns false when no reserved key is present', () => {
       const configYml = `just a string`;
 
-      expect(outputYmlIncludesReservedPerformanceKey(configYml)).toBe(false);
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, safeLoad)).toBe(false);
     });
   });
 });
