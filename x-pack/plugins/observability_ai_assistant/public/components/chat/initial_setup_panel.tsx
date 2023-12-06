@@ -20,11 +20,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
-import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
-import { ExperimentalFeatureBanner } from './experimental_feature_banner';
+import { Disclaimer } from './disclaimer';
 import { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { useKibana } from '../../hooks/use_kibana';
+import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 
 export function InitialSetupPanel({
   connectors,
@@ -62,7 +62,7 @@ export function InitialSetupPanel({
 
   return (
     <>
-      <ExperimentalFeatureBanner />
+      <Disclaimer />
 
       <EuiPanel paddingSize="m" style={{ overflowY: 'auto' }}>
         <EuiSpacer size="s" />
