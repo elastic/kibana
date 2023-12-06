@@ -17,7 +17,7 @@ export function Disclaimer() {
       <EuiTitle>
         <h2>
           {i18n.translate('xpack.observabilityAiAssistant.disclaimer.title', {
-            defaultMessage: 'Welcome to Elastic AI Assistant!',
+            defaultMessage: 'Welcome to the Elastic AI Assistant for Observability',
           })}
         </h2>
       </EuiTitle>
