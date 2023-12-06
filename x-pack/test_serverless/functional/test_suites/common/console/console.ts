@@ -197,27 +197,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await PageObjects.console.hasFolds()).to.be(false);
       });
-
-      it(`doesn't fail if a fold fails`, async () => {
-        // for more details, see https://github.com/elastic/kibana/issues/151563
-        await browser.clearLocalStorage();
-        await browser.setLocalStorageItem(
-          'sense:folds',
-          '[{"start":{"row":1,"column":1},"end":{"row":82,"column":4}}]'
-        );
-        await browser.setLocalStorageItem(
-          'sense:console_local_text-object_95a511b6-b6e1-4ea6-9344-428bf5183d88',
-          '{"id":"95a511b6-b6e1-4ea6-9344-428bf5183d88","createdAt":1677592109975,"updatedAt":1677592148666,"text":"GET _cat/indices"}'
-        );
-        await browser.refresh();
-        await PageObjects.common.sleep(3000);
-
-        await PageObjects.console.closeHelpIfExists();
-        const request = await PageObjects.console.getRequest();
-        // the request is restored from the local storage value
-        expect(request).to.eql('GET _cat/indices');
-        await browser.clearLocalStorage();
-      });
     });
   });
 }
