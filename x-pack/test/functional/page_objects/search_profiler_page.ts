@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
-  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const aceEditor = getService('aceEditor');
   const editorTestSubjectSelector = 'searchProfilerEditor';
