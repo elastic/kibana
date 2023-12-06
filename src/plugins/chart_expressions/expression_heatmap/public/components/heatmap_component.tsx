@@ -26,6 +26,7 @@ import {
   SeriesIdentifier,
   TooltipValue,
 } from '@elastic/charts';
+import numeral from '@elastic/numeral';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
 import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';
@@ -64,6 +65,11 @@ declare global {
      */
     _echDebugStateFlag?: boolean;
   }
+}
+
+function formatAndExtractNumericValue(value: number, valueFormatter: (d: number) => string) {
+  // @ts-expect-error value method is not declared in the Numeral.js types
+  return Number.isFinite(value) ? numeral(valueFormatter(value)).value() : value;
 }
 
 function getStops(
@@ -519,8 +525,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       const overwriteColor = overwriteColors?.[overwriteArrayIdx];
       return {
         // with the default continuity:above the every range is left-closed
-        start: Number.isFinite(startValue) ? Number(valueFormatter(startValue)) : startValue,
-        end: Number.isFinite(endValue) ? Number(valueFormatter(endValue)) : endValue,
+        start: formatAndExtractNumericValue(startValue, valueFormatter),
+        end: formatAndExtractNumericValue(endValue, valueFormatter),
         // the current colors array contains a duplicated color at the beginning that we need to skip
         color: overwriteColor ?? colors[index + 1],
       };
