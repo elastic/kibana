@@ -41,6 +41,9 @@ import {
   PackageESError,
   KibanaSOReferenceError,
   PackageAlreadyInstalledError,
+  AgentPolicyNotFoundError,
+  InputNotFoundError,
+  StreamNotFoundError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -82,7 +85,13 @@ const getHTTPResponseCode = (error: FleetError): number => {
   if (error instanceof AgentNotFoundError) {
     return 404;
   }
+  if (error instanceof AgentPolicyNotFoundError) {
+    return 404;
+  }
   if (error instanceof AgentActionNotFoundError) {
+    return 404;
+  }
+  if (error instanceof InputNotFoundError || error instanceof StreamNotFoundError) {
     return 404;
   }
   // Conflict

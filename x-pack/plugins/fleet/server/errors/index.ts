@@ -57,6 +57,8 @@ export class PackagePolicyIneligibleForUpgradeError extends FleetError {}
 export class PackagePolicyValidationError extends FleetError {}
 export class PackagePolicyNameExistsError extends FleetError {}
 export class PackagePolicyNotFoundError extends FleetError {}
+export class InputNotFoundError extends FleetError {}
+export class StreamNotFoundError extends FleetError {}
 export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
   constructor(message = 'Cannot perform that action') {
     super(
