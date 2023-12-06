@@ -54,7 +54,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
           </EuiFlexItem>
           {Boolean(user) && (
             <EuiFlexItem grow={false}>
-              <EuiText color="subdued">
+              <EuiText>
                 <h4>
                   {user
                     ? i18n.translate('searchApiPanels.welcomeBanner.header.greeting.customTitle', {
