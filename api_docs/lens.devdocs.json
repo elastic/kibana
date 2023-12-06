@@ -8498,6 +8498,20 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.XYArgs.minBarHeight",
+            "type": "number",
+            "tags": [],
+            "label": "minBarHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.XYArgs.splitRowAccessor",
             "type": "CompoundType",
             "tags": [],
@@ -9494,6 +9508,20 @@
             "type": "number",
             "tags": [],
             "label": "fillOpacity",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYState.minBarHeight",
+            "type": "number",
+            "tags": [],
+            "label": "minBarHeight",
             "description": [],
             "signature": [
               "number | undefined"
