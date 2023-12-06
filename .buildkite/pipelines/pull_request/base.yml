@@ -1,3 +1,6 @@
+env:
+  BUILDKITE_AGENT_EXPERIMENT: "git-mirrors"
+
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
@@ -172,7 +175,7 @@ steps:
     retry:
       automatic:
         - exit_status: '*'
-          limit: 1        
+          limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution.sh
     label: 'Security Solution Cypress Tests'
@@ -221,7 +224,7 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-          
+
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
     label: 'Detection Engine - Security Solution Cypress Tests'
     agents:
@@ -256,7 +259,7 @@ steps:
     retry:
       automatic:
         - exit_status: '*'
-          limit: 1        
+          limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
     label: 'Investigations - Security Solution Cypress Tests'
