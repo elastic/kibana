@@ -28,7 +28,11 @@ import {
   type KnowledgeBaseEntry,
   type Message,
 } from '../../../common/types';
-import type { KnowledgeBaseService, RecalledEntry } from '../kb_service';
+import {
+  KnowledgeBaseEntryOperationType,
+  KnowledgeBaseService,
+  RecalledEntry,
+} from '../knowledge_base_service';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 
@@ -377,23 +381,52 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
-  summarize = async ({
-    entry,
-  }: {
-    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
-  }): Promise<void> => {
-    return this.dependencies.knowledgeBaseService.summarize({
-      namespace: this.dependencies.namespace,
-      user: this.dependencies.user,
-      entry,
-    });
-  };
-
   getKnowledgeBaseStatus = () => {
     return this.dependencies.knowledgeBaseService.status();
   };
 
   setupKnowledgeBase = () => {
     return this.dependencies.knowledgeBaseService.setup();
+  };
+
+  createKnowledgeBaseEntry = async ({
+    entry,
+  }: {
+    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
+  }): Promise<void> => {
+    return this.dependencies.knowledgeBaseService.addEntry({
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+      entry,
+    });
+  };
+
+  importKnowledgeBaseEntries = async ({
+    entries,
+  }: {
+    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
+  }): Promise<void> => {
+    const operations = entries.map((entry) => ({
+      type: KnowledgeBaseEntryOperationType.Index,
+      document: { ...entry, '@timestamp': new Date().toISOString() },
+    }));
+
+    await this.dependencies.knowledgeBaseService.addEntries({ operations });
+  };
+
+  getKnowledgeBaseEntries = async ({
+    query,
+    sortBy,
+    sortDirection,
+  }: {
+    query: string;
+    sortBy: string;
+    sortDirection: 'asc' | 'desc';
+  }) => {
+    return this.dependencies.knowledgeBaseService.getEntries({ query, sortBy, sortDirection });
+  };
+
+  deleteKnowledgeBaseEntry = async (id: string) => {
+    return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 }

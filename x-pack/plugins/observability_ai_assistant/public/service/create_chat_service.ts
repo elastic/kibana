@@ -36,7 +36,7 @@ import {
 } from '../../common/types';
 import { ObservabilityAIAssistantAPIClient } from '../api';
 import type {
-  ChatRegistrationFunction,
+  AssistantRegistrationFunction,
   CreateChatCompletionResponseChunk,
   ObservabilityAIAssistantChatService,
   PendingMessage,
@@ -65,7 +65,7 @@ export async function createChatService({
 }: {
   analytics: AnalyticsServiceStart;
   signal: AbortSignal;
-  registrations: ChatRegistrationFunction[];
+  registrations: AssistantRegistrationFunction[];
   client: ObservabilityAIAssistantAPIClient;
 }): Promise<ObservabilityAIAssistantChatService> {
   const contextRegistry: ContextRegistry = new Map();

@@ -62,7 +62,6 @@ export function ChatBody({
   connectors,
   knowledgeBase,
   connectorsManagementHref,
-  modelsManagementHref,
   currentUser,
   startedFrom,
   onConversationUpdate,
@@ -73,7 +72,6 @@ export function ChatBody({
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
   connectorsManagementHref: string;
-  modelsManagementHref: string;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   startedFrom?: StartedFrom;
   onConversationUpdate: (conversation: Conversation) => void;
@@ -333,7 +331,6 @@ export function ChatBody({
               : undefined
           }
           connectorsManagementHref={connectorsManagementHref}
-          modelsManagementHref={modelsManagementHref}
           knowledgeBase={knowledgeBase}
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}
