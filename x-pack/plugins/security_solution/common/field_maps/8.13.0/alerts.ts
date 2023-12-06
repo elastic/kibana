@@ -8,7 +8,7 @@
 import { alertsFieldMap840 } from '../8.4.0';
 import { ALERT_HOST_CRITICALITY, ALERT_USER_CRITICALITY } from '../field_names';
 
-export const alertsFieldMap8120 = {
+export const alertsFieldMap8130 = {
   ...alertsFieldMap840,
   /**
    * Stores the criticality level for the host, as determined by analysts, in relation to the alert.
@@ -32,4 +32,4 @@ export const alertsFieldMap8120 = {
   },
 } as const;
 
-export type AlertsFieldMap8120 = typeof alertsFieldMap8120;
+export type AlertsFieldMap8130 = typeof alertsFieldMap8130;

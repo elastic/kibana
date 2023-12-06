@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertsFieldMap8120 } from './alerts';
-import { alertsFieldMap8120 } from './alerts';
-export type { AlertsFieldMap8120 };
-export { alertsFieldMap8120 };
+import type { AlertsFieldMap8130 } from './alerts';
+import { alertsFieldMap8130 } from './alerts';
+export type { AlertsFieldMap8130 };
+export { alertsFieldMap8130 };
