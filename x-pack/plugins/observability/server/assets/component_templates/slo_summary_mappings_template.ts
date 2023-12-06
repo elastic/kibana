@@ -50,6 +50,11 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
             },
             instanceId: {
               type: 'keyword',
+              fields: {
+                text: {
+                  type: 'text',
+                },
+              },
             },
             name: {
               type: 'text',
