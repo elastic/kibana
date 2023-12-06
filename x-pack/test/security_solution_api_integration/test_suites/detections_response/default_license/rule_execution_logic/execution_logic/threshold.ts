@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
+
 import {
   ALERT_REASON,
   ALERT_RULE_UUID,
@@ -15,6 +16,7 @@ import {
 
 import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
+
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -63,13 +65,13 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getOpenAlerts(supertest, log, es, createdRule);
-      expect(alerts.hits.hits.length).eql(1);
+      expect(alerts.hits.hits.length).toEqual(1);
       const fullAlert = alerts.hits.hits[0]._source;
       if (!fullAlert) {
-        return expect(fullAlert).to.be.ok();
+        return expect(fullAlert).toBeTruthy();
       }
       const eventIds = (fullAlert?.[ALERT_ANCESTORS] as Ancestor[]).map((event) => event.id);
-      expect(fullAlert).eql({
+      expect(fullAlert).toEqual({
         ...fullAlert,
         'host.id': '8cc95778cce5407c809480e8e32ad76b',
         [EVENT_KIND]: 'signal',
@@ -109,7 +111,7 @@ export default ({ getService }: FtrProviderContext) => {
         max_signals: 5,
       };
       const { logs } = await previewRule({ supertest, rule });
-      expect(logs[0].warnings).contain(getMaxAlertsWarning());
+      expect(logs[0].warnings).toContain(getMaxAlertsWarning());
     });
 
     it("doesn't generate max alerts warning when circuit breaker is met but not exceeded", async () => {
@@ -122,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
         max_signals: 7,
       };
       const { logs } = await previewRule({ supertest, rule });
-      expect(logs[0].warnings).not.contain(getMaxAlertsWarning());
+      expect(logs[0].warnings).not.toContain(getMaxAlertsWarning());
     });
 
     it('generates 2 alerts from Threshold rules when threshold is met', async () => {
@@ -135,7 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).eql(2);
+      expect(previewAlerts.length).toEqual(2);
     });
 
     it('applies the provided query before bucketing ', async () => {
@@ -149,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).eql(1);
+      expect(previewAlerts.length).toEqual(1);
     });
 
     it('generates no alerts from Threshold rules when threshold is met and cardinality is not met', async () => {
@@ -168,7 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).eql(0);
+      expect(previewAlerts.length).toEqual(0);
     });
 
     it('generates no alerts from Threshold rules when cardinality is met and threshold is not met', async () => {
@@ -187,7 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).eql(0);
+      expect(previewAlerts.length).toEqual(0);
     });
 
     it('generates alerts from Threshold rules when threshold and cardinality are both met', async () => {
@@ -206,13 +208,13 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).eql(1);
+      expect(previewAlerts.length).toEqual(1);
       const fullAlert = previewAlerts[0]._source;
       if (!fullAlert) {
-        return expect(fullAlert).to.be.ok();
+        return expect(fullAlert).toBeTruthy();
       }
       const eventIds = (fullAlert?.[ALERT_ANCESTORS] as Ancestor[]).map((event) => event.id);
-      expect(fullAlert).eql({
+      expect(fullAlert).toEqual({
         ...fullAlert,
         'host.id': '8cc95778cce5407c809480e8e32ad76b',
         [EVENT_KIND]: 'signal',
@@ -258,7 +260,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).eql(0);
+      expect(previewAlerts.length).toEqual(0);
     });
 
     it('generates alerts from Threshold rules when bucketing by multiple fields', async () => {
@@ -271,13 +273,13 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).eql(1);
+      expect(previewAlerts.length).toEqual(1);
       const fullAlert = previewAlerts[0]._source;
       if (!fullAlert) {
-        return expect(fullAlert).to.be.ok();
+        return expect(fullAlert).toBeTruthy();
       }
       const eventIds = (fullAlert[ALERT_ANCESTORS] as Ancestor[]).map((event) => event.id);
-      expect(fullAlert).eql({
+      expect(fullAlert).toEqual({
         ...fullAlert,
         'event.module': 'system',
         'host.id': '2ab45fc1c41e4c84bbd02202a7e5761f',
@@ -329,7 +331,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getOpenAlerts(supertest, log, es, createdRule);
-      expect(alerts.hits.hits.length).eql(1);
+      expect(alerts.hits.hits.length).toEqual(1);
     });
 
     describe('Timestamp override and fallback', async () => {
@@ -356,19 +358,19 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).eql(4);
+        expect(previewAlerts.length).toEqual(4);
 
         for (const hit of previewAlerts) {
           const originalTime = hit._source?.[ALERT_ORIGINAL_TIME];
           const hostName = hit._source?.['host.name'];
           if (hostName === 'host-1') {
-            expect(originalTime).eql('2020-12-16T15:15:18.570Z');
+            expect(originalTime).toEqual('2020-12-16T15:15:18.570Z');
           } else if (hostName === 'host-2') {
-            expect(originalTime).eql('2020-12-16T15:16:18.570Z');
+            expect(originalTime).toEqual('2020-12-16T15:16:18.570Z');
           } else if (hostName === 'host-3') {
-            expect(originalTime).eql('2020-12-16T16:15:18.570Z');
+            expect(originalTime).toEqual('2020-12-16T16:15:18.570Z');
           } else {
-            expect(originalTime).eql('2020-12-16T16:16:18.570Z');
+            expect(originalTime).toEqual('2020-12-16T16:16:18.570Z');
           }
         }
       });
@@ -384,19 +386,19 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).eql(4);
+        expect(previewAlerts.length).toEqual(4);
 
         for (const hit of previewAlerts) {
           const originalTime = hit._source?.[ALERT_ORIGINAL_TIME];
           const hostName = hit._source?.['host.name'];
           if (hostName === 'host-1') {
-            expect(originalTime).eql('2020-12-16T15:15:18.570Z');
+            expect(originalTime).toEqual('2020-12-16T15:15:18.570Z');
           } else if (hostName === 'host-2') {
-            expect(originalTime).eql('2020-12-16T15:16:18.570Z');
+            expect(originalTime).toEqual('2020-12-16T15:16:18.570Z');
           } else if (hostName === 'host-3') {
-            expect(originalTime).eql('2020-12-16T16:15:18.570Z');
+            expect(originalTime).toEqual('2020-12-16T16:15:18.570Z');
           } else {
-            expect(originalTime).eql('2020-12-16T16:16:18.570Z');
+            expect(originalTime).toEqual('2020-12-16T16:16:18.570Z');
           }
         }
       });
@@ -422,10 +424,10 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId, sort: ['host.name'] });
 
-        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).to.eql('Low');
-        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(20);
-        expect(previewAlerts[1]?._source?.host?.risk?.calculated_level).to.eql('Critical');
-        expect(previewAlerts[1]?._source?.host?.risk?.calculated_score_norm).to.eql(96);
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Low');
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(20);
+        expect(previewAlerts[1]?._source?.host?.risk?.calculated_level).toEqual('Critical');
+        expect(previewAlerts[1]?._source?.host?.risk?.calculated_score_norm).toEqual(96);
       });
     });
   });
