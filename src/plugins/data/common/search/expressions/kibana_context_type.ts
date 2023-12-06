@@ -12,6 +12,8 @@ import { DataViewField } from '../..';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ExecutionContextSearch = {
+  // TODO why not make all these required properties?
+  now?: number;
   filters?: Filter[];
   query?: Query | Query[];
   timeRange?: TimeRange;

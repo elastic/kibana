@@ -76,9 +76,9 @@ export type ExpressionFunctionFormulaTimeRange = ExpressionFunctionDefinition<
   number
 >;
 
-const getTimeRangeAsNumber = (timeRange: TimeRange | undefined) => {
+const getTimeRangeAsNumber = (timeRange: TimeRange | undefined, now: number) => {
   if (!timeRange) return 0;
-  const absoluteTimeRange = getAbsoluteTimeRange(timeRange); // TODO - do we need to use the NowProvider with forceNow here?
+  const absoluteTimeRange = getAbsoluteTimeRange(timeRange, { forceNow: new Date(now) });
   return timeRange ? moment(absoluteTimeRange.to).diff(moment(absoluteTimeRange.from)) : 0;
 };
 
@@ -90,8 +90,9 @@ export const formulaTimeRangeFn: ExpressionFunctionFormulaTimeRange = {
   args: {},
 
   fn(_input, _args, { getSearchContext }) {
-    const { timeRange } = getSearchContext() as { timeRange: TimeRange };
-    return getTimeRangeAsNumber(timeRange);
+    // TODO: decide whether "now" can be undefined
+    const { timeRange, now } = getSearchContext() as { timeRange: TimeRange; now: number };
+    return getTimeRangeAsNumber(timeRange, now);
   },
 };
 
@@ -146,8 +147,8 @@ export const formulaNowFn: ExpressionFunctionFormulaNow = {
 
   args: {},
 
-  fn(_input, _args) {
-    return Date.now();
+  fn(_input, _args, { getSearchContext }) {
+    return getSearchContext().now as number;
   },
 };
 
@@ -196,11 +197,11 @@ export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
   },
 
   fn(_input, args, { getSearchContext }) {
-    const context = getSearchContext();
-    return context.timeRange && args.targetBars
+    const { timeRange, now } = getSearchContext() as { timeRange: TimeRange; now: number };
+    return timeRange && args.targetBars
       ? calcAutoIntervalNear(
           args.targetBars,
-          getTimeRangeAsNumber(context.timeRange as TimeRange)
+          getTimeRangeAsNumber(timeRange as TimeRange, now as number)
         ).asMilliseconds()
       : 0;
   },
