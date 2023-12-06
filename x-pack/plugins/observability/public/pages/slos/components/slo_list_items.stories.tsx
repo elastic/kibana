@@ -8,7 +8,7 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
+import { ActiveAlerts } from '../../../hooks/slo/active_alerts';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloListItems as Component, Props } from './slo_list_items';
 import { sloList } from '../../../data/slo/slo';
