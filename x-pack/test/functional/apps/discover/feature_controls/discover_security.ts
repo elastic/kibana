@@ -11,7 +11,6 @@ import { getSavedQuerySecurityUtils } from '../../saved_query_management/utils/s
 
 export default function (ctx: FtrProviderContext) {
   const { getPageObjects, getService } = ctx;
-  const log = getService('log');
   const savedQuerySecurityUtils = getSavedQuerySecurityUtils(ctx);
   const esArchiver = getService('esArchiver');
   const esSupertest = getService('esSupertest');
@@ -451,15 +450,16 @@ export default function (ctx: FtrProviderContext) {
 
         // can't access logstash index directly
         // swapping index patterns so we get an updated field list
-        log.debug('DEBUG a bunch of data view switching');
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await PageObjects.discover.selectIndexPattern('logstash-*');
         await new Promise((resolve) => setTimeout(resolve, 5000));
         await PageObjects.discover.selectIndexPattern('alias-logstash-discover');
         await new Promise((resolve) => setTimeout(resolve, 5000));
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await new Promise((resolve) => setTimeout(resolve, 5000));
         await PageObjects.discover.selectIndexPattern('alias-logstash-discover');
-        log.debug('DEBUG a bunch of data view switching done');
-        //
+
+        await new Promise((resolve) => setTimeout(resolve, 5000));
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('discoverNoResultsCheckIndices');
