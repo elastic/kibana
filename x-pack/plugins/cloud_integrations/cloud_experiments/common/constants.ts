@@ -40,7 +40,7 @@ export enum FEATURE_FLAG_NAMES {
   'cloud-chat.chat-variant' = 'cloud-chat.chat-variant',
   /**
    * Used in guided onboarding to switch between guide card versions.
-   * Options are 'classic' and 'guide'
+   * Options are 'guide' and 'classic'
    */
   'guided.onboarding' = 'guided.onboarding',
 }

@@ -36,7 +36,7 @@ import {
   type GuideFilterValuesClassic,
 } from '@kbn/guided-onboarding/classic';
 import { GuideId, GuideState, GuideVersion } from '@kbn/guided-onboarding/src/types';
-import { getServices, useVariation } from '../../kibana_services';
+import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
 const homeBreadcrumb = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
@@ -65,7 +65,7 @@ export const GettingStarted = () => {
     i18nStart,
     docLinks,
     share,
-    cloudExperiments,
+    version,
   } = getServices();
 
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
@@ -75,10 +75,10 @@ export const GettingStarted = () => {
   const { search } = useLocation();
   const query = parse(search);
   // using for A/B testing
-  const [guideVersion, setGuideVersion] = useState<GuideVersion>('guide');
+  const [guideVersion] = useState<GuideVersion>(version);
   const useCase = query.useCase as GuideFilterValues;
   const [filter, setFilter] = useState<GuideFilterValues | GuideFilterValuesClassic>(
-    guideVersion ? useCase ?? 'all' : useCase ?? 'search'
+    guideVersion === 'classic' ? useCase ?? 'all' : useCase ?? 'search'
   );
 
   const history = useHistory();
@@ -154,9 +154,6 @@ export const GettingStarted = () => {
     },
     [guidedOnboardingService]
   );
-
-  // set up A/B testing
-  useVariation(cloudExperiments!, 'guided.onboarding', guideVersion, setGuideVersion);
 
   // filter cards for solution and based on classic or new format
   const guide = 'classic' ? guideCardsClassic : guideCards;

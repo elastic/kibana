@@ -20,6 +20,7 @@ import { KEY_ENABLE_WELCOME } from '../home';
 import { ReactWrapper } from '@kbn/test-jest-helpers/src/testbed/types';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { GuideFiltersProps } from '@kbn/guided-onboarding/src/components/landing_page/guide/guide_filters';
+import { GuideVersion } from '@kbn/guided-onboarding/src/types';
 
 const mockCloud = cloudMock.createSetup();
 const mockChrome = chromeServiceMock.createStartContract();
@@ -37,6 +38,7 @@ jest.mock('../../kibana_services', () => ({
     trackUiMetric: jest.fn(),
     share: mockShare,
     guidedOnboardingService: mockApiService,
+    version: 'guide',
   }),
 }));
 
@@ -134,6 +136,7 @@ describe('getting started', () => {
         chrome: mockChrome,
         application: mockApplication,
         share: mockShare,
+        version: 'classic' as GuideVersion,
         guidedOnboardingService: mockApiService,
       }),
     }));

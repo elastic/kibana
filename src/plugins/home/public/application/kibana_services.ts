@@ -29,6 +29,7 @@ import {
   CloudExperimentsPluginStart,
 } from '@kbn/cloud-experiments-plugin/common';
 import { useEffect } from 'react';
+import { GuideVersion } from '@kbn/guided-onboarding/src/types';
 import { TutorialService } from '../services/tutorials';
 import { AddDataService } from '../services/add_data';
 import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
@@ -63,7 +64,7 @@ export interface HomeKibanaServices {
   openModal: OverlayStart['openModal'];
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
-  cloudExperiments: CloudExperimentsPluginStart;
+  version: GuideVersion;
 }
 
 let services: HomeKibanaServices | null = null;
