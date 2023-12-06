@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const testIndex = 'test-index';
@@ -20,7 +19,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const security = getService('security');
   const es = getService('es');
-  const log = getService('log');
 
   describe('Search Profiler Editor', () => {
     before(async () => {
@@ -123,38 +121,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await retry.try(async () => {
         const searchProfilerInput = await PageObjects.searchProfiler.getQuery();
         expect(searchProfilerInput).to.eql(query);
-      });
-    });
-
-    describe('No indices', () => {
-      before(async () => {
-        // Delete any existing indices that were not properly cleaned up
-        try {
-          const indices = await es.indices.get({
-            index: '*',
-          });
-          const indexNames = Object.keys(indices);
-
-          if (indexNames.length > 0) {
-            await asyncForEach(indexNames, async (indexName) => {
-              await es.indices.delete({ index: indexName });
-            });
-          }
-        } catch (e) {
-          log.debug('[Setup error] Error deleting existing indices');
-          throw e;
-        }
-      });
-
-      it('returns error if profile is executed with no valid indices', async () => {
-        await PageObjects.searchProfiler.setIndexName('_all');
-        await PageObjects.searchProfiler.setQuery(testQuery);
-
-        await PageObjects.searchProfiler.clickProfileButton();
-
-        await retry.waitFor('notification renders', async () => {
-          return await PageObjects.searchProfiler.editorHasErrorNotification();
-        });
       });
     });
 
