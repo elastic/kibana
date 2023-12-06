@@ -7140,10 +7140,10 @@
             "nullable": true
           },
           "unenroll_timeout": {
-            "type": "number"
+            "type": "integer"
           },
           "inactivity_timeout": {
-            "type": "number"
+            "type": "integer"
           },
           "package_policies": {
             "description": "This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter",
@@ -7243,10 +7243,10 @@
             "nullable": true
           },
           "unenroll_timeout": {
-            "type": "number"
+            "type": "integer"
           },
           "inactivity_timeout": {
-            "type": "number"
+            "type": "integer"
           },
           "agent_features": {
             "type": "array",
@@ -7315,10 +7315,10 @@
             "nullable": true
           },
           "unenroll_timeout": {
-            "type": "number"
+            "type": "integer"
           },
           "inactivity_timeout": {
-            "type": "number"
+            "type": "integer"
           },
           "agent_features": {
             "type": "array",
@@ -7952,6 +7952,16 @@
           "config": {
             "type": "object"
           },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "balanced",
+              "custom",
+              "throughput",
+              "scale",
+              "latency"
+            ]
+          },
           "config_yaml": {
             "type": "string"
           },
@@ -8441,6 +8451,16 @@
           },
           "config": {
             "type": "object"
+          },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "balanced",
+              "custom",
+              "throughput",
+              "scale",
+              "latency"
+            ]
           },
           "config_yaml": {
             "type": "string"
