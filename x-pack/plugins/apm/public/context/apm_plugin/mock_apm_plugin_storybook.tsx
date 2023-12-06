@@ -122,6 +122,7 @@ const mockCore = {
   uiSettings: {
     get: (key: string) => uiSettings[key],
     get$: (key: string) => of(mockCore.uiSettings.get(key)),
+    isDefault: (key: string) => !(key in uiSettings),
   },
 };
 
