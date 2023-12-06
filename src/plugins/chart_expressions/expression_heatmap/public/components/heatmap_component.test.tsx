@@ -28,7 +28,7 @@ import { act } from 'react-dom/test-utils';
 import { HeatmapRenderProps, HeatmapArguments } from '../../common';
 import HeatmapComponent from './heatmap_component';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
-import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -110,10 +110,6 @@ const uiState = {
   emit: jest.fn(),
   setSilent: jest.fn(),
 } as any;
-
-function toPrecisionWithoutRounding(v: number, digits: number) {
-  return Math.trunc(v * Math.pow(10, digits)) / Math.pow(10, digits);
-}
 
 describe('HeatmapComponent', function () {
   let wrapperProps: HeatmapRenderProps;
