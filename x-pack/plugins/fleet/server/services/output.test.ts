@@ -1679,4 +1679,46 @@ describe('Output Service', () => {
       expect(hosts).toEqual(['http://localhost:9200']);
     });
   });
+
+  describe('getLatestOutputHealth', () => {
+    it('should return unkown state if no hits', async () => {
+      esClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [],
+        },
+      } as any);
+
+      const response = await outputService.getLatestOutputHealth(esClientMock, 'id');
+
+      expect(response).toEqual({
+        state: 'UNKOWN',
+        message: '',
+        timestamp: '',
+      });
+    });
+
+    it('should return state from hits', async () => {
+      esClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                state: 'DEGRADED',
+                message: 'connection error',
+                '@timestamp': '2023-11-30T14:25:31Z',
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const response = await outputService.getLatestOutputHealth(esClientMock, 'id');
+
+      expect(response).toEqual({
+        state: 'DEGRADED',
+        message: 'connection error',
+        timestamp: '2023-11-30T14:25:31Z',
+      });
+    });
+  });
 });
