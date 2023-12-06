@@ -544,7 +544,7 @@ export class DataViewsService {
     forceRefresh: boolean = false
   ) => {
     const metaFields = await this.config.get<string[]>(META_FIELDS);
-    return await this.apiClient.getFieldsForWildcard({
+    return this.apiClient.getFieldsForWildcard({
       type: dataView.type,
       rollupIndex: dataView?.typeMeta?.params?.rollup_index,
       allowNoIndex: true,

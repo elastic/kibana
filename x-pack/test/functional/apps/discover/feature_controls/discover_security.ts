@@ -450,6 +450,8 @@ export default function (ctx: FtrProviderContext) {
 
         // can't access logstash index directly
         // swapping index patterns so we get an updated field list
+        // this is necessary since we don't have access to data view management
+        // nor can we force reload the browser in a test
         await new Promise((resolve) => setTimeout(resolve, 5000));
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await new Promise((resolve) => setTimeout(resolve, 5000));
