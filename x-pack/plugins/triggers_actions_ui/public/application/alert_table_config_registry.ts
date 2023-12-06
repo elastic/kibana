@@ -92,7 +92,7 @@ export class AlertTableConfigRegistry {
     return this.objectTypes.get(id)!;
   }
 
-  public getAlertConfigIdPerRuleType(ruleTypeIds: string[]): string {
+  public getAlertConfigIdPerRuleTypes(ruleTypeIds: string[]): string {
     const alertConfigs = Array.from(this.objectTypes).reduce<string[]>((acc, [id, objectType]) => {
       if (ruleTypeIds.every((ruleTypeId) => objectType.ruleTypeIds?.includes(ruleTypeId))) {
         acc.push(id);

@@ -133,7 +133,7 @@ describe('update()', () => {
   });
 });
 
-describe('getAlertConfigIdPerRuleType()', () => {
+describe('getAlertConfigIdPerRuleTypes()', () => {
   const alertTableConfigRegistry = new AlertTableConfigRegistry();
   beforeAll(() => {
     alertTableConfigRegistry.register(
@@ -151,12 +151,12 @@ describe('getAlertConfigIdPerRuleType()', () => {
   });
 
   test('should return a config ID if match one ruleTypeId match with a configuration', () => {
-    const configId = alertTableConfigRegistry.getAlertConfigIdPerRuleType(['xpack-ml-anomaly']);
+    const configId = alertTableConfigRegistry.getAlertConfigIdPerRuleTypes(['xpack-ml-anomaly']);
     expect(configId).toEqual('ml-alerts-table');
   });
 
   test('should return a config ID if more that one ruleTypeId match with a configuration', () => {
-    const configId = alertTableConfigRegistry.getAlertConfigIdPerRuleType([
+    const configId = alertTableConfigRegistry.getAlertConfigIdPerRuleTypes([
       'o11y-apm-threshold',
       'o11y-metric-threshold',
     ]);
@@ -164,7 +164,7 @@ describe('getAlertConfigIdPerRuleType()', () => {
   });
 
   test('should return the generic config ID if more that one ruleTypeId match with more than one configuration', () => {
-    const configId = alertTableConfigRegistry.getAlertConfigIdPerRuleType([
+    const configId = alertTableConfigRegistry.getAlertConfigIdPerRuleTypes([
       'o11y-apm-threshold',
       'o11y-metric-threshold',
       'ml-alerts-table',
@@ -173,12 +173,12 @@ describe('getAlertConfigIdPerRuleType()', () => {
   });
 
   test('should return the generic config ID if empty ruleTypeIds match with a configuration', () => {
-    const configId = alertTableConfigRegistry.getAlertConfigIdPerRuleType([]);
+    const configId = alertTableConfigRegistry.getAlertConfigIdPerRuleTypes([]);
     expect(configId).toEqual('stackAlerts-generic-alert-table');
   });
 
   test('should return the generic config ID if an unknown ruleTypeId match with NO configuration', () => {
-    const configId = alertTableConfigRegistry.getAlertConfigIdPerRuleType(['unknown-threshold']);
+    const configId = alertTableConfigRegistry.getAlertConfigIdPerRuleTypes(['unknown-threshold']);
     expect(configId).toEqual('stackAlerts-generic-alert-table');
   });
 });

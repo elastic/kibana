@@ -89,15 +89,6 @@ export const CaseViewActivity = ({
   const { data: currentUserProfile, isFetching: isLoadingCurrentUserProfile } =
     useGetCurrentUserProfile();
 
-  const onShowAlertDetails = useCallback(
-    (alertId: string, index: string) => {
-      if (showAlertDetails) {
-        showAlertDetails(alertId, index);
-      }
-    },
-    [showAlertDetails]
-  );
-
   const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
     caseData,
   });
@@ -221,7 +212,7 @@ export const CaseViewActivity = ({
                 data={caseData}
                 casesConfiguration={casesConfiguration}
                 actionsNavigation={actionsNavigation}
-                onShowAlertDetails={onShowAlertDetails}
+                onShowAlertDetails={showAlertDetails}
                 onUpdateField={onUpdateField}
                 statusActionButton={
                   permissions.update ? (

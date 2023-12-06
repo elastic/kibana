@@ -14,6 +14,7 @@ import { createAppMockRenderer } from '../../../common/mock';
 import type { CaseUI } from '../../../../common';
 import { CaseViewAlerts } from './case_view_alerts';
 import * as api from '../../../containers/api';
+import type { FeatureIdsResponse } from '../../../containers/types';
 
 jest.mock('../../../containers/api');
 
@@ -73,7 +74,7 @@ describe('CaseUI View Page activity tab', () => {
         producer: { buckets: [] },
         ruleTypeIds: { buckets: [{ doc_count: 1, key: 'log-threshold' }] },
       },
-    } as unknown as api.FeatureIdsResponse);
+    } as unknown as FeatureIdsResponse);
     appMockRender.render(
       <CaseViewAlerts
         caseData={{

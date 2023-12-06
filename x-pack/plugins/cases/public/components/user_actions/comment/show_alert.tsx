@@ -8,12 +8,14 @@
 import React, { memo, useCallback } from 'react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import * as i18n from '../translations';
+import { useCaseViewNavigation, useCaseViewParams } from '../../../common/navigation';
+import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 
 interface UserActionShowAlertProps {
   id: string;
   alertId: string;
   index: string;
-  onShowAlertDetails: (alertId: string, index: string) => void;
+  onShowAlertDetails?: (alertId: string, index: string) => void;
 }
 
 const UserActionShowAlertComponent = ({
@@ -22,10 +24,16 @@ const UserActionShowAlertComponent = ({
   index,
   onShowAlertDetails,
 }: UserActionShowAlertProps) => {
-  const onClick = useCallback(
-    () => onShowAlertDetails(alertId, index),
-    [alertId, index, onShowAlertDetails]
-  );
+  const { navigateToCaseView } = useCaseViewNavigation();
+  const { detailName } = useCaseViewParams();
+
+  const onClick = useCallback(() => {
+    if (onShowAlertDetails) {
+      onShowAlertDetails(alertId, index);
+    } else {
+      navigateToCaseView({ detailName, tabId: CASE_VIEW_PAGE_TABS.ALERTS });
+    }
+  }, [alertId, detailName, index, navigateToCaseView, onShowAlertDetails]);
 
   return (
     <EuiToolTip position="top" content={<p>{i18n.SHOW_ALERT_TOOLTIP}</p>}>
