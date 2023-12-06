@@ -11,16 +11,28 @@ import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
-import { getFormattedMessageContent } from './helpers';
+import {
+  getFormattedMessageContent,
+  getOptionalRequestParams,
+  hasParsableResponse,
+} from './helpers';
 import { PerformEvaluationParams } from './settings/evaluation_settings/use_perform_evaluation';
 
 export interface FetchConnectorExecuteAction {
+  alerts: boolean;
+  alertsIndexPattern?: string;
+  allow?: string[];
+  allowReplacement?: string[];
   assistantLangChain: boolean;
+  assistantStreamingEnabled: boolean;
   apiConfig: Conversation['apiConfig'];
   http: HttpSetup;
   messages: Message[];
+  onNewReplacements: (newReplacements: Record<string, string>) => void;
+  ragOnAlerts: boolean;
+  replacements?: Record<string, string>;
   signal?: AbortSignal | undefined;
-  assistantStreamingEnabled: boolean;
+  size?: number;
 }
 
 export interface FetchConnectorExecuteResponse {
@@ -34,12 +46,20 @@ export interface FetchConnectorExecuteResponse {
 }
 
 export const fetchConnectorExecuteAction = async ({
+  alerts,
+  alertsIndexPattern,
+  allow,
+  allowReplacement,
   assistantLangChain,
+  assistantStreamingEnabled,
   http,
   messages,
+  onNewReplacements,
+  ragOnAlerts,
+  replacements,
   apiConfig,
   signal,
-  assistantStreamingEnabled,
+  size,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
   const outboundMessages = messages.map((msg) => ({
     role: msg.role,
@@ -65,6 +85,16 @@ export const fetchConnectorExecuteAction = async ({
   // In part 3 I will make enhancements to langchain to introduce streaming
   // Once implemented, invokeAI can be removed
   const isStream = assistantStreamingEnabled && !assistantLangChain;
+  const optionalRequestParams = getOptionalRequestParams({
+    alerts,
+    alertsIndexPattern,
+    allow,
+    allowReplacement,
+    ragOnAlerts,
+    replacements,
+    size,
+  });
+
   const requestBody = isStream
     ? {
         params: {
@@ -72,6 +102,7 @@ export const fetchConnectorExecuteAction = async ({
           subAction: 'invokeStream',
         },
         assistantLangChain,
+        ...optionalRequestParams,
       }
     : {
         params: {
@@ -79,6 +110,7 @@ export const fetchConnectorExecuteAction = async ({
           subAction: 'invokeAI',
         },
         assistantLangChain,
+        ...optionalRequestParams,
       };
 
   try {
@@ -117,6 +149,7 @@ export const fetchConnectorExecuteAction = async ({
       connector_id: string;
       status: string;
       data: string;
+      replacements?: Record<string, string>;
       service_message?: string;
       trace_data?: {
         transaction_id: string;
@@ -153,14 +186,24 @@ export const fetchConnectorExecuteAction = async ({
           }
         : undefined;
 
+    onNewReplacements(response.replacements ?? {});
+
     return {
-      response: assistantLangChain ? getFormattedMessageContent(response.data) : response.data,
+      response: hasParsableResponse({
+        alerts,
+        assistantLangChain,
+        ragOnAlerts,
+      })
+        ? getFormattedMessageContent(response.data)
+        : response.data,
       isError: false,
       isStream: false,
       traceData,
     };
   } catch (error) {
-    const reader = error?.response?.body?.getReader();
+    const getReader = error?.response?.body?.getReader;
+    const reader =
+      isStream && typeof getReader === 'function' ? getReader.call(error.response.body) : null;
 
     if (!reader) {
       return {
