@@ -45,7 +45,7 @@ export const managedUserDetails: SecuritySolutionFactory<UsersQueries.managedDet
     const managedUsers = buckets.reduce<ManagedUserHits>((acc, bucket) => {
       acc[bucket.key] = bucket.latest_hit.hits.hits[0];
       return acc;
-    }, {} as ManagedUserHits);
+    }, {});
 
     return {
       ...response,
