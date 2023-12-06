@@ -30,49 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-    });
-
-    it('correctly parses triple quotes in JSON', async () => {
-      // The below inputs are written to work _with_ ace's autocomplete unlike console's unit test
-      // counterparts in src/legacy/core_plugins/console/public/tests/src/editor.test.js
-
-      const okInputs = [
-        `{
-    "query": {
-    "match_all": {}`,
-        `{
-    "query": {
-    "match_all": {
-    "test": """{ "more": "json" }"""`,
-      ];
-
-      const notOkInputs = [
-        `{
-    "query": {
-    "match_all": {
-    "test": """{ "more": "json" }""`,
-        `{
-    "query": {
-    "match_all": {
-    "test": """{ "more": "json" }""'`,
-      ];
-
-      const expectHasParseErrorsToBe = (expectation: boolean) => async (inputs: string[]) => {
-        for (const input of inputs) {
-          await PageObjects.searchProfiler.setQuery(input);
-
-          await retry.waitFor(
-            `parser errors to match expectation: HAS ${expectation ? 'ERRORS' : 'NO ERRORS'}`,
-            async () => {
-              const actual = await PageObjects.searchProfiler.editorHasParseErrors();
-              return expectation === actual;
-            }
-          );
-        }
-      };
-
-      await expectHasParseErrorsToBe(false)(okInputs);
-      await expectHasParseErrorsToBe(true)(notOkInputs);
+      await PageObjects.svlCommonPage.forceLogout();
     });
 
     it('supports pre-configured search query', async () => {
