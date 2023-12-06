@@ -44,7 +44,7 @@ const chatService: ObservabilityAIAssistantChatService = {
   hasRenderFunction: () => true,
 };
 
-const service: ObservabilityAIAssistantService = {
+export const mockService: ObservabilityAIAssistantService = {
   isEnabled: () => true,
   start: async () => {
     return chatService;
@@ -66,6 +66,7 @@ const service: ObservabilityAIAssistantService = {
       url: {},
       navigate: () => {},
     } as unknown as SharePluginStart),
+  register: () => {},
 };
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {
@@ -82,7 +83,7 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         },
       }}
     >
-      <ObservabilityAIAssistantProvider value={service}>
+      <ObservabilityAIAssistantProvider value={mockService}>
         <ObservabilityAIAssistantChatServiceProvider value={chatService}>
           <Story />
         </ObservabilityAIAssistantChatServiceProvider>
