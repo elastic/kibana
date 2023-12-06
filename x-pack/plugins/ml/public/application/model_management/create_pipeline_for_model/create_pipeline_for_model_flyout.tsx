@@ -18,6 +18,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
+import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
 
 import { ModelItem } from '../models_list';
 import type { AddInferencePipelineSteps } from '../../components/ml_inference/types';
@@ -57,6 +58,11 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
   const [formState, setFormState] = useState<InferecePipelineCreationState>(initialState);
   const [step, setStep] = useState<AddInferencePipelineSteps>(ADD_INFERENCE_PIPELINE_STEPS.DETAILS);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const taskType = useMemo(
+    () => Object.keys(model.inference_config ?? {})[0],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [model.model_id]
+  ) as SupportedPytorchTasksType;
 
   const {
     trainedModels: { createInferencePipeline },
@@ -139,6 +145,7 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
             pipelineNameError={pipelineNameError}
             pipelineDescription={formState.pipelineDescription}
             modelId={model.model_id}
+            taskType={taskType}
             initialPipelineConfig={formState.initialPipelineConfig}
             setHasUnsavedChanges={setHasUnsavedChanges}
           />

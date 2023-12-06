@@ -19,6 +19,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
 import { type InferecePipelineCreationState } from './state';
 import { EDIT_MESSAGE, CANCEL_EDIT_MESSAGE } from '../../components/ml_inference/constants';
 import { isValidJson } from '../../../../common/util/validation_utils';
@@ -35,6 +36,7 @@ interface Props {
   pipelineDescription: string;
   initialPipelineConfig?: InferecePipelineCreationState['initialPipelineConfig'];
   setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+  taskType?: SupportedPytorchTasksType;
 }
 
 export const PipelineDetails: FC<Props> = memo(
@@ -46,6 +48,7 @@ export const PipelineDetails: FC<Props> = memo(
     pipelineDescription,
     initialPipelineConfig,
     setHasUnsavedChanges,
+    taskType,
   }) => {
     const [isProcessorConfigValid, setIsProcessorConfigValid] = useState<boolean>(true);
     const [processorConfigError, setProcessorConfigError] = useState<string | undefined>();
@@ -60,7 +63,8 @@ export const PipelineDetails: FC<Props> = memo(
 
     const updateProcessorConfig = () => {
       const invalidProcessorConfigMessage = validatePipelineProcessors(
-        JSON.parse(processorConfigString)
+        JSON.parse(processorConfigString),
+        taskType
       );
       if (invalidProcessorConfigMessage === undefined) {
         handlePipelineConfigUpdate({ initialPipelineConfig: JSON.parse(processorConfigString) });

@@ -46,13 +46,18 @@ export function getInferencePropertiesFromPipelineConfig(
   type: string,
   pipelineConfig: estypes.IngestPipeline
 ): any {
-  const propertiesToReturn: Record<string, any> = { [INPUT_FIELD]: '' };
+  const propertiesToReturn: Record<string, any> = {
+    [INPUT_FIELD]: '',
+  };
 
   pipelineConfig.processors?.forEach((processor) => {
-    const inference = processor.inference;
+    const { inference } = processor;
     if (inference) {
+      propertiesToReturn.inferenceObj = inference;
       // Get the input field
       if (inference.field_map) {
+        propertiesToReturn.fieldMap = inference.field_map;
+
         for (const [key, value] of Object.entries(inference.field_map)) {
           if (value === DEFAULT_INPUT_FIELD) {
             propertiesToReturn[INPUT_FIELD] = key;
@@ -63,14 +68,14 @@ export function getInferencePropertiesFromPipelineConfig(
           propertiesToReturn[INPUT_FIELD] = Object.keys(inference.field_map)[0];
         }
       }
-      const inferenceConfig = inference.inference_config;
+      propertiesToReturn.inferenceConfig = inference.inference_config;
       // Get the properties associated with the type of model/task
       if (
-        isMlInferencePipelineInferenceConfig(inferenceConfig) &&
+        isMlInferencePipelineInferenceConfig(propertiesToReturn.inferenceConfig) &&
         isSupportedInferenceConfigPropertyType(type)
       ) {
         MODEL_INFERENCE_CONFIG_PROPERTIES[type]?.forEach((property) => {
-          const configSettings = inferenceConfig[type];
+          const configSettings = propertiesToReturn.inferenceConfig[type];
           propertiesToReturn[property] =
             configSettings && configSettings.hasOwnProperty(property)
               ? // @ts-ignore

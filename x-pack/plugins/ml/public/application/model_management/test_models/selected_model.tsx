@@ -7,6 +7,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, useMemo, useEffect } from 'react';
+import { cloneDeep } from 'lodash';
 
 import { TRAINED_MODEL_TYPE, SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { NerInference } from './models/ner';
@@ -123,10 +124,49 @@ export const SelectedModel: FC<Props> = ({
           }
         });
       } else {
-        tempInferrer?.getPipeline$().subscribe((pipeline) => {
-          if (handlePipelineConfigUpdate && pipeline && externalPipelineConfig) {
+        tempInferrer?.getPipeline$().subscribe((testPipeline) => {
+          if (handlePipelineConfigUpdate && testPipeline && externalPipelineConfig) {
+            const {
+              fieldMap: testFieldMap,
+              inferenceConfig: testInferenceConfig,
+              labels,
+              multi_label: multiLabel,
+              question,
+            } = getInferencePropertiesFromPipelineConfig(taskType, testPipeline);
+
+            const updatedPipeline = cloneDeep(externalPipelineConfig);
+            const { inferenceObj: externalInference, inferenceConfig: externalInferenceConfig } =
+              getInferencePropertiesFromPipelineConfig(taskType, updatedPipeline);
+            // Always update target field change
+            externalInference.field_map = testFieldMap;
+
+            if (externalInferenceConfig === undefined) {
+              externalInference.inference_config = testInferenceConfig;
+            } else {
+              // Only update the properties that change in the test step to avoid overwriting user edits
+              if (
+                taskType === SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION &&
+                labels &&
+                multiLabel !== undefined
+              ) {
+                externalInference.inference_config[
+                  SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION
+                ].multi_label = multiLabel;
+                externalInference.inference_config[
+                  SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION
+                ].labels = labels;
+              } else if (
+                taskType === SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING &&
+                question !== undefined
+              ) {
+                externalInference.inference_config[
+                  SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING
+                ].question = question;
+              }
+            }
+
             handlePipelineConfigUpdate({
-              initialPipelineConfig: { ...externalPipelineConfig, ...pipeline },
+              initialPipelineConfig: updatedPipeline,
             });
           }
         });

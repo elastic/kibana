@@ -8,6 +8,7 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
+import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
 import { InferenceModelTypes } from './types';
 import type { AddInferencePipelineFormErrors } from './types';
 
@@ -88,7 +89,7 @@ export const validateInferencePipelineConfigurationStep = (
 
 export const validateInferenceConfig = (
   inferenceConfig: IngestInferenceProcessor['inference_config'],
-  modelType?: InferenceModelTypes
+  modelType?: InferenceModelTypes | SupportedPytorchTasksType
 ) => {
   const inferenceConfigKeys = Object.keys(inferenceConfig ?? {});
   let error;
@@ -130,7 +131,10 @@ export const validateFieldMap = (
   return error;
 };
 
-export const validatePipelineProcessors = (pipelineProcessors: estypes.IngestPipeline) => {
+export const validatePipelineProcessors = (
+  pipelineProcessors: estypes.IngestPipeline,
+  taskType?: SupportedPytorchTasksType
+) => {
   const { processors } = pipelineProcessors;
   let error;
   // Must have at least one processor
@@ -138,12 +142,18 @@ export const validatePipelineProcessors = (pipelineProcessors: estypes.IngestPip
     error = PROCESSOR_REQUIRED;
   }
 
-  const hasInferenceProcessor = processors?.some((processor) => {
-    return processor.inference && processor.inference.model_id;
-  });
+  const inferenceProcessor = processors?.find(
+    (processor) => processor.inference && processor.inference.model_id
+  );
 
-  if (hasInferenceProcessor === false) {
+  if (inferenceProcessor === undefined) {
     error = INFERENCE_PROCESSOR_REQUIRED;
+  } else {
+    // If populated, inference config must have the correct model type
+    const inferenceConfig = inferenceProcessor.inference?.inference_config;
+    if (taskType && inferenceConfig) {
+      error = validateInferenceConfig(inferenceConfig, taskType);
+    }
   }
 
   return error;
