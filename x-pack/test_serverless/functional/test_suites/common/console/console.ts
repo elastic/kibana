@@ -210,8 +210,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '{"id":"95a511b6-b6e1-4ea6-9344-428bf5183d88","createdAt":1677592109975,"updatedAt":1677592148666,"text":"GET _cat/indices"}'
         );
         await browser.refresh();
+        await PageObjects.common.sleep(3000);
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.console.closeHelpIfExists();
         const request = await PageObjects.console.getRequest();
         // the request is restored from the local storage value
