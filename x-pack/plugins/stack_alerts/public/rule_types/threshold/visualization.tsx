@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
-import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { interval } from 'rxjs';
 import {
   AnnotationDomainType,
@@ -19,7 +19,7 @@ import {
   Settings,
   niceTimeFormatter,
 } from '@elastic/charts';
-import moment from 'moment-timezone';
+import { getTimeZone } from '@kbn/visualization-utils';
 import {
   EuiCallOut,
   EuiLoadingChart,
@@ -52,24 +52,6 @@ const customTheme = () => {
       },
     },
   };
-};
-
-// TODO: Can be potentially replaced with getTimeZone from @kbn/visualization-utils
-const getTimezone = (uiSettings: IUiSettingsClient) => {
-  const config = uiSettings;
-  const DATE_FORMAT_CONFIG_KEY = 'dateFormat:tz';
-  const isCustomTimezone = !config.isDefault(DATE_FORMAT_CONFIG_KEY);
-  if (isCustomTimezone) {
-    return config.get(DATE_FORMAT_CONFIG_KEY);
-  }
-
-  const detectedTimezone = moment.tz.guess();
-  if (detectedTimezone) {
-    return detectedTimezone;
-  }
-  // default to UTC if we can't figure out the timezone
-  const tzOffset = moment().format('Z');
-  return tzOffset;
 };
 
 const getDomain = (alertInterval: string, startAt: Date) => {
@@ -243,7 +225,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
 
   if (visualizationData) {
     const alertVisualizationDataKeys = Object.keys(visualizationData);
-    const timezone = getTimezone(uiSettings);
+    const timezone = getTimeZone(uiSettings);
     const actualThreshold = getThreshold();
     let maxY = actualThreshold[actualThreshold.length - 1];
 

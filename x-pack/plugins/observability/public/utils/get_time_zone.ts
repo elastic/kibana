@@ -8,7 +8,6 @@
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { UI_SETTINGS } from '../hooks/use_kibana_ui_settings';
 
-// TODO: Can be potentially replaced with getTimeZone from @kbn/visualization-utils
 export function getTimeZone(uiSettings?: IUiSettingsClient) {
   const kibanaTimeZone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
   if (!kibanaTimeZone || kibanaTimeZone === 'Browser') {
