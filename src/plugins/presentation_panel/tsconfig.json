@@ -25,7 +25,8 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/panel-loader"
   ],
   "exclude": ["target/**/*"]
 }
