@@ -30,7 +30,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
   ApmRuleType,
   ES_QUERY_ID,
-  ML_ANOMALY_DETECTION_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -84,7 +84,7 @@ const o11yRuleTypes = [
   SLO_BURN_RATE_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ES_QUERY_ID,
-  ML_ANOMALY_DETECTION_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   ...Object.values(ApmRuleType),
 ];
