@@ -78,6 +78,18 @@ export const rumFieldFormats: FieldFormat[] = [
     },
   },
   {
+    field: FID_FIELD,
+    format: {
+      id: 'duration',
+      params: {
+        inputFormat: 'milliseconds',
+        outputFormat: 'humanizePrecise',
+        showSuffix: true,
+        useShortSuffix: true,
+      },
+    },
+  },
+  {
     field: TRANSACTION_TIME_TO_FIRST_BYTE,
     format: {
       id: 'duration',
