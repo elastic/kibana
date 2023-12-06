@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './indices';
-export * from './constants';
+export * from './common.gen';
