@@ -16,10 +16,11 @@ import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { Document, checkForDuplicateTitle, SavedObjectIndexStore } from '../persistence';
 import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
-import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common/constants';
+import { APP_ID, getFullPath } from '../../common/constants';
 import type { LensAppState } from '../state_management';
 import { getPersisted } from '../state_management/init_middleware/load_initial';
 import { VisualizeEditorContext } from '../types';
+import { redirectToDashboard } from './save_modal_container_helpers';
 
 type ExtraProps = Pick<LensAppProps, 'initialInput'> &
   Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>;
@@ -170,40 +171,6 @@ export function SaveModalContainer({
     />
   );
 }
-
-const redirectToDashboard = ({
-  embeddableInput,
-  dashboardFeatureFlag,
-  dashboardId,
-  originatingApp,
-  getOriginatingPath,
-  stateTransfer,
-}: {
-  embeddableInput: LensEmbeddableInput;
-  dashboardId: string;
-  dashboardFeatureFlag: LensAppServices['dashboardFeatureFlag'];
-  originatingApp?: string;
-  getOriginatingPath?: (dashboardId: string) => string | undefined;
-  stateTransfer: LensAppServices['stateTransfer'];
-}) => {
-  if (!dashboardFeatureFlag.allowByValueEmbeddables) {
-    throw new Error('redirectToDashboard called with by-value embeddables disabled');
-  }
-
-  const state = {
-    input: embeddableInput,
-    type: LENS_EMBEDDABLE_TYPE,
-  };
-
-  const path =
-    getOriginatingPath?.(dashboardId) ??
-    (dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`);
-  const appId = originatingApp ?? 'dashboards';
-  stateTransfer.navigateToWithEmbeddablePackage(appId, {
-    state,
-    path,
-  });
-};
 
 const getDocToSave = (
   lastKnownDoc: Document,
