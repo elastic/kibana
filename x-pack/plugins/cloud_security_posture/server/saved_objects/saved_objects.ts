@@ -7,16 +7,16 @@
 
 import { SavedObjectsServiceSetup } from '@kbn/core/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { cspRuleTemplateSavedObjectMapping } from './mappings';
-import { cspRuleTemplateMigrations } from './migrations';
+import { cspRuleSavedObjectMapping } from './mappings';
+import { cspRuleMigrations } from './migrations';
 
 import { rulesV1, rulesV2, rulesV3 } from '@kbn/cloud-security-posture-plugin/common/types/';
-import { CspRuleTemplate } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import { CspRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
 import { CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
-  savedObjects.registerType<CspRuleTemplate>({
+  savedObjects.registerType<CspRule>({
     name: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
     indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
     hidden: false,
@@ -26,11 +26,11 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
       visibleInManagement: true,
     },
     schemas: {
-      '8.3.0': rulesV1.cspRuleTemplateSchema,
-      '8.4.0': rulesV2.cspRuleTemplateSchema,
-      '8.7.0': rulesV3.cspRuleTemplateSchema,
+      '8.3.0': rulesV1.cspRuleSchema,
+      '8.4.0': rulesV2.cspRuleSchema,
+      '8.7.0': rulesV3.cspRuleSchema,
     },
-    migrations: cspRuleTemplateMigrations,
-    mappings: cspRuleTemplateSavedObjectMapping,
+    migrations: cspRuleMigrations,
+    mappings: cspRuleSavedObjectMapping,
   });
 }

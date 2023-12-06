@@ -7,7 +7,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 // Since version 8.3.0
-export const cspRuleTemplateSchema = schema.object({
+export const cspRuleSchema = schema.object({
   audit: schema.string(),
   benchmark: schema.object({ name: schema.string(), version: schema.string() }),
   default_value: schema.maybe(schema.string()),
@@ -27,4 +27,4 @@ export const cspRuleTemplateSchema = schema.object({
   version: schema.string(),
 });
 
-export type CspRuleTemplate = TypeOf<typeof cspRuleTemplateSchema>;
+export type CspRule = TypeOf<typeof cspRuleSchema>;

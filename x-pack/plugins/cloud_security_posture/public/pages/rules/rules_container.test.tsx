@@ -9,13 +9,13 @@ import React from 'react';
 import { RulesContainer } from './rules_container';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
-import { useFindCspRuleTemplates } from './use_csp_rules';
+import { useFindCspRule } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { Chance } from 'chance';
 import { TestProvider } from '../../test/test_provider';
 import { useParams } from 'react-router-dom';
 import { coreMock } from '@kbn/core/public/mocks';
-import { CspRuleTemplate } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import { CspRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
 const chance = new Chance();
 
@@ -52,7 +52,7 @@ const getWrapper =
     return <TestProvider core={core}>{children}</TestProvider>;
   };
 
-const getRuleMock = (id = chance.guid()): CspRuleTemplate =>
+const getRuleMock = (id = chance.guid()): CspRule =>
   ({
     metadata: {
       audit: chance.sentence(),
@@ -75,7 +75,7 @@ const getRuleMock = (id = chance.guid()): CspRuleTemplate =>
       tags: [chance.word(), chance.word()],
       version: chance.sentence(),
     },
-  } as CspRuleTemplate);
+  } as CspRule);
 
 const params = {
   packagePolicyId: chance.guid(),
@@ -93,7 +93,7 @@ describe('<RulesContainer />', () => {
     const Wrapper = getWrapper();
     const rule1 = getRuleMock();
 
-    (useFindCspRuleTemplates as jest.Mock).mockReturnValue({
+    (useFindCspRule as jest.Mock).mockReturnValue({
       status: 'success',
       data: {
         total: 1,

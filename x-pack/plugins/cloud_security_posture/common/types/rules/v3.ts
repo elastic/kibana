@@ -12,7 +12,7 @@ import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
 const DEFAULT_RULES_TEMPLATE_PER_PAGE = 25;
 
 // Since version 8.7.0
-export const cspRuleTemplateMetadataSchema = schema.object({
+export const cspRuleMetadataSchema = schema.object({
   audit: schema.string(),
   benchmark: schema.object({
     name: schema.string(),
@@ -38,15 +38,15 @@ export const cspRuleTemplateMetadataSchema = schema.object({
   version: schema.string(),
 });
 
-export type CspRuleTemplateMetadata = TypeOf<typeof cspRuleTemplateMetadataSchema>;
+export type CspRuleMetadata = TypeOf<typeof cspRuleMetadataSchema>;
 
-export const cspRuleTemplateSchema = schema.object({
-  metadata: cspRuleTemplateMetadataSchema,
+export const cspRuleSchema = schema.object({
+  metadata: cspRuleMetadataSchema,
 });
 
-export type CspRuleTemplate = TypeOf<typeof cspRuleTemplateSchema>;
+export type CspRule = TypeOf<typeof cspRuleSchema>;
 
-export const findCspRuleTemplateRequest = schema.object({
+export const findCspRuleRequest = schema.object({
   /**
    * An Elasticsearch simple_query_string
    */
@@ -63,13 +63,13 @@ export const findCspRuleTemplateRequest = schema.object({
   perPage: schema.number({ defaultValue: DEFAULT_RULES_TEMPLATE_PER_PAGE, min: 0 }),
 
   /**
-   *  Fields to retrieve from CspRuleTemplate saved object
+   *  Fields to retrieve from CspRule saved object
    */
   fields: schema.maybe(schema.arrayOf(schema.string())),
 
   /**
    *  The fields to perform the parsed query against.
-   * Valid fields are fields which mapped to 'text' in cspRuleTemplateSavedObjectMapping
+   * Valid fields are fields which mapped to 'text' in cspRuleSavedObjectMapping
    */
   searchFields: schema.arrayOf(
     schema.oneOf([schema.literal('metadata.name.text'), schema.literal('metadata.section.text')]),
@@ -121,10 +121,10 @@ export const findCspRuleTemplateRequest = schema.object({
   section: schema.maybe(schema.string()),
 });
 
-export type GetCspRuleTemplateRequest = TypeOf<typeof findCspRuleTemplateRequest>;
+export type FindCspRuleRequest = TypeOf<typeof findCspRuleRequest>;
 
-export interface GetCspRuleTemplateResponse {
-  items: CspRuleTemplate[];
+export interface FindCspRuleResponse {
+  items: CspRule[];
   total: number;
   page: number;
   perPage: number;

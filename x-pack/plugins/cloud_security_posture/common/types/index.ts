@@ -12,10 +12,9 @@ export * as rulesV2 from './rules/v2';
 export * as rulesV3 from './rules/v3';
 
 export type {
-  cspRuleTemplateMetadataSchema,
-  CspRuleTemplateMetadata,
-  CspRuleTemplate,
-  findCspRuleTemplateRequest,
-  GetCspRuleTemplateRequest,
-  GetCspRuleTemplateResponse,
+  cspRuleMetadataSchema,
+  CspRuleMetadata,
+  CspRule,
+  FindCspRuleRequest,
+  FindCspRuleResponse,
 } from './latest';

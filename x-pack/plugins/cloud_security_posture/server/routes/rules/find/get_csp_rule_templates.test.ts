@@ -6,7 +6,7 @@
  */
 
 import { getSortedCspRulesTemplates } from './get_csp_rule_template';
-import { CspRuleTemplate } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import { CspRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
 describe('getSortedCspRulesTemplates', () => {
   it('sorts by metadata.benchmark.rule_number, invalid semantic version still should still get sorted and empty values should be sorted last', () => {
@@ -18,7 +18,7 @@ describe('getSortedCspRulesTemplates', () => {
       { metadata: { benchmark: { rule_number: 'invalid' } } },
       { metadata: { benchmark: { rule_number: '3.0' } } },
       { metadata: { benchmark: {} } },
-    ] as CspRuleTemplate[];
+    ] as CspRule[];
 
     const sortedCspRulesTemplates = getSortedCspRulesTemplates(cspRulesTemplates);
 
@@ -34,7 +34,7 @@ describe('getSortedCspRulesTemplates', () => {
   });
 
   it('edge case - returns empty array if input is empty', () => {
-    const cspRulesTemplates: CspRuleTemplate[] = [];
+    const cspRulesTemplates: CspRule[] = [];
 
     const sortedCspRulesTemplates = getSortedCspRulesTemplates(cspRulesTemplates);
 
@@ -42,9 +42,7 @@ describe('getSortedCspRulesTemplates', () => {
   });
 
   it('edge case - returns sorted array even if input only has one element', () => {
-    const cspRulesTemplates = [
-      { metadata: { benchmark: { rule_number: '1.0.0' } } },
-    ] as CspRuleTemplate[];
+    const cspRulesTemplates = [{ metadata: { benchmark: { rule_number: '1.0.0' } } }] as CspRule[];
 
     const sortedCspRulesTemplates = getSortedCspRulesTemplates(cspRulesTemplates);
 
@@ -59,7 +57,7 @@ describe('getSortedCspRulesTemplates', () => {
       { metadata: { benchmark: { rule_number: undefined } } },
       { metadata: { benchmark: { rule_number: '2.0.0' } } },
       { metadata: { benchmark: { rule_number: null } } },
-    ] as CspRuleTemplate[];
+    ] as CspRule[];
 
     const sortedCspRulesTemplates = getSortedCspRulesTemplates(cspRulesTemplates);
 
@@ -76,7 +74,7 @@ describe('getSortedCspRulesTemplates', () => {
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
       { metadata: { benchmark: { rule_number: '2.0' } } },
       { metadata: { benchmark: { rule_number: '3.0.0' } } },
-    ] as CspRuleTemplate[];
+    ] as CspRule[];
 
     const sortedCspRulesTemplates = getSortedCspRulesTemplates(cspRulesTemplates);
 

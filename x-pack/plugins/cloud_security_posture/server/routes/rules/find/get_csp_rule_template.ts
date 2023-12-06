@@ -11,10 +11,10 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
 import {
-  CspRuleTemplate,
-  GetCspRuleTemplateRequest,
-  GetCspRuleTemplateResponse,
-  findCspRuleTemplateRequest,
+  CspRule,
+  FindCspRuleRequest,
+  FindCspRuleResponse,
+  findCspRuleRequest,
 } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { getBenchmarkFromPackagePolicy } from '../../../../common/utils/helpers';
 
@@ -23,7 +23,7 @@ import { CspRouter } from '../../../types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../benchmarks/benchmarks';
 import { findRuleHandler } from './v1';
 
-export const getSortedCspRulesTemplates = (cspRulesTemplates: CspRuleTemplate[]) => {
+export const getSortedCspRulesTemplates = (cspRulesTemplates: CspRule[]) => {
   return cspRulesTemplates.slice().sort((a, b) => {
     const ruleNumberA = a?.metadata?.benchmark?.rule_number;
     const ruleNumberB = b?.metadata?.benchmark?.rule_number;
@@ -50,7 +50,7 @@ export const getBenchmarkIdFromPackagePolicyId = async (
   return getBenchmarkFromPackagePolicy(res.attributes.inputs);
 };
 
-export const defineFindCspRuleTemplateRoute = (router: CspRouter) =>
+export const defineFindCspRuleRoute = (router: CspRouter) =>
   router.versioned
     .get({
       access: 'internal',
@@ -61,7 +61,7 @@ export const defineFindCspRuleTemplateRoute = (router: CspRouter) =>
         version: '1',
         validate: {
           request: {
-            query: findCspRuleTemplateRequest,
+            query: findCspRuleRequest,
           },
         },
       },
@@ -70,11 +70,11 @@ export const defineFindCspRuleTemplateRoute = (router: CspRouter) =>
           return response.forbidden();
         }
 
-        const requestBody: GetCspRuleTemplateRequest = request.query;
+        const requestBody: FindCspRuleRequest = request.query;
         const cspContext = await context.csp;
 
         try {
-          const cspRulesTemplates: GetCspRuleTemplateResponse = await findRuleHandler(
+          const cspRulesTemplates: FindCspRuleResponse = await findRuleHandler(
             cspContext.soClient,
             requestBody
           );

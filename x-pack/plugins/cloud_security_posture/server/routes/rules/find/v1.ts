@@ -7,9 +7,9 @@
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
-  CspRuleTemplate,
-  GetCspRuleTemplateRequest,
-  GetCspRuleTemplateResponse,
+  CspRule,
+  FindCspRuleRequest,
+  FindCspRuleResponse,
 } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { getBenchmarkFilter } from '../../../../common/utils/helpers';
 
@@ -21,8 +21,8 @@ import {
 
 export const findRuleHandler = async (
   soClient: SavedObjectsClientContract,
-  options: GetCspRuleTemplateRequest
-): Promise<GetCspRuleTemplateResponse> => {
+  options: FindCspRuleRequest
+): Promise<FindCspRuleResponse> => {
   if (
     (!options.packagePolicyId && !options.benchmarkId) ||
     (options.packagePolicyId && options.benchmarkId)
@@ -34,7 +34,7 @@ export const findRuleHandler = async (
     ? options.benchmarkId
     : await getBenchmarkIdFromPackagePolicyId(soClient, options.packagePolicyId!);
 
-  const cspRulesTemplatesSo = await soClient.find<CspRuleTemplate>({
+  const cspRulesTemplatesSo = await soClient.find<CspRule>({
     type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
     searchFields: options.searchFields,
     search: options.search ? `"${options.search}"*` : '',
@@ -45,9 +45,7 @@ export const findRuleHandler = async (
     filter: getBenchmarkFilter(benchmarkId, options.section),
   });
 
-  const cspRulesTemplates = cspRulesTemplatesSo.saved_objects.map(
-    (cspRuleTemplate) => cspRuleTemplate.attributes
-  );
+  const cspRulesTemplates = cspRulesTemplatesSo.saved_objects.map((cspRule) => cspRule.attributes);
 
   // Semantic version sorting using semver for valid versions and custom comparison for invalid versions
   const sortedCspRulesTemplates = getSortedCspRulesTemplates(cspRulesTemplates);

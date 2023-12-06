@@ -7,7 +7,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 // Since version 8.4.0 //TODO: rename V840
-export const cspRuleTemplateMetadataSchema = schema.object({
+export const cspRuleMetadataSchema = schema.object({
   audit: schema.string(),
   benchmark: schema.object({
     name: schema.string(),
@@ -29,10 +29,10 @@ export const cspRuleTemplateMetadataSchema = schema.object({
   version: schema.string(),
 });
 
-export const cspRuleTemplateSchema = schema.object({
+export const cspRuleSchema = schema.object({
   enabled: schema.boolean(),
-  metadata: cspRuleTemplateMetadataSchema,
+  metadata: cspRuleMetadataSchema,
   muted: schema.boolean(),
 });
 
-export type CspRuleTemplate = TypeOf<typeof cspRuleTemplateSchema>;
+export type CspRule = TypeOf<typeof cspRuleSchema>;

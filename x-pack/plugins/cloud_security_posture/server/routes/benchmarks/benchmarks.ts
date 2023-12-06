@@ -7,7 +7,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AgentPolicy, ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { CspRuleTemplate } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import { CspRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   BENCHMARKS_ROUTE_PATH,
@@ -36,7 +36,7 @@ export const getRulesCountForPolicy = async (
   soClient: SavedObjectsClientContract,
   benchmarkId: BenchmarkId
 ): Promise<number> => {
-  const rules = await soClient.find<CspRuleTemplate>({
+  const rules = await soClient.find<CspRule>({
     type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
     filter: getBenchmarkFilter(benchmarkId),
     perPage: 0,

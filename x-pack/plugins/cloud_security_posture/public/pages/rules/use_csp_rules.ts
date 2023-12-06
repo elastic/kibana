@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
-import { GetCspRuleTemplateRequest, GetCspRuleTemplateResponse } from '../../../common/types';
+
 import { useKibana } from '../../common/hooks/use_kibana';
 
 import {
@@ -13,11 +13,15 @@ import {
   FIND_CSP_RULE_TEMPLATE_API_CURRENT_VERSION,
   FIND_CSP_RULE_TEMPLATE_ROUTE_PATH,
 } from '../../../common/constants';
+import {
+  FindCspRuleRequest,
+  FindCspRuleResponse,
+} from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
-export type RulesQuery = Pick<GetCspRuleTemplateRequest, 'section' | 'search' | 'page' | 'perPage'>;
-export type RulesQueryResult = ReturnType<typeof useFindCspRuleTemplates>;
+export type RulesQuery = Pick<FindCspRuleRequest, 'section' | 'search' | 'page' | 'perPage'>;
+export type RulesQueryResult = ReturnType<typeof useFindCspRule>;
 
-export const useFindCspRuleTemplates = (
+export const useFindCspRule = (
   { search, page, perPage, section }: RulesQuery,
   packagePolicyId: string
 ) => {
@@ -26,7 +30,7 @@ export const useFindCspRuleTemplates = (
   return useQuery(
     [CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE, { section, search, page, perPage, packagePolicyId }],
     () => {
-      return http.get<GetCspRuleTemplateResponse>(FIND_CSP_RULE_TEMPLATE_ROUTE_PATH, {
+      return http.get<FindCspRuleResponse>(FIND_CSP_RULE_TEMPLATE_ROUTE_PATH, {
         query: { packagePolicyId, page, perPage, search, section },
         version: FIND_CSP_RULE_TEMPLATE_API_CURRENT_VERSION,
       });
