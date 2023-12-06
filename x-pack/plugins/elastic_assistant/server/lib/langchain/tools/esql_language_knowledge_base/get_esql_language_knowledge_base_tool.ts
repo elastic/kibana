@@ -15,6 +15,7 @@ export const getEsqlLanguageKnowledgeBaseTool = ({
 }: {
   assistantLangChain: boolean;
   chain: RetrievalQAChain;
+  /** true when the ELSER model is installed */
   modelExists: boolean;
 }): Tool | null =>
   assistantLangChain && modelExists
