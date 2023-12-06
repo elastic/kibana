@@ -27,7 +27,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   describe('File operations:', () => {
-    const homeFilePath = process.env.CI || true ? '/home/vagrant' : `/home/ubuntu`;
+    const homeFilePath = Cypress.env('IS_CI') ? '/home/vagrant' : '/home/ubuntu';
 
     const fileContent = 'This is a test file for the get-file command.';
     const filePath = `${homeFilePath}/test_file.txt`;
