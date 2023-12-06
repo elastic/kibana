@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { render, screen, within, waitForElementToBeRemoved } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import { GuideCards, GuideCardsProps } from './guide_cards';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
