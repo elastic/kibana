@@ -681,20 +681,41 @@ export class ActionsClient {
   }: Omit<ExecuteOptions, 'request' | 'actionExecutionId'>): Promise<
     ActionTypeExecutorResult<unknown>
   > {
+    const log = this.context.logger;
+
     if (
       (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
       const additionalPrivileges = this.getSystemActionKibanaPrivileges(actionId, params);
-      // TODO: Optimize so we don't do another get on top of getAuthorizationModeBySource and within the actionExecutor.execute
-      const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
-        'action',
-        actionId
-      );
+      let actionTypeId: string = '';
+
+      if (this.isPreconfigured(actionId)) {
+        const connector = this.context.inMemoryConnectors.find(
+          (inMemoryConnector) => inMemoryConnector.id === actionId
+        );
+
+        // FIXME:PT change log to `.debug()`
+        log.info(`actionTypeId retrieved from in-memory connectors: ${JSON.stringify(connector)}`);
+
+        actionTypeId = connector?.actionTypeId ?? '';
+      } else {
+        // TODO: Optimize so we don't do another get on top of getAuthorizationModeBySource and within the actionExecutor.execute
+        const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
+          'action',
+          actionId
+        );
+
+        // FIXME:PT change log to `.debug()`
+        log.info(`actionTypeId retrieved from SavedObject: ${JSON.stringify(attributes)}`);
+
+        actionTypeId = attributes.actionTypeId;
+      }
+
       await this.context.authorization.ensureAuthorized({
         operation: 'execute',
         additionalPrivileges,
-        actionTypeId: attributes.actionTypeId,
+        actionTypeId,
       });
     } else {
       trackLegacyRBACExemption('execute', this.context.usageCounter);
