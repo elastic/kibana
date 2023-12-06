@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiHeader, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
 import { TopNavMenuBadges, TopNavMenuItems } from '@kbn/navigation-plugin/public';
 import { LogExplorerTabs } from '../../../../components/log_explorer_tabs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
-import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 
@@ -25,14 +23,7 @@ export const DiscoverTopNavServerless = ({
 }) => {
   const { customizationContext } = stateContainer;
   const services = useDiscoverServices();
-  const columns = useAppStateSelector((state) => state.columns);
-  const sort = useAppStateSelector((state) => state.sort);
-  const dataView = useInternalStateSelector((state) => state.dataView);
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
-  const params = useMemo(
-    () => ({ columns, sort, dataViewSpec: dataView?.toMinimalSpec() }),
-    [columns, dataView, sort]
-  );
 
   if (!services.serverless || customizationContext.displayMode !== 'standalone') {
     return null;
@@ -43,7 +34,7 @@ export const DiscoverTopNavServerless = ({
       {customizationContext.showLogExplorerTabs && (
         <EuiHeaderSection>
           <EuiHeaderSectionItem>
-            <LogExplorerTabs services={services} params={params} selectedTab="discover" />
+            <LogExplorerTabs services={services} selectedTab="discover" />
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
       )}

@@ -73,17 +73,11 @@ const ServerlessTopNav = ({
   services,
   state$,
 }: Pick<LogExplorerTopNavMenuProps, 'services' | 'state$'>) => {
-  const { columns, sort, dataViewSpec } = useDiscoverLinkParams(state$);
-
   return (
     <EuiHeader data-test-subj="logExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
       <EuiHeaderSection>
         <EuiHeaderSectionItem>
-          <LogExplorerTabs
-            services={services}
-            params={{ columns, sort, dataViewSpec }}
-            selectedTab="log-explorer"
-          />
+          <LogExplorerTabs services={services} selectedTab="log-explorer" />
         </EuiHeaderSectionItem>
       </EuiHeaderSection>
       <EuiHeaderSection
