@@ -312,7 +312,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
     return doc;
   }
 
-  public isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  public async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('isolate');
   }
 
