@@ -4,8 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { loggerMock } from '@kbn/logging-mocks';
+
+import type { Logger } from '@kbn/core/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
 import type { ArchivePackage } from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
+
+import { appContextService } from '../..';
 
 import {
   parseDefaultIngestPipeline,
@@ -21,7 +28,20 @@ import {
   parseAndVerifyReadme,
 } from './parse';
 
+jest.mock('../../app_context');
+
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
+
+let mockedLogger: jest.Mocked<Logger>;
 describe('parseDefaultIngestPipeline', () => {
+  beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+  });
+
   it('Should return undefined for stream without any elasticsearch dir', () => {
     expect(
       parseDefaultIngestPipeline('pkg-1.0.0/data_stream/stream1/', [

@@ -144,7 +144,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         !preconfiguredAgentPolicy.is_default &&
         !preconfiguredAgentPolicy.is_default_fleet_server
       ) {
-        throw new FleetErrorError(
+        throw new FleetError(
           i18n.translate('xpack.fleet.preconfiguration.missingIDError', {
             defaultMessage:
               '{agentPolicyName} is missing an `id` field. `id` is required, except for policies marked is_default or is_default_fleet_server.',
