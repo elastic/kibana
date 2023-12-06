@@ -119,3 +119,5 @@ export const kafkaSupportedVersions = [
   '2.5.1',
   '2.6.0',
 ];
+
+export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';
