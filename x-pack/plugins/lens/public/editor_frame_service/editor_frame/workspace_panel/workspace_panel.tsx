@@ -23,7 +23,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginStart, ExecutionContextSearch } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ExecutionContextSearch } from '@kbn/es-query';
 import type {
   ExpressionRendererEvent,
   ExpressionRenderError,

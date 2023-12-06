@@ -20,11 +20,11 @@ import {
   TimeRange,
   isOfQueryType,
   getAggregateQueryMode,
+  ExecutionContextSearch,
 } from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   DataPublicPluginStart,
-  ExecutionContextSearch,
   TimefilterContract,
   FilterManager,
   getEsQueryConfig,
