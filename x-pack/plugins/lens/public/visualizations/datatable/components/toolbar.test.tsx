@@ -13,6 +13,8 @@ import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
 import { ReactWrapper } from 'enzyme';
 import { PagingState } from '../../../../common/expressions';
 import { EuiButtonGroup, EuiRange } from '@elastic/eui';
+import { getByTestId, prettyDOM, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -97,7 +99,55 @@ describe('datatable toolbar', () => {
     harness = new Harness(mountWithIntl(<DataTableToolbar {...defaultProps} />));
   });
 
-  it('should reflect state in the UI', async () => {
+  const renderToolbar = () => {
+    const rtlRender = render(<DataTableToolbar {...defaultProps} />);
+
+    const togglePopover = () => {
+      userEvent.click(screen.getByRole('button', { name: /visual options/i }));
+    };
+
+    const getButtonGroupInputValue = (testId: string) => () => {
+      const buttonGroup = screen.getByTestId(testId);
+      const options = within(buttonGroup).getAllByRole('radio');
+      const checkedOption = options.find((option) => option.getAttribute('checked') === '');
+      if (checkedOption == null) {
+        throw new Error(`No checked option found in button group ${testId}`);
+      }
+      return checkedOption.nextSibling;
+    };
+
+    return {
+      ...rtlRender,
+      togglePopover,
+      getRowHeightValue: getButtonGroupInputValue('lnsRowHeightSettings'),
+      getHeaderHeightValue: getButtonGroupInputValue('lnsHeaderHeightSettings'),
+    };
+  };
+
+  it.only('should reflect state in the UI', async () => {
+    const { togglePopover, getRowHeightValue, getHeaderHeightValue } = renderToolbar();
+    togglePopover();
+    expect(getRowHeightValue()).toHaveTextContent('Single');
+    expect(getHeaderHeightValue()).toHaveTextContent('Single');
+    screen.debug();
+    expect(screen.getByRole('switch')).not.toBeChecked();
+
+    // harness.wrapper.setProps({
+    //   state: {
+    //     rowHeight: 'auto',
+    //     paging: defaultPagingState,
+    //   },
+    // });
+
+    userEvent.click(screen.getByRole('switch'));
+
+    // expect(harness.rowHeight.prop('idSelected')).toBe('auto');
+    // expect(harness.paginationSwitch.prop('checked')).toBe(true);
+    // expect(getRowHeightValue()).toHaveTextContent('auto');
+    expect(screen.getByRole('switch')).toBeChecked();
+  });
+
+  it('should reflect state in the UI enzyme', async () => {
     harness.togglePopover();
 
     expect(harness.rowHeight.prop('idSelected')).toBe('single');
