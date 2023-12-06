@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { HEIGHT_ANIMATION_DURATION } from '../styles/card_step.styles';
 
 const HEADER_OFFSET = 40;
 
@@ -35,12 +36,7 @@ export const useScrollToHash = () => {
           top: element.offsetTop - HEADER_OFFSET,
           behavior: 'smooth',
         });
-      }, 250);
-    } else {
-      window.scrollTo({
-        behavior: 'auto',
-        top: 0,
-      });
+      }, HEIGHT_ANIMATION_DURATION);
     }
   }, [location.hash, documentReadyState]);
 };
