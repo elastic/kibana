@@ -1001,6 +1001,7 @@ describe('secrets', () => {
 
         expect(esClientMock.transport.request).toHaveBeenCalledTimes(1);
         expect(result.secretReferences).toHaveLength(1);
+        expect(Object.keys(result.packagePolicyUpdate.vars as any)).toEqual(['pkg-secret-1']);
       });
     });
 
@@ -1039,6 +1040,10 @@ describe('secrets', () => {
 
         expect(esClientMock.transport.request).toHaveBeenCalledTimes(2);
         expect(result.secretReferences).toHaveLength(2);
+        expect(Object.keys(result.packagePolicyUpdate.vars as any)).toEqual([
+          'pkg-secret-1',
+          'pkg-secret-2',
+        ]);
       });
     });
   });
