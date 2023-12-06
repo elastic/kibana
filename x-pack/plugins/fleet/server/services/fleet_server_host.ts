@@ -26,7 +26,7 @@ import type {
   NewFleetServerHost,
   AgentPolicy,
 } from '../types';
-import { FleetServerHostUnauthorizedError } from '../errors';
+import { FleetServerHostUnauthorizedError, FleetServerHostNotFoundError } from '../errors';
 
 import { appContextService } from './app_context';
 
@@ -233,7 +233,7 @@ export async function getFleetServerHostsForAgentPolicy(
 
   const defaultFleetServerHost = await getDefaultFleetServerHost(soClient);
   if (!defaultFleetServerHost) {
-    throw new Error('Default Fleet Server host is not setup');
+    throw new FleetServerHostNotFoundError('Default Fleet Server host is not setup');
   }
 
   return defaultFleetServerHost;

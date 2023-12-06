@@ -15,6 +15,8 @@ import { AGENTS_INDEX } from '../../constants';
 
 import { appContextService } from '../app_context';
 
+import { FleetError } from '../../errors';
+
 import { ActionRunner } from './action_runner';
 
 import { BulkActionTaskType } from './bulk_action_types';
@@ -124,7 +126,9 @@ export async function updateTagsBatch(
       conflicts: 'proceed', // relying on the task to retry in case of conflicts - retry only conflicted agents
     });
   } catch (error) {
-    throw new Error('Caught error: ' + JSON.stringify(error).slice(0, 1000));
+    throw new FleetError(
+      'Caught error while batch updating tags: ' + JSON.stringify(error).slice(0, 1000)
+    );
   }
 
   appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
@@ -203,7 +207,7 @@ export async function updateTagsBatch(
         .getLogger()
         .debug(`action conflict result wrote on ${versionConflictCount} agents`);
     }
-    throw new Error(`version conflict of ${versionConflictCount} agents`);
+    throw new FleetError(`Version conflict of ${versionConflictCount} agents`);
   }
 
   return { actionId, updated: res.updated, took: res.took };

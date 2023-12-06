@@ -568,7 +568,7 @@ async function installPackageCommon(options: {
     const elasticSubscription = getElasticSubscription(packageInfo);
     if (!licenseService.hasAtLeast(elasticSubscription)) {
       logger.error(`Installation requires ${elasticSubscription} license`);
-      const err = new Error(`Requires ${elasticSubscription} license`);
+      const err = new FleetError(`Installation requires ${elasticSubscription} license`);
       sendEvent({
         ...telemetryEvent,
         errorMessage: err.message,

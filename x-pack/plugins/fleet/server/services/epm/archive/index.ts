@@ -6,7 +6,11 @@
  */
 
 import type { AssetParts } from '../../../../common/types';
-import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
+import {
+  PackageInvalidArchiveError,
+  PackageUnsupportedMediaTypeError,
+  PackageNotFoundError,
+} from '../../../errors';
 
 import {
   getArchiveEntry,
@@ -149,7 +153,7 @@ export function getPathParts(path: string): AssetParts {
 
 export function getAsset(key: string) {
   const buffer = getArchiveEntry(key);
-  if (buffer === undefined) throw new Error(`Cannot find asset ${key}`);
+  if (buffer === undefined) throw new PackageNotFoundError(`Cannot find asset ${key}`);
 
   return buffer;
 }

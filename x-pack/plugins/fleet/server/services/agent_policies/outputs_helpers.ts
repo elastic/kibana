@@ -12,7 +12,7 @@ import { LICENCE_FOR_PER_POLICY_OUTPUT, outputType } from '../../../common/const
 import { policyHasFleetServer, policyHasSyntheticsIntegration } from '../../../common/services';
 import { appContextService } from '..';
 import { outputService } from '../output';
-import { OutputInvalidError, OutputLicenceError } from '../../errors';
+import { OutputInvalidError, OutputLicenceError, OutputNotFoundError } from '../../errors';
 
 /**
  * Get the data output for a given agent policy
@@ -28,7 +28,7 @@ export async function getDataOutputForAgentPolicy(
     agentPolicy.data_output_id || (await outputService.getDefaultDataOutputId(soClient));
 
   if (!dataOutputId) {
-    throw new Error('No default data output found.');
+    throw new OutputNotFoundError('No default data output found.');
   }
 
   return outputService.get(soClient, dataOutputId);
