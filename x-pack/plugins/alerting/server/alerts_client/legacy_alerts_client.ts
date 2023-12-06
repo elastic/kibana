@@ -5,12 +5,13 @@
  * 2.0.
  */
 import { Logger } from '@kbn/core/server';
-import { cloneDeep, keys, merge } from 'lodash';
+import { cloneDeep, isEmpty, keys, merge } from 'lodash';
 import { Alert } from '../alert/alert';
 import {
   AlertFactory,
   createAlertFactory,
   getPublicAlertFactory,
+  PublicAlertFactory,
 } from '../alert/create_alert_factory';
 import {
   determineAlertsToReturn,
@@ -32,6 +33,8 @@ import {
   ProcessAlertsOpts,
   LogAlertsOpts,
   TrackedAlerts,
+  ReportedAlert,
+  UpdateableAlert,
 } from './types';
 import { DEFAULT_MAX_ALERTS } from '../config';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -71,6 +74,12 @@ export class LegacyAlertsClient<
   };
 
   private alertFactory?: AlertFactory<
+    State,
+    Context,
+    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+  >;
+
+  private publicAlertFactory?: PublicAlertFactory<
     State,
     Context,
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
@@ -126,6 +135,7 @@ export class LegacyAlertsClient<
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
     });
+    this.publicAlertFactory = getPublicAlertFactory(this.alertFactory!);
   }
 
   public getTrackedAlerts() {
@@ -250,11 +260,63 @@ export class LegacyAlertsClient<
   }
 
   public factory() {
-    return getPublicAlertFactory(this.alertFactory!);
+    return this.publicAlertFactory!;
   }
 
   public client() {
-    return null;
+    return {
+      report: (
+        alert: ReportedAlert<
+          {},
+          State,
+          Context,
+          WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+        >
+      ) => {
+        const context = alert.context ? alert.context : ({} as Context);
+        const state = !isEmpty(alert.state) ? alert.state : null;
+
+        // Create a legacy alert
+        const legacyAlert = this.factory()
+          .create(alert.id)
+          .scheduleActions(alert.actionGroup, context);
+
+        if (state) {
+          legacyAlert.replaceState(state);
+        }
+
+        return {
+          uuid: legacyAlert.getUuid(),
+          start: legacyAlert.getStart() ?? this.startedAtString,
+        };
+      },
+      setAlertData: (alert: UpdateableAlert<{}, State, Context, RecoveryActionGroupId>) => {
+        const context = alert.context ? alert.context : ({} as Context);
+
+        // Allow setting context and payload on known alerts only
+        // Alerts are known if they have been reported in this execution or are recovered
+        const alertToUpdate = this.getAlert(alert.id);
+
+        if (!alertToUpdate) {
+          throw new Error(
+            `Cannot set alert data for alert ${alert.id} because it has not been reported and it is not recovered.`
+          );
+        }
+
+        // Set the alert context
+        alertToUpdate.setContext(context);
+      },
+      getAlertLimitValue: (): number => this.factory().alertLimit.getValue(),
+      setAlertLimitReached: (reached: boolean) =>
+        this.factory().alertLimit.setLimitReached(reached),
+      getRecoveredAlerts: () => {
+        const { getRecoveredAlerts } = this.factory().done();
+        const recoveredLegacyAlerts = getRecoveredAlerts() ?? [];
+        return recoveredLegacyAlerts.map((alert) => ({
+          alert,
+        }));
+      },
+    };
   }
 
   public async persistAlerts() {}
