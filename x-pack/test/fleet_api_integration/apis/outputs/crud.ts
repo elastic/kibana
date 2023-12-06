@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
+import {
+  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+  OUTPUT_HEALTH_DATA_STREAM,
+} from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -186,6 +189,52 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(getOutputRes.item).to.have.keys('id', 'name', 'type', 'is_default', 'hosts');
+      });
+    });
+
+    describe('GET /outputs/{outputId}/health', () => {
+      before(async () => {
+        await es.index({
+          refresh: 'wait_for',
+          index: OUTPUT_HEALTH_DATA_STREAM,
+          document: {
+            state: 'HEALTHY',
+            message: '',
+            '@timestamp': '' + Date.parse('2023-11-29T14:25:31Z'),
+            output: defaultOutputId,
+          },
+        });
+
+        await es.index({
+          refresh: 'wait_for',
+          index: OUTPUT_HEALTH_DATA_STREAM,
+          document: {
+            state: 'DEGRADED',
+            message: 'connection error',
+            '@timestamp': '' + Date.parse('2023-11-30T14:25:31Z'),
+            output: defaultOutputId,
+          },
+        });
+
+        await es.index({
+          refresh: 'wait_for',
+          index: OUTPUT_HEALTH_DATA_STREAM,
+          document: {
+            state: 'HEALTHY',
+            message: '',
+            '@timestamp': '' + Date.parse('2023-11-31T14:25:31Z'),
+            output: 'remote2',
+          },
+        });
+      });
+      it('should allow return the latest output health', async () => {
+        const { body: outputHealth } = await supertest
+          .get(`/api/fleet/outputs/${defaultOutputId}/health`)
+          .expect(200);
+
+        expect(outputHealth.state).to.equal('DEGRADED');
+        expect(outputHealth.message).to.equal('connection error');
+        expect(outputHealth.timestamp).not.to.be.empty();
       });
     });
 

@@ -29,19 +29,22 @@ export async function getHosts(options: GetHostsOptionsInjected): Promise<{ host
   const filters: QueryDslQueryContainer[] = [];
 
   if (options.filters?.ean) {
-    const ean = Array.isArray(options.filters.ean) ? options.filters.ean[0] : options.filters.ean;
-    const { kind, id } = parseEan(ean);
+    const eans = Array.isArray(options.filters.ean) ? options.filters.ean : [options.filters.ean];
+    const hostnames = eans
+      .map(parseEan)
+      .filter(({ kind }) => kind === 'host')
+      .map(({ id }) => id);
 
     // if EAN filter isn't targeting a host asset, we don't need to do this query
-    if (kind !== 'host') {
+    if (hostnames.length === 0) {
       return {
         hosts: [],
       };
     }
 
     filters.push({
-      term: {
-        'host.hostname': id,
+      terms: {
+        'host.hostname': hostnames,
       },
     });
   }

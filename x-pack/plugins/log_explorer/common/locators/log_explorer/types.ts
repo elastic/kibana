@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { DiscoverSetup } from '@kbn/discover-plugin/public';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 
 export interface LogExplorerLocatorDependencies {
-  discover: DiscoverSetup;
+  discoverAppLocator?: LocatorPublic<DiscoverAppLocatorParams>;
 }

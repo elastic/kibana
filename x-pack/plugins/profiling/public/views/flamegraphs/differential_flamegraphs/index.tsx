@@ -131,6 +131,8 @@ export function DifferentialFlameGraphsView() {
                     totalCPU: state.data.primaryFlamegraph.TotalCPU,
                     totalCount: state.data.primaryFlamegraph.TotalSamples,
                     scaleFactor: isNormalizedByTime ? baselineTime : baseline,
+                    totalAnnualCO2Kgs: state.data.primaryFlamegraph.TotalAnnualCO2Kgs,
+                    totalAnnualCostUSD: state.data.primaryFlamegraph.TotalAnnualCostsUSD,
                   }
                 : undefined
             }
@@ -142,6 +144,8 @@ export function DifferentialFlameGraphsView() {
                     totalCPU: state.data.comparisonFlamegraph.TotalCPU,
                     totalCount: state.data.comparisonFlamegraph.TotalSamples,
                     scaleFactor: isNormalizedByTime ? comparisonTime : comparison,
+                    totalAnnualCO2Kgs: state.data.comparisonFlamegraph.TotalAnnualCO2Kgs,
+                    totalAnnualCostUSD: state.data.comparisonFlamegraph.TotalAnnualCostsUSD,
                   }
                 : undefined
             }

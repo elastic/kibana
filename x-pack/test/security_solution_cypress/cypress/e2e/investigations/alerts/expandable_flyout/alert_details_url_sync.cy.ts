@@ -26,13 +26,13 @@ describe('Expandable flyout state sync', { tags: ['@ess', '@serverless'] }, () =
   });
 
   it('should test flyout url sync', () => {
-    cy.url().should('not.include', 'eventFlyout');
+    cy.url().should('not.include', 'rightPanel');
 
     expandFirstAlertExpandableFlyout();
 
     cy.log('should serialize its state to url');
 
-    cy.url().should('include', 'eventFlyout');
+    cy.url().should('include', 'rightPanel');
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('have.text', rule.name);
 
     cy.log('should reopen the flyout after browser refresh');
@@ -40,13 +40,13 @@ describe('Expandable flyout state sync', { tags: ['@ess', '@serverless'] }, () =
     cy.reload();
     waitForAlertsToPopulate();
 
-    cy.url().should('include', 'eventFlyout');
+    cy.url().should('include', 'rightPanel');
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('have.text', rule.name);
 
     cy.log('should clear the url state when flyout is closed');
 
     closeFlyout();
 
-    cy.url().should('not.include', 'eventFlyout');
+    cy.url().should('not.include', 'rightPanel');
   });
 });
