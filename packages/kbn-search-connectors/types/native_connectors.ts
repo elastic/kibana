@@ -1448,7 +1448,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           'searchConnectors.nativeConnectors.mongodb.configuration.tlsInsecureTooltip',
           {
             defaultMessage:
-              'This option skips certificate validation for TLS/SSL connections to your MongoDB server. We strongly recommend setting this option to \'disable\'.',
+              "This option skips certificate validation for TLS/SSL connections to your MongoDB server. We strongly recommend setting this option to 'disable'.",
           }
         ),
         type: FieldType.BOOLEAN,
