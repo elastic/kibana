@@ -548,7 +548,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           afterQueryBar
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
-          indexPatterns={this.props.indexPatterns!}
+          indexPatterns={indexPatterns}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
@@ -567,7 +567,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           query={this.state.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
-          indexPatterns={this.props.indexPatterns}
+          indexPatterns={indexPatterns}
           isLoading={this.props.isLoading}
           fillSubmitButton={this.props.fillSubmitButton || false}
           prepend={this.props.showFilterBar || this.props.showQueryInput ? queryBarMenu : undefined}
