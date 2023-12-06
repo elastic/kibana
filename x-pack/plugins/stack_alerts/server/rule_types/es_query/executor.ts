@@ -166,9 +166,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_TITLE]: actionContext.title,
         [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
-        ...(params.threshold?.length === 1
-          ? { [ALERT_EVALUATION_THRESHOLD]: params.threshold[0] }
-          : {}),
+        [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
       },
     });
     if (!isGroupAgg) {
@@ -219,9 +217,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_TITLE]: recoveryContext.title,
         [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${recoveryContext.value}`,
-        ...(params.threshold?.length === 1
-          ? { [ALERT_EVALUATION_THRESHOLD]: params.threshold[0] }
-          : {}),
+        [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
       },
     });
   }

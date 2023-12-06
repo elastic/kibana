@@ -357,6 +357,7 @@ describe('es_query executor', () => {
         payload: {
           'kibana.alert.evaluation.conditions':
             'Number of matching documents is between 200 and 500',
+          'kibana.alert.evaluation.threshold': null,
           'kibana.alert.evaluation.value': '491',
           'kibana.alert.reason':
             'Document count is 491 in the last 5m. Alert when between 200 and 500.',
