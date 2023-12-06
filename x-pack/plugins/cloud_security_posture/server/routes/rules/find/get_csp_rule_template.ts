@@ -16,14 +16,12 @@ import {
   GetCspRuleTemplateResponse,
   findCspRuleTemplateRequest,
 } from '@kbn/cloud-security-posture-plugin/common/types/latest';
-import { getBenchmarkFromPackagePolicy, getBenchmarkFilter } from '../../../common/utils/helpers';
+import { getBenchmarkFromPackagePolicy } from '../../../../common/utils/helpers';
 
-import {
-  CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-  FIND_CSP_RULE_TEMPLATE_ROUTE_PATH,
-} from '../../../common/constants';
-import { CspRouter } from '../../types';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../benchmarks/benchmarks';
+import { FIND_CSP_RULE_TEMPLATE_ROUTE_PATH } from '../../../../common/constants';
+import { CspRouter } from '../../../types';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../benchmarks/benchmarks';
+import { findRuleHandler } from './v1';
 
 export const getSortedCspRulesTemplates = (cspRulesTemplates: CspRuleTemplate[]) => {
   return cspRulesTemplates.slice().sort((a, b) => {
@@ -41,7 +39,7 @@ export const getSortedCspRulesTemplates = (cspRulesTemplates: CspRuleTemplate[])
   });
 };
 
-const getBenchmarkIdFromPackagePolicyId = async (
+export const getBenchmarkIdFromPackagePolicyId = async (
   soClient: SavedObjectsClientContract,
   packagePolicyId: string
 ): Promise<string> => {
@@ -50,47 +48,6 @@ const getBenchmarkIdFromPackagePolicyId = async (
     packagePolicyId
   );
   return getBenchmarkFromPackagePolicy(res.attributes.inputs);
-};
-
-const findCspRuleTemplateHandler = async (
-  soClient: SavedObjectsClientContract,
-  options: GetCspRuleTemplateRequest
-): Promise<GetCspRuleTemplateResponse> => {
-  if (
-    (!options.packagePolicyId && !options.benchmarkId) ||
-    (options.packagePolicyId && options.benchmarkId)
-  ) {
-    throw new Error('Please provide either benchmarkId or packagePolicyId, but not both');
-  }
-
-  const benchmarkId = options.benchmarkId
-    ? options.benchmarkId
-    : await getBenchmarkIdFromPackagePolicyId(soClient, options.packagePolicyId!);
-
-  const cspRulesTemplatesSo = await soClient.find<CspRuleTemplate>({
-    type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-    searchFields: options.searchFields,
-    search: options.search ? `"${options.search}"*` : '',
-    page: options.page,
-    perPage: options.perPage,
-    sortField: options.sortField,
-    fields: options?.fields,
-    filter: getBenchmarkFilter(benchmarkId, options.section),
-  });
-
-  const cspRulesTemplates = cspRulesTemplatesSo.saved_objects.map(
-    (cspRuleTemplate) => cspRuleTemplate.attributes
-  );
-
-  // Semantic version sorting using semver for valid versions and custom comparison for invalid versions
-  const sortedCspRulesTemplates = getSortedCspRulesTemplates(cspRulesTemplates);
-
-  return {
-    items: sortedCspRulesTemplates,
-    total: cspRulesTemplatesSo.total,
-    page: options.page,
-    perPage: options.perPage,
-  };
 };
 
 export const defineFindCspRuleTemplateRoute = (router: CspRouter) =>
@@ -117,7 +74,7 @@ export const defineFindCspRuleTemplateRoute = (router: CspRouter) =>
         const cspContext = await context.csp;
 
         try {
-          const cspRulesTemplates: GetCspRuleTemplateResponse = await findCspRuleTemplateHandler(
+          const cspRulesTemplates: GetCspRuleTemplateResponse = await findRuleHandler(
             cspContext.soClient,
             requestBody
           );
