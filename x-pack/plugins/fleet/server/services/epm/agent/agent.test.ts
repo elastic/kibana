@@ -5,9 +5,30 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
+import type { Logger } from '@kbn/core/server';
+
+import { appContextService } from '../..';
+
 import { compileTemplate } from './agent';
 
+jest.mock('../../app_context');
+
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
+
+let mockedLogger: jest.Mocked<Logger>;
+
 describe('compileTemplate', () => {
+  beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+  });
+
   it('should work', () => {
     const streamTemplate = `
 input: log
