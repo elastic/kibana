@@ -299,7 +299,7 @@ export class Plugin
         'user',
         'experience',
       ],
-      searchable: Boolean(pluginsSetup.serverless),
+      searchable: !Boolean(pluginsSetup.serverless),
     };
 
     coreSetup.application.register(app);
