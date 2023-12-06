@@ -323,7 +323,9 @@ class VectorTileInspector extends Component<InspectorViewProps, State> {
 function getTileResponse(tileRequest: TileRequest) {
   if (tileRequest.tileError) {
     return {
-      error: tileRequest.tileError.error ? tileRequest.tileError.error : tileRequest.tileError.message,
+      error: tileRequest.tileError.error
+        ? tileRequest.tileError.error
+        : tileRequest.tileError.message,
     };
   }
 

@@ -13,12 +13,12 @@ describe('getTileError', () => {
     const tileErrors = [
       {
         message: 'simulated failure 1',
-        tileKey: '1/0/0'
+        tileKey: '1/0/0',
       },
       {
         message: 'simulated failure 2',
-        tileKey: '1/1/0'
-      }
+        tileKey: '1/1/0',
+      },
     ];
     const tileError = getTileError(0, 0, 1, tileErrors);
     expect(tileError).not.toBeUndefined();
@@ -38,14 +38,14 @@ describe('getTileMetaFeature', () => {
               [180, 0],
               [180, -85.05112877980659],
               [0, -85.05112877980659],
-            ]
+            ],
           ],
-          type: 'Polygon'
+          type: 'Polygon',
         },
         properties: {
           'hits.total.value': 0,
         },
-        type: 'Feature'
+        type: 'Feature',
       } as TileMetaFeature,
       {
         geometry: {
@@ -56,14 +56,14 @@ describe('getTileMetaFeature', () => {
               [0, 85.05112877980659],
               [0, 0],
               [-180, 0],
-            ]
+            ],
           ],
-          type: 'Polygon'
+          type: 'Polygon',
         },
         properties: {
           'hits.total.value': 182,
         },
-        type: 'Feature'
+        type: 'Feature',
       } as TileMetaFeature,
     ];
     const tileMetaFeature = getTileMetaFeature(0, 0, 1, tileMetaFeatures);
