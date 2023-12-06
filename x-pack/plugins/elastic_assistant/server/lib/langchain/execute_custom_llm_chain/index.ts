@@ -107,22 +107,7 @@ export const callAgentExecutor = async ({
       chat_history: pastMessages,
     });
 
-    async function* generate() {
-      try {
-        for await (const chunk of stream) {
-          console.log('WE ARE HERE CHUNK', chunk);
-          yield chunk;
-        }
-      } catch (e) {
-        console.log('WE ARE HERE ERROR generate?????', e);
-        throw e;
-      }
-    }
-    const readable = Readable.from(generate());
-
-    console.log('WE ARE HERE after Readable.from', stream);
-
-    return readable.pipe(new PassThrough());
+    return Readable.from(stream).pipe(new PassThrough());
   } catch (err) {
     console.log('WE ARE HERE ERROR execute?????', err);
     throw err;
