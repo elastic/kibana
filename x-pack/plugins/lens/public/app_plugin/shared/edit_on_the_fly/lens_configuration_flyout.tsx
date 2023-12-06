@@ -27,6 +27,7 @@ import {
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import {
   useLensSelector,
   selectFramePublicAPI,
@@ -76,12 +77,13 @@ export function LensEditConfigurationFlyout({
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeDatasource = datasourceMap[datasourceId];
-  const { datasourceStates, visualization, isLoading, annotationGroups } = useLensSelector(
-    (state) => state.lens
-  );
+
+  const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
+    useLensSelector((state) => state.lens);
   // use the latest activeId, but fallback to attributes
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
+
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
   const suggestsLimitedColumns = activeDatasource?.suggestsLimitedColumns?.(datasourceState);
 
@@ -272,6 +274,40 @@ export function LensEditConfigurationFlyout({
     ]
   );
 
+  const isSaveable = useMemo(() => {
+    if (!attributesChanged) {
+      return false;
+    }
+    if (!visualization.state || !visualization.activeId) {
+      return false;
+    }
+    return Boolean(
+      buildExpression({
+        visualization: activeVisualization,
+        visualizationState: visualization.state,
+        datasourceMap,
+        datasourceStates,
+        datasourceLayers: framePublicAPI.datasourceLayers,
+        indexPatterns: framePublicAPI.dataViews.indexPatterns,
+        dateRange: framePublicAPI.dateRange,
+        nowInstant: startDependencies.data.nowProvider.get(),
+        searchSessionId,
+      })
+    );
+  }, [
+    attributesChanged,
+    activeVisualization,
+    datasourceMap,
+    datasourceStates,
+    framePublicAPI.dataViews.indexPatterns,
+    framePublicAPI.dateRange,
+    framePublicAPI.datasourceLayers,
+    searchSessionId,
+    startDependencies.data.nowProvider,
+    visualization.activeId,
+    visualization.state,
+  ]);
+
   const textBasedMode = isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined;
 
   if (isLoading) return null;
@@ -285,8 +321,8 @@ export function LensEditConfigurationFlyout({
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
         isScrollable={true}
-        attributesChanged={attributesChanged}
         isNewPanel={isNewPanel}
+        isSaveable={isSaveable}
       >
         <LayerConfiguration
           getUserMessages={getUserMessages}
@@ -312,8 +348,8 @@ export function LensEditConfigurationFlyout({
         onCancel={onCancel}
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
-        attributesChanged={attributesChanged}
         language={textBasedMode ? getLanguageDisplayName(textBasedMode) : ''}
+        isSaveable={isSaveable}
         isScrollable={false}
         isNewPanel={isNewPanel}
       >
