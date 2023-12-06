@@ -23,13 +23,9 @@ interface Telemetry {
  * Register the telemetry collector
  */
 
-export const registerTelemetryUsageCollector = (
-  usageCollection: UsageCollectionSetup,
-  client: ElasticsearchClient
-) => {
+export const registerTelemetryUsageCollector = (usageCollection: UsageCollectionSetup) => {
   const telemetryUsageCollector = usageCollection.makeUsageCollector<Telemetry>({
     type: 'connectors',
-    fetch: async () => fetchTelemetryMetrics(client),
     isReady: () => true,
     schema: {
       native: {
@@ -38,6 +34,9 @@ export const registerTelemetryUsageCollector = (
       clients: {
         total: { type: 'long' },
       },
+    },
+    async fetch({ esClient }) {
+      return await fetchTelemetryMetrics(esClient);
     },
   });
   usageCollection.registerCollector(telemetryUsageCollector);

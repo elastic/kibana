@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
+
 import { registerTelemetryUsageCollector } from './telemetry';
 
 describe('Connectors Telemetry Usage Collector', () => {
@@ -14,17 +16,13 @@ describe('Connectors Telemetry Usage Collector', () => {
     makeUsageCollector: makeUsageCollectorStub,
     registerCollector: registerStub,
   } as any;
-  const mockClient = {
-    count: jest.fn(),
-  } as any;
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('registerTelemetryUsageCollector', () => {
     it('should make and register the usage collector', () => {
-      registerTelemetryUsageCollector(usageCollectionMock, mockClient);
+      registerTelemetryUsageCollector(usageCollectionMock);
 
       expect(registerStub).toHaveBeenCalledTimes(1);
       expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
@@ -35,13 +33,16 @@ describe('Connectors Telemetry Usage Collector', () => {
 
   describe('fetchTelemetryMetrics', () => {
     it('should return telemetry data', async () => {
-      mockClient.count.mockImplementation((query: any) =>
+      const fetchContextMock = createCollectorFetchContextMock();
+      fetchContextMock.esClient.count = jest.fn().mockImplementation((query: any) =>
         Promise.resolve({
           count: query.query.bool.filter[0].term.is_native ? 5 : 2,
         })
       );
-      registerTelemetryUsageCollector(usageCollectionMock, mockClient);
-      const telemetryMetrics = await makeUsageCollectorStub.mock.calls[0][0].fetch();
+      registerTelemetryUsageCollector(usageCollectionMock);
+      const telemetryMetrics = await makeUsageCollectorStub.mock.calls[0][0].fetch(
+        fetchContextMock
+      );
 
       expect(telemetryMetrics).toEqual({
         native: {

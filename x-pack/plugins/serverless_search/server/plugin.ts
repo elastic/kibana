@@ -96,11 +96,8 @@ export class ServerlessSearchPlugin
     });
 
     if (usageCollection) {
-      getStartServices().then(([coreStart]) => {
-        registerTelemetryUsageCollector(
-          usageCollection,
-          coreStart.elasticsearch.client.asInternalUser
-        );
+      getStartServices().then(() => {
+        registerTelemetryUsageCollector(usageCollection);
       });
     }
 
