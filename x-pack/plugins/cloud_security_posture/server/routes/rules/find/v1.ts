@@ -13,11 +13,8 @@ import {
 } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { getBenchmarkFilter } from '../../../../common/utils/helpers';
 
-import { CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import {
-  getBenchmarkIdFromPackagePolicyId,
-  getSortedCspRulesTemplates,
-} from './get_csp_rule_template';
+import { CSP_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import { getBenchmarkIdFromPackagePolicyId, getSortedCspRulesTemplates } from './find_csp_rule';
 
 export const findRuleHandler = async (
   soClient: SavedObjectsClientContract,
@@ -35,7 +32,7 @@ export const findRuleHandler = async (
     : await getBenchmarkIdFromPackagePolicyId(soClient, options.packagePolicyId!);
 
   const cspRulesTemplatesSo = await soClient.find<CspRule>({
-    type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+    type: CSP_RULE_SAVED_OBJECT_TYPE,
     searchFields: options.searchFields,
     search: options.search ? `"${options.search}"*` : '',
     page: options.page,

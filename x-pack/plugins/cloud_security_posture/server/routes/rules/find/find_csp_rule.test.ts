@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSortedCspRulesTemplates } from './get_csp_rule_template';
+import { getSortedCspRulesTemplates } from './find_csp_rule';
 import { CspRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
 describe('getSortedCspRulesTemplates', () => {

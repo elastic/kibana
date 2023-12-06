@@ -7,13 +7,13 @@
 
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
-import { CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { CSP_RULE_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { cspRuleMigrations } from './migrations';
 import { cspRuleSavedObjectMapping } from './mappings';
 import { rulesV1, rulesV2, rulesV3 } from '@kbn/cloud-security-posture-plugin/common/types/';
 
 export const cspRule: SavedObjectsType = {
-  name: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  name: CSP_RULE_SAVED_OBJECT_TYPE,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'agnostic',

@@ -17,7 +17,7 @@ import { defineGetComplianceDashboardRoute } from './compliance_dashboard/compli
 import { defineGetVulnerabilitiesDashboardRoute } from './vulnerabilities_dashboard/vulnerabilities_dashboard';
 import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
 import { defineGetCspStatusRoute } from './status/status';
-import { defineFindCspRuleRoute } from './rules/find/get_csp_rule_template';
+import { defineFindCspRuleRoute } from './rules/find/find_csp_rule';
 import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_detection_engine_alerts_count_by_rule_tags';
 
 /**
