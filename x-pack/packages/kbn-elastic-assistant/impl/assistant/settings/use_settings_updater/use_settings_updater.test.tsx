@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { act, renderHook } from '@testing-library/react-hooks';
+
+import { DEFAULT_LATEST_ALERTS } from '../../../assistant_context/constants';
 import { alertConvo, customConvo, welcomeConvo } from '../../../mock/conversation';
 import { useSettingsUpdater } from './use_settings_updater';
 import { Prompt } from '../../../..';
@@ -56,7 +58,9 @@ const updatedValues = {
   defaultAllow: ['allow2'],
   defaultAllowReplacement: ['replacement2'],
   knowledgeBase: {
+    alerts: false,
     assistantLangChain: false,
+    latestAlerts: DEFAULT_LATEST_ALERTS,
   },
 };
 
