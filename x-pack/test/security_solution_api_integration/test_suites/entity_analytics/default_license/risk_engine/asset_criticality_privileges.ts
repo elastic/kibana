@@ -63,7 +63,7 @@ const USERNAME_TO_ROLES = {
 };
 
 export default ({ getService }: FtrProviderContext) => {
-  describe('@ess privileges_apis', () => {
+  describe('@ess Entity Analytics - Asset Criticality Privileges API', () => {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const assetCriticalityRoutesNoAuth =
       assetCriticalityRouteHelpersFactoryNoAuth(supertestWithoutAuth);

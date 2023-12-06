@@ -80,7 +80,7 @@ const USERNAME_TO_ROLES = {
 };
 
 export default ({ getService }: FtrProviderContext) => {
-  describe('@ess privileges_apis', () => {
+  describe('@ess Entity Analytics - Risk Engine Privileges API', () => {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const riskEngineRoutesNoAuth = riskEngineRouteHelpersFactoryNoAuth(supertestWithoutAuth);
     const security = getService('security');
