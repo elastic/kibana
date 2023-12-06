@@ -15,7 +15,7 @@ import { Chance } from 'chance';
 import { TestProvider } from '../../test/test_provider';
 import { useParams } from 'react-router-dom';
 import { coreMock } from '@kbn/core/public/mocks';
-import { CspRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import type { CspRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
 const chance = new Chance();
 

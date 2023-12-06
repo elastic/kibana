@@ -6,7 +6,7 @@
  */
 import { schema, TypeOf } from '@kbn/config-schema';
 
-// Since version 8.4.0 //TODO: rename V840
+// Since version 8.4.0
 export const cspRuleMetadataSchema = schema.object({
   audit: schema.string(),
   benchmark: schema.object({

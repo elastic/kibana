@@ -46,7 +46,7 @@ export const cspRuleSchema = schema.object({
 
 export type CspRule = TypeOf<typeof cspRuleSchema>;
 
-export const findCspRuleRequest = schema.object({
+export const findCspRuleRequestSchema = schema.object({
   /**
    * An Elasticsearch simple_query_string
    */
@@ -121,7 +121,7 @@ export const findCspRuleRequest = schema.object({
   section: schema.maybe(schema.string()),
 });
 
-export type FindCspRuleRequest = TypeOf<typeof findCspRuleRequest>;
+export type FindCspRuleRequest = TypeOf<typeof findCspRuleRequestSchema>;
 
 export interface FindCspRuleResponse {
   items: CspRule[];

@@ -14,14 +14,14 @@ import {
   CspRule,
   FindCspRuleRequest,
   FindCspRuleResponse,
-  findCspRuleRequest,
+  findCspRuleRequestSchema,
 } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { getBenchmarkFromPackagePolicy } from '../../../../common/utils/helpers';
 
 import { FIND_CSP_RULE_ROUTE_PATH } from '../../../../common/constants';
 import { CspRouter } from '../../../types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../benchmarks/benchmarks';
-import { findRuleHandler } from './v1';
+import { findRuleHandler as findRuleHandlerV1 } from './v1';
 
 export const getSortedCspRulesTemplates = (cspRulesTemplates: CspRule[]) => {
   return cspRulesTemplates.slice().sort((a, b) => {
@@ -61,7 +61,7 @@ export const defineFindCspRuleRoute = (router: CspRouter) =>
         version: '1',
         validate: {
           request: {
-            query: findCspRuleRequest,
+            query: findCspRuleRequestSchema,
           },
         },
       },
@@ -74,7 +74,7 @@ export const defineFindCspRuleRoute = (router: CspRouter) =>
         const cspContext = await context.csp;
 
         try {
-          const cspRulesTemplates: FindCspRuleResponse = await findRuleHandler(
+          const cspRulesTemplates: FindCspRuleResponse = await findRuleHandlerV1(
             cspContext.soClient,
             requestBody
           );

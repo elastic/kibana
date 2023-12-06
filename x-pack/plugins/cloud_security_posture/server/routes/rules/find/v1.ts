@@ -6,15 +6,15 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import {
+import { getBenchmarkFilter } from '../../../../common/utils/helpers';
+import { CSP_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import { getBenchmarkIdFromPackagePolicyId, getSortedCspRulesTemplates } from './find_csp_rule';
+
+import type {
   CspRule,
   FindCspRuleRequest,
   FindCspRuleResponse,
 } from '@kbn/cloud-security-posture-plugin/common/types/latest';
-import { getBenchmarkFilter } from '../../../../common/utils/helpers';
-
-import { CSP_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import { getBenchmarkIdFromPackagePolicyId, getSortedCspRulesTemplates } from './find_csp_rule';
 
 export const findRuleHandler = async (
   soClient: SavedObjectsClientContract,
