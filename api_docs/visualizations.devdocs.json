@@ -13304,6 +13304,20 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-common.XYConfiguration.minBarHeight",
+            "type": "number",
+            "tags": [],
+            "label": "minBarHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-common.XYConfiguration.hideEndzones",
             "type": "CompoundType",
             "tags": [],

@@ -265,6 +265,11 @@ export const basicFileMock: FileJSON = {
   fileKind: '',
   status: 'READY',
   extension: 'png',
+  hash: {
+    md5: 'md5',
+    sha1: 'sha1',
+    sha256: 'sha256',
+  },
 };
 
 export const caseWithAlerts = {
