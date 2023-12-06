@@ -7,6 +7,7 @@
 
 export const ASSET_CRITICALITY_INDEX_PATTERN = '.asset-criticality.asset-criticality-*';
 
+type AssetCriticalityIndexPrivilege = 'read' | 'write';
 export const ASSET_CRITICALITY_REQUIRED_ES_INDEX_PRIVILEGES = {
-  [ASSET_CRITICALITY_INDEX_PATTERN]: ['read', 'write'],
-} as const;
+  [ASSET_CRITICALITY_INDEX_PATTERN]: ['read', 'write'] as AssetCriticalityIndexPrivilege[],
+};
