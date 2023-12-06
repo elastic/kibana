@@ -978,6 +978,7 @@ describe('secrets', () => {
             'pkg-secret-1': {
               value: 'pkg-secret-1-val',
             },
+            'pkg-secret-2': {},
           },
           inputs: [],
         } as unknown as PackagePolicy;
@@ -987,6 +988,7 @@ describe('secrets', () => {
             'pkg-secret-1': {
               value: 'pkg-secret-1-val-update',
             },
+            'pkg-secret-2': {},
           },
           inputs: [],
         } as unknown as UpdatePackagePolicy;
@@ -1000,6 +1002,10 @@ describe('secrets', () => {
 
         expect(esClientMock.transport.request).toHaveBeenCalledTimes(1);
         expect(result.secretReferences).toHaveLength(1);
+        expect((result.packagePolicyUpdate.vars as any)['pkg-secret-1'].value.isSecretRef).toEqual(
+          true
+        );
+        expect((result.packagePolicyUpdate.vars as any)['pkg-secret-2'].value).toBeUndefined();
       });
     });
 
@@ -1011,7 +1017,7 @@ describe('secrets', () => {
               value: 'pkg-secret-1-val',
             },
             'pkg-secret-2': {
-              value: 'pkg-secret-2-val',
+              value: { id: '1234', isSecretRef: true },
             },
           },
           inputs: [],
@@ -1038,6 +1044,12 @@ describe('secrets', () => {
 
         expect(esClientMock.transport.request).toHaveBeenCalledTimes(2);
         expect(result.secretReferences).toHaveLength(2);
+        expect((result.packagePolicyUpdate.vars as any)['pkg-secret-1'].value.isSecretRef).toEqual(
+          true
+        );
+        expect((result.packagePolicyUpdate.vars as any)['pkg-secret-2'].value.isSecretRef).toEqual(
+          true
+        );
       });
     });
   });
