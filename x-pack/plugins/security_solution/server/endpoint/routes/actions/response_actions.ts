@@ -318,7 +318,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         responseActionsClient = new EndpointActionsClient({
           esClient,
           casesClient,
-          endpointContext,
+          endpointService: endpointContext.service,
           username: user?.username ?? 'unknown',
         });
         break;
@@ -326,7 +326,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         responseActionsClient = new SentinelOneActionsClient({
           esClient,
           casesClient,
-          endpointContext,
+          endpointService: endpointContext.service,
           username: user?.username ?? 'unknown',
           connectorActions,
         });

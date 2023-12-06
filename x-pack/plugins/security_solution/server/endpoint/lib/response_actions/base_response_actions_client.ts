@@ -11,9 +11,10 @@ import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { APP_ID } from '../../../../common';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
-import { getActionDetailsById } from '../../services';
+import { getActionDetailsById } from '../../services/actions/action_details_by_id';
 import {
   ResponseActionsClientError,
   ResponseActionsNotSupportedError,
@@ -27,7 +28,6 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
-import type { EndpointAppContext } from '../../types';
 import type { ResponseActionsClient } from './types';
 import type {
   ActionDetails,
@@ -58,7 +58,7 @@ import type { CreateActionPayload } from '../../services/actions/create/types';
 import { dump } from '../../utils/dump';
 
 export interface ResponseActionsClientOptions {
-  endpointContext: EndpointAppContext;
+  endpointService: EndpointAppContextService;
   esClient: ElasticsearchClient;
   casesClient?: CasesClient;
   /** Username that will be stored along with the action's ES documents */
@@ -72,7 +72,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
   protected readonly log: Logger;
 
   constructor(protected readonly options: ResponseActionsClientOptions) {
-    this.log = options.endpointContext.logFactory.get(
+    this.log = options.endpointService.createLogger(
       this.constructor.name ?? 'ResponseActionsClient'
     );
   }
@@ -193,7 +193,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
   ): Promise<T> {
     return getActionDetailsById(
       this.options.esClient,
-      this.options.endpointContext.service.getEndpointMetadataService(),
+      this.options.endpointService.getEndpointMetadataService(),
       actionId
     );
   }

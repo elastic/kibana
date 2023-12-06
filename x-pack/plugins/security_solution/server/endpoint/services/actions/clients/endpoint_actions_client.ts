@@ -42,7 +42,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     allValid: boolean;
     hosts: HostMetadata[];
   }> {
-    const foundEndpointHosts = await this.options.endpointContext.service
+    const foundEndpointHosts = await this.options.endpointService
       .getEndpointMetadataService()
       .getMetadataForEndpoints(this.options.esClient, [...new Set(ids)]);
     const validIds = foundEndpointHosts.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
@@ -71,7 +71,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       user: { username: this.options.username },
     };
 
-    const response = await this.options.endpointContext.service
+    const response = await this.options.endpointService
       .getActionCreateService()
       .createAction(createPayload, agentIds.valid);
 
@@ -152,7 +152,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   async upload(
     options: UploadActionApiRequestBody
   ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>> {
-    const fleetFiles = await this.options.endpointContext.service.getFleetToHostFilesClient();
+    const fleetFiles = await this.options.endpointService.getFleetToHostFilesClient();
     const fileStream = options.file as HapiReadableStream;
     const { file: _, parameters: userParams, ...actionPayload } = options;
     const uploadParameters: ResponseActionUploadParameters = {
