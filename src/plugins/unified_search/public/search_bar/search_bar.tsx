@@ -528,8 +528,20 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     ) : undefined;
 
     let filterBar;
+    const esqlIndexPatternMap = new Map<string, boolean>();
     const indexPatterns = this.props.indexPatterns
-      ? this.props.indexPatterns.filter((ip) => ip.type !== 'esql')
+      ? this.props.indexPatterns.reduce((collector, dataView) => {
+          if (dataView.type !== 'esql') {
+            collector.push(dataView);
+          } else {
+            const indexPattern = dataView.getIndexPattern();
+            if (!esqlIndexPatternMap.has(indexPattern)) {
+              esqlIndexPatternMap.set(indexPattern, true);
+              collector.push(dataView);
+            }
+          }
+          return collector;
+        }, [] as DataView[])
       : [];
     if (this.shouldRenderFilterBar()) {
       filterBar = this.shouldShowDatePickerAsBadge() ? (
