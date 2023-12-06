@@ -185,6 +185,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleRiskScore',
                 idAria: 'detectionEngineStepAboutRuleRiskScore',
                 isDisabled: isLoading || indexPatternLoading,
+                isActive,
                 indices: indexPattern,
               }}
             />
