@@ -77,29 +77,31 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       inputConsoleCommand(`get-file --path ${filePath}`);
       submitCommand();
 
-      cy.getByTestSubj('getFileSuccess', { timeout: 120000 }).within(() => {
+      cy.getByTestSubj('getFileSuccess', { timeout: 60000 }).within(() => {
         cy.contains('File retrieved from the host.');
         cy.contains('(ZIP file passcode: elastic)');
         cy.contains(
           'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
         );
-        cy.contains('Click here to download').click();
-        const downloadsFolder = Cypress.config('downloadsFolder');
-        cy.readFile(`${downloadsFolder}/upload.zip`, { timeout: 120000 }).should('exist');
+        cy.contains('Click here to download').should('exist');
+      });
 
-        cy.task('uploadFileToEndpoint', {
-          hostname: createdHost.hostname,
-          srcPath: `${downloadsFolder}/upload.zip`,
-          destPath: `${homeFilePath}/upload.zip`,
-        });
+      cy.contains('Click here to download').click();
+      const downloadsFolder = Cypress.config('downloadsFolder');
+      cy.readFile(`${downloadsFolder}/upload.zip`, { timeout: 120000 }).should('exist');
 
-        cy.task('readZippedFileContentOnEndpoint', {
-          hostname: createdHost.hostname,
-          path: `${homeFilePath}/upload.zip`,
-          password: 'elastic',
-        }).then((unzippedFileContent) => {
-          expect(unzippedFileContent).to.equal(fileContent);
-        });
+      cy.task('uploadFileToEndpoint', {
+        hostname: createdHost.hostname,
+        srcPath: `${downloadsFolder}/upload.zip`,
+        destPath: `${homeFilePath}/upload.zip`,
+      });
+
+      cy.task('readZippedFileContentOnEndpoint', {
+        hostname: createdHost.hostname,
+        path: `${homeFilePath}/upload.zip`,
+        password: 'elastic',
+      }).then((unzippedFileContent) => {
+        expect(unzippedFileContent).to.equal(fileContent);
       });
     });
 
