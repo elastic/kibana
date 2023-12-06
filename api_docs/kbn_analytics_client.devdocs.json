@@ -731,6 +731,18 @@
                 "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
+                "plugin": "observabilityAIAssistant",
+                "path": "x-pack/plugins/observability_ai_assistant/public/components/chat/chat_body.tsx"
+              },
+              {
+                "plugin": "observabilityAIAssistant",
+                "path": "x-pack/plugins/observability_ai_assistant/public/utils/storybook_decorator.tsx"
+              },
+              {
+                "plugin": "observabilityAIAssistant",
+                "path": "x-pack/plugins/observability_ai_assistant/public/components/insight/insight.tsx"
+              },
+              {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/public/services/telemetry/telemetry_client.ts"
               },
@@ -857,6 +869,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "observabilityAIAssistant",
+                "path": "x-pack/plugins/observability_ai_assistant/public/service/create_chat_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -1037,6 +1053,14 @@
               {
                 "plugin": "@kbn/core-analytics-server-mocks",
                 "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "observabilityAIAssistant",
+                "path": "x-pack/plugins/observability_ai_assistant/public/hooks/use_chat.test.ts"
+              },
+              {
+                "plugin": "observabilityAIAssistant",
+                "path": "x-pack/plugins/observability_ai_assistant/public/service/create_mock_chat_service.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
