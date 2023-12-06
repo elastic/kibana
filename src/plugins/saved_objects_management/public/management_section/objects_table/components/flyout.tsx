@@ -71,6 +71,7 @@ export interface FlyoutState {
   importWarnings?: ProcessedImportResponse['importWarnings'];
   error?: string;
   file?: File;
+  containsManaged?: boolean;
   importCount: number;
   indexPatterns?: DataView[];
   importMode: ImportMode;
@@ -132,6 +133,19 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   setImportFile = (files: FileList | null) => {
+    if (files) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.type === 'load') {
+          const objects = event.target.result.split('\n').map(JSON.parse);
+          if (objects.some((obj) => obj.managed)) {
+            this.setState({ containsManaged: true });
+          }
+        }
+      };
+      reader.readAsText(files[0]);
+    }
+
     if (!files || !files[0]) {
       this.setState({ file: undefined });
       return;
@@ -486,6 +500,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         </EuiFormRow>
         <EuiFormRow fullWidth>
           <ImportModeControl
+            containsManaged={!!this.state.containsManaged}
             initialValues={importMode}
             updateSelection={(newValues: ImportMode) => this.changeImportMode(newValues)}
           />

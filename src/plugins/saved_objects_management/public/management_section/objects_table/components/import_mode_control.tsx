@@ -17,10 +17,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface ImportModeControlProps {
+  containsManaged: boolean;
   initialValues: ImportMode;
   updateSelection: (result: ImportMode) => void;
 }
@@ -86,7 +88,11 @@ const createLabel = ({ text, tooltip }: { text: string; tooltip: string }) => (
   </EuiFlexGroup>
 );
 
-export const ImportModeControl = ({ initialValues, updateSelection }: ImportModeControlProps) => {
+export const ImportModeControl = ({
+  initialValues,
+  updateSelection,
+  containsManaged,
+}: ImportModeControlProps) => {
   const [createNewCopies, setCreateNewCopies] = useState(initialValues.createNewCopies);
   const [overwrite, setOverwrite] = useState(initialValues.overwrite);
 
@@ -109,27 +115,37 @@ export const ImportModeControl = ({ initialValues, updateSelection }: ImportMode
         ),
       }}
     >
-      <EuiCheckableCard
-        id={createNewCopiesDisabled.id}
-        label={createLabel(createNewCopiesDisabled)}
-        checked={!createNewCopies}
-        onChange={() => onChange({ createNewCopies: false })}
+      <EuiToolTip
+        display="block"
+        content={
+          containsManaged
+            ? 'Your import contains content that has been managed by Elastic. This content must get new IDs to prevent conflicts in the future.'
+            : null
+        }
       >
-        <EuiRadioGroup
-          options={[overwriteEnabled, overwriteDisabled]}
-          idSelected={overwrite ? overwriteEnabled.id : overwriteDisabled.id}
-          onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}
-          disabled={createNewCopies}
-          data-test-subj={'savedObjectsManagement-importModeControl-overwriteRadioGroup'}
-        />
-      </EuiCheckableCard>
+        <EuiCheckableCard
+          id={createNewCopiesDisabled.id}
+          label={createLabel(createNewCopiesDisabled)}
+          checked={!createNewCopies && !containsManaged}
+          disabled={containsManaged}
+          onChange={() => onChange({ createNewCopies: false })}
+        >
+          <EuiRadioGroup
+            options={[overwriteEnabled, overwriteDisabled]}
+            idSelected={overwrite ? overwriteEnabled.id : overwriteDisabled.id}
+            onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}
+            disabled={createNewCopies || containsManaged}
+            data-test-subj={'savedObjectsManagement-importModeControl-overwriteRadioGroup'}
+          />
+        </EuiCheckableCard>
+      </EuiToolTip>
 
       <EuiSpacer size="s" />
 
       <EuiCheckableCard
         id={createNewCopiesEnabled.id}
         label={createLabel(createNewCopiesEnabled)}
-        checked={createNewCopies}
+        checked={createNewCopies || containsManaged}
         onChange={() => onChange({ createNewCopies: true })}
       />
     </EuiFormFieldset>
