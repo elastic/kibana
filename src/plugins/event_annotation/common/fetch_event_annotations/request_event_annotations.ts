@@ -53,7 +53,6 @@ interface QueryGroup {
   ignoreGlobalFilters: boolean;
 }
 
-// TODO: should this be refactored too with the usage of "@kbn/visualization-utils"? The implementation is slightly different.
 export function getTimeZone(uiSettings: IUiSettingsClient) {
   const configuredTimeZone = uiSettings.get('dateFormat:tz');
   if (configuredTimeZone === 'Browser') {
