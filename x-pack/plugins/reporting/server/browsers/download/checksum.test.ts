@@ -26,7 +26,9 @@ describe('sha256', () => {
   });
 
   it('should return an sha256 hash', async () => {
-    await expect(sha256('path')).resolves.toBe('437b930db84b8079c2dd804a71936b5f');
+    expect(await sha256('path')).toMatchInlineSnapshot(
+      `"3fc9b689459d738f8c88a3a48aa9e33542016b7a4052e001aaa536fca74813cb"`
+    );
   });
 
   it('should reject on stream error', async () => {
