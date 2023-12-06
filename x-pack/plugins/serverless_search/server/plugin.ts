@@ -99,8 +99,7 @@ export class ServerlessSearchPlugin
       getStartServices().then(([coreStart]) => {
         registerTelemetryUsageCollector(
           usageCollection,
-          coreStart.elasticsearch.client,
-          this.logger
+          coreStart.elasticsearch.client.asInternalUser
         );
       });
     }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IClusterClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '@kbn/search-connectors';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -25,12 +25,11 @@ interface Telemetry {
 
 export const registerTelemetryUsageCollector = (
   usageCollection: UsageCollectionSetup,
-  client: IClusterClient,
-  log: Logger
+  client: ElasticsearchClient
 ) => {
   const telemetryUsageCollector = usageCollection.makeUsageCollector<Telemetry>({
     type: 'connectors',
-    fetch: async () => fetchTelemetryMetrics(client, log),
+    fetch: async () => fetchTelemetryMetrics(client),
     isReady: () => true,
     schema: {
       native: {
@@ -48,21 +47,9 @@ export const registerTelemetryUsageCollector = (
  * Fetch the aggregated telemetry metrics
  */
 
-export const fetchTelemetryMetrics = async (
-  client: IClusterClient,
-  log: Logger
-): Promise<Telemetry> => {
-  const defaultTelemetryMetrics: Telemetry = {
-    native: {
-      total: 0,
-    },
-    clients: {
-      total: 0,
-    },
-  };
-
-  try {
-    const nativeCountResponse = await client.asInternalUser.count({
+export const fetchTelemetryMetrics = async (client: ElasticsearchClient): Promise<Telemetry> => {
+  const [nativeCountResponse, clientsCountResponse] = await Promise.all([
+    client.count({
       index: CONNECTORS_INDEX,
       query: {
         bool: {
@@ -84,9 +71,8 @@ export const fetchTelemetryMetrics = async (
           ],
         },
       },
-    });
-
-    const clientsCountResponse = await client.asInternalUser.count({
+    }),
+    client.count({
       index: CONNECTORS_INDEX,
       query: {
         bool: {
@@ -99,18 +85,15 @@ export const fetchTelemetryMetrics = async (
           ],
         },
       },
-    });
+    }),
+  ]);
 
-    return {
-      native: {
-        total: nativeCountResponse.count,
-      },
-      clients: {
-        total: clientsCountResponse.count,
-      },
-    } as Telemetry;
-  } catch (error) {
-    log.error(`Failed to retrieve telemetry data: ${error}`);
-    return defaultTelemetryMetrics;
-  }
+  return {
+    native: {
+      total: nativeCountResponse.count,
+    },
+    clients: {
+      total: clientsCountResponse.count,
+    },
+  } as Telemetry;
 };
