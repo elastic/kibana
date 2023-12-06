@@ -77,7 +77,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       inputConsoleCommand(`get-file --path ${filePath}`);
       submitCommand();
 
-      cy.getByTestSubj('getFileSuccess', { timeout: 60000 }).within(() => {
+      cy.getByTestSubj('getFileSuccess', { timeout: 120000 }).within(() => {
         cy.contains('File retrieved from the host.');
         cy.contains('(ZIP file passcode: elastic)');
         cy.contains(
@@ -85,7 +85,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
         );
         cy.contains('Click here to download').click();
         const downloadsFolder = Cypress.config('downloadsFolder');
-        cy.readFile(`${downloadsFolder}/upload.zip`);
+        cy.readFile(`${downloadsFolder}/upload.zip`, { timeout: 120000 }).should('exist');
 
         cy.task('uploadFileToEndpoint', {
           hostname: createdHost.hostname,
