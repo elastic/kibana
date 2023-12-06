@@ -451,6 +451,7 @@ describe('CasesConnector', () => {
           expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
             cases: [
               {
+                id: 'mock-id-3',
                 title: 'Test rule (Auto-created)',
                 description:
                   'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `B` and `dest.ip` equals `0.0.0.3`',
@@ -525,6 +526,50 @@ describe('CasesConnector', () => {
             cases: [{ id: cases[0].id, status: 'open', version: cases[0].version }],
           });
         });
+
+        it('create new cases if reopenClosedCases=false and there are closed cases', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [{ ...cases[0], status: CaseStatuses.closed }],
+            errors: [],
+          });
+
+          mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+
+          await connector.run({
+            alerts,
+            groupingBy,
+            owner,
+            rule,
+            timeWindow,
+            reopenClosedCases: false,
+          });
+
+          expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
+            { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
+          ]);
+
+          expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
+            cases: [
+              {
+                id: 'mock-id-4',
+                title: 'Test rule (Auto-created)',
+                description:
+                  'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `A` and `dest.ip` equals `0.0.0.1`',
+                owner: 'cases',
+                settings: {
+                  syncAlerts: false,
+                },
+                tags: ['auto-generated', ...rule.tags],
+                connector: {
+                  fields: null,
+                  id: 'none',
+                  name: 'none',
+                  type: '.none',
+                },
+              },
+            ],
+          });
+        });
       });
 
       describe('Alerts', () => {
@@ -581,6 +626,101 @@ describe('CasesConnector', () => {
               {
                 alertId: 'alert-id-3',
                 index: 'alert-index-3',
+                owner: 'securitySolution',
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
+                type: 'alert',
+              },
+            ],
+          });
+        });
+
+        it('attaches alerts to reopen cases', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [{ ...cases[0], status: CaseStatuses.closed }],
+            errors: [],
+          });
+
+          casesClientMock.cases.bulkUpdate.mockResolvedValue([
+            { ...cases[0], status: CaseStatuses.open },
+          ]);
+
+          await connector.run({
+            alerts,
+            groupingBy,
+            owner,
+            rule,
+            timeWindow,
+            reopenClosedCases: true,
+          });
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+            caseId: 'mock-id-1',
+            attachments: [
+              {
+                alertId: 'alert-id-0',
+                index: 'alert-index-0',
+                owner: 'securitySolution',
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
+                type: 'alert',
+              },
+              {
+                alertId: 'alert-id-2',
+                index: 'alert-index-2',
+                owner: 'securitySolution',
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
+                type: 'alert',
+              },
+            ],
+          });
+        });
+
+        it('attaches alerts to new created cases if they were closed', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [{ ...cases[0], status: CaseStatuses.closed }],
+            errors: [],
+          });
+
+          mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({
+            cases: [{ ...cases[0], id: 'mock-id-4' }],
+          });
+
+          await connector.run({
+            alerts,
+            groupingBy,
+            owner,
+            rule,
+            timeWindow,
+            reopenClosedCases: false,
+          });
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+            caseId: 'mock-id-4',
+            attachments: [
+              {
+                alertId: 'alert-id-0',
+                index: 'alert-index-0',
+                owner: 'securitySolution',
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
+                type: 'alert',
+              },
+              {
+                alertId: 'alert-id-2',
+                index: 'alert-index-2',
                 owner: 'securitySolution',
                 rule: {
                   id: 'rule-test-id',

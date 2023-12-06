@@ -15,7 +15,7 @@ import { CoreKibanaRequest } from '@kbn/core/server';
 import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
-import type { Case, Cases } from '../../../common';
+import type { Case } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
 import { CASES_CONNECTOR_SUB_ACTION, MAX_CONCURRENT_ES_REQUEST } from './constants';
 import type {
@@ -24,7 +24,6 @@ import type {
   CasesConnectorRunParams,
   CasesConnectorSecrets,
   OracleRecord,
-  OracleRecordCreateRequest,
 } from './types';
 import { CasesConnectorRunParamsSchema } from './schema';
 import { CasesOracleService } from './cases_oracle_service';
@@ -44,7 +43,8 @@ interface GroupedAlerts {
 }
 
 type GroupedAlertsWithOracleKey = GroupedAlerts & { oracleKey: string };
-type GroupedAlertsWithCaseId = GroupedAlertsWithOracleKey & { caseId: string };
+type GroupedAlertsWithOracleRecords = GroupedAlertsWithOracleKey & { oracleRecord: OracleRecord };
+type GroupedAlertsWithCaseId = GroupedAlertsWithOracleRecords & { caseId: string };
 type GroupedAlertsWithCases = GroupedAlertsWithCaseId & { theCase: Case };
 
 export class CasesConnector extends SubActionConnector<
@@ -109,16 +109,9 @@ export class CasesConnector extends SubActionConnector<
     /**
      * Add circuit breakers to the number of oracles they can be created or retrieved
      */
-    const oracleRecords = await this.upsertOracleRecords(
-      params,
-      Array.from(groupedAlertsWithOracleKey.values())
-    );
+    const oracleRecordsMap = await this.upsertOracleRecords(params, groupedAlertsWithOracleKey);
 
-    const groupedAlertsWithCaseId = this.generateCaseIds(
-      params,
-      groupedAlertsWithOracleKey,
-      oracleRecords
-    );
+    const groupedAlertsWithCaseId = this.generateCaseIds(params, oracleRecordsMap);
 
     const groupedAlertsWithCases = await this.upsertCases(
       params,
@@ -126,7 +119,13 @@ export class CasesConnector extends SubActionConnector<
       groupedAlertsWithCaseId
     );
 
-    await this.attachAlertsToCases(casesClient, groupedAlertsWithCases, params);
+    const groupedAlertsWithClosedCasesHandled = await this.handleClosedCases(
+      params,
+      casesClient,
+      groupedAlertsWithCases
+    );
+
+    await this.attachAlertsToCases(casesClient, groupedAlertsWithClosedCasesHandled, params);
   }
 
   private groupAlerts({
@@ -187,12 +186,22 @@ export class CasesConnector extends SubActionConnector<
 
   private async upsertOracleRecords(
     params: CasesConnectorRunParams,
-    groupedAlertsWithOracleKey: GroupedAlertsWithOracleKey[]
-  ): Promise<OracleRecord[]> {
+    groupedAlertsWithOracleKey: Map<string, GroupedAlertsWithOracleKey>
+  ): Promise<Map<string, GroupedAlertsWithOracleRecords>> {
     const { timeWindow } = params;
     const bulkCreateReq: BulkCreateOracleRecordRequest = [];
+    const oracleRecordMap = new Map<string, GroupedAlertsWithOracleRecords>();
 
-    const ids = groupedAlertsWithOracleKey.map(({ oracleKey }) => oracleKey);
+    const addRecordToMap = (oracleRecords: OracleRecord[]) => {
+      for (const record of oracleRecords) {
+        if (groupedAlertsWithOracleKey.has(record.id)) {
+          const data = groupedAlertsWithOracleKey.get(record.id) as GroupedAlertsWithCaseId;
+          oracleRecordMap.set(record.id, { ...data, oracleRecord: record });
+        }
+      }
+    };
+
+    const ids = Array.from(groupedAlertsWithOracleKey.values()).map(({ oracleKey }) => oracleKey);
 
     const bulkGetRes = await this.casesOracleService.bulkGetRecords(ids);
     const [bulkGetValidRecords, bulkGetRecordsErrors] = partitionRecordsByError(bulkGetRes);
@@ -202,17 +211,11 @@ export class CasesConnector extends SubActionConnector<
       (req) => this.isTimeWindowPassed(timeWindow, req.updatedAt ?? req.createdAt)
     );
 
-    if (bulkGetRecordsErrors.length === 0 && recordsToIncreaseCounter.length === 0) {
-      return bulkGetValidRecords;
-    }
+    addRecordToMap(recordsWithoutIncreasedCounter);
 
-    const recordsMap = new Map<string, OracleRecordCreateRequest>(
-      groupedAlertsWithOracleKey.map(({ oracleKey, grouping }) => [
-        oracleKey,
-        // TODO: Add the rule info
-        { cases: [], rules: [], grouping },
-      ])
-    );
+    if (bulkGetRecordsErrors.length === 0 && recordsToIncreaseCounter.length === 0) {
+      return oracleRecordMap;
+    }
 
     /**
      * TODO: Throw/retry for other errors
@@ -220,15 +223,37 @@ export class CasesConnector extends SubActionConnector<
     const nonFoundErrors = bulkGetRecordsErrors.filter((error) => error.statusCode === 404);
 
     for (const error of nonFoundErrors) {
-      if (error.id && recordsMap.has(error.id)) {
+      if (error.id && groupedAlertsWithOracleKey.has(error.id)) {
+        const record = groupedAlertsWithOracleKey.get(error.id);
         bulkCreateReq.push({
           recordId: error.id,
-          payload: recordsMap.get(error.id) ?? { cases: [], rules: [], grouping: {} },
+          // TODO: Add the rule info
+          payload: { cases: [], rules: [], grouping: record?.grouping ?? {} },
         });
       }
     }
 
-    const bulkUpdateReq = recordsToIncreaseCounter.map((record) => ({
+    const bulkCreateRes = await this.casesOracleService.bulkCreateRecord(bulkCreateReq);
+    const bulkUpdateValidRecords = await this.increaseOracleRecordCounter(recordsToIncreaseCounter);
+
+    /**
+     * TODO: Throw/Retry on errors
+     */
+    const [bulkCreateValidRecords, _bulkCreateErrors] = partitionRecordsByError(bulkCreateRes);
+
+    addRecordToMap([...bulkCreateValidRecords, ...bulkUpdateValidRecords]);
+
+    return oracleRecordMap;
+  }
+
+  private async increaseOracleRecordCounter(
+    oracleRecords: OracleRecord[]
+  ): Promise<OracleRecord[]> {
+    if (oracleRecords.length === 0) {
+      return [];
+    }
+
+    const bulkUpdateReq = oracleRecords.map((record) => ({
       recordId: record.id,
       version: record.version,
       /**
@@ -237,24 +262,13 @@ export class CasesConnector extends SubActionConnector<
       payload: { counter: record.counter + 1 },
     }));
 
-    const bulkCreateRes = await this.casesOracleService.bulkCreateRecord(bulkCreateReq);
     const bulkUpdateRes = await this.casesOracleService.bulkUpdateRecord(bulkUpdateReq);
-
     /**
      * TODO: Throw/Retry on errors
      */
-    const [bulkCreateValidRecords, _bulkCreateErrors] = partitionRecordsByError(bulkCreateRes);
     const [bulkUpdateValidRecords, _bulkUpdateErrors] = partitionRecordsByError(bulkUpdateRes);
 
-    /**
-     * TODO: Should we check if the records in the
-     * arrays are unique?
-     */
-    return [
-      ...recordsWithoutIncreasedCounter,
-      ...bulkCreateValidRecords,
-      ...bulkUpdateValidRecords,
-    ];
+    return bulkUpdateValidRecords;
   }
 
   private isTimeWindowPassed(timeWindow: string, counterLastUpdatedAt: string) {
@@ -281,8 +295,7 @@ export class CasesConnector extends SubActionConnector<
 
   private generateCaseIds(
     params: CasesConnectorRunParams,
-    groupedAlertsWithOracleKey: Map<string, GroupedAlertsWithOracleKey>,
-    oracleRecords: OracleRecord[]
+    groupedAlertsWithOracleRecords: Map<string, GroupedAlertsWithOracleRecords>
   ): Map<string, GroupedAlertsWithCaseId> {
     const { rule, owner } = params;
 
@@ -293,21 +306,22 @@ export class CasesConnector extends SubActionConnector<
 
     const casesMap = new Map<string, GroupedAlertsWithCaseId>();
 
-    for (const oracleRecord of oracleRecords) {
-      const { alerts, grouping } = groupedAlertsWithOracleKey.get(oracleRecord.id) ?? {
-        alerts: [],
-        grouping: {},
-      };
-
+    for (const [recordId, entry] of groupedAlertsWithOracleRecords.entries()) {
       const caseId = this.casesService.getCaseId({
         ruleId: rule.id,
-        grouping,
+        grouping: entry.grouping,
         owner,
         spaceId,
-        counter: oracleRecord.counter,
+        counter: entry.oracleRecord.counter,
       });
 
-      casesMap.set(caseId, { caseId, alerts, grouping, oracleKey: oracleRecord.id });
+      casesMap.set(caseId, {
+        caseId,
+        alerts: entry.alerts,
+        grouping: entry.grouping,
+        oracleKey: recordId,
+        oracleRecord: entry.oracleRecord,
+      });
     }
 
     return casesMap;
@@ -320,37 +334,19 @@ export class CasesConnector extends SubActionConnector<
   ): Promise<Map<string, GroupedAlertsWithCases>> {
     const bulkCreateReq: BulkCreateCasesRequest['cases'] = [];
     const casesMap = new Map<string, GroupedAlertsWithCases>();
-    let bulkUpdateCasesResponse: Cases = [];
 
     const ids = Array.from(groupedAlertsWithCaseId.values()).map(({ caseId }) => caseId);
     const { cases, errors } = await casesClient.cases.bulkGet({ ids });
-    const [closedCases, nonClosedCases] = partition(
-      cases,
-      (req) => req.status === CaseStatuses.closed
-    );
 
-    for (const theCase of nonClosedCases) {
+    for (const theCase of cases) {
       if (groupedAlertsWithCaseId.has(theCase.id)) {
         const data = groupedAlertsWithCaseId.get(theCase.id) as GroupedAlertsWithCaseId;
         casesMap.set(theCase.id, { ...data, theCase });
       }
     }
 
-    if (errors.length === 0 && closedCases.length === 0) {
+    if (errors.length === 0) {
       return casesMap;
-    }
-
-    if (params.reopenClosedCases && closedCases.length > 0) {
-      const bulkUpdateReq = closedCases.map((theCase) => ({
-        id: theCase.id,
-        version: theCase.version,
-        status: CaseStatuses.open,
-      }));
-
-      /**
-       * TODO: bulkUpdate throws an error. Retry on errors.
-       */
-      bulkUpdateCasesResponse = [...(await casesClient.cases.bulkUpdate({ cases: bulkUpdateReq }))];
     }
 
     /**
@@ -375,7 +371,7 @@ export class CasesConnector extends SubActionConnector<
      */
     const bulkCreateCasesResponse = await casesClient.cases.bulkCreate({ cases: bulkCreateReq });
 
-    for (const res of [...bulkCreateCasesResponse.cases, ...bulkUpdateCasesResponse]) {
+    for (const res of bulkCreateCasesResponse.cases) {
       if (groupedAlertsWithCaseId.has(res.id)) {
         const data = groupedAlertsWithCaseId.get(res.id) as GroupedAlertsWithCaseId;
         casesMap.set(res.id, { ...data, theCase: res });
@@ -388,8 +384,8 @@ export class CasesConnector extends SubActionConnector<
   private getCreateCaseRequest(
     params: CasesConnectorRunParams,
     groupingData: GroupedAlertsWithCaseId
-  ) {
-    const { grouping } = groupingData;
+  ): BulkCreateCasesRequest['cases'][number] {
+    const { grouping, caseId } = groupingData;
 
     const ruleName = params.rule.ruleUrl
       ? `[${params.rule.name}](${params.rule.ruleUrl})`
@@ -408,6 +404,7 @@ export class CasesConnector extends SubActionConnector<
      * We should find a way to fill the custom fields with default values.
      */
     return {
+      id: caseId,
       description,
       tags: ['auto-generated', ...tags],
       /**
@@ -435,6 +432,115 @@ export class CasesConnector extends SubActionConnector<
         return `${keyAsCodeBlock} equals ${valueAsCodeBlock}`;
       })
       .join(' and ');
+  }
+
+  private async handleClosedCases(
+    params: CasesConnectorRunParams,
+    casesClient: CasesClient,
+    casesMap: Map<string, GroupedAlertsWithCases>
+  ) {
+    const entriesWithClosedCases = Array.from(casesMap.values()).filter(
+      (theCase) => theCase.theCase.status === CaseStatuses.closed
+    );
+
+    if (entriesWithClosedCases.length === 0) {
+      return casesMap;
+    }
+
+    const res = params.reopenClosedCases
+      ? await this.reopenClosedCases(casesClient, entriesWithClosedCases, casesMap)
+      : await this.createNewCasesOutOfClosedCases(
+          params,
+          casesClient,
+          entriesWithClosedCases,
+          casesMap
+        );
+
+    /**
+     * The initial map contained the closed cases. We need to remove them to
+     * avoid attaching alerts to a close case
+     */
+    return new Map([...res].filter(([_, record]) => record.theCase.status !== CaseStatuses.closed));
+  }
+
+  private async reopenClosedCases(
+    casesClient: CasesClient,
+    closedCasesEntries: GroupedAlertsWithCases[],
+    casesMap: Map<string, GroupedAlertsWithCases>
+  ): Promise<Map<string, GroupedAlertsWithCases>> {
+    const casesMapWithClosedCasesOpened = new Map(casesMap);
+
+    const bulkUpdateReq = closedCasesEntries.map((entry) => ({
+      id: entry.theCase.id,
+      version: entry.theCase.version,
+      status: CaseStatuses.open,
+    }));
+
+    /**
+     * TODO: bulkUpdate throws an error. Retry on errors.
+     */
+    const bulkUpdateCasesResponse = await casesClient.cases.bulkUpdate({ cases: bulkUpdateReq });
+
+    for (const res of bulkUpdateCasesResponse) {
+      if (casesMap.has(res.id)) {
+        const data = casesMap.get(res.id) as GroupedAlertsWithCases;
+        casesMapWithClosedCasesOpened.set(res.id, { ...data, theCase: res });
+      }
+    }
+
+    return casesMapWithClosedCasesOpened;
+  }
+
+  private async createNewCasesOutOfClosedCases(
+    params: CasesConnectorRunParams,
+    casesClient: CasesClient,
+    closedCasesEntries: GroupedAlertsWithCases[],
+    casesMap: Map<string, GroupedAlertsWithCases>
+  ): Promise<Map<string, GroupedAlertsWithCases>> {
+    const casesMapWithClosedCasesOpened = new Map(casesMap);
+    const casesMapAsArray = Array.from(casesMap.values());
+
+    const findEntryByOracleRecord = (oracleId: string) => {
+      return casesMapAsArray.find((record) => record.oracleRecord.id === oracleId);
+    };
+
+    const bulkUpdateOracleValidRecords = await this.increaseOracleRecordCounter(
+      closedCasesEntries.map((entry) => entry.oracleRecord)
+    );
+
+    const groupedAlertsWithOracleRecords = new Map<string, GroupedAlertsWithOracleRecords>();
+
+    for (const record of bulkUpdateOracleValidRecords) {
+      const foundRecord = findEntryByOracleRecord(record.id);
+
+      if (foundRecord) {
+        groupedAlertsWithOracleRecords.set(record.id, {
+          oracleKey: record.id,
+          oracleRecord: foundRecord.oracleRecord,
+          alerts: foundRecord.alerts,
+          grouping: foundRecord.grouping,
+        });
+      }
+    }
+
+    const groupedAlertsWithCaseId = this.generateCaseIds(params, groupedAlertsWithOracleRecords);
+    const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
+      this.getCreateCaseRequest(params, record)
+    );
+
+    /**
+     * TODO: bulkCreate throws an error. Retry on errors.
+     */
+    const bulkCreateCasesResponse = await casesClient.cases.bulkCreate({ cases: bulkCreateReq });
+
+    for (const res of bulkCreateCasesResponse.cases) {
+      if (groupedAlertsWithCaseId.has(res.id)) {
+        const data = groupedAlertsWithCaseId.get(res.id) as GroupedAlertsWithCaseId;
+        casesMapWithClosedCasesOpened.set(res.id, { ...data, theCase: res });
+      }
+    }
+
+    return casesMapWithClosedCasesOpened;
   }
 
   private async attachAlertsToCases(
