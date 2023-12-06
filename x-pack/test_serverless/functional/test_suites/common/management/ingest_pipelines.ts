@@ -34,7 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.svlCommonPage.login();
     });
     beforeEach(async () => {
-      await pageObjects.common.navigateToApp('management/ingest/ingest_pipelines');
+      await pageObjects.common.navigateToApp('ingestPipelines');
     });
     after(async () => {
       await pageObjects.svlCommonPage.forceLogout();
