@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import UseUnmount from 'react-use/lib/useUnmount';
+import useUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
@@ -41,6 +41,7 @@ import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants
 import './_dashboard_top_nav.scss';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { ConfirmShareModal } from './confirm_share_modal';
+import { canSaveToSharedObject } from './can_save_to_shared_object';
 
 const ALL_SPACES_ID = '*';
 const UNKNOWN_SPACE = '?';
@@ -290,7 +291,6 @@ export function InternalDashboardTopNav({
       onCancel?: () => void;
     }) => {
       const sharedWithAllSpaces = namespaces?.includes(ALL_SPACES_ID);
-      const hasHiddenSpace = namespaces?.includes(UNKNOWN_SPACE);
       const isShared = namespaces && (namespaces.length > 1 || sharedWithAllSpaces);
 
       // Skip confirm modal, and just save
@@ -299,7 +299,6 @@ export function InternalDashboardTopNav({
         return;
       }
 
-      let message;
       const modalTitle = i18n.translate('dashboard.topNav.confirmSaveModalTitle', {
         defaultMessage: `Save '{title}'?`,
         values: { title },
@@ -311,32 +310,11 @@ export function InternalDashboardTopNav({
         saveOptions: {},
       });
 
-      const shareableSpaces = await spacesManager.getSpaces({
-        purpose: 'shareSavedObjectsIntoSpace',
+      const canSave = await canSaveToSharedObject({
+        savedObjectTarget: { type: 'dashboard', id: lastSavedId, namespaces },
+        references,
+        spacesManager,
       });
-
-      const shareableReferences = (
-        await spacesManager.getShareableReferences([
-          {
-            type: 'dashboard',
-            id: lastSavedId,
-          },
-        ])
-      ).objects;
-
-      const hasUnsharedReference = references.some(({ id }) => {
-        const shareableRef = shareableReferences.find(
-          ({ id: refId }: { id: string }) => id === refId
-        );
-
-        if (!shareableRef) return true;
-
-        return namespaces.some((sharedSpace) => !shareableRef.spaces.includes(sharedSpace));
-      });
-
-      // User cannot save when the changes include an unshared reference and the user is missing access to
-      // one of the shared spaces
-      const canSave = !(hasUnsharedReference && hasHiddenSpace);
 
       const session = openModal(
         toMountPoint(
@@ -399,7 +377,7 @@ export function InternalDashboardTopNav({
     confirmSaveForSharedDashboard,
   });
 
-  UseUnmount(() => {
+  useUnmount(() => {
     dashboard.clearOverlays();
   });
 
