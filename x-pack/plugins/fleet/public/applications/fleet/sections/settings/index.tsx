@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback } from 'react';
-import { EuiLoadingSpinner, EuiPortal } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiPortal } from '@elastic/eui';
 import { useHistory, Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
@@ -31,8 +31,7 @@ import { useDeleteOutput, useDeleteFleetServerHost, useDeleteProxy } from './hoo
 import { EditDownloadSourceFlyout } from './components/download_source_flyout';
 import { useDeleteDownloadSource } from './components/download_source_flyout/use_delete_download_source';
 import { FleetProxyFlyout } from './components/edit_fleet_proxy_flyout';
-
-const EditOutputFlyout = React.lazy(() => import('./components/edit_output_flyout'));
+import { EditOutputFlyout } from './components/edit_output_flyout';
 
 function useSettingsAppData() {
   const outputs = useGetOutputs();
@@ -124,9 +123,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
           <EuiPortal>
-            <Suspense fallback={<EuiLoadingSpinner />}>
-              <EditOutputFlyout proxies={proxies.data.items} onClose={onCloseCallback} />
-            </Suspense>
+            <EditOutputFlyout proxies={proxies.data.items} onClose={onCloseCallback} />
           </EuiPortal>
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_proxy}>
@@ -158,13 +155,11 @@ export const SettingsApp = withConfirmModalProvider(() => {
 
             return (
               <EuiPortal>
-                <Suspense fallback={<EuiLoadingSpinner />}>
-                  <EditOutputFlyout
-                    proxies={proxies.data?.items ?? []}
-                    onClose={onCloseCallback}
-                    output={output}
-                  />
-                </Suspense>
+                <EditOutputFlyout
+                  proxies={proxies.data?.items ?? []}
+                  onClose={onCloseCallback}
+                  output={output}
+                />
               </EuiPortal>
             );
           }}
