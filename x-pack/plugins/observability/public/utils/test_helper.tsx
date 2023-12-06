@@ -29,7 +29,7 @@ const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 export const core = coreMock.createStart();
 export const data = dataPluginMock.createStartContract();
 
-const defaultConfig = {
+const defaultConfig: ConfigSchema = {
   unsafe: {
     alertDetails: {
       metrics: { enabled: false },
@@ -38,7 +38,7 @@ const defaultConfig = {
     },
     thresholdRule: { enabled: false },
   },
-} as ConfigSchema;
+};
 
 const queryClient = new QueryClient({
   defaultOptions: {

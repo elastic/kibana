@@ -78,7 +78,7 @@ const withCore = makeDecorator({
       },
     } as unknown as Partial<CoreStart>);
 
-    const config = {
+    const config: ConfigSchema = {
       unsafe: {
         alertDetails: {
           metrics: { enabled: false },
@@ -87,7 +87,7 @@ const withCore = makeDecorator({
         },
         thresholdRule: { enabled: false },
       },
-    } as ConfigSchema;
+    };
 
     return (
       <MemoryRouter>
