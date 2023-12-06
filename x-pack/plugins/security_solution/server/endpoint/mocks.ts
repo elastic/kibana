@@ -133,6 +133,7 @@ export const createMockEndpointAppContextServiceSetupContract =
     return {
       securitySolutionRequestContextFactory: requestContextFactoryMock.create(),
       cloud: cloudMock.createSetup(),
+      loggerFactory: loggingSystemMock.create(),
     };
   };
 
