@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { WATCH_VIDEO_DESCRIPTION1, WATCH_VIDEO_DESCRIPTION2 } from '../translations';
+import { WATCH_VIDEO_DESCRIPTION1, WATCH_VIDEO_DESCRIPTION2 } from '../../translations';
 
 const OverviewVideoDescriptionComponent = () => (
   <>
