@@ -115,7 +115,7 @@ export function generateTransformForTimeslicesAndRolling(slo: SLO): TransformPut
         },
       },
     },
-    description: `Summarise the rollup data of the SLO [id: ${slo.id}, revision: ${slo.revision}].`,
+    description: `Summarise the rollup data of SLO: ${slo.name} [id: ${slo.id}, revision: ${slo.revision}].`,
     frequency: '1m',
     sync: {
       time: {
