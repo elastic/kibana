@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CspRuleTemplate } from '../../../common/schemas';
+import { CspRuleTemplate } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 

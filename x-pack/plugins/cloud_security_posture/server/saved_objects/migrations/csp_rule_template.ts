@@ -5,21 +5,17 @@
  * 2.0.
  */
 
+import { rulesV1, rulesV2, rulesV3 } from '@kbn/cloud-security-posture-plugin/common/types/';
 import {
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationContext,
 } from '@kbn/core/server';
-import {
-  CspRuleTemplateV830,
-  CspRuleTemplateV840,
-  CspRuleTemplateV870,
-} from '../../../common/schemas/csp_rule_template';
 
 function migrateCspRuleTemplatesToV840(
-  doc: SavedObjectUnsanitizedDoc<CspRuleTemplateV830>,
+  doc: SavedObjectUnsanitizedDoc<rulesV1.CspRuleTemplate>,
   context: SavedObjectMigrationContext
-): SavedObjectUnsanitizedDoc<CspRuleTemplateV840> {
+): SavedObjectUnsanitizedDoc<rulesV2.CspRuleTemplate> {
   const { enabled, muted, benchmark, ...metadata } = doc.attributes;
   return {
     ...doc,
@@ -38,9 +34,9 @@ function migrateCspRuleTemplatesToV840(
 }
 
 function migrateCspRuleTemplatesToV870(
-  doc: SavedObjectUnsanitizedDoc<CspRuleTemplateV840>,
+  doc: SavedObjectUnsanitizedDoc<rulesV2.CspRuleTemplate>,
   context: SavedObjectMigrationContext
-): SavedObjectUnsanitizedDoc<CspRuleTemplateV870> {
+): SavedObjectUnsanitizedDoc<rulesV3.CspRuleTemplate> {
   // Keeps only metadata, deprecated state
   const { muted, enabled, ...attributes } = doc.attributes;
 

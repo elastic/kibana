@@ -10,9 +10,12 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
-import { GetCspRuleTemplateRequest, GetCspRuleTemplateResponse } from '../../../common/types';
-import { CspRuleTemplate } from '../../../common/schemas';
-import { findCspRuleTemplateRequest } from '../../../common/schemas/csp_rule_template_api/get_csp_rule_template';
+import {
+  CspRuleTemplate,
+  GetCspRuleTemplateRequest,
+  GetCspRuleTemplateResponse,
+  findCspRuleTemplateRequest,
+} from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { getBenchmarkFromPackagePolicy, getBenchmarkFilter } from '../../../common/utils/helpers';
 
 import {

@@ -8,10 +8,9 @@ import { type TypeOf } from '@kbn/config-schema';
 import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
 import { CspFinding } from './schemas/csp_finding';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
-import { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
-import { CspRuleTemplate } from './schemas';
-import { findCspRuleTemplateRequest } from './schemas/csp_rule_template_api/get_csp_rule_template';
+
 import { getComplianceDashboardSchema } from './schemas/stats';
+import { CspRuleTemplateMetadata } from './types/latest';
 
 export type AwsCredentialsType =
   | 'assume_role'
@@ -167,16 +166,7 @@ export interface GetBenchmarkResponse {
   perPage: number;
 }
 
-export type GetCspRuleTemplateRequest = TypeOf<typeof findCspRuleTemplateRequest>;
-
 export type GetComplianceDashboardRequest = TypeOf<typeof getComplianceDashboardSchema>;
-
-export interface GetCspRuleTemplateResponse {
-  items: CspRuleTemplate[];
-  total: number;
-  page: number;
-  perPage: number;
-}
 
 // CNVM DASHBOARD
 

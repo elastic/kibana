@@ -5,11 +5,46 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-// this pages follows versioning interface strategy https://docs.elastic.dev/kibana-dev-docs/versioning-interfaces
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
 
 const DEFAULT_RULES_TEMPLATE_PER_PAGE = 25;
+
+// Since version 8.7.0
+export const cspRuleTemplateMetadataSchema = schema.object({
+  audit: schema.string(),
+  benchmark: schema.object({
+    name: schema.string(),
+    posture_type: schema.maybe(
+      schema.oneOf([schema.literal(CSPM_POLICY_TEMPLATE), schema.literal(KSPM_POLICY_TEMPLATE)])
+    ),
+    id: schema.string(),
+    version: schema.string(),
+    rule_number: schema.maybe(schema.string()),
+  }),
+  default_value: schema.maybe(schema.string()),
+  description: schema.string(),
+  id: schema.string(),
+  impact: schema.maybe(schema.string()),
+  name: schema.string(),
+  profile_applicability: schema.string(),
+  rationale: schema.string(),
+  references: schema.maybe(schema.string()),
+  rego_rule_id: schema.string(),
+  remediation: schema.string(),
+  section: schema.string(),
+  tags: schema.arrayOf(schema.string()),
+  version: schema.string(),
+});
+
+export type CspRuleTemplateMetadata = TypeOf<typeof cspRuleTemplateMetadataSchema>;
+
+export const cspRuleTemplateSchema = schema.object({
+  metadata: cspRuleTemplateMetadataSchema,
+});
+
+export type CspRuleTemplate = TypeOf<typeof cspRuleTemplateSchema>;
 
 export const findCspRuleTemplateRequest = schema.object({
   /**
@@ -85,3 +120,12 @@ export const findCspRuleTemplateRequest = schema.object({
    */
   section: schema.maybe(schema.string()),
 });
+
+export type GetCspRuleTemplateRequest = TypeOf<typeof findCspRuleTemplateRequest>;
+
+export interface GetCspRuleTemplateResponse {
+  items: CspRuleTemplate[];
+  total: number;
+  page: number;
+  perPage: number;
+}

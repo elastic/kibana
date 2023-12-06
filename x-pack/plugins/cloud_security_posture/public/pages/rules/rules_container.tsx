@@ -7,7 +7,7 @@
 import React, { useState, useMemo } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { CspRuleTemplate } from '../../../common/schemas';
+import { CspRuleTemplate } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesTableHeader } from './rules_table_header';

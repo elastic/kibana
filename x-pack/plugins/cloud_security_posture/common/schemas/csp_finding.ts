@@ -7,7 +7,7 @@
 
 // TODO: this needs to be defined in a versioned schema
 import type { EcsEvent } from '@kbn/ecs';
-import type { CspRuleTemplateMetadata } from './csp_rule_template_metadata';
+import { CspRuleTemplateMetadata } from '../types/latest';
 
 export interface CspFinding {
   '@timestamp': string;

@@ -6,8 +6,10 @@
  */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { GetCspRuleTemplateResponse } from '@kbn/cloud-security-posture-plugin/common/types';
-import { CspRuleTemplate } from '@kbn/cloud-security-posture-plugin/common/schemas';
+import {
+  CspRuleTemplate,
+  GetCspRuleTemplateResponse,
+} from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createPackagePolicy } from './helper';
 

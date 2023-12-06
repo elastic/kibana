@@ -6,7 +6,7 @@
  */
 
 import { getSortedCspRulesTemplates } from './get_csp_rule_template';
-import { CspRuleTemplate } from '../../../common/schemas';
+import { CspRuleTemplate } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
 describe('getSortedCspRulesTemplates', () => {
   it('sorts by metadata.benchmark.rule_number, invalid semantic version still should still get sorted and empty values should be sorted last', () => {
