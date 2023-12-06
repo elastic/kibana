@@ -38,7 +38,7 @@ const defaultConfig: ConfigSchema = {
       observability: { enabled: false },
     },
   },
-} as ConfigSchema;
+};
 
 const queryClient = new QueryClient({
   defaultOptions: {

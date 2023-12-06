@@ -100,7 +100,7 @@ export interface ConfigSchema {
         enabled: boolean;
       };
     };
-    thresholdRule: {
+    thresholdRule?: {
       enabled: boolean;
     };
   };
