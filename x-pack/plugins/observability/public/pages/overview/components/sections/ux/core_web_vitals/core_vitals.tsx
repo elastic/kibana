@@ -7,11 +7,12 @@
 
 import * as React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import {
   CLS_HELP_LABEL,
   CLS_LABEL,
-  FID_HELP_LABEL,
-  FID_LABEL,
+  INP_HELP_LABEL,
+  INP_LABEL,
   LCP_HELP_LABEL,
   LCP_LABEL,
 } from './translations';
@@ -26,18 +27,6 @@ export interface CoreVitalProps {
   serviceName?: string;
   totalPageViews?: number;
   displayTrafficMetric?: boolean;
-}
-
-export interface UXMetrics {
-  cls: number | null;
-  fid?: number | null;
-  lcp?: number | null;
-  tbt: number;
-  fcp?: number | null;
-  coreVitalPages: number;
-  lcpRanks: number[];
-  fidRanks: number[];
-  clsRanks: number[];
 }
 
 function formatToSec(value?: number | string, fromUnit = 'MicroSec'): string {
@@ -58,7 +47,7 @@ function formatToMilliseconds(value?: number | null) {
 
 const CoreVitalsThresholds = {
   LCP: { good: '2.5s', bad: '4.0s' },
-  FID: { good: '100ms', bad: '300ms' },
+  INP: { good: '200ms', bad: '500ms' },
   CLS: { good: '0.1', bad: '0.25' },
 };
 
@@ -71,7 +60,7 @@ export default function CoreVitals({
   totalPageViews,
   displayTrafficMetric = false,
 }: CoreVitalProps) {
-  const { lcp, lcpRanks, fid, fidRanks, cls, clsRanks, coreVitalPages } = data || {};
+  const { lcp, lcpRanks, inp, inpRanks, cls, clsRanks, coreVitalPages } = data || {};
 
   return (
     <>
@@ -93,16 +82,18 @@ export default function CoreVitals({
             loading={loading}
             thresholds={CoreVitalsThresholds.LCP}
             helpLabel={LCP_HELP_LABEL}
+            dataTestSubj={'lcp-core-vital'}
           />
         </EuiFlexItem>
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
-            title={FID_LABEL}
-            value={formatToMilliseconds(fid)}
-            ranks={fidRanks}
+            title={INP_LABEL}
+            value={formatToMilliseconds(inp)}
+            ranks={inpRanks}
             loading={loading}
-            thresholds={CoreVitalsThresholds.FID}
-            helpLabel={FID_HELP_LABEL}
+            thresholds={CoreVitalsThresholds.INP}
+            helpLabel={INP_HELP_LABEL}
+            dataTestSubj={'inp-core-vital'}
           />
         </EuiFlexItem>
         <EuiFlexItem style={{ flexBasis: 380 }}>
@@ -114,6 +105,7 @@ export default function CoreVitals({
             thresholds={CoreVitalsThresholds.CLS}
             isCls={true}
             helpLabel={CLS_HELP_LABEL}
+            dataTestSubj={'cls-core-vital'}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

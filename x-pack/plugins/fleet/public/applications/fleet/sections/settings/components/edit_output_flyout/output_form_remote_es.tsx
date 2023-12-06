@@ -54,6 +54,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         >
           <EuiFieldText
             fullWidth
+            data-test-subj="serviceTokenSecretInput"
             {...inputs.serviceTokenInput.props}
             placeholder={i18n.translate(
               'xpack.fleet.settings.editOutputFlyout.remoteESHostPlaceholder',
