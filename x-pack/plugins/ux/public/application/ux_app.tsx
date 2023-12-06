@@ -119,11 +119,13 @@ export function UXAppRoot({
     dataViews,
     lens,
   },
+  isDev,
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   corePlugins: ApmPluginStartDeps;
+  isDev: boolean;
 }) {
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
@@ -183,6 +185,7 @@ export function UXAppRoot({
                           </EuiErrorBoundary>
                           <UXActionMenu
                             appMountParameters={appMountParameters}
+                            isDev={isDev}
                           />
                         </UrlParamsProvider>
                       </InspectorContextProvider>
@@ -207,11 +210,13 @@ export const renderApp = ({
   deps,
   appMountParameters,
   corePlugins,
+  isDev,
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   appMountParameters: AppMountParameters;
   corePlugins: ApmPluginStartDeps;
+  isDev: boolean;
 }) => {
   const { element } = appMountParameters;
 
@@ -229,6 +234,7 @@ export const renderApp = ({
       core={core}
       deps={deps}
       corePlugins={corePlugins}
+      isDev={isDev}
     />,
     element
   );

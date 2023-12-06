@@ -4335,6 +4335,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/elastic-assistant-common@link:x-pack/packages/kbn-elastic-assistant-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/elastic-assistant-plugin@link:x-pack/plugins/elastic_assistant":
   version "0.0.0"
   uid ""
