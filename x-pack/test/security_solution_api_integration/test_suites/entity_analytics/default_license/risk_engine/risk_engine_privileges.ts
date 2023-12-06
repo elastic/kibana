@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Risk engine privileges API', () => {
-      it('should return has_all_required true for user with all risk engine privileges', async () => {
+      it('returns has_all_required true for user with all risk engine privileges', async () => {
         const { body } = await getPrivilegesForUsername('all');
         expect(body.has_all_required).to.eql(true);
         expect(body.privileges).to.eql({
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
       });
-      it('should return has_all_required false for user with no write access to risk indices', async () => {
+      it('returns has_all_required false for user with no write access to risk indices', async () => {
         const { body } = await getPrivilegesForUsername('no_risk_score_index_write');
         expect(body.has_all_required).to.eql(false);
         expect(body.privileges).to.eql({
@@ -142,7 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
       });
-      it('should return has_all_required false for user with no read access to risk indices', async () => {
+      it('returns has_all_required false for user with no read access to risk indices', async () => {
         const { body } = await getPrivilegesForUsername('no_risk_score_index_read');
         expect(body.has_all_required).to.eql(false);
         expect(body.privileges).to.eql({
@@ -160,7 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
       });
-      it('should return has_all_required false for user with no cluster manage transform privilege', async () => {
+      it('returns has_all_required false for user with no cluster manage transform privilege', async () => {
         const { body } = await getPrivilegesForUsername('no_cluster_manage_transform');
         expect(body.has_all_required).to.eql(false);
         expect(body.privileges).to.eql({
@@ -178,7 +178,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
       });
-      it('should return has_all_required false for user with no cluster manage index templates privilege', async () => {
+      it('returns has_all_required false for user with no cluster manage index templates privilege', async () => {
         const { body } = await getPrivilegesForUsername('no_cluster_manage_index_templates');
         expect(body.has_all_required).to.eql(false);
         expect(body.privileges).to.eql({

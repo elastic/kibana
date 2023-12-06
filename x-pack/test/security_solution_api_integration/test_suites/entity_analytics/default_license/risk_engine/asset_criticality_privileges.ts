@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('Asset Criticality privileges API', () => {
-        it('should return has_all_required true for user with all risk engine privileges', async () => {
+        it('returns has_all_required true for user with all risk engine privileges', async () => {
           const { body } = await getPrivilegesForUsername('all');
           expect(body.has_all_required).to.eql(true);
           expect(body.privileges).to.eql({
@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           });
         });
-        it('should return has_all_required false for user without asset criticality index read', async () => {
+        it('returns has_all_required false for user without asset criticality index read', async () => {
           const { body } = await getPrivilegesForUsername('no_asset_criticality_index_read');
           expect(body.has_all_required).to.eql(false);
           expect(body.privileges).to.eql({
@@ -120,7 +120,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           });
         });
-        it('should return has_all_required false for user without asset criticality index write', async () => {
+        it('returns has_all_required false for user without asset criticality index write', async () => {
           const { body } = await getPrivilegesForUsername('no_asset_criticality_index_write');
           expect(body.has_all_required).to.eql(false);
           expect(body.privileges).to.eql({
@@ -141,7 +141,7 @@ export default ({ getService }: FtrProviderContext) => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
       const assetCriticalityRoutesNoAuth =
         assetCriticalityRouteHelpersFactoryNoAuth(supertestWithoutAuth);
-      it('should return that t1_analyst only has read privileges', async () => {
+      it('returns that t1_analyst only has read privileges', async () => {
         const { body } = await assetCriticalityRoutesNoAuth.privilegesForUser({
           username: SERVERLESS_USERNAMES.t1_analyst,
           password: USER_PASSWORD,
@@ -159,7 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should return that t2_analyst only has all privileges', async () => {
+      it('returns that t2_analyst only has all privileges', async () => {
         const { body } = await assetCriticalityRoutesNoAuth.privilegesForUser({
           username: SERVERLESS_USERNAMES.t2_analyst,
           password: USER_PASSWORD,
