@@ -32,6 +32,7 @@ export type GcpCredentialsTypeFieldMap = {
 
 export type AzureCredentialsType =
   | 'arm_template'
+  | 'manual' // TODO: remove for stack version 8.13
   | 'service_principal_with_client_secret'
   | 'service_principal_with_client_certificate'
   | 'service_principal_with_client_username_and_password'

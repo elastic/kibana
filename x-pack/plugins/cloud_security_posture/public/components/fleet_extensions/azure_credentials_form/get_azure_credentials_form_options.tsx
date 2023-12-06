@@ -26,12 +26,15 @@ export const getAzureCredentialsFormManualOptions = (): Array<{
   value: AzureCredentialsType;
   text: string;
 }> => {
-  return Object.entries(getAzureCredentialsFormOptions())
-    .map(([key, value]) => ({
-      value: key as AzureCredentialsType,
-      text: value.label,
-    }))
-    .filter(({ value }) => value !== 'arm_template');
+  return (
+    Object.entries(getAzureCredentialsFormOptions())
+      .map(([key, value]) => ({
+        value: key as AzureCredentialsType,
+        text: value.label,
+      }))
+      // TODO: remove 'manual' for stack version 8.13
+      .filter(({ value }) => value !== 'arm_template' && value !== 'manual')
+  );
 };
 
 export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCredentialsFields) =>
@@ -72,6 +75,12 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
   },
   arm_template: {
     label: 'ARM Template',
+    info: [],
+    fields: {},
+  },
+  // TODO: remove for stack version 8.13
+  manual: {
+    label: 'Manual',
     info: [],
     fields: {},
   },
