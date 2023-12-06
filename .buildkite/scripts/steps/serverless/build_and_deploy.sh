@@ -86,6 +86,12 @@ deploy() {
   PROJECT_KIBANA_LOGIN_URL="${PROJECT_KIBANA_URL}/login"
   PROJECT_ELASTICSEARCH_URL=$(jq -r --slurp '.[1].endpoints.elasticsearch' $DEPLOY_LOGS)
 
+  if [[ "$VAULT_ADDR" == *"secrets.elastic.co"* ]]; then
+    VAULT_PATH_PREFIX="secret/kibana-issues/dev"
+  else
+    VAULT_PATH_PREFIX="secret/ci/elastic-kibana"
+  fi
+
   cat << EOF | buildkite-agent annotate --style "info" --context "project-$PROJECT_TYPE"
 ### $PROJECT_TYPE_LABEL Deployment
 
@@ -93,7 +99,7 @@ Kibana: $PROJECT_KIBANA_LOGIN_URL
 
 Elasticsearch: $PROJECT_ELASTICSEARCH_URL
 
-Credentials: \`vault_get cloud-deploy/$PROJECT_NAME\`
+Credentials: \`vault read $VAULT_PATH_PREFIX/cloud-deploy/$PROJECT_NAME\`
 
 Kibana image: \`$KIBANA_IMAGE\`
 EOF

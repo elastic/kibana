@@ -10,7 +10,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { createCallObservabilityAIAssistantAPI } from '../api';
-import type { ChatRegistrationFunction, ObservabilityAIAssistantService } from '../types';
+import type { AssistantRegistrationFunction, ObservabilityAIAssistantService } from '../types';
 
 export function createService({
   analytics,
@@ -26,10 +26,10 @@ export function createService({
   licenseStart: LicensingPluginStart;
   securityStart: SecurityPluginStart;
   shareStart: SharePluginStart;
-}): ObservabilityAIAssistantService & { register: (fn: ChatRegistrationFunction) => void } {
+}): ObservabilityAIAssistantService {
   const client = createCallObservabilityAIAssistantAPI(coreStart);
 
-  const registrations: ChatRegistrationFunction[] = [];
+  const registrations: AssistantRegistrationFunction[] = [];
 
   return {
     isEnabled: () => {
