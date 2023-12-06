@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiPortal } from '@elastic/eui';
+import React, { Suspense, useCallback } from 'react';
+import { EuiLoadingSpinner, EuiPortal } from '@elastic/eui';
 import { useHistory, Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
@@ -27,11 +27,12 @@ import { FleetServerFlyout } from '../../components';
 import { SettingsPage } from './components/settings_page';
 import { withConfirmModalProvider } from './hooks/use_confirm_modal';
 import { FleetServerHostsFlyout } from './components/fleet_server_hosts_flyout';
-import { EditOutputFlyout } from './components/edit_output_flyout';
 import { useDeleteOutput, useDeleteFleetServerHost, useDeleteProxy } from './hooks';
 import { EditDownloadSourceFlyout } from './components/download_source_flyout';
 import { useDeleteDownloadSource } from './components/download_source_flyout/use_delete_download_source';
 import { FleetProxyFlyout } from './components/edit_fleet_proxy_flyout';
+
+const EditOutputFlyout = React.lazy(() => import('./components/edit_output_flyout'));
 
 function useSettingsAppData() {
   const outputs = useGetOutputs();
@@ -123,7 +124,9 @@ export const SettingsApp = withConfirmModalProvider(() => {
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
           <EuiPortal>
-            <EditOutputFlyout proxies={proxies.data.items} onClose={onCloseCallback} />
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <EditOutputFlyout proxies={proxies.data.items} onClose={onCloseCallback} />
+            </Suspense>
           </EuiPortal>
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_proxy}>

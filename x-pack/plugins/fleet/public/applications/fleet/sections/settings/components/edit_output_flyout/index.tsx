@@ -701,3 +701,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
     </EuiFlyout>
   );
 };
+
+// default export to support React.lazy
+// eslint-disable-next-line import/no-default-export
+export default EditOutputFlyout;
