@@ -22,11 +22,14 @@ import { i18n } from '@kbn/i18n';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import * as TEST_SUBJECTS from './test_subjects';
-import { CspRule, CspRuleMetadata } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import {
+  CspBenchmarkRule,
+  CspBenchmarkRuleMetadata,
+} from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
 interface RuleFlyoutProps {
   onClose(): void;
-  rule: CspRule;
+  rule: CspBenchmarkRule;
 }
 
 const tabs = [
@@ -86,7 +89,7 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
   );
 };
 
-const RuleOverviewTab = ({ rule }: { rule: CspRuleMetadata }) => (
+const RuleOverviewTab = ({ rule }: { rule: CspBenchmarkRuleMetadata }) => (
   <EuiFlexGroup direction="column">
     <EuiFlexItem>
       <EuiDescriptionList listItems={getRuleList(rule)} />

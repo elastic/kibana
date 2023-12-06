@@ -14,14 +14,17 @@ import {
   FIND_CSP_RULE_ROUTE_PATH,
 } from '../../../common/constants';
 import {
-  FindCspRuleRequest,
-  FindCspRuleResponse,
+  FindCspBenchmarkRuleRequest,
+  FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
-export type RulesQuery = Pick<FindCspRuleRequest, 'section' | 'search' | 'page' | 'perPage'>;
-export type RulesQueryResult = ReturnType<typeof useFindCspRule>;
+export type RulesQuery = Pick<
+  FindCspBenchmarkRuleRequest,
+  'section' | 'search' | 'page' | 'perPage'
+>;
+export type RulesQueryResult = ReturnType<typeof useFindCspBenchmarkRule>;
 
-export const useFindCspRule = (
+export const useFindCspBenchmarkRule = (
   { search, page, perPage, section }: RulesQuery,
   packagePolicyId: string
 ) => {
@@ -30,7 +33,7 @@ export const useFindCspRule = (
   return useQuery(
     [CSP_RULE_SAVED_OBJECT_TYPE, { section, search, page, perPage, packagePolicyId }],
     () => {
-      return http.get<FindCspRuleResponse>(FIND_CSP_RULE_ROUTE_PATH, {
+      return http.get<FindCspBenchmarkRuleResponse>(FIND_CSP_RULE_ROUTE_PATH, {
         query: { packagePolicyId, page, perPage, search, section },
         version: FIND_CSP_RULE_API_CURRENT_VERSION,
       });

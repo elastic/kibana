@@ -10,7 +10,7 @@ import { CspFinding } from './schemas/csp_finding';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
 import { getComplianceDashboardSchema } from './schemas/stats';
-import type { CspRuleMetadata } from './types/latest';
+import type { CspBenchmarkRuleMetadata } from './types/latest';
 
 export type AwsCredentialsType =
   | 'assume_role'
@@ -150,9 +150,9 @@ export interface Benchmark {
   rules_count: number;
 }
 
-export type BenchmarkId = CspRuleMetadata['benchmark']['id'];
-export type BenchmarkName = CspRuleMetadata['benchmark']['name'];
-export type RuleSection = CspRuleMetadata['section'];
+export type BenchmarkId = CspBenchmarkRuleMetadata['benchmark']['id'];
+export type BenchmarkName = CspBenchmarkRuleMetadata['benchmark']['name'];
+export type RuleSection = CspBenchmarkRuleMetadata['section'];
 
 // Fleet Integration types
 export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];

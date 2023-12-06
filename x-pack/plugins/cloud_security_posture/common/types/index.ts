@@ -11,9 +11,9 @@ export * as rulesV3 from './rules/v3';
 
 // Explicit export of everything from latest
 export type {
-  cspRuleMetadataSchema,
-  CspRuleMetadata,
-  CspRule,
-  FindCspRuleRequest,
-  FindCspRuleResponse,
+  cspBenchmarkRuleMetadataSchema,
+  CspBenchmarkRuleMetadata,
+  CspBenchmarkRule,
+  FindCspBenchmarkRuleRequest,
+  FindCspBenchmarkRuleResponse,
 } from './latest';

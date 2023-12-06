@@ -9,10 +9,10 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
 
-const DEFAULT_RULES_TEMPLATE_PER_PAGE = 25;
+const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
 
 // Since version 8.7.0
-export const cspRuleMetadataSchema = schema.object({
+export const cspBenchmarkRuleMetadataSchema = schema.object({
   audit: schema.string(),
   benchmark: schema.object({
     name: schema.string(),
@@ -38,15 +38,15 @@ export const cspRuleMetadataSchema = schema.object({
   version: schema.string(),
 });
 
-export type CspRuleMetadata = TypeOf<typeof cspRuleMetadataSchema>;
+export type CspBenchmarkRuleMetadata = TypeOf<typeof cspBenchmarkRuleMetadataSchema>;
 
-export const cspRuleSchema = schema.object({
-  metadata: cspRuleMetadataSchema,
+export const cspBenchmarkRuleSchema = schema.object({
+  metadata: cspBenchmarkRuleMetadataSchema,
 });
 
-export type CspRule = TypeOf<typeof cspRuleSchema>;
+export type CspBenchmarkRule = TypeOf<typeof cspBenchmarkRuleSchema>;
 
-export const findCspRuleRequestSchema = schema.object({
+export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * An Elasticsearch simple_query_string
    */
@@ -60,16 +60,16 @@ export const findCspRuleRequestSchema = schema.object({
   /**
    * The number of objects to include in each page
    */
-  perPage: schema.number({ defaultValue: DEFAULT_RULES_TEMPLATE_PER_PAGE, min: 0 }),
+  perPage: schema.number({ defaultValue: DEFAULT_BENCHMARK_RULES_PER_PAGE, min: 0 }),
 
   /**
-   *  Fields to retrieve from CspRule saved object
+   *  Fields to retrieve from CspBenchmarkRule saved object
    */
   fields: schema.maybe(schema.arrayOf(schema.string())),
 
   /**
    *  The fields to perform the parsed query against.
-   * Valid fields are fields which mapped to 'text' in cspRuleSavedObjectMapping
+   * Valid fields are fields which mapped to 'text' in cspBenchmarkRuleSavedObjectMapping
    */
   searchFields: schema.arrayOf(
     schema.oneOf([schema.literal('metadata.name.text'), schema.literal('metadata.section.text')]),
@@ -121,10 +121,10 @@ export const findCspRuleRequestSchema = schema.object({
   section: schema.maybe(schema.string()),
 });
 
-export type FindCspRuleRequest = TypeOf<typeof findCspRuleRequestSchema>;
+export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
 
-export interface FindCspRuleResponse {
-  items: CspRule[];
+export interface FindCspBenchmarkRuleResponse {
+  items: CspBenchmarkRule[];
   total: number;
   page: number;
   perPage: number;

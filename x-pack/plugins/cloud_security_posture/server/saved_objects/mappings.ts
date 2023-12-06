@@ -7,7 +7,7 @@
 
 import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
-export const cspRuleSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
+export const cspBenchmarkRuleSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
     metadata: {

@@ -7,7 +7,7 @@
 
 // TODO: this needs to be defined in a versioned schema
 import type { EcsEvent } from '@kbn/ecs';
-import { CspRuleMetadata } from '../types/latest';
+import { CspBenchmarkRuleMetadata } from '../types/latest';
 
 export interface CspFinding {
   '@timestamp': string;
@@ -16,7 +16,7 @@ export interface CspFinding {
   cloud?: CspFindingCloud; // only available on CSPM findings
   result: CspFindingResult;
   resource: CspFindingResource;
-  rule: CspRuleMetadata;
+  rule: CspBenchmarkRuleMetadata;
   host: CspFindingHost;
   event: EcsEvent;
   agent: CspFindingAgent;

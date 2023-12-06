@@ -8,18 +8,21 @@
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { getBenchmarkFilter } from '../../../../common/utils/helpers';
 import { CSP_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import { getBenchmarkIdFromPackagePolicyId, getSortedCspRulesTemplates } from './find_csp_rule';
+import {
+  getBenchmarkIdFromPackagePolicyId,
+  getSortedCspBenchmarkRulesTemplates,
+} from './find_csp_rule';
 
 import type {
-  CspRule,
-  FindCspRuleRequest,
-  FindCspRuleResponse,
+  CspBenchmarkRule,
+  FindCspBenchmarkRuleRequest,
+  FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
 export const findRuleHandler = async (
   soClient: SavedObjectsClientContract,
-  options: FindCspRuleRequest
-): Promise<FindCspRuleResponse> => {
+  options: FindCspBenchmarkRuleRequest
+): Promise<FindCspBenchmarkRuleResponse> => {
   if (
     (!options.packagePolicyId && !options.benchmarkId) ||
     (options.packagePolicyId && options.benchmarkId)
@@ -31,7 +34,7 @@ export const findRuleHandler = async (
     ? options.benchmarkId
     : await getBenchmarkIdFromPackagePolicyId(soClient, options.packagePolicyId!);
 
-  const cspRulesTemplatesSo = await soClient.find<CspRule>({
+  const cspCspBenchmarkRulesSo = await soClient.find<CspBenchmarkRule>({
     type: CSP_RULE_SAVED_OBJECT_TYPE,
     searchFields: options.searchFields,
     search: options.search ? `"${options.search}"*` : '',
@@ -42,14 +45,16 @@ export const findRuleHandler = async (
     filter: getBenchmarkFilter(benchmarkId, options.section),
   });
 
-  const cspRulesTemplates = cspRulesTemplatesSo.saved_objects.map((cspRule) => cspRule.attributes);
+  const cspRulesTemplates = cspCspBenchmarkRulesSo.saved_objects.map(
+    (cspRule) => cspRule.attributes
+  );
 
   // Semantic version sorting using semver for valid versions and custom comparison for invalid versions
-  const sortedCspRulesTemplates = getSortedCspRulesTemplates(cspRulesTemplates);
+  const sortedCspRulesTemplates = getSortedCspBenchmarkRulesTemplates(cspRulesTemplates);
 
   return {
     items: sortedCspRulesTemplates,
-    total: cspRulesTemplatesSo.total,
+    total: cspCspBenchmarkRulesSo.total,
     page: options.page,
     perPage: options.perPage,
   };

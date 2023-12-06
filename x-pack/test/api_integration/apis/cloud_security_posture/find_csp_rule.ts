@@ -10,8 +10,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { createPackagePolicy } from './helper';
 
 import type {
-  CspRule,
-  FindCspRuleResponse,
+  CspBenchmarkRule,
+  FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -121,7 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kspm'
       );
 
-      const { body }: { body: FindCspRuleResponse } = await supertest
+      const { body }: { body: FindCspBenchmarkRuleResponse } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
@@ -133,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body.items.length).greaterThan(0);
 
       const allRulesHaveCorrectBenchmarkId = body.items.every(
-        (rule: CspRule) => rule.metadata.benchmark.id === 'cis_k8s'
+        (rule: CspBenchmarkRule) => rule.metadata.benchmark.id === 'cis_k8s'
       );
 
       expect(allRulesHaveCorrectBenchmarkId).to.eql(
@@ -152,7 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kspm'
       );
 
-      const { body }: { body: FindCspRuleResponse } = await supertest
+      const { body }: { body: FindCspBenchmarkRuleResponse } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
@@ -165,7 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body.items.length).greaterThan(0);
 
       const allowedFields = ['name', 'section', 'id'];
-      const fieldsMatched = body.items.every((rule: CspRule) => {
+      const fieldsMatched = body.items.every((rule: CspBenchmarkRule) => {
         const keys = Object.keys(rule.metadata);
         return (
           keys.length === allowedFields.length && keys.every((key) => allowedFields.includes(key))
@@ -185,7 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kspm'
       );
 
-      const { body }: { body: FindCspRuleResponse } = await supertest
+      const { body }: { body: FindCspBenchmarkRuleResponse } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
@@ -199,7 +199,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body.items.length).greaterThan(0);
 
       // check if the items are sorted by metadata.section field
-      const sections = body.items.map((rule: CspRule) => rule.metadata.section);
+      const sections = body.items.map((rule: CspBenchmarkRule) => rule.metadata.section);
       const isSorted = sections.every(
         (section, index) => index === 0 || section >= sections[index - 1]
       );
@@ -219,7 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kspm'
       );
 
-      const { body }: { body: FindCspRuleResponse } = await supertest
+      const { body }: { body: FindCspBenchmarkRuleResponse } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')

@@ -12,10 +12,10 @@ import {
   SavedObjectMigrationContext,
 } from '@kbn/core/server';
 
-function migrateCspRuleToV840(
-  doc: SavedObjectUnsanitizedDoc<rulesV1.CspRule>,
+function migrateCspBenchmarkRuleToV840(
+  doc: SavedObjectUnsanitizedDoc<rulesV1.CspBenchmarkRule>,
   context: SavedObjectMigrationContext
-): SavedObjectUnsanitizedDoc<rulesV2.CspRule> {
+): SavedObjectUnsanitizedDoc<rulesV2.CspBenchmarkRule> {
   const { enabled, muted, benchmark, ...metadata } = doc.attributes;
   return {
     ...doc,
@@ -33,10 +33,10 @@ function migrateCspRuleToV840(
   };
 }
 
-function migrateCspRuleToV870(
-  doc: SavedObjectUnsanitizedDoc<rulesV2.CspRule>,
+function migrateCspBenchmarkRuleToV870(
+  doc: SavedObjectUnsanitizedDoc<rulesV2.CspBenchmarkRule>,
   context: SavedObjectMigrationContext
-): SavedObjectUnsanitizedDoc<rulesV3.CspRule> {
+): SavedObjectUnsanitizedDoc<rulesV3.CspBenchmarkRule> {
   // Keeps only metadata, deprecated state
   const { muted, enabled, ...attributes } = doc.attributes;
 
@@ -55,7 +55,7 @@ function migrateCspRuleToV870(
   };
 }
 
-export const cspRuleMigrations: SavedObjectMigrationMap = {
-  '8.4.0': migrateCspRuleToV840,
-  '8.7.0': migrateCspRuleToV870,
+export const cspBenchmarkRuleMigrations: SavedObjectMigrationMap = {
+  '8.4.0': migrateCspBenchmarkRuleToV840,
+  '8.7.0': migrateCspBenchmarkRuleToV870,
 };
