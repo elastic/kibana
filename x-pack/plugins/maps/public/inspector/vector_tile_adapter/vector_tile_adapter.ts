@@ -79,8 +79,8 @@ export class VectorTileAdapter extends EventEmitter {
       return {
         layerId,
         tileUrl,
-        tileError: getTileError(layerId, tile.x, tile.y, tile.z, tileErrors),
-        tileMetaFeature: getTileMetaFeature(layerId, tile.x, tile.y, tile.z, tileMetaFeatures),
+        tileError: getTileError(tile.x, tile.y, tile.z, tileErrors),
+        tileMetaFeature: getTileMetaFeature(tile.x, tile.y, tile.z, tileMetaFeatures),
         ...tile,
       };
     });
@@ -91,8 +91,7 @@ export class VectorTileAdapter extends EventEmitter {
   }
 }
 
-function getTileMetaFeature(
-  layerId: string,
+export function getTileMetaFeature(
   x: number,
   y: number,
   z: number,
@@ -114,7 +113,7 @@ function getTileMetaFeature(
   });
 }
 
-function getTileError(layerId: string, x: number, y: number, z: number, tileErrors?: TileError[]) {
+export function getTileError(x: number, y: number, z: number, tileErrors?: TileError[]) {
   if (!tileErrors || tileErrors.length === 0) {
     return;
   }
