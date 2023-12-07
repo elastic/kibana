@@ -13,6 +13,12 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
+  const browser = getService('browser');
+
+  type RandomSamplerOption =
+    | 'aiopsRandomSamplerOptionOnAutomatic'
+    | 'aiopsRandomSamplerOptionOnManual'
+    | 'aiopsRandomSamplerOptionOff';
 
   return {
     async assertLogPatternAnalysisPageExists() {
@@ -174,6 +180,77 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
           expectedTitle,
           `Expected flyout title to be '${expectedTitle}' (got '${title}')`
         );
+      });
+    },
+
+    async assertRandomSamplingOption(
+      expectedOption: RandomSamplerOption,
+      expectedProbability?: number
+    ) {
+      await retry.tryForTime(20000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await testSubjects.clickWhenNotDisabled('aiopsLogPatternAnalysisShowSamplingOptionsButton');
+        await testSubjects.clickWhenNotDisabled('aiopsRandomSamplerOptionsSelect');
+
+        if (expectedOption === 'aiopsRandomSamplerOptionOff') {
+          await testSubjects.existOrFail('aiopsRandomSamplerOptionOff', { timeout: 1000 });
+          await testSubjects.missingOrFail('aiopsRandomSamplerProbabilityRange', { timeout: 1000 });
+          await testSubjects.missingOrFail('aiopsRandomSamplerProbabilityUsedMsg', {
+            timeout: 1000,
+          });
+        }
+
+        if (expectedOption === 'aiopsRandomSamplerOptionOnManual') {
+          await testSubjects.existOrFail('aiopsRandomSamplerOptionOnManual', { timeout: 1000 });
+          await testSubjects.existOrFail('aiopsRandomSamplerProbabilityRange', { timeout: 1000 });
+          if (expectedProbability !== undefined) {
+            const probability = await testSubjects.getAttribute(
+              'aiopsRandomSamplerProbabilityRange',
+              'value'
+            );
+            expect(probability).to.eql(
+              `${expectedProbability}`,
+              `Expected probability to be ${expectedProbability}, got ${probability}`
+            );
+          }
+        }
+
+        if (expectedOption === 'aiopsRandomSamplerOptionOnAutomatic') {
+          await testSubjects.existOrFail('aiopsRandomSamplerOptionOnAutomatic', { timeout: 1000 });
+          await testSubjects.existOrFail('aiopsRandomSamplerProbabilityUsedMsg', {
+            timeout: 1000,
+          });
+
+          if (expectedProbability !== undefined) {
+            const probabilityText = await testSubjects.getVisibleText(
+              'aiopsRandomSamplerProbabilityUsedMsg'
+            );
+            expect(probabilityText).to.contain(
+              `${expectedProbability}`,
+              `Expected probability text to contain ${expectedProbability}, got ${probabilityText}`
+            );
+          }
+        }
+        await testSubjects.clickWhenNotDisabled('aiopsLogPatternAnalysisShowSamplingOptionsButton');
+      });
+    },
+
+    async setRandomSamplingOption(option: RandomSamplerOption) {
+      await retry.tryForTime(20000, async () => {
+        // escape popover
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await testSubjects.existOrFail('aiopsLogPatternAnalysisShowSamplingOptionsButton');
+        await testSubjects.clickWhenNotDisabled('aiopsLogPatternAnalysisShowSamplingOptionsButton');
+
+        await testSubjects.clickWhenNotDisabled('aiopsRandomSamplerOptionsSelect');
+
+        await testSubjects.existOrFail('aiopsRandomSamplerOptionOff', { timeout: 1000 });
+        await testSubjects.existOrFail('aiopsRandomSamplerOptionOnManual', { timeout: 1000 });
+        await testSubjects.existOrFail('aiopsRandomSamplerOptionOnAutomatic', { timeout: 1000 });
+
+        await testSubjects.click(option);
+
+        await this.assertRandomSamplingOption(option);
       });
     },
   };
