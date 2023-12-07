@@ -60,7 +60,7 @@ export const getBenchmarks = async (
     packagePolicies.items
   );
 
-  const benchmarksVersion2 = await createBenchmarksV2(soClient, esClient);
+  const benchmarksVersion2 = await createBenchmarksV2(soClient, esClient, logger);
   const getBenchmarkResponse = {
     ...packagePolicies,
     items: benchmarksVersion2,

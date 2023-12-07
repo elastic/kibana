@@ -9,6 +9,7 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Logger } from '@kbn/core/server';
 import {
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -79,7 +80,8 @@ export const createBenchmarks = (
 
 export const createBenchmarksV2 = async (
   soClient: SavedObjectsClientContract,
-  esClient?: any
+  esClient: any,
+  logger: Logger
 ): Promise<BenchmarkVersion2[]> => {
   // Returns a list of benchmark based on their Version and Benchmark ID
   const benchmarksResponse = await soClient.find<CspRuleTemplate>({
@@ -136,8 +138,14 @@ export const createBenchmarksV2 = async (
               ],
             },
           };
-          const benchmarkScore = await getStats(esClient, query, pitId, runtimeMappings);
-          const benchmarkEvaluation = await getClusters(esClient, query, pitId, runtimeMappings);
+          const benchmarkScore = await getStats(esClient, query, pitId, runtimeMappings, logger);
+          const benchmarkEvaluation = await getClusters(
+            esClient,
+            query,
+            pitId,
+            runtimeMappings,
+            logger
+          );
 
           return {
             id: benchmarkId,
