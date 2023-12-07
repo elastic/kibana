@@ -20,7 +20,7 @@ import { KEY_ENABLE_WELCOME } from '../home';
 import { ReactWrapper } from '@kbn/test-jest-helpers/src/testbed/types';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { GuideFiltersProps } from '@kbn/guided-onboarding/src/components/landing_page/guide/guide_filters';
-import { GuideVersion } from '@kbn/guided-onboarding/src/types';
+import { beforeEach } from 'node:test';
 
 const mockCloud = cloudMock.createSetup();
 const mockChrome = chromeServiceMock.createStartContract();
@@ -53,6 +53,10 @@ describe('getting started', () => {
     if (storageItemValue) {
       localStorage.setItem(KEY_ENABLE_WELCOME, storageItemValue);
     }
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   test('should render getting started component', async () => {
@@ -127,32 +131,6 @@ describe('getting started', () => {
     expect((guideFilters.props() as GuideFiltersProps).activeFilter).toBe('search');
   });
 
-  xtest('should set default guide filter value to "all" for classic versions, if querystring parameter does NOT exist', async () => {
-    let component: ReactWrapper;
-
-    jest.mock('../../kibana_services', () => ({
-      getServices: () => ({
-        cloud: mockCloud,
-        chrome: mockChrome,
-        application: mockApplication,
-        share: mockShare,
-        version: 'classic' as GuideVersion,
-        guidedOnboardingService: mockApiService,
-      }),
-    }));
-
-    await act(async () => {
-      component = mountWithIntl(
-        <MemoryRouter>
-          <GettingStarted />
-        </MemoryRouter>
-      );
-    });
-
-    const guideFilters = component!.find('[data-test-subj="onboarding--guideFilters"]');
-    expect((guideFilters.props() as GuideFiltersProps).activeFilter).toBe('all');
-  });
-
   test('should auto-select guide filter value based on querystring parameter', async () => {
     const cloudDiscoveryUseCase = 'observability';
     let component: ReactWrapper;
@@ -169,5 +147,34 @@ describe('getting started', () => {
 
     const guideFilters = component!.find('[data-test-subj="onboarding--guideFilters"]');
     expect((guideFilters.props() as GuideFiltersProps).activeFilter).toBe(cloudDiscoveryUseCase);
+  });
+
+  beforeEach(() => {
+    jest.mock('../../kibana_services', () => ({
+      getServices: () => ({
+        cloud: mockCloud,
+        chrome: mockChrome,
+        application: mockApplication,
+        trackUiMetric: jest.fn(),
+        share: mockShare,
+        guidedOnboardingService: mockApiService,
+        version: 'classic',
+      }),
+    }));
+
+    test('should set default guide filter value to "all" for classic versions, if querystring parameter does NOT exist', async () => {
+      let component: ReactWrapper;
+
+      await act(async () => {
+        component = mountWithIntl(
+          <MemoryRouter>
+            <GettingStarted />
+          </MemoryRouter>
+        );
+      });
+
+      const guideFilters = component!.find('[data-test-subj="onboarding--guideFilters"]');
+      expect((guideFilters.props() as GuideFiltersProps).activeFilter).toBe('all');
+    });
   });
 });
