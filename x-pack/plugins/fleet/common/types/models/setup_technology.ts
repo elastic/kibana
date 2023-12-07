@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { useDevToolsRequest } from './devtools_request';
-export { useOnSubmit } from './form';
-export { useSetupTechnology } from './setup_technology';
+export enum SetupTechnology {
+  AGENTLESS = 'agentless',
+  AGENT_BASED = 'agent-based',
+}
