@@ -98,16 +98,6 @@ export interface DisableRiskEngineResponse {
   success: boolean;
 }
 
-export interface RiskEnginePrivilegesResponse {
-  privileges: {
-    elasticsearch: {
-      cluster: Record<string, boolean>;
-      index: Record<string, Record<string, boolean>>;
-    };
-  };
-  has_all_required: boolean;
-}
-
 export interface CalculateRiskScoreAggregations {
   user?: {
     after_key: AfterKey;

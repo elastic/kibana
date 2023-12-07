@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ComponentType } from 'react';
-import { Observable } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { Serializable } from '@kbn/utility-types';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { ObservabilityAIAssistantProvider } from '../context/observability_ai_assistant_provider';
+import React, { ComponentType } from 'react';
+import { Observable } from 'rxjs';
+import type { StreamingChatResponseEvent } from '../../common/conversation_complete';
 import { ObservabilityAIAssistantAPIClient } from '../api';
-import type { Message } from '../../common';
+import { ObservabilityAIAssistantChatServiceProvider } from '../context/observability_ai_assistant_chat_service_provider';
+import { ObservabilityAIAssistantProvider } from '../context/observability_ai_assistant_provider';
 import type {
   ObservabilityAIAssistantChatService,
   ObservabilityAIAssistantService,
   PendingMessage,
 } from '../types';
 import { buildFunctionElasticsearch, buildFunctionServiceSummary } from './builders';
-import { ObservabilityAIAssistantChatServiceProvider } from '../context/observability_ai_assistant_chat_service_provider';
 
 const chatService: ObservabilityAIAssistantChatService = {
   analytics: {
@@ -27,24 +27,23 @@ const chatService: ObservabilityAIAssistantChatService = {
     reportEvent: () => {},
     telemetryCounter$: new Observable(),
   },
-  chat: (options: { messages: Message[]; connectorId: string }) => new Observable<PendingMessage>(),
+  chat: (options) => new Observable<PendingMessage>(),
+  complete: (options) => new Observable<StreamingChatResponseEvent>(),
   getContexts: () => [],
   getFunctions: () => [buildFunctionElasticsearch(), buildFunctionServiceSummary()],
-  executeFunction: async ({}: {
-    name: string;
-    args: string | undefined;
-    messages: Message[];
-    signal: AbortSignal;
-  }): Promise<{ content?: Serializable; data?: Serializable }> => ({}),
-  renderFunction: (name: string, args: string | undefined, response: {}) => (
-    // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
-    <div>Hello! {name}</div>
+  renderFunction: (name) => (
+    <div>
+      {i18n.translate('xpack.observabilityAiAssistant.chatService.div.helloLabel', {
+        defaultMessage: 'Hello',
+      })}
+      {name}
+    </div>
   ),
   hasFunction: () => true,
   hasRenderFunction: () => true,
 };
 
-const service: ObservabilityAIAssistantService = {
+export const mockService: ObservabilityAIAssistantService = {
   isEnabled: () => true,
   start: async () => {
     return chatService;
@@ -66,6 +65,7 @@ const service: ObservabilityAIAssistantService = {
       url: {},
       navigate: () => {},
     } as unknown as SharePluginStart),
+  register: () => {},
 };
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {
@@ -82,7 +82,7 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         },
       }}
     >
-      <ObservabilityAIAssistantProvider value={service}>
+      <ObservabilityAIAssistantProvider value={mockService}>
         <ObservabilityAIAssistantChatServiceProvider value={chatService}>
           <Story />
         </ObservabilityAIAssistantChatServiceProvider>

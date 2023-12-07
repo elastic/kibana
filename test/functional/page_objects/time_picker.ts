@@ -57,6 +57,7 @@ export class TimePickerPageObject extends FtrService {
     });
     if (isVisible) {
       await this.testSubjects.click('noDataPopoverDismissButton');
+      await this.testSubjects.waitForDeleted('noDataPopoverDismissButton');
     }
   }
 

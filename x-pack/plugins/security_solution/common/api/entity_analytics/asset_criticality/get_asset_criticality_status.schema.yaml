@@ -2,6 +2,13 @@ openapi: 3.0.0
 info:
   version: 1.0.0
   title: Asset Criticality Status Schema
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
 paths:
   /internal/asset_criticality/status:
     get:

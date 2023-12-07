@@ -2967,6 +2967,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-assistant-management-observability-plugin@link:src/plugins/ai_assistant_management/observability":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ai-assistant-management-plugin@link:src/plugins/ai_assistant_management/selection":
+  version "0.0.0"
+  uid ""
+
 "@kbn/aiops-components@link:x-pack/packages/ml/aiops_components":
   version "0.0.0"
   uid ""
@@ -4328,6 +4336,10 @@
   uid ""
 
 "@kbn/elastic-agent-utils@link:packages/kbn-elastic-agent-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/elastic-assistant-common@link:x-pack/packages/kbn-elastic-assistant-common":
   version "0.0.0"
   uid ""
 

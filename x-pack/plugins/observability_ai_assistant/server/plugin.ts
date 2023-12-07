@@ -7,7 +7,6 @@
 
 import {
   CoreSetup,
-  CoreStart,
   DEFAULT_APP_CATEGORIES,
   Logger,
   Plugin,
@@ -31,7 +30,8 @@ import {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
-import { addLensDocsToKb } from './service/kb_service/kb_docs/lens';
+import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
+import { registerFunctions } from './functions';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -43,6 +43,8 @@ export class ObservabilityAIAssistantPlugin
     >
 {
   logger: Logger;
+  service: ObservabilityAIAssistantService | undefined;
+
   constructor(context: PluginInitializerContext<ObservabilityAIAssistantConfig>) {
     this.logger = context.logger.get();
   }
@@ -103,11 +105,13 @@ export class ObservabilityAIAssistantPlugin
       };
     }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
 
-    const service = new ObservabilityAIAssistantService({
+    const service = (this.service = new ObservabilityAIAssistantService({
       logger: this.logger.get('service'),
       core,
       taskManager: plugins.taskManager,
-    });
+    }));
+
+    service.register(registerFunctions);
 
     addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
 
@@ -116,17 +120,18 @@ export class ObservabilityAIAssistantPlugin
       logger: this.logger,
       dependencies: {
         plugins: routeHandlerPlugins,
-        service,
+        service: this.service,
       },
     });
 
-    return {};
+    return {
+      service,
+    };
   }
 
-  public start(
-    core: CoreStart,
-    plugins: ObservabilityAIAssistantPluginStartDependencies
-  ): ObservabilityAIAssistantPluginStart {
-    return {};
+  public start(): ObservabilityAIAssistantPluginStart {
+    return {
+      service: this.service!,
+    };
   }
 }
