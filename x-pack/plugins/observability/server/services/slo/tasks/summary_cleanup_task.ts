@@ -13,7 +13,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../assets/constants';
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
 import { StoredSLO } from '../../../domain/models';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 
