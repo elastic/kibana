@@ -8,7 +8,12 @@ import type { Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import type { DatasourceMap, VisualizationMap, FramePublicAPI } from '../../../types';
+import type {
+  DatasourceMap,
+  VisualizationMap,
+  FramePublicAPI,
+  UserMessagesGetter,
+} from '../../../types';
 import type { LensEmbeddableOutput } from '../../../embeddable';
 import type { LensInspector } from '../../../lens_inspector_service';
 import type { Document } from '../../../persistence';
@@ -82,4 +87,5 @@ export interface LayerConfigurationProps {
   framePublicAPI: FramePublicAPI;
   hasPadding?: boolean;
   setIsInlineFlyoutVisible: (flag: boolean) => void;
+  getUserMessages: UserMessagesGetter;
 }

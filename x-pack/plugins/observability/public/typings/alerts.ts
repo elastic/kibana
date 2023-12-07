@@ -15,4 +15,5 @@ export interface TopAlert<TAdditionalMetaFields extends Record<string, any> = {}
   reason: string;
   link?: string;
   active: boolean;
+  hasBasePath?: boolean;
 }

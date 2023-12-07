@@ -27,6 +27,14 @@ jest.mock('../audit_logging');
 jest.mock('../../../common/services/is_agent_upgradeable', () => ({
   isAgentUpgradeable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
 }));
+jest.mock('./versions', () => {
+  return {
+    getAvailableVersions: jest
+      .fn()
+      .mockResolvedValue(['8.4.0', '8.5.0', '8.6.0', '8.7.0', '8.8.0']),
+    getLatestAvailableVersion: jest.fn().mockResolvedValue('8.8.0'),
+  };
+});
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
@@ -151,8 +159,7 @@ describe('Agents CRUD test', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/171541
-  describe.skip('getAgentsByKuery', () => {
+  describe('getAgentsByKuery', () => {
     it('should return upgradeable on first page', async () => {
       searchMock
         .mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2', '3', '4', '5'], 7)))
