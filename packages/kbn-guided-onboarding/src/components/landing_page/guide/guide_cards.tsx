@@ -22,6 +22,7 @@ import { GuideId, GuideState } from '../../../types';
 import { GuideFilterValues } from './guide_filters';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCard } from './guide_card';
+import { css } from '@emotion/react';
 
 export type GuideCardSolutions = 'search' | 'observability' | 'security';
 
@@ -41,10 +42,16 @@ export interface GuideCardsProps {
 }
 export const GuideCards = (props: GuideCardsProps) => {
   const { filteredCards } = props;
+  console.log(filteredCards)
+  const stylingForSmallerScreens = css`
+  @media only screen and (max-width: 767px) {
+    align-items: center;
+  }
+`;
   return (
     <EuiFlexGroup wrap alignItems="center" justifyContent="center">
       {filteredCards?.map((card, index) => (
-        <EuiFlexItem key={index}>
+        <EuiFlexItem key={index} css={stylingForSmallerScreens} >
           <GuideCard card={card} {...props} />
           <EuiSpacer size="m" />
         </EuiFlexItem>
