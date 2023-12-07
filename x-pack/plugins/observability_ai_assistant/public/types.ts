@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
@@ -40,6 +42,7 @@ import type {
 } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { PendingMessage } from '../common/types';
+import { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -52,6 +55,7 @@ export type CreateChatCompletionResponseChunk = Omit<CreateChatCompletionRespons
 };
 
 export interface ObservabilityAIAssistantChatService {
+  analytics: AnalyticsServiceStart;
   chat: (options: {
     messages: Message[];
     connectorId: string;
@@ -75,7 +79,7 @@ export interface ObservabilityAIAssistantChatService {
   ) => React.ReactNode;
 }
 
-export type ChatRegistrationFunction = ({}: {
+export type AssistantRegistrationFunction = ({}: {
   signal: AbortSignal;
   registerFunction: RegisterFunctionDefinition;
   registerContext: RegisterContextDefinition;
@@ -88,10 +92,12 @@ export interface ObservabilityAIAssistantService {
   getLicense: () => Observable<ILicense>;
   getLicenseManagementLocator: () => SharePluginStart;
   start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
+  register: (fn: AssistantRegistrationFunction) => void;
 }
 
-export interface ObservabilityAIAssistantPluginStart extends ObservabilityAIAssistantService {
-  register: (fn: ChatRegistrationFunction) => void;
+export interface ObservabilityAIAssistantPluginStart {
+  service: ObservabilityAIAssistantService;
+  useGenAIConnectors: () => UseGenAIConnectorsResult;
 }
 
 export interface ObservabilityAIAssistantPluginSetup {}

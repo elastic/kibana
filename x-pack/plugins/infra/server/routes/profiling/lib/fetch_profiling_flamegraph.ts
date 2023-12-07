@@ -8,24 +8,19 @@
 import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { ProfilingDataAccessPluginStart } from '@kbn/profiling-data-access-plugin/server';
 import type { BaseFlameGraph } from '@kbn/profiling-utils';
-import { profilingUseLegacyFlamegraphAPI } from '@kbn/observability-plugin/common';
-import type { InfraProfilingFlamegraphRequestParams } from '../../../../common/http_api/profiling_api';
 import { HOST_FIELD } from '../../../../common/constants';
+import type { InfraProfilingFlamegraphRequestParams } from '../../../../common/http_api/profiling_api';
 
 export async function fetchProfilingFlamegraph(
   { hostname, from, to }: InfraProfilingFlamegraphRequestParams,
   profilingDataAccess: ProfilingDataAccessPluginStart,
   coreRequestContext: CoreRequestHandlerContext
 ): Promise<BaseFlameGraph> {
-  const useLegacyFlamegraphAPI = await coreRequestContext.uiSettings.client.get<boolean>(
-    profilingUseLegacyFlamegraphAPI
-  );
-
   return await profilingDataAccess.services.fetchFlamechartData({
+    core: coreRequestContext,
     esClient: coreRequestContext.elasticsearch.client.asCurrentUser,
     rangeFromMs: from,
     rangeToMs: to,
     kuery: `${HOST_FIELD} : "${hostname}"`,
-    useLegacyFlamegraphAPI,
   });
 }
