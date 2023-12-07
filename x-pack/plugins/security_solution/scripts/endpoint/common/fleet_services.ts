@@ -59,7 +59,7 @@ import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
 import { userInfo } from 'os';
-import { metadataCurrentIndexPattern } from '../../../common/endpoint/constants';
+import { metadataIndexPattern } from '../../../common/endpoint/constants';
 import { fetchEndpointMetadataList } from './endpoint_metadata_services';
 import type { HostInfo } from '../../../common/endpoint/types';
 import { isFleetServerRunning } from './fleet_server/fleet_server_services';
@@ -227,12 +227,10 @@ export const waitForHostToEnroll = async (
   log.info(
     JSON.stringify(
       await esClient?.indices.getSettings({
-        index: [
-          '.fleet-agents',
-          metadataCurrentIndexPattern,
-          '.metrics-endpoint.metadata_united_default',
-        ],
-      })
+        index: ['.fleet-agents', metadataIndexPattern],
+      }),
+      null,
+      2
     )
   );
   log.info('Succesfully queries indicies.');
@@ -250,6 +248,7 @@ export const waitForHostToEnroll = async (
     metadataFound = await retryOnError(
       async () =>
         fetchEndpointMetadataList(kbnClient).then((response) => {
+          log.info(JSON.stringify(response, null, 2));
           return response.data.filter(
             (record) =>
               record.metadata.host.hostname === hostname && record.host_status === 'healthy'
