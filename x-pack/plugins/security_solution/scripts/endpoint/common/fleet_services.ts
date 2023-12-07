@@ -59,7 +59,6 @@ import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
 import { userInfo } from 'os';
-import { metadataIndexPattern } from '../../../common/endpoint/constants';
 import { fetchEndpointMetadataList } from './endpoint_metadata_services';
 import type { HostInfo } from '../../../common/endpoint/types';
 import { isFleetServerRunning } from './fleet_server/fleet_server_services';
@@ -227,7 +226,7 @@ export const waitForHostToEnroll = async (
   log.info(
     JSON.stringify(
       await esClient?.indices.getSettings({
-        index: ['.fleet-agents', metadataIndexPattern],
+        index: ['.fleet-agents', '.metrics-endpoint.metadata_united_default'],
       }),
       null,
       2
@@ -245,6 +244,16 @@ export const waitForHostToEnroll = async (
   let metadataFound: HostInfo | undefined;
 
   while (!metadataFound && !hasTimedOutMetadataLookup()) {
+    log.info(
+      JSON.stringify(
+        await esClient.transport.request({
+          method: 'GET',
+          path: `_transform/endpoint.metadata_united-default-8.11.0/_stats`,
+        }),
+        null,
+        2
+      )
+    );
     metadataFound = await retryOnError(
       async () =>
         fetchEndpointMetadataList(kbnClient).then((response) => {
