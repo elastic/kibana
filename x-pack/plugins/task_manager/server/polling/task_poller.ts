@@ -89,7 +89,7 @@ export function createTaskPoller<T, H>({
         typeof interval !== 'number' ||
         Number.isNaN(interval) ||
         interval < 0 ||
-        interval > Number.MAX_SAFE_INTEGER
+        !Number.isSafeInteger(interval)
       ) {
         // TODO: Investigate why we sometimes get null / NaN, causing the setTimeout logic to always schedule
         // the next polling cycle to run immediately. If we don't see occurrences of this message by December 2024,

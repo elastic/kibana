@@ -110,7 +110,7 @@ function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
         Number.isNaN(newPollInterval) ||
         newPollInterval == null ||
         newPollInterval < 0 ||
-        newPollInterval > Number.MAX_SAFE_INTEGER
+        !Number.isSafeInteger(newPollInterval)
       ) {
         logger.error(
           `Poll interval configuration had an issue calculating the new poll interval: Math.min(Math.ceil(${previousPollInterval} * ${POLL_INTERVAL_INCREASE_PERCENTAGE}), Math.max(${PREFERRED_MAX_POLL_INTERVAL}, ${startingPollInterval})) = ${newPollInterval}, will keep the poll interval unchanged (${previousPollInterval})`
@@ -128,7 +128,7 @@ function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
         Number.isNaN(newPollInterval) ||
         newPollInterval == null ||
         newPollInterval < 0 ||
-        newPollInterval > Number.MAX_SAFE_INTEGER
+        !Number.isSafeInteger(newPollInterval)
       ) {
         logger.error(
           `Poll interval configuration had an issue calculating the new poll interval: Math.max(${startingPollInterval}, Math.floor(${previousPollInterval} * ${POLL_INTERVAL_DECREASE_PERCENTAGE})) = ${newPollInterval}, will keep the poll interval unchanged (${previousPollInterval})`
