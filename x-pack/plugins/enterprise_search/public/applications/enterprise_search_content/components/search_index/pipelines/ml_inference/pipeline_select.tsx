@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiSelectable, useIsWithinMaxBreakpoint } from '@elastic/eui';
+import { EuiSelectable, useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
 
 import { MLInferenceLogic, MLInferencePipelineOption } from './ml_inference_logic';
 import { PipelineSelectOption, PipelineSelectOptionProps } from './pipeline_select_option';
@@ -23,8 +23,14 @@ export const PipelineSelect: React.FC = () => {
 
   const { pipelineName } = configuration;
 
-  const rowHeight: number = useIsWithinMaxBreakpoint('s') ? 120 : 90;
-  const [height, setHeight] = useState(4.5 * rowHeight);
+  const { euiTheme } = useEuiTheme();
+  const largeScreenRowHeight = euiTheme.base * 6;
+  const smallScreenRowHeight = euiTheme.base * 8;
+  const maxVisibleOptions = 4.5;
+  const rowHeight: number = useIsWithinMaxBreakpoint('s')
+    ? smallScreenRowHeight
+    : largeScreenRowHeight;
+  const [height, setHeight] = useState(maxVisibleOptions * rowHeight);
 
   const getPipelineOptions = (
     pipelineOptions: MLInferencePipelineOption[]
@@ -68,7 +74,7 @@ export const PipelineSelect: React.FC = () => {
       }}
       searchProps={{
         onChange: (_, matchingOptions) => {
-          setHeight(Math.min(4.5, matchingOptions.length) * rowHeight);
+          setHeight(Math.min(maxVisibleOptions, matchingOptions.length) * rowHeight);
         },
       }}
       searchable
