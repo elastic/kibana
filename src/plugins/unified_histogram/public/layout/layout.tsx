@@ -7,7 +7,7 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, { PropsWithChildren, ReactElement, useState } from 'react';
+import React, { PropsWithChildren, ReactElement, useMemo, useState } from 'react';
 import { Observable } from 'rxjs';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
@@ -38,6 +38,10 @@ import type {
   UnifiedHistogramInput$,
 } from '../types';
 import { useLensSuggestions } from './hooks/use_lens_suggestions';
+
+const ChartMemoized = React.memo(Chart);
+
+const chartSpacer = <EuiSpacer size="s" />;
 
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
   /**
@@ -265,10 +269,15 @@ export const UnifiedHistogramLayout = ({
 
   const currentTopPanelHeight = topPanelHeight ?? defaultTopPanelHeight;
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const chartMemoized = useMemo(() => chart, [chart?.title, chart?.timeInterval, chart?.hidden]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const hitsMemoized = useMemo(() => hits, [hits?.status, hits?.total]);
+
   return (
     <>
       <InPortal node={topPanelNode}>
-        <Chart
+        <ChartMemoized
           isChartAvailable={isChartAvailable}
           className={chartClassName}
           services={services}
@@ -278,15 +287,15 @@ export const UnifiedHistogramLayout = ({
           timeRange={timeRange}
           relativeTimeRange={relativeTimeRange}
           request={request}
-          hits={hits}
+          hits={hitsMemoized}
           currentSuggestion={currentSuggestion}
           isChartLoading={isChartLoading}
           allSuggestions={allSuggestions}
           isPlainRecord={isPlainRecord}
-          chart={chart}
+          chart={chartMemoized}
           breakdown={breakdown}
           renderCustomChartToggleActions={renderCustomChartToggleActions}
-          appendHistogram={<EuiSpacer size="s" />}
+          appendHistogram={chartSpacer}
           disableAutoFetching={disableAutoFetching}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}

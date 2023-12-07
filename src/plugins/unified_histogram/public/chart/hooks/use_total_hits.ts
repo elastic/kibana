@@ -102,13 +102,11 @@ const fetchTotalHits = async ({
   abortController.current?.abort();
   abortController.current = undefined;
 
-  // Either the chart is visible, in which case Lens will make the request,
-  // or there is no hits context, which means the total hits should be hidden
-  if (chartVisible || !hits) {
+  if (chartVisible) {
     return;
   }
 
-  onTotalHitsChange?.(UnifiedHistogramFetchStatus.loading, hits.total);
+  onTotalHitsChange?.(UnifiedHistogramFetchStatus.loading, hits?.total);
 
   const newAbortController = new AbortController();
 
