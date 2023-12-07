@@ -227,6 +227,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             })}
             {...inputs.sslKeySecretInput.formRowProps}
             onUsePlainText={onUsePlainText}
+            cancelEdit={inputs.sslKeySecretInput.cancelEdit}
           >
             <EuiTextArea
               fullWidth
