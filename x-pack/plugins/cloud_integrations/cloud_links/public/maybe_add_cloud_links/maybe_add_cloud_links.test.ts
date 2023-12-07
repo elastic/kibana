@@ -95,7 +95,6 @@ describe('maybeAddCloudLinks', () => {
           },
           Object {
             "dataTestSubj": "connectionDetailsHelpLink",
-            "iconType": "console",
             "onClick": [Function],
             "title": "Connection details",
           },
@@ -169,7 +168,6 @@ describe('maybeAddCloudLinks', () => {
           },
           Object {
             "dataTestSubj": "connectionDetailsHelpLink",
-            "iconType": "console",
             "onClick": [Function],
             "title": "Connection details",
           },

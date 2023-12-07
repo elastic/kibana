@@ -13,13 +13,13 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import { OBSERVABILITY_LOG_EXPLORER } from '@kbn/deeplinks-observability';
 import {
   ObservabilityLogExplorerLocators,
   SingleDatasetLocatorDefinition,
   AllDatasetsLocatorDefinition,
 } from '../common/locators';
 import { type ObservabilityLogExplorerConfig } from '../common/plugin_config';
-import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '../common/constants';
 import { logExplorerAppTitle } from '../common/translations';
 import { renderObservabilityLogExplorer } from './applications/observability_log_explorer';
 import type {
@@ -48,7 +48,7 @@ export class ObservabilityLogExplorerPlugin
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({
-      id: OBSERVABILITY_LOG_EXPLORER_APP_ID,
+      id: OBSERVABILITY_LOG_EXPLORER,
       title: logExplorerAppTitle,
       category: DEFAULT_APP_CATEGORIES.observability,
       euiIconType: 'logoLogging',
