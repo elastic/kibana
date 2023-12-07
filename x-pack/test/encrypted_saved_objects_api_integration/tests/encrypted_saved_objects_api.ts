@@ -441,7 +441,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(400, {
           statusCode: 400,
           error: 'Bad Request',
-          message: 'Failed to encrypt attributes',
+          message: 'Failed to decrypt attributes',
         });
     });
 
