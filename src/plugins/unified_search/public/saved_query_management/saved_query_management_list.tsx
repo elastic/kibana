@@ -215,6 +215,10 @@ export function SavedQueryManagementList({
           filteredQueries.unshift(loadedQuery);
         }
 
+        if (!filteredQueries.some((savedQuery) => savedQuery.id === selectedSavedQuery?.id)) {
+          setSelectedSavedQuery(undefined);
+        }
+
         setTotalQueryCount(total);
         setCurrentPageQueries(filteredQueries);
         selectableRef.current?.scrollToItem(0);
@@ -226,7 +230,7 @@ export function SavedQueryManagementList({
     };
 
     fetchPage();
-  }, [currentPageNumber, latestLoadedQuery, savedQueryService, searchTerm]);
+  }, [currentPageNumber, latestLoadedQuery, savedQueryService, searchTerm, selectedSavedQuery?.id]);
 
   const handleLoad = useCallback(() => {
     if (selectedSavedQuery) {
