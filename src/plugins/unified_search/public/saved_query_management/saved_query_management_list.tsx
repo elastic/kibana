@@ -15,16 +15,29 @@ import {
   EuiSelectable,
   EuiPopoverFooter,
   EuiButtonIcon,
-  EuiButtonEmpty,
   EuiConfirmModal,
   usePrettyDuration,
   ShortDate,
   EuiPagination,
   EuiBadge,
+  EuiContextMenuItem,
+  EuiTitle,
+  useEuiTheme,
+  logicalCSS,
+  keys,
+  EuiToolTip,
 } from '@elastic/eui';
-
+import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
+import React, {
+  useCallback,
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+  RefObject,
+  KeyboardEvent,
+} from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
@@ -32,12 +45,15 @@ import './saved_query_management_list.scss';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { debounce } from 'lodash';
 import useLatest from 'react-use/lib/useLatest';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import type { IUnifiedSearchPluginServices } from '../types';
+import { strings as queryBarMenuPanelsStrings } from '../query_string_input/query_bar_menu_panels';
 
 export interface SavedQueryManagementListProps {
   showSaveQuery?: boolean;
   loadedSavedQuery?: SavedQuery;
   savedQueryService: SavedQueryService;
+  queryBarMenuRef: RefObject<EuiContextMenuClass>;
   onLoad: (savedQuery: SavedQuery) => void;
   onClearSavedQuery: () => void;
   onClose: () => void;
@@ -134,18 +150,19 @@ const savedQueryMultipleNamespacesDeleteWarning = i18n.translate(
   }
 );
 
-const SAVED_QUERY_PAGE_SIZE = 20;
+const SAVED_QUERY_PAGE_SIZE = 5;
 const SAVED_QUERY_SEARCH_DEBOUNCE = 500;
 
 export function SavedQueryManagementList({
   showSaveQuery,
   loadedSavedQuery,
+  savedQueryService,
+  queryBarMenuRef,
   onLoad,
   onClearSavedQuery,
-  savedQueryService,
   onClose,
 }: SavedQueryManagementListProps) {
-  const { uiSettings, http, application } = useKibana<IUnifiedSearchPluginServices>().services;
+  const { uiSettings } = useKibana<IUnifiedSearchPluginServices>().services;
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPageNumber, setCurrentPageNumber] = useState(0);
   const [totalQueryCount, setTotalQueryCount] = useState(0);
@@ -276,10 +293,9 @@ export function SavedQueryManagementList({
     );
   };
 
-  const canEditSavedObjects = application.capabilities.savedObjectsManagement.edit;
-
-  const listComponent = (
+  return (
     <>
+      <ListTitle queryBarMenuRef={queryBarMenuRef} />
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
@@ -296,9 +312,7 @@ export function SavedQueryManagementList({
             isLoading={isInitializing}
             singleSelection="always"
             options={savedQueriesOptions}
-            listProps={{
-              isVirtualized: true,
-            }}
+            listProps={{ onFocusBadge: false }}
             isPreFiltered
             searchable
             searchProps={{
@@ -333,6 +347,16 @@ export function SavedQueryManagementList({
               }
             }}
             renderOption={renderOption}
+            css={{
+              '.euiSelectableList__list': {
+                WebkitMaskImage: 'unset',
+                maskImage: 'unset',
+              },
+              '.euiSelectableListItem': {
+                color: 'inherit !important',
+                backgroundColor: 'inherit !important',
+              },
+            }}
           >
             {(list, search) => (
               <>
@@ -359,71 +383,61 @@ export function SavedQueryManagementList({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiPopoverFooter paddingSize="s">
-        <EuiFlexGroup gutterSize="s" direction="column">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-              <EuiFlexItem>
-                <EuiButton
-                  size="s"
-                  fill
-                  onClick={handleLoad}
-                  disabled={!selectedSavedQuery}
-                  aria-label={i18n.translate(
-                    'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
-                    {
-                      defaultMessage: 'Load query',
-                    }
-                  )}
-                  data-test-subj="saved-query-management-apply-changes-button"
-                >
-                  {i18n.translate(
-                    'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
-                    {
-                      defaultMessage: 'Load query',
-                    }
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
-              {Boolean(showSaveQuery) && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    display="base"
-                    size="s"
-                    iconType="trash"
-                    color="danger"
-                    disabled={!selectedSavedQuery}
-                    title={i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
-                      defaultMessage: 'Delete query',
-                    })}
-                    aria-label={i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
-                      defaultMessage: 'Delete query',
-                    })}
-                    data-test-subj="delete-saved-query-button"
-                    onClick={() => {
-                      if (selectedSavedQuery) {
-                        handleDelete(selectedSavedQuery);
-                      }
-                    }}
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          {canEditSavedObjects && (
+      <EuiPopoverFooter
+        paddingSize="s"
+        css={{ backgroundColor: euiThemeVars.euiColorLightestShade }}
+      >
+        <EuiFlexGroup
+          responsive={false}
+          gutterSize="xs"
+          alignItems="center"
+          justifyContent="spaceBetween"
+        >
+          {Boolean(showSaveQuery) && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={http.basePath.prepend(
-                  `/app/management/kibana/objects?initialQuery=type:("query")`
-                )}
+              <EuiButtonIcon
+                display="base"
                 size="s"
-              >
-                {i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverManageLabel', {
-                  defaultMessage: 'Manage saved objects',
+                iconType="trash"
+                color="danger"
+                disabled={!selectedSavedQuery}
+                title={i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
+                  defaultMessage: 'Delete query',
                 })}
-              </EuiButtonEmpty>
+                aria-label={i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
+                  defaultMessage: 'Delete query',
+                })}
+                data-test-subj="delete-saved-query-button"
+                onClick={() => {
+                  if (selectedSavedQuery) {
+                    handleDelete(selectedSavedQuery);
+                  }
+                }}
+              />
             </EuiFlexItem>
           )}
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              fill
+              onClick={handleLoad}
+              disabled={!selectedSavedQuery}
+              aria-label={i18n.translate(
+                'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
+                {
+                  defaultMessage: 'Load query',
+                }
+              )}
+              data-test-subj="saved-query-management-apply-changes-button"
+            >
+              {i18n.translate(
+                'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
+                {
+                  defaultMessage: 'Load query',
+                }
+              )}
+            </EuiButton>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverFooter>
       {showDeletionConfirmationModal && toBeDeletedSavedQuery && (
@@ -466,6 +480,93 @@ export function SavedQueryManagementList({
       )}
     </>
   );
-
-  return listComponent;
 }
+
+const ListTitle = ({ queryBarMenuRef }: { queryBarMenuRef: RefObject<EuiContextMenuClass> }) => {
+  const { application, http } = useKibana<IUnifiedSearchPluginServices>().services;
+  const canEditSavedObjects = application.capabilities.savedObjectsManagement.edit;
+  const { euiTheme } = useEuiTheme();
+  const titleRef = useRef<HTMLButtonElement | null>(null);
+
+  const onTitleClick = useCallback(
+    () => queryBarMenuRef.current?.showPreviousPanel(),
+    [queryBarMenuRef]
+  );
+
+  const onTitleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLButtonElement>) => {
+      if (event.key !== keys.ARROW_LEFT) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      queryBarMenuRef.current?.showPreviousPanel();
+      queryBarMenuRef.current?.onUseKeyboardToNavigate();
+    },
+    [queryBarMenuRef]
+  );
+
+  useEffectOnce(() => {
+    const panel = titleRef.current?.closest('.euiContextMenuPanel');
+    const focus = () => titleRef.current?.focus();
+
+    panel?.addEventListener('animationend', focus, { once: true });
+
+    return () => panel?.removeEventListener('animationend', focus);
+  });
+
+  return (
+    <EuiFlexGroup
+      responsive={false}
+      gutterSize="none"
+      alignItems="center"
+      css={[logicalCSS('border-bottom', euiTheme.border.thin)]}
+    >
+      <EuiFlexItem>
+        <EuiTitle size="xxs">
+          <EuiContextMenuItem
+            buttonRef={titleRef}
+            className="euiContextMenuPanel__title"
+            icon="arrowLeft"
+            onClick={onTitleClick}
+            onKeyDown={onTitleKeyDown}
+            data-test-subj="contextMenuPanelTitleButton"
+            css={{
+              '&:enabled:focus': {
+                /* Override the default focus background on EUiContextMenuItems */
+                backgroundColor: 'unset',
+              },
+            }}
+          >
+            {queryBarMenuPanelsStrings.getLoadCurrentFilterSetLabel()}
+          </EuiContextMenuItem>
+        </EuiTitle>
+      </EuiFlexItem>
+      {canEditSavedObjects && (
+        <EuiFlexItem grow={false} css={{ paddingInline: euiTheme.size.s }}>
+          <EuiToolTip
+            position="bottom"
+            content={i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverManageLabel', {
+              defaultMessage: 'Manage queries',
+            })}
+          >
+            <EuiButtonIcon
+              iconType="gear"
+              color="text"
+              href={http.basePath.prepend(
+                `/app/management/kibana/objects?initialQuery=type:("query")`
+              )}
+              aria-label={i18n.translate(
+                'unifiedSearch.search.searchBar.savedQueryPopoverManageLabel',
+                {
+                  defaultMessage: 'Manage queries',
+                }
+              )}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};

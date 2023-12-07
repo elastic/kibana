@@ -516,7 +516,6 @@ export function QueryBarMenuPanels({
     },
     {
       id: 4,
-      title: strings.getLoadCurrentFilterSetLabel(),
       width: 400,
       content: <div>{manageFilterSetComponent}</div>,
     },

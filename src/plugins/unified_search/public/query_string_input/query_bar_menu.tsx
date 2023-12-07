@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, RefObject } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -16,6 +16,7 @@ import {
   EuiButtonIconProps,
   EuiToolTip,
 } from '@elastic/eui';
+import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -69,6 +70,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   buttonProps?: Partial<EuiButtonIconProps>;
   isDisabled?: boolean;
   suggestionsAbstraction?: SuggestionsAbstraction;
+  queryBarMenuRef: RefObject<EuiContextMenuClass>;
 }
 
 function QueryBarMenuComponent({
@@ -103,6 +105,7 @@ function QueryBarMenuComponent({
   onLocalFilterCreate,
   onLocalFilterUpdate,
   suggestionsAbstraction,
+  queryBarMenuRef,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
 
@@ -175,6 +178,8 @@ function QueryBarMenuComponent({
       default:
         return (
           <EuiContextMenu
+            // @ts-expect-error EuiContextMenu ref is mistyped
+            ref={queryBarMenuRef}
             initialPanelId={0}
             panels={panels}
             data-test-subj="queryBarMenuPanel"

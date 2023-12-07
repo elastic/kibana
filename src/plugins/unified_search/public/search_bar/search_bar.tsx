@@ -9,8 +9,9 @@
 import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import { EuiIconProps, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
+import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { get, isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
 
@@ -150,6 +151,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
 
   private services = this.props.kibana.services;
   private savedQueryService = this.services.data.query.savedQueries;
+  private queryBarMenuRef = createRef<EuiContextMenuClass>();
 
   public static getDerivedStateFromProps(
     nextProps: SearchBarProps,
@@ -524,6 +526,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
             : undefined
         }
         suggestionsAbstraction={this.props.suggestionsAbstraction}
+        queryBarMenuRef={this.queryBarMenuRef}
       />
     ) : undefined;
 
@@ -625,8 +628,9 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         <SavedQueryManagementList
           showSaveQuery={showSaveQuery}
           loadedSavedQuery={savedQuery}
-          onLoad={this.onLoadSavedQuery}
           savedQueryService={this.savedQueryService}
+          queryBarMenuRef={this.queryBarMenuRef}
+          onLoad={this.onLoadSavedQuery}
           onClearSavedQuery={onClearSavedQuery}
           onClose={() => this.setState({ openQueryBarMenu: false })}
         />
