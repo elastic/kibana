@@ -6,10 +6,10 @@
  */
 
 import { Pagination } from '@elastic/eui';
-import { HttpSetup } from '@kbn/core-http-browser';
 import { SearchHit } from '@kbn/es-types';
 import { pageToPagination, Paginate } from '@kbn/search-index-documents';
 import { useQuery } from '@tanstack/react-query';
+import { useKibanaServices } from '../use_kibana';
 
 interface IndexDocuments {
   meta: Pagination;
@@ -24,9 +24,9 @@ const DEFAULT_PAGINATION = {
 export const useIndexDocumentSearch = (
   indexName: string,
   pagination: Omit<Pagination, 'totalItemCount'>,
-  http: HttpSetup,
   searchQuery?: string
 ) => {
+  const { http } = useKibanaServices();
   const response = useQuery({
     queryKey: ['fetchIndexDocuments', pagination, searchQuery],
     queryFn: async () =>

@@ -13,11 +13,9 @@ import {
   INDEX_DOCUMENTS_META_DEFAULT,
 } from '@kbn/search-index-documents';
 
-import { HttpSetup } from '@kbn/core-http-browser';
-import { useQuery } from '@tanstack/react-query';
-import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { useIndexDocumentSearch } from '../../hooks/api/use_index_documents';
+import { useIndexMappings } from '../../hooks/api/use_index_mappings';
 
 const DEFAULT_PAGINATION = {
   pageIndex: INDEX_DOCUMENTS_META_DEFAULT.pageIndex,
@@ -27,10 +25,9 @@ const DEFAULT_PAGINATION = {
 
 interface IndexDocumentsProps {
   indexName: string;
-  http: HttpSetup;
 }
 
-export const IndexDocuments: React.FC<IndexDocumentsProps> = ({ http, indexName }) => {
+export const IndexDocuments: React.FC<IndexDocumentsProps> = ({ indexName }) => {
   const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
   const [searchQuery, setSearchQuery] = useState('');
   const searchQueryCallback = (query: string) => {
@@ -39,17 +36,10 @@ export const IndexDocuments: React.FC<IndexDocumentsProps> = ({ http, indexName 
   const { results: indexDocuments, meta: documentsMeta } = useIndexDocumentSearch(
     indexName,
     pagination,
-    http,
     searchQuery
   );
 
-  const { data: mappingData } = useQuery({
-    queryKey: ['fetchIndexMappings'],
-    queryFn: async () =>
-      http.fetch<IndicesGetMappingIndexMappingRecord>(
-        `/internal/serverless_search/mappings/${indexName}`
-      ),
-  });
+  const { data: mappingData } = useIndexMappings(indexName);
 
   const docs = indexDocuments?.data ?? [];
 

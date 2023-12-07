@@ -137,7 +137,7 @@ describe('Elasticsearch Search', () => {
       });
 
       expect(fetchSearchResults).toHaveBeenCalledWith(
-        mockClient,
+        undefined,
         'search-index-name',
         'banana',
         0,
