@@ -264,7 +264,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
             field: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id`,
             size: bucketSize,
             include,
-            // exclude: 'policy-elastic-agent-on-cloud', // todo: find a better way to not return or even generate token for managed policies
           },
           aggs: {
             latest: {
