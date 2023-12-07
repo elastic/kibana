@@ -19,7 +19,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const TEST_TEMPLATE = 'a_test_template';
 
-  describe('Index Templates', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/172703
+  describe.skip('Index Templates', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
       // Navigate to the index management page
