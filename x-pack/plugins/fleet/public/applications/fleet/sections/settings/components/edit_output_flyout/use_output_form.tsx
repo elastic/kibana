@@ -10,6 +10,8 @@ import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
+import { getDefaultPresetForEsOutput } from '../../../../../../../common/services/output_helpers';
+
 import type {
   KafkaOutput,
   NewElasticsearchOutput,
@@ -84,6 +86,7 @@ export interface OutputFormInputsType {
   diskQueueCompressionEnabled: ReturnType<typeof useSwitchInput>;
   compressionLevelInput: ReturnType<typeof useSelectInput>;
   logstashHostsInput: ReturnType<typeof useComboInput>;
+  presetInput: ReturnType<typeof useInput>;
   additionalYamlConfigInput: ReturnType<typeof useInput>;
   defaultOutputInput: ReturnType<typeof useSwitchInput>;
   defaultMonitoringOutputInput: ReturnType<typeof useSwitchInput>;
@@ -176,6 +179,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     if (!isPreconfigured) {
       return false;
     }
+
     return !allowEdit.includes(field);
   }
 
@@ -209,6 +213,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     output?.hosts ?? [],
     validateESHosts,
     isDisabled('hosts')
+  );
+
+  const presetInput = useInput(
+    output?.preset ?? getDefaultPresetForEsOutput(output?.config_yaml ?? '', safeLoad),
+    () => undefined,
+    isDisabled('preset')
   );
 
   // Remtote ES inputs
@@ -506,6 +516,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     diskQueueCompressionEnabled,
     compressionLevelInput,
     logstashHostsInput,
+    presetInput,
     additionalYamlConfigInput,
     defaultOutputInput,
     defaultMonitoringOutputInput,
@@ -865,6 +876,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               hosts: elasticsearchUrlInput.value,
               is_default: false,
               is_default_monitoring: defaultMonitoringOutputInput.value,
+              preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
               service_token: serviceTokenInput.value || undefined,
               ...(!serviceTokenInput.value &&
@@ -884,6 +896,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               hosts: elasticsearchUrlInput.value,
               is_default: defaultOutputInput.value,
               is_default_monitoring: defaultMonitoringOutputInput.value,
+              preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
@@ -940,26 +953,26 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     loadBalanceEnabledInput.value,
     typeInput.value,
     kafkaSslCertificateAuthoritiesInput.value,
-    kafkaCompressionInput.value,
+    kafkaSslKeyInput,
+    kafkaSslKeySecretInput,
+    kafkaAuthPasswordInput,
+    kafkaAuthPasswordSecretInput,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,
     defaultMonitoringOutputInput.value,
     additionalYamlConfigInput.value,
+    kafkaConnectionTypeInput.value,
     kafkaAuthMethodInput.value,
     kafkaSslCertificateInput.value,
-    kafkaSslKeyInput,
-    kafkaSslKeySecretInput,
     kafkaVerificationModeInput.value,
     kafkaClientIdInput.value,
     kafkaVersionInput.value,
     kafkaKeyInput.value,
+    kafkaCompressionInput.value,
     kafkaCompressionCodecInput.value,
     kafkaCompressionLevelInput.value,
-    kafkaConnectionTypeInput.value,
     kafkaAuthUsernameInput.value,
-    kafkaAuthPasswordInput,
-    kafkaAuthPasswordSecretInput,
     kafkaSaslMechanismInput.value,
     kafkaPartitionTypeInput.value,
     kafkaPartitionTypeRandomInput.value,
@@ -974,12 +987,13 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     logstashHostsInput.value,
     sslCertificateInput.value,
     sslKeyInput.value,
-    sslKeySecretInput.value,
     sslCertificateAuthoritiesInput.value,
+    sslKeySecretInput.value,
     elasticsearchUrlInput.value,
-    caTrustedFingerprintInput.value,
     serviceTokenInput.value,
     serviceTokenSecretInput.value,
+    presetInput.value,
+    caTrustedFingerprintInput.value,
     confirm,
     notifications.toasts,
   ]);

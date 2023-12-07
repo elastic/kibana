@@ -84,7 +84,7 @@ const StepContentComponent = ({
           css={rightPanelStyles}
         >
           {splitPanel && (
-            <div className="right-content-panel" css={rightPanelContentStyles}>
+            <div className="right-panel-wrapper" css={rightPanelContentStyles}>
               {splitPanel}
             </div>
           )}
