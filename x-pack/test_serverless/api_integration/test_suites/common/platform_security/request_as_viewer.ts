@@ -9,8 +9,9 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('security/request as viewer', () => {
+  describe('security/me as viewer', () => {
     const svlUserManager = getService('svlUserManager');
+    const svlCommonApi = getService('svlCommonApi');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     let credentials: { Cookie: string };
 
@@ -19,15 +20,17 @@ export default function ({ getService }: FtrProviderContext) {
       credentials = await svlUserManager.getApiCredentialsForRole('viewer');
     });
 
-    it('returns full status payload for authenticated request', async () => {
-      const { body } = await supertestWithoutAuth
-        .get('/api/status')
-        .set(credentials)
-        .set('kbn-xsrf', 'kibana');
+    it('returns valid user data for authenticated request', async () => {
+      const { body, status } = await supertestWithoutAuth
+      .get('/internal/security/me')
+      .set(svlCommonApi.getInternalRequestHeader())
+      .set(credentials);
 
-      expect(body.name).to.be.a('string');
-      expect(body.uuid).to.be.a('string');
-      expect(body.version.number).to.be.a('string');
+      const userData = await svlUserManager.getUserData('viewer');
+
+      expect(status).to.be(200);
+      expect(body.full_name).to.be(userData.fullname);
+      expect(body.email).to.be(userData.email);
     });
   });
 }
