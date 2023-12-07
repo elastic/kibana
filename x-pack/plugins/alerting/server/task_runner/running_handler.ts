@@ -6,7 +6,7 @@
  */
 
 import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
-import { partiallyUpdateAlert } from '../saved_objects/partially_update_alert';
+import { partiallyUpdateRule } from '../saved_objects/partially_update_rule';
 
 const TIME_TO_WAIT = 2000;
 
@@ -45,7 +45,7 @@ export class RunningHandler {
 
   private setRunning(ruleId: string, namespace?: string) {
     this.isUpdating = true;
-    this.runningPromise = partiallyUpdateAlert(
+    this.runningPromise = partiallyUpdateRule(
       this.client,
       ruleId,
       { running: true },

@@ -11,14 +11,15 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 
-import { partiallyUpdateAlert, PartiallyUpdateableAlertAttributes } from './partially_update_alert';
+import { partiallyUpdateRule, PartiallyUpdateableRuleAttributes } from './partially_update_rule';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { RULE_SAVED_OBJECT_TYPE } from '.';
 
 const MockSavedObjectsClientContract = savedObjectsClientMock.create();
 const MockISavedObjectsRepository =
   MockSavedObjectsClientContract as unknown as jest.Mocked<ISavedObjectsRepository>;
 
-describe('partially_update_alert', () => {
+describe('partially_update_rule', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -28,52 +29,77 @@ describe('partially_update_alert', () => {
       test('should work with no options', async () => {
         soClient.update.mockResolvedValueOnce(MockUpdateValue);
 
-        await partiallyUpdateAlert(soClient, MockAlertId, DefaultAttributes);
-        expect(soClient.update).toHaveBeenCalledWith('alert', MockAlertId, DefaultAttributes, {});
+        await partiallyUpdateRule(soClient, MockRuleId, DefaultAttributes);
+        expect(soClient.update).toHaveBeenCalledWith(
+          RULE_SAVED_OBJECT_TYPE,
+          MockRuleId,
+          DefaultAttributes,
+          {}
+        );
       });
 
       test('should work with extraneous attributes ', async () => {
-        const attributes = InvalidAttributes as unknown as PartiallyUpdateableAlertAttributes;
+        const attributes = InvalidAttributes as unknown as PartiallyUpdateableRuleAttributes;
         soClient.update.mockResolvedValueOnce(MockUpdateValue);
 
-        await partiallyUpdateAlert(soClient, MockAlertId, attributes);
-        expect(soClient.update).toHaveBeenCalledWith('alert', MockAlertId, DefaultAttributes, {});
+        await partiallyUpdateRule(soClient, MockRuleId, attributes);
+        expect(soClient.update).toHaveBeenCalledWith(
+          RULE_SAVED_OBJECT_TYPE,
+          MockRuleId,
+          DefaultAttributes,
+          {}
+        );
       });
 
       test('should handle SO errors', async () => {
         soClient.update.mockRejectedValueOnce(new Error('wops'));
 
         await expect(
-          partiallyUpdateAlert(soClient, MockAlertId, DefaultAttributes)
+          partiallyUpdateRule(soClient, MockRuleId, DefaultAttributes)
         ).rejects.toThrowError('wops');
       });
 
       test('should handle the version option', async () => {
         soClient.update.mockResolvedValueOnce(MockUpdateValue);
 
-        await partiallyUpdateAlert(soClient, MockAlertId, DefaultAttributes, { version: '1.2.3' });
-        expect(soClient.update).toHaveBeenCalledWith('alert', MockAlertId, DefaultAttributes, {
-          version: '1.2.3',
-        });
+        await partiallyUpdateRule(soClient, MockRuleId, DefaultAttributes, { version: '1.2.3' });
+        expect(soClient.update).toHaveBeenCalledWith(
+          RULE_SAVED_OBJECT_TYPE,
+          MockRuleId,
+          DefaultAttributes,
+          {
+            version: '1.2.3',
+          }
+        );
       });
 
       test('should handle the ignore404 option', async () => {
         const err = SavedObjectsErrorHelpers.createGenericNotFoundError();
         soClient.update.mockRejectedValueOnce(err);
 
-        await partiallyUpdateAlert(soClient, MockAlertId, DefaultAttributes, { ignore404: true });
-        expect(soClient.update).toHaveBeenCalledWith('alert', MockAlertId, DefaultAttributes, {});
+        await partiallyUpdateRule(soClient, MockRuleId, DefaultAttributes, { ignore404: true });
+        expect(soClient.update).toHaveBeenCalledWith(
+          RULE_SAVED_OBJECT_TYPE,
+          MockRuleId,
+          DefaultAttributes,
+          {}
+        );
       });
 
       test('should handle the namespace option', async () => {
         soClient.update.mockResolvedValueOnce(MockUpdateValue);
 
-        await partiallyUpdateAlert(soClient, MockAlertId, DefaultAttributes, {
+        await partiallyUpdateRule(soClient, MockRuleId, DefaultAttributes, {
           namespace: 'bat.cave',
         });
-        expect(soClient.update).toHaveBeenCalledWith('alert', MockAlertId, DefaultAttributes, {
-          namespace: 'bat.cave',
-        });
+        expect(soClient.update).toHaveBeenCalledWith(
+          RULE_SAVED_OBJECT_TYPE,
+          MockRuleId,
+          DefaultAttributes,
+          {
+            namespace: 'bat.cave',
+          }
+        );
       });
     });
 });
@@ -100,11 +126,11 @@ const DefaultAttributes = {
 
 const InvalidAttributes = { ...DefaultAttributes, foo: 'bar' };
 
-const MockAlertId = 'alert-id';
+const MockRuleId = 'rule-id';
 
 const MockUpdateValue = {
-  id: MockAlertId,
-  type: 'alert',
+  id: MockRuleId,
+  type: RULE_SAVED_OBJECT_TYPE,
   attributes: {
     actions: [],
     scheduledTaskId: 'scheduled-task-id',

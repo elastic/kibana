@@ -28,6 +28,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { migrateLegacyActions } from '../lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -106,7 +107,7 @@ describe('update()', () => {
   let actionsClient: jest.Mocked<ActionsClient>;
   const existingAlert = {
     id: '1',
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       enabled: true,
       tags: ['foo'],
@@ -238,7 +239,7 @@ describe('update()', () => {
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: true,
         schedule: { interval: '1m' },
@@ -376,14 +377,18 @@ describe('update()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
-      namespace: 'default',
-    });
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        namespace: 'default',
+      }
+    );
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
-    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual(RULE_SAVED_OBJECT_TYPE);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
@@ -537,7 +542,7 @@ describe('update()', () => {
     actionsClient.isPreconfigured.mockReturnValueOnce(true);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: true,
         schedule: { interval: '1m' },
@@ -628,7 +633,7 @@ describe('update()', () => {
 
     expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
       1,
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         actions: [
           {
@@ -728,9 +733,13 @@ describe('update()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
-      namespace: 'default',
-    });
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        namespace: 'default',
+      }
+    );
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(3);
   });
@@ -789,7 +798,7 @@ describe('update()', () => {
     actionsClient.isSystemAction.mockReturnValueOnce(true);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: true,
         schedule: { interval: '1m' },
@@ -872,7 +881,7 @@ describe('update()', () => {
 
     expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
       1,
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         actions: [
           {
@@ -964,9 +973,13 @@ describe('update()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
-      namespace: 'default',
-    });
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        namespace: 'default',
+      }
+    );
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(actionsClient.isSystemAction).toHaveBeenCalledTimes(3);
   });
@@ -1017,7 +1030,7 @@ describe('update()', () => {
     }));
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: true,
         schedule: { interval: '1m' },
@@ -1077,7 +1090,7 @@ describe('update()', () => {
 
     expect(extractReferencesFn).toHaveBeenCalledWith(ruleParams);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         actions: [
           {
@@ -1161,7 +1174,7 @@ describe('update()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: true,
         schedule: { interval: '1m' },
@@ -1254,7 +1267,7 @@ describe('update()', () => {
       expect.any(Object)
     );
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
-    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual(RULE_SAVED_OBJECT_TYPE);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
@@ -1321,7 +1334,7 @@ describe('update()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: false,
         schedule: { interval: '1m' },
@@ -1407,7 +1420,7 @@ describe('update()', () => {
     `);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
-    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual(RULE_SAVED_OBJECT_TYPE);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
@@ -1563,7 +1576,7 @@ describe('update()', () => {
   it('should trim alert name in the API key name', async () => {
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: false,
         name: ' my alert name ',
@@ -1613,7 +1626,7 @@ describe('update()', () => {
   it('swallows error when invalidate API key throws', async () => {
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: true,
         schedule: { interval: '1m' },
@@ -1721,7 +1734,7 @@ describe('update()', () => {
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: true,
         schedule: { interval: '1m' },
@@ -1840,7 +1853,7 @@ describe('update()', () => {
         ],
       },
     });
-    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, '1');
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'update(): Failed to load API key to invalidate on alert 1: Fail'
     );
@@ -1920,7 +1933,7 @@ describe('update()', () => {
       });
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
         id: alertId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           actions: [],
           enabled: true,
@@ -1947,7 +1960,7 @@ describe('update()', () => {
       });
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: alertId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           enabled: true,
           schedule: updatedSchedule,
@@ -2374,7 +2387,7 @@ describe('update()', () => {
     actionsClient.isPreconfigured.mockReturnValueOnce(true);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: true,
         schedule: { interval: '1m' },
@@ -2436,7 +2449,7 @@ describe('update()', () => {
 
     expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
       1,
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         actions: [
           {
@@ -2502,9 +2515,13 @@ describe('update()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
-      namespace: 'default',
-    });
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        namespace: 'default',
+      }
+    );
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(1);
   });
@@ -2549,7 +2566,7 @@ describe('update()', () => {
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: true,
         schedule: { interval: '1m' },
@@ -2700,7 +2717,7 @@ describe('update()', () => {
     beforeEach(() => {
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           alertTypeId: 'myType',
           consumer: 'myApp',
@@ -2779,7 +2796,7 @@ describe('update()', () => {
     beforeEach(() => {
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           enabled: true,
           schedule: { interval: '1m' },
@@ -2817,7 +2834,7 @@ describe('update()', () => {
             action: 'rule_update',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
         })
       );
     });
@@ -2850,7 +2867,7 @@ describe('update()', () => {
           kibana: {
             saved_object: {
               id: '1',
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
             },
           },
           error: {
@@ -2885,7 +2902,7 @@ describe('update()', () => {
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: true,
         schedule: { interval: '1m' },
@@ -2980,7 +2997,7 @@ describe('update()', () => {
       },
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         actions: [
           {
@@ -3031,7 +3048,7 @@ describe('update()', () => {
     beforeEach(() => {
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           enabled: true,
           schedule: { interval: '1m' },
@@ -3093,7 +3110,7 @@ describe('update()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: true,
         schedule: { interval: '1m' },
@@ -3190,7 +3207,7 @@ describe('update()', () => {
     expect(bulkMarkApiKeysForInvalidationMock).not.toHaveBeenCalled();
 
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
-    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual(RULE_SAVED_OBJECT_TYPE);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [

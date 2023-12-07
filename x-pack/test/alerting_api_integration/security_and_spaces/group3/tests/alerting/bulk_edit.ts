@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
@@ -123,7 +124,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdRule.id,
               });
               break;

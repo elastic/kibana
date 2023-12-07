@@ -34,6 +34,7 @@ import {
 } from './test_helpers';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { migrateLegacyActions } from '../lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -767,12 +768,12 @@ describe('bulkEnableRules', () => {
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_enable');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[0][0]?.kibana).toEqual({
-        saved_object: { id: 'id1', type: 'alert' },
+        saved_object: { id: 'id1', type: RULE_SAVED_OBJECT_TYPE },
       });
       expect(auditLogger.log.mock.calls[1][0]?.event?.action).toEqual('rule_enable');
       expect(auditLogger.log.mock.calls[1][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[1][0]?.kibana).toEqual({
-        saved_object: { id: 'id2', type: 'alert' },
+        saved_object: { id: 'id2', type: RULE_SAVED_OBJECT_TYPE },
       });
     });
 

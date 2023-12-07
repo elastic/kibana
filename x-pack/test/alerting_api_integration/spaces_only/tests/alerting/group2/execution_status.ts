@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
 import {
   checkAAD,
@@ -49,7 +50,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: response.body.id,
       });
     });
@@ -82,7 +83,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: response.body.id,
       });
     });
@@ -118,7 +119,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: response.body.id,
       });
     });
@@ -151,7 +152,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: response.body.id,
       });
     });

@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
 import { muteAlertParamsSchema } from './schemas';
 import type { MuteAlertParams } from './types';
@@ -38,7 +39,7 @@ async function muteInstanceWithOCC(
   { alertId, alertInstanceId }: MuteAlertParams
 ) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
-    'alert',
+    RULE_SAVED_OBJECT_TYPE,
     alertId
   );
 
@@ -57,7 +58,7 @@ async function muteInstanceWithOCC(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.MUTE_ALERT,
-        savedObject: { type: 'alert', id: alertId },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: alertId },
         error,
       })
     );
@@ -68,7 +69,7 @@ async function muteInstanceWithOCC(
     ruleAuditEvent({
       action: RuleAuditAction.MUTE_ALERT,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id: alertId },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: alertId },
     })
   );
 

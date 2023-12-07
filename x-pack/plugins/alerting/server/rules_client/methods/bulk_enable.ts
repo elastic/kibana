@@ -32,6 +32,7 @@ import {
 import { RulesClientContext, BulkOperationError, BulkOptions } from '../types';
 import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
 import { RuleAttributes } from '../../data/rule/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const getShouldScheduleTask = async (
   context: RulesClientContext,
@@ -118,7 +119,7 @@ const bulkEnableRulesWithOCC = async (
       await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
         {
           filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           perPage: 100,
           ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
         }
@@ -241,7 +242,7 @@ const bulkEnableRulesWithOCC = async (
             ruleAuditEvent({
               action: RuleAuditAction.ENABLE,
               outcome: 'unknown',
-              savedObject: { type: 'alert', id: rule.id },
+              savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
             })
           );
         } catch (error) {

@@ -24,6 +24,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { RecoveredActionGroup } from '../common';
+import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
 
 jest.mock('./application/rule/methods/get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),
@@ -227,7 +228,7 @@ function expectSuccess(
 // tests to run when the method is expected to fail
 function expectConflict(success: boolean, err: Error, method: 'update' | 'create' = 'update') {
   const conflictErrorMessage = SavedObjectsErrorHelpers.createConflictError(
-    'alert',
+    RULE_SAVED_OBJECT_TYPE,
     MockAlertId
   ).message;
 
@@ -249,7 +250,7 @@ function mockSavedObjectUpdateConflictErrorTimes(times: number) {
   // default success value
   const mockUpdateValue = {
     id: MockAlertId,
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       actions: [],
       scheduledTaskId: 'scheduled-task-id',
@@ -263,10 +264,10 @@ function mockSavedObjectUpdateConflictErrorTimes(times: number) {
   // queue up specified number of errors before a success call
   for (let i = 0; i < times; i++) {
     unsecuredSavedObjectsClient.update.mockRejectedValueOnce(
-      SavedObjectsErrorHelpers.createConflictError('alert', MockAlertId)
+      SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, MockAlertId)
     );
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(
-      SavedObjectsErrorHelpers.createConflictError('alert', MockAlertId)
+      SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, MockAlertId)
     );
   }
 }
@@ -276,9 +277,9 @@ function setupRawAlertMocks(
   overrides: Record<string, unknown> = {},
   attributeOverrides: Record<string, unknown> = {}
 ) {
-  const rawAlert = {
+  const rawRule = {
     id: MockAlertId,
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       enabled: true,
       tags: ['foo'],
@@ -297,10 +298,10 @@ function setupRawAlertMocks(
     version: '123',
     ...overrides,
   };
-  const decryptedRawAlert = {
-    ...rawAlert,
+  const decryptedRawRule = {
+    ...rawRule,
     attributes: {
-      ...rawAlert.attributes,
+      ...rawRule.attributes,
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
   };
@@ -310,11 +311,11 @@ function setupRawAlertMocks(
 
   // splitting this out as it's easier to set a breakpoint :-)
   unsecuredSavedObjectsClient.get.mockImplementation(async () => {
-    return cloneDeep(rawAlert);
+    return cloneDeep(rawRule);
   });
 
   encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(async () => {
-    return cloneDeep(decryptedRawAlert);
+    return cloneDeep(decryptedRawRule);
   });
 }
 

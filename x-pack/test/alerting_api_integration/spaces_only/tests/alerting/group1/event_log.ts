@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ES_TEST_INDEX_NAME, ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
 import {
   getUrlPrefix,
@@ -167,7 +168,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 validateEvent(event, {
                   spaceId: space.id,
                   savedObjects: [
-                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                    {
+                      type: RULE_SAVED_OBJECT_TYPE,
+                      id: alertId,
+                      rel: 'primary',
+                      type_id: 'test.patternFiring',
+                    },
                   ],
                   message: `rule execution start: "${alertId}"`,
                   shouldHaveTask: true,
@@ -186,7 +192,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 validateEvent(event, {
                   spaceId: space.id,
                   savedObjects: [
-                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                    {
+                      type: RULE_SAVED_OBJECT_TYPE,
+                      id: alertId,
+                      rel: 'primary',
+                      type_id: 'test.patternFiring',
+                    },
                     { type: 'action', id: createdAction.id, type_id: 'test.noop' },
                   ],
                   message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup: 'default' action: test.noop:${createdAction.id}`,
@@ -238,7 +249,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 validateEvent(event, {
                   spaceId: space.id,
                   savedObjects: [
-                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                    {
+                      type: RULE_SAVED_OBJECT_TYPE,
+                      id: alertId,
+                      rel: 'primary',
+                      type_id: 'test.patternFiring',
+                    },
                   ],
                   outcome: 'success',
                   message: `rule executed: test.patternFiring:${alertId}: 'abc'`,
@@ -289,7 +305,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             validateEvent(event, {
               spaceId: space.id,
               savedObjects: [
-                { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                {
+                  type: RULE_SAVED_OBJECT_TYPE,
+                  id: alertId,
+                  rel: 'primary',
+                  type_id: 'test.patternFiring',
+                },
               ],
               message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
               instanceId: 'instance',

@@ -21,6 +21,7 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -73,7 +74,7 @@ describe('updateApiKey()', () => {
   let rulesClient: RulesClient;
   const existingAlert = {
     id: '1',
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       revision: 0,
       schedule: { interval: '10s' },
@@ -117,11 +118,15 @@ describe('updateApiKey()', () => {
     });
     await rulesClient.updateApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
-      namespace: 'default',
-    });
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        namespace: 'default',
+      }
+    );
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       '1',
       {
         schedule: { interval: '10s' },
@@ -174,11 +179,15 @@ describe('updateApiKey()', () => {
     });
     await rulesClient.updateApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
-      namespace: 'default',
-    });
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        namespace: 'default',
+      }
+    );
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       '1',
       {
         schedule: { interval: '10s' },
@@ -226,11 +235,15 @@ describe('updateApiKey()', () => {
     });
     await rulesClient.updateApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
-      namespace: 'default',
-    });
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        namespace: 'default',
+      }
+    );
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       '1',
       {
         schedule: { interval: '10s' },
@@ -282,12 +295,16 @@ describe('updateApiKey()', () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
 
     await rulesClient.updateApiKey({ id: '1' });
-    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
-    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
-      namespace: 'default',
-    });
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, '1');
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        namespace: 'default',
+      }
+    );
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       '1',
       {
         schedule: { interval: '10s' },
@@ -401,7 +418,7 @@ describe('updateApiKey()', () => {
             action: 'rule_update_api_key',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
         })
       );
     });
@@ -419,7 +436,7 @@ describe('updateApiKey()', () => {
           kibana: {
             saved_object: {
               id: '1',
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
             },
           },
           error: {
