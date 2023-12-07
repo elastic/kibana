@@ -3147,6 +3147,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/bfetch-error@link:packages/kbn-bfetch-error":
+  version "0.0.0"
+  uid ""
+
 "@kbn/bfetch-explorer-plugin@link:examples/bfetch_explorer":
   version "0.0.0"
   uid ""
@@ -5520,6 +5524,10 @@
   uid ""
 
 "@kbn/search-connectors@link:packages/kbn-search-connectors":
+  version "0.0.0"
+  uid ""
+
+"@kbn/search-errors@link:packages/kbn-search-errors":
   version "0.0.0"
   uid ""
 

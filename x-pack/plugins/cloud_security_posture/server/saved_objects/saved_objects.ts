@@ -7,20 +7,17 @@
 
 import { SavedObjectsServiceSetup } from '@kbn/core/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { cspRuleTemplateSavedObjectMapping } from './mappings';
-import { cspRuleTemplateMigrations } from './migrations';
-import {
-  cspRuleTemplateSchemaV830,
-  cspRuleTemplateSchemaV840,
-  cspRuleTemplateSchemaV870,
-  CspRuleTemplate,
-} from '../../common/schemas';
+import { rulesV1, rulesV2, rulesV3 } from '../../common/types';
+import { cspBenchmarkRuleSavedObjectMapping } from './mappings';
+import { cspBenchmarkRuleMigrations } from './migrations';
 
-import { CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { CspBenchmarkRule } from '../../common/types/latest';
+
+import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
-  savedObjects.registerType<CspRuleTemplate>({
-    name: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  savedObjects.registerType<CspBenchmarkRule>({
+    name: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
     indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
@@ -29,11 +26,11 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
       visibleInManagement: true,
     },
     schemas: {
-      '8.3.0': cspRuleTemplateSchemaV830,
-      '8.4.0': cspRuleTemplateSchemaV840,
-      '8.7.0': cspRuleTemplateSchemaV870,
+      '8.3.0': rulesV1.cspBenchmarkRuleSchema,
+      '8.4.0': rulesV2.cspBenchmarkRuleSchema,
+      '8.7.0': rulesV3.cspBenchmarkRuleSchema,
     },
-    migrations: cspRuleTemplateMigrations,
-    mappings: cspRuleTemplateSavedObjectMapping,
+    migrations: cspBenchmarkRuleMigrations,
+    mappings: cspBenchmarkRuleSavedObjectMapping,
   });
 }
