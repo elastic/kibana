@@ -10,16 +10,12 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationContext,
 } from '@kbn/core/server';
-import {
-  CspRuleTemplateV830,
-  CspRuleTemplateV840,
-  CspRuleTemplateV870,
-} from '../../../common/schemas/csp_rule_template';
+import { rulesV1, rulesV2, rulesV3 } from '../../../common/types';
 
-function migrateCspRuleTemplatesToV840(
-  doc: SavedObjectUnsanitizedDoc<CspRuleTemplateV830>,
+function migrateCspBenchmarkRuleToV840(
+  doc: SavedObjectUnsanitizedDoc<rulesV1.CspBenchmarkRule>,
   context: SavedObjectMigrationContext
-): SavedObjectUnsanitizedDoc<CspRuleTemplateV840> {
+): SavedObjectUnsanitizedDoc<rulesV2.CspBenchmarkRule> {
   const { enabled, muted, benchmark, ...metadata } = doc.attributes;
   return {
     ...doc,
@@ -37,10 +33,10 @@ function migrateCspRuleTemplatesToV840(
   };
 }
 
-function migrateCspRuleTemplatesToV870(
-  doc: SavedObjectUnsanitizedDoc<CspRuleTemplateV840>,
+function migrateCspBenchmarkRuleToV870(
+  doc: SavedObjectUnsanitizedDoc<rulesV2.CspBenchmarkRule>,
   context: SavedObjectMigrationContext
-): SavedObjectUnsanitizedDoc<CspRuleTemplateV870> {
+): SavedObjectUnsanitizedDoc<rulesV3.CspBenchmarkRule> {
   // Keeps only metadata, deprecated state
   const { muted, enabled, ...attributes } = doc.attributes;
 
@@ -59,7 +55,7 @@ function migrateCspRuleTemplatesToV870(
   };
 }
 
-export const cspRuleTemplateMigrations: SavedObjectMigrationMap = {
-  '8.4.0': migrateCspRuleTemplatesToV840,
-  '8.7.0': migrateCspRuleTemplatesToV870,
+export const cspBenchmarkRuleMigrations: SavedObjectMigrationMap = {
+  '8.4.0': migrateCspBenchmarkRuleToV840,
+  '8.7.0': migrateCspBenchmarkRuleToV870,
 };

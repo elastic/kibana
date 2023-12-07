@@ -5,13 +5,48 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-// this pages follows versioning interface strategy https://docs.elastic.dev/kibana-dev-docs/versioning-interfaces
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
 
-const DEFAULT_RULES_TEMPLATE_PER_PAGE = 25;
+const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
 
-export const findCspRuleTemplateRequest = schema.object({
+// Since version 8.7.0
+export const cspBenchmarkRuleMetadataSchema = schema.object({
+  audit: schema.string(),
+  benchmark: schema.object({
+    name: schema.string(),
+    posture_type: schema.maybe(
+      schema.oneOf([schema.literal(CSPM_POLICY_TEMPLATE), schema.literal(KSPM_POLICY_TEMPLATE)])
+    ),
+    id: schema.string(),
+    version: schema.string(),
+    rule_number: schema.maybe(schema.string()),
+  }),
+  default_value: schema.maybe(schema.string()),
+  description: schema.string(),
+  id: schema.string(),
+  impact: schema.maybe(schema.string()),
+  name: schema.string(),
+  profile_applicability: schema.string(),
+  rationale: schema.string(),
+  references: schema.maybe(schema.string()),
+  rego_rule_id: schema.string(),
+  remediation: schema.string(),
+  section: schema.string(),
+  tags: schema.arrayOf(schema.string()),
+  version: schema.string(),
+});
+
+export type CspBenchmarkRuleMetadata = TypeOf<typeof cspBenchmarkRuleMetadataSchema>;
+
+export const cspBenchmarkRuleSchema = schema.object({
+  metadata: cspBenchmarkRuleMetadataSchema,
+});
+
+export type CspBenchmarkRule = TypeOf<typeof cspBenchmarkRuleSchema>;
+
+export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * An Elasticsearch simple_query_string
    */
@@ -25,16 +60,16 @@ export const findCspRuleTemplateRequest = schema.object({
   /**
    * The number of objects to include in each page
    */
-  perPage: schema.number({ defaultValue: DEFAULT_RULES_TEMPLATE_PER_PAGE, min: 0 }),
+  perPage: schema.number({ defaultValue: DEFAULT_BENCHMARK_RULES_PER_PAGE, min: 0 }),
 
   /**
-   *  Fields to retrieve from CspRuleTemplate saved object
+   *  Fields to retrieve from CspBenchmarkRule saved object
    */
   fields: schema.maybe(schema.arrayOf(schema.string())),
 
   /**
    *  The fields to perform the parsed query against.
-   * Valid fields are fields which mapped to 'text' in cspRuleTemplateSavedObjectMapping
+   * Valid fields are fields which mapped to 'text' in cspBenchmarkRuleSavedObjectMapping
    */
   searchFields: schema.arrayOf(
     schema.oneOf([schema.literal('metadata.name.text'), schema.literal('metadata.section.text')]),
@@ -85,3 +120,12 @@ export const findCspRuleTemplateRequest = schema.object({
    */
   section: schema.maybe(schema.string()),
 });
+
+export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
+
+export interface FindCspBenchmarkRuleResponse {
+  items: CspBenchmarkRule[];
+  total: number;
+  page: number;
+  perPage: number;
+}

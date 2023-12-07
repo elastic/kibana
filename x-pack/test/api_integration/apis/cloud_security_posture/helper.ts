@@ -9,7 +9,7 @@ import type { SuperTest, Test } from 'supertest';
 import { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { IndexDetails } from '@kbn/cloud-security-posture-plugin/common/types';
+import type { IndexDetails } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import { SecurityService } from '../../../../../test/common/services/security/security';
 
 export const deleteIndex = (es: Client, indexToBeDeleted: string[]) => {

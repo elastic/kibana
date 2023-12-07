@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './es_error';
-export * from './painless_error';
-export * from './timeout_error';
-export * from './utils';
-export * from './types';
-export * from './search_session_incomplete_warning';
+export { isEsError, EsError } from './src/es_error';
+export { isPainlessError, PainlessError } from './src/painless_error';
+export { renderSearchError } from './src/render_search_error';
+export type { IEsError } from './src/types';

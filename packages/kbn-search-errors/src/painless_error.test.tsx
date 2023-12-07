@@ -12,7 +12,53 @@ const startMock = coreMock.createStart();
 import { mount } from 'enzyme';
 import { PainlessError } from './painless_error';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
+
+const searchPhaseException = {
+  error: {
+    root_cause: [
+      {
+        type: 'script_exception',
+        reason: 'compile error',
+        script_stack: ['invalid', '^---- HERE'],
+        script: 'invalid',
+        lang: 'painless',
+        position: {
+          offset: 0,
+          start: 0,
+          end: 7,
+        },
+      },
+    ],
+    type: 'search_phase_execution_exception',
+    reason: 'all shards failed',
+    phase: 'query',
+    grouped: true,
+    failed_shards: [
+      {
+        shard: 0,
+        index: '.kibana_11',
+        node: 'b3HX8C96Q7q1zgfVLxEsPA',
+        reason: {
+          type: 'script_exception',
+          reason: 'compile error',
+          script_stack: ['invalid', '^---- HERE'],
+          script: 'invalid',
+          lang: 'painless',
+          position: {
+            offset: 0,
+            start: 0,
+            end: 7,
+          },
+          caused_by: {
+            type: 'illegal_argument_exception',
+            reason: 'cannot resolve symbol [invalid]',
+          },
+        },
+      },
+    ],
+  },
+  status: 400,
+};
 
 describe('PainlessError', () => {
   beforeEach(() => {
