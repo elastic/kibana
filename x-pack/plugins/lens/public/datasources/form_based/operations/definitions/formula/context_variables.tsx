@@ -65,7 +65,7 @@ export interface TimeRangeIndexPatternColumn extends ReferenceBasedIndexPatternC
   operationType: 'time_range';
 }
 
-const timeRangeHelp = i18n.translate('lens.formula.timeRange.help', {
+const timeRangeHelp = i18n.translate('xpack.lens.formula.timeRange.help', {
   defaultMessage: 'The specified time range, in milliseconds (ms).',
 });
 
@@ -129,7 +129,7 @@ export const timeRangeOperation = createContextValueBasedOperation<TimeRangeInde
   getErrorMessage: getTimeRangeErrorMessages,
 });
 
-const nowHelp = i18n.translate('lens.formula.now.help', {
+const nowHelp = i18n.translate('xpack.lens.formula.now.help', {
   defaultMessage: 'The current now moment used in Kibana expressed in milliseconds (ms).',
 });
 
@@ -169,7 +169,7 @@ export const nowOperation = createContextValueBasedOperation<NowIndexPatternColu
   getErrorMessage: getNowErrorMessage,
 });
 
-const intervalHelp = i18n.translate('lens.formula.interval.help', {
+const intervalHelp = i18n.translate('xpack.lens.formula.interval.help', {
   defaultMessage: 'The specified minimum interval for the date histogram, in milliseconds (ms).',
 });
 
@@ -190,7 +190,7 @@ export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
   args: {
     targetBars: {
       types: ['number'],
-      help: i18n.translate('lens.formula.interval.targetBars.help', {
+      help: i18n.translate('xpack.lens.formula.interval.targetBars.help', {
         defaultMessage: 'The target number of bars for the date histogram.',
       }),
     },
