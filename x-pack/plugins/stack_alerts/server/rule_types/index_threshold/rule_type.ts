@@ -12,7 +12,6 @@ import {
   TIME_SERIES_BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/server';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
-import { StackAlert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
@@ -23,13 +22,14 @@ import { ComparatorFns, getComparatorScript, getHumanReadableComparator } from '
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { Params, ParamsSchema } from './rule_type_params';
 import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
+import { StackAlertType } from '../types';
 
 export const ID = '.index-threshold';
 export const ActionGroupId = 'threshold met';
 
 export function getRuleType(
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
-): RuleType<Params, never, {}, {}, ActionContext, typeof ActionGroupId, never, StackAlert> {
+): RuleType<Params, never, {}, {}, ActionContext, typeof ActionGroupId, never, StackAlertType> {
   const ruleTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
@@ -212,7 +212,14 @@ export function getRuleType(
   };
 
   async function executor(
-    options: RuleExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId, StackAlert>
+    options: RuleExecutorOptions<
+      Params,
+      {},
+      {},
+      ActionContext,
+      typeof ActionGroupId,
+      StackAlertType
+    >
   ) {
     const {
       rule: { id: ruleId, name },
