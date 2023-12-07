@@ -26,7 +26,7 @@ export function SloList({ autoRefresh }: Props) {
   const [query, setQuery] = useState(state.kqlQuery);
   const [sort, setSort] = useState<SortField>(state.sort.by);
   const [direction] = useState<SortDirection>(state.sort.direction);
-  const [sloView, setSloView] = useState<SLOView>(state.view);
+  const [view, setView] = useState<SLOView>(state.view);
   const [isCompact, setIsCompact] = useLocalStorage<'true' | 'false'>(SLO_LIST_IS_COMPACT, 'true');
   const isCompactView = isCompact === 'true';
 
@@ -68,7 +68,7 @@ export function SloList({ autoRefresh }: Props) {
   };
 
   const handleChangeView = (newView: SLOView) => {
-    setSloView(newView);
+    setView(newView);
     storeState({ view: newView });
   };
 
@@ -84,11 +84,9 @@ export function SloList({ autoRefresh }: Props) {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ToggleSLOView
-          sloView={sloView}
+          sloView={view}
           setSLOView={handleChangeView}
-          toggleCompactView={() =>
-            isCompact === 'true' ? setIsCompact('false') : setIsCompact('true')
-          }
+          toggleCompactView={() => (isCompactView ? setIsCompact('false') : setIsCompact('true'))}
           isCompact={isCompactView}
         />
       </EuiFlexItem>
@@ -97,7 +95,7 @@ export function SloList({ autoRefresh }: Props) {
         loading={isLoading || isRefetching}
         error={isError}
         isCompact={isCompactView}
-        sloView={sloView}
+        sloView={view}
       />
 
       {total > 0 ? (
