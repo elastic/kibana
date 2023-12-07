@@ -12,7 +12,6 @@ export const alertsFieldMap8130 = {
   ...alertsFieldMap840,
   /**
    * Stores the criticality level for the host, as determined by analysts, in relation to the alert.
-   * This field is set only once when the alert is first indexed.
    * The Criticality level is copied from the asset criticality index.
    */
   [ALERT_HOST_CRITICALITY]: {
@@ -22,7 +21,6 @@ export const alertsFieldMap8130 = {
   },
   /**
    * Stores the criticality level for the user, as determined by analysts, in relation to the alert.
-   * This field is set only once when the alert is first indexed.
    * The Criticality level is copied from the asset criticality index.
    */
   [ALERT_USER_CRITICALITY]: {

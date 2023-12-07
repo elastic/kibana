@@ -28,8 +28,6 @@ export type EnrichmentFunction = <T extends BaseFieldsLatest>(
   e: EventsForEnrichment<T>
 ) => EventsForEnrichment<T>;
 
-/** A map from event._id's to arrays of enrichment functions. the enrichment functions are bound to enrichment events via stack context.
- * TODO: reconsider if we need this. */
 export interface EventsMapByEnrichments {
   [id: string]: EnrichmentFunction[];
 }

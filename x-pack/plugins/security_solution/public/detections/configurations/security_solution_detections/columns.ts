@@ -76,7 +76,6 @@ const getBaseColumns = (
           id: 'user.risk.calculated_level',
         }
       : null,
-    // fields for ALERT_HOST_CRITICALITY and ALERT_USER_CRITICALITY
     isPlatinumPlus
       ? {
           columnHeaderType: defaultColumnHeaderType,
