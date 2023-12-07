@@ -256,8 +256,8 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
 
       if (logsEndpointActionsResult.statusCode !== 201) {
         throw new ResponseActionsClientError(
-          `Failed to create action request document. Received: [${logsEndpointActionsResult.statusCode}][${logsEndpointActionsResult.body.result}]`,
-          500,
+          `Failed to create action request document. Result: ${logsEndpointActionsResult.body.result}`,
+          logsEndpointActionsResult.statusCode,
           logsEndpointActionsResult
         );
       }

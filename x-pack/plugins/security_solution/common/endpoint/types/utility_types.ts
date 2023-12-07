@@ -10,3 +10,10 @@
 export type PromiseResolvedValue<T extends Promise<any>> = T extends Promise<infer Value>
   ? Value
   : never;
+
+/**
+ * Deeply convert a immutable type (those with `readonly` properties) to a mutable type
+ */
+export type DeepMutable<T> = T extends Record<any, any>
+  ? { -readonly [K in keyof T]: DeepMutable<T[K]> }
+  : T;

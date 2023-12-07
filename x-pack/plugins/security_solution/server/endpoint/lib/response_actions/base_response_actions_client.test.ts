@@ -29,6 +29,23 @@ import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { CasesByAlertIDParams } from '@kbn/cases-plugin/server/client/cases/get';
 import type { Logger } from '@kbn/logging';
+import { getActionDetailsById as _getActionDetailsById } from '../../services/actions/action_details_by_id';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult } from '@elastic/elasticsearch';
+import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
+import type { DeepMutable } from '../../../../common/endpoint/types/utility_types';
+import { set } from 'lodash';
+
+jest.mock('../../services/actions/action_details_by_id', () => {
+  const original = jest.requireActual('../../services/actions/action_details_by_id');
+
+  return {
+    ...original,
+    getActionDetailsById: jest.fn(original.getActionDetailsById),
+  };
+});
+
+const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
 
 describe('`ResponseActionsClientImpl` class', () => {
   let esClient: ElasticsearchClientMock;
@@ -52,6 +69,10 @@ describe('`ResponseActionsClientImpl` class', () => {
       endpointService: endpointAppContextService,
       username: 'foo',
     });
+  });
+
+  afterEach(() => {
+    getActionDetailsByIdMock.mockClear();
   });
 
   describe('Public methods', () => {
@@ -166,25 +187,204 @@ describe('`ResponseActionsClientImpl` class', () => {
 
       expect(casesClient.cases.getCasesByAlertID).toHaveBeenCalledTimes(4);
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringMatching(/Attempt to get cases for alertID \[invalid-alert-id\]/)
+        expect.stringContaining('Attempt to get cases for alertID [invalid-alert-id]')
       );
     });
 
-    it.todo('should do nothing if alertIDs were not associated with any cases');
+    it('should do nothing if alertIDs were not associated with any cases', async () => {
+      updateCasesOptions.caseIds.length = 0;
+      updateCasesOptions.alertIds = [KNOWN_ALERT_ID_3];
+      await baseClassMock.updateCases(updateCasesOptions);
 
-    it.todo('should update cases with an attachment for each host');
+      expect(logger.debug).toHaveBeenCalledWith(`Nothing to do. Alert IDs are not tied to Cases`);
+    });
 
-    it.todo('should not error if update to a case fails');
+    it('should update cases with an attachment for each host', async () => {
+      const updateResponse = await baseClassMock.updateCases(updateCasesOptions);
+
+      expect(updateResponse).toBeUndefined();
+      expect(casesClient.attachments.bulkCreate).toHaveBeenCalledTimes(4);
+      expect(casesClient.attachments.bulkCreate).toHaveBeenLastCalledWith({
+        attachments: [
+          {
+            actions: {
+              targets: [
+                {
+                  endpointId: '1-2-3',
+                  hostname: 'foo-one',
+                },
+                {
+                  endpointId: '4-5-6',
+                  hostname: 'foo-two',
+                },
+              ],
+              type: 'isolate',
+            },
+            comment: 'this is a case comment',
+            owner: 'securitySolution',
+            type: 'actions',
+          },
+          {
+            actions: {
+              targets: [
+                {
+                  endpointId: '1-2-3',
+                  hostname: 'foo-one',
+                },
+                {
+                  endpointId: '4-5-6',
+                  hostname: 'foo-two',
+                },
+              ],
+              type: 'isolate',
+            },
+            comment: 'this is a case comment',
+            owner: 'securitySolution',
+            type: 'actions',
+          },
+          {
+            actions: {
+              targets: [
+                {
+                  endpointId: '1-2-3',
+                  hostname: 'foo-one',
+                },
+                {
+                  endpointId: '4-5-6',
+                  hostname: 'foo-two',
+                },
+              ],
+              type: 'isolate',
+            },
+            comment: 'this is a case comment',
+            owner: 'securitySolution',
+            type: 'actions',
+          },
+          {
+            actions: {
+              targets: [
+                {
+                  endpointId: '1-2-3',
+                  hostname: 'foo-one',
+                },
+                {
+                  endpointId: '4-5-6',
+                  hostname: 'foo-two',
+                },
+              ],
+              type: 'isolate',
+            },
+            comment: 'this is a case comment',
+            owner: 'securitySolution',
+            type: 'actions',
+          },
+        ],
+        caseId: 'case-3',
+      });
+    });
+
+    it('should not error if update to a case fails', async () => {
+      (casesClient.attachments.bulkCreate as jest.Mock).mockImplementation(async (options) => {
+        if (options.caseId === 'case-2') {
+          throw new Error('update filed to case-2');
+        }
+      });
+      await baseClassMock.updateCases(updateCasesOptions);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Attempt to update case ID [case-2] failed:')
+      );
+    });
   });
 
   describe('#fetchActionDetails()', () => {
-    it.todo('should retrieve action details');
+    it('should retrieve action details', async () => {
+      await baseClassMock.fetchActionDetails('one').catch(() => {
+        // just ignoring error
+      });
+
+      expect(getActionDetailsByIdMock).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'one'
+      );
+    });
   });
 
   describe('#writeActionRequestToEndpointIndex()', () => {
-    it.todo('should return indexed record on success');
+    let esIndexDocResponse: TransportResult<estypes.IndexResponse, unknown>;
+    let indexDocOptions: DeepMutable<ResponseActionsClientWriteActionRequestToEndpointIndexOptions>;
+    let expectedIndexDoc: LogsEndpointAction;
 
-    it.todo('should include alert_ids if any were provided');
+    beforeEach(() => {
+      esIndexDocResponse = {
+        body: {
+          result: 'created',
+          _id: '123',
+          _index: ENDPOINT_ACTIONS_INDEX,
+          _version: 1,
+        },
+        statusCode: 201,
+        headers: {},
+        meta: {},
+        warnings: null,
+      } as TransportResult<estypes.IndexResponse, unknown>;
+
+      indexDocOptions = {
+        command: 'isolate',
+        rule_name: 'my-rule',
+        rule_id: 'rule-1',
+        agent_type: 'endpoint',
+        endpoint_ids: ['one'],
+        comment: 'test comment',
+        alert_ids: undefined,
+        case_ids: undefined,
+        hosts: undefined,
+        parameters: undefined,
+        file: undefined,
+      };
+
+      expectedIndexDoc = {
+        '@timestamp': expect.any(String),
+        EndpointActions: {
+          action_id: expect.any(String),
+          data: {
+            command: 'isolate',
+            comment: 'test comment',
+          },
+          expiration: expect.any(String),
+          input_type: 'endpoint',
+          type: 'INPUT_ACTION',
+        },
+        agent: {
+          id: ['one'],
+        },
+        rule: {
+          id: 'rule-1',
+          name: 'my-rule',
+        },
+        user: {
+          id: 'foo',
+        },
+      };
+
+      esClient.index.mockReturnValue(Promise.resolve(esIndexDocResponse));
+    });
+
+    it('should return indexed record on success', async () => {
+      await expect(
+        baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+      ).resolves.toEqual(expectedIndexDoc);
+    });
+
+    it('should include alert_ids if any were provided', async () => {
+      indexDocOptions.alert_ids = ['one', 'two'];
+      set(expectedIndexDoc, 'EndpointActions.data.alert_id', indexDocOptions.alert_ids);
+
+      await expect(
+        baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+      ).resolves.toEqual(expectedIndexDoc);
+    });
 
     it.todo('should included hosts if any where provided');
 
@@ -220,7 +420,7 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
   }
 
   public async writeActionResponseToEndpointIndex<TOutputContent extends object = object>(
-    options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions
+    options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {
     return super.writeActionResponseToEndpointIndex<TOutputContent>(options);
   }
