@@ -104,7 +104,7 @@ function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
       // whichever is greater.
       newPollInterval = Math.min(
         Math.ceil(previousPollInterval * POLL_INTERVAL_INCREASE_PERCENTAGE),
-        Math.max(PREFERRED_MAX_POLL_INTERVAL, startingPollInterval)
+        Math.ceil(Math.max(PREFERRED_MAX_POLL_INTERVAL, startingPollInterval))
       );
       if (
         Number.isNaN(newPollInterval) ||
