@@ -48,7 +48,13 @@ export const DocumentViewModeToggle = ({
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" css={containerCss}>
+    <EuiFlexGroup
+      direction="row"
+      gutterSize="s"
+      alignItems="center"
+      responsive={false}
+      css={containerCss}
+    >
       {prepend && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
       <EuiFlexItem grow={false}>
         {isTextBasedQuery || !showViewModeToggle ? (

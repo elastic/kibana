@@ -58,6 +58,8 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
             }),
             iconType: 'transitionLeftIn',
             'data-test-subj': 'dscShowSidebarButton',
+            'aria-expanded': !isSidebarCollapsed,
+            'aria-controls': 'discover-sidebar',
             onClick: () => sidebarToggleState?.toggle?.(false),
           },
         ]
@@ -74,6 +76,8 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
                 }),
             iconType: isChartHidden ? 'transitionTopIn' : 'transitionTopOut',
             'data-test-subj': isChartHidden ? 'dscShowHistogramButton' : 'dscHideHistogramButton',
+            'aria-expanded': !isChartHidden,
+            'aria-controls': 'unifiedHistogramCollapsablePanel',
             onClick: onToggleChart,
           },
         ]

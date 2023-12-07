@@ -221,8 +221,15 @@ export function Chart({
     isPlainRecord,
   });
 
+  const a11yCommonProps = {
+    id: 'unifiedHistogramCollapsablePanel',
+    'aria-label': i18n.translate('unifiedHistogram.collapsablePanelAriaLabel', {
+      defaultMessage: 'Histogram chart',
+    }),
+  };
+
   if (Boolean(renderCustomChartToggleActions) && !chartVisible) {
-    return <div data-test-subj="unifiedHistogramChartPanelHidden" />;
+    return <div {...a11yCommonProps} data-test-subj="unifiedHistogramChartPanelHidden" />;
   }
 
   const LensSaveModalComponent = services.lens.SaveModalComponent;
@@ -265,6 +272,7 @@ export function Chart({
 
   return (
     <EuiFlexGroup
+      {...a11yCommonProps}
       className={className}
       direction="column"
       alignItems="stretch"
