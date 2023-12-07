@@ -179,7 +179,7 @@ export class ComboBoxService extends FtrService {
    * @param comboBoxElement element that wraps up EuiComboBox
    * @param filterValue text
    */
-  private async setFilterValue(
+  public async setFilterValue(
     comboBoxElement: WebElementWrapper,
     filterValue: string
   ): Promise<void> {
