@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Validator as IValidator } from '@cfworker/json-schema';
 import * as Boom from '@hapi/boom';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server/plugin';
 import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-plugin/server';
@@ -13,6 +12,7 @@ import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/serv
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import Ajv, { type ValidateFunction } from 'ajv';
 import { once } from 'lodash';
 import {
   ContextRegistry,
@@ -33,6 +33,10 @@ import type {
   RespondFunctionResources,
 } from './types';
 import { splitKbText } from './util/split_kb_text';
+
+const ajv = new Ajv({
+  strict: false,
+});
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -296,22 +300,14 @@ export class ObservabilityAIAssistantService {
     const contextRegistry: ContextRegistry = new Map();
     const functionHandlerRegistry: FunctionHandlerRegistry = new Map();
 
-    // const Validator = await import('@cfworker/json-schema').then((m) => m.Validator);
-
-    const validators = new Map<string, IValidator>();
+    const validators = new Map<string, ValidateFunction>();
 
     const registerContext: RegisterContextDefinition = (context) => {
       contextRegistry.set(context.name, context);
     };
 
     const registerFunction: RegisterFunction = (definition, respond) => {
-      validators.set(
-        definition.name,
-        // new Validator(definition.parameters as Schema, '2020-12', true)
-        {
-          validate: () => ({ valid: true, errors: [] }),
-        } as any as IValidator
-      );
+      validators.set(definition.name, ajv.compile(definition.parameters));
       functionHandlerRegistry.set(definition.name, { definition, respond });
     };
     await Promise.all(

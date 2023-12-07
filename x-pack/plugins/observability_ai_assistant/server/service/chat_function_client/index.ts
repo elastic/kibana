@@ -6,7 +6,7 @@
  */
 /* eslint-disable max-classes-per-file*/
 
-import type { Validator, OutputUnit } from '@cfworker/json-schema';
+import type { ErrorObject, ValidateFunction } from 'ajv';
 import { keyBy } from 'lodash';
 import type {
   ContextDefinition,
@@ -18,7 +18,7 @@ import { filterFunctionDefinitions } from '../../../common/utils/filter_function
 import { FunctionHandler, FunctionHandlerRegistry } from '../types';
 
 export class FunctionArgsValidationError extends Error {
-  constructor(public readonly errors: OutputUnit[]) {
+  constructor(public readonly errors: ErrorObject[]) {
     super('Function arguments are invalid');
   }
 }
@@ -27,14 +27,14 @@ export class ChatFunctionClient {
   constructor(
     private readonly contextRegistry: ContextRegistry,
     private readonly functionRegistry: FunctionHandlerRegistry,
-    private readonly validators: Map<string, Validator>
+    private readonly validators: Map<string, ValidateFunction>
   ) {}
 
   private validate(name: string, parameters: unknown) {
     const validator = this.validators.get(name)!;
-    const result = validator.validate(parameters);
-    if (!result.valid) {
-      throw new FunctionArgsValidationError(result.errors);
+    const result = validator(parameters);
+    if (!result) {
+      throw new FunctionArgsValidationError(validator.errors!);
     }
   }
 

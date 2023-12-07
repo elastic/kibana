@@ -985,14 +985,10 @@ describe('Observability AI Assistant service', () => {
           });
           response$.error(new Error('Unexpected error'));
 
-          endStreamPromise = finished(stream);
-
-          await endStreamPromise.catch(() => {});
+          await finished(stream);
         });
 
-        it('appends an error and fails the stream', () => {
-          // expect(endStreamPromise).rejects.toBeDefined();
-
+        it('appends an error', () => {
           expect(JSON.parse(dataHandler.mock.lastCall!)).toEqual({
             type: StreamingChatResponseEventType.ConversationCompletionError,
             error: {
