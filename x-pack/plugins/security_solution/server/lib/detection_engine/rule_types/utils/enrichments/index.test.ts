@@ -111,7 +111,7 @@ describe('enrichEvents', () => {
   afterEach(() => {
     mockGetIsUserRiskScoreAvailable.mockClear();
     mockGetIsUserRiskScoreAvailable.mockClear();
-    doesAssetCriticalityIndexExist.mockClear();
+    mockDoesAssetCriticalityIndexExist.mockClear();
   });
 
   it('return the same events, if risk indexes are not available', async () => {

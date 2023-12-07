@@ -620,5 +620,30 @@ export default ({ getService }: FtrProviderContext) => {
         expect(fullAlert?.host?.risk?.calculated_score_norm).to.eql(96);
       });
     });
+
+    describe('with asset criticality', async () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      it('should be enriched alert with criticality_level', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['auditbeat-*']),
+          query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        const fullAlert = previewAlerts[0]._source;
+        if (!fullAlert) {
+          return expect(fullAlert).to.be.ok();
+        }
+        expect(fullAlert?.['kibana.alert.host.criticality_level']).to.eql('important');
+      });
+    });
   });
 };

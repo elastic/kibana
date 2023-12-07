@@ -297,10 +297,10 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts[0]?._source?.kibana?.alert?.host?.criticality_level).to.eql(
+        expect(previewAlerts[0]?._source?.['kibana.alert.host.criticality_level']).to.eql(
           'important'
         );
-        expect(previewAlerts[0]?._source?.kibana?.alert?.user?.criticality_level).to.eql(
+        expect(previewAlerts[0]?._source?.['kibana.alert.user.criticality_level']).to.eql(
           'very_important'
         );
       });
