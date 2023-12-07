@@ -226,18 +226,6 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                       />
                     </EuiLink>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge
-                      color="hollow"
-                      target={'_blank'}
-                      href={'https://huggingface.co/elastic/multilingual-e5-small-optimized'}
-                    >
-                      <FormattedMessage
-                        id="xpack.ml.trainedModels.modelsList.mitLicenseLabel"
-                        defaultMessage="License: MIT"
-                      />
-                    </EuiBadge>
-                  </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size={'l'} />
               </div>
@@ -286,25 +274,45 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                               {model.model_id}
                             </EuiText>
                           </EuiFlexItem>
-                          {model.recommended ? (
-                            <EuiFlexItem grow={false}>
-                              <EuiToolTip
-                                content={
-                                  <FormattedMessage
-                                    id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
-                                    defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
-                                  />
-                                }
-                              >
-                                <EuiBadge color="hollow">
-                                  <FormattedMessage
-                                    id="xpack.ml.trainedModels.addModelFlyout.recommendedDownloadLabel"
-                                    defaultMessage="Recommended"
-                                  />
-                                </EuiBadge>
-                              </EuiToolTip>
-                            </EuiFlexItem>
-                          ) : null}
+                          <EuiFlexItem grow={false}>
+                            <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+                              {model.recommended ? (
+                                <EuiFlexItem grow={false}>
+                                  <EuiToolTip
+                                    content={
+                                      <FormattedMessage
+                                        id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
+                                        defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
+                                      />
+                                    }
+                                  >
+                                    <EuiBadge color="hollow">
+                                      <FormattedMessage
+                                        id="xpack.ml.trainedModels.addModelFlyout.recommendedDownloadLabel"
+                                        defaultMessage="Recommended"
+                                      />
+                                    </EuiBadge>
+                                  </EuiToolTip>
+                                </EuiFlexItem>
+                              ) : null}
+                              {model.licenseUrl && model.softwareLicense ? (
+                                <EuiFlexItem grow={false}>
+                                  <EuiBadge
+                                    color="hollow"
+                                    target={'_blank'}
+                                    href={model.licenseUrl}
+                                  >
+                                    {model.softwareLicense === 'MIT' ? (
+                                      <FormattedMessage
+                                        id="xpack.ml.trainedModels.modelsList.mitLicenseLabel"
+                                        defaultMessage="License: MIT"
+                                      />
+                                    ) : null}
+                                  </EuiBadge>
+                                </EuiFlexItem>
+                              ) : null}
+                            </EuiFlexGroup>
+                          </EuiFlexItem>
                         </EuiFlexGroup>
                       }
                       name={model.model_id}
