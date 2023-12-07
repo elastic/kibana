@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/eui';
 import { mergeWith, isEqual } from 'lodash';
 import { MoreFiltersSelectable } from './table_filter_config/more_filters_selectable';
 import type { CaseStatuses } from '../../../common/types/domain';
@@ -126,7 +126,7 @@ const CasesTableFiltersComponent = ({
   }, [onCreateCasePressed]);
 
   return (
-    <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
+    <EuiFlexGroup gutterSize="s" justifyContent="flexStart" wrap={true}>
       {isSelectorView && onCreateCasePressed ? (
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -149,20 +149,21 @@ const CasesTableFiltersComponent = ({
           onSearch={handleOnSearch}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFilterGroup data-test-subj="cases-table-filters-group">
-          {activeFilters.map((filter) => (
-            <React.Fragment key={filter.key}>{filter.render({ filterOptions })}</React.Fragment>
-          ))}
-          {isSelectorView || (
-            <MoreFiltersSelectable
-              options={selectableOptions}
-              activeFilters={activeSelectableOptionKeys}
-              onChange={onFilterConfigChange}
-            />
-          )}
-        </EuiFilterGroup>
-      </EuiFlexItem>
+      {activeFilters.map((filter) => (
+        <EuiFlexItem grow={false} key={filter.key}>
+          {filter.render({ filterOptions })}
+        </EuiFlexItem>
+      ))}
+
+      {isSelectorView || (
+        <EuiFlexItem grow={false}>
+          <MoreFiltersSelectable
+            options={selectableOptions}
+            activeFilters={activeSelectableOptionKeys}
+            onChange={onFilterConfigChange}
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
