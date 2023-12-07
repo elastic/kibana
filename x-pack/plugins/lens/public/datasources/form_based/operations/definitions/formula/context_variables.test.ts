@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ExecutionContextSearch } from '@kbn/data-plugin/public';
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common';
+import type { ExecutionContextSearch } from '@kbn/data-plugin/public';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { FormBasedLayer } from '../../../../..';
 import { createMockedIndexPattern } from '../../../mocks';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';

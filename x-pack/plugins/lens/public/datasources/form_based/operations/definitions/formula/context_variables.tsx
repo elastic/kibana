@@ -20,7 +20,7 @@ import {
   ExpressionFunctionDefinitions,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import type {
   DateHistogramIndexPatternColumn,
   FormBasedLayer,
