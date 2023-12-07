@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSortedCspBenchmarkRulesTemplates } from './find_csp_rule';
+import { getSortedCspBenchmarkRulesTemplates } from './find_csp_benchmark_rule';
 import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
 describe('getSortedCspBenchmarkRules', () => {

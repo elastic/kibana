@@ -13,11 +13,11 @@ import { cspBenchmarkRuleMigrations } from './migrations';
 import { rulesV1, rulesV2, rulesV3 } from '@kbn/cloud-security-posture-plugin/common/types/';
 import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
-import { CSP_RULE_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType<CspBenchmarkRule>({
-    name: CSP_RULE_SAVED_OBJECT_TYPE,
+    name: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
     indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',

@@ -18,7 +18,7 @@ import {
 } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { getBenchmarkFromPackagePolicy } from '../../../../common/utils/helpers';
 
-import { FIND_CSP_RULE_ROUTE_PATH } from '../../../../common/constants';
+import { FIND_CSP_BENCHMARK_RULE_ROUTE_PATH } from '../../../../common/constants';
 import { CspRouter } from '../../../types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../benchmarks/benchmarks';
 import { findRuleHandler as findRuleHandlerV1 } from './v1';
@@ -54,7 +54,7 @@ export const defineFindCspBenchmarkRuleRoute = (router: CspRouter) =>
   router.versioned
     .get({
       access: 'internal',
-      path: FIND_CSP_RULE_ROUTE_PATH,
+      path: FIND_CSP_BENCHMARK_RULE_ROUTE_PATH,
     })
     .addVersion(
       {

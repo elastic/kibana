@@ -23,8 +23,8 @@ export const VULNERABILITIES_DASHBOARD_ROUTE_PATH =
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
 export const BENCHMARKS_API_CURRENT_VERSION = '1';
 
-export const FIND_CSP_RULE_ROUTE_PATH = '/internal/cloud_security_posture/rules/_find';
-export const FIND_CSP_RULE_API_CURRENT_VERSION = '1';
+export const FIND_CSP_BENCHMARK_RULE_ROUTE_PATH = '/internal/cloud_security_posture/rules/_find';
+export const FIND_CSP_BENCHMARK_RULE_API_CURRENT_VERSION = '1';
 
 export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
 export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
@@ -85,7 +85,7 @@ export const INTERNAL_FEATURE_FLAGS = {
   showFindingFlyoutEvidence: true,
 } as const;
 
-export const CSP_RULE_SAVED_OBJECT_TYPE = 'csp-rule-template';
+export const CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE = 'csp-rule-template';
 
 export const CLOUDBEAT_VANILLA = 'cloudbeat/cis_k8s';
 export const CLOUDBEAT_EKS = 'cloudbeat/cis_eks';

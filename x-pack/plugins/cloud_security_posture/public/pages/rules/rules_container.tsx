@@ -11,7 +11,11 @@ import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/type
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesTableHeader } from './rules_table_header';
-import { useFindCspBenchmarkRule, type RulesQuery, type RulesQueryResult } from './use_csp_rules';
+import {
+  useFindCspBenchmarkRule,
+  type RulesQuery,
+  type RulesQueryResult,
+} from './use_csp_benchmark_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
 import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';

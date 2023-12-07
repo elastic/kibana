@@ -9,7 +9,7 @@ import React from 'react';
 import { RulesContainer } from './rules_container';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
-import { useFindCspBenchmarkRule } from './use_csp_rules';
+import { useFindCspBenchmarkRule } from './use_csp_benchmark_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { Chance } from 'chance';
 import { TestProvider } from '../../test/test_provider';
