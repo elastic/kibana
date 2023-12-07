@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { StackAlert } from '@kbn/alerts-as-data-utils';
 import { RuleExecutorOptions, RuleTypeParams } from '../../types';
 import { ActionContext } from './action_context';
 import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
 import { ActionGroupId } from './constants';
+import { StackAlertType } from '../types';
 
 export type OnlyEsQueryRuleParams = Omit<EsQueryRuleParams, 'searchConfiguration' | 'esqlQuery'> & {
   searchType: 'esQuery';
@@ -37,5 +37,5 @@ export type ExecutorOptions<P extends RuleTypeParams> = RuleExecutorOptions<
   {},
   ActionContext,
   typeof ActionGroupId,
-  StackAlert
+  StackAlertType
 >;
