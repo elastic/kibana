@@ -14,7 +14,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'target/kibana-coverage/functional/**/*'
   buildkite-agent artifact upload 'target/kibana-*'
   buildkite-agent artifact upload 'target/kibana-security-solution/**/*.png'
-  buildkite-agent artifact upload 'target/kibana-security-solution/**/management/**/*.mp4'
+  buildkite-agent artifact upload 'target/kibana-security-solution/**/*.mp4'
   buildkite-agent artifact upload 'target/kibana-osquery/**/*.png'
   buildkite-agent artifact upload 'target/kibana-osquery/**/*.mp4'
   buildkite-agent artifact upload 'target/kibana-fleet/**/*.png'
