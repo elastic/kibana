@@ -35,8 +35,6 @@ import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { RulesPageTourComponent } from '../../components/rules_table/alternative_tour/tour';
-import { useIsEsqlRuleTypeEnabled } from '../../../rule_creation/hooks';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -72,8 +70,6 @@ const RulesPageComponent: React.FC = () => {
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
 
-  const isEsqlRuleTypeEnabled = useIsEsqlRuleTypeEnabled();
-
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -88,18 +84,6 @@ const RulesPageComponent: React.FC = () => {
     });
     return null;
   }
-
-  const addNewRuleButton = (
-    <SecuritySolutionLinkButton
-      data-test-subj="create-new-rule"
-      fill
-      iconType="plusInCircle"
-      isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
-      deepLinkId={SecurityPageName.rulesCreate}
-    >
-      {i18n.ADD_NEW_RULE}
-    </SecuritySolutionLinkButton>
-  );
 
   return (
     <>
@@ -155,11 +139,15 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {isEsqlRuleTypeEnabled ? (
-                  <RulesPageTourComponent>{addNewRuleButton}</RulesPageTourComponent>
-                ) : (
-                  addNewRuleButton
-                )}
+                <SecuritySolutionLinkButton
+                  data-test-subj="create-new-rule"
+                  fill
+                  iconType="plusInCircle"
+                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                  deepLinkId={SecurityPageName.rulesCreate}
+                >
+                  {i18n.ADD_NEW_RULE}
+                </SecuritySolutionLinkButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
