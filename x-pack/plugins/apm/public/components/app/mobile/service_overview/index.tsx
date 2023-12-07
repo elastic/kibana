@@ -119,7 +119,7 @@ export function MobileServiceOverview() {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
-              <EuiFlexGroup>
+              <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={8}>
                   <GeoMap
                     start={start}
@@ -128,7 +128,7 @@ export function MobileServiceOverview() {
                     filters={embeddableFilters}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={4}>
+                <EuiFlexItem grow={3}>
                   <MobileLocationStats
                     start={start}
                     end={end}
