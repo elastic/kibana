@@ -75,18 +75,23 @@ const createMetricsSubClientMock = (): MetricsSubClientMock => {
 type AttachmentsSubClientMock = jest.Mocked<AttachmentsSubClient>;
 
 const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
+  const NOOP_ASYNC = async () => {};
   return {
-    bulkGet: jest.fn(),
-    add: jest.fn(),
-    bulkCreate: jest.fn(),
-    delete: jest.fn(),
-    deleteAll: jest.fn(),
-    bulkDeleteFileAttachments: jest.fn(),
-    find: jest.fn(),
-    getAll: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-    getAllAlertsAttachToCase: jest.fn(),
+    bulkGet: jest.fn(NOOP_ASYNC as unknown as AttachmentsSubClientMock['bulkGet']),
+    add: jest.fn(NOOP_ASYNC as unknown as AttachmentsSubClientMock['add']),
+    bulkCreate: jest.fn(NOOP_ASYNC as unknown as AttachmentsSubClientMock['bulkCreate']),
+    delete: jest.fn(NOOP_ASYNC as unknown as AttachmentsSubClientMock['delete']),
+    deleteAll: jest.fn(NOOP_ASYNC as unknown as AttachmentsSubClientMock['deleteAll']),
+    bulkDeleteFileAttachments: jest.fn(
+      NOOP_ASYNC as unknown as AttachmentsSubClientMock['bulkDeleteFileAttachments']
+    ),
+    find: jest.fn(NOOP_ASYNC as unknown as AttachmentsSubClientMock['find']),
+    getAll: jest.fn(NOOP_ASYNC as unknown as AttachmentsSubClientMock['getAll']),
+    get: jest.fn(NOOP_ASYNC as unknown as AttachmentsSubClientMock['get']),
+    update: jest.fn(NOOP_ASYNC as unknown as AttachmentsSubClientMock['update']),
+    getAllAlertsAttachToCase: jest.fn(
+      NOOP_ASYNC as unknown as AttachmentsSubClientMock['getAllAlertsAttachToCase']
+    ),
   };
 };
 
