@@ -206,13 +206,14 @@ export function SavedQueryManagementList({
           return;
         }
 
+        let filteredQueries = queries;
         const loadedQuery = latestLoadedQuery.current;
-        const filteredQueries = trimmedSearchTerm
-          ? queries
-          : queries.filter((savedQuery) => savedQuery.id !== loadedQuery?.id);
 
         if (loadedQuery && !trimmedSearchTerm && currentPageNumber === 0) {
-          filteredQueries.unshift(loadedQuery);
+          filteredQueries = [
+            loadedQuery,
+            ...queries.filter((savedQuery) => savedQuery.id !== loadedQuery?.id),
+          ];
         }
 
         if (!filteredQueries.some((savedQuery) => savedQuery.id === selectedSavedQuery?.id)) {
