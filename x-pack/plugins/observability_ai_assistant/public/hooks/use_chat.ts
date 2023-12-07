@@ -6,12 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { last } from 'lodash';
+import { merge } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { isObservable } from 'rxjs';
-import { type Message, MessageRole } from '../../common';
+import { MessageRole, type Message } from '../../common';
+import {
+  ConversationCreateEvent,
+  ConversationUpdateEvent,
+  StreamingChatResponseEventType,
+} from '../../common/conversation_complete';
 import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
-import type { ObservabilityAIAssistantChatService, PendingMessage } from '../types';
+import type { ObservabilityAIAssistantChatService } from '../types';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
 
@@ -20,6 +24,13 @@ export enum ChatState {
   Loading = 'loading',
   Error = 'error',
   Aborted = 'aborted',
+}
+
+function getWithSystemMessage(messages: Message[], systemMessage: Message) {
+  return [
+    systemMessage,
+    ...messages.filter((message) => message.message.role !== MessageRole.System),
+  ];
 }
 
 export interface UseChatResult {
@@ -32,16 +43,22 @@ export interface UseChatResult {
 
 export interface UseChatProps {
   initialMessages: Message[];
+  initialConversationId?: string;
   chatService: ObservabilityAIAssistantChatService;
   connectorId?: string;
+  persist: boolean;
+  onConversationUpdate?: (event: ConversationCreateEvent | ConversationUpdateEvent) => void;
   onChatComplete?: (messages: Message[]) => void;
 }
 
 export function useChat({
   initialMessages,
+  initialConversationId: initialConversationIdFromProps,
   chatService,
   connectorId,
+  onConversationUpdate,
   onChatComplete,
+  persist,
 }: UseChatProps): UseChatResult {
   const [chatState, setChatState] = useState(ChatState.Ready);
 
@@ -51,9 +68,11 @@ export function useChat({
 
   useOnce(initialMessages);
 
+  const initialConversationId = useOnce(initialConversationIdFromProps);
+
   const [messages, setMessages] = useState<Message[]>(initialMessages);
 
-  const [pendingMessage, setPendingMessage] = useState<PendingMessage>();
+  const [pendingMessages, setPendingMessages] = useState<Message[]>();
 
   const abortControllerRef = useRef(new AbortController());
 
@@ -62,12 +81,26 @@ export function useChat({
   } = useKibana();
 
   const onChatCompleteRef = useRef(onChatComplete);
-
   onChatCompleteRef.current = onChatComplete;
+
+  const onConversationUpdateRef = useRef(onConversationUpdate);
+  onConversationUpdateRef.current = onConversationUpdate;
 
   const handleSignalAbort = useCallback(() => {
     setChatState(ChatState.Aborted);
   }, []);
+
+  const handleError = useCallback(
+    (error: Error) => {
+      notifications.toasts.addError(error, {
+        title: i18n.translate('xpack.observabilityAiAssistant.failedToLoadResponse', {
+          defaultMessage: 'Failed to load response from the AI Assistant',
+        }),
+      });
+      setChatState(ChatState.Error);
+    },
+    [notifications.toasts]
+  );
 
   const next = useCallback(
     async (nextMessages: Message[]) => {
@@ -77,173 +110,134 @@ export function useChat({
       // cancel running requests
       abortControllerRef.current.abort();
 
-      const lastMessage = last(nextMessages);
+      abortControllerRef.current = new AbortController();
 
-      const allMessages = [
-        systemMessage,
-        ...nextMessages.filter((message) => message.message.role !== MessageRole.System),
-      ];
+      setPendingMessages([]);
+      setMessages(nextMessages);
 
-      setMessages(allMessages);
-
-      if (!lastMessage || !connectorId) {
+      if (!connectorId || !nextMessages.length) {
         setChatState(ChatState.Ready);
-        onChatCompleteRef.current?.(nextMessages);
         return;
       }
-
-      const isUserMessage = lastMessage.message.role === MessageRole.User;
-      const functionCall = lastMessage.message.function_call;
-      const isAssistantMessageWithFunctionRequest =
-        lastMessage.message.role === MessageRole.Assistant && functionCall && !!functionCall.name;
-
-      const isFunctionResult = isUserMessage && !!lastMessage.message.name;
-
-      const isRecallFunctionAvailable = chatService.hasFunction('recall');
-
-      if (!isUserMessage && !isAssistantMessageWithFunctionRequest) {
-        setChatState(ChatState.Ready);
-        onChatCompleteRef.current?.(nextMessages);
-        return;
-      }
-
-      const abortController = (abortControllerRef.current = new AbortController());
-
-      abortController.signal.addEventListener('abort', handleSignalAbort);
 
       setChatState(ChatState.Loading);
 
-      if (isUserMessage && !isFunctionResult && isRecallFunctionAvailable) {
-        const allMessagesWithRecall = allMessages.concat({
-          '@timestamp': new Date().toISOString(),
-          message: {
-            role: MessageRole.Assistant,
-            content: '',
-            function_call: {
-              name: 'recall',
-              arguments: JSON.stringify({ queries: [], contexts: [] }),
-              trigger: MessageRole.Assistant,
-            },
-          },
-        });
-        next(allMessagesWithRecall);
-        return;
+      const next$ = chatService.complete({
+        connectorId,
+        messages: getWithSystemMessage(nextMessages, systemMessage),
+        persist,
+        signal: abortControllerRef.current.signal,
+        conversationId: initialConversationId,
+      });
+
+      function getPendingMessages() {
+        return [
+          ...completedMessages,
+          ...(pendingMessage
+            ? [
+                merge(
+                  {
+                    message: {
+                      role: MessageRole.Assistant,
+                      function_call: { trigger: MessageRole.Assistant as const },
+                    },
+                  },
+                  pendingMessage
+                ),
+              ]
+            : []),
+        ];
       }
 
-      function handleError(error: Error) {
-        setChatState(ChatState.Error);
-        notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.observabilityAiAssistant.failedToLoadResponse', {
-            defaultMessage: 'Failed to load response from the AI Assistant',
-          }),
-        });
-      }
+      const completedMessages: Message[] = [];
 
-      const response = isAssistantMessageWithFunctionRequest
-        ? await chatService
-            .executeFunction({
-              name: functionCall.name,
-              signal: abortController.signal,
-              args: functionCall.arguments,
-              connectorId,
-              messages: allMessages,
-            })
-            .catch((error) => {
-              return {
-                content: {
-                  message: error.toString(),
-                  error,
-                },
-                data: undefined,
-              };
-            })
-        : chatService.chat({
-            messages: allMessages,
-            connectorId,
-          });
+      let pendingMessage:
+        | {
+            '@timestamp': string;
+            message: { content: string; function_call: { name: string; arguments: string } };
+          }
+        | undefined;
 
-      if (abortController.signal.aborted) {
-        return;
-      }
+      const subscription = next$.subscribe({
+        next: (event) => {
+          switch (event.type) {
+            case StreamingChatResponseEventType.ChatCompletionChunk:
+              if (!pendingMessage) {
+                pendingMessage = {
+                  '@timestamp': new Date().toISOString(),
+                  message: {
+                    content: event.message.content || '',
+                    function_call: {
+                      name: event.message.function_call?.name || '',
+                      arguments: event.message.function_call?.arguments || '',
+                    },
+                  },
+                };
+              } else {
+                pendingMessage.message.content += event.message.content || '';
+                pendingMessage.message.function_call.name +=
+                  event.message.function_call?.name || '';
+                pendingMessage.message.function_call.arguments +=
+                  event.message.function_call?.arguments || '';
+              }
+              break;
 
-      if (isObservable(response)) {
-        let localPendingMessage: PendingMessage = {
-          message: {
-            content: '',
-            role: MessageRole.User,
-          },
-        };
+            case StreamingChatResponseEventType.MessageAdd:
+              pendingMessage = undefined;
+              completedMessages.push(event.message);
+              break;
 
-        const subscription = response.subscribe({
-          next: (nextPendingMessage) => {
-            localPendingMessage = nextPendingMessage;
-            setPendingMessage(nextPendingMessage);
-          },
-          complete: () => {
-            setPendingMessage(undefined);
-            const allMessagesWithResolved = allMessages.concat({
-              message: {
-                ...localPendingMessage.message,
-              },
-              '@timestamp': new Date().toISOString(),
-            });
-            if (localPendingMessage.aborted) {
-              setChatState(ChatState.Aborted);
-              setMessages(allMessagesWithResolved);
-            } else if (localPendingMessage.error) {
-              handleError(localPendingMessage.error);
-              setMessages(allMessagesWithResolved);
-            } else {
-              next(allMessagesWithResolved);
-            }
-          },
-          error: (error) => {
-            handleError(error);
-          },
-        });
+            case StreamingChatResponseEventType.ConversationCreate:
+            case StreamingChatResponseEventType.ConversationUpdate:
+              onConversationUpdateRef.current?.(event);
+              break;
+          }
+          setPendingMessages(getPendingMessages());
+        },
+        complete: () => {
+          setChatState(ChatState.Ready);
+          const completed = nextMessages.concat(completedMessages);
+          setMessages(completed);
+          setPendingMessages([]);
+          onChatCompleteRef.current?.(completed);
+        },
+        error: (error) => {
+          setPendingMessages([]);
+          setMessages(nextMessages.concat(getPendingMessages()));
+          handleError(error);
+        },
+      });
 
-        abortController.signal.addEventListener('abort', () => {
-          subscription.unsubscribe();
-        });
-      } else {
-        const allMessagesWithFunctionReply = allMessages.concat({
-          '@timestamp': new Date().toISOString(),
-          message: {
-            name: functionCall!.name,
-            role: MessageRole.User,
-            content: JSON.stringify(response.content),
-            data: JSON.stringify(response.data),
-          },
-        });
-        next(allMessagesWithFunctionReply);
-      }
+      abortControllerRef.current.signal.addEventListener('abort', () => {
+        handleSignalAbort();
+        subscription.unsubscribe();
+      });
     },
-    [connectorId, chatService, handleSignalAbort, notifications.toasts, systemMessage]
+    [
+      connectorId,
+      chatService,
+      handleSignalAbort,
+      systemMessage,
+      handleError,
+      persist,
+      initialConversationId,
+    ]
   );
 
   useEffect(() => {
+    const controller = abortControllerRef.current;
     return () => {
-      abortControllerRef.current.abort();
+      controller.abort();
     };
   }, []);
 
   const memoizedMessages = useMemo(() => {
-    const includingSystemMessage = [
-      systemMessage,
-      ...messages.filter((message) => message.message.role !== MessageRole.System),
-    ];
-
-    return pendingMessage
-      ? includingSystemMessage.concat({
-          ...pendingMessage,
-          '@timestamp': new Date().toISOString(),
-        })
-      : includingSystemMessage;
-  }, [systemMessage, messages, pendingMessage]);
+    return getWithSystemMessage(messages.concat(pendingMessages ?? []), systemMessage);
+  }, [systemMessage, messages, pendingMessages]);
 
   const setMessagesWithAbort = useCallback((nextMessages: Message[]) => {
     abortControllerRef.current.abort();
-    setPendingMessage(undefined);
+    setPendingMessages([]);
     setChatState(ChatState.Ready);
     setMessages(nextMessages);
   }, []);

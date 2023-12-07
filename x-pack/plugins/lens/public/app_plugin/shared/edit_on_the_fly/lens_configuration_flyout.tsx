@@ -26,7 +26,13 @@ import {
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
-import { useLensSelector, selectFramePublicAPI } from '../../../state_management';
+import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import {
+  useLensSelector,
+  selectFramePublicAPI,
+  onActiveDataChange,
+  useLensDispatch,
+} from '../../../state_management';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { extractReferencesFromState } from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
@@ -34,6 +40,7 @@ import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
 import { getSuggestions } from './helpers';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
+import { useApplicationUserMessages } from '../../get_application_user_messages';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -57,6 +64,7 @@ export function LensEditConfigurationFlyout({
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
+  const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
   const [errors, setErrors] = useState<Error[] | undefined>();
@@ -66,24 +74,33 @@ export function LensEditConfigurationFlyout({
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
-  const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
+  const { datasourceStates, visualization, isLoading, annotationGroups } = useLensSelector(
+    (state) => state.lens
+  );
+  const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
   const suggestsLimitedColumns = activeDatasource?.suggestsLimitedColumns?.(datasourceState);
-  const activeData: Record<string, Datatable> = useMemo(() => {
-    return {};
-  }, []);
+
+  const layers = useMemo(
+    () => activeDatasource.getLayers(datasourceState),
+    [activeDatasource, datasourceState]
+  );
+
+  const dispatch = useLensDispatch();
   useEffect(() => {
     const s = output$?.subscribe(() => {
-      const layers = activeDatasource.getLayers(datasourceState);
-      const adaptersTables = lensAdapters?.tables?.tables as Record<string, Datatable>;
+      const activeData: Record<string, Datatable> = {};
+      const adaptersTables = previousAdapters.current?.tables?.tables as Record<string, Datatable>;
       const [table] = Object.values(adaptersTables || {});
-      layers.forEach((layer) => {
-        if (table) {
+      if (table) {
+        layers.forEach((layer) => {
           activeData[layer] = table;
-        }
-      });
+        });
+
+        dispatch(onActiveDataChange({ activeData }));
+      }
     });
     return () => s?.unsubscribe();
-  }, [activeDatasource, lensAdapters, datasourceState, output$, activeData]);
+  }, [dispatch, output$, layers]);
 
   const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;
@@ -99,10 +116,33 @@ export function LensEditConfigurationFlyout({
         : false;
 
     const visualizationState = visualization.state;
-    return (
-      !isEqual(visualizationState, previousAttrs.state.visualization) || !datasourceStatesAreSame
-    );
-  }, [attributes.references, datasourceId, datasourceMap, datasourceStates, visualization.state]);
+    const customIsEqual = visualizationMap[previousAttrs.visualizationType]?.isEqual;
+    const visualizationStateIsEqual = customIsEqual
+      ? (() => {
+          try {
+            return customIsEqual(
+              previousAttrs.state.visualization,
+              previousAttrs.references,
+              visualizationState,
+              attributes.references,
+              annotationGroups
+            );
+          } catch (err) {
+            return false;
+          }
+        })()
+      : isEqual(visualizationState, previousAttrs.state.visualization);
+
+    return !visualizationStateIsEqual || !datasourceStatesAreSame;
+  }, [
+    attributes.references,
+    datasourceId,
+    datasourceMap,
+    datasourceStates,
+    visualizationMap,
+    annotationGroups,
+    visualization.state,
+  ]);
 
   const onCancel = useCallback(() => {
     const previousAttrs = previousAttributes.current;
@@ -181,6 +221,18 @@ export function LensEditConfigurationFlyout({
     datasourceMap,
   ]);
 
+  const { getUserMessages } = useApplicationUserMessages({
+    coreStart,
+    framePublicAPI,
+    activeDatasourceId: datasourceId,
+    datasourceState: datasourceStates[datasourceId],
+    datasource: datasourceMap[datasourceId],
+    dispatch,
+    visualization: activeVisualization,
+    visualizationType: visualization.activeId,
+    visualizationState: visualization,
+  });
+
   // needed for text based languages mode which works ONLY with adHoc dataviews
   const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
 
@@ -210,17 +262,6 @@ export function LensEditConfigurationFlyout({
     ]
   );
 
-  const framePublicAPI = useLensSelector((state) => {
-    const newState = {
-      ...state,
-      lens: {
-        ...state.lens,
-        activeData,
-      },
-    };
-    return selectFramePublicAPI(newState, datasourceMap);
-  });
-
   const textBasedMode = isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined;
 
   if (isLoading) return null;
@@ -237,6 +278,7 @@ export function LensEditConfigurationFlyout({
         attributesChanged={attributesChanged}
       >
         <LayerConfiguration
+          getUserMessages={getUserMessages}
           attributes={attributes}
           coreStart={coreStart}
           startDependencies={startDependencies}
@@ -366,6 +408,7 @@ export function LensEditConfigurationFlyout({
             >
               <LayerConfiguration
                 attributes={attributes}
+                getUserMessages={getUserMessages}
                 coreStart={coreStart}
                 startDependencies={startDependencies}
                 visualizationMap={visualizationMap}
