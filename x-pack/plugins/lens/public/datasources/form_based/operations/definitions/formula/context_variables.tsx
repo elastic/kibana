@@ -7,7 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { calcAutoIntervalNear, getAbsoluteTimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
+import {
+  calcAutoIntervalNear,
+  ExecutionContextSearch,
+  getAbsoluteTimeRange,
+  UI_SETTINGS,
+} from '@kbn/data-plugin/common';
 import { partition } from 'lodash';
 import {
   buildExpressionFunction,
@@ -76,9 +81,9 @@ export type ExpressionFunctionFormulaTimeRange = ExpressionFunctionDefinition<
   number
 >;
 
-const getTimeRangeAsNumber = (timeRange: TimeRange | undefined, now: number) => {
+const getTimeRangeAsNumber = (timeRange: TimeRange | undefined, now: number | undefined) => {
   if (!timeRange) return 0;
-  const absoluteTimeRange = getAbsoluteTimeRange(timeRange, { forceNow: new Date(now) });
+  const absoluteTimeRange = getAbsoluteTimeRange(timeRange, now ? { forceNow: new Date(now) } : {});
   return timeRange ? moment(absoluteTimeRange.to).diff(moment(absoluteTimeRange.from)) : 0;
 };
 
@@ -90,8 +95,7 @@ export const formulaTimeRangeFn: ExpressionFunctionFormulaTimeRange = {
   args: {},
 
   fn(_input, _args, { getSearchContext }) {
-    // TODO: decide whether "now" can be undefined
-    const { timeRange, now } = getSearchContext() as { timeRange: TimeRange; now: number };
+    const { timeRange, now } = getSearchContext() as ExecutionContextSearch;
     return getTimeRangeAsNumber(timeRange, now);
   },
 };
@@ -148,7 +152,7 @@ export const formulaNowFn: ExpressionFunctionFormulaNow = {
   args: {},
 
   fn(_input, _args, { getSearchContext }) {
-    return getSearchContext().now as number;
+    return (getSearchContext() as ExecutionContextSearch).now ?? Date.now();
   },
 };
 
@@ -197,12 +201,9 @@ export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
   },
 
   fn(_input, args, { getSearchContext }) {
-    const { timeRange, now } = getSearchContext() as { timeRange: TimeRange; now: number };
+    const { timeRange, now } = getSearchContext() as ExecutionContextSearch;
     return timeRange && args.targetBars
-      ? calcAutoIntervalNear(
-          args.targetBars,
-          getTimeRangeAsNumber(timeRange as TimeRange, now as number)
-        ).asMilliseconds()
+      ? calcAutoIntervalNear(args.targetBars, getTimeRangeAsNumber(timeRange, now)).asMilliseconds()
       : 0;
   },
 };

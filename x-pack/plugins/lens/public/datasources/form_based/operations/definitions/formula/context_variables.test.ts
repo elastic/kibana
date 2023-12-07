@@ -223,7 +223,7 @@ describe('context variables', () => {
           }),
         } as unknown as ExecutionContext<Adapters, SerializableRecord>);
 
-        expect(result).toBe(900001);
+        expect(result).toBe(900000);
       });
     });
   });
