@@ -40,6 +40,7 @@ import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
 import { getSuggestions } from './helpers';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
+import { useApplicationUserMessages } from '../../get_application_user_messages';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -73,7 +74,9 @@ export function LensEditConfigurationFlyout({
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
-  const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
+  const { datasourceStates, visualization, isLoading, annotationGroups } = useLensSelector(
+    (state) => state.lens
+  );
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
   const suggestsLimitedColumns = activeDatasource?.suggestsLimitedColumns?.(datasourceState);
 
@@ -113,10 +116,33 @@ export function LensEditConfigurationFlyout({
         : false;
 
     const visualizationState = visualization.state;
-    return (
-      !isEqual(visualizationState, previousAttrs.state.visualization) || !datasourceStatesAreSame
-    );
-  }, [attributes.references, datasourceId, datasourceMap, datasourceStates, visualization.state]);
+    const customIsEqual = visualizationMap[previousAttrs.visualizationType]?.isEqual;
+    const visualizationStateIsEqual = customIsEqual
+      ? (() => {
+          try {
+            return customIsEqual(
+              previousAttrs.state.visualization,
+              previousAttrs.references,
+              visualizationState,
+              attributes.references,
+              annotationGroups
+            );
+          } catch (err) {
+            return false;
+          }
+        })()
+      : isEqual(visualizationState, previousAttrs.state.visualization);
+
+    return !visualizationStateIsEqual || !datasourceStatesAreSame;
+  }, [
+    attributes.references,
+    datasourceId,
+    datasourceMap,
+    datasourceStates,
+    visualizationMap,
+    annotationGroups,
+    visualization.state,
+  ]);
 
   const onCancel = useCallback(() => {
     const previousAttrs = previousAttributes.current;
@@ -195,6 +221,18 @@ export function LensEditConfigurationFlyout({
     datasourceMap,
   ]);
 
+  const { getUserMessages } = useApplicationUserMessages({
+    coreStart,
+    framePublicAPI,
+    activeDatasourceId: datasourceId,
+    datasourceState: datasourceStates[datasourceId],
+    datasource: datasourceMap[datasourceId],
+    dispatch,
+    visualization: activeVisualization,
+    visualizationType: visualization.activeId,
+    visualizationState: visualization,
+  });
+
   // needed for text based languages mode which works ONLY with adHoc dataviews
   const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
 
@@ -240,6 +278,7 @@ export function LensEditConfigurationFlyout({
         attributesChanged={attributesChanged}
       >
         <LayerConfiguration
+          getUserMessages={getUserMessages}
           attributes={attributes}
           coreStart={coreStart}
           startDependencies={startDependencies}
@@ -369,6 +408,7 @@ export function LensEditConfigurationFlyout({
             >
               <LayerConfiguration
                 attributes={attributes}
+                getUserMessages={getUserMessages}
                 coreStart={coreStart}
                 startDependencies={startDependencies}
                 visualizationMap={visualizationMap}

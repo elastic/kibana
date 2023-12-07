@@ -1,6 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows_burn.sh
-    label: 'Defend Workflows Cypress Tests, burning changed specs'
+    label: '[Soft fail] Defend Workflows Cypress Tests, burning changed specs'
     agents:
       queue: n2-4-virt
     depends_on: build
@@ -11,7 +11,7 @@ steps:
       automatic: false
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless_burn.sh
-    label: 'Defend Workflows Cypress Tests on Serverless, burning changed specs'
+    label: '[Soft fail] Defend Workflows Cypress Tests on Serverless, burning changed specs'
     agents:
       queue: n2-4-virt
     depends_on: build
@@ -22,7 +22,7 @@ steps:
       automatic: false
 
   - command: .buildkite/scripts/steps/functional/security_solution_burn.sh
-    label: 'Security Solution Cypress tests, burning changed specs'
+    label: '[Soft fail] Security Solution Cypress tests, burning changed specs'
     agents:
       queue: n2-4-spot
     depends_on: build
@@ -33,7 +33,7 @@ steps:
     soft_fail: true
 
   - command: .buildkite/scripts/steps/functional/osquery_cypress_burn.sh
-    label: 'Osquery Cypress Tests, burning changed specs'
+    label: '[Soft fail] Osquery Cypress Tests, burning changed specs'
     agents:
       queue: n2-4-spot
     depends_on: build
