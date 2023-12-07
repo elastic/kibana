@@ -38,6 +38,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import {
@@ -175,21 +176,35 @@ export const ControlEditor = ({
       <EuiKeyPadMenu data-test-subj={`controlTypeMenu`}>
         {allDataControlTypes.map((controlType) => {
           const factory = getControlFactory(controlType);
-          return (
+
+          const disabled =
+            fieldRegistry && selectedField
+              ? !fieldRegistry[selectedField].compatibleControlTypes.includes(controlType)
+              : true;
+          const keyPadMenuItem = (
             <EuiKeyPadMenuItem
               key={controlType}
               data-test-subj={`create__${controlType}`}
               isSelected={controlType === selectedControlType}
-              disabled={
-                fieldRegistry && selectedField
-                  ? !fieldRegistry[selectedField].compatibleControlTypes.includes(controlType)
-                  : true
-              }
+              disabled={disabled}
               onClick={() => setSelectedControlType(controlType)}
               label={factory.getDisplayName()}
             >
               <EuiIcon type={factory.getIconType()} size="l" />
             </EuiKeyPadMenuItem>
+          );
+
+          return disabled ? (
+            <EuiToolTip
+              content={ControlGroupStrings.manageControl.dataSource.getControlTypeErrorMessage({
+                fieldSelected: Boolean(selectedField),
+                controlType,
+              })}
+            >
+              {keyPadMenuItem}
+            </EuiToolTip>
+          ) : (
+            keyPadMenuItem
           );
         })}
       </EuiKeyPadMenu>
