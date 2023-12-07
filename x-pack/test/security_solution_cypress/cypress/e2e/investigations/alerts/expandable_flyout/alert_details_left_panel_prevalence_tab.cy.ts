@@ -20,6 +20,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_USER_PREVALENCE_CELL,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_DATE_PICKER,
 } from '../../../../screens/expandable_flyout/alert_details_left_panel_prevalence_tab';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -32,6 +33,7 @@ describe(
   { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
+      deleteAlertsAndRules();
       login();
       createRule({ ...getNewRule(), investigation_fields: { field_names: ['host.os.name'] } });
       visit(ALERTS_URL);

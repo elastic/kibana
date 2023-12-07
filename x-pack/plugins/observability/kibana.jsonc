@@ -20,6 +20,7 @@
       "dataViews",
       "dataViewEditor",
       "embeddable",
+      "uiActions",
       "exploratoryView",
       "features",
       "files",
@@ -36,6 +37,7 @@
       "visualizations",
       "dashboard",
       "expressions",
+      "logExplorer",
       "licensing"
     ],
     "optionalPlugins": [
