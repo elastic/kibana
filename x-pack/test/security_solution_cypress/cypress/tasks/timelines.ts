@@ -65,4 +65,4 @@ export const exportSelectedTimelines = () => {
   cy.get(EXPORT_TIMELINE_ACTION).click();
 };
 
-export const createTimeline = () => cy.get(CREATE_NEW_TIMELINE_WITH_BORDER).click();
+export const createTimeline = () => cy.get(CREATE_NEW_TIMELINE_WITH_BORDER).should('exist').click();
