@@ -23,6 +23,9 @@ import { discover } from './plugins_discovery';
 import { CoreContext } from '../../core_context';
 import { PluginType } from '../types';
 
+// Required due to changes to paths in #172202
+jest.mock('@kbn/utils');
+
 const KIBANA_ROOT = process.cwd();
 
 const Plugins = {
