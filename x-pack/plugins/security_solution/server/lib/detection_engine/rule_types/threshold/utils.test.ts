@@ -8,7 +8,12 @@
 import dateMath from '@kbn/datemath';
 
 import { getThresholdRuleParams } from '../../rule_schema/mocks';
-import { calculateThresholdSignalUuid, getSignalHistory, getThresholdTermsHash } from './utils';
+import {
+  calculateThresholdSignalUuid,
+  getSignalHistory,
+  getThresholdTermsHash,
+  transformBulkCreatedItemsToHits,
+} from './utils';
 
 describe('threshold utils', () => {
   describe('calcualteThresholdSignalUuid', () => {
@@ -64,6 +69,32 @@ describe('threshold utils', () => {
       const validSignalHistory = getSignalHistory(state, state.signalHistory, tuple);
       expect(validSignalHistory[hashOne]).toBe(undefined);
       expect(validSignalHistory[hashTwo]).toBe(state.signalHistory[hashTwo]);
+    });
+  });
+
+  describe('transformBulkCreatedItemsToHits', () => {
+    it('should correctly transform bulk created items to hit', () => {
+      expect(
+        transformBulkCreatedItemsToHits([
+          {
+            _id: 'test-1',
+            _index: 'logs-*',
+            rule: {
+              name: 'test',
+            },
+          },
+        ] as unknown as Parameters<typeof transformBulkCreatedItemsToHits>[number])
+      ).toEqual([
+        {
+          _id: 'test-1',
+          _index: 'logs-*',
+          _source: {
+            rule: {
+              name: 'test',
+            },
+          },
+        },
+      ]);
     });
   });
 });

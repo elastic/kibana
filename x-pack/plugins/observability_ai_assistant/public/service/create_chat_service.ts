@@ -7,7 +7,7 @@
 /* eslint-disable max-classes-per-file*/
 import { Validator, type Schema, type OutputUnit } from '@cfworker/json-schema';
 
-import { HttpResponse } from '@kbn/core/public';
+import { AnalyticsServiceStart, HttpResponse } from '@kbn/core/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { IncomingMessage } from 'http';
 import { cloneDeep, pick } from 'lodash';
@@ -36,7 +36,7 @@ import {
 } from '../../common/types';
 import { ObservabilityAIAssistantAPIClient } from '../api';
 import type {
-  ChatRegistrationFunction,
+  AssistantRegistrationFunction,
   CreateChatCompletionResponseChunk,
   ObservabilityAIAssistantChatService,
   PendingMessage,
@@ -58,12 +58,14 @@ export class FunctionArgsValidationError extends Error {
 }
 
 export async function createChatService({
+  analytics,
   signal: setupAbortSignal,
   registrations,
   client,
 }: {
+  analytics: AnalyticsServiceStart;
   signal: AbortSignal;
-  registrations: ChatRegistrationFunction[];
+  registrations: AssistantRegistrationFunction[];
   client: ObservabilityAIAssistantAPIClient;
 }): Promise<ObservabilityAIAssistantChatService> {
   const contextRegistry: ContextRegistry = new Map();
@@ -114,6 +116,7 @@ export async function createChatService({
   }
 
   return {
+    analytics,
     executeFunction: async ({ name, args, signal, messages, connectorId }) => {
       const fn = functionRegistry.get(name);
 
