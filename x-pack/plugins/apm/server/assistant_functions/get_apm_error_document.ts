@@ -6,14 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { callApmApi } from '../services/rest/create_call_apm_api';
+import type { FunctionRegistrationParameters } from '.';
+import { getApmErrorDocument } from '../routes/assistant_functions/get_apm_error_document';
 
 export function registerGetApmErrorDocumentFunction({
+  apmEventClient,
   registerFunction,
-}: {
-  registerFunction: RegisterFunctionDefinition;
-}) {
+}: FunctionRegistrationParameters) {
   registerFunction(
     {
       name: 'get_apm_error_document',
@@ -55,12 +54,12 @@ export function registerGetApmErrorDocumentFunction({
       } as const,
     },
     async ({ arguments: args }, signal) => {
-      return callApmApi('GET /internal/apm/assistant/get_error_document', {
-        signal,
-        params: {
-          query: args,
-        },
-      });
+      return {
+        content: await getApmErrorDocument({
+          apmEventClient,
+          arguments: args,
+        }),
+      };
     }
   );
 }
