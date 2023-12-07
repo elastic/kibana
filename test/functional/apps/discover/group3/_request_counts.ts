@@ -86,14 +86,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       savedSearch,
       query1,
       query2,
-      savedSearchesRequests,
       setQuery,
     }: {
       type: 'ese' | 'esql';
       savedSearch: string;
       query1: string;
       query2: string;
-      savedSearchesRequests?: number;
       setQuery: (query: string) => Promise<void>;
     }) => {
       it('should send 2 search requests (documents + chart) on page load', async () => {
@@ -145,10 +143,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Sep 23, 2015 @ 00:00:00.000'
         );
         await waitForLoadingToFinish();
-        // TODO: Check why the request happens 4 times in case of opening a saved search
-        // https://github.com/elastic/kibana/issues/165192
         // creating the saved search
-        await expectSearches(type, savedSearchesRequests ?? 2, async () => {
+        await expectSearches(type, 2, async () => {
           await PageObjects.discover.saveSearch(savedSearch);
         });
         // resetting the saved search
@@ -164,8 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await waitForLoadingToFinish();
         });
         // loading the saved search
-        // TODO: https://github.com/elastic/kibana/issues/165192
-        await expectSearches(type, savedSearchesRequests ?? 2, async () => {
+        await expectSearches(type, 2, async () => {
           await PageObjects.discover.loadSavedSearch(savedSearch);
         });
       });
@@ -240,7 +235,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         savedSearch: 'esql test',
         query1: 'from logstash-* | where bytes > 1000 | stats countB = count(bytes) ',
         query2: 'from logstash-* | where bytes < 2000 | stats countB = count(bytes) ',
-        savedSearchesRequests: 4,
         setQuery: (query) => monacoEditor.setCodeEditorValue(query),
       });
     });
