@@ -169,6 +169,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(alertDoc['kibana.alert.evaluation.conditions']).to.be(
           'Number of matching documents is greater than -1'
         );
+        expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(-1);
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
         expect(value).greaterThan(0);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');

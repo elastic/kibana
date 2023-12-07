@@ -7,12 +7,14 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  EuiBetaBadge,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHighlight,
   EuiPopover,
   EuiSelectable,
   EuiSelectableOption,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
@@ -86,17 +88,29 @@ export function FunctionListPopover({
     searchValue: string
   ) => {
     return (
-      <>
-        <EuiText size="s">
-          <strong>
-            <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>{' '}
-          </strong>
-        </EuiText>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>
-          <EuiHighlight search={searchValue}>{option.searchableLabel || ''}</EuiHighlight>
-        </EuiText>
-      </>
+      <EuiFlexGroup gutterSize="xs" direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>
+                  <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>{' '}
+                  <EuiBetaBadge label="beta" size="s" style={{ verticalAlign: 'middle' }} />
+                </strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText
+            size="xs"
+            style={{ textOverflow: 'ellipsis', overflow: 'hidden', marginBottom: 4 }}
+          >
+            <EuiHighlight search={searchValue}>{option.searchableLabel || ''}</EuiHighlight>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
 
@@ -172,12 +186,12 @@ function mapFunctions({
   selectedFunctionName: string | undefined;
 }) {
   return functions
-    .filter((func) => func.options.visibility !== FunctionVisibility.System)
+    .filter((func) => func.visibility !== FunctionVisibility.System)
     .map((func) => ({
-      label: func.options.name,
-      searchableLabel: func.options.descriptionForUser || func.options.description,
+      label: func.name,
+      searchableLabel: func.descriptionForUser || func.description,
       checked:
-        func.options.name === selectedFunctionName
+        func.name === selectedFunctionName
           ? ('on' as EuiSelectableOptionCheckedType)
           : ('off' as EuiSelectableOptionCheckedType),
     }));

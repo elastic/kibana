@@ -826,6 +826,14 @@ export function setTileState(
       newValue: tileErrors,
     });
 
+    if (!isLayerGroup(layer) && layer.getSource().isESSource()) {
+      getInspectorAdapters(getState()).vectorTiles.setTileResults(
+        layerId,
+        tileMetaFeatures,
+        tileErrors
+      );
+    }
+
     if (!tileMetaFeatures && !layer.getDescriptor().__tileMetaFeatures) {
       return;
     }

@@ -38,7 +38,8 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
   const rule = getEsqlRule();
   const expectedNumberOfRules = 1;
 
-  describe('creation', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172618
+  describe.skip('creation', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
       login();
@@ -85,8 +86,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172074
-  describe.skip('ES|QL query validation', () => {
+  describe('ES|QL query validation', () => {
     beforeEach(() => {
       login();
       visit(CREATE_RULE_URL);
