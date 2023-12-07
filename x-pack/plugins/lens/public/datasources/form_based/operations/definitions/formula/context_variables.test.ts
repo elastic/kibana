@@ -40,20 +40,6 @@ function createLayer<T extends ConstantsIndexPatternColumn>(
   };
 }
 
-function createExpression(type: 'interval' | 'now' | 'time_range', value: number) {
-  return [
-    {
-      type: 'function',
-      function: 'mathColumn',
-      arguments: {
-        id: ['col1'],
-        name: [`Constant: ${type}`],
-        expression: [String(value)],
-      },
-    },
-  ];
-}
-
 describe('context variables', () => {
   describe('interval', () => {
     describe('getErrorMessages', () => {
