@@ -7,7 +7,6 @@
 import React, { useState, useMemo } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { CspBenchmarkRule } from '../../../common/types/latest';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesTableHeader } from './rules_table_header';
@@ -20,7 +19,7 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
 import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
-
+import type { CspBenchmarkRule } from '../../../common/types/latest';
 interface RulesPageData {
   rules_page: CspBenchmarkRule[];
   all_rules: CspBenchmarkRule[];

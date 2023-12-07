@@ -15,13 +15,14 @@ import type {
 } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createPackagePolicy } from '../../../apis/cloud_security_posture/helper';
+import { createPackagePolicy } from '../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
+  // find csp benchmark rule tests
   describe('GET internal/cloud_security_posture/rules/_find', function () {
     // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.fleet-actions-7], this action is granted by the index privileges [create_index,manage,all]
     this.tags(['failsOnMKI']);
