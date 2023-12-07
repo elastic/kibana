@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -21,7 +21,6 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
-  Pagination,
 } from '@elastic/eui';
 
 import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
@@ -172,26 +171,6 @@ export const ModelSelectTable: React.FC = () => {
     },
   };
 
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(3);
-
-  const onTableChange = (models: MlModel[], {
-    page = { index: 0, size: 3 },
-  }) => {
-    console.log('ontablechange', page, models)
-    const { index, size } = page;
-    setPageIndex(index);
-    setPageSize(size);
-  };
-
-  const pagination: Pagination = {
-    pageIndex,
-    pageSize,
-    totalItemCount: 10,
-    pageSizeOptions: [3],
-    showPerPageOptions: false,
-  };
-
   const getModelSelectOptionProps = (models: MlModel[]): ModelSelectOptionProps[] =>
     (models ?? []).map((model) => ({
       ...model,
@@ -218,14 +197,12 @@ export const ModelSelectTable: React.FC = () => {
         tableCaption="Demo of EuiBasicTable"
         columns={columns}
         search={search}
-        pagination={pagination}
         items={getModelSelectOptionProps(selectableModels)}
         loading={isLoading}
         hasActions
         rowProps={(model) => ({
           onClick: () => onClickRow(model),
         })}
-        onTableChange={(nextValues) => onTableChange(selectableModels, nextValues)}
       />
     </EuiPanel>
   );
