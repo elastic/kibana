@@ -67,17 +67,25 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('"get-file --path" - should retrieve a file', () => {
+      const downloadsFolder = Cypress.config('downloadsFolder');
+
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       cy.task('createFileOnEndpoint', {
         hostname: createdHost.hostname,
         path: filePath,
         content: fileContent,
       });
+
+      // initiate get file action and wait for the API to complete
+      cy.intercept('api/endpoint/action/get_file').as('getFileAction');
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`get-file --path ${filePath}`);
       submitCommand();
+      cy.wait('@getFileAction', { timeout: 60000 });
 
-      cy.getByTestSubj('getFileSuccess', { timeout: 60000 }).within(() => {
+      // verify that the file was retrieved
+      // and that the file download link is available
+      cy.getByTestSubj('getFileSuccess').within(() => {
         cy.contains('File retrieved from the host.');
         cy.contains('(ZIP file passcode: elastic)');
         cy.contains(
@@ -87,15 +95,18 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       cy.contains('Click here to download').click();
-      const downloadsFolder = Cypress.config('downloadsFolder');
+
+      // wait for file to be downloaded
       cy.readFile(`${downloadsFolder}/upload.zip`, { timeout: 120000 }).should('exist');
 
+      // move the zip file to VM
       cy.task('uploadFileToEndpoint', {
         hostname: createdHost.hostname,
         srcPath: `${downloadsFolder}/upload.zip`,
         destPath: `${homeFilePath}/upload.zip`,
       });
 
+      // unzip the file and read its content
       cy.task('readZippedFileContentOnEndpoint', {
         hostname: createdHost.hostname,
         path: `${homeFilePath}/upload.zip`,
