@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreTheme } from '@kbn/core/public';
-import { Observable } from 'rxjs';
-
-export interface ControlsThemeService {
-  theme$: Observable<CoreTheme>;
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/kbn-reporting/export_types/csv_common'],
+};
