@@ -24,7 +24,10 @@ import {
   createMockEndpointAppContextServiceStartContract,
 } from '../../mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { ResponseActionsNotSupportedError } from '../../services/actions/clients/errors';
+import {
+  ResponseActionsClientError,
+  ResponseActionsNotSupportedError,
+} from '../../services/actions/clients/errors';
 import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { CasesByAlertIDParams } from '@kbn/cases-plugin/server/client/cases/get';
@@ -89,9 +92,10 @@ describe('`ResponseActionsClientImpl` class', () => {
 
     it.each(methods)('should throw Not Supported error for %s()', async (method) => {
       // @ts-expect-error ignoring input type to method since they all should throw
-      await expect(baseClassMock[method]({})).rejects.toBeInstanceOf(
-        ResponseActionsNotSupportedError
-      );
+      const responsePromise = baseClassMock[method]({});
+
+      await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsNotSupportedError);
+      await expect(responsePromise).rejects.toHaveProperty('statusCode', 405);
     });
   });
 
@@ -332,11 +336,11 @@ describe('`ResponseActionsClientImpl` class', () => {
 
       indexDocOptions = {
         command: 'isolate',
-        rule_name: 'my-rule',
-        rule_id: 'rule-1',
         agent_type: 'endpoint',
         endpoint_ids: ['one'],
         comment: 'test comment',
+        rule_name: undefined,
+        rule_id: undefined,
         alert_ids: undefined,
         case_ids: undefined,
         hosts: undefined,
@@ -359,16 +363,13 @@ describe('`ResponseActionsClientImpl` class', () => {
         agent: {
           id: ['one'],
         },
-        rule: {
-          id: 'rule-1',
-          name: 'my-rule',
-        },
         user: {
           id: 'foo',
         },
       };
 
-      esClient.index.mockReturnValue(Promise.resolve(esIndexDocResponse));
+      // @ts-expect-error TS2345: Argument of type... Due to the fact that the method definition is overloaded
+      esClient.index.mockResolvedValue(esIndexDocResponse);
     });
 
     it('should return indexed record on success', async () => {
@@ -386,19 +387,112 @@ describe('`ResponseActionsClientImpl` class', () => {
       ).resolves.toEqual(expectedIndexDoc);
     });
 
-    it.todo('should included hosts if any where provided');
+    it('should include hosts if any where provided', async () => {
+      indexDocOptions.hosts = { hostA: { name: 'host a' } };
+      set(expectedIndexDoc, 'EndpointActions.data.hosts', indexDocOptions.hosts);
 
-    it.todo('should include Rule information if rule_id and rule_name were provided');
+      await expect(
+        baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+      ).resolves.toEqual(expectedIndexDoc);
+    });
 
-    it.todo('should error if index of document did not return a 201');
+    it('should include Rule information if rule_id and rule_name were provided', async () => {
+      indexDocOptions.rule_id = '1-2-3';
+      indexDocOptions.rule_name = 'rule 123';
+      expectedIndexDoc.rule = {
+        name: indexDocOptions.rule_name,
+        id: indexDocOptions.rule_id,
+      };
 
-    it.todo('should throw ResponseActionsClientError if operation fails');
+      await expect(
+        baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+      ).resolves.toEqual(expectedIndexDoc);
+    });
+
+    it('should NOT include Rule information if rule_id or rule_name are missing', async () => {
+      indexDocOptions.rule_id = '1-2-3';
+
+      await expect(
+        baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+      ).resolves.toEqual(expectedIndexDoc);
+    });
+
+    it('should error if index of document did not return a 201', async () => {
+      esIndexDocResponse.statusCode = 200;
+      const responsePromise = baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+
+      await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsClientError);
+      await expect(responsePromise).rejects.toHaveProperty('statusCode', 500);
+    });
+
+    it('should throw ResponseActionsClientError if operation fails', async () => {
+      esClient.index.mockImplementation(async () => {
+        throw new Error('test error');
+      });
+      const responsePromise = baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+
+      await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsClientError);
+      await expect(responsePromise).rejects.toHaveProperty('statusCode', 500);
+      await expect(responsePromise).rejects.toHaveProperty(
+        'message',
+        expect.stringContaining('Failed to create action request document:')
+      );
+    });
   });
 
   describe('#writeActionResponseToEndpointIndex()', () => {
-    it.todo('should return indexed record on success');
+    let actionResponseOptions: ResponseActionsClientWriteActionResponseToEndpointIndexOptions;
 
-    it.todo('should throw ResponseActionsClientError if operation fails');
+    beforeEach(() => {
+      actionResponseOptions = {
+        actionId: '1-2-3',
+        agentId: '123',
+        error: { message: 'test error' },
+        data: {
+          command: 'isolate',
+          comment: 'some comment',
+          output: undefined,
+        },
+      };
+    });
+
+    it('should return indexed record on success', async () => {
+      await expect(
+        baseClassMock.writeActionResponseToEndpointIndex(actionResponseOptions)
+      ).resolves.toEqual({
+        '@timestamp': expect.any(String),
+        EndpointActions: {
+          action_id: '1-2-3',
+          completed_at: expect.any(String),
+          data: {
+            command: 'isolate',
+            comment: 'some comment',
+          },
+          started_at: expect.any(String),
+        },
+        agent: {
+          id: '123',
+        },
+        error: {
+          message: 'test error',
+        },
+      });
+    });
+
+    it('should throw ResponseActionsClientError if operation fails', async () => {
+      esClient.index.mockImplementation(async () => {
+        throw new Error('oh oh');
+      });
+      const responsePromise =
+        baseClassMock.writeActionResponseToEndpointIndex(actionResponseOptions);
+
+      await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsClientError);
+      await expect(responsePromise).rejects.toHaveProperty(
+        'message',
+        expect.stringContaining('Failed to create action response document: ')
+      );
+      await expect(responsePromise).rejects.toHaveProperty('statusCode', 500);
+    });
   });
 });
 
