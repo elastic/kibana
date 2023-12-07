@@ -99,6 +99,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
       expect(alertDoc['kibana.alert.title']).to.be("rule 'always fire' matched query");
       expect(alertDoc['kibana.alert.evaluation.conditions']).to.be('Query matched documents');
+      expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(0);
       const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
       expect(value).greaterThan(0);
       expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
