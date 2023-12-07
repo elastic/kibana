@@ -462,8 +462,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
         riskScorePrerequisites: `${SECURITY_SOLUTION_DOCS}ers-requirements.html`,
         hostRiskScore: `${SECURITY_SOLUTION_DOCS}host-risk-score.html`,
         userRiskScore: `${SECURITY_SOLUTION_DOCS}user-risk-score.html`,
-        entityRiskScoring: `${SECURITY_SOLUTION_DOCS}advanced-entity-analytics-overview.html#entity-risk-scoring`,
+        entityRiskScoring: `${SECURITY_SOLUTION_DOCS}entity-risk-scoring.html`,
       },
+      detectionEngineOverview: `${SECURITY_SOLUTION_DOCS}detection-engine-overview.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -618,6 +619,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     security: {
       apiKeyServiceSettings: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
       clusterPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-cluster`,
+      definingRoles: `${ELASTICSEARCH_DOCS}defining-roles.html`,
       elasticsearchSettings: `${ELASTICSEARCH_DOCS}security-settings.html`,
       elasticsearchEnableSecurity: `${ELASTICSEARCH_DOCS}configuring-stack-security.html`,
       elasticsearchEnableApiKeys: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
