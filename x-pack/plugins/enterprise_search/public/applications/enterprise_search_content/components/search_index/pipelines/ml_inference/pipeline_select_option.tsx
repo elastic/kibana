@@ -50,16 +50,16 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
+        <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={pipeline.modelType.length === 0}>
             <EuiText size="s">{modelIdDisplay}</EuiText>
           </EuiFlexItem>
           {pipeline.modelType.length > 0 && (
             <EuiFlexItem>
               {/* Wrap in a div to prevent the badge from growing to a whole row on mobile*/}
-              <div>
+              <span>
                 <MLModelTypeBadge type={pipeline.modelType} />
-              </div>
+              </span>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
