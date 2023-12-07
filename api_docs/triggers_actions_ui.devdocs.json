@@ -1828,21 +1828,13 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.useLoadRuleTypes",
+        "id": "def-public.useLoadRuleTypesQuery",
         "type": "Function",
         "tags": [],
-        "label": "useLoadRuleTypes",
+        "label": "useLoadRuleTypesQuery",
         "description": [],
         "signature": [
-          "({ filteredRuleTypes }: RuleTypesProps) => { ruleTypes: ",
-          {
-            "pluginId": "@kbn/triggers-actions-ui-types",
-            "scope": "common",
-            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
-            "section": "def-common.RuleType",
-            "text": "RuleType"
-          },
-          "<string, string>[]; error: string | null; ruleTypeIndex: ",
+          "({ filteredRuleTypes, enabled, }: UseLoadRuleTypesQueryProps) => { ruleTypesState: { initialLoad: boolean; isLoading: boolean; data: ",
           {
             "pluginId": "@kbn/triggers-actions-ui-types",
             "scope": "common",
@@ -1850,23 +1842,31 @@
             "section": "def-common.RuleTypeIndex",
             "text": "RuleTypeIndex"
           },
-          "; ruleTypesIsLoading: boolean; }"
+          "; error: unknown; }; hasAnyAuthorizedRuleType: boolean; authorizedRuleTypes: ",
+          {
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.RuleType",
+            "text": "RuleType"
+          },
+          "<string, string>[]; authorizedToReadAnyRules: boolean; authorizedToCreateAnyRules: boolean; isSuccess: boolean; }"
         ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_load_rule_types.ts",
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_load_rule_types_query.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.useLoadRuleTypes.$1",
+            "id": "def-public.useLoadRuleTypesQuery.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ filteredRuleTypes }",
+            "label": "{\n  filteredRuleTypes,\n  enabled = true,\n}",
             "description": [],
             "signature": [
-              "RuleTypesProps"
+              "UseLoadRuleTypesQueryProps"
             ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_load_rule_types.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_load_rule_types_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -6336,7 +6336,13 @@
         "label": "GetRenderCellValue",
         "description": [],
         "signature": [
-          "({ setFlyoutAlert, context, }: { setFlyoutAlert?: ((data: unknown) => void) | undefined; context?: T | undefined; }) => (props: unknown) => React.ReactNode"
+          "({ setFlyoutAlert, context, }: { setFlyoutAlert: ",
+          "SetFlyoutAlert",
+          "; context?: T | undefined; }) => (props: ",
+          "EuiDataGridCellValueElementProps",
+          " & { data: ",
+          "TimelineNonEcsData",
+          "[]; }) => React.ReactNode | JSX.Element"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -6351,7 +6357,9 @@
             "label": "__0",
             "description": [],
             "signature": [
-              "{ setFlyoutAlert?: ((data: unknown) => void) | undefined; context?: T | undefined; }"
+              "{ setFlyoutAlert: ",
+              "SetFlyoutAlert",
+              "; context?: T | undefined; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -6567,6 +6575,23 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.AlertsTableContext",
+        "type": "Object",
+        "tags": [],
+        "label": "AlertsTableContext",
+        "description": [],
+        "signature": [
+          "React.Context<",
+          "AlertsTableContextType",
+          ">"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/contexts/alerts_table_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "triggersActionsUi",
         "id": "def-public.builtInAggregationTypes",
@@ -7813,6 +7838,42 @@
                   "section": "def-public.AlertsTableProps",
                   "text": "AlertsTableProps"
                 }
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAlertsTableDefaultAlertActions",
+          "type": "Function",
+          "tags": [],
+          "label": "getAlertsTableDefaultAlertActions",
+          "description": [],
+          "signature": [
+            "<P extends ",
+            "AlertActionsProps",
+            ">(props: P) => React.ReactElement<",
+            "AlertActionsProps",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAlertsTableDefaultAlertActions.$1",
+              "type": "Uncategorized",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,

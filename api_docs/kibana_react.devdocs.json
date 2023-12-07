@@ -812,54 +812,6 @@
             "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/time_slider/embeddable/time_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/time_slider/embeddable/time_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/time_slider/embeddable/time_slider_embeddable.tsx"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
           },
@@ -2703,30 +2655,6 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_add_data_control_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_add_data_control_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_edit_control_group_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_edit_control_group_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/actions/edit_control_action.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/actions/edit_control_action.tsx"
           },
           {
             "plugin": "dashboard",

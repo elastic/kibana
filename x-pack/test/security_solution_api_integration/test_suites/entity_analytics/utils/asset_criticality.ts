@@ -13,6 +13,7 @@ import {
 import {
   ASSET_CRITICALITY_STATUS_URL,
   ASSET_CRITICALITY_URL,
+  ASSET_CRITICALITY_PRIVILEGES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -107,4 +108,18 @@ export const assetCriticalityRouteHelpersFactory = (
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .expect(expectStatusCode);
   },
+});
+
+export const assetCriticalityRouteHelpersFactoryNoAuth = (
+  supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>,
+  namespace?: string
+) => ({
+  privilegesForUser: async ({ username, password }: { username: string; password: string }) =>
+    await supertestWithoutAuth
+      .get(ASSET_CRITICALITY_PRIVILEGES_URL)
+      .auth(username, password)
+      .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send()
+      .expect(200),
 });
