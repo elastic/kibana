@@ -504,7 +504,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         {
           // TODO: This is a quick fix to make sure that we do not lose conditions state on refetching index patterns via `useFetchIndexPatterns`
           // which happens due to data being stale after 5 minutes (in `useFetchJobsSummaryQuery`, `useFetchModulesQuery` and `useFetchRecognizerQuery`)
-          // which makes useQuery triggring data refetch.
+          // which makes useQuery triggering data refetch.
           // To fix the issue properly, we will need to do refactoring and store conditions state in the parent component (`AddExceptionFlyout`)
           // instead of keeping it in `ExceptionsConditions` which can be removed and recreated due to fetching steps described above.
           // Refactoring ticket: https://github.com/elastic/security-team/issues/8197
