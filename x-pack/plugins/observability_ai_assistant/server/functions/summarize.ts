@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type { RegisterFunctionDefinition } from '../../common/types';
-import type { ObservabilityAIAssistantService } from '../types';
+import type { FunctionRegistrationParameters } from '.';
+import { KnowledgeBaseEntryRole } from '../../common';
 
 export function registerSummarizationFunction({
-  service,
+  client,
   registerFunction,
-}: {
-  service: ObservabilityAIAssistantService;
-  registerFunction: RegisterFunctionDefinition;
-}) {
+}: FunctionRegistrationParameters) {
   registerFunction(
     {
       name: 'summarize',
@@ -65,19 +62,19 @@ export function registerSummarizationFunction({
       { arguments: { id, text, is_correction: isCorrection, confidence, public: isPublic } },
       signal
     ) => {
-      return service
-        .callApi('POST /internal/observability_ai_assistant/functions/summarize', {
-          params: {
-            body: {
-              id,
-              text,
-              is_correction: isCorrection,
-              confidence,
-              public: isPublic,
-              labels: {},
-            },
+      return client
+        .createKnowledgeBaseEntry({
+          entry: {
+            doc_id: id,
+            role: KnowledgeBaseEntryRole.AssistantSummarization,
+            id,
+            text,
+            is_correction: isCorrection,
+            confidence,
+            public: isPublic,
+            labels: {},
           },
-          signal,
+          // signal,
         })
         .then(() => ({
           content: {
