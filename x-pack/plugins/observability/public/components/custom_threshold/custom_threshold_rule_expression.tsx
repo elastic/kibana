@@ -14,6 +14,7 @@ import {
   EuiEmptyPrompt,
   EuiFormErrorText,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
@@ -36,13 +37,12 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
-import { CUSTOM_AGGREGATOR } from '../../../common/custom_threshold_rule/constants';
 import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
-import { ExpressionChart } from './components/expression_chart';
 import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerFields, GroupBy } from './components/group_by';
+import { PreviewChart } from './components/preview_chart/preview_chart';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -52,7 +52,6 @@ type Props = Omit<
 >;
 
 export const defaultExpression: MetricExpression = {
-  aggType: CUSTOM_AGGREGATOR,
   comparator: Comparator.GT,
   metrics: [
     {
@@ -60,7 +59,7 @@ export const defaultExpression: MetricExpression = {
       aggType: Aggregators.COUNT,
     },
   ],
-  threshold: [1000],
+  threshold: [100],
   timeSize: 1,
   timeUnit: 'm',
 };
@@ -202,11 +201,8 @@ export default function Expressions(props: Props) {
 
   const removeExpression = useCallback(
     (id: number) => {
-      const ruleCriteria = ruleParams.criteria?.slice() || [];
-      if (ruleCriteria.length > 1) {
-        ruleCriteria.splice(id, 1);
-        setRuleParams('criteria', ruleCriteria);
-      }
+      const ruleCriteria = ruleParams.criteria?.filter((_, index) => index !== id) || [];
+      setRuleParams('criteria', ruleCriteria);
     },
     [setRuleParams, ruleParams.criteria]
   );
@@ -318,7 +314,6 @@ export default function Expressions(props: Props) {
       defaultMessage: 'Search for observability data… (e.g. host.name:host-1)',
     }
   );
-
   return (
     <>
       <EuiTitle size="xs">
@@ -376,30 +371,11 @@ export default function Expressions(props: Props) {
         </EuiFormErrorText>
       )}
       <EuiSpacer size="l" />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.observability.customThreshold.rule.alertFlyout.setConditions"
-            defaultMessage="Set rule conditions"
-          />
-        </h5>
-      </EuiTitle>
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (
             <div key={idx}>
-              {/* index has semantic meaning, we show the condition title starting from the 2nd one  */}
-              {idx >= 1 && (
-                <EuiTitle size="xs">
-                  <h5>
-                    <FormattedMessage
-                      id="xpack.observability.customThreshold.rule.alertFlyout.condition"
-                      defaultMessage="Condition {conditionNumber}"
-                      values={{ conditionNumber: idx + 1 }}
-                    />
-                  </h5>
-                </EuiTitle>
-              )}
+              {idx > 0 && <EuiHorizontalRule margin="s" />}
               <ExpressionRow
                 canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
                 fields={derivedIndexPattern.fields}
@@ -411,14 +387,27 @@ export default function Expressions(props: Props) {
                 errors={(errors[idx] as IErrorObject) || emptyError}
                 expression={e || {}}
                 dataView={derivedIndexPattern}
+                title={
+                  ruleParams.criteria.length === 1 ? (
+                    <FormattedMessage
+                      id="xpack.observability.customThreshold.rule.alertFlyout.setConditions"
+                      defaultMessage="Set rule conditions"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.observability.customThreshold.rule.alertFlyout.condition"
+                      defaultMessage="Condition {conditionNumber}"
+                      values={{ conditionNumber: idx + 1 }}
+                    />
+                  )
+                }
               >
-                {/* Preview */}
-                <ExpressionChart
-                  expression={e}
-                  derivedIndexPattern={derivedIndexPattern}
+                <PreviewChart
+                  metricExpression={e}
+                  dataView={dataView}
                   filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
                   groupBy={ruleParams.groupBy}
-                  timeFieldName={dataView?.timeFieldName}
+                  error={(errors[idx] as IErrorObject) || emptyError}
                 />
               </ExpressionRow>
             </div>

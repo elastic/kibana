@@ -443,7 +443,7 @@ export interface AgentUpgradeDetails {
   target_version: string;
   action_id: string;
   state: AgentUpgradeStateType;
-  metadata: {
+  metadata?: {
     scheduled_at?: string;
     download_percent?: number;
     failed_state?: AgentUpgradeStateType;

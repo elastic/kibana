@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { asyncForEach } from '@kbn/std';
 import type { FilterSpecification, Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
 import type { KibanaExecutionContext } from '@kbn/core/public';
@@ -50,7 +51,7 @@ import {
   VectorStyleRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
-import { LayerIcon, ILayer, LayerError } from '../layer';
+import { LayerIcon, ILayer, LayerMessage } from '../layer';
 import { InnerJoin } from '../../joins/inner_join';
 import { isSpatialJoin } from '../../joins/is_spatial_join';
 import { IField } from '../../fields/field';
@@ -274,18 +275,18 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     });
   }
 
-  getErrors(): LayerError[] {
-    const errors = super.getErrors();
+  getErrors(inspectorAdapters: Adapters): LayerMessage[] {
+    const errors = super.getErrors(inspectorAdapters);
 
     this.getValidJoins().forEach((join) => {
       const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
-      const error = joinDataRequest?.getError();
-      if (error) {
+      const joinError = joinDataRequest?.renderError();
+      if (joinError) {
         errors.push({
           title: i18n.translate('xpack.maps.vectorLayer.joinFetchErrorTitle', {
             defaultMessage: `An error occurred when loading join metrics`,
           }),
-          error,
+          body: joinError,
         });
       }
     });
@@ -469,7 +470,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       startLoading(dataRequestId, requestToken, nextMeta);
       const layerName = await this.getDisplayName(source);
 
-      const styleMeta = await (source as IESSource).loadStylePropsMeta({
+      const { styleMeta, warnings } = await (source as IESSource).loadStylePropsMeta({
         layerName,
         style,
         dynamicStyleProps,
@@ -481,10 +482,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         executionContext: dataFilters.executionContext,
       });
 
-      stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
+      stopLoading(dataRequestId, requestToken, styleMeta, { ...nextMeta, warnings });
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
-        onLoadError(dataRequestId, requestToken, error.message);
+        onLoadError(dataRequestId, requestToken, error);
       }
       throw error;
     }
@@ -554,7 +555,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
       stopLoading(dataRequestId, requestToken, formatters, nextMeta);
     } catch (error) {
-      onLoadError(dataRequestId, requestToken, error.message);
+      onLoadError(dataRequestId, requestToken, error);
       throw error;
     }
   }
@@ -605,31 +606,29 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         dataHasChanged: false,
         join,
         joinIndex,
-        propertiesMap: prevDataRequest?.getData() as PropertiesMap,
+        joinMetrics: prevDataRequest?.getData() as PropertiesMap,
       };
     }
 
     try {
       startLoading(sourceDataId, requestToken, joinRequestMeta);
-      const leftSourceName = await this._source.getDisplayName();
-      const propertiesMap = await joinSource.getPropertiesMap(
+      const { joinMetrics, warnings } = await joinSource.getJoinMetrics(
         joinRequestMeta,
-        leftSourceName,
-        join.getLeftField().getName(),
+        await this.getDisplayName(),
         registerCancelCallback.bind(null, requestToken),
         inspectorAdapters,
         featureCollection
       );
-      stopLoading(sourceDataId, requestToken, propertiesMap);
+      stopLoading(sourceDataId, requestToken, joinMetrics, { warnings });
       return {
         dataHasChanged: true,
         join,
         joinIndex,
-        propertiesMap,
+        joinMetrics,
       };
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
-        onLoadError(sourceDataId, requestToken, `Join error: ${error.message}`);
+        onLoadError(sourceDataId, requestToken, error);
       }
       throw error;
     }
@@ -727,7 +726,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       const supportsFeatureEditing = await source.supportsFeatureEditing();
       stopLoading(dataRequestId, requestToken, { supportsFeatureEditing });
     } catch (error) {
-      onLoadError(dataRequestId, requestToken, error.message);
+      onLoadError(dataRequestId, requestToken, error);
       throw error;
     }
   }

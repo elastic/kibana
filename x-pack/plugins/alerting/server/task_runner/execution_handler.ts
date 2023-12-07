@@ -7,7 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
-import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
+import { ALERT_UUID, getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import {
@@ -23,12 +23,16 @@ import {
   AlertingEventLogger,
   ActionOpts as EventLogAction,
 } from '../lib/alerting_event_logger/alerting_event_logger';
-import { parseDuration, CombinedSummarizedAlerts, ThrottledActions } from '../types';
+import { AlertHit, parseDuration, CombinedSummarizedAlerts, ThrottledActions } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
 import { Executable, ExecutionHandlerOptions, RuleTaskInstance } from './types';
 import { TaskRunnerContext } from './task_runner_factory';
-import { transformActionParams, transformSummaryActionParams } from './transform_action_params';
+import {
+  transformActionParams,
+  TransformActionParamsOptions,
+  transformSummaryActionParams,
+} from './transform_action_params';
 import { Alert } from '../alert';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
@@ -141,7 +145,6 @@ export class ExecutionHandler<
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private mutedAlertIdsSet: Set<string> = new Set();
   private previousStartedAt: Date | null;
-  private maintenanceWindowIds: string[] = [];
   private alertsClient: IAlertsClient<
     AlertData,
     State,
@@ -164,7 +167,6 @@ export class ExecutionHandler<
     ruleLabel,
     previousStartedAt,
     actionsClient,
-    maintenanceWindowIds,
     alertsClient,
   }: ExecutionHandlerOptions<
     Params,
@@ -194,7 +196,6 @@ export class ExecutionHandler<
     );
     this.previousStartedAt = previousStartedAt;
     this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
-    this.maintenanceWindowIds = maintenanceWindowIds ?? [];
     this.alertsClient = alertsClient;
   }
 
@@ -416,33 +417,40 @@ export class ExecutionHandler<
     RecoveryActionGroupId
   >): Promise<RunActionReturnValue> {
     const ruleUrl = this.buildRuleUrl(spaceId);
+    const executableAlert = alert!;
+    const actionGroup = action.group as ActionGroupIds;
+    const transformActionParamsOptions: TransformActionParamsOptions = {
+      actionsPlugin: this.taskRunnerContext.actionsPlugin,
+      alertId: ruleId,
+      alertType: this.ruleType.id,
+      actionTypeId: action.actionTypeId,
+      alertName: this.rule.name,
+      spaceId,
+      tags: this.rule.tags,
+      alertInstanceId: executableAlert.getId(),
+      alertUuid: executableAlert.getUuid(),
+      alertActionGroup: actionGroup,
+      alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
+      context: executableAlert.getContext(),
+      actionId: action.id,
+      state: executableAlert.getState(),
+      kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+      alertParams: this.rule.params,
+      actionParams: action.params,
+      flapping: executableAlert.getFlapping(),
+      ruleUrl: ruleUrl?.absoluteUrl,
+    };
+
+    if (executableAlert.isAlertAsData()) {
+      transformActionParamsOptions.aadAlert = executableAlert.getAlertAsData();
+    }
     const actionToRun = {
       ...action,
       params: injectActionParams({
         actionTypeId: action.actionTypeId,
         ruleUrl,
         ruleName: this.rule.name,
-        actionParams: transformActionParams({
-          actionsPlugin: this.taskRunnerContext.actionsPlugin,
-          alertId: ruleId,
-          alertType: this.ruleType.id,
-          actionTypeId: action.actionTypeId,
-          alertName: this.rule.name,
-          spaceId,
-          tags: this.rule.tags,
-          alertInstanceId: alert.getId(),
-          alertUuid: alert.getUuid(),
-          alertActionGroup: action.group,
-          alertActionGroupName: this.ruleTypeActionGroups!.get(action.group as ActionGroupIds)!,
-          context: alert.getContext(),
-          actionId: action.id,
-          state: alert.getState(),
-          kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-          alertParams: this.rule.params,
-          actionParams: action.params,
-          flapping: alert.getFlapping(),
-          ruleUrl: ruleUrl?.absoluteUrl,
-        }),
+        actionParams: transformActionParams(transformActionParamsOptions),
       }),
     };
 
@@ -766,17 +774,7 @@ export class ExecutionHandler<
         }
       }
 
-      // By doing that we are not cancelling the summary action but just waiting
-      // for the window maintenance to be over before sending the summary action
-      if (isSummaryAction(action) && this.maintenanceWindowIds.length > 0) {
-        this.logger.debug(
-          `no scheduling of summary actions "${action.id}" for rule "${
-            this.taskInstance.params.alertId
-          }": has active maintenance windows ${this.maintenanceWindowIds.join()}.`
-        );
-
-        continue;
-      } else if (isSummaryAction(action) || isSystemAction(action)) {
+      if (isSummaryAction(action) || isSystemAction(action)) {
         if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
           executables.push({ action, summarizedAlerts });
         }
@@ -785,16 +783,17 @@ export class ExecutionHandler<
       }
 
       for (const [alertId, alert] of alertsArray) {
-        if (alert.isFilteredOut(summarizedAlerts)) {
+        const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
+        if (alertMaintenanceWindowIds.length !== 0) {
+          this.logger.debug(
+            `no scheduling of summary actions "${action.id}" for rule "${
+              this.taskInstance.params.alertId
+            }": has active maintenance windows ${alertMaintenanceWindowIds.join()}.`
+          );
           continue;
         }
 
-        if (alert.getMaintenanceWindowIds().length > 0) {
-          this.logger.debug(
-            `no scheduling of actions "${action.id}" for rule "${
-              this.taskInstance.params.alertId
-            }": has active maintenance windows ${alert.getMaintenanceWindowIds().join()}.`
-          );
+        if (alert.isFilteredOut(summarizedAlerts)) {
           continue;
         }
 
@@ -814,6 +813,15 @@ export class ExecutionHandler<
           action.frequency?.notifyWhen !== RuleNotifyWhen.CHANGE
         ) {
           continue;
+        }
+
+        if (summarizedAlerts) {
+          const alertAsData = summarizedAlerts.all.data.find(
+            (alertHit: AlertHit) => alertHit._id === alert.getUuid()
+          );
+          if (alertAsData) {
+            alert.setAlertAsData(alertAsData);
+          }
         }
 
         if (action.group === actionGroup && !this.isAlertMuted(alertId)) {
@@ -857,6 +865,10 @@ export class ExecutionHandler<
      * alerts-as-data which are needed by system actions.
      */
     if (isSystemAction(action)) {
+      return true;
+    }
+
+    if (action.useAlertDataForTemplate) {
       return true;
     }
 
@@ -914,12 +926,40 @@ export class ExecutionHandler<
     }
     const alerts = await this.alertsClient.getSummarizedAlerts!(options);
 
-    const total = alerts.new.count + alerts.ongoing.count + alerts.recovered.count;
+    /**
+     * We need to remove all new alerts with maintenance windows retrieved from
+     * getSummarizedAlerts because they might not have maintenance window IDs
+     * associated with them from maintenance windows with scoped query updated
+     * yet (the update call uses refresh: false). So we need to rely on the in
+     * memory alerts to do this.
+     */
+    const newAlertsInMemory =
+      Object.values(this.alertsClient.getProcessedAlerts('new') || {}) || [];
+
+    const newAlertsWithMaintenanceWindowIds = newAlertsInMemory.reduce<string[]>(
+      (result, alert) => {
+        if (alert.getMaintenanceWindowIds().length > 0) {
+          result.push(alert.getUuid());
+        }
+        return result;
+      },
+      []
+    );
+
+    const newAlerts = alerts.new.data.filter((alert) => {
+      return !newAlertsWithMaintenanceWindowIds.includes(alert[ALERT_UUID]);
+    });
+
+    const total = newAlerts.length + alerts.ongoing.count + alerts.recovered.count;
     return {
       ...alerts,
+      new: {
+        count: newAlerts.length,
+        data: newAlerts,
+      },
       all: {
         count: total,
-        data: [...alerts.new.data, ...alerts.ongoing.data, ...alerts.recovered.data],
+        data: [...newAlerts, ...alerts.ongoing.data, ...alerts.recovered.data],
       },
     };
   }

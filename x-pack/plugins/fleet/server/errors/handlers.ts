@@ -34,6 +34,13 @@ import {
   PackagePolicyNotFoundError,
   FleetUnauthorizedError,
   PackagePolicyNameExistsError,
+  PackageOutdatedError,
+  PackageInvalidArchiveError,
+  BundledPackageLocationNotFoundError,
+  PackageRemovalError,
+  PackageESError,
+  KibanaSOReferenceError,
+  PackageAlreadyInstalledError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -47,30 +54,30 @@ interface IngestErrorHandlerParams {
 }
 // unsure if this is correct. would prefer to use something "official"
 // this type is based on BadRequest values observed while debugging https://github.com/elastic/kibana/issues/75862
-
 const getHTTPResponseCode = (error: FleetError): number => {
-  if (error instanceof RegistryResponseError) {
-    // 4xx/5xx's from EPR
-    return 500;
-  }
-  if (error instanceof RegistryConnectionError || error instanceof RegistryError) {
-    // Connection errors (ie. RegistryConnectionError) / fallback  (RegistryError) from EPR
-    return 502; // Bad Gateway
-  }
-  if (error instanceof PackageNotFoundError || error instanceof PackagePolicyNotFoundError) {
-    return 404; // Not Found
-  }
-  if (error instanceof AgentPolicyNameExistsError) {
-    return 409; // Conflict
-  }
-  if (error instanceof PackageUnsupportedMediaTypeError) {
-    return 415; // Unsupported Media Type
-  }
+  // Bad Request
   if (error instanceof PackageFailedVerificationError) {
-    return 400; // Bad Request
+    return 400;
   }
-  if (error instanceof ConcurrentInstallOperationError) {
-    return 409; // Conflict
+  if (error instanceof PackageOutdatedError) {
+    return 400;
+  }
+  if (error instanceof PackageInvalidArchiveError) {
+    return 400;
+  }
+  if (error instanceof PackageRemovalError) {
+    return 400;
+  }
+  if (error instanceof KibanaSOReferenceError) {
+    return 400;
+  }
+  // Unauthorized
+  if (error instanceof FleetUnauthorizedError) {
+    return 403;
+  }
+  // Not Found
+  if (error instanceof PackageNotFoundError || error instanceof PackagePolicyNotFoundError) {
+    return 404;
   }
   if (error instanceof AgentNotFoundError) {
     return 404;
@@ -78,15 +85,43 @@ const getHTTPResponseCode = (error: FleetError): number => {
   if (error instanceof AgentActionNotFoundError) {
     return 404;
   }
-  if (error instanceof FleetUnauthorizedError) {
-    return 403; // Unauthorized
+  // Conflict
+  if (error instanceof AgentPolicyNameExistsError) {
+    return 409;
+  }
+  if (error instanceof ConcurrentInstallOperationError) {
+    return 409;
   }
   if (error instanceof PackagePolicyNameExistsError) {
-    return 409; // Conflict
+    return 409;
   }
+  if (error instanceof PackageAlreadyInstalledError) {
+    return 409;
+  }
+  // Unsupported Media Type
+  if (error instanceof PackageUnsupportedMediaTypeError) {
+    return 415;
+  }
+  // Internal Server Error
   if (error instanceof UninstallTokenError) {
-    return 500; // Internal Error
+    return 500;
   }
+  if (error instanceof BundledPackageLocationNotFoundError) {
+    return 500;
+  }
+  if (error instanceof PackageESError) {
+    return 500;
+  }
+  if (error instanceof RegistryResponseError) {
+    // 4xx/5xx's from EPR
+    return 500;
+  }
+  // Bad Gateway
+  if (error instanceof RegistryConnectionError || error instanceof RegistryError) {
+    // Connection errors (ie. RegistryConnectionError) / fallback  (RegistryError) from EPR
+    return 502;
+  }
+
   return 400; // Bad Request
 };
 
@@ -115,7 +150,7 @@ export function fleetErrorToResponseOptions(error: IngestErrorHandlerParams['err
     };
   }
 
-  // not sure what type of error this is. log as much as possible
+  // default response is 500
   logger.error(error);
   return {
     statusCode: 500,

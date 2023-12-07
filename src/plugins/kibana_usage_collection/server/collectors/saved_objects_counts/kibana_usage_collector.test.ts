@@ -97,7 +97,7 @@ describe('getKibanaSavedObjectCounts', () => {
     expect(getSavedObjectsCountsMock).toHaveBeenCalledWith(
       soClient,
       ['dashboard', 'visualization', 'search', 'index-pattern', 'graph-workspace'],
-      true
+      { exclusive: true }
     );
   });
 });

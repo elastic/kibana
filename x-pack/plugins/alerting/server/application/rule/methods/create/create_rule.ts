@@ -24,7 +24,7 @@ import {
 } from '../../../../rules_client/lib';
 import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RulesClientContext } from '../../../../rules_client/types';
+import { RulesClientContext, NormalizedAlertAction } from '../../../../rules_client/types';
 import { RuleDomain, RuleParams } from '../../types';
 import {
   getRuleCircuitBreakerErrorMessage,
@@ -67,9 +67,10 @@ export async function createRule<Params extends RuleParams = never>(
     (action): action is RuleSystemAction => action.type === RuleActionTypes.SYSTEM
   );
 
+  // TODO (http-versioning): Remove this cast when we fix addGeneratedActionValues
   const data = {
     ...initialData,
-    actions: addGeneratedActionValues(initialData.actions),
+    actions: addGeneratedActionValues(initialData.actions as NormalizedAlertAction[]),
   };
 
   const id = options?.id || SavedObjectsUtils.generateId();

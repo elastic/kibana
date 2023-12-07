@@ -19,36 +19,45 @@ const transformCreateBodyActions = (
 ): CreateRuleData['actions'] => {
   if (!actions) return [];
 
-  return actions.map(({ frequency, alerts_filter: alertsFilter, ...action }) => {
-    if (isSystemAction(action.id)) {
+  return actions.map(
+    ({
+      frequency,
+      alerts_filter: alertsFilter,
+      use_alert_data_for_template: useAlertDataForTemplate,
+      ...action
+    }) => {
+      if (isSystemAction(action.id)) {
+        return {
+          id: action.id,
+          params: action.params,
+          actionTypeId: action.actionTypeId,
+          ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
+          ...(action.uuid ? { uuid: action.uuid } : {}),
+          type: RuleActionTypes.SYSTEM,
+        };
+      }
+
       return {
+        group: action.group ?? 'default',
         id: action.id,
         params: action.params,
         actionTypeId: action.actionTypeId,
+        ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
         ...(action.uuid ? { uuid: action.uuid } : {}),
-        type: RuleActionTypes.SYSTEM,
+        ...(frequency
+          ? {
+              frequency: {
+                summary: frequency.summary,
+                throttle: frequency.throttle,
+                notifyWhen: frequency.notify_when,
+              },
+            }
+          : {}),
+        ...(alertsFilter ? { alertsFilter } : {}),
+        type: RuleActionTypes.DEFAULT,
       };
     }
-
-    return {
-      group: action.group ?? 'default',
-      id: action.id,
-      params: action.params,
-      actionTypeId: action.actionTypeId,
-      ...(action.uuid ? { uuid: action.uuid } : {}),
-      ...(frequency
-        ? {
-            frequency: {
-              summary: frequency.summary,
-              throttle: frequency.throttle,
-              notifyWhen: frequency.notify_when,
-            },
-          }
-        : {}),
-      ...(alertsFilter ? { alertsFilter } : {}),
-      type: RuleActionTypes.DEFAULT,
-    };
-  });
+  );
 };
 
 export const transformCreateBody = <Params extends RuleParams = never>(

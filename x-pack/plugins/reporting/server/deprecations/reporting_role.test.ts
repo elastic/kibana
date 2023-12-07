@@ -7,12 +7,9 @@
 
 import { GetDeprecationsContext, IScopedClusterClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ReportingCore } from '..';
-import {
-  createMockConfigSchema,
-  createMockPluginSetup,
-  createMockReportingCore,
-} from '../test_helpers';
+import { createMockPluginSetup, createMockReportingCore } from '../test_helpers';
 import { getDeprecationsInfo } from './reporting_role';
 
 let reportingCore: ReportingCore;

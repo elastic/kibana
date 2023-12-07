@@ -25,6 +25,7 @@ const defaultActionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
   alertsFilter: schema.maybe(actionAlertsFilterSchema),
   type: schema.literal(RuleActionTypes.DEFAULT),
+  useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 
 export const systemActionSchema = schema.object({
@@ -33,6 +34,7 @@ export const systemActionSchema = schema.object({
   params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
   uuid: schema.maybe(schema.string()),
   type: schema.literal(RuleActionTypes.SYSTEM),
+  useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 
 export const createRuleDataSchema = schema.object({

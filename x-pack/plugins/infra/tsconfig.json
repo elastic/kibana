@@ -74,7 +74,12 @@
     "@kbn/expressions-plugin",
     "@kbn/chart-icons",
     "@kbn/advanced-settings-plugin",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/custom-icons",
+    "@kbn/profiling-utils",
+    "@kbn/profiling-data-access-plugin",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/observability-get-padded-alert-time-range-util"
   ],
   "exclude": ["target/**/*"]
 }

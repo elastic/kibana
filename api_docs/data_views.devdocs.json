@@ -168,7 +168,7 @@
               "\nReturns scripted fields"
             ],
             "signature": [
-              "() => { storedFields: string[]; scriptFields: Record<string, ",
+              "() => { scriptFields: Record<string, ",
               "ScriptField",
               ">; docvalueFields: { field: string; format: string; }[]; runtimeFields: ",
               "MappingRuntimeFields",
@@ -4488,6 +4488,22 @@
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewAttributes.allowHidden",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowHidden",
+            "description": [
+              "\nAllow hidden and system indices when loading field list"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6164,7 +6180,7 @@
             "section": "def-common.FieldAttrs",
             "text": "FieldAttrs"
           },
-          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
+          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -6557,7 +6573,7 @@
               "\nReturns scripted fields"
             ],
             "signature": [
-              "() => { storedFields: string[]; scriptFields: Record<string, ",
+              "() => { scriptFields: Record<string, ",
               "ScriptField",
               ">; docvalueFields: { field: string; format: string; }[]; runtimeFields: ",
               "MappingRuntimeFields",
@@ -9221,7 +9237,7 @@
             "signature": [
               "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; indexFilter?: ",
               "QueryDslQueryContainer",
-              " | undefined; fields?: string[] | undefined; }) => Promise<{ fields: ",
+              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; }) => Promise<{ fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -9340,6 +9356,20 @@
                     "description": [],
                     "signature": [
                       "string[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.allowHidden",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "allowHidden",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                     "deprecated": false,
@@ -11985,7 +12015,7 @@
               "\nReturns scripted fields"
             ],
             "signature": [
-              "() => { storedFields: string[]; scriptFields: Record<string, ",
+              "() => { scriptFields: Record<string, ",
               "ScriptField",
               ">; docvalueFields: { field: string; format: string; }[]; runtimeFields: ",
               "MappingRuntimeFields",
@@ -15787,6 +15817,22 @@
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewAttributes.allowHidden",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowHidden",
+            "description": [
+              "\nAllow hidden and system indices when loading field list"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -18081,6 +18127,20 @@
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.GetFieldsOptions.allowHidden",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowHidden",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -18763,7 +18823,7 @@
                 "section": "def-common.FieldAttrs",
                 "text": "FieldAttrs"
               },
-              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
+              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
             ],
             "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts",
             "deprecated": false,
@@ -20486,7 +20546,7 @@
             "section": "def-common.FieldAttrs",
             "text": "FieldAttrs"
           },
-          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
+          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,

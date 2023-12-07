@@ -9,7 +9,7 @@
         "tags": [],
         "label": "DataRequest",
         "description": [],
-        "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+        "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,7 +23,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -37,7 +37,7 @@
                 "signature": [
                   "DataRequestDescriptor"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+                "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -55,7 +55,7 @@
             "signature": [
               "() => object | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -71,7 +71,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -88,7 +88,7 @@
               "() => ",
               "DataRequestMeta"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -104,7 +104,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -120,7 +120,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -136,7 +136,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -152,7 +152,7 @@
             "signature": [
               "() => symbol | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -160,15 +160,15 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.DataRequest.getError",
+            "id": "def-public.DataRequest.renderError",
             "type": "Function",
             "tags": [],
-            "label": "getError",
+            "label": "renderError",
             "description": [],
             "signature": [
-              "() => string | undefined"
+              "() => React.ReactNode"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1684,12 +1684,12 @@
           {
             "parentPluginId": "maps",
             "id": "def-public.GeoJsonWithMeta.meta",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "meta",
             "description": [],
             "signature": [
-              "ESSearchSourceResponseMeta",
+              "DataRequestMeta",
               " | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",

@@ -53,6 +53,7 @@ import type {
   PostAgentUnenrollResponse,
   GenerateServiceTokenResponse,
   GetOutputsResponse,
+  DeleteAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
@@ -323,6 +324,28 @@ export const fetchAgentPolicy = async (
 };
 
 /**
+ * Delete a single Fleet Agent Policy
+ * @param kbnClient
+ * @param agentPolicyId
+ */
+export const deleteAgentPolicy = async (
+  kbnClient: KbnClient,
+  agentPolicyId: string
+): Promise<DeleteAgentPolicyResponse> => {
+  return kbnClient
+    .request<DeleteAgentPolicyResponse>({
+      method: 'POST',
+      path: agentPolicyRouteService.getDeletePath(),
+      body: {
+        agentPolicyId,
+      },
+      headers: { 'elastic-api-version': '2023-10-31' },
+    })
+    .then((response) => response.data)
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
+/**
  * Retrieves a list of Fleet Integration policies
  * @param kbnClient
  * @param options
@@ -373,6 +396,16 @@ export const getAgentVersionMatchingCurrentStack = async (
   return version;
 };
 
+// Generates a file name using system arch and an agent version.
+export const getAgentFileName = (agentVersion: string): string => {
+  const downloadArch =
+    { arm64: 'arm64', x64: 'x86_64' }[process.arch as string] ??
+    `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
+  const fileName = `elastic-agent-${agentVersion}-linux-${downloadArch}`;
+
+  return fileName;
+};
+
 interface ElasticArtifactSearchResponse {
   manifest: {
     'last-update-time': string;
@@ -414,11 +447,9 @@ export const getAgentDownloadUrl = async (
   log?: ToolingLog
 ): Promise<GetAgentDownloadUrlResponse> => {
   const agentVersion = closestMatch ? await getLatestAgentDownloadVersion(version, log) : version;
-  const downloadArch =
-    { arm64: 'arm64', x64: 'x86_64' }[process.arch as string] ??
-    `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
-  const fileNameNoExtension = `elastic-agent-${agentVersion}-linux-${downloadArch}`;
-  const agentFile = `${fileNameNoExtension}.tar.gz`;
+
+  const fileNameWithoutExtension = getAgentFileName(agentVersion);
+  const agentFile = `${fileNameWithoutExtension}.tar.gz`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${agentVersion}/${agentFile}`;
 
   log?.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
@@ -444,7 +475,7 @@ export const getAgentDownloadUrl = async (
   return {
     url: searchResult.packages[agentFile].url,
     fileName: agentFile,
-    dirName: fileNameNoExtension,
+    dirName: fileNameWithoutExtension,
   };
 };
 
@@ -523,6 +554,33 @@ export const unEnrollFleetAgent = async (
     .catch(catchAxiosErrorFormatAndThrow);
 
   return data;
+};
+
+/**
+ * Un-enrolls a Fleet agent
+ *
+ * @param kbnClient
+ * @param agentId
+ * @param force
+ */
+export const getAgentPolicyEnrollmentKey = async (
+  kbnClient: KbnClient,
+  policyId: string
+): Promise<string> => {
+  const { data } = await kbnClient
+    .request<GetEnrollmentAPIKeysResponse>({
+      method: 'GET',
+      path: enrollmentAPIKeyRouteService.getListPath(),
+      query: {
+        policy_id: policyId,
+      },
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
+    })
+    .catch(catchAxiosErrorFormatAndThrow);
+
+  return data.items?.[0]?.api_key;
 };
 
 export const generateFleetServiceToken = async (

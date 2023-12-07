@@ -12,7 +12,7 @@ import {
   VIEW_CASE_TOASTER_LINK,
 } from '../../../../screens/expandable_flyout/common';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
-import { ALERT_CHECKBOX, EMPTY_ALERT_TABLE } from '../../../../screens/alerts';
+import { ALERT_CHECKBOX } from '../../../../screens/alerts';
 import {
   DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON,
@@ -30,6 +30,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_RESPOND,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_ICON,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_LINK_ICON,
   DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE,
@@ -49,16 +51,30 @@ import {
   openTakeActionButtonAndSelectItem,
   selectTakeActionItem,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
-import { deleteAlertsAndRules } from '../../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { TOASTER } from '../../../../screens/alerts_detection_rules';
+import { goToAcknowledgedAlerts, goToClosedAlerts, waitForAlerts } from '../../../../tasks/alerts';
+import {
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_DETAILS,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_TITLE,
+} from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 
 describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewRule();
+
+  before(() => {
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
+  });
+
+  after(() => {
+    cy.task('esArchiverUnload', 'auditbeat_multiple');
+  });
 
   beforeEach(() => {
     deleteAlertsAndRules();
@@ -71,7 +87,9 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
   it('should display header and footer basics', () => {
     expandFirstAlertExpandableFlyout();
 
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ICON).should('exist');
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('have.text', rule.name);
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_LINK_ICON).should('exist');
 
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS).should('have.text', 'open');
 
@@ -128,9 +146,9 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
     fillOutFormToCreateNewCase();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_EXISTING_CASE);
 
-    cy.get(EXISTING_CASE_SELECT_BUTTON).should('be.visible').contains('Select').click();
+    cy.get(EXISTING_CASE_SELECT_BUTTON).contains('Select').click();
 
-    cy.get(VIEW_CASE_TOASTER_LINK).should('be.visible').and('contain.text', 'View case');
+    cy.get(VIEW_CASE_TOASTER_LINK).should('contain.text', 'View case');
   });
 
   // TODO this will change when add to new case is improved
@@ -140,31 +158,49 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE);
     fillOutFormToCreateNewCase();
 
-    cy.get(VIEW_CASE_TOASTER_LINK).should('be.visible').and('contain.text', 'View case');
+    cy.get(VIEW_CASE_TOASTER_LINK).should('contain.text', 'View case');
   });
 
   it('should mark as acknowledged', () => {
-    cy.get(ALERT_CHECKBOX).should('have.length', 1);
+    cy.get(ALERT_CHECKBOX).should('have.length', 5);
 
     expandFirstAlertExpandableFlyout();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_MARK_AS_ACKNOWLEDGED);
 
-    // TODO figure out how to verify the toasts pops up
-    // cy.get(KIBANA_TOAST)
-    //   .should('be.visible')
-    //   .and('have.text', 'Successfully marked 1 alert as acknowledged.');
-    cy.get(EMPTY_ALERT_TABLE).should('exist');
+    cy.get(TOASTER).should('have.text', 'Successfully marked 1 alert as acknowledged.');
+
+    goToAcknowledgedAlerts();
+    waitForAlerts();
+    expandFirstAlertExpandableFlyout();
+    cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_TITLE).should(
+      'have.text',
+      'Last alert status change'
+    );
+    cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_DETAILS).should(
+      'contain.text',
+      'Alert status updated'
+    );
   });
 
   it('should mark as closed', () => {
-    cy.get(ALERT_CHECKBOX).should('have.length', 1);
+    cy.get(ALERT_CHECKBOX).should('have.length', 5);
 
     expandFirstAlertExpandableFlyout();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED);
 
-    // TODO figure out how to verify the toasts pops up
-    // cy.get(KIBANA_TOAST).should('be.visible').and('have.text', 'Successfully closed 1 alert.');
-    cy.get(EMPTY_ALERT_TABLE).should('exist');
+    cy.get(TOASTER).should('have.text', 'Successfully closed 1 alert.');
+
+    goToClosedAlerts();
+    waitForAlerts();
+    expandFirstAlertExpandableFlyout();
+    cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_TITLE).should(
+      'have.text',
+      'Last alert status change'
+    );
+    cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_DETAILS).should(
+      'contain.text',
+      'Alert status updated'
+    );
   });
 
   // these actions are now grouped together as we're not really testing their functionality but just the existence of the option in the dropdown

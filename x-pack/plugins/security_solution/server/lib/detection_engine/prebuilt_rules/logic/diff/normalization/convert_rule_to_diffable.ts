@@ -6,6 +6,7 @@
  */
 
 import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
+import { requiredOptional } from '@kbn/zod-helpers';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../../common/constants';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import type {
@@ -123,7 +124,7 @@ const extractDiffableCommonFields = (
     severity: rule.severity,
     severity_mapping: rule.severity_mapping ?? [],
     risk_score: rule.risk_score,
-    risk_score_mapping: rule.risk_score_mapping ?? [],
+    risk_score_mapping: rule.risk_score_mapping?.map((mapping) => requiredOptional(mapping)) ?? [],
 
     // About -> Advanced settings
     references: rule.references ?? [],

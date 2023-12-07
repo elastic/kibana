@@ -499,7 +499,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       context,
       operations,
       rule: ruleDomain,
-      ruleActions: ruleDomain.actions,
+      ruleActions: ruleActions as RuleDomain['actions'], // TODO (http-versioning) Remove this cast once we fix injectReferencesIntoActions
       ruleType,
     });
 

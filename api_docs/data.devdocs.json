@@ -2690,7 +2690,7 @@
                     "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; enableUiSettingsValidations: boolean; }>>"
                 ],
                 "path": "src/plugins/data/public/plugin.ts",
                 "deprecated": false,
@@ -7790,6 +7790,20 @@
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.GetFieldsOptions.allowHidden",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowHidden",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -12656,6 +12670,10 @@
             },
             {
               "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_row/distinct_values.tsx"
+            },
+            {
+              "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/top_values/top_values.tsx"
             },
             {
@@ -12825,7 +12843,7 @@
                     "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; enableUiSettingsValidations: boolean; }>>"
                 ],
                 "path": "src/plugins/data/server/plugin.ts",
                 "deprecated": false,
@@ -13227,7 +13245,7 @@
               "\nReturns scripted fields"
             ],
             "signature": [
-              "() => { storedFields: string[]; scriptFields: Record<string, ",
+              "() => { scriptFields: Record<string, ",
               "ScriptField",
               ">; docvalueFields: { field: string; format: string; }[]; runtimeFields: ",
               "MappingRuntimeFields",
@@ -15601,7 +15619,7 @@
             "signature": [
               "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; indexFilter?: ",
               "QueryDslQueryContainer",
-              " | undefined; fields?: string[] | undefined; }) => Promise<{ fields: ",
+              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; }) => Promise<{ fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -15720,6 +15738,20 @@
                     "description": [],
                     "signature": [
                       "string[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.allowHidden",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "allowHidden",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                     "deprecated": false,
@@ -19374,7 +19406,7 @@
               "\nReturns scripted fields"
             ],
             "signature": [
-              "() => { storedFields: string[]; scriptFields: Record<string, ",
+              "() => { scriptFields: Record<string, ",
               "ScriptField",
               ">; docvalueFields: { field: string; format: string; }[]; runtimeFields: ",
               "MappingRuntimeFields",
@@ -23659,6 +23691,22 @@
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewAttributes.allowHidden",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowHidden",
+            "description": [
+              "\nAllow hidden and system indices when loading field list"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -23908,6 +23956,20 @@
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.GetFieldsOptions.allowHidden",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowHidden",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -24085,7 +24147,7 @@
                 "section": "def-common.FieldAttrs",
                 "text": "FieldAttrs"
               },
-              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
+              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
             ],
             "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts",
             "deprecated": false,
@@ -25212,7 +25274,7 @@
             "section": "def-common.FieldAttrs",
             "text": "FieldAttrs"
           },
-          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
+          " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,

@@ -13,7 +13,6 @@ import {
   ENDPOINT_ARTIFACT_LIST_IDS,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
 import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -21,7 +20,6 @@ import {
   getArtifactsListTestsData,
   ArtifactActionsType,
   AgentPolicyResponseType,
-  InternalManifestSchemaResponseType,
   getCreateMultipleData,
   MultipleArtifactActionsType,
 } from './mocks';
@@ -32,6 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'artifactEntriesList']);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const endpointArtifactsTestResources = getService('endpointArtifactTestResources');
   const endpointTestResources = getService('endpointTestResources');
   const retry = getService('retry');
   const esClient = getService('es');
@@ -52,8 +51,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true');
   };
 
+  // Several flaky tests from this file in serverless, hence @skipInServerless
+  // - https://github.com/elastic/kibana/issues?q=is%3Aissue+is%3Aopen+X-pack+endpoint+integrations++artifact+entries+list
+  // https://github.com/elastic/kibana/issues/171475
+  // https://github.com/elastic/kibana/issues/171476
+  // https://github.com/elastic/kibana/issues/171477
+  // https://github.com/elastic/kibana/issues/171478
+  // https://github.com/elastic/kibana/issues/171487
+  // https://github.com/elastic/kibana/issues/171488
+  // https://github.com/elastic/kibana/issues/171489
+  // https://github.com/elastic/kibana/issues/171491
+  // https://github.com/elastic/kibana/issues/171492
   describe('For each artifact list under management', function () {
-    targetTags(this, ['@ess', '@serverless']);
+    targetTags(this, ['@ess', '@serverless', '@skipInServerless']);
 
     this.timeout(60_000 * 5);
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -75,29 +85,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Check edited artifact is in the list with new values (wait for list to be updated)
       let updatedArtifact: ArtifactElasticsearchProperties | undefined;
       await retry.waitForWithTimeout('fleet artifact is updated', 120_000, async () => {
-        // Get endpoint manifest
-        const {
-          hits: { hits: manifestResults },
-        } = await esClient.search({
-          index: '.kibana*',
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    type: ManifestConstants.SAVED_OBJECT_TYPE,
-                  },
-                },
-              ],
-            },
-          },
-          size: 1,
-        });
+        const artifacts = await endpointArtifactsTestResources.getArtifacts();
 
-        const manifestResult = manifestResults[0] as InternalManifestSchemaResponseType;
-        const manifestArtifact = manifestResult._source[
-          'endpoint:user-artifact-manifest'
-        ].artifacts.find((artifact) => {
+        const manifestArtifact = artifacts.find((artifact) => {
           return (
             artifact.artifactId ===
               `${expectedArtifact.identifier}-${expectedArtifact.decoded_sha256}` &&
@@ -235,7 +225,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     for (const testData of getArtifactsListTestsData()) {
-      describe(`When on the ${testData.title} entries list`, function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/171489
+      // FLAKY: https://github.com/elastic/kibana/issues/171475
+      describe.skip(`When on the ${testData.title} entries list`, function () {
         beforeEach(async () => {
           policyInfo = await policyTestResources.createPolicy();
           await removeAllArtifacts();
@@ -321,7 +313,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     }
 
-    describe('Should check artifacts are correctly generated when multiple entries', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/171476
+    describe.skip('Should check artifacts are correctly generated when multiple entries', function () {
       let firstPolicy: PolicyTestResourceInfo;
       let secondPolicy: PolicyTestResourceInfo;
 

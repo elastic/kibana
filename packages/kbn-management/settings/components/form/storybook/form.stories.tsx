@@ -12,6 +12,7 @@ import { FieldDefinition } from '@kbn/management-settings-types';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
 
+import { categorizeFields } from '@kbn/management-settings-utilities';
 import { uiSettingsClientMock } from '../mocks';
 import { Form as Component } from '../form';
 import { FormProvider } from '../services';
@@ -37,6 +38,13 @@ export default {
         saveChanges={action('saveChanges')}
         showError={action('showError')}
         showReloadPagePrompt={action('showReloadPagePrompt')}
+        validateChange={async (key, value) => {
+          action(`validateChange`)({
+            key,
+            value,
+          });
+          return { successfulValidation: true, valid: true };
+        }}
       >
         <Story />
       </FormProvider>
@@ -62,8 +70,16 @@ export const Form = ({ isSavingEnabled, requirePageReload }: FormStoryProps) => 
     uiSettingsClientMock
   );
 
-  // This is only needed for when a search query is present
-  const categoryCounts = {};
+  const categorizedFields = categorizeFields(fields);
+
+  const categoryCounts = Object.keys(categorizedFields).reduce(
+    (acc, category) => ({
+      ...acc,
+      [category]: categorizedFields[category].count,
+    }),
+    {}
+  );
+
   const onClearQuery = () => {};
 
   return <Component {...{ fields, isSavingEnabled, categoryCounts, onClearQuery }} />;

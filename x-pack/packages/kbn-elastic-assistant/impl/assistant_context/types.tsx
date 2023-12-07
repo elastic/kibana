@@ -16,10 +16,15 @@ export interface MessagePresentation {
 export interface Message {
   role: ConversationRole;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
+  replacements?: Record<string, string>;
   content?: string;
   timestamp: string;
   isError?: boolean;
   presentation?: MessagePresentation;
+  traceData?: {
+    transactionId: string;
+    traceId: string;
+  };
 }
 
 export interface ConversationTheme {

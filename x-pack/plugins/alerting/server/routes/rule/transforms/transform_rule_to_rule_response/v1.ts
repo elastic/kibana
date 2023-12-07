@@ -46,13 +46,25 @@ export const transformRuleActions = (actions: Rule['actions']): RuleResponseV1['
       return { id, params, uuid, connector_type_id: actionTypeId };
     }
 
-    const { group, id, actionTypeId, params, frequency, uuid, alertsFilter } = action;
+    const {
+      group,
+      id,
+      actionTypeId,
+      params,
+      frequency,
+      uuid,
+      alertsFilter,
+      useAlertDataForTemplate,
+    } = action;
 
     return {
       group,
       id,
       params,
       connector_type_id: actionTypeId,
+      ...(typeof useAlertDataForTemplate !== 'undefined'
+        ? { use_alert_data_for_template: useAlertDataForTemplate }
+        : {}),
       ...(frequency
         ? {
             frequency: {

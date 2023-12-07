@@ -6,196 +6,169 @@
  */
 import { i18n } from '@kbn/i18n';
 import { merge, omit } from 'lodash';
-import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
-import { type Conversation, type Message } from '../../common';
-import { ConversationCreateRequest, MessageRole } from '../../common/types';
-import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
-import { ObservabilityAIAssistantChatService } from '../types';
+import { useState } from 'react';
+import type { Conversation, Message } from '../../common';
+import type { ConversationCreateRequest } from '../../common/types';
+import { EMPTY_CONVERSATION_TITLE } from '../i18n';
+import type { ObservabilityAIAssistantChatService } from '../types';
 import { useAbortableAsync, type AbortableAsyncState } from './use_abortable_async';
+import { useChat, UseChatResult } from './use_chat';
 import { useKibana } from './use_kibana';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
-import { createNewConversation } from './use_timeline';
+import { useOnce } from './use_once';
+
+function createNewConversation({
+  title = EMPTY_CONVERSATION_TITLE,
+}: { title?: string } = {}): ConversationCreateRequest {
+  return {
+    '@timestamp': new Date().toISOString(),
+    messages: [],
+    conversation: {
+      title,
+    },
+    labels: {},
+    numeric_labels: {},
+    public: false,
+  };
+}
+
+export interface UseConversationProps {
+  initialConversationId?: string;
+  initialMessages?: Message[];
+  initialTitle?: string;
+  chatService: ObservabilityAIAssistantChatService;
+  connectorId: string | undefined;
+  onConversationUpdate?: (conversation: { conversation: Conversation['conversation'] }) => void;
+}
+
+export type UseConversationResult = {
+  conversation: AbortableAsyncState<ConversationCreateRequest | Conversation | undefined>;
+  saveTitle: (newTitle: string) => void;
+} & Omit<UseChatResult, 'setMessages'>;
+
+const DEFAULT_INITIAL_MESSAGES: Message[] = [];
 
 export function useConversation({
-  conversationId,
+  initialConversationId: initialConversationIdFromProps,
+  initialMessages: initialMessagesFromProps = DEFAULT_INITIAL_MESSAGES,
+  initialTitle: initialTitleFromProps,
   chatService,
   connectorId,
-  initialMessages = [],
-}: {
-  conversationId?: string;
-  chatService?: ObservabilityAIAssistantChatService; // will eventually resolve to a non-nullish value
-  connectorId: string | undefined;
-  initialMessages?: Message[];
-}): {
-  conversation: AbortableAsyncState<ConversationCreateRequest | Conversation | undefined>;
-  displayedMessages: Message[];
-  setDisplayedMessages: Dispatch<SetStateAction<Message[]>>;
-  getSystemMessage: () => Message;
-  save: (messages: Message[], handleRefreshConversations?: () => void) => Promise<Conversation>;
-  saveTitle: (
-    title: string,
-    handleRefreshConversations?: () => void
-  ) => Promise<Conversation | void>;
-} {
+  onConversationUpdate,
+}: UseConversationProps): UseConversationResult {
   const service = useObservabilityAIAssistant();
 
   const {
     services: { notifications },
   } = useKibana();
 
-  const [displayedMessages, setDisplayedMessages] = useState<Message[]>(initialMessages);
+  const initialConversationId = useOnce(initialConversationIdFromProps);
+  const initialMessages = useOnce(initialMessagesFromProps);
+  const initialTitle = useOnce(initialTitleFromProps);
 
-  const getSystemMessage = useCallback(() => {
-    return getAssistantSetupMessage({ contexts: chatService?.getContexts() || [] });
-  }, [chatService]);
+  if (initialMessages.length && initialConversationId) {
+    throw new Error('Cannot set initialMessages if initialConversationId is set');
+  }
 
-  const displayedMessagesWithHardcodedSystemMessage = useMemo(() => {
-    if (!chatService) {
-      return displayedMessages;
-    }
+  const update = (nextConversationObject: Conversation) => {
+    return service
+      .callApi(`PUT /internal/observability_ai_assistant/conversation/{conversationId}`, {
+        signal: null,
+        params: {
+          path: {
+            conversationId: nextConversationObject.conversation.id,
+          },
+          body: {
+            conversation: merge(
+              {
+                '@timestamp': nextConversationObject['@timestamp'],
+                conversation: {
+                  id: nextConversationObject.conversation.id,
+                },
+              },
+              omit(nextConversationObject, 'conversation.last_updated', 'namespace', 'user')
+            ),
+          },
+        },
+      })
+      .catch((err) => {
+        notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.observabilityAiAssistant.errorUpdatingConversation', {
+            defaultMessage: 'Could not update conversation',
+          }),
+        });
+        throw err;
+      });
+  };
 
-    const systemMessage = getSystemMessage();
+  const { next, messages, setMessages, state, stop } = useChat({
+    initialMessages,
+    initialConversationId,
+    chatService,
+    connectorId,
+    onConversationUpdate: (event) => {
+      setDisplayedConversationId(event.conversation.id);
+      onConversationUpdate?.({ conversation: event.conversation });
+    },
+    persist: true,
+  });
 
-    if (displayedMessages[0]?.message.role === MessageRole.User) {
-      return [systemMessage, ...displayedMessages];
-    }
-
-    return [systemMessage, ...displayedMessages.slice(1)];
-  }, [displayedMessages, chatService, getSystemMessage]);
+  const [displayedConversationId, setDisplayedConversationId] = useState(initialConversationId);
 
   const conversation: AbortableAsyncState<ConversationCreateRequest | Conversation | undefined> =
     useAbortableAsync(
       ({ signal }) => {
-        if (!conversationId) {
-          const nextConversation = createNewConversation({
-            contexts: chatService?.getContexts() || [],
-          });
-          setDisplayedMessages(nextConversation.messages);
+        if (!displayedConversationId) {
+          const nextConversation = createNewConversation({ title: initialTitle });
           return nextConversation;
         }
 
         return service
           .callApi('GET /internal/observability_ai_assistant/conversation/{conversationId}', {
             signal,
-            params: { path: { conversationId } },
+            params: { path: { conversationId: displayedConversationId } },
           })
           .then((nextConversation) => {
-            setDisplayedMessages(nextConversation.messages);
+            setMessages(nextConversation.messages);
             return nextConversation;
           })
           .catch((error) => {
-            setDisplayedMessages([]);
+            setMessages([]);
             throw error;
           });
       },
-      [conversationId, chatService]
+      [displayedConversationId, initialTitle],
+      {
+        defaultValue: () => {
+          if (!displayedConversationId) {
+            const nextConversation = createNewConversation({ title: initialTitle });
+            return nextConversation;
+          }
+          return undefined;
+        },
+      }
     );
 
   return {
     conversation,
-    displayedMessages: displayedMessagesWithHardcodedSystemMessage,
-    setDisplayedMessages,
-    getSystemMessage,
-    save: (messages: Message[], handleRefreshConversations?: () => void) => {
-      const conversationObject = conversation.value!;
-
-      return conversationId
-        ? service
-            .callApi(`PUT /internal/observability_ai_assistant/conversation/{conversationId}`, {
-              signal: null,
-              params: {
-                path: {
-                  conversationId,
-                },
-                body: {
-                  conversation: merge(
-                    {
-                      '@timestamp': conversationObject['@timestamp'],
-                      conversation: {
-                        id: conversationId,
-                      },
-                    },
-                    omit(
-                      conversationObject,
-                      'conversation.last_updated',
-                      'namespace',
-                      'user',
-                      'messages'
-                    ),
-                    { messages }
-                  ),
-                },
-              },
-            })
-            .catch((err) => {
-              notifications.toasts.addError(err, {
-                title: i18n.translate('xpack.observabilityAiAssistant.errorUpdatingConversation', {
-                  defaultMessage: 'Could not update conversation',
-                }),
-              });
-              throw err;
-            })
-        : service
-            .callApi(`POST /internal/observability_ai_assistant/conversation`, {
-              signal: null,
-              params: {
-                body: {
-                  conversation: merge({}, conversationObject, { messages }),
-                },
-              },
-            })
-            .then((nextConversation) => {
-              if (connectorId) {
-                service
-                  .callApi(
-                    `PUT /internal/observability_ai_assistant/conversation/{conversationId}/auto_title`,
-                    {
-                      signal: null,
-                      params: {
-                        path: {
-                          conversationId: nextConversation.conversation.id,
-                        },
-                        body: {
-                          connectorId,
-                        },
-                      },
-                    }
-                  )
-                  .then(() => {
-                    handleRefreshConversations?.();
-                    return conversation.refresh();
-                  });
-              }
-              return nextConversation;
-            })
-            .catch((err) => {
-              notifications.toasts.addError(err, {
-                title: i18n.translate('xpack.observabilityAiAssistant.errorCreatingConversation', {
-                  defaultMessage: 'Could not create conversation',
-                }),
-              });
-              throw err;
-            });
-    },
-    saveTitle: (title: string, handleRefreshConversations?: () => void) => {
-      if (conversationId) {
-        return service
-          .callApi('PUT /internal/observability_ai_assistant/conversation/{conversationId}/title', {
-            signal: null,
-            params: {
-              path: {
-                conversationId,
-              },
-              body: {
-                title,
-              },
-            },
-          })
-          .then(() => {
-            handleRefreshConversations?.();
-          });
+    state,
+    next,
+    stop,
+    messages,
+    saveTitle: (title: string) => {
+      if (!displayedConversationId || !conversation.value) {
+        throw new Error('Cannot save title if conversation is not stored');
       }
-      return Promise.resolve();
+      const nextConversation = merge({}, conversation.value as Conversation, {
+        conversation: { title },
+      });
+      return update(nextConversation)
+        .then(() => {
+          return conversation.refresh();
+        })
+        .then(() => {
+          onConversationUpdate?.(nextConversation);
+        });
     },
   };
 }

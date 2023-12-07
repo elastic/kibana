@@ -38,6 +38,8 @@ import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { ConnectorTypes, UserActionTypes } from '../../../../common/types/domain';
 import { CaseMetricsFeature } from '../../../../common/types/api';
+import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
+import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -56,9 +58,13 @@ jest.mock('../../../containers/use_get_case_connectors');
 jest.mock('../../../containers/use_get_case_users');
 jest.mock('../use_on_update_field');
 jest.mock('../../../common/use_cases_features');
+jest.mock('../../../containers/configure/use_get_case_configuration');
+jest.mock('../../../containers/user_profiles/use_get_current_user_profile');
 
 (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
 (useGetCategories as jest.Mock).mockReturnValue({ data: ['foo', 'bar'], refetch: jest.fn() });
+(useGetCaseConfiguration as jest.Mock).mockReturnValue({ data: {} });
+(useGetCurrentUserProfile as jest.Mock).mockReturnValue({ data: {}, isFetching: false });
 
 const caseData: CaseUI = {
   ...basicCase,
@@ -135,7 +141,16 @@ const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
 
 describe('Case View Page activity tab', () => {
+  let appMockRender: AppMockRenderer;
   const caseConnectors = getCaseConnectorsMockResponse();
+  const platinumLicense = licensingMock.createLicense({
+    license: { type: 'platinum' },
+  });
+  const basicLicense = licensingMock.createLicense({
+    license: { type: 'basic' },
+  });
+  // eslint-disable-next-line prefer-object-spread
+  const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
 
   beforeAll(() => {
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
@@ -154,15 +169,36 @@ describe('Case View Page activity tab', () => {
       isLoading: false,
       useOnUpdateField: jest.fn,
     });
-  });
-  let appMockRender: AppMockRenderer;
 
-  const platinumLicense = licensingMock.createLicense({
-    license: { type: 'platinum' },
+    Object.defineProperty(window, 'getComputedStyle', {
+      value: (el: HTMLElement) => {
+        /**
+         * This is based on the jsdom implementation of getComputedStyle
+         * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+         *
+         * It is missing global style parsing and will only return styles applied directly to an element.
+         * Will not return styles that are global or from emotion
+         */
+        const declaration = new CSSStyleDeclaration();
+        const { style } = el;
+
+        Array.prototype.forEach.call(style, (property: string) => {
+          declaration.setProperty(
+            property,
+            style.getPropertyValue(property),
+            style.getPropertyPriority(property)
+          );
+        });
+
+        return declaration;
+      },
+      configurable: true,
+      writable: true,
+    });
   });
 
-  const basicLicense = licensingMock.createLicense({
-    license: { type: 'basic' },
+  afterAll(() => {
+    Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
   });
 
   beforeEach(() => {
@@ -177,13 +213,18 @@ describe('Case View Page activity tab', () => {
     appMockRender = createAppMockRenderer({ license: platinumLicense });
     appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-    expect(await screen.findByTestId('case-view-activity')).toBeInTheDocument();
-    expect(await screen.findAllByTestId('user-actions-list')).toHaveLength(2);
+    const caseViewActivity = await screen.findByTestId('case-view-activity');
+    expect(await within(caseViewActivity).findAllByTestId('user-actions-list')).toHaveLength(2);
+    expect(
+      await within(caseViewActivity).findByTestId('case-view-status-action-button')
+    ).toBeInTheDocument();
+
     expect(await screen.findByTestId('description')).toBeInTheDocument();
-    expect(await screen.findByTestId('case-tags')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-categories')).toBeInTheDocument();
-    expect(await screen.findByTestId('connector-edit-header')).toBeInTheDocument();
-    expect(await screen.findByTestId('case-view-status-action-button')).toBeInTheDocument();
+
+    const caseViewSidebar = await screen.findByTestId('case-view-page-sidebar');
+    expect(await within(caseViewSidebar).findByTestId('case-tags')).toBeInTheDocument();
+    expect(await within(caseViewSidebar).findByTestId('cases-categories')).toBeInTheDocument();
+    expect(await within(caseViewSidebar).findByTestId('connector-edit-header')).toBeInTheDocument();
 
     await waitForComponentToUpdate();
   });
@@ -215,11 +256,7 @@ describe('Case View Page activity tab', () => {
     });
 
     appMockRender.render(<CaseViewActivity {...caseProps} />);
-    expect(await screen.findByTestId('case-view-activity')).toBeInTheDocument();
-    expect(await screen.findAllByTestId('user-actions-list')).toHaveLength(2);
-    expect(await screen.findByTestId('case-tags')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-categories')).toBeInTheDocument();
-    expect(await screen.findByTestId('connector-edit-header')).toBeInTheDocument();
+
     expect(screen.queryByTestId('case-view-status-action-button')).not.toBeInTheDocument();
 
     await waitForComponentToUpdate();
@@ -232,11 +269,7 @@ describe('Case View Page activity tab', () => {
     });
 
     appMockRender.render(<CaseViewActivity {...caseProps} />);
-    expect(await screen.findByTestId('case-view-activity')).toBeInTheDocument();
-    expect(await screen.findAllByTestId('user-actions-list')).toHaveLength(2);
-    expect(await screen.findByTestId('case-tags')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-categories')).toBeInTheDocument();
-    expect(await screen.findByTestId('connector-edit-header')).toBeInTheDocument();
+
     expect(await screen.findByTestId('case-severity-selection')).toBeDisabled();
 
     await waitForComponentToUpdate();

@@ -27,7 +27,7 @@ export type DateHistogramColumnParams = DateHistogramIndexPatternColumn['params'
 
 export type TopValuesColumnParams = Pick<
   TermsIndexPatternColumn['params'],
-  'size' | 'orderDirection' | 'orderBy'
+  'size' | 'orderDirection' | 'orderBy' | 'secondaryFields' | 'accuracyMode'
 >;
 
 export const getHistogramColumn = ({
@@ -37,10 +37,11 @@ export const getHistogramColumn = ({
   columnName: string;
   options?: Partial<
     Pick<DateHistogramIndexPatternColumn, 'sourceField'> & {
-      params: DateHistogramColumnParams;
+      params: Partial<DateHistogramColumnParams>;
     }
   >;
 }) => {
+  const { interval = 'auto', ...rest } = options?.params ?? {};
   return {
     [columnName]: {
       dataType: 'date',
@@ -48,9 +49,8 @@ export const getHistogramColumn = ({
       label: '@timestamp',
       operationType: 'date_histogram',
       scale: 'interval',
-      sourceField: '@timestamp',
-      ...options,
-      params: { interval: 'auto', ...options?.params },
+      sourceField: options?.sourceField ?? '@timestamp',
+      params: { interval, ...rest },
     } as DateHistogramIndexPatternColumn,
   };
 };
