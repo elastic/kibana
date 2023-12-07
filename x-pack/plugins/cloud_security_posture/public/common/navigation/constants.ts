@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
-import { PosturePolicyTemplate } from '../../../common/types';
+import { PosturePolicyTemplate } from '../../../common/types_old';
 import type {
   CspBenchmarksPage,
   CspIntegrationDocNavigationItem,

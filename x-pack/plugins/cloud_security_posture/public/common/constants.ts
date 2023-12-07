@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types';
+import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types_old';
 import {
   CLOUDBEAT_EKS,
   CLOUDBEAT_VANILLA,
@@ -101,7 +101,6 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         icon: googleCloudLogo,
         testId: 'cisGcpTestId',
       },
-      // needs to be a function that disables/enabled based on integration version
       {
         type: CLOUDBEAT_AZURE,
         name: i18n.translate('xpack.csp.cspmIntegration.azureOption.nameTitle', {
@@ -110,8 +109,6 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.azureOption.benchmarkTitle', {
           defaultMessage: 'CIS Azure',
         }),
-        disabled: false,
-        isBeta: true,
         icon: 'logoAzure',
         testId: 'cisAzureTestId',
       },

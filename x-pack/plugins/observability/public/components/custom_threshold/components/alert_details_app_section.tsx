@@ -22,11 +22,8 @@ import {
 } from '@elastic/eui';
 import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES } from '@kbn/rule-data-utils';
 import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
-import {
-  AlertAnnotation,
-  getPaddedAlertTimeRange,
-  AlertActiveTimeRangeAnnotation,
-} from '@kbn/observability-alert-details';
+import { AlertAnnotation, AlertActiveTimeRangeAnnotation } from '@kbn/observability-alert-details';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { MetricsExplorerChartType } from '../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../utils/kibana_react';

@@ -5,32 +5,41 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, useEuiBackgroundColor } from '@elastic/eui';
-import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
-import numeral from '@elastic/numeral';
-import { ALL_VALUE } from '@kbn/slo-schema';
 import { EuiLoadingChart } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
-import { useKibana } from '../../../utils/kibana_react';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import { SloCardBadgesPortal } from '../../../pages/slos/components/card_view/badges_portal';
+import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
+import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
+import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
+import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
+import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_card_item_badges';
+import { SloCardChart } from '../../../pages/slos/components/card_view/slo_card_item';
 import { useFetchSloDetails } from '../../../hooks/slo/use_fetch_slo_details';
-import { paths } from '../../../../common/locators/paths';
 
 import { EmbeddableSloProps } from './types';
 
 export function SloOverview({
   sloId,
   sloInstanceId,
-  lastReloadRequestTime,
   onRenderComplete,
+  reloadSubject,
 }: EmbeddableSloProps) {
-  const {
-    uiSettings,
-    application: { navigateToUrl },
-    http: { basePath },
-  } = useKibana().services;
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    reloadSubject?.subscribe(() => {
+      setLastRefreshTime(Date.now());
+    });
+    return () => {
+      reloadSubject?.unsubscribe();
+    };
+  }, [reloadSubject]);
+
   const {
     isLoading,
     data: slo,
@@ -41,9 +50,21 @@ export function SloOverview({
     instanceId: sloInstanceId,
   });
 
+  const { data: rulesBySlo } = useFetchRulesForSlo({
+    sloIds: sloId ? [sloId] : [],
+  });
+
+  const { data: activeAlertsBySlo } = useFetchActiveAlerts({
+    sloIdsAndInstanceIds: slo ? [[slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]] : [],
+  });
+
+  const { data: historicalSummaries = [] } = useFetchHistoricalSummary({
+    list: slo ? [{ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE }] : [],
+  });
+
   useEffect(() => {
     refetch();
-  }, [lastReloadRequestTime, refetch]);
+  }, [lastRefreshTime, refetch]);
   useEffect(() => {
     if (!onRenderComplete) return;
 
@@ -52,42 +73,9 @@ export function SloOverview({
     }
   }, [isLoading, onRenderComplete]);
 
-  const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloNotFound = !isLoading && slo === undefined;
 
-  const getIcon = useCallback(
-    (type: string) =>
-      ({ width = 20, height = 20, color }: { width: number; height: number; color: string }) => {
-        return <EuiIcon type={type} width={width} height={height} fill={color} />;
-      },
-    []
-  );
-
-  const sloSummary = slo?.summary;
-  const sloStatus = sloSummary?.status;
-  const healthyColor = useEuiBackgroundColor('success');
-  const noDataColor = useEuiBackgroundColor('subdued');
-  const degradingColor = useEuiBackgroundColor('warning');
-  const violatedColor = useEuiBackgroundColor('danger');
-  let color;
-  switch (sloStatus) {
-    case 'HEALTHY':
-      color = healthyColor;
-      break;
-    case 'NO_DATA':
-      color = noDataColor;
-      break;
-    case 'DEGRADING':
-      color = degradingColor;
-      break;
-    case 'VIOLATED':
-      color = violatedColor;
-      break;
-    default:
-      color = noDataColor;
-  }
-
-  if (isRefetching || isLoading) {
+  if (isRefetching || isLoading || !slo) {
     return (
       <LoadingContainer>
         <LoadingContent>
@@ -110,52 +98,30 @@ export function SloOverview({
     );
   }
 
-  const TargetCopy = i18n.translate('xpack.observability.sloEmbeddable.overview.sloTargetLabel', {
-    defaultMessage: 'Target',
-  });
-  const extraContent = `${TargetCopy} <b>${numeral(slo?.objective.target).format(
-    percentFormat
-  )}</b>`;
-  // eslint-disable-next-line react/no-danger
-  const extra = <span dangerouslySetInnerHTML={{ __html: extraContent }} />;
-  const metricData =
-    slo !== undefined
-      ? [
-          {
-            color,
-            title: slo.name,
-            subtitle: slo.groupBy !== ALL_VALUE ? `${slo.groupBy}:${slo.instanceId}` : '',
-            icon: getIcon('visGauge'),
-            value:
-              sloStatus === 'NO_DATA'
-                ? NOT_AVAILABLE_LABEL
-                : numeral(slo.summary.sliValue).format(percentFormat),
-            valueFormatter: (value: number) => `${value}%`,
-            extra,
-            trend: [],
-            trendShape: MetricTrendShape.Area,
-          },
-        ]
-      : [];
+  const rules = rulesBySlo?.[slo?.id];
+  const activeAlerts = activeAlertsBySlo.get(slo);
+
+  const hasGroupBy = Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE);
+
+  const historicalSummary = historicalSummaries.find(
+    (histSummary) =>
+      histSummary.sloId === slo.id && histSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+  )?.data;
+
+  const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
+
   return (
-    <>
-      <Chart>
-        <Settings
-          onElementClick={() => {
-            navigateToUrl(
-              basePath.prepend(
-                paths.observability.sloDetails(
-                  slo!.id,
-                  slo?.groupBy !== ALL_VALUE && slo?.instanceId ? slo.instanceId : undefined
-                )
-              )
-            );
-          }}
-          locale={i18n.getLocale()}
+    <div ref={containerRef} style={{ width: '100%' }}>
+      <SloCardChart slo={slo} historicalSliData={historicalSliData ?? []} cardsPerRow={4} />
+      <SloCardBadgesPortal containerRef={containerRef}>
+        <SloCardItemBadges
+          slo={slo}
+          rules={rules}
+          activeAlerts={activeAlerts}
+          hasGroupBy={hasGroupBy}
         />
-        <Metric id={`${slo?.id}-${slo?.instanceId}`} data={[metricData]} />
-      </Chart>
-    </>
+      </SloCardBadgesPortal>
+    </div>
   );
 }
 

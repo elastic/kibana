@@ -5,74 +5,57 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { isEqual } from 'lodash/fp';
-import styled from 'styled-components';
+import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
-
-import type { CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
-import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
-import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses } from '../../../common/types/domain';
+import { mergeWith, isEqual } from 'lodash';
+import { MoreFiltersSelectable } from './table_filter_config/more_filters_selectable';
+import type { CaseStatuses } from '../../../common/types/domain';
 import type { FilterOptions } from '../../containers/types';
-import { FilterPopover } from '../filter_popover';
-import { SolutionFilter } from './solution_filter';
-import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
-import { SeverityFilter } from './severity_filter';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCategories } from '../../containers/use_get_categories';
-import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
-import { AssigneesFilterPopover } from './assignees_filter';
 import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
-import type { Solution } from './types';
+import { useSystemFilterConfig } from './table_filter_config/use_system_filter_config';
+import { useFilterConfig } from './table_filter_config/use_filter_config';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
   countInProgressCases: number | null;
   countOpenCases: number | null;
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
-  initial: FilterOptions;
-  hiddenStatuses?: CaseStatusWithAllStatus[];
-  availableSolutions: Solution[];
+  hiddenStatuses?: CaseStatuses[];
+  availableSolutions: string[];
   isSelectorView?: boolean;
   onCreateCasePressed?: () => void;
+  initialFilterOptions: Partial<FilterOptions>;
   isLoading: boolean;
   currentUserProfile: CurrentUserProfile;
+  filterOptions: FilterOptions;
 }
 
-// Fix the width of the status dropdown to prevent hiding long text items
-const StatusFilterWrapper = styled(EuiFlexItem)`
-  && {
-    flex-basis: 180px;
+const mergeCustomizer = (objValue: string | string[], srcValue: string | string[], key: string) => {
+  if (Array.isArray(objValue)) {
+    return srcValue;
   }
-`;
-
-const SeverityFilterWrapper = styled(EuiFlexItem)`
-  && {
-    flex-basis: 180px;
-  }
-`;
+};
 
 const CasesTableFiltersComponent = ({
   countClosedCases,
   countOpenCases,
   countInProgressCases,
   onFilterChanged,
-  initial = DEFAULT_FILTER_OPTIONS,
   hiddenStatuses,
   availableSolutions,
   isSelectorView = false,
   onCreateCasePressed,
+  initialFilterOptions,
   isLoading,
   currentUserProfile,
+  filterOptions,
 }: CasesTableFiltersProps) => {
-  const [search, setSearch] = useState(initial.search);
-  const [selectedTags, setSelectedTags] = useState(initial.tags);
-  const [selectedCategories, setSelectedCategories] = useState(initial.category);
-  const [selectedOwner, setSelectedOwner] = useState([]);
+  const [search, setSearch] = useState(filterOptions.search);
   const [selectedAssignees, setSelectedAssignees] = useState<AssigneesFilteringSelection[]>([]);
   const { data: tags = [] } = useGetTags();
   const { data: categories = [] } = useGetCategories();
@@ -90,42 +73,40 @@ const CasesTableFiltersComponent = ({
     [selectedAssignees, onFilterChanged]
   );
 
-  const handleSelectedTags = useCallback(
-    (newTags) => {
-      if (!isEqual(newTags, selectedTags)) {
-        setSelectedTags(newTags);
-        onFilterChanged({ tags: newTags });
+  const onFilterOptionsChange = useCallback(
+    (partialFilterOptions: Partial<FilterOptions>) => {
+      const newFilterOptions = mergeWith({}, filterOptions, partialFilterOptions, mergeCustomizer);
+      if (!isEqual(newFilterOptions, filterOptions)) {
+        onFilterChanged(newFilterOptions);
       }
     },
-    [onFilterChanged, selectedTags]
+    [filterOptions, onFilterChanged]
   );
 
-  const handleSelectedSolution = useCallback(
-    (newOwner) => {
-      if (!isEqual(newOwner, selectedOwner)) {
-        setSelectedOwner(newOwner);
-        onFilterChanged({ owner: newOwner });
-      }
-    },
-    [onFilterChanged, selectedOwner]
-  );
+  const { systemFilterConfig } = useSystemFilterConfig({
+    availableSolutions,
+    caseAssignmentAuthorized,
+    categories,
+    countClosedCases,
+    countInProgressCases,
+    countOpenCases,
+    currentUserProfile,
+    handleSelectedAssignees,
+    hiddenStatuses,
+    initialFilterOptions,
+    isLoading,
+    isSelectorView,
+    onFilterOptionsChange,
+    selectedAssignees,
+    tags,
+  });
 
-  const handleSelectedCategories = useCallback(
-    (newCategories) => {
-      if (!isEqual(newCategories, selectedCategories)) {
-        setSelectedCategories(newCategories);
-        onFilterChanged({ category: newCategories });
-      }
-    },
-    [onFilterChanged, selectedCategories]
-  );
-
-  useEffect(() => {
-    if (selectedTags.length) {
-      const newTags = selectedTags.filter((t) => tags.includes(t));
-      handleSelectedTags(newTags);
-    }
-  }, [handleSelectedTags, selectedTags, tags]);
+  const {
+    filters: activeFilters,
+    selectableOptions,
+    activeSelectableOptionKeys,
+    onFilterConfigChange,
+  } = useFilterConfig({ systemFilterConfig, onFilterOptionsChange, isSelectorView, filterOptions });
 
   const handleOnSearch = useCallback(
     (newSearch) => {
@@ -138,30 +119,6 @@ const CasesTableFiltersComponent = ({
     [onFilterChanged, search]
   );
 
-  const onStatusChanged = useCallback(
-    (status: CaseStatusWithAllStatus) => {
-      onFilterChanged({ status });
-    },
-    [onFilterChanged]
-  );
-
-  const onSeverityChanged = useCallback(
-    (severity: CaseSeverityWithAll) => {
-      onFilterChanged({ severity });
-    },
-    [onFilterChanged]
-  );
-
-  const stats = useMemo(
-    () => ({
-      [StatusAll]: null,
-      [CaseStatuses.open]: countOpenCases ?? 0,
-      [CaseStatuses['in-progress']]: countInProgressCases ?? 0,
-      [CaseStatuses.closed]: countClosedCases ?? 0,
-    }),
-    [countClosedCases, countInProgressCases, countOpenCases]
-  );
-
   const handleOnCreateCasePressed = useCallback(() => {
     if (onCreateCasePressed) {
       onCreateCasePressed();
@@ -169,82 +126,39 @@ const CasesTableFiltersComponent = ({
   }, [onCreateCasePressed]);
 
   return (
-    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s">
-          {isSelectorView && onCreateCasePressed ? (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={handleOnCreateCasePressed}
-                iconType="plusInCircle"
-                data-test-subj="cases-table-add-case-filter-bar"
-              >
-                {i18n.CREATE_CASE_TITLE}
-              </EuiButton>
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem>
-            <EuiFieldSearch
-              aria-label={i18n.SEARCH_CASES}
-              data-test-subj="search-cases"
-              fullWidth
-              incremental={false}
-              placeholder={i18n.SEARCH_PLACEHOLDER}
-              onSearch={handleOnSearch}
-            />
-          </EuiFlexItem>
-          <SeverityFilterWrapper grow={false} data-test-subj="severity-filter-wrapper">
-            <SeverityFilter
-              selectedSeverity={initial.severity}
-              onSeverityChange={onSeverityChanged}
-              isLoading={false}
-              isDisabled={false}
-            />
-          </SeverityFilterWrapper>
-          <StatusFilterWrapper grow={false} data-test-subj="status-filter-wrapper">
-            <StatusFilter
-              selectedStatus={initial.status}
-              onStatusChanged={onStatusChanged}
-              stats={stats}
-              hiddenStatuses={hiddenStatuses}
-            />
-          </StatusFilterWrapper>
-        </EuiFlexGroup>
+    <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
+      {isSelectorView && onCreateCasePressed ? (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            onClick={handleOnCreateCasePressed}
+            iconType="plusInCircle"
+            data-test-subj="cases-table-add-case-filter-bar"
+          >
+            {i18n.CREATE_CASE_TITLE}
+          </EuiButton>
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem grow={false}>
+        <EuiFieldSearch
+          aria-label={i18n.SEARCH_CASES}
+          data-test-subj="search-cases"
+          fullWidth
+          incremental={false}
+          placeholder={i18n.SEARCH_PLACEHOLDER}
+          onSearch={handleOnSearch}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
-          {caseAssignmentAuthorized && !isSelectorView ? (
-            <AssigneesFilterPopover
-              selectedAssignees={selectedAssignees}
-              currentUserProfile={currentUserProfile}
-              isLoading={isLoading}
-              onSelectionChange={handleSelectedAssignees}
-            />
-          ) : null}
-          <FilterPopover
-            buttonLabel={i18n.TAGS}
-            onSelectedOptionsChanged={handleSelectedTags}
-            selectedOptions={selectedTags}
-            options={tags}
-            optionsEmptyLabel={i18n.NO_TAGS_AVAILABLE}
-            limit={MAX_TAGS_FILTER_LENGTH}
-            limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_TAGS_FILTER_LENGTH, 'tags')}
-          />
-          <FilterPopover
-            buttonLabel={i18n.CATEGORIES}
-            onSelectedOptionsChanged={handleSelectedCategories}
-            selectedOptions={selectedCategories}
-            options={categories}
-            optionsEmptyLabel={i18n.NO_CATEGORIES_AVAILABLE}
-            limit={MAX_CATEGORY_FILTER_LENGTH}
-            limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_CATEGORY_FILTER_LENGTH, 'categories')}
-          />
-          {availableSolutions.length > 1 && (
-            <SolutionFilter
-              onSelectedOptionsChanged={handleSelectedSolution}
-              selectedOptions={selectedOwner}
-              options={availableSolutions}
+        <EuiFilterGroup data-test-subj="cases-table-filters-group">
+          {activeFilters.map((filter) => (
+            <React.Fragment key={filter.key}>{filter.render({ filterOptions })}</React.Fragment>
+          ))}
+          {isSelectorView || (
+            <MoreFiltersSelectable
+              options={selectableOptions}
+              activeFilters={activeSelectableOptionKeys}
+              onChange={onFilterConfigChange}
             />
           )}
         </EuiFilterGroup>

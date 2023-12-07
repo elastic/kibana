@@ -53,7 +53,9 @@ export function ProfilingEmbeddableProvider({ deps, children }: Props) {
     <i18nCore.Context>
       <KibanaContextProvider services={{ ...deps.coreStart, ...deps.pluginsStart, storage }}>
         <ProfilingDependenciesContextProvider value={profilingDependencies}>
-          <ObservabilityAIAssistantProvider value={deps.pluginsStart.observabilityAIAssistant}>
+          <ObservabilityAIAssistantProvider
+            value={deps.pluginsStart.observabilityAIAssistant.service}
+          >
             {children}
           </ObservabilityAIAssistantProvider>
         </ProfilingDependenciesContextProvider>
