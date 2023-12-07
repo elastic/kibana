@@ -21,6 +21,7 @@ export interface SearchState {
     direction: SortDirection;
   };
   view: SLOView;
+  compact: boolean;
 }
 
 export const DEFAULT_STATE = {
@@ -28,6 +29,7 @@ export const DEFAULT_STATE = {
   page: 0,
   sort: { by: 'status' as const, direction: 'desc' as const },
   view: 'cardView' as const,
+  compact: true,
 };
 
 export function useUrlSearchState(): {

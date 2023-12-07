@@ -27,8 +27,7 @@ export function SloList({ autoRefresh }: Props) {
   const [sort, setSort] = useState<SortField>(state.sort.by);
   const [direction] = useState<SortDirection>(state.sort.direction);
   const [view, setView] = useState<SLOView>(state.view);
-  const [isCompact, setIsCompact] = useLocalStorage<'true' | 'false'>(SLO_LIST_IS_COMPACT, 'true');
-  const isCompactView = isCompact === 'true';
+  const [isCompact, setCompact] = useState<boolean>(state.compact);
 
   const {
     isLoading,
@@ -72,6 +71,12 @@ export function SloList({ autoRefresh }: Props) {
     storeState({ view: newView });
   };
 
+  const handleToggleCompact = () => {
+    const newCompact = !isCompact;
+    setCompact(newCompact);
+    storeState({ compact: newCompact });
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
@@ -86,15 +91,15 @@ export function SloList({ autoRefresh }: Props) {
         <ToggleSLOView
           sloView={view}
           setSLOView={handleChangeView}
-          toggleCompactView={() => (isCompactView ? setIsCompact('false') : setIsCompact('true'))}
-          isCompact={isCompactView}
+          toggleCompactView={handleToggleCompact}
+          isCompact={isCompact}
         />
       </EuiFlexItem>
       <SlosView
         sloList={results}
         loading={isLoading || isRefetching}
         error={isError}
-        isCompact={isCompactView}
+        isCompact={isCompact}
         sloView={view}
       />
 
