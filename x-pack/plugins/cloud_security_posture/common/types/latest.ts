@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const OBSERVABILITY_LOG_EXPLORER_APP_ID = 'observability-log-explorer';
+export * from './rules/v3';

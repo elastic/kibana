@@ -9,10 +9,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCodeBlock } from '@elastic/eui';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { IEsError, isEsError } from './types';
-import { EsError } from './es_error';
+import type { IEsError } from './types';
+import { EsError, isEsError } from './es_error';
 import { getRootCause } from './utils';
 
 export class PainlessError extends EsError {
@@ -37,7 +37,7 @@ export class PainlessError extends EsError {
     return (
       <>
         <EuiText size="s" data-test-subj="painlessScript">
-          {i18n.translate('data.painlessError.painlessScriptedFieldErrorMessage', {
+          {i18n.translate('searchErrors.painlessError.painlessScriptedFieldErrorMessage', {
             defaultMessage:
               'Error executing runtime field or scripted field on index pattern {indexPatternName}',
             values: {
@@ -73,7 +73,7 @@ export class PainlessError extends EsError {
         onClick={() => onClick(this?.indexPattern?.id)}
         size="s"
       >
-        {i18n.translate('data.painlessError.buttonTxt', {
+        {i18n.translate('searchErrors.painlessError.buttonTxt', {
           defaultMessage: 'Edit script',
         })}
       </EuiButtonEmpty>

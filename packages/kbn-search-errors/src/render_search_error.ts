@@ -6,19 +6,13 @@
  * Side Public License, v 1.
  */
 
-import stringify from 'json-stable-stringify';
-import { Sha256 } from '@kbn/crypto-browser';
 import { i18n } from '@kbn/i18n';
 import { ReactNode } from 'react';
-import { BfetchRequestError } from '@kbn/bfetch-plugin/public';
-import { ApplicationStart } from '@kbn/core-application-browser';
-import { EsError } from '../errors';
+import { BfetchRequestError } from '@kbn/bfetch-error';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import { EsError } from './es_error';
 
-export async function createRequestHash(keys: Record<string, any>) {
-  return new Sha256().update(stringify(keys), 'utf8').digest('hex');
-}
-
-export function getSearchErrorOverrideDisplay({
+export function renderSearchError({
   error,
   application,
 }: {
@@ -27,7 +21,7 @@ export function getSearchErrorOverrideDisplay({
 }): { title: string; body: ReactNode; actions?: ReactNode[] } | undefined {
   if (error instanceof EsError) {
     return {
-      title: i18n.translate('data.search.esErrorTitle', {
+      title: i18n.translate('searchErrors.search.esErrorTitle', {
         defaultMessage: 'Cannot retrieve search results',
       }),
       body: error.getErrorMessage(),
@@ -36,12 +30,12 @@ export function getSearchErrorOverrideDisplay({
   }
 
   if (error.constructor.name === 'HttpFetchError' || error instanceof BfetchRequestError) {
-    const defaultMsg = i18n.translate('data.errors.fetchError', {
+    const defaultMsg = i18n.translate('searchErrors.errors.fetchError', {
       defaultMessage: 'Check your network connection and try again.',
     });
 
     return {
-      title: i18n.translate('data.search.httpErrorTitle', {
+      title: i18n.translate('searchErrors.search.httpErrorTitle', {
         defaultMessage: 'Unable to connect to the Kibana server',
       }),
       body: error.message || defaultMsg,
