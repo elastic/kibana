@@ -1092,9 +1092,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async getCurrentChartDebugState(visType: string): Promise<DebugState | undefined> {
+    async getCurrentChartDebugState(visType: string): Promise<DebugState> {
       await this.waitForVisualization(visType);
-      return await elasticChart.getChartDebugData('lnsWorkspace');
+      return (await elasticChart.getChartDebugData('lnsWorkspace'))!;
     },
 
     /**
