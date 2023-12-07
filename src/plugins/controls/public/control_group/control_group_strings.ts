@@ -246,36 +246,45 @@ export const ControlGroupStrings = {
           defaultMessage: 'Cancel',
         }),
     },
-    validateSelections: {
-      getValidateSelectionsTitle: () =>
-        i18n.translate('controls.controlGroup.management.validate.title', {
-          defaultMessage: 'Validate user selections',
+    selectionSettings: {
+      getSelectionSettingsTitle: () =>
+        i18n.translate('controls.controlGroup.management.selectionSettings', {
+          defaultMessage: 'Selections',
         }),
-      getValidateSelectionsSubTitle: () =>
-        i18n.translate('controls.controlGroup.management.validate.subtitle', {
-          defaultMessage:
-            'Automatically ignore any control selection that would result in no data.',
-        }),
+      validateSelections: {
+        getValidateSelectionsTitle: () =>
+          i18n.translate('controls.controlGroup.management.validate.title', {
+            defaultMessage: 'Validate user selections',
+          }),
+        getValidateSelectionsSubTitle: () =>
+          i18n.translate('controls.controlGroup.management.validate.subtitle', {
+            defaultMessage:
+              'Automatically ignore any control selection that would result in no data.',
+          }),
+      },
+      controlChaining: {
+        getHierarchyTitle: () =>
+          i18n.translate('controls.controlGroup.management.hierarchy.title', {
+            defaultMessage: 'Chain controls',
+          }),
+        getHierarchySubTitle: () =>
+          i18n.translate('controls.controlGroup.management.hierarchy.subtitle', {
+            defaultMessage:
+              'Selections in one control narrow down available options in the next. Controls are chained from left to right.',
+          }),
+      },
     },
-    controlChaining: {
-      getHierarchyTitle: () =>
-        i18n.translate('controls.controlGroup.management.hierarchy.title', {
-          defaultMessage: 'Chain controls',
+    filteringSettings: {
+      getFilteringSettingsTitle: () =>
+        i18n.translate('controls.controlGroup.management.filteringSettings', {
+          defaultMessage: 'Filtering',
         }),
-      getHierarchySubTitle: () =>
-        i18n.translate('controls.controlGroup.management.hierarchy.subtitle', {
-          defaultMessage:
-            'Selections in one control narrow down available options in the next. Controls are chained from left to right.',
-        }),
-    },
-    /** TODO: These translations aren't used but they will be once https://github.com/elastic/kibana/issues/162985 is resolved */
-    querySync: {
       getUseGlobalFiltersTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.useGlobalFilters', {
+        i18n.translate('controls.controlGroup.management.filtering.useGlobalFilters', {
           defaultMessage: 'Apply global filters to controls',
         }),
       getUseGlobalTimeRangeTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.useGlobalTimeRange', {
+        i18n.translate('controls.controlGroup.management.filtering.useGlobalTimeRange', {
           defaultMessage: 'Apply global time range to controls',
         }),
     },

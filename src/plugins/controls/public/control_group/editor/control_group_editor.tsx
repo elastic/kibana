@@ -15,8 +15,7 @@
  */
 
 import fastIsEqual from 'fast-deep-equal';
-import { omit } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import {
   EuiButton,
@@ -91,13 +90,6 @@ export const ControlGroupEditor = ({
     [controlGroupEditorState]
   );
 
-  const fullQuerySyncActive = useMemo(
-    () =>
-      !Object.values(omit(controlGroupEditorState.ignoreParentSettings, 'ignoreValidations')).some(
-        Boolean
-      ),
-    [controlGroupEditorState]
-  );
   const applyChangesToInput = useCallback(() => {
     const inputToApply = { ...controlGroupEditorState };
     if (!editorControlGroupInputIsEqual(inputToApply, initialInput)) updateInput(inputToApply);
@@ -128,11 +120,13 @@ export const ControlGroupEditor = ({
             />
           </EuiFormRow>
 
-          <EuiFormRow label="Filtering">
-            <>
+          <EuiFormRow
+            label={ControlGroupStrings.management.filteringSettings.getFilteringSettingsTitle()}
+          >
+            <div>
               <EuiSwitch
-                data-test-subj="control-group-chaining"
-                label={ControlGroupStrings.management.querySync.getUseGlobalFiltersTitle()}
+                data-test-subj="control-group-filter-sync"
+                label={ControlGroupStrings.management.filteringSettings.getUseGlobalFiltersTitle()}
                 onChange={(e) =>
                   updateIgnoreSetting({
                     ignoreFilters: !e.target.checked,
@@ -146,15 +140,17 @@ export const ControlGroupEditor = ({
               />
               <EuiSpacer size="s" />
               <EuiSwitch
-                data-test-subj="control-group-chaining"
-                label={ControlGroupStrings.management.querySync.getUseGlobalTimeRangeTitle()}
+                data-test-subj="control-group-query-sync-time-range"
+                label={ControlGroupStrings.management.filteringSettings.getUseGlobalTimeRangeTitle()}
                 onChange={(e) => updateIgnoreSetting({ ignoreTimerange: !e.target.checked })}
                 checked={!Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreTimerange)}
               />
-            </>
+            </div>
           </EuiFormRow>
 
-          <EuiFormRow label={'Selections'}>
+          <EuiFormRow
+            label={ControlGroupStrings.management.selectionSettings.getSelectionSettingsTitle()}
+          >
             <div>
               <EuiSwitch
                 data-test-subj="control-group-validate-selections"
@@ -162,12 +158,12 @@ export const ControlGroupEditor = ({
                   <div>
                     <EuiTitle size="xxs">
                       <h3>
-                        {ControlGroupStrings.management.validateSelections.getValidateSelectionsTitle()}
+                        {ControlGroupStrings.management.selectionSettings.validateSelections.getValidateSelectionsTitle()}
                       </h3>
                     </EuiTitle>
                     <EuiText size="s">
                       <p>
-                        {ControlGroupStrings.management.validateSelections.getValidateSelectionsSubTitle()}
+                        {ControlGroupStrings.management.selectionSettings.validateSelections.getValidateSelectionsSubTitle()}
                       </p>
                     </EuiText>
                   </div>
@@ -181,10 +177,14 @@ export const ControlGroupEditor = ({
                 label={
                   <div>
                     <EuiTitle size="xxs">
-                      <h3>{ControlGroupStrings.management.controlChaining.getHierarchyTitle()}</h3>
+                      <h3>
+                        {ControlGroupStrings.management.selectionSettings.controlChaining.getHierarchyTitle()}
+                      </h3>
                     </EuiTitle>
                     <EuiText size="s">
-                      <p>{ControlGroupStrings.management.controlChaining.getHierarchySubTitle()}</p>
+                      <p>
+                        {ControlGroupStrings.management.selectionSettings.controlChaining.getHierarchySubTitle()}
+                      </p>
                     </EuiText>
                   </div>
                 }
