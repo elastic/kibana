@@ -4439,6 +4439,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/eso-model-version-example@link:examples/eso_model_version_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/eso-plugin@link:x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin":
   version "0.0.0"
   uid ""
