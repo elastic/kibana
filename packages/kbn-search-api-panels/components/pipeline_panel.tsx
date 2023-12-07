@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -19,11 +20,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useAssetBasePath } from '../hooks/use_asset_base_path';
+interface PipelinePanelProps {
+  clusterImage: string;
+  cutImage: string;
+  reporterImage: string;
+}
 
-export const PipelinePanel: React.FC = () => {
-  const assetBasePath = useAssetBasePath();
-
+export const PipelinePanel: React.FC<PipelinePanelProps> = ({
+  clusterImage,
+  cutImage,
+  reporterImage,
+}) => {
   return (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel paddingSize="xl">
@@ -31,24 +38,21 @@ export const PipelinePanel: React.FC = () => {
           <EuiFlexItem>
             <EuiFlexGroup alignItems="flexStart" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
-                <EuiImage alt="cluster" src={`${assetBasePath}/cluster.svg`} />
+                <EuiImage alt="" src={clusterImage} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
                   <h3>
-                    {i18n.translate(
-                      'xpack.serverlessSearch.pipeline.overview.dataEnrichment.title',
-                      {
-                        defaultMessage: 'Enrich Data',
-                      }
-                    )}
+                    {i18n.translate('searchApiPanels.pipeline.overview.dataEnrichment.title', {
+                      defaultMessage: 'Enrich Data',
+                    })}
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <EuiText size="s">
                   <p>
                     {i18n.translate(
-                      'xpack.serverlessSearch.pipeline.overview.dataEnrichment.description',
+                      'searchApiPanels.pipeline.overview.dataEnrichment.description',
                       {
                         defaultMessage:
                           'Add information from external sources or apply transformations to your documents for more contextual, insightful search.',
@@ -62,28 +66,22 @@ export const PipelinePanel: React.FC = () => {
           <EuiFlexItem>
             <EuiFlexGroup alignItems="flexStart" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
-                <EuiImage alt="cut" src={`${assetBasePath}/cut.svg`} />
+                <EuiImage alt="" src={cutImage} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
                   <h3>
-                    {i18n.translate(
-                      'xpack.serverlessSearch.pipeline.overview.extAndStandard.title',
-                      {
-                        defaultMessage: 'Extract and standardize',
-                      }
-                    )}
+                    {i18n.translate('searchApiPanels.pipeline.overview.extAndStandard.title', {
+                      defaultMessage: 'Extract and standardize',
+                    })}
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <EuiText size="s">
-                  {i18n.translate(
-                    'xpack.serverlessSearch.pipeline.overview.extAndStandard.description',
-                    {
-                      defaultMessage:
-                        'Parse information from your documents to ensure they conform to a standardized format.',
-                    }
-                  )}
+                  {i18n.translate('searchApiPanels.pipeline.overview.extAndStandard.description', {
+                    defaultMessage:
+                      'Parse information from your documents to ensure they conform to a standardized format.',
+                  })}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -91,28 +89,21 @@ export const PipelinePanel: React.FC = () => {
           <EuiFlexItem>
             <EuiFlexGroup alignItems="flexStart" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
-                <EuiImage alt="reporter" src={`${assetBasePath}/reporter.svg`} />
+                <EuiImage alt="" src={reporterImage} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
                   <h3>
-                    {i18n.translate(
-                      'xpack.serverlessSearch.pipeline.overview.anonymization.title',
-                      {
-                        defaultMessage: 'Anonymize data',
-                      }
-                    )}
+                    {i18n.translate('searchApiPanels.pipeline.overview.anonymization.title', {
+                      defaultMessage: 'Anonymize data',
+                    })}
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <EuiText size="s">
-                  {i18n.translate(
-                    'xpack.serverlessSearch.pipeline.overview.anonymization.description',
-                    {
-                      defaultMessage:
-                        'Remove sensitive information from documents before indexing.',
-                    }
-                  )}
+                  {i18n.translate('searchApiPanels.pipeline.overview.anonymization.description', {
+                    defaultMessage: 'Remove sensitive information from documents before indexing.',
+                  })}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>

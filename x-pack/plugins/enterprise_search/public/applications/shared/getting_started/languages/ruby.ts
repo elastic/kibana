@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 
-import { docLinks } from '../../../../../../shared/doc_links';
+import { docLinks } from '../../doc_links';
 
 import { ingestKeysToRuby } from './helpers';
 

@@ -17,6 +17,7 @@ export * from './components/ingest_data';
 export * from './components/ingestions_panel';
 export * from './components/language_client_panel';
 export * from './components/overview_panel';
+export * from './components/pipeline_panel';
 export * from './components/select_client';
 export * from './components/try_in_console_button';
 export * from './components/install_client';
