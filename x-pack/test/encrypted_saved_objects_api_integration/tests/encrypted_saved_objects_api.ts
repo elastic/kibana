@@ -744,8 +744,8 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      // In these test cases, we simulate a scenario where some existing model version objects need to migrated. This happens because they
-      // have an outdated model version number. This also means that the encryptedSavedObjects.createModelVersion wrapper is used to
+      // In these test cases, we simulate a scenario where some existing model version objects need to be migrated. This happens because
+      // they have an outdated model version number. This also means that the encryptedSavedObjects.createModelVersion wrapper is used to
       // facilitate the migration (see x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts)
       describe('handles model version transforms correctly', () => {
         before(async () => {
@@ -768,8 +768,6 @@ export default function ({ getService }: FtrProviderContext) {
           });
           const { body: decryptedResponse } = await supertest.get(getApiUrl).expect(200);
           expect(decryptedResponse.attributes).to.eql(expectedDecryptedAttributes);
-          const pass = 1;
-          expect(pass).to.equal(1);
         });
 
         it('in a custom space', async () => {

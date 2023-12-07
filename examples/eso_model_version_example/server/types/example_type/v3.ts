@@ -42,7 +42,7 @@ export interface EsoModelVersionExample {
 export const EsoModelVersionExampleTypeRegistration: EncryptedSavedObjectTypeRegistration = {
   type: EXAMPLE_SAVED_OBJECT_TYPE,
   attributesToEncrypt: new Set(['secrets']),
-  attributesToExcludeFromAAD: new Set(['name', 'aadExcludedField']), // aadField1 is included in AAD, but not name, or aadExcludedField
+  attributesToExcludeFromAAD: new Set(['name', 'aadExcludedField']), // aadField1 and aadField2 are included in AAD, but not name, or aadExcludedField
 };
 
 // This is just some static information used to generate a document

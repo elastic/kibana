@@ -184,8 +184,8 @@ describe('create ESO model version', () => {
         id: '123',
         type: 'known-type-1',
         namespace: 'namespace',
-        new_prop_1: 'new prop 1', // added by unsafe tranfsorm
-        new_prop_2: 'new prop 2', // added by unsafe tranfsorm
+        new_prop_1: 'new prop 1', // added by unsafe transform
+        new_prop_2: 'new prop 2', // added by unsafe transform
         attributes: expectedAttributes,
       },
     });

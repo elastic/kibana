@@ -65,7 +65,7 @@ export class EsoModelVersionExample implements Plugin<void, void> {
     core: CoreSetup<EsoModelVersionExamplePluginsStart>,
     plugins: EsoModelVersionExamplePluginSetup
   ) {
-    // Register some endoints for the example plugin
+    // Register some endpoints for the example plugin
     const router = core.http.createRouter();
     this.registerGenerateEndpoint(router); // This will create three objects - one for each model version definition.
     this.registerReadRawEndpoint(router); // This will read the objects' raw documents with an Elasticsearch client.
@@ -170,7 +170,7 @@ export class EsoModelVersionExample implements Plugin<void, void> {
                 // If we know that we will be adding a new AAD field in the next version, we will NOT strip new fields
                 // in the forward compatibility schema. This is a Zero-downtime upgrade consideration and ensures that
                 // old versions will use those fields when constructing AAD. The caveat is that we need to know ahead
-                // of time, and make sure the an consuming code can handle having the additional attribute, even if it
+                // of time, and make sure the consuming code can handle having the additional attribute, even if it
                 // is not used yet.
                 { unknowns: 'allow' }
               ),
@@ -196,7 +196,7 @@ export class EsoModelVersionExample implements Plugin<void, void> {
           modelVersion: {
             // Version 3 adds a new attribute aadField2 which is included in AAD, we're not going to back fill it.
             // For zero-downtime this new attribute is ok, because the previous model version allows unknown fields and will not strip it.
-            // The previous version will include it by default whrn constructing AAD.
+            // The previous version will include it by default when constructing AAD.
             changes: [
               {
                 type: 'data_removal',

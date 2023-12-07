@@ -7,7 +7,7 @@ This plugin provides a simple use case demonstration of:
 
 This is an example plugin to demonstrate implementation of an encrypted saved object with model versions using the new encryptedSavedObjectsPlugin.createModelVersion API.
 
-A good place to start is by reviewing the definitions in `examples/eso_model_version_example/server/types`. This is where the interfaces and constants that for the examnple saved object are defined.
+A good place to start is by reviewing the definitions in `examples/eso_model_version_example/server/types`. This is where the interfaces and constants that for the example saved object are defined.
 
 In `examples/eso_model_version_example/server/plugin.ts` the model versions are defined, which include typical changes you might see in a saved object over time only in this case the model version definitions are wrapped by the new createModelVersion API.
 

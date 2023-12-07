@@ -30,11 +30,11 @@ export interface CreateEsoModelVersionFnOpts {
 // wrapping migration functions for the same purpose.
 //
 // For Model Versions, 'data_backfill', 'data_removal', and 'unsafe_transform' changes are leveraged to implement
-// any changes to the object as usual. This funtion returns a Model Version where the changes are merged into a
+// any changes to the object as usual. This function returns a Model Version where the changes are merged into a
 // single 'unsafe_transform' transform where the document being transformed is first decrypted via the inputType
-// EncryptedSavedObjectTypeRegistration, then transformed based on the changes defined in the the input Model
-// Version, and finally encrypred via the outputType EncryptedSavedObjectTypeRegistration. The implementation for
-// this can be found in getCreateEsoModelVersion below.
+// EncryptedSavedObjectTypeRegistration, then transformed based on the changes defined in the input Model Version,
+// and finally encrypted via the outputType EncryptedSavedObjectTypeRegistration.The implementation for this can
+// be found in getCreateEsoModelVersion below.
 export type CreateEsoModelVersionFn = (
   opts: CreateEsoModelVersionFnOpts
 ) => SavedObjectsModelVersion;
@@ -62,14 +62,9 @@ export const getCreateEsoModelVersion =
       );
     }
 
-    const inputService = instantiateServiceWithLegacyType(inputType); // inputType
-    // ? instantiateServiceWithLegacyType(inputType)
-    // : encryptedSavedObjectsService;
-
+    const inputService = instantiateServiceWithLegacyType(inputType);
     const outputService =
-      inputType !== outputType ? instantiateServiceWithLegacyType(outputType) : inputService; // outputType
-    // ? instantiateServiceWithLegacyType(outputType)
-    // : encryptedSavedObjectsService;
+      inputType !== outputType ? instantiateServiceWithLegacyType(outputType) : inputService;
 
     const transformFn = createMergedTransformFn(
       inputService,
@@ -95,16 +90,21 @@ function createMergedTransformFn(
 
     const descriptorNamespace = context.namespaceType === 'single' ? document.namespace : undefined;
     const encryptionDescriptor = { id, type, namespace: descriptorNamespace };
+    const decryptionParams = {
+      // Note about isTypeBeingConverted: false
+      // "Converting to multi-namespace clashes with the ZDT requirement for serverless"
+      // See deprecation in packages/core/saved-objects/core-saved-objects-server/src/migration.ts SavedObjectMigrationContext
+      isTypeBeingConverted: false,
+      originId,
+    };
 
-    // Note about isTypeBeingConverted: false
-    // "Converting to multi-namespace clashes with the ZDT requirement for serverless"
-    // See deprecation in packages/core/saved-objects/core-saved-objects-server/src/migration.ts SavedObjectMigrationContext
     const documentToTransform = mapAttributes(document, (inputAttributes) => {
       try {
-        return inputService.decryptAttributesSync<any>(encryptionDescriptor, inputAttributes, {
-          isTypeBeingConverted: false, // incompatible with model versions/ZDT
-          originId,
-        });
+        return inputService.decryptAttributesSync<any>(
+          encryptionDescriptor,
+          inputAttributes,
+          decryptionParams
+        );
       } catch (err) {
         if (!shouldTransformIfDecryptionFails || !(err instanceof EncryptionError)) {
           throw err;
@@ -116,10 +116,7 @@ function createMergedTransformFn(
         return inputService.stripOrDecryptAttributesSync<any>(
           encryptionDescriptor,
           inputAttributes,
-          {
-            isTypeBeingConverted: false, // incompatible with model versions/ZDT
-            originId,
-          }
+          decryptionParams
         ).attributes;
       }
     });
