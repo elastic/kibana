@@ -92,13 +92,11 @@ function wrapEsClient(opts: WrapEsClientOpts): ElasticsearchClient {
 
   const wrappedClient = esClient.child({});
 
-  // Mutating the request function first so other wrapped functions use it
+  // Mutating the functions we want to wrap
   wrappedClient.transport.request = getWrappedTransportRequestFn({
     esClient: wrappedClient,
     ...rest,
   });
-
-  // Mutating the functions we want to wrap
   wrappedClient.search = getWrappedSearchFn({ esClient: wrappedClient, ...rest });
   wrappedClient.eql.search = getWrappedEqlSearchFn({ esClient: wrappedClient, ...rest });
 
