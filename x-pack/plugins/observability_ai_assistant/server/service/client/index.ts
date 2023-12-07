@@ -10,16 +10,23 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { compact, isEmpty, merge, omit } from 'lodash';
+import { compact, isEmpty, last, merge, omit, pick } from 'lodash';
 import type {
-  ChatCompletionFunctions,
   ChatCompletionRequestMessage,
   CreateChatCompletionRequest,
   CreateChatCompletionResponse,
 } from 'openai';
+import { isObservable, lastValueFrom } from 'rxjs';
 import { PassThrough, Readable } from 'stream';
 import { v4 } from 'uuid';
 import {
+  ConversationNotFoundError,
+  isChatCompletionError,
+  StreamingChatResponseEventType,
+  type StreamingChatResponseEvent,
+} from '../../../common/conversation_complete';
+import {
+  FunctionResponse,
   MessageRole,
   type CompatibleJSONSchema,
   type Conversation,
@@ -28,9 +35,18 @@ import {
   type KnowledgeBaseEntry,
   type Message,
 } from '../../../common/types';
-import type { KnowledgeBaseService, RecalledEntry } from '../kb_service';
+import { concatenateOpenAiChunks } from '../../../common/utils/concatenate_openai_chunks';
+import { processOpenAiStream } from '../../../common/utils/process_openai_stream';
+import type { ChatFunctionClient } from '../chat_function_client';
+import {
+  KnowledgeBaseEntryOperationType,
+  KnowledgeBaseService,
+  RecalledEntry,
+} from '../knowledge_base_service';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
+import { streamIntoObservable } from '../util/stream_into_observable';
+import { handleLlmResponse } from './handle_llm_response';
 
 export class ObservabilityAIAssistantClient {
   constructor(
@@ -104,18 +120,263 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
+  complete = async (
+    params: {
+      messages: Message[];
+      connectorId: string;
+      signal: AbortSignal;
+      functionClient: ChatFunctionClient;
+      persist: boolean;
+    } & ({ conversationId: string } | { title?: string })
+  ) => {
+    const stream = new PassThrough();
+
+    const { messages, connectorId, signal, functionClient, persist } = params;
+
+    let conversationId: string = '';
+    let title: string = '';
+    if ('conversationId' in params) {
+      conversationId = params.conversationId;
+    }
+
+    if ('title' in params) {
+      title = params.title || '';
+    }
+
+    function write(event: StreamingChatResponseEvent) {
+      if (stream.destroyed) {
+        return Promise.resolve();
+      }
+
+      return new Promise<void>((resolve, reject) => {
+        stream.write(`${JSON.stringify(event)}\n`, 'utf-8', (err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve();
+        });
+      });
+    }
+
+    function fail(error: Error) {
+      const code = isChatCompletionError(error) ? error.code : undefined;
+      write({
+        type: StreamingChatResponseEventType.ConversationCompletionError,
+        error: {
+          message: error.message,
+          stack: error.stack,
+          code,
+        },
+      }).finally(() => {
+        stream.end();
+      });
+    }
+
+    const next = async (nextMessages: Message[]): Promise<void> => {
+      const lastMessage = last(nextMessages);
+
+      const isUserMessage = lastMessage?.message.role === MessageRole.User;
+
+      const isUserMessageWithoutFunctionResponse = isUserMessage && !lastMessage?.message.name;
+
+      const recallFirst =
+        isUserMessageWithoutFunctionResponse && functionClient.hasFunction('recall');
+
+      const isAssistantMessageWithFunctionRequest =
+        lastMessage?.message.role === MessageRole.Assistant &&
+        !!lastMessage?.message.function_call?.name;
+
+      if (recallFirst) {
+        const addedMessage = {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.Assistant,
+            content: '',
+            function_call: {
+              name: 'recall',
+              arguments: JSON.stringify({
+                queries: [],
+                contexts: [],
+              }),
+              trigger: MessageRole.Assistant as const,
+            },
+          },
+        };
+        await write({
+          type: StreamingChatResponseEventType.MessageAdd,
+          id: v4(),
+          message: addedMessage,
+        });
+        return await next(nextMessages.concat(addedMessage));
+      } else if (isUserMessage) {
+        const { message } = await handleLlmResponse({
+          signal,
+          write,
+          source$: streamIntoObservable(
+            await this.chat({
+              messages: nextMessages,
+              connectorId,
+              stream: true,
+              signal,
+              functions: functionClient
+                .getFunctions()
+                .map((fn) => pick(fn.definition, 'name', 'description', 'parameters')),
+            })
+          ).pipe(processOpenAiStream()),
+        });
+        return await next(nextMessages.concat({ message, '@timestamp': new Date().toISOString() }));
+      }
+
+      if (isAssistantMessageWithFunctionRequest) {
+        const functionResponse = await functionClient
+          .executeFunction({
+            connectorId,
+            name: lastMessage.message.function_call!.name,
+            messages: nextMessages,
+            args: lastMessage.message.function_call!.arguments,
+            signal,
+          })
+          .catch((error): FunctionResponse => {
+            return {
+              content: {
+                message: error.toString(),
+                error,
+              },
+            };
+          });
+
+        if (signal.aborted) {
+          return;
+        }
+
+        const functionResponseIsObservable = isObservable(functionResponse);
+
+        const functionResponseMessage = {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            name: lastMessage.message.function_call!.name,
+            ...(functionResponseIsObservable
+              ? { content: '{}' }
+              : {
+                  content: JSON.stringify(functionResponse.content || {}),
+                  data: functionResponse.data ? JSON.stringify(functionResponse.data) : undefined,
+                }),
+            role: MessageRole.User,
+          },
+        };
+
+        nextMessages = nextMessages.concat(functionResponseMessage);
+        await write({
+          type: StreamingChatResponseEventType.MessageAdd,
+          message: functionResponseMessage,
+          id: v4(),
+        });
+
+        if (functionResponseIsObservable) {
+          const { message } = await handleLlmResponse({
+            signal,
+            write,
+            source$: functionResponse,
+          });
+          return await next(
+            nextMessages.concat({ '@timestamp': new Date().toISOString(), message })
+          );
+        }
+        return await next(nextMessages);
+      }
+
+      if (!persist) {
+        stream.end();
+        return;
+      }
+
+      // store the updated conversation and close the stream
+      if (conversationId) {
+        const conversation = await this.getConversationWithMetaFields(conversationId);
+        if (!conversation) {
+          throw new ConversationNotFoundError();
+        }
+
+        if (signal.aborted) {
+          return;
+        }
+
+        const updatedConversation = await this.update(
+          merge({}, omit(conversation._source, 'messages'), { messages: nextMessages })
+        );
+        await write({
+          type: StreamingChatResponseEventType.ConversationUpdate,
+          conversation: updatedConversation.conversation,
+        });
+      } else {
+        const generatedTitle = await titlePromise;
+        if (signal.aborted) {
+          return;
+        }
+
+        const conversation = await this.create({
+          '@timestamp': new Date().toISOString(),
+          conversation: {
+            title: generatedTitle || title || 'New conversation',
+          },
+          messages: nextMessages,
+          labels: {},
+          numeric_labels: {},
+          public: false,
+        });
+        await write({
+          type: StreamingChatResponseEventType.ConversationCreate,
+          conversation: conversation.conversation,
+        });
+      }
+
+      stream.end();
+    };
+
+    next(messages).catch((error) => {
+      if (!signal.aborted) {
+        this.dependencies.logger.error(error);
+      }
+      fail(error);
+    });
+
+    const titlePromise =
+      !conversationId && !title && persist
+        ? this.getGeneratedTitle({
+            messages,
+            connectorId,
+            signal,
+          }).catch((error) => {
+            this.dependencies.logger.error(
+              'Could not generate title, falling back to default title'
+            );
+            this.dependencies.logger.error(error);
+            return Promise.resolve(undefined);
+          })
+        : Promise.resolve(undefined);
+
+    signal.addEventListener('abort', () => {
+      stream.end();
+    });
+
+    return stream;
+  };
+
   chat = async <TStream extends boolean | undefined = true>({
     messages,
     connectorId,
     functions,
     functionCall,
     stream = true,
+    signal,
   }: {
     messages: Message[];
     connectorId: string;
     functions?: Array<{ name: string; description: string; parameters: CompatibleJSONSchema }>;
     functionCall?: string;
     stream?: TStream;
+    signal: AbortSignal;
   }): Promise<TStream extends false ? CreateChatCompletionResponse : Readable> => {
     const messagesForOpenAI: ChatCompletionRequestMessage[] = compact(
       messages
@@ -135,47 +396,12 @@ export class ObservabilityAIAssistantClient {
         })
     );
 
-    // add recalled information to system message, so the LLM considers it more important
-
-    const recallMessages = messagesForOpenAI.filter((message) => message.name === 'recall');
-
-    const recalledDocuments: Map<string, { id: string; text: string }> = new Map();
-
-    recallMessages.forEach((message) => {
-      const entries = message.content
-        ? (JSON.parse(message.content) as Array<{ id: string; text: string }>)
-        : [];
-
-      const ids: string[] = [];
-
-      entries.forEach((entry) => {
-        const id = entry.id;
-        if (!recalledDocuments.has(id)) {
-          recalledDocuments.set(id, entry);
-        }
-        ids.push(id);
-      });
-
-      message.content = `The following documents, present in the system message, were recalled: ${ids.join(
-        ', '
-      )}`;
-    });
-
-    const systemMessage = messagesForOpenAI.find((message) => message.role === MessageRole.System);
-
-    if (systemMessage && recalledDocuments.size > 0) {
-      systemMessage.content += `The "recall" function is not available. Do not attempt to execute it. Recalled documents: ${JSON.stringify(
-        Array.from(recalledDocuments.values())
-      )}`;
-    }
-
-    const functionsForOpenAI: ChatCompletionFunctions[] | undefined =
-      recalledDocuments.size > 0 ? functions?.filter((fn) => fn.name !== 'recall') : functions;
+    const functionsForOpenAI = functions;
 
     const request: Omit<CreateChatCompletionRequest, 'model'> & { model?: string } = {
       messages: messagesForOpenAI,
-      stream: true,
-      functions: functionsForOpenAI,
+      ...(stream ? { stream: true } : {}),
+      ...(!!functions?.length ? { functions: functionsForOpenAI } : {}),
       temperature: 0,
       function_call: functionCall ? { name: functionCall } : undefined,
     };
@@ -196,8 +422,14 @@ export class ObservabilityAIAssistantClient {
     }
 
     const response = stream
-      ? ((executeResult.data as Readable).pipe(new PassThrough()) as Readable)
+      ? (executeResult.data as Readable)
       : (executeResult.data as CreateChatCompletionResponse);
+
+    if (response instanceof PassThrough) {
+      signal.addEventListener('abort', () => {
+        response.end();
+      });
+    }
 
     return response as any;
   };
@@ -250,65 +482,47 @@ export class ObservabilityAIAssistantClient {
     return updatedConversation;
   };
 
-  autoTitle = async ({
-    conversationId,
+  getGeneratedTitle = async ({
+    messages,
     connectorId,
+    signal,
   }: {
-    conversationId: string;
+    messages: Message[];
     connectorId: string;
+    signal: AbortSignal;
   }) => {
-    const document = await this.getConversationWithMetaFields(conversationId);
-    if (!document) {
-      throw notFound();
-    }
-
-    const conversation = await this.get(conversationId);
-
-    if (!conversation) {
-      throw notFound();
-    }
-
-    const response = await this.chat({
+    const stream = await this.chat({
       messages: [
         {
           '@timestamp': new Date().toISOString(),
           message: {
-            role: MessageRole.Assistant,
-            content: conversation.messages.slice(1).reduce((acc, curr) => {
+            role: MessageRole.User,
+            content: messages.slice(1).reduce((acc, curr) => {
               return `${acc} ${curr.message.role}: ${curr.message.content}`;
-            }, 'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on this content: '),
+            }, 'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. Here is the content:'),
           },
         },
       ],
       connectorId,
-      stream: false,
+      stream: true,
+      signal,
     });
 
-    if ('object' in response && response.object === 'chat.completion') {
-      const input =
-        response.choices[0].message?.content || `Conversation on ${conversation['@timestamp']}`;
+    const response = await lastValueFrom(
+      streamIntoObservable(stream).pipe(processOpenAiStream(), concatenateOpenAiChunks())
+    );
 
-      // This regular expression captures a string enclosed in single or double quotes.
-      // It extracts the string content without the quotes.
-      // Example matches:
-      // - "Hello, World!" => Captures: Hello, World!
-      // - 'Another Example' => Captures: Another Example
-      // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
-      const match = input.match(/^["']?([^"']+)["']?$/);
-      const title = match ? match[1] : input;
+    const input = response.message?.content || '';
 
-      const updatedConversation: Conversation = merge(
-        {},
-        conversation,
-        { conversation: { title } },
-        this.getConversationUpdateValues(new Date().toISOString())
-      );
-
-      await this.setTitle({ conversationId, title });
-
-      return updatedConversation;
-    }
-    return conversation;
+    // This regular expression captures a string enclosed in single or double quotes.
+    // It extracts the string content without the quotes.
+    // Example matches:
+    // - "Hello, World!" => Captures: Hello, World!
+    // - 'Another Example' => Captures: Another Example
+    // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
+    const match = input.match(/^["']?([^"']+)["']?$/);
+    const title = match ? match[1] : input;
+    return title;
   };
 
   setTitle = async ({ conversationId, title }: { conversationId: string; title: string }) => {
@@ -377,23 +591,52 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
-  summarize = async ({
-    entry,
-  }: {
-    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
-  }): Promise<void> => {
-    return this.dependencies.knowledgeBaseService.summarize({
-      namespace: this.dependencies.namespace,
-      user: this.dependencies.user,
-      entry,
-    });
-  };
-
   getKnowledgeBaseStatus = () => {
     return this.dependencies.knowledgeBaseService.status();
   };
 
   setupKnowledgeBase = () => {
     return this.dependencies.knowledgeBaseService.setup();
+  };
+
+  createKnowledgeBaseEntry = async ({
+    entry,
+  }: {
+    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
+  }): Promise<void> => {
+    return this.dependencies.knowledgeBaseService.addEntry({
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+      entry,
+    });
+  };
+
+  importKnowledgeBaseEntries = async ({
+    entries,
+  }: {
+    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
+  }): Promise<void> => {
+    const operations = entries.map((entry) => ({
+      type: KnowledgeBaseEntryOperationType.Index,
+      document: { ...entry, '@timestamp': new Date().toISOString() },
+    }));
+
+    await this.dependencies.knowledgeBaseService.addEntries({ operations });
+  };
+
+  getKnowledgeBaseEntries = async ({
+    query,
+    sortBy,
+    sortDirection,
+  }: {
+    query: string;
+    sortBy: string;
+    sortDirection: 'asc' | 'desc';
+  }) => {
+    return this.dependencies.knowledgeBaseService.getEntries({ query, sortBy, sortDirection });
+  };
+
+  deleteKnowledgeBaseEntry = async (id: string) => {
+    return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 }
