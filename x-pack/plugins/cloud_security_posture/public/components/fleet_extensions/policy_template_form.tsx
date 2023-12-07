@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
 import { assert } from '../../../common/utils/helpers';
-import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
+import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../common/types';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VANILLA,
@@ -41,14 +41,14 @@ import {
   SUPPORTED_POLICY_TEMPLATES,
 } from '../../../common/constants';
 import {
-  getPosturePolicy,
-  getPostureInputHiddenVars,
-  getVulnMgmtCloudFormationDefaultValue,
-  POSTURE_NAMESPACE,
-  type NewPackagePolicyPostureInput,
-  isPostureInput,
   getMaxPackageName,
+  getPostureInputHiddenVars,
+  getPosturePolicy,
+  getVulnMgmtCloudFormationDefaultValue,
+  isPostureInput,
   isBelowMinVersion,
+  type NewPackagePolicyPostureInput,
+  POSTURE_NAMESPACE,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -58,6 +58,8 @@ import {
 } from './policy_template_selectors';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 import { gcpField, getInputVarsFields } from './gcp_credential_form';
+import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
+import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -520,7 +522,16 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
 );
 
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
-  ({ newPolicy, onChange, validationResults, isEditPage, packageInfo }) => {
+  ({
+    agentPolicy,
+    newPolicy,
+    onChange,
+    validationResults,
+    isEditPage,
+    packageInfo,
+    handleSetupTechnologyChange,
+    agentlessPolicy,
+  }) => {
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
       ? integrationParam
@@ -528,6 +539,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
     const input = getSelectedOption(newPolicy.inputs, integration);
+    const { isAgentlessAvailable, setupTechnology, setSetupTechnology } = useSetupTechnology({
+      input,
+      agentPolicy,
+      agentlessPolicy,
+      handleSetupTechnologyChange,
+    });
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy) => {
@@ -721,6 +738,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           fields={integrationFields}
           onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
         />
+
+        {isAgentlessAvailable && (
+          <SetupTechnologySelector
+            setupTechnology={setupTechnology}
+            onSetupTechnologyChange={setSetupTechnology}
+          />
+        )}
 
         {/* Defines the vars of the enabled input of the active policy template */}
         <PolicyTemplateVarsForm

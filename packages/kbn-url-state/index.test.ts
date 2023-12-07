@@ -52,7 +52,24 @@ describe('useSyncToUrl', () => {
     expect(window.history.pushState).toHaveBeenCalledWith(
       {},
       '',
-      '#should_be_there?namespace=(test:foo)'
+      '#should_be_there?namespace=(test%3Afoo)'
+    );
+  });
+
+  it('should escape values correctly', () => {
+    window.location.hash = '#should_be_there';
+
+    const { result } = renderHook(() => useUrlState('namespace', 'test'));
+
+    act(() => {
+      result.current[1]('foo#bar');
+      jest.runAllTimers();
+    });
+
+    expect(window.history.pushState).toHaveBeenCalledWith(
+      {},
+      '',
+      '#should_be_there?namespace=(test%3Afoo%23bar)'
     );
   });
 
