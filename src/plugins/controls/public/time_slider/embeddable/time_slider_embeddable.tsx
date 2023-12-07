@@ -7,35 +7,37 @@
  */
 
 import _ from 'lodash';
-import { debounceTime, first, map } from 'rxjs/operators';
 import moment from 'moment-timezone';
-import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
-import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
+import { debounceTime, first, map } from 'rxjs/operators';
+
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+
 import { TIME_SLIDER_CONTROL } from '../..';
 import { TimeSliderControlEmbeddableInput } from '../../../common/time_slider/types';
-import { pluginServices } from '../../services';
-import { ControlsSettingsService } from '../../services/settings/types';
-import { ControlsDataService } from '../../services/data/types';
-import { ControlOutput, IClearableControl } from '../../types';
 import { ControlGroupContainer } from '../../control_group/embeddable/control_group_container';
+import { pluginServices } from '../../services';
+import { ControlsDataService } from '../../services/data/types';
+import { ControlsSettingsService } from '../../services/settings/types';
+import { ControlOutput, IClearableControl } from '../../types';
 import { TimeSlider, TimeSliderPrepend } from '../components';
 import { timeSliderReducers } from '../time_slider_reducers';
-import { TimeSliderReduxState } from '../types';
+import { getIsAnchored, getRoundedTimeRangeBounds } from '../time_slider_selectors';
 import {
+  FROM_INDEX,
   getMomentTimezone,
   getStepSize,
   getTicks,
-  FROM_INDEX,
-  TO_INDEX,
   roundDownToNextStepSizeFactor,
   roundUpToNextStepSizeFactor,
+  TO_INDEX,
 } from '../time_utils';
-import { getIsAnchored, getRoundedTimeRangeBounds } from '../time_slider_selectors';
+import { TimeSliderReduxState } from '../types';
 
 export const TimeSliderControlContext = createContext<TimeSliderControlEmbeddable | null>(null);
 export const useTimeSlider = (): TimeSliderControlEmbeddable => {
@@ -365,7 +367,7 @@ export class TimeSliderControlEmbeddable
     }
     this.node = node;
     ReactDOM.render(
-      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+      <KibanaThemeProvider theme={pluginServices.getServices().core.theme}>
         <TimeSliderControlContext.Provider value={this}>
           <TimeSlider
             formatDate={this.formatDate}
