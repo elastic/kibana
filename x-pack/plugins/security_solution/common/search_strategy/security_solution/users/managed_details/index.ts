@@ -25,6 +25,6 @@ export interface ManagedUserHit {
   fields?: ManagedUserFields;
 }
 
-export type ManagedUserHits = Record<ManagedUserDatasetKey, ManagedUserHit | undefined>;
+export type ManagedUserHits = Partial<Record<ManagedUserDatasetKey, ManagedUserHit>>;
 
 export type ManagedUserFields = Record<string, SearchTypes[]>;
