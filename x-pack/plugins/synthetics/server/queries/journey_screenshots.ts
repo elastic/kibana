@@ -12,7 +12,9 @@ import {
 import { isRefResult, RefResult } from '../../common/runtime_types';
 import { RouteContext, UptimeRouteContext } from '../routes/types';
 
-export type ClientContract = Buffer | { screenshotRef: RefResult };
+export interface ClientContract {
+  screenshotRef: RefResult;
+}
 
 function getSharedHeaders(stepName: string, totalSteps: number) {
   return {
