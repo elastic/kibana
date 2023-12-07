@@ -20,6 +20,7 @@
       "dataViews",
       "dataViewEditor",
       "embeddable",
+      "uiActions",
       "exploratoryView",
       "features",
       "files",
@@ -34,12 +35,13 @@
       "unifiedSearch",
       "visualizations",
       "dashboard",
-      "expressions"
+      "expressions",
+      "logExplorer",
+      "licensing"
     ],
     "optionalPlugins": [
       "discover",
       "home",
-      "licensing",
       "usageCollection",
       "cloud",
       "spaces",

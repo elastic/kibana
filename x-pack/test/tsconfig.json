@@ -67,7 +67,6 @@
     "@kbn/ftr-common-functional-services",
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/securitysolution-list-constants",
-    "@kbn/securitysolution-es-utils",
     "@kbn/expect",
     "@kbn/dev-cli-errors",
     "@kbn/ci-stats-reporter",
@@ -150,5 +149,6 @@
     "@kbn/reporting-export-types-pdf-common",
     "@kbn/reporting-export-types-png-common",
     "@kbn/reporting-common",
+    "@kbn/security-plugin-types-common",
   ]
 }

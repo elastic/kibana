@@ -39,6 +39,22 @@ export class CommonPageObject extends FtrService {
     return url.toString();
   }
 
+  private async disableTours() {
+    const NEW_FEATURES_TOUR_STORAGE_KEYS = {
+      RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.9',
+      TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
+    };
+
+    const tourStorageKeys = Object.values(NEW_FEATURES_TOUR_STORAGE_KEYS);
+    const tourConfig = {
+      isTourActive: false,
+    };
+
+    for (const key of tourStorageKeys) {
+      await this.browser.setLocalStorageItem(key, JSON.stringify(tourConfig));
+    }
+  }
+
   /**
    * Logins to Kibana as default user and navigates to provided app
    * @param appUrl Kibana URL
@@ -54,6 +70,8 @@ export class CommonPageObject extends FtrService {
     if (disableWelcomePrompt) {
       await this.browser.setLocalStorageItem('home:welcome:show', 'false');
     }
+
+    await this.disableTours();
 
     let currentUrl = await this.browser.getCurrentUrl();
     this.log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);

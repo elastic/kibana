@@ -119,7 +119,7 @@ const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
 
 // for editor width smaller than this value we want to start hiding some text
-const BREAKPOINT_WIDTH = 410;
+const BREAKPOINT_WIDTH = 540;
 
 const languageId = (language: string) => {
   switch (language) {
@@ -621,6 +621,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     <LanguageDocumentationPopover
                       language={getLanguageDisplayName(String(language))}
                       sections={documentationSections}
+                      searchInDescription
                       buttonProps={{
                         color: 'text',
                         size: 's',
@@ -825,6 +826,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       language={
                         String(language) === 'esql' ? 'ES|QL' : String(language).toUpperCase()
                       }
+                      searchInDescription
                       sections={documentationSections}
                       buttonProps={{
                         display: 'empty',

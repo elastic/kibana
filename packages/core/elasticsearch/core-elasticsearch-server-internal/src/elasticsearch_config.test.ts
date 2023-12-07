@@ -40,11 +40,12 @@ test('set correct defaults', () => {
       "idleSocketTimeout": "PT1M",
       "ignoreVersionMismatch": false,
       "maxIdleSockets": 256,
-      "maxSockets": Infinity,
+      "maxSockets": 800,
       "password": undefined,
       "pingTimeout": "PT30S",
       "requestHeadersWhitelist": Array [
         "authorization",
+        "es-client-authentication",
       ],
       "requestTimeout": "PT30S",
       "serviceAccountToken": undefined,

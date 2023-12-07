@@ -7,7 +7,6 @@
 
 import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import {
   createLifecycleExecutor,
   Dataset,
@@ -15,7 +14,8 @@ import {
 } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import { sloFeatureId, AlertsLocatorParams, observabilityFeatureId } from '../../../common';
+import { CustomThresholdLocators } from './custom_threshold/custom_threshold_executor';
+import { sloFeatureId, observabilityFeatureId } from '../../../common';
 import { ObservabilityConfig } from '../..';
 import {
   SLO_RULE_REGISTRATION_CONTEXT,
@@ -27,11 +27,11 @@ import { sloRuleFieldMap } from './slo_burn_rate/field_map';
 
 export function registerRuleTypes(
   alertingPlugin: PluginSetupContract,
-  logger: Logger,
-  ruleDataService: IRuleDataService,
   basePath: IBasePath,
   config: ObservabilityConfig,
-  alertsLocator?: LocatorPublic<AlertsLocatorParams>
+  logger: Logger,
+  ruleDataService: IRuleDataService,
+  locators: CustomThresholdLocators
 ) {
   // SLO RULE
   const ruleDataClientSLO = ruleDataService.initializeIndex({
@@ -55,7 +55,7 @@ export function registerRuleTypes(
     ruleDataClientSLO
   );
   alertingPlugin.registerType(
-    sloBurnRateRuleType(createLifecycleRuleExecutorSLO, basePath, alertsLocator)
+    sloBurnRateRuleType(createLifecycleRuleExecutorSLO, basePath, locators.alertsLocator)
   );
 
   // Threshold RULE
@@ -85,7 +85,7 @@ export function registerRuleTypes(
         config,
         logger,
         ruleDataClientThreshold,
-        alertsLocator
+        locators
       )
     );
   }

@@ -1844,8 +1844,20 @@
                 }
               }
             }
+          },
+          "service_token": {
+            "dynamic": false,
+            "properties": {
+              "id": {
+                "type": "keyword"
+              }
+            }
           }
         }
+      },
+      "preset": {
+        "type": "keyword",
+        "index": false
       }
     }
   },
@@ -1958,6 +1970,10 @@
             "type": "boolean"
           }
         }
+      },
+      "latest_install_failed_attempts": {
+        "type": "object",
+        "enabled": false
       },
       "installed_kibana": {
         "dynamic": false,

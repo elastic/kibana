@@ -15,6 +15,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { renderApp } from '.';
+import { mockObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public';
 
 describe('renderApp', () => {
   const originalConsole = global.console;
@@ -31,7 +32,6 @@ describe('renderApp', () => {
   const mockSearchSessionClear = jest.fn();
 
   const plugins = {
-    usageCollection: { reportUiCounter: noop },
     data: {
       query: {
         timefilter: {
@@ -50,6 +50,8 @@ describe('renderApp', () => {
         },
       },
     },
+    usageCollection: { reportUiCounter: noop },
+    observabilityAIAssistant: { service: mockObservabilityAIAssistantService },
   } as unknown as ObservabilityPublicPluginsStart;
 
   const core = {
@@ -75,7 +77,6 @@ describe('renderApp', () => {
   const config = {
     unsafe: {
       alertDetails: {
-        logs: { enabled: false },
         metrics: { enabled: false },
         uptime: { enabled: false },
       },
