@@ -76,19 +76,13 @@ describe('Timezone helper', () => {
 
     it('returns local when uiSettings returns Browser', () => {
       expect(
-        getTimeZone({
-          get: () => 'Browser',
-          isDefault: () => true,
-        } as unknown as IUiSettingsClient)
-      ).toEqual('America/New_York');
+        getTimeZone({ get: () => 'Browser' } as unknown as IUiSettingsClient)
+      ).toEqual('local');
     });
     it('returns timezone defined on uiSettings', () => {
       const timezone = 'America/toronto';
       expect(
-        getTimeZone({
-          get: () => timezone,
-          isDefault: () => false,
-        } as unknown as IUiSettingsClient)
+        getTimeZone({ get: () => timezone } as unknown as IUiSettingsClient)
       ).toEqual(timezone);
     });
   });
