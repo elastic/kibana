@@ -81,6 +81,8 @@ export {
   // secrets
   SECRETS_ENDPOINT_PATH,
   SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+  // outputs
+  OUTPUT_HEALTH_DATA_STREAM,
   type PrivilegeMapObject,
 } from '../../common/constants';
 

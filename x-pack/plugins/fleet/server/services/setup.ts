@@ -131,6 +131,9 @@ async function createSetupSideEffects(
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
+  logger.debug('Backfilling output performance presets');
+  await outputService.backfillAllOutputPresets(soClient, esClient);
+
   logger.debug('Setting up Fleet Elasticsearch assets');
   let stepSpan = apm.startSpan('Install Fleet global assets', 'preconfiguration');
   await ensureFleetGlobalEsAssets(soClient, esClient);
