@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import type { RegisterFunctionDefinition } from '../../common/types';
-import type { ObservabilityAIAssistantService } from '../types';
+import axios from 'axios';
+import { format } from 'url';
+import type { FunctionRegistrationParameters } from '.';
 
 export function registerKibanaFunction({
-  service,
   registerFunction,
-  coreStart,
-}: {
-  service: ObservabilityAIAssistantService;
-  registerFunction: RegisterFunctionDefinition;
-  coreStart: CoreStart;
-}) {
+  resources,
+}: FunctionRegistrationParameters) {
   registerFunction(
     {
       name: 'kibana',
@@ -54,16 +49,36 @@ export function registerKibanaFunction({
       },
     },
     ({ arguments: { method, pathname, body, query } }, signal) => {
-      return coreStart.http
-        .fetch(pathname, {
-          method,
-          body: body ? JSON.stringify(body) : undefined,
-          query,
-          signal,
-        })
-        .then((response) => {
-          return { content: response };
-        });
+      const { request } = resources;
+
+      const {
+        protocol,
+        host,
+        username,
+        password,
+        pathname: pathnameFromRequest,
+      } = request.rewrittenUrl!;
+      const nextUrl = {
+        host,
+        protocol,
+        username,
+        password,
+        pathname: pathnameFromRequest.replace(
+          '/internal/observability_ai_assistant/chat/complete',
+          pathname
+        ),
+        query,
+      };
+
+      return axios({
+        method,
+        headers: request.headers,
+        url: format(nextUrl),
+        data: body ? JSON.stringify(body) : undefined,
+        signal,
+      }).then((response) => {
+        return { content: response.data };
+      });
     }
   );
 }
