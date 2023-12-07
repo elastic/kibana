@@ -23,7 +23,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
       password: config.get('servers.kibana.password'),
     },
     log,
-    isCloud
+    isCloud,
   });
 
   return sessionManager;
