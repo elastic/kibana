@@ -80,6 +80,7 @@ export function useCloneSlo() {
             values: { name: slo.name },
           })
         );
+        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
       },
     }
   );

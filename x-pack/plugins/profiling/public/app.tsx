@@ -84,7 +84,7 @@ function App({
     <KibanaThemeProvider theme$={theme$}>
       <KibanaContextProvider services={{ ...coreStart, ...pluginsStart, storage }}>
         <i18nCore.Context>
-          <ObservabilityAIAssistantProvider value={pluginsStart.observabilityAIAssistant}>
+          <ObservabilityAIAssistantProvider value={pluginsStart.observabilityAIAssistant.service}>
             <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
               <RouterProvider router={profilingRouter as any} history={history}>
                 <RouterErrorBoundary>

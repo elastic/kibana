@@ -308,6 +308,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
+      "kibana.alert.workflow_status_updated_at": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
       "kibana.alert.workflow_tags": Object {
         "array": true,
         "required": false,
