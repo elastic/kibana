@@ -302,6 +302,19 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'to_geopoint',
+    description: i18n.translate('monaco.esql.autocomplete.toGeopointDoc', {
+      defaultMessage: 'Converts to geo_point.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'any' }],
+        returnType: 'geo_point',
+        examples: [`from index | where field="value"" | EVAL geopoint = to_geopoint(field)`],
+      },
+    ],
+  },
+  {
     name: 'to_ip',
     description: i18n.translate('monaco.esql.autocomplete.toIpDoc', {
       defaultMessage: 'Converts to ip.',
