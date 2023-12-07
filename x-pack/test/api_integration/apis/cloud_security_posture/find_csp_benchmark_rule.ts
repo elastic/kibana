@@ -6,13 +6,12 @@
  */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { createPackagePolicy } from './helper';
-
 import type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { createPackagePolicy } from './helper';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

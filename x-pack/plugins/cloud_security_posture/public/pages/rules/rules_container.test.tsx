@@ -13,13 +13,13 @@ import { useFindCspBenchmarkRule } from './use_csp_benchmark_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { Chance } from 'chance';
 import { TestProvider } from '../../test/test_provider';
+import type { CspBenchmarkRule } from '../../../common/types/latest';
 import { useParams } from 'react-router-dom';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
 const chance = new Chance();
 
-jest.mock('./use_csp_rules', () => ({
+jest.mock('./use_csp_benchmark_rules', () => ({
   useFindCspBenchmarkRule: jest.fn(),
   useBulkUpdateCspBenchmarkRule: jest.fn(),
 }));

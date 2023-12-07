@@ -7,11 +7,11 @@
 
 import { SavedObjectsServiceSetup } from '@kbn/core/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { rulesV1, rulesV2, rulesV3 } from '../../common/types/index';
 import { cspBenchmarkRuleSavedObjectMapping } from './mappings';
 import { cspBenchmarkRuleMigrations } from './migrations';
 
-import { rulesV1, rulesV2, rulesV3 } from '@kbn/cloud-security-posture-plugin/common/types/';
-import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import { CspBenchmarkRule } from '../../common/types/latest';
 
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../common/constants';
 

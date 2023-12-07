@@ -15,7 +15,7 @@ import {
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
   findCspBenchmarkRuleRequestSchema,
-} from '@kbn/cloud-security-posture-plugin/common/types/latest';
+} from '../../../../common/types/latest';
 import { getBenchmarkFromPackagePolicy } from '../../../../common/utils/helpers';
 
 import { FIND_CSP_BENCHMARK_RULE_ROUTE_PATH } from '../../../../common/constants';

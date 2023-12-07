@@ -9,13 +9,13 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createPackagePolicy } from '../../../apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
-
 import type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { createPackagePolicy } from '../../../apis/cloud_security_posture/helper';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

@@ -5,7 +5,10 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
-
+import {
+  FindCspBenchmarkRuleRequest,
+  FindCspBenchmarkRuleResponse,
+} from '../../../common/types/latest';
 import { useKibana } from '../../common/hooks/use_kibana';
 
 import {
@@ -13,10 +16,6 @@ import {
   FIND_CSP_BENCHMARK_RULE_API_CURRENT_VERSION,
   FIND_CSP_BENCHMARK_RULE_ROUTE_PATH,
 } from '../../../common/constants';
-import {
-  FindCspBenchmarkRuleRequest,
-  FindCspBenchmarkRuleResponse,
-} from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
 export type RulesQuery = Pick<
   FindCspBenchmarkRuleRequest,

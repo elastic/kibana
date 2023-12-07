@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { rulesV1, rulesV2, rulesV3 } from '@kbn/cloud-security-posture-plugin/common/types/';
 import {
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationContext,
 } from '@kbn/core/server';
+import { rulesV1, rulesV2, rulesV3 } from '../../../common/types';
 
 function migrateCspBenchmarkRuleToV840(
   doc: SavedObjectUnsanitizedDoc<rulesV1.CspBenchmarkRule>,
