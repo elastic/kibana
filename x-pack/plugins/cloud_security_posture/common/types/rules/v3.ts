@@ -129,3 +129,32 @@ export interface FindCspBenchmarkRuleResponse {
   page: number;
   perPage: number;
 }
+
+export const cspBenchmarkRulesBulkActionRequestSchema = schema.object({
+  action: schema.oneOf([schema.literal('mute'), schema.literal('unmute')]),
+  rules: schema.arrayOf(
+    schema.object({
+      benchmark_id: schema.string(),
+      benchmark_version: schema.string(),
+      rule_number: schema.string(),
+    })
+  ),
+});
+
+export type CspBenchmarkRulesBulkActionRequestSchema = TypeOf<
+  typeof cspBenchmarkRulesBulkActionRequestSchema
+>;
+
+const rulesStates = schema.recordOf(
+  schema.string(),
+  schema.object({
+    muted: schema.boolean(),
+  })
+);
+
+export const cspSettingsSchema = schema.object({
+  rules_states: rulesStates,
+});
+
+export type CspBenchmarkRulesStates = TypeOf<typeof rulesStates>;
+export type CspSettings = TypeOf<typeof cspSettingsSchema>;
