@@ -47,6 +47,11 @@ export const allowedExperimentalValues = Object.freeze({
   extendedRuleExecutionLoggingEnabled: false,
 
   /**
+   * Enables streaming for Security AI Assistant - non-langchain only (knowledge base off)
+   */
+  assistantStreamingEnabled: false,
+
+  /**
    * Enables the SOC trends timerange and stats on D&R page
    */
   socTrendsEnabled: false,
@@ -89,6 +94,11 @@ export const allowedExperimentalValues = Object.freeze({
    */
   assistantModelEvaluation: false,
 
+  /**
+   * Enables Retrieval Augmented Generation (RAG) on Alerts in the assistant
+   */
+  assistantRagOnAlerts: false,
+
   /*
    * Enables the new user details flyout displayed on the Alerts page and timeline.
    *
@@ -114,6 +124,38 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
+
+  /**
+   * Enables alerts suppression for threshold rules
+   */
+  alertSuppressionForThresholdRuleEnabled: false,
+
+  /**
+   * Disables the timeline save tour.
+   * This flag is used to disable the tour in cypress tests.
+   */
+  disableTimelineSaveTour: false,
+
+  /**
+   * Enables the risk engine privileges route
+   * and associated callout in the UI
+   */
+  riskEnginePrivilegesRouteEnabled: true,
+
+  /*
+   * Enables experimental Entity Analytics Asset Criticality feature
+   */
+  entityAnalyticsAssetCriticalityEnabled: false,
+
+  /*
+   * Enables experimental Experimental S1 integration data to be available in Analyzer
+   */
+  sentinelOneDataInAnalyzerEnabled: false,
+
+  /**
+   * Enables SentinelOne manual host manipulation actions
+   */
+  sentinelOneManualHostActionsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

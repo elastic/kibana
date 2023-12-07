@@ -8,43 +8,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 
-import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
 import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+import { ActiveAlerts } from './active_alerts';
+
 import { SLO_LONG_REFETCH_INTERVAL } from '../../constants';
-
-type SLO = Pick<SLOResponse, 'id' | 'instanceId'>;
-
-export class ActiveAlerts {
-  private data: Map<string, number> = new Map();
-
-  constructor(initialData?: Record<string, number>) {
-    if (initialData) {
-      Object.keys(initialData).forEach((key) => this.data.set(key, initialData[key]));
-    }
-  }
-
-  set(slo: SLO, value: number) {
-    this.data.set(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`, value);
-  }
-
-  get(slo: SLO) {
-    return this.data.get(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`);
-  }
-
-  has(slo: SLO) {
-    return this.data.has(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`);
-  }
-
-  delete(slo: SLO) {
-    return this.data.delete(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`);
-  }
-
-  clear() {
-    return this.data.clear();
-  }
-}
 
 type SloIdAndInstanceId = [string, string];
 

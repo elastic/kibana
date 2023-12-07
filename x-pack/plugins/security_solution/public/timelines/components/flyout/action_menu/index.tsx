@@ -7,7 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { useGetUserCasesPermissions } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { APP_ID } from '../../../../../common';
 import type { TimelineTabs } from '../../../../../common/types';
 import { InspectButton } from '../../../../common/components/inspect';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -15,6 +16,7 @@ import { AddToCaseButton } from '../add_to_case_button';
 import { NewTimelineAction } from './new_timeline';
 import { SaveTimelineButton } from './save_timeline_button';
 import { OpenTimelineAction } from './open_timeline';
+import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../../timeline/tour/step_config';
 
 interface TimelineActionMenuProps {
   mode?: 'compact' | 'normal';
@@ -29,9 +31,12 @@ const TimelineActionMenuComponent = ({
   activeTab,
   isInspectButtonDisabled,
 }: TimelineActionMenuProps) => {
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const { cases } = useKibana().services;
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+
   return (
     <EuiFlexGroup
+      id={TIMELINE_TOUR_CONFIG_ANCHORS.ACTION_MENU}
       gutterSize="xs"
       justifyContent="flexEnd"
       alignItems="center"

@@ -6,12 +6,15 @@
  */
 
 import fs from 'fs/promises';
+
 import apm from 'elastic-apm-node';
 
 import { compact } from 'lodash';
 import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
+import { MessageSigningError } from '../../common/errors';
 
 import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
@@ -50,11 +53,16 @@ import {
   getPreconfiguredFleetServerHostFromConfig,
 } from './preconfiguration/fleet_server_host';
 import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
+import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
 
 export interface SetupStatus {
   isInitialized: boolean;
   nonFatalErrors: Array<
-    PreconfigurationError | DefaultPackagesInstallationError | UpgradeManagedPackagePoliciesResult
+    | PreconfigurationError
+    | DefaultPackagesInstallationError
+    | UpgradeManagedPackagePoliciesResult
+    | UninstallTokenInvalidError
+    | { error: MessageSigningError }
   >;
 }
 
@@ -123,6 +131,9 @@ async function createSetupSideEffects(
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
+  logger.debug('Backfilling output performance presets');
+  await outputService.backfillAllOutputPresets(soClient, esClient);
+
   logger.debug('Setting up Fleet Elasticsearch assets');
   let stepSpan = apm.startSpan('Install Fleet global assets', 'preconfiguration');
   await ensureFleetGlobalEsAssets(soClient, esClient);
@@ -168,8 +179,6 @@ async function createSetupSideEffects(
   ).filter((result) => (result.errors ?? []).length > 0);
   stepSpan?.end();
 
-  const nonFatalErrors = [...preconfiguredPackagesNonFatalErrors, ...packagePolicyUpgradeErrors];
-
   logger.debug('Upgrade Fleet package install versions');
   stepSpan = apm.startSpan('Upgrade package install format version', 'preconfiguration');
   await upgradePackageInstallVersion({ soClient, esClient, logger });
@@ -182,7 +191,16 @@ async function createSetupSideEffects(
       'xpack.encryptedSavedObjects.encryptionKey is not configured, private key passphrase is being stored in plain text'
     );
   }
-  await appContextService.getMessageSigningService()?.generateKeyPair();
+  let messageSigningServiceNonFatalError: { error: MessageSigningError } | undefined;
+  try {
+    await appContextService.getMessageSigningService()?.generateKeyPair();
+  } catch (error) {
+    if (error instanceof MessageSigningError) {
+      messageSigningServiceNonFatalError = { error };
+    } else {
+      throw error;
+    }
+  }
 
   logger.debug('Generating Agent uninstall tokens');
   if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
@@ -196,9 +214,15 @@ async function createSetupSideEffects(
     logger.debug('Checking for and encrypting plain text uninstall tokens');
     await appContextService.getUninstallTokenService()?.encryptTokens();
   }
+
+  logger.debug('Checking validity of Uninstall Tokens');
+  const uninstallTokenError = await appContextService
+    .getUninstallTokenService()
+    ?.checkTokenValidityForAllPolicies();
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Upgrade agent policy schema', 'preconfiguration');
+
   logger.debug('Upgrade Agent policy schema version');
   await upgradeAgentPolicySchemaVersion(soClient);
   stepSpan?.end();
@@ -207,6 +231,13 @@ async function createSetupSideEffects(
   logger.debug('Setting up Fleet enrollment keys');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
   stepSpan?.end();
+
+  const nonFatalErrors = [
+    ...preconfiguredPackagesNonFatalErrors,
+    ...packagePolicyUpgradeErrors,
+    ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
+    ...(uninstallTokenError ? [uninstallTokenError] : []),
+  ];
 
   if (nonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');

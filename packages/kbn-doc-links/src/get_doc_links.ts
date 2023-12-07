@@ -458,6 +458,13 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
       manageDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-management.html`,
       createEsqlRuleType: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#create-esql-rule`,
+      entityAnalytics: {
+        riskScorePrerequisites: `${SECURITY_SOLUTION_DOCS}ers-requirements.html`,
+        hostRiskScore: `${SECURITY_SOLUTION_DOCS}host-risk-score.html`,
+        userRiskScore: `${SECURITY_SOLUTION_DOCS}user-risk-score.html`,
+        entityRiskScoring: `${SECURITY_SOLUTION_DOCS}entity-risk-scoring.html`,
+      },
+      detectionEngineOverview: `${SECURITY_SOLUTION_DOCS}detection-engine-overview.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -517,6 +524,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       trainedModels: `${MACHINE_LEARNING_DOCS}ml-trained-models.html`,
       startTrainedModelsDeployment: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-model.html`,
       nlpElser: `${MACHINE_LEARNING_DOCS}ml-nlp-elser.html`,
+      nlpE5: `${MACHINE_LEARNING_DOCS}ml-nlp-e5.html`,
       nlpImportModel: `${MACHINE_LEARNING_DOCS}ml-nlp-import-model.html`,
     },
     transforms: {
@@ -611,6 +619,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     security: {
       apiKeyServiceSettings: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
       clusterPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-cluster`,
+      definingRoles: `${ELASTICSEARCH_DOCS}defining-roles.html`,
       elasticsearchSettings: `${ELASTICSEARCH_DOCS}security-settings.html`,
       elasticsearchEnableSecurity: `${ELASTICSEARCH_DOCS}configuring-stack-security.html`,
       elasticsearchEnableApiKeys: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,

@@ -57,7 +57,6 @@ export {
 } from './hooks/use_track_metric';
 export type { TrackEvent } from './hooks/use_track_metric';
 export { useQuickTimeRanges } from './hooks/use_quick_time_ranges';
-export { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
 export { useTimeZone } from './hooks/use_time_zone';
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useLinkProps, shouldHandleLinkEvent } from './hooks/use_link_props';
@@ -66,7 +65,7 @@ export { NavigationWarningPromptProvider, Prompt } from './components/navigation
 
 export type { ApmIndicesConfig, UXMetrics } from './types';
 
-export { noCasesPermissions } from './utils/cases_permissions';
+export { noCasesPermissions, allCasesPermissions } from './utils/cases_permissions';
 
 export {
   type ObservabilityActionContextMenuItemProps,
@@ -89,3 +88,5 @@ export {
   EmbeddableProfilingSearchBar,
   type EmbeddableProfilingSearchBarProps,
 } from './components/profiling/embeddables';
+
+export { ProfilingEmptyState } from './components/profiling/profiling_empty_state';

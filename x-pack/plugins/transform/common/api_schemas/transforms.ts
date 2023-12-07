@@ -6,8 +6,8 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { CreateDataViewApiResponseSchema } from '@kbn/ml-data-view-utils/types/api_create_response_schema';
 
 import type { Dictionary } from '../types/common';
 import type { PivotAggDict } from '../types/pivot_aggs';
@@ -148,28 +148,16 @@ export interface PutTransformsPivotRequestSchema
 
 export type PutTransformsLatestRequestSchema = Omit<PutTransformsRequestSchema, 'pivot'>;
 
-export const putTransformsQuerySchema = schema.object({
-  createDataView: schema.boolean({ defaultValue: false }),
-  timeFieldName: schema.maybe(schema.string()),
-});
-
-export type PutTransformsQuerySchema = TypeOf<typeof putTransformsQuerySchema>;
-
 interface TransformCreated {
   transform: TransformId;
-}
-interface DataViewCreated {
-  id: string;
 }
 interface CreatedError {
   id: string;
   error: any;
 }
 
-export interface PutTransformsResponseSchema {
+export interface PutTransformsResponseSchema extends CreateDataViewApiResponseSchema {
   transformsCreated: TransformCreated[];
-  dataViewsCreated: DataViewCreated[];
-  dataViewsErrors: CreatedError[];
   errors: CreatedError[];
 }
 

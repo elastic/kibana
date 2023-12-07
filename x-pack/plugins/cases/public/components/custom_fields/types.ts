@@ -33,6 +33,12 @@ export interface CustomFieldType<T extends CaseUICustomField> {
   }>;
 }
 
+export interface CustomFieldFactoryFilterOption {
+  key: string;
+  label: string;
+  value: boolean | null;
+}
+
 export type CustomFieldEuiTableColumn = Pick<
   EuiTableComputedColumnType<CaseUI>,
   'name' | 'width' | 'data-test-subj'
@@ -45,6 +51,7 @@ export type CustomFieldFactory<T extends CaseUICustomField> = () => {
   label: string;
   getEuiTableColumn: (params: { label: string }) => CustomFieldEuiTableColumn;
   build: () => CustomFieldType<T>;
+  filterOptions?: CustomFieldFactoryFilterOption[];
 };
 
 export type CustomFieldBuilderMap = {

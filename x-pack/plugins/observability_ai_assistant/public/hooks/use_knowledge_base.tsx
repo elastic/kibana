@@ -29,7 +29,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   const service = useObservabilityAIAssistant();
 
   const status = useAbortableAsync(({ signal }) => {
-    return service.callApi('GET /internal/observability_ai_assistant/functions/kb_status', {
+    return service.callApi('GET /internal/observability_ai_assistant/kb/status', {
       signal,
     });
   }, []);
@@ -45,7 +45,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     const install = (): Promise<void> => {
       setIsInstalling(true);
       return service
-        .callApi('POST /internal/observability_ai_assistant/functions/setup_kb', {
+        .callApi('POST /internal/observability_ai_assistant/kb/setup', {
           signal: null,
         })
         .then(() => {
@@ -57,6 +57,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
             text: i18n.translate('xpack.observabilityAiAssistant.knowledgeBaseReadyContentReload', {
               defaultMessage: 'A page reload is needed to be able to use it.',
             }),
+            toastLifeTimeMs: Number.MAX_VALUE,
           });
         })
         .catch((error) => {

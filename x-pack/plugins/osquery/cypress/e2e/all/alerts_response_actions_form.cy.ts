@@ -15,6 +15,7 @@ import {
   packFixture,
 } from '../../tasks/api_fixtures';
 import {
+  RESPONSE_ACTIONS_ERRORS,
   OSQUERY_RESPONSE_ACTION_ADD_BUTTON,
   RESPONSE_ACTIONS_ITEM_0,
   RESPONSE_ACTIONS_ITEM_1,
@@ -66,6 +67,48 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.getBySel('globalLoadingIndicator').should('not.exist');
     cy.contains('Response actions are run on each rule execution.');
     cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
+
+    cy.getBySel(RESPONSE_ACTIONS_ERRORS).within(() => {
+      cy.contains('Query is a required field');
+      cy.contains('Timeout value must be greater than 60 seconds.').should('not.exist');
+    });
+
+    // check if changing error state of one input doesn't clear other errors - START
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
+      cy.contains('Advanced').click();
+      cy.getBySel('timeout-input').clear();
+      cy.contains('Timeout value must be greater than 60 seconds.');
+    });
+
+    cy.getBySel(RESPONSE_ACTIONS_ERRORS).within(() => {
+      cy.contains('Query is a required field');
+      cy.contains('Timeout value must be greater than 60 seconds.');
+    });
+
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
+      cy.getBySel('timeout-input').type('6');
+      cy.contains('Timeout value must be greater than 60 seconds.');
+    });
+    cy.getBySel(RESPONSE_ACTIONS_ERRORS).within(() => {
+      cy.contains('Query is a required field');
+      cy.contains('Timeout value must be greater than 60 seconds.');
+    });
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
+      cy.getBySel('timeout-input').type('6');
+      cy.contains('Timeout value must be greater than 60 seconds.').should('not.exist');
+    });
+    cy.getBySel(RESPONSE_ACTIONS_ERRORS).within(() => {
+      cy.contains('Query is a required field');
+    });
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
+      cy.getBySel('timeout-input').type('6');
+    });
+    cy.getBySel(RESPONSE_ACTIONS_ERRORS).within(() => {
+      cy.contains('Query is a required field');
+      cy.contains('Timeout value must be greater than 60 seconds.').should('not.exist');
+    });
+    // check if changing error state of one input doesn't clear other errors - END
+
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('Query is a required field');
       inputQuery('select * from uptime1');
@@ -74,7 +117,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('Run a set of queries in a pack').click();
     });
-    cy.getBySel('response-actions-error')
+    cy.getBySel(RESPONSE_ACTIONS_ERRORS)
       .within(() => {
         cy.contains('Pack is a required field');
       })

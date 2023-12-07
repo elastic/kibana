@@ -82,10 +82,13 @@ export const createMockTelemetryReceiver = (
     fetchLicenseInfo: jest.fn().mockReturnValue(stubLicenseInfo),
     copyLicenseFields: jest.fn(),
     fetchFleetAgents: jest.fn(),
-    fetchDiagnosticAlerts: jest.fn().mockReturnValue(diagnosticsAlert ?? jest.fn()),
+    openPointInTime: jest.fn().mockReturnValue(Promise.resolve('test-pit-id')),
+    getAlertsIndex: jest.fn().mockReturnValue('alerts-*'),
+    fetchDiagnosticAlertsBatch: jest.fn().mockReturnValue(diagnosticsAlert ?? jest.fn()),
+    getExperimentalFeatures: jest.fn().mockReturnValue(undefined),
     fetchEndpointMetrics: jest.fn().mockReturnValue(stubEndpointMetricsResponse),
     fetchEndpointPolicyResponses: jest.fn(),
-    fetchPrebuiltRuleAlerts: jest.fn().mockReturnValue(prebuiltRuleAlertsResponse),
+    fetchPrebuiltRuleAlertsBatch: jest.fn().mockReturnValue(prebuiltRuleAlertsResponse),
     fetchDetectionRulesPackageVersion: jest.fn(),
     fetchTrustedApplications: jest.fn(),
     fetchEndpointList: jest.fn(),
@@ -95,7 +98,6 @@ export const createMockTelemetryReceiver = (
     buildProcessTree: jest.fn().mockReturnValue(processTreeResponse),
     fetchTimelineEvents: jest.fn().mockReturnValue(Promise.resolve(stubFetchTimelineEvents())),
     fetchValueListMetaData: jest.fn(),
-    getAlertsIndex: jest.fn().mockReturnValue('test-alerts-index'),
   } as unknown as jest.Mocked<TelemetryReceiver>;
 };
 

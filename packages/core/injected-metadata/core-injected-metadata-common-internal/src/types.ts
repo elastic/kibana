@@ -16,6 +16,7 @@ export interface InjectedMetadataClusterInfo {
   cluster_uuid?: string;
   cluster_name?: string;
   cluster_version?: string;
+  cluster_build_flavor?: string;
 }
 
 /** @internal */
