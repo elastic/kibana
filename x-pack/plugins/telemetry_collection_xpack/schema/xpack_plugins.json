@@ -7713,6 +7713,42 @@
         }
       }
     },
+    "connectors": {
+      "properties": {
+        "native": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "clients": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "connectors_serverless": {
+      "properties": {
+        "native": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "clients": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "discoverEnhanced": {
       "properties": {
         "exploreDataInChartActionEnabled": {

@@ -30,7 +30,6 @@ import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { ChatTimeline } from './chat_timeline';
-import { ExperimentalFeatureBanner } from './experimental_feature_banner';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { InitialSetupPanel } from './initial_setup_panel';
 import { ChatActionClickType } from './types';
@@ -299,11 +298,6 @@ export function ChatBody({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
-      {connectors.selectedConnector ? (
-        <EuiFlexItem grow={false}>
-          <ExperimentalFeatureBanner />
-        </EuiFlexItem>
-      ) : null}
       <EuiFlexItem
         grow={false}
         className={conversation.error ? chatBodyContainerClassNameWithError : undefined}
