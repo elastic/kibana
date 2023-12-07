@@ -20,14 +20,15 @@ import type { IsolationRouteRequestBody } from '../../../../../../common/api/end
 import type { ResponseActionsClientOptions } from '../../../../lib/response_actions/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../../../../lib/response_actions/base_response_actions_client';
 
+export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
+  connectorActions: ActionsClient;
+};
+
 export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private readonly connectorActionsClient: ActionsClient;
   private readonly getConnector: () => Promise<ConnectorWithExtraFindData>;
 
-  constructor({
-    connectorActions,
-    ...options
-  }: ResponseActionsClientOptions & { connectorActions: ActionsClient }) {
+  constructor({ connectorActions, ...options }: SentinelOneActionsClientOptions) {
     super(options);
     this.connectorActionsClient = connectorActions;
 

@@ -17,19 +17,13 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import {
-  createMockEndpointAppContextServiceSetupContract,
-  createMockEndpointAppContextServiceStartContract,
-} from '../../mocks';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   ResponseActionsClientError,
   ResponseActionsNotSupportedError,
 } from '../../services/actions/clients/errors';
 import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
-import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { CasesByAlertIDParams } from '@kbn/cases-plugin/server/client/cases/get';
 import type { Logger } from '@kbn/logging';
 import { getActionDetailsById as _getActionDetailsById } from '../../services/actions/action_details_by_id';
@@ -38,6 +32,7 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
 import type { DeepMutable } from '../../../../common/endpoint/types/utility_types';
 import { set } from 'lodash';
+import { responseActionsClientMock } from './mocks';
 
 jest.mock('../../services/actions/action_details_by_id', () => {
   const original = jest.requireActual('../../services/actions/action_details_by_id');
@@ -50,7 +45,7 @@ jest.mock('../../services/actions/action_details_by_id', () => {
 
 const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
 
-describe('`ResponseActionsClientImpl` class', () => {
+describe('ResponseActionsClientImpl base class', () => {
   let esClient: ElasticsearchClientMock;
   let endpointAppContextService: EndpointAppContextService;
   let baseClassMock: MockClassWithExposedProtectedMembers;
@@ -58,20 +53,13 @@ describe('`ResponseActionsClientImpl` class', () => {
   let logger: Logger;
 
   beforeEach(async () => {
-    esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
-    casesClient = createCasesClientMock();
+    const constructorOptions = responseActionsClientMock.createConstructorOptions();
 
-    endpointAppContextService = new EndpointAppContextService();
-    endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
-
+    esClient = constructorOptions.esClient;
+    casesClient = constructorOptions.casesClient;
+    endpointAppContextService = constructorOptions.endpointService;
     logger = endpointAppContextService.createLogger();
-    baseClassMock = new MockClassWithExposedProtectedMembers({
-      esClient,
-      casesClient,
-      endpointService: endpointAppContextService,
-      username: 'foo',
-    });
+    baseClassMock = new MockClassWithExposedProtectedMembers(constructorOptions);
   });
 
   afterEach(() => {
