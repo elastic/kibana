@@ -109,10 +109,10 @@ export const ApiKeyPanelContent: React.FC<ApiKeyPanelContent> = ({ apiKeys, open
                       values={{
                         number: (
                           <EuiBadge
-                            color={apiKeys.length > 0 ? 'success' : 'warning'}
+                            color={(apiKeys?.length || 0) > 0 ? 'success' : 'warning'}
                             data-test-subj="api-keys-count-badge"
                           >
-                            {apiKeys.length}
+                            {apiKeys?.length || 0}
                           </EuiBadge>
                         ),
                       }}

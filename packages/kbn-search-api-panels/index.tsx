@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiImage, EuiText } fro
 import { i18n } from '@kbn/i18n';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 
+export * from './components/cloud_details';
 export * from './components/code_box';
 export * from './components/github_link';
 export * from './components/ingest_data';

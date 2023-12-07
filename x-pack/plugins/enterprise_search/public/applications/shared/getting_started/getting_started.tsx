@@ -23,6 +23,7 @@ import {
   OverviewPanel,
   getLanguageDefinitionCodeSnippet,
   getConsoleRequest,
+  CloudDetailsPanel,
 } from '@kbn/search-api-panels';
 
 import { ApiKey } from '@kbn/security-plugin/common';
@@ -39,7 +40,6 @@ import { curlDefinition } from './languages/curl';
 import { languageDefinitions } from './languages/languages';
 import { AddDataPanelContent } from './panels/add_data_panel_content';
 import { ApiKeyPanelContent } from './panels/api_key_panel_content';
-import { ElasticsearchUrlPanelContent } from './panels/elasticsearch_url_panel_content';
 import { InitializeClientPanelContent } from './panels/initialize_client_panel_content';
 import { GettingStartedPipelinePanel } from './panels/pipeline_panel';
 import { SearchQueryPanelContent } from './panels/search_query_panel_content';
@@ -130,32 +130,7 @@ export const GettingStarted: React.FC<GettingStartedProps> = ({
         overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
 
-      <OverviewPanel
-        description={i18n.translate(
-          'xpack.enterpriseSearch.content.overview.gettingStarted.cloudId.description',
-          {
-            defaultMessage: "You'll need this to identify your deployment.",
-          }
-        )}
-        leftPanelContent={
-          isPanelLeft ? (
-            <ElasticsearchUrlPanelContent cloudId={codeArgs.cloudId} url={codeArgs.url} />
-          ) : undefined
-        }
-        rightPanelContent={
-          isPanelLeft ? undefined : (
-            <ElasticsearchUrlPanelContent cloudId={codeArgs.cloudId} url={codeArgs.url} />
-          )
-        }
-        links={[]}
-        title={i18n.translate(
-          'xpack.enterpriseSearch.overview.gettingStarted.cloudId.panelTitleElastic',
-          {
-            defaultMessage: 'Copy your Elasticsearch URL',
-          }
-        )}
-        overviewPanelProps={{ color: 'plain', hasShadow: false }}
-      />
+      <CloudDetailsPanel cloudId={codeArgs.cloudId} elasticsearchUrl={codeArgs.url} />
 
       <OverviewPanel
         description={i18n.translate(
