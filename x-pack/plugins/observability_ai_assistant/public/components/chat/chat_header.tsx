@@ -34,7 +34,6 @@ export function ChatHeader({
   licenseInvalid,
   connectors,
   connectorsManagementHref,
-  modelsManagementHref,
   conversationId,
   knowledgeBase,
   startedFrom,
@@ -46,7 +45,6 @@ export function ChatHeader({
   licenseInvalid: boolean;
   connectors: UseGenAIConnectorsResult;
   connectorsManagementHref: string;
-  modelsManagementHref: string;
   conversationId?: string;
   knowledgeBase: UseKnowledgeBaseResult;
   startedFrom?: StartedFrom;
@@ -103,12 +101,8 @@ export function ChatHeader({
         <EuiFlexItem grow={false}>
           <ChatActionsMenu
             connectors={connectors}
-            connectorsManagementHref={connectorsManagementHref}
             disabled={licenseInvalid}
-            modelsManagementHref={modelsManagementHref}
             conversationId={conversationId}
-            knowledgeBase={knowledgeBase}
-            startedFrom={startedFrom}
             onCopyConversationClick={onCopyConversation}
           />
         </EuiFlexItem>
