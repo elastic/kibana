@@ -37,6 +37,7 @@ const waitForNextWrite = async (stream: Readable): Promise<void> => {
 
 function createLlmSimulator() {
   const stream = new PassThrough();
+
   return {
     stream,
     next: async (msg: ChunkDelta) => {
@@ -237,7 +238,25 @@ describe('Observability AI Assistant service', () => {
       });
 
       describe('after the LLM errors out', () => {
-        it('adds an error to the stream and closes it', () => {});
+        beforeEach(async () => {
+          await llmSimulator.next({ content: ' again' });
+
+          llmSimulator.error(new Error('Unexpected error'));
+
+          await finished(stream);
+        });
+
+        it('adds an error to the stream and closes it', () => {
+          expect(dataHandler).toHaveBeenCalledTimes(3);
+
+          expect(JSON.parse(dataHandler.mock.lastCall!)).toEqual({
+            error: {
+              message: 'Unexpected error',
+              stack: expect.any(String),
+            },
+            type: StreamingChatResponseEventType.ConversationCompletionError,
+          });
+        });
       });
 
       describe('when generating a title fails', () => {
@@ -366,7 +385,7 @@ describe('Observability AI Assistant service', () => {
     });
   });
 
-  describe('when completing a conversation with an initial conversation id', () => {
+  describe('when completig a conversation with an initial conversation id', () => {
     let stream: Readable;
 
     let dataHandler: jest.Mock;
@@ -537,9 +556,9 @@ describe('Observability AI Assistant service', () => {
         )
       );
 
-      await finished(stream);
-
       await llmSimulator.complete();
+
+      await finished(stream);
     });
 
     it('ends the stream and writes an error', async () => {
@@ -967,8 +986,6 @@ describe('Observability AI Assistant service', () => {
       });
 
       describe('if the observable errors out', () => {
-        let endStreamPromise: Promise<void>;
-
         beforeEach(async () => {
           response$.next({
             created: 0,

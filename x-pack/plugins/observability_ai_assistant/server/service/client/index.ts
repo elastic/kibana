@@ -422,7 +422,7 @@ export class ObservabilityAIAssistantClient {
     }
 
     const response = stream
-      ? (executeResult.data as Readable).pipe(new PassThrough())
+      ? (executeResult.data as Readable)
       : (executeResult.data as CreateChatCompletionResponse);
 
     if (response instanceof PassThrough) {

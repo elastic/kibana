@@ -10,6 +10,7 @@ import type { Readable } from 'stream';
 
 export function streamIntoObservable(readable: Readable): Observable<string> {
   let lineBuffer = '';
+
   return from(readable).pipe(
     map((chunk: Buffer) => chunk.toString('utf-8')),
     map((part) => {
