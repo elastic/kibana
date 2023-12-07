@@ -30,7 +30,13 @@ export type GcpCredentialsTypeFieldMap = {
   [key in GcpCredentialsType]: string[];
 };
 
-export type AzureCredentialsType = 'arm_template' | 'manual';
+export type AzureCredentialsType =
+  | 'arm_template'
+  | 'service_principal_with_client_secret'
+  | 'service_principal_with_client_certificate'
+  | 'service_principal_with_client_username_and_password'
+  | 'managed_identity'
+  | 'manual';
 
 export type AzureCredentialsTypeFieldMap = {
   [key in AzureCredentialsType]: string[];
@@ -74,11 +80,30 @@ export interface Cluster {
   trend: PostureTrend[];
 }
 
+export interface BenchmarkData {
+  meta: {
+    benchmarkId: CspFinding['rule']['benchmark']['id'];
+    benchmarkVersion: CspFinding['rule']['benchmark']['version'];
+    benchmarkName: CspFinding['rule']['benchmark']['name'];
+    assetCount: number;
+  };
+  stats: Stats;
+  groupedFindingsEvaluation: GroupedFindingsEvaluation[];
+  trend: PostureTrend[];
+}
+
 export interface ComplianceDashboardData {
   stats: Stats;
   groupedFindingsEvaluation: GroupedFindingsEvaluation[];
   clusters: Cluster[];
   trend: PostureTrend[];
+}
+
+export interface ComplianceDashboardDataV2 {
+  stats: Stats;
+  groupedFindingsEvaluation: GroupedFindingsEvaluation[];
+  trend: PostureTrend[];
+  benchmarks: BenchmarkData[];
 }
 
 export type CspStatusCode =
