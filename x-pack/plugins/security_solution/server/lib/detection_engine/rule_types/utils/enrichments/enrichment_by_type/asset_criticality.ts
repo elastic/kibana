@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep } from 'lodash';
+import {
+  ALERT_HOST_CRITICALITY,
+  ALERT_USER_CRITICALITY,
+} from '../../../../../../../common/field_maps/field_names';
 import { createSingleFieldMatchEnrichment } from '../create_single_field_match_enrichment';
 import type {
   CreateCriticalityEnrichment,
@@ -41,7 +44,9 @@ const getExtraFiltersForEnrichment = (field: string) => [
 ];
 
 const createEnrichmentFactoryFunction =
-  (alertField: string): CreateEnrichmentFunction =>
+  (
+    alertField: typeof ALERT_HOST_CRITICALITY | typeof ALERT_USER_CRITICALITY
+  ): CreateEnrichmentFunction =>
   (enrichment) =>
   (event) => {
     const criticality = getFieldValue(enrichment, 'criticality_level');
@@ -50,8 +55,8 @@ const createEnrichmentFactoryFunction =
       return event;
     }
     const newEvent = cloneDeep(event);
-    if (criticality) {
-      set(newEvent, alertField, criticality);
+    if (criticality && newEvent._source) {
+      newEvent._source[alertField] = criticality;
     }
     return newEvent;
   };
@@ -74,9 +79,7 @@ export const createHostAssetCriticalityEnrichments: CreateCriticalityEnrichment 
     },
     enrichmentResponseFields,
     extraFilters: getExtraFiltersForEnrichment('host.name'),
-    createEnrichmentFunction: createEnrichmentFactoryFunction(
-      '_source.kibana.alert.host.criticality_level'
-    ),
+    createEnrichmentFunction: createEnrichmentFactoryFunction(ALERT_HOST_CRITICALITY),
   });
 };
 
@@ -98,8 +101,6 @@ export const createUserAssetCriticalityEnrichments: CreateCriticalityEnrichment 
     },
     enrichmentResponseFields,
     extraFilters: getExtraFiltersForEnrichment('user.name'),
-    createEnrichmentFunction: createEnrichmentFactoryFunction(
-      '_source.kibana.alert.user.criticality_level'
-    ),
+    createEnrichmentFunction: createEnrichmentFactoryFunction(ALERT_USER_CRITICALITY),
   });
 };
