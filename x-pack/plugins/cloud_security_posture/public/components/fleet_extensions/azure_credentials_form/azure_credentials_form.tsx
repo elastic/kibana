@@ -248,18 +248,6 @@ const TemporaryManualSetup = ({ integrationLink }: { integrationLink: string }) 
 const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0';
 const AZURE_MANUAL_FIELDS_PACKAGE_VERSION = '1.7.0';
 
-export const getDefaultAzureManualCredentialType = (packageInfo: PackageInfo) => {
-  const packageSemanticVersion = semverValid(packageInfo.version);
-  const cleanPackageVersion = semverCoerce(packageSemanticVersion) || '';
-
-  const isPackageVersionValidForManualFields = !semverLt(
-    cleanPackageVersion,
-    AZURE_MANUAL_FIELDS_PACKAGE_VERSION
-  );
-
-  return isPackageVersionValidForManualFields ? 'managed_identity' : 'manual';
-};
-
 const AzureInputVarFields = ({
   fields,
   onChange,
