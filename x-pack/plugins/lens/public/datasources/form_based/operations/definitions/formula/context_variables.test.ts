@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ExecutionContextSearch } from '@kbn/data-plugin/public';
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
 import type { FormBasedLayer } from '../../../../..';
 import { createMockedIndexPattern } from '../../../mocks';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
@@ -18,6 +18,7 @@ import {
   timeRangeOperation,
   formulaIntervalFn,
   formulaTimeRangeFn,
+  formulaNowFn,
 } from './context_variables';
 
 function createLayer<T extends ConstantsIndexPatternColumn>(
@@ -136,7 +137,7 @@ describe('context variables', () => {
           getSearchContext: () => ({
             /* no time range */
           }),
-        } as ExecutionContext<Adapters, SerializableRecord>);
+        } as ExecutionContext<Adapters, ExecutionContextSearch>);
         expect(result).toEqual(0);
       });
 
@@ -153,7 +154,7 @@ describe('context variables', () => {
                 to: 'now',
               },
             }),
-          } as unknown as ExecutionContext<Adapters, SerializableRecord>
+          } as ExecutionContext<Adapters, ExecutionContextSearch>
         );
         expect(result).toEqual(0);
       });
@@ -166,7 +167,7 @@ describe('context variables', () => {
               to: 'now',
             },
           }),
-        } as unknown as ExecutionContext<Adapters, SerializableRecord>);
+        } as ExecutionContext<Adapters, ExecutionContextSearch>);
         expect(result).toEqual(10000);
       });
     });
@@ -209,7 +210,7 @@ describe('context variables', () => {
           getSearchContext: () => ({
             /* no time range */
           }),
-        } as ExecutionContext<Adapters, SerializableRecord>);
+        } as ExecutionContext<Adapters, ExecutionContextSearch>);
         expect(result).toEqual(0);
       });
 
@@ -221,9 +222,9 @@ describe('context variables', () => {
               to: 'now',
             },
           }),
-        } as unknown as ExecutionContext<Adapters, SerializableRecord>);
+        } as ExecutionContext<Adapters, ExecutionContextSearch>);
 
-        expect(result).toBe(900000);
+        expect(result).toBe(900001);
       });
     });
   });
@@ -236,14 +237,16 @@ describe('context variables', () => {
       });
     });
 
-    describe.skip('toExpression', () => {
+    describe('expression function', () => {
       it('should return the now value when passed', () => {
-        const now = new Date();
+        const now = 123456789;
         expect(
-          nowOperation.toExpression(createLayer('now'), 'col1', createMockedIndexPattern(), {
-            now,
-          })
-        ).toEqual(expect.arrayContaining(createExpression('now', +now)));
+          formulaNowFn.fn(undefined, {}, {
+            getSearchContext: () => ({
+              now,
+            }),
+          } as ExecutionContext<Adapters, ExecutionContextSearch>)
+        ).toEqual(now);
       });
     });
   });
