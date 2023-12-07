@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 export const MAX_SPACES_COUNT = 1;
 
+type ClusterPrivilege = 'manage_index_templates' | 'manage_transform';
 export const RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_index_templates',
   'manage_transform',
-];
+] as ClusterPrivilege[];
 
+type RiskEngineIndexPrivilege = 'read' | 'write';
 export const RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES = Object.freeze({
-  'risk-score.risk-score-*': ['read', 'write'],
+  'risk-score.risk-score-*': ['read', 'write'] as RiskEngineIndexPrivilege[],
 });

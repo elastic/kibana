@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CspRuleTemplate } from '../../../common/schemas';
+import { CspBenchmarkRule } from '../../../common/types/latest';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 
@@ -41,20 +41,20 @@ export const RulesTable = ({
   const { euiTheme } = useEuiTheme();
   const columns = useMemo(() => getColumns({ setSelectedRuleId }), [setSelectedRuleId]);
 
-  const euiPagination: EuiBasicTableProps<CspRuleTemplate>['pagination'] = {
+  const euiPagination: EuiBasicTableProps<CspBenchmarkRule>['pagination'] = {
     pageIndex: page,
     pageSize,
     totalItemCount: total,
     pageSizeOptions: [10, 25, 100],
   };
 
-  const onTableChange = ({ page: pagination }: Criteria<CspRuleTemplate>) => {
+  const onTableChange = ({ page: pagination }: Criteria<CspBenchmarkRule>) => {
     if (!pagination) return;
     setPagination({ page: pagination.index, perPage: pagination.size });
   };
 
-  const rowProps = (row: CspRuleTemplate) => ({
-    ['data-test-subj']: TEST_SUBJECTS.getCspRuleTemplatesTableRowItemTestId(row.metadata.id),
+  const rowProps = (row: CspBenchmarkRule) => ({
+    ['data-test-subj']: TEST_SUBJECTS.getCspBenchmarkRuleTableRowItemTestId(row.metadata.id),
     style: {
       background: row.metadata.id === selectedRuleId ? euiTheme.colors.highlight : undefined,
     },
@@ -79,7 +79,7 @@ type GetColumnProps = Pick<RulesTableProps, 'setSelectedRuleId'>;
 
 const getColumns = ({
   setSelectedRuleId,
-}: GetColumnProps): Array<EuiTableFieldDataColumnType<CspRuleTemplate>> => [
+}: GetColumnProps): Array<EuiTableFieldDataColumnType<CspBenchmarkRule>> => [
   {
     field: 'metadata.benchmark.rule_number',
     name: i18n.translate('xpack.csp.rules.rulesTable.ruleNumberColumnLabel', {

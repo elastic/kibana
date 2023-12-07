@@ -79,13 +79,13 @@ export function AlertActions({
   const observabilityAlert = parseObservabilityAlert(alert);
 
   useEffect(() => {
-    const alertLink = alert.link as unknown as string;
-    if (!alert.hasBasePath) {
+    const alertLink = observabilityAlert.link as unknown as string;
+    if (!observabilityAlert.hasBasePath) {
       setViewInAppUrl(prepend(alertLink ?? ''));
     } else {
       setViewInAppUrl(alertLink);
     }
-  }, [alert.hasBasePath, alert.link, prepend]);
+  }, [observabilityAlert.hasBasePath, observabilityAlert.link, prepend]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
