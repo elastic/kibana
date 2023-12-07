@@ -37,6 +37,7 @@ function getCallbackMocks() {
               name: `${type}Field`,
               type,
             })),
+            { name: 'geoPointField', type: 'geo_point' },
             { name: 'any#Char$ field', type: 'number' },
             { name: 'kubernetes.something.something', type: 'number' },
             {
