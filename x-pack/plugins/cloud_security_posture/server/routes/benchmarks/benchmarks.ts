@@ -15,7 +15,7 @@ import {
   POSTURE_TYPE_ALL,
 } from '../../../common/constants';
 import { benchmarksQueryParamsSchema } from '../../../common/schemas/benchmark';
-import type { Benchmark } from '../../../common/types';
+import type { Benchmark } from '../../../common/types_old';
 import {
   getBenchmarkFromPackagePolicy,
   getBenchmarkFilter,
@@ -28,7 +28,7 @@ import {
   getCspAgentPolicies,
   getCspPackagePolicies,
 } from '../../lib/fleet_util';
-import { BenchmarkId } from '../../../common/types';
+import { BenchmarkId } from '../../../common/types_old';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 

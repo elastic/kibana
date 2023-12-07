@@ -10,7 +10,7 @@ import {
   VulnSeverity,
   AwsCredentialsTypeFieldMap,
   GcpCredentialsTypeFieldMap,
-} from './types';
+} from './types_old';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
 export const STATUS_API_CURRENT_VERSION = '1';

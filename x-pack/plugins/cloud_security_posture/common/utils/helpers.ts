@@ -30,7 +30,7 @@ import type {
   GcpCredentialsType,
   AzureCredentialsType,
   RuleSection,
-} from '../types';
+} from '../types_old';
 
 /**
  * @example

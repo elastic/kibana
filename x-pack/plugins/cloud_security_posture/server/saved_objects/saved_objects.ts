@@ -7,7 +7,7 @@
 
 import { SavedObjectsServiceSetup } from '@kbn/core/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { rulesV1, rulesV2, rulesV3 } from '../../common/types/index';
+import { rulesV1, rulesV2, rulesV3 } from '../../common/types';
 import { cspBenchmarkRuleSavedObjectMapping } from './mappings';
 import { cspBenchmarkRuleMigrations } from './migrations';
 
