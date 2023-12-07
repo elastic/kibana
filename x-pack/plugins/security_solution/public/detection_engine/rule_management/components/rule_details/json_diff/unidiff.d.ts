@@ -6,11 +6,18 @@
  */
 
 declare module 'unidiff' {
+  interface Change {
+    count?: number | undefined;
+    value: string;
+    added?: boolean | undefined;
+    removed?: boolean | undefined;
+  }
+
   export interface FormatOptions {
     context?: number;
   }
 
-  export function diffLines(x: string, y: string): string[];
+  export function diffLines(x: string, y: string): Change[];
 
-  export function formatLines(line: string[], options?: FormatOptions): string;
+  export function formatLines(line: Change[], options?: FormatOptions): string;
 }

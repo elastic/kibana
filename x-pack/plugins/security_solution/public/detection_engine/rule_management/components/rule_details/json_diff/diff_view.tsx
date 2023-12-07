@@ -33,8 +33,8 @@ interface UseExpandReturn {
 }
 
 /**
- * @param {HunkData[]} hunks - An array of ChangeData representing the changes in the block.
- * @param {string} oldSource - The method used for performing the diff.
+ * @param {HunkData[]} hunks - An array of hunk objects representing changes in a section of a string. Sections normally span multiple lines.
+ * @param {string} oldSource - Original string, before changes
  * @returns {UseExpandReturn} - "expandRange" is function that triggers expansion, "hunks" is an array of hunks with hidden section expanded.
  *
  * @description
@@ -104,9 +104,13 @@ const renderGutter: RenderGutter = ({ change }) => {
 
 const convertToDiffFile = (oldSource: string, newSource: string) => {
   /*
-    "diffLines" call below converts two strings of text into an array of Change objects.
+    "diffLines" call converts two strings of text into an array of Change objects.
+  */
+  const changes = unidiff.diffLines(oldSource, newSource);
 
+  /*
     Then "formatLines" takes an array of Change objects and turns it into a single "unified diff" string.
+    More info about the "unified diff" format: https://en.wikipedia.org/wiki/Diff_utility#Unified_format
     Unified diff is a string with change markers added. Looks something like:
     `
       @@ -3,16 +3,15 @@
@@ -116,8 +120,7 @@ const convertToDiffFile = (oldSource: string, newSource: string) => {
          "history_window_start": "now-14d",
     `
   */
-
-  const unifiedDiff: string = unidiff.formatLines(unidiff.diffLines(oldSource, newSource), {
+  const unifiedDiff: string = unidiff.formatLines(changes, {
     context: 3,
   });
 
@@ -206,22 +209,23 @@ export const DiffView = ({
   /*
     "react-diff-view" components consume diffs not as a strings, but as something they call "hunks".
     So we first need to convert our "before" and "after" strings into these "hunk" objects.
-    "hunks" are objects describing changed sections of code plus a few unchanged lines above and below for context.
+    "hunks" describe changed sections of code plus a few unchanged lines above and below for context.
   */
 
   /*
-    "diffFile" is essentially an object containing "hunks" and some metadata.
+    "diffFile" is essentially an object containing an array of hunks plus some metadata.
   */
   const diffFile = useMemo(() => convertToDiffFile(oldSource, newSource), [oldSource, newSource]);
 
   /*
     Sections of diff without changes are hidden by default, because they are not present in the "hunks" array.
-    "useExpand" allows to show these hidden sections when user clicks on "Expand hidden <number> lines" button.
+    "useExpand" allows to show these hidden sections when a user clicks on "Expand hidden <number> lines" button.
   */
   const { expandRange, hunks } = useExpand(diffFile.hunks, oldSource);
 
   /*
-    Go over each hunk and extract tokens from it. For example, split strings into words or characters.
+    Go over each hunk and extract tokens from it. For example, split strings into words or characters,
+    so we can highlight them later.
   */
   const tokens = useTokens(hunks, diffMethod, oldSource);
 

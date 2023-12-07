@@ -272,6 +272,10 @@ export function markEdits(hunks: HunkData[], diffMethod: DiffMethod): TokenizeEn
   );
 
   const [oldEdits, newEdits] = changeBlocks
+    /*
+      diffChangeBlock diffs two substrings and determines character positions of changes,
+      taking the diffing algorithm into account (by char, by word, by sentence, etc.)
+    */
     .map((changes) => diffChangeBlock(changes, diffMethod))
     .reduce(
       // eslint-disable-next-line @typescript-eslint/no-shadow
