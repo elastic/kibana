@@ -7,12 +7,35 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps', 'header']);
+  const inspector = getService('inspector');
+  const testSubjects = getService('testSubjects');
 
   describe('layer errors', () => {
     before(async () => {
       await PageObjects.maps.loadSavedMap('layer with errors');
+    });
+
+    describe('Layer with EsError', () => {
+      after(async () => {
+        await inspector.close();
+      });
+
+      it('should diplay error icon in legend', async () => {
+        await PageObjects.maps.hasErrorIconExistsOrFail('connections');
+      });
+
+      it('should display "View details" button', async () => {
+        await testSubjects.existOrFail('viewEsErrorButton');
+      });
+
+      it('should open request in inspector', async () => {
+        await testSubjects.click('viewEsErrorButton');
+
+        const selectedRequest = await testSubjects.getVisibleText('euiComboBoxPill');
+        expect(selectedRequest).to.equal('load layer features (connections)');
+      });
     });
 
     describe('ESSearchSource with missing index pattern id', () => {
