@@ -15,7 +15,7 @@ import {
   PopoverAnchorPosition,
 } from '@elastic/eui';
 import { ValuesType } from 'utility-types';
-import { HoverActionType, useHoverActions } from '../../../hooks/use_hover_actions';
+import { useHoverActions } from '../../../hooks/use_hover_actions';
 import { LogDocument } from '..';
 
 interface HoverPopoverActionProps {
@@ -35,7 +35,7 @@ export const HoverActionPopover = ({
 }: HoverPopoverActionProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const leaveTimer = useRef<NodeJS.Timeout | null>(null);
-  const hoverActions: HoverActionType[] = useHoverActions({ field, value });
+  const hoverActions = useHoverActions({ field, value });
 
   // The timeout hack is required because we are using a Popover which ideally should be used with a mouseclick,
   // but we are using it as a Tooltip. Which means we now need to manually handle the open and close
