@@ -1,0 +1,26 @@
+{
+    "name": "Test SLO for api integration",
+    "description": "Fixture for api integration tests",
+    "indicator": {
+      "type": "sli.kql.custom",
+      "params": {
+        "index": "service-logs*",
+        "filter": "dataset : *",
+        "good": "latency < 90",
+        "total": "latency: *",
+        "timestampField": "@timestamp"
+      }
+    },
+    "budgetingMethod": "occurrences",
+    "timeWindow": {
+      "duration": "30d",
+      "type": "rolling"
+    },
+    "objective": {
+      "target": 0.99
+    },
+    "tags": [
+      "test"
+    ],
+    "groupBy": "host"
+}
