@@ -6,9 +6,8 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { isEqual } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
-import { mergeWith } from 'lodash';
+import { mergeWith, isEqual } from 'lodash';
 import { MoreFiltersSelectable } from './table_filter_config/more_filters_selectable';
 import type { CaseStatuses } from '../../../common/types/domain';
 import type { FilterOptions } from '../../containers/types';
@@ -104,7 +103,7 @@ const CasesTableFiltersComponent = ({
     selectableOptions,
     activeSelectableOptionKeys,
     onFilterConfigChange,
-  } = useFilterConfig({ systemFilterConfig, onFilterOptionsChange, isSelectorView });
+  } = useFilterConfig({ systemFilterConfig, onFilterOptionsChange, isSelectorView, filterOptions });
 
   const handleOnSearch = useCallback(
     (newSearch) => {

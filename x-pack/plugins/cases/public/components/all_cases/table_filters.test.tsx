@@ -12,7 +12,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 
-import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
+import { CaseStatuses, CustomFieldTypes, CaseSeverity } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -905,5 +905,35 @@ describe('CasesTableFilters ', () => {
         ]
       `);
     });
+  });
+
+  it('should activate a filter when there is a value in the global state as this means that it has a value set in the url', async () => {
+    const previousState = [
+      { key: 'severity', isActive: false }, // notice severity filter not active
+      { key: 'status', isActive: false }, // notice status filter not active
+      { key: 'tags', isActive: true },
+      { key: 'category', isActive: false },
+    ];
+
+    localStorage.setItem('testAppId.cases.list.tableFiltersConfig', JSON.stringify(previousState));
+
+    const overrideProps = {
+      ...props,
+      filterOptions: {
+        ...DEFAULT_FILTER_OPTIONS,
+        severity: [CaseSeverity.MEDIUM], // but they have values
+        status: [CaseStatuses.open, CaseStatuses['in-progress']],
+      },
+    };
+
+    appMockRender.render(<CasesTableFilters {...overrideProps} />);
+
+    const statusButton = await screen.findByRole('button', { name: 'Status' });
+    expect(statusButton).toBeInTheDocument();
+    expect(within(statusButton).getByLabelText('2 active filters')).toBeInTheDocument();
+
+    const severityButton = await screen.findByRole('button', { name: 'Severity' });
+    expect(severityButton).toBeInTheDocument();
+    expect(within(severityButton).getByLabelText('1 active filters')).toBeInTheDocument();
   });
 });

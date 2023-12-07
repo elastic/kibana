@@ -121,6 +121,7 @@ const getHTTPResponseCode = (error: FleetError): number => {
     // Connection errors (ie. RegistryConnectionError) / fallback  (RegistryError) from EPR
     return 502;
   }
+
   return 400; // Bad Request
 };
 

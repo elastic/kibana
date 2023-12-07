@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 import type { CaseStatuses } from '../../../../common/types/domain';
 import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../../common/constants';
@@ -204,45 +204,7 @@ export const useSystemFilterConfig = ({
   selectedAssignees,
   tags,
 }: UseFilterConfigProps) => {
-  const [filterConfig, setFilterConfig] = useState<FilterConfig[]>(() =>
-    getSystemFilterConfig({
-      availableSolutions,
-      caseAssignmentAuthorized,
-      categories,
-      countClosedCases,
-      countInProgressCases,
-      countOpenCases,
-      currentUserProfile,
-      handleSelectedAssignees,
-      hiddenStatuses,
-      isLoading,
-      isSelectorView,
-      onFilterOptionsChange,
-      selectedAssignees,
-      tags,
-    })
-  );
-
-  useEffect(() => {
-    setFilterConfig(
-      getSystemFilterConfig({
-        availableSolutions,
-        caseAssignmentAuthorized,
-        categories,
-        countClosedCases,
-        countInProgressCases,
-        countOpenCases,
-        currentUserProfile,
-        handleSelectedAssignees,
-        hiddenStatuses,
-        isLoading,
-        isSelectorView,
-        onFilterOptionsChange,
-        selectedAssignees,
-        tags,
-      })
-    );
-  }, [
+  const filterConfig = getSystemFilterConfig({
     availableSolutions,
     caseAssignmentAuthorized,
     categories,
@@ -257,7 +219,7 @@ export const useSystemFilterConfig = ({
     onFilterOptionsChange,
     selectedAssignees,
     tags,
-  ]);
+  });
 
   return {
     systemFilterConfig: filterConfig,
