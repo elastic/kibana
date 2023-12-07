@@ -92,6 +92,7 @@ export const loadRemoteESOutput = () =>
     is_default_monitoring: false,
     hosts: ['https://bla.co'],
     secrets: { service_token: 'token' },
+    preset: 'balanced',
   });
 
 export const loadLogstashOutput = () =>
