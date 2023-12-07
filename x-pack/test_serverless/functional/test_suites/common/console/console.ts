@@ -29,7 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
 
-  describe('console app', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/172632
+  // FLAKY: https://github.com/elastic/kibana/issues/172668
+  describe.skip('console app', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
