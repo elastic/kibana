@@ -31,7 +31,6 @@
     "@kbn/presentation-publishing",
     "@kbn/presentation-containers",
     "@kbn/presentation-library",
-    "@kbn/panel-loader"
   ],
   "exclude": ["target/**/*"]
 }
