@@ -11,12 +11,12 @@ import { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger } from '@kbn/core/server';
 import {
-  CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '../../../common/constants';
 import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
-import { CspRuleTemplate } from '../../../common/schemas';
-import { BenchmarkId, Benchmark, BenchmarkVersion2 } from '../../../common/types';
+import { CspBenchmarkRule } from '../../../common/types/latest';
+import { BenchmarkId, Benchmark, BenchmarkVersion2 } from '../../../common/types_old';
 import {
   getBenchmarkFilter,
   isNonNullable,
@@ -30,8 +30,8 @@ export const getRulesCountForPolicy = async (
   soClient: SavedObjectsClientContract,
   benchmarkId: BenchmarkId
 ): Promise<number> => {
-  const rules = await soClient.find<CspRuleTemplate>({
-    type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  const rules = await soClient.find<CspBenchmarkRule>({
+    type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
     filter: getBenchmarkFilter(benchmarkId),
     perPage: 0,
   });
@@ -84,22 +84,23 @@ export const createBenchmarksV2 = async (
   logger: Logger
 ): Promise<BenchmarkVersion2[]> => {
   // Returns a list of benchmark based on their Version and Benchmark ID
-  const benchmarksResponse = await soClient.find<CspRuleTemplate>({
-    type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+
+  const benchmarksResponse = await soClient.find<CspBenchmarkRule>({
+    type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
     aggs: {
       benchmark_id: {
         terms: {
-          field: `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id`,
+          field: `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id`,
         },
         aggs: {
           name: {
             terms: {
-              field: `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.name`,
+              field: `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.name`,
             },
             aggs: {
               version: {
                 terms: {
-                  field: `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version`,
+                  field: `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version`,
                 },
               },
             },
@@ -156,6 +157,7 @@ export const createBenchmarksV2 = async (
           };
         })
       );
+
       return benchmarksTableObjects;
     })
   );

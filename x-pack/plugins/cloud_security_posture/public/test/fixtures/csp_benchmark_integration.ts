@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { BenchmarkVersion2 } from '../../../common/types';
+/* eslint-disable @typescript-eslint/naming-convention */
+
+import Chance from 'chance';
+import type { BenchmarkVersion2 } from '../../../common/types_old';
 
 type CreateCspBenchmarkIntegrationFixtureInput = {
   chance?: Chance.Chance;
