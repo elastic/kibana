@@ -19,13 +19,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { CspBenchmarkRule, CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import * as TEST_SUBJECTS from './test_subjects';
-import {
-  CspBenchmarkRule,
-  CspBenchmarkRuleMetadata,
-} from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
 interface RuleFlyoutProps {
   onClose(): void;

@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import { CspBenchmarkRule } from '../../../common/types/latest';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 
