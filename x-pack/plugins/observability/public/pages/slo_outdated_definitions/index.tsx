@@ -1,0 +1,156 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBetaBadge,
+  EuiSpacer,
+  EuiTablePagination,
+} from '@elastic/eui';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from '../../utils/kibana_react';
+import { useLicense } from '../../hooks/use_license';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useCapabilities } from '../../hooks/slo/use_capabilities';
+import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { useFetchSloDefinitions } from '../../hooks/slo/use_fetch_slo_definitions';
+import { paths } from '../../../common/locators/paths';
+import { SloListEmpty } from '../slos/components/slo_list_empty';
+import { OutdatedSlo } from './outdated_slo';
+import { OutdatedSloSearchBar } from './outdated_slo_search_bar';
+
+export function SlosOutdatedDefinitions() {
+  const {
+    http: { basePath },
+  } = useKibana().services;
+  const { hasWriteCapabilities } = useCapabilities();
+  const { data: globalDiagnosis } = useFetchSloGlobalDiagnosis();
+  const { ObservabilityPageTemplate } = usePluginContext();
+
+  useBreadcrumbs([
+    {
+      href: basePath.prepend(paths.observability.slos),
+      text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
+        defaultMessage: 'SLOs',
+      }),
+      deepLinkId: 'observability-overview:slos',
+    },
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.slosOutdatedDefinitions', {
+        defaultMessage: 'Outdated SLO Definitinos',
+      }),
+    },
+  ]);
+
+  const [search, setSearch] = useState<string>('');
+  const [activePage, setActivePage] = useState<number>(0);
+  const [perPage, setPerPage] = useState<number>(10);
+
+  const handlePerPageChange = (perPageNumber: number) => {
+    setPerPage(perPageNumber);
+    setActivePage(0);
+  };
+
+  const { hasAtLeast } = useLicense();
+
+  const { isLoading, data, refetch } = useFetchSloDefinitions({
+    name: search,
+    includeOutdatedOnly: true,
+    page: activePage + 1,
+    perPage,
+  });
+  const { total } = data ?? { total: 0 };
+
+  const hasRequiredWritePrivileges =
+    !!globalDiagnosis?.userPrivileges.write.has_all_requested && hasWriteCapabilities;
+
+  const hasSlosAndHasPermissions = hasAtLeast('platinum') === true && hasRequiredWritePrivileges;
+
+  if (!hasSlosAndHasPermissions) {
+    return (
+      <div>
+        {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.permissionsError', {
+          defaultMessage: 'You must have write permissions to access this page',
+        })}
+      </div>
+    );
+  }
+
+  const pageTitle = (
+    <EuiFlexGroup
+      direction="row"
+      gutterSize="m"
+      alignItems="center"
+      justifyContent="flexStart"
+      responsive={false}
+    >
+      <EuiFlexItem grow={false}>
+        {i18n.translate('xpack.observability.slo.slosOutdatedDefintions.pageTitle', {
+          defaultMessage: 'Outdated SLO Definitions',
+        })}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBetaBadge
+          label="Beta"
+          tooltipPosition="bottom"
+          tooltipContent={i18n.translate(
+            'xpack.observability.slo.slosOutdatedDefinitions.headerTitle.betaBadgeDescription',
+            {
+              defaultMessage:
+                'This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features.',
+            }
+          )}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  return (
+    hasSlosAndHasPermissions && (
+      <ObservabilityPageTemplate
+        data-test-subj="slosOutdatedDefinitions"
+        pageHeader={{ pageTitle }}
+      >
+        <HeaderMenu />
+        <p>
+          {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.description', {
+            defaultMessage:
+              'The following SLOs are from a previous version and need to either be reset to upgrade to the latest version OR deleted and removed from the system. When you reset the SLO, the transfrom will be updated to the latest version and the historical data will be regenerated from the source data.',
+          })}
+        </p>
+        <EuiSpacer size="l" />
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            <OutdatedSloSearchBar initialSearch={search} onRefresh={refetch} onSearch={setSearch} />
+          </EuiFlexItem>
+          {!isLoading && total === 0 && <SloListEmpty />}
+          {!isLoading &&
+            total > 0 &&
+            data &&
+            data.results.map((slo) => (
+              <OutdatedSlo slo={slo} onDelete={refetch} onReset={refetch} />
+            ))}
+        </EuiFlexGroup>
+        {!isLoading && data && (
+          <EuiTablePagination
+            activePage={activePage}
+            pageCount={Math.ceil(total / perPage)}
+            itemsPerPage={perPage}
+            onChangePage={setActivePage}
+            onChangeItemsPerPage={handlePerPageChange}
+            itemsPerPageOptions={[10, 20, 50, 100]}
+          />
+        )}
+      </ObservabilityPageTemplate>
+    )
+  );
+}
