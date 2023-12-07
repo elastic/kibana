@@ -106,7 +106,7 @@ function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
         Math.ceil(previousPollInterval * POLL_INTERVAL_INCREASE_PERCENTAGE),
         Math.ceil(Math.max(PREFERRED_MAX_POLL_INTERVAL, startingPollInterval))
       );
-      if (newPollInterval < 0 || !Number.isSafeInteger(newPollInterval)) {
+      if (!Number.isSafeInteger(newPollInterval) || newPollInterval < 0) {
         logger.error(
           `Poll interval configuration had an issue calculating the new poll interval: Math.min(Math.ceil(${previousPollInterval} * ${POLL_INTERVAL_INCREASE_PERCENTAGE}), Math.max(${PREFERRED_MAX_POLL_INTERVAL}, ${startingPollInterval})) = ${newPollInterval}, will keep the poll interval unchanged (${previousPollInterval})`
         );
@@ -119,7 +119,7 @@ function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
         startingPollInterval,
         Math.floor(previousPollInterval * POLL_INTERVAL_DECREASE_PERCENTAGE)
       );
-      if (newPollInterval < 0 || !Number.isSafeInteger(newPollInterval)) {
+      if (!Number.isSafeInteger(newPollInterval) || newPollInterval < 0) {
         logger.error(
           `Poll interval configuration had an issue calculating the new poll interval: Math.max(${startingPollInterval}, Math.floor(${previousPollInterval} * ${POLL_INTERVAL_DECREASE_PERCENTAGE})) = ${newPollInterval}, will keep the poll interval unchanged (${previousPollInterval})`
         );
