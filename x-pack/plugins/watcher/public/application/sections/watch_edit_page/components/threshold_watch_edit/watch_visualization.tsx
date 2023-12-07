@@ -18,7 +18,7 @@ import {
 } from '@elastic/charts';
 import dateMath from '@kbn/datemath';
 import moment from 'moment-timezone';
-import { getTimeZone } from '@kbn/visualization-utils';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -44,6 +44,21 @@ const customTheme = () => {
       },
     },
   };
+};
+
+const getTimezone = (config: IUiSettingsClient) => {
+  const DATE_FORMAT_CONFIG_KEY = 'dateFormat:tz';
+  const isCustomTimezone = !config.isDefault(DATE_FORMAT_CONFIG_KEY);
+  if (isCustomTimezone) {
+    return config.get(DATE_FORMAT_CONFIG_KEY);
+  }
+
+  const detectedTimezone = moment.tz.guess();
+  if (detectedTimezone) {
+    return detectedTimezone;
+  }
+  // default to UTC if we can't figure out the timezone
+  return moment().format('Z');
 };
 
 const getDomain = (watch: any) => {
@@ -102,7 +117,7 @@ export const WatchVisualization = () => {
     rangeFrom: domain.min,
     rangeTo: domain.max,
     interval,
-    timezone: getTimeZone(uiSettings),
+    timezone: getTimezone(uiSettings),
   });
 
   // Fetching visualization data is independent of watch actions
@@ -178,7 +193,7 @@ export const WatchVisualization = () => {
 
   if (watchVisualizationData) {
     const watchVisualizationDataKeys = Object.keys(watchVisualizationData);
-    const timezone = getTimeZone(uiSettings);
+    const timezone = getTimezone(uiSettings);
     const actualThreshold = getThreshold(watch);
     let maxY = actualThreshold[actualThreshold.length - 1];
 
