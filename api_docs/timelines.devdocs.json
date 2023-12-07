@@ -1501,19 +1501,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/field_value_cell.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/field_value_cell.tsx"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/use_action_cell_data_provider.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/use_action_cell_data_provider.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/field_value_cell.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/field_value_cell.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -3967,19 +3967,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/flyout/body.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/flyout/body.tsx"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/flyout/body.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/flyout/body.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4191,38 +4191,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/providers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/providers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/columns.tsx"
           },
           {
@@ -4291,6 +4259,38 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/providers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/providers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/index.tsx"
           },
           {
@@ -4335,19 +4335,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/context.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/context.tsx"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/context.tsx"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/context.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/context.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/context.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4516,11 +4516,11 @@
         "references": [
           {
             "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/alerts_table/render_cell_value.tsx"
+            "path": "x-pack/plugins/observability/public/components/alerts_table/slo/render_cell_value.tsx"
           },
           {
             "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/alerts_table/render_cell_value.tsx"
+            "path": "x-pack/plugins/observability/public/components/alerts_table/slo/render_cell_value.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
