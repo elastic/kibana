@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiProgress,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -23,7 +24,11 @@ import { useBreadcrumb } from '../../../../../context/breadcrumbs/use_breadcrumb
 import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
 import { useCrashGroupDistributionFetcher } from '../../../../../hooks/use_crash_group_distribution_fetcher';
-import { FETCH_STATUS, useFetcher } from '../../../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { ErrorSampler } from '../../../error_group_details/error_sampler';
@@ -219,46 +224,40 @@ export function CrashGroupDetails() {
 
   return (
     <>
-      <EuiSpacer size={'s'} />
-
+      <EuiSpacer size="m" />
       <CrashGroupHeader
         groupId={groupId}
         occurrencesCount={errorSamplesData?.occurrencesCount}
       />
-
-      <EuiSpacer size={'m'} />
-      <EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="s">
         <ChartPointerEventContextProvider>
           <EuiFlexItem grow={3}>
-            <EuiPanel hasBorder={true}>
-              <ErrorDistribution
-                fetchStatus={crashDistributionStatus}
-                distribution={crashDistributionData}
-                title={i18n.translate(
-                  'xpack.apm.serviceDetails.metrics.crashOccurrencesChart.title',
-                  { defaultMessage: 'Crash occurrences' }
-                )}
-                height={300}
-                tip={i18n.translate(
-                  'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.tip',
-                  {
-                    defaultMessage: `Crash occurrence is measured in crashes per minute.`,
-                  }
-                )}
-              />
-            </EuiPanel>
+            <ErrorDistribution
+              fetchStatus={crashDistributionStatus}
+              distribution={crashDistributionData}
+              title={i18n.translate(
+                'xpack.apm.serviceDetails.metrics.crashOccurrencesChart.title',
+                { defaultMessage: 'Crash occurrences' }
+              )}
+              height={300}
+              tip={i18n.translate(
+                'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.tip',
+                {
+                  defaultMessage: `Crash occurrence is measured in crashes per minute.`,
+                }
+              )}
+            />
           </EuiFlexItem>
         </ChartPointerEventContextProvider>
-        <EuiFlexItem grow={2}>
-          <EuiPanel hasBorder={true}>
-            <MobileErrorsAndCrashesTreemap
-              serviceName={serviceName}
-              kuery={`${kueryForTreemap}`}
-              environment={environment}
-              start={start}
-              end={end}
-            />
-          </EuiPanel>
+        <EuiFlexItem grow={3}>
+          <MobileErrorsAndCrashesTreemap
+            serviceName={serviceName}
+            kuery={`${kueryForTreemap}`}
+            environment={environment}
+            start={start}
+            end={end}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
