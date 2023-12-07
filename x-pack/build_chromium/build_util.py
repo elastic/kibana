@@ -21,7 +21,7 @@ def mkdir(dir):
     return os.makedirs(dir)
 
 def sha256_file(filename):
-  """Builds a hex md5 hash of the given file"""
+  """Builds a hex sha256 hash of the given file"""
   sha256 = hashlib.sha256()
   with open(filename, 'rb') as f:
     for chunk in iter(lambda: f.read(128 * sha256.block_size), b''):
