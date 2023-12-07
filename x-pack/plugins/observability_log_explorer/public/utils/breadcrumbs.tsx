@@ -11,15 +11,15 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { useEffect } from 'react';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import {
+  LOGS_APP_ID,
+  OBSERVABILITY_LOG_EXPLORER,
+  OBSERVABILITY_OVERVIEW_APP_ID,
+} from '@kbn/deeplinks-observability';
+import {
   logExplorerAppTitle,
   logsAppTitle,
   observabilityAppTitle,
 } from '../../common/translations';
-import {
-  OBSERVABILITY_LOG_EXPLORER_APP_ID,
-  OBSERVABILITY_OVERVIEW_APP_ID,
-  OBSERVABILITY_LOGS_APP_ID,
-} from '../../common/constants';
 
 export const useBreadcrumbs = (
   breadcrumbs: EuiBreadcrumb[],
@@ -27,8 +27,8 @@ export const useBreadcrumbs = (
   serverlessService?: ServerlessPluginStart
 ) => {
   const observabilityLinkProps = useLinkProps({ app: OBSERVABILITY_OVERVIEW_APP_ID });
-  const logsLinkProps = useLinkProps({ app: OBSERVABILITY_LOGS_APP_ID });
-  const logExplorerLinkProps = useLinkProps({ app: OBSERVABILITY_LOG_EXPLORER_APP_ID });
+  const logsLinkProps = useLinkProps({ app: LOGS_APP_ID });
+  const logExplorerLinkProps = useLinkProps({ app: OBSERVABILITY_LOG_EXPLORER });
 
   useEffect(() => {
     setBreadcrumbs(
