@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SimpleRiskInput } from '../../../../common/risk_engine';
-import { RiskCategories } from '../../../../common/risk_engine';
+import type { SimpleRiskInput } from '../../../../common/entity_analytics/risk_engine';
+import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { RiskInputsPanel } from '.';

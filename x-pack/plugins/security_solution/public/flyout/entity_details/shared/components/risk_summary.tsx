@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { ONE_WEEK_IN_HOURS } from '../../../../timelines/components/side_panel/new_user_detail/constants';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { RiskScoreEntity } from '../../../../../common/risk_engine';
+import { RiskScoreEntity } from '../../../../../common/entity_analytics/risk_engine';
 import type { RiskScoreState } from '../../../../explore/containers/risk_score';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { getRiskScoreSummaryAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_summary';
