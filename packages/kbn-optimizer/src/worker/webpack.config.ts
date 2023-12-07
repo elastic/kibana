@@ -176,7 +176,15 @@ export function getWebpackConfig(
                 {
                   loader: 'sass-loader',
                   options: {
-                    webpackImporter: false,
+                    additionalData(content: string, loaderContext: webpack.loader.LoaderContext) {
+                      return `@import ${stringifyRequest(
+                        loaderContext,
+                        Path.resolve(
+                          worker.repoRoot,
+                          `src/core/public/styles/core_app/_globals_${theme}.scss`
+                        )
+                      )};\n${content}`;
+                    },
                     implementation: require('sass-embedded'),
                     sassOptions: {
                       outputStyle: worker.dist ? 'compressed' : 'expanded',

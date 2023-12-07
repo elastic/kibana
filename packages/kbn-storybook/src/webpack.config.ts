@@ -109,6 +109,12 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
             {
               loader: 'sass-loader',
               options: {
+                additionalData(content: string, loaderContext: any) {
+                  return `@import ${stringifyRequest(
+                    loaderContext,
+                    resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
+                  )};\n${content}`;
+                },
                 implementation: require('sass-embedded'),
                 sassOptions: {
                   includePaths: [resolve(REPO_ROOT, 'node_modules')],

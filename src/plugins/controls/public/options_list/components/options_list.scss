@@ -65,7 +65,7 @@
     }
 
     .optionsList__actionsRow {
-      margin: ($euiSizeS / 2) 0 !important;
+      margin: calc($euiSizeS / 2) 0 !important;
 
       .optionsList__actionBarDivider {
         height: $euiSize;
