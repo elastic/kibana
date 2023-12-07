@@ -108,6 +108,7 @@ export interface UninstallTokenServiceInterface {
   /**
    * Generate uninstall token for given policy id
    * Will not create a new token if one already exists for a given policy unless force: true is used
+   * Will create an uninstall token even if the policy is managed
    *
    * @param policyId agent policy id
    * @param force generate a new token even if one already exists
