@@ -88,4 +88,5 @@ export const LICENSE_OVERRIDES = {
   '@elastic/eui@90.0.1-backport.0': ['SSPL-1.0 OR Elastic License 2.0'],
   'language-subtag-registry@0.3.21': ['CC-BY-4.0'], // retired ODC‑By license https://github.com/mattcg/language-subtag-registry
   'buffers@0.1.1': ['MIT'], // license in importing module https://www.npmjs.com/package/binary
+  '@bufbuild/protobuf': ['Apache-2.0'], // license (Apache-2.0 AND BSD-3-Clause)
 };
