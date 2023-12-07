@@ -73,10 +73,6 @@ export class ActionsAuthorization {
           ? operationAlias[operation](authorization)
           : [authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation)];
 
-        if (operation === 'execute' && !actionTypeId) {
-          throw new Error('actionTypeId required to authorize execution of actions');
-        }
-
         const { hasAllRequested } = await checkPrivileges({
           kibana: [
             ...privileges,

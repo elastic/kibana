@@ -696,11 +696,6 @@ export class ActionsClient {
             (inMemoryConnector) => inMemoryConnector.id === actionId
           );
 
-          // FIXME:PT change log to `.debug()`
-          log.info(
-            `actionTypeId retrieved from in-memory connectors: ${JSON.stringify(connector)}`
-          );
-
           actionTypeId = connector?.actionTypeId ?? '';
         } else {
           // TODO: Optimize so we don't do another get on top of getAuthorizationModeBySource and within the actionExecutor.execute
@@ -709,14 +704,10 @@ export class ActionsClient {
             actionId
           );
 
-          // FIXME:PT change log to `.debug()`
-          log.info(`actionTypeId retrieved from SavedObject: ${JSON.stringify(attributes)}`);
-
           actionTypeId = attributes.actionTypeId;
         }
       } catch (err) {
-        // FIXME:PT change log to `.debug()`
-        log.info(`Failed to retrieve actionTypeId for action [${actionId}]`, err);
+        log.debug(`Failed to retrieve actionTypeId for action [${actionId}]`, err);
       }
 
       await this.context.authorization.ensureAuthorized({
