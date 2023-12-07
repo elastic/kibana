@@ -94,7 +94,7 @@ export interface ConfigSchema {
       metrics: {
         enabled: boolean;
       };
-      logs: {
+      logs?: {
         enabled: boolean;
       };
       uptime: {

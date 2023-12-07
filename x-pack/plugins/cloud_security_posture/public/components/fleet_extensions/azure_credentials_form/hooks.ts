@@ -7,10 +7,7 @@
 
 import { useEffect, useRef } from 'react';
 import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import {
-  AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
-  getDefaultAzureManualCredentialType,
-} from './azure_credentials_form';
+import { AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE } from './azure_credentials_form';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import {
   getArmTemplateUrlFromCspmPackage,
@@ -151,7 +148,7 @@ export const useAzureCredentialsForm = ({
     setupFormat,
   });
 
-  const defaultAzureManualCredentialType = getDefaultAzureManualCredentialType(packageInfo);
+  const defaultAzureManualCredentialType = 'managed_identity';
 
   const onSetupFormatChange = (newSetupFormat: SetupFormat) => {
     if (newSetupFormat === AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE) {
