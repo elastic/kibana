@@ -146,11 +146,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
           >
             <EuiTextTruncate text={buttonLabel || ''} truncation={'end'} width={128}>
               {(truncatedText: string) => (
-                <EuiText
-                  size="s"
-                  // Value returned from formatFieldValue is always sanitized
-                  dangerouslySetInnerHTML={{ __html: truncatedText }}
-                />
+                <EuiText size="s" dangerouslySetInnerHTML={{ __html: truncatedText }} />
               )}
             </EuiTextTruncate>
           </EuiFilterButton>
