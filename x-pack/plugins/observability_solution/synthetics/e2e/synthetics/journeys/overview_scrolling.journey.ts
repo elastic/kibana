@@ -84,7 +84,9 @@ journey('OverviewScrolling', async ({ page, params }) => {
     expect(count <= 32).toBe(true);
 
     await retry.tryForTime(90 * 1000, async () => {
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      for (let i = 1; i < 96; i += 4) {
+        await page.locator(`text="test monitor ${i}"`).scrollIntoViewIfNeeded();
+      }
       const showingAllMonitorsNode = await page.$(`text="Showing all monitors"`);
       expect(showingAllMonitorsNode).toBeTruthy();
       expect(await showingAllMonitorsNode?.isVisible()).toBe(true);
