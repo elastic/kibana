@@ -118,21 +118,26 @@ async function fetchAgentVersionsFromApi() {
     },
   };
 
-  const response = await pRetry(() => fetch(PRODUCT_VERSIONS_URL, options), { retries: 1 });
-  const rawBody = await response.text();
+  try {
+    const response = await pRetry(() => fetch(PRODUCT_VERSIONS_URL, options), { retries: 1 });
+    const rawBody = await response.text();
 
-  // We need to handle non-200 responses gracefully here to support airgapped environments where
-  // Kibana doesn't have internet access to query this API
-  if (response.status >= 400) {
-    logger.debug(`Status code ${response.status} received from versions API: ${rawBody}`);
+    // We need to handle non-200 responses gracefully here to support airgapped environments where
+    // Kibana doesn't have internet access to query this API
+    if (response.status >= 400) {
+      logger.debug(`Status code ${response.status} received from versions API: ${rawBody}`);
+      return [];
+    }
+
+    const jsonBody = JSON.parse(rawBody);
+
+    const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
+      .filter((item: any) => item?.title?.includes('Elastic Agent'))
+      .map((item: any) => item?.version_number);
+
+    return versions;
+  } catch (error) {
+    logger.debug(`Error fetching available versions from API: ${error.message}`);
     return [];
   }
-
-  const jsonBody = JSON.parse(rawBody);
-
-  const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
-    .filter((item: any) => item?.title?.includes('Elastic Agent'))
-    .map((item: any) => item?.version_number);
-
-  return versions;
 }
