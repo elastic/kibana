@@ -96,11 +96,11 @@ export async function getAgentsPerOutput(
       };
     }
 
-    ['balanced', 'custom', 'latency', 'scale', 'throughput'].forEach((preset) => {
-      if (output.preset === preset) {
-        outputTelemetryRecord.preset_counts![preset] += 1;
-      }
-    });
+    if (output.preset && output.preset in outputTelemetryRecord.preset_counts) {
+      outputTelemetryRecord.preset_counts[
+        output.preset as keyof typeof outputTelemetryRecord.preset_counts
+      ] += 1;
+    }
   });
 
   return Object.values(outputTypes);
