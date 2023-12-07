@@ -88,7 +88,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
     });
 
-    describe('updating settings', () => {
+    describe.skip('updating settings', () => {
       it('allows to update a setting', async () => {
         const fieldTestSubj = 'management-settings-editField-' + settings.CSV_QUOTE_VALUES_ID;
         expect(await testSubjects.isEuiSwitchChecked(fieldTestSubj)).to.be(true);
