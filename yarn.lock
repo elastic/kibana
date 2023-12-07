@@ -5147,6 +5147,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/no-data-page-example-plugin@link:examples/no_data":
+  version "0.0.0"
+  uid ""
+
 "@kbn/no-data-page-plugin@link:src/plugins/no_data_page":
   version "0.0.0"
   uid ""

@@ -5,6 +5,9 @@
   "plugin": {
     "id": "noDataPage",
     "server": true,
-    "browser": true
+    "browser": true,
+    "optionalPlugins": [
+      "security"
+    ]
   }
 }
