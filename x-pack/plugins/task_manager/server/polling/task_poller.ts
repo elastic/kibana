@@ -85,7 +85,12 @@ export function createTaskPoller<T, H>({
       return;
     }
     pollInterval$.subscribe((interval) => {
-      if (typeof interval !== 'number' || Number.isNaN(interval) || interval < 0) {
+      if (
+        typeof interval !== 'number' ||
+        Number.isNaN(interval) ||
+        interval < 0 ||
+        interval > Number.MAX_SAFE_INTEGER
+      ) {
         // TODO: Investigate why we sometimes get null / NaN, causing the setTimeout logic to always schedule
         // the next polling cycle to run immediately. If we don't see occurrences of this message by December 2024,
         // we can remove the TODO and/or check because we now have a cap to how much we increase the poll interval.

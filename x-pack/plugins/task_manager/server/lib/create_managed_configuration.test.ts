@@ -189,7 +189,7 @@ describe('createManagedConfiguration()', () => {
       errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
       expect(logger.error).toHaveBeenCalledWith(
-        'Poll interval configuration had an issue calculating the new poll interval: Math.min(Math.ceil(NaN * 1.2), Math.max(60000, NaN)) = NaN'
+        'Poll interval configuration had an issue calculating the new poll interval: Math.min(Math.ceil(NaN * 1.2), Math.max(60000, NaN)) = NaN, will keep the poll interval unchanged (NaN)'
       );
     });
 
@@ -197,7 +197,7 @@ describe('createManagedConfiguration()', () => {
       setupScenario(NaN);
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
       expect(logger.error).toHaveBeenCalledWith(
-        'Poll interval configuration had an issue calculating the new poll interval: Math.max(NaN, Math.floor(NaN * 0.95)) = NaN'
+        'Poll interval configuration had an issue calculating the new poll interval: Math.max(NaN, Math.floor(NaN * 0.95)) = NaN, will keep the poll interval unchanged (NaN)'
       );
     });
 
