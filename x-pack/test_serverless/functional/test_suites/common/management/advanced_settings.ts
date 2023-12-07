@@ -25,19 +25,38 @@ const editorSettings = new Set<string>([
 ]);
 export const isEditorFieldSetting = (settingId: string) => editorSettings.has(settingId);
 
+const SAVE_BUTTON_TEST_SUBJ = 'settings-save-button';
+const PAGE_RELOAD_BUTTON_TEST_SUBJ = 'pageReloadButton';
+
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['svlCommonPage', 'common']);
   const browser = getService('browser');
   const retry = getService('retry');
+  const security = getService('security');
+  const kibanaServer = getService('kibanaServer');
+  let INITIAL_CSV_QUOTE_VALUES_SETTING_VALUE: any;
 
   describe('Common advanced settings', function () {
+    // the suite is flaky on MKI
+    this.tags(['failsOnMKI']);
     before(async () => {
+      // We need kibana_admin role in order to update settings
+      await security.testUser.setRoles(['kibana_admin']);
+      INITIAL_CSV_QUOTE_VALUES_SETTING_VALUE = await kibanaServer.uiSettings.get('csv:quoteValues');
+      // Setting the `csv:quoteValues` setting to its default value
+      await kibanaServer.uiSettings.update({
+        'csv:quoteValues': true,
+      });
       await pageObjects.svlCommonPage.login();
       await pageObjects.common.navigateToApp('settings');
     });
 
     after(async () => {
+      // Resetting the `csv:quoteValues` setting to its initial value
+      await kibanaServer.uiSettings.update({
+        'csv:quoteValues': INITIAL_CSV_QUOTE_VALUES_SETTING_VALUE,
+      });
       await pageObjects.svlCommonPage.forceLogout();
     });
 
@@ -67,6 +86,71 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(await testSubjects.exists(fieldTestSubj)).to.be(true);
         });
       }
+    });
+
+    describe.skip('updating settings', () => {
+      it('allows to update a setting', async () => {
+        const fieldTestSubj = 'management-settings-editField-' + settings.CSV_QUOTE_VALUES_ID;
+        expect(await testSubjects.isEuiSwitchChecked(fieldTestSubj)).to.be(true);
+        await testSubjects.click(fieldTestSubj);
+
+        // Save changes
+        await testSubjects.click(SAVE_BUTTON_TEST_SUBJ);
+
+        await browser.refresh();
+        await pageObjects.common.sleep(1000);
+
+        // Check if field is now disabled
+        expect(await testSubjects.isEuiSwitchChecked(fieldTestSubj)).to.be(false);
+      });
+
+      it('allows resetting a setting to its default value', async () => {
+        const fieldTestSubj = 'management-settings-editField-' + settings.CSV_QUOTE_VALUES_ID;
+        const resetLinkTestSubj = 'management-settings-resetField-' + settings.CSV_QUOTE_VALUES_ID;
+        expect(await testSubjects.exists(resetLinkTestSubj)).to.be(true);
+        await testSubjects.click(resetLinkTestSubj);
+
+        // Save changes
+        await testSubjects.click(SAVE_BUTTON_TEST_SUBJ);
+
+        await browser.refresh();
+        await pageObjects.common.sleep(1000);
+
+        // Check if field is now enabled
+        expect(await testSubjects.isEuiSwitchChecked(fieldTestSubj)).to.be(true);
+      });
+
+      it('renders a page reload toast when updating a setting that requires page reload', async () => {
+        const fieldTestSubj =
+          'management-settings-editField-' + settings.ACCESSIBILITY_DISABLE_ANIMATIONS_ID;
+        const fieldEnabled = await testSubjects.isEuiSwitchChecked(fieldTestSubj);
+        await testSubjects.click(fieldTestSubj);
+
+        // Save changes
+        await testSubjects.click(SAVE_BUTTON_TEST_SUBJ);
+
+        expect(await testSubjects.exists(PAGE_RELOAD_BUTTON_TEST_SUBJ)).to.be(true);
+        await testSubjects.click(PAGE_RELOAD_BUTTON_TEST_SUBJ);
+        await pageObjects.common.sleep(1000);
+
+        // Reset setting to its initial value
+        await testSubjects.click(fieldTestSubj);
+        await testSubjects.click(SAVE_BUTTON_TEST_SUBJ);
+        await testSubjects.click(PAGE_RELOAD_BUTTON_TEST_SUBJ);
+        await pageObjects.common.sleep(1000);
+        expect(await testSubjects.isEuiSwitchChecked(fieldTestSubj)).to.be(fieldEnabled);
+      });
+
+      it("doesn't allow setting an invalid value", async () => {
+        const fieldTestSubj = 'management-settings-editField-' + settings.DEFAULT_COLUMNS_ID;
+        // The Default columns setting allows maximum 50 columns, so we set more than this
+        const invalidValue = new Array(51).fill('test').toString();
+        await testSubjects.setValue(fieldTestSubj, invalidValue);
+        await pageObjects.common.sleep(1000);
+
+        // Check if the Save button is disabled
+        expect(await testSubjects.isEnabled(SAVE_BUTTON_TEST_SUBJ)).to.be(false);
+      });
     });
   });
 };

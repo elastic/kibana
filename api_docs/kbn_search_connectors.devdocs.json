@@ -770,7 +770,7 @@
             "section": "def-common.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
-          ", indexNames?: string[] | undefined) => Promise<",
+          ", indexNames?: string[] | undefined, fetchOnlyCrawlers?: boolean | undefined, searchQuery?: string | undefined) => Promise<",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -814,6 +814,36 @@
             "description": [],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/lib/fetch_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.fetchConnectors.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fetchOnlyCrawlers",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-connectors/lib/fetch_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.fetchConnectors.$4",
+            "type": "string",
+            "tags": [],
+            "label": "searchQuery",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/kbn-search-connectors/lib/fetch_connectors.ts",
             "deprecated": false,
@@ -4002,7 +4032,7 @@
             "label": "rule",
             "description": [],
             "signature": [
-              "\">\" | \"<\" | \"contains\" | \"regex\" | \"equals\" | \"ends_with\" | \"starts_with\""
+              "\">\" | \"<\" | \"contains\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
             ],
             "path": "packages/kbn-search-connectors/types/connectors.ts",
             "deprecated": false,
@@ -5103,6 +5133,21 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.CRAWLER_SERVICE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "CRAWLER_SERVICE_TYPE",
+        "description": [],
+        "signature": [
+          "\"elastic-crawler\""
+        ],
+        "path": "packages/kbn-search-connectors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.CURRENT_CONNECTORS_INDEX",
         "type": "string",
         "tags": [],
@@ -5169,7 +5214,7 @@
         "label": "FilteringRuleRule",
         "description": [],
         "signature": [
-          "\">\" | \"<\" | \"contains\" | \"regex\" | \"equals\" | \"ends_with\" | \"starts_with\""
+          "\">\" | \"<\" | \"contains\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
         ],
         "path": "packages/kbn-search-connectors/types/connectors.ts",
         "deprecated": false,
