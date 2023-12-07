@@ -24,6 +24,7 @@ const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_lis
 
 // Endpoint maintained by the web-team and hosted on the elastic website
 const PRODUCT_VERSIONS_URL = 'https://www.elastic.co/api/product_versions';
+const MAX_REQUEST_TIMEOUT = 60 * 1000; // Only attempt to fetch product versions for one minute total
 
 // Cache available versions in memory for 1 hour
 const CACHE_DURATION = 1000 * 60 * 60;
@@ -119,7 +120,10 @@ async function fetchAgentVersionsFromApi() {
   };
 
   try {
-    const response = await pRetry(() => fetch(PRODUCT_VERSIONS_URL, options), { retries: 1 });
+    const response = await pRetry(() => fetch(PRODUCT_VERSIONS_URL, options), {
+      retries: 1,
+      maxRetryTime: MAX_REQUEST_TIMEOUT,
+    });
     const rawBody = await response.text();
 
     // We need to handle non-200 responses gracefully here to support airgapped environments where
