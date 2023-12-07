@@ -30,7 +30,7 @@ export interface SamlSessionManagerOptions {
 }
 
 /**
- * Manages cookies assosiated with user roles
+ * Manages cookies associated with user roles
  */
 export class SamlSessionManager {
   private readonly isCloud: boolean;
