@@ -57,7 +57,6 @@ import {
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { createSkipError, isRetryableError, isSkipError, isUnrecoverableError } from './errors';
 import type { EventLoopDelayConfig, RequeueInvalidTasksConfig } from '../config';
-import { TaskValidator } from '../task_validator';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -110,7 +109,6 @@ type Opts = {
   usageCounter?: UsageCounter;
   eventLoopDelayConfig: EventLoopDelayConfig;
   requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
-  allowReadingInvalidState: boolean;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -160,7 +158,6 @@ export class TaskManagerRunner implements TaskRunner {
   private usageCounter?: UsageCounter;
   private eventLoopDelayConfig: EventLoopDelayConfig;
   private readonly requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
-  private readonly taskValidator: TaskValidator;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -185,7 +182,6 @@ export class TaskManagerRunner implements TaskRunner {
     usageCounter,
     eventLoopDelayConfig,
     requeueInvalidTasksConfig,
-    allowReadingInvalidState,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -200,11 +196,6 @@ export class TaskManagerRunner implements TaskRunner {
     this.uuid = uuidv4();
     this.eventLoopDelayConfig = eventLoopDelayConfig;
     this.requeueInvalidTasksConfig = requeueInvalidTasksConfig;
-    this.taskValidator = new TaskValidator({
-      logger: this.logger,
-      definitions: this.definitions,
-      allowReadingInvalidState,
-    });
   }
 
   /**
@@ -315,11 +306,8 @@ export class TaskManagerRunner implements TaskRunner {
       childOf: this.instance.task.traceparent,
     });
 
-    // Validate state
-    const validatedTaskInstance = this.validateTaskState(this.instance.task);
-
     const modifiedContext = await this.beforeRun({
-      taskInstance: validatedTaskInstance,
+      taskInstance: this.instance.task,
     });
 
     const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
@@ -403,17 +391,6 @@ export class TaskManagerRunner implements TaskRunner {
     }
 
     return { ...(error ? { error } : {}), state };
-  }
-
-  private validateTaskState(taskInstance: ConcreteTaskInstance) {
-    const { taskType, id } = taskInstance;
-    try {
-      const validatedTask = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
-      return validatedTask;
-    } catch (error) {
-      this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${error.message}`);
-      throw error;
-    }
   }
 
   private async validateIndirectTaskParams({ taskInstance }: RunContext) {

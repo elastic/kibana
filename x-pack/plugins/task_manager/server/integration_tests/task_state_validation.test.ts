@@ -307,7 +307,7 @@ describe('task state validation', () => {
     });
 
     it('should fail the task run when setting allow_reading_invalid_state:false and reading an invalid state', async () => {
-      const logSpy = jest.spyOn(pollingLifecycleOpts.logger, 'warn');
+      const errorLogSpy = jest.spyOn(pollingLifecycleOpts.logger, 'error');
 
       const id = uuidV4();
       await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
@@ -328,13 +328,12 @@ describe('task state validation', () => {
       taskIdsToRemove.push(id);
 
       await retry(async () => {
-        expect(logSpy.mock.calls[0][0]).toBe(
-          `Task (fooType/${id}) has a validation error: [foo]: expected value of type [string] but got [boolean]`
-        );
-        expect(logSpy.mock.calls[1][0]).toBe(
-          `Task fooType \"${id}\" failed in attempt to run: [foo]: expected value of type [string] but got [boolean]`
+        expect(errorLogSpy).toHaveBeenCalledWith(
+          `Failed to poll for work: Error: [foo]: expected value of type [string] but got [boolean]`
         );
       });
+
+      expect(mockCreateTaskRunner).not.toHaveBeenCalled();
     });
   });
 });
