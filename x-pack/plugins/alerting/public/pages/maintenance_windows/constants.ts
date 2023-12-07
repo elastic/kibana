@@ -123,5 +123,3 @@ export const STATUS_OPTIONS = [
   { value: MaintenanceWindowStatus.Finished, name: i18n.TABLE_STATUS_FINISHED },
   { value: MaintenanceWindowStatus.Archived, name: i18n.TABLE_STATUS_ARCHIVED },
 ];
-
-export const IS_SCOPED_QUERY_ENABLED = true;
