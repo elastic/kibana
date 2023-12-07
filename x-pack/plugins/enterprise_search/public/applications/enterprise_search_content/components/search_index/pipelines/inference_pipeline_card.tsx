@@ -18,7 +18,6 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
-  EuiTextColor,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -86,7 +85,9 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
               <EuiFlexItem>
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiTextColor color="subdued">{modelId}</EuiTextColor>
+                    <EuiText size="s" color="subdued">
+                      {modelId}
+                    </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <span>

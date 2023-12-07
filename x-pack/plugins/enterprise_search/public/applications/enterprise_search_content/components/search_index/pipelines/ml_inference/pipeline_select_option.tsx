@@ -45,8 +45,8 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
     // TODO: Add model state & pipeline info link. Make sure to check mobile rendering when doing this!
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
-        <EuiTitle size="xxs">
-          <h5>{pipeline.pipelineName}</h5>
+        <EuiTitle size="xs">
+          <h4>{pipeline.pipelineName}</h4>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
