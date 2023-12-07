@@ -33,13 +33,36 @@ export const ACTION_PANEL_NOTIFICATIONS = 'ACTION_PANEL_NOTIFICATIONS';
  */
 export class PanelNotificationsAction implements ActionDefinition<EnhancedEmbeddableContext> {
   public readonly id = ACTION_PANEL_NOTIFICATIONS;
+  public type = ACTION_PANEL_NOTIFICATIONS;
 
   private getEventCount(embeddable: EnhancedEmbeddable): number {
     return embeddable.enhancements.dynamicActions.state.get().events.length;
   }
 
+  public getIconType = ({ embeddable }: EnhancedEmbeddableContext) => '';
+
   public readonly getDisplayName = ({ embeddable }: EnhancedEmbeddableContext) => {
     return String(this.getEventCount(embeddable));
+  };
+
+  public couldBecomeCompatible({ embeddable }: EnhancedEmbeddableContext) {
+    return true;
+  }
+
+  public subscribeToCompatibilityChanges = (
+    { embeddable }: EnhancedEmbeddableContext,
+    onChange: (isCompatible: boolean, action: PanelNotificationsAction) => void
+  ) => {
+    // There is no notification for when a dynamic action is added or removed, so we subscribe to the embeddable root instead as a proxy.
+    return embeddable
+      .getRoot()
+      .getInput$()
+      .subscribe(() => {
+        onChange(
+          embeddable.getInput().viewMode === ViewMode.EDIT && this.getEventCount(embeddable) > 0,
+          this
+        );
+      });
   };
 
   public readonly getDisplayNameTooltip = ({ embeddable }: EnhancedEmbeddableContext) => {

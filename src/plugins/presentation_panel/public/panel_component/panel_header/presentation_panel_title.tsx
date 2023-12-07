@@ -29,9 +29,9 @@ export const PresentationPanelTitle = ({
 }) => {
   const panelTitleElement = useMemo(() => {
     if (hideTitle) return null;
-    const titleClassNames = classNames('presentationPanel__titleText', {
+    const titleClassNames = classNames('embPanel__titleText', {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      presentationPanel__placeholderTitleText: !panelTitle,
+      embPanel__placeholderTitleText: !panelTitle,
     });
 
     if (viewMode !== 'edit') {
@@ -56,7 +56,7 @@ export const PresentationPanelTitle = ({
   const describedPanelTitleElement = useMemo(() => {
     if (!panelDescription)
       return (
-        <span data-test-subj="presentationPanelTitle" className="presentationPanel__titleInner">
+        <span data-test-subj="presentationPanelTitle" className="embPanel__titleInner">
           {panelTitleElement}
         </span>
       );
@@ -65,9 +65,9 @@ export const PresentationPanelTitle = ({
         content={panelDescription}
         delay="regular"
         position="top"
-        anchorClassName="presentationPanel__titleTooltipAnchor"
+        anchorClassName="embPanel__titleTooltipAnchor"
       >
-        <span data-test-subj="presentationPanelTitle" className="presentationPanel__titleInner">
+        <span data-test-subj="presentationPanelTitle" className="embPanel__titleInner">
           {panelTitleElement}{' '}
           <EuiIcon
             type="iInCircle"

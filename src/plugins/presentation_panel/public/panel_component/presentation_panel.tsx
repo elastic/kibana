@@ -90,8 +90,8 @@ export const PresentationPanelInternal = <
     <EuiPanel
       role="figure"
       paddingSize="none"
-      className={classNames('presentationPanel', {
-        'presentationPanel--editing': viewMode !== 'view',
+      className={classNames('embPanel', {
+        'embPanel--editing': viewMode !== 'view',
       })}
       hasShadow={showShadow}
       aria-labelledby={headerId}
@@ -116,7 +116,7 @@ export const PresentationPanelInternal = <
       {blockingError && api && (
         <EuiFlexGroup
           alignItems="center"
-          className="eui-fullHeight presentationPanel__error"
+          className="eui-fullHeight embPanel__error"
           data-test-subj="embeddableError"
           justifyContent="center"
         >
@@ -125,7 +125,7 @@ export const PresentationPanelInternal = <
       )}
       {!initialLoadComplete && <PanelLoader />}
       {!blockingError && (
-        <div className="presentationPanel__content">
+        <div className="embPanel__content">
           <Component
             {...(componentProps as React.ComponentProps<typeof Component>)}
             {...contentAttrs}

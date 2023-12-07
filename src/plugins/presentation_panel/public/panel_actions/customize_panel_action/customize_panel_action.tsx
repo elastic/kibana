@@ -28,7 +28,7 @@ import {
 import { core } from '../../kibana_services';
 import { CustomizePanelEditor } from './customize_panel_editor';
 
-export const ACTION_CUSTOMIZE_PANEL = 'customizePanel';
+export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';
 
 export type CustomizePanelActionApi = PublishesViewMode &
   PublishesDataViews &

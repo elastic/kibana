@@ -117,7 +117,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
             {children}
           </>
         ) : (
-          <div className="embPanel embPanel-isLoading">
+          <div>
             <EuiLoadingChart size="l" mono />
           </div>
         )}

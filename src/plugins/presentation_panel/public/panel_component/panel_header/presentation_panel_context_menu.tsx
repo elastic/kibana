@@ -121,14 +121,14 @@ export const PresentationPanelContextMenu = ({
 
   const contextMenuClasses = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    presentationPanel__optionsMenuPopover: true,
-    'presentationPanel__optionsMenuPopover-notification': showNotification,
+    embPanel__optionsMenuPopover: true,
+    'embPanel__optionsMenuPopover-notification': showNotification,
   });
 
   const ContextMenuButton = (
     <EuiButtonIcon
       color="text"
-      className="presentationPanel__optionsMenuButton"
+      className="embPanel__optionsMenuButton"
       data-test-subj="embeddablePanelToggleMenuIcon"
       aria-label={getContextMenuAriaLabel(title, index)}
       onClick={() => setIsContextMenuOpen((isOpen) => !isOpen)}
@@ -151,7 +151,7 @@ export const PresentationPanelContextMenu = ({
     >
       {menuPanelsLoading ? (
         <EuiContextMenuPanel
-          className="presentationPanel__optionsMenuPopover-loading"
+          className="embPanel__optionsMenuPopover-loading"
           title={i18n.translate('embeddableApi.panel.contextMenu.loadingTitle', {
             defaultMessage: 'Options',
           })}

@@ -62,12 +62,12 @@ export const PresentationPanelHeader = <
     </EuiScreenReaderOnly>
   );
 
-  const headerClasses = classNames('presentationPanel__header', {
-    'presentationPanel__header--floater': !showPanelBar,
+  const headerClasses = classNames('embPanel__header', {
+    'embPanel__header--floater': !showPanelBar,
   });
 
-  const titleClasses = classNames('presentationPanel__title', {
-    'presentationPanel--dragHandle': viewMode === 'edit',
+  const titleClasses = classNames('embPanel__title', {
+    'embPanel--dragHandle': viewMode === 'edit',
   });
 
   const contextMenuElement = (

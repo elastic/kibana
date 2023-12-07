@@ -1,4 +1,4 @@
-.presentationPanel {
+.embPanel {
   z-index: auto;
   flex: 1;
   display: flex;
@@ -14,7 +14,7 @@
   }
 
   // SASSTODO: The inheritence factor stemming from embeddables makes this class hard to change
-  .presentationPanel__content {
+  .embPanel__content {
     display: flex;
     flex: 1 1 100%;
     z-index: 1;
@@ -29,21 +29,21 @@
   }
 
   // SASSTODO: this MIGHT be fixing IE
-  .presentationPanel__content--fullWidth {
+  .embPanel__content--fullWidth {
     width: 100%;
   }
 }
 
 // HEADER
 
-.presentationPanel__header {
+.embPanel__header {
   flex: 0 0 auto;
   display: flex;
   // ensure menu button is on the right even if the title doesn't exist
   justify-content: flex-end;
 }
 
-.presentationPanel__title {
+.embPanel__title {
   @include euiTitle('xxxs');
   overflow: hidden;
   line-height: 1.5;
@@ -57,33 +57,33 @@
     padding-left: $euiSizeS;
   }
 
-  .presentationPanel__titleInner {
+  .embPanel__titleInner {
     overflow: hidden;
     display: flex;
     align-items: center;
     padding-right: $euiSizeS;
   }
 
-  .presentationPanel__titleTooltipAnchor {
+  .embPanel__titleTooltipAnchor {
     max-width: 100%;
   }
 
-  .presentationPanel__titleText {
+  .embPanel__titleText {
     @include euiTextTruncate;
     font-weight: $euiFontWeightBold;
   }
 
-  .presentationPanel__placeholderTitleText {
+  .embPanel__placeholderTitleText {
     color: $euiColorMediumShade;
     font-weight: $euiFontWeightRegular;
   }
 }
 
-.presentationPanel--dragHandle:not(.presentationPanel__title) {
+.embPanel--dragHandle:not(.embPanel__title) {
   flex-grow: 1;
 }
 
-.presentationPanel__header--floater {
+.embPanel__header--floater {
   position: absolute;
   right: 0;
   top: 0;
@@ -101,7 +101,7 @@
   * 3. Always show in editing mode
   */
 
-.presentationPanel__optionsMenuButton {
+.embPanel__optionsMenuButton {
   background-color: transparentize($euiColorDarkestShade, .9);
   border-bottom-right-radius: 0;
   border-top-left-radius: 0;
@@ -112,11 +112,11 @@
 
 }
 
-.presentationPanel__optionsMenuPopover-loading {
+.embPanel__optionsMenuPopover-loading {
   width: $euiSizeS * 32;
 }
 
-.presentationPanel__optionsMenuPopover-notification::after {
+.embPanel__optionsMenuPopover-notification::after {
   position: absolute;
   top: 0;
   right: 0;
@@ -126,7 +126,7 @@
   font-size: $euiSizeL;
 }
 
-.presentationPanel .presentationPanel__optionsMenuButton {
+.embPanel .embPanel__optionsMenuButton {
   opacity: 0; /* 1 */
 
   &:focus {
@@ -134,15 +134,15 @@
   }
 }
 
-.presentationPanel:hover {
-  .presentationPanel__optionsMenuButton {
+.embPanel:hover {
+  .embPanel__optionsMenuButton {
     opacity: 1;
   }
 }
 
 // EDITING MODE
 
-.presentationPanel--editing {
+.embPanel--editing {
   outline-style: dashed !important;
   outline-color: $euiColorMediumShade !important;
   transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
@@ -153,7 +153,7 @@
     @include euiSlightShadowHover;
   }
 
-  .presentationPanel--dragHandle {
+  .embPanel--dragHandle {
     transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
 
     &:hover {
@@ -162,14 +162,14 @@
     }
   }
 
-  .presentationPanel__optionsMenuButton {
+  .embPanel__optionsMenuButton {
     opacity: 1; /* 3 */
   }
 }
 
 // LOADING and ERRORS
 
-.presentationPanel__error {
+.embPanel__error {
   padding: $euiSizeL;
 
   & > * {
@@ -178,7 +178,7 @@
   }
 }
 
-.presentationPanel__label {
+.embPanel__label {
   position: absolute;
   padding-left: $euiSizeS;
   z-index: $euiZLevel1;
