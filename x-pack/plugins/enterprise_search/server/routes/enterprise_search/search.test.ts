@@ -9,12 +9,13 @@ import { MockRouter, mockDependencies } from '../../__mocks__';
 
 import { RequestHandlerContext } from '@kbn/core/server';
 
-jest.mock('../../lib/fetch_search_results', () => ({
-  fetchSearchResults: jest.fn(),
-}));
-import { fetchSearchResults } from '../../lib/fetch_search_results';
+import { fetchSearchResults } from '@kbn/search-index-documents/lib';
 
 import { registerSearchRoute } from './search';
+
+jest.mock('@kbn/search-index-documents/lib', () => ({
+  fetchSearchResults: jest.fn(),
+}));
 
 describe('Elasticsearch Search', () => {
   let mockRouter: MockRouter;
@@ -45,22 +46,22 @@ describe('Elasticsearch Search', () => {
 
     it('returns search results for a query', async () => {
       const mockData = {
-        _shards: { failed: 0, skipped: 0, successful: 2, total: 2 },
-        hits: {
-          hits: [
-            {
-              _id: '5a12292a0f5ae10021650d7e',
-              _index: 'search-regular-index',
-              _score: 4.437291,
-              _source: { id: '5a12292a0f5ae10021650d7e', name: 'banana' },
-            },
-          ],
-
-          max_score: null,
-          total: { relation: 'eq', value: 1 },
+        _meta: {
+          page: {
+            from: 0,
+            has_more_hits_than_total: false,
+            size: 25,
+            total: 26,
+          },
         },
-        timed_out: false,
-        took: 4,
+        data: [
+          {
+            _id: '5a12292a0f5ae10021650d7e',
+            _index: 'search-regular-index',
+            _score: 4.437291,
+            _source: { id: '5a12292a0f5ae10021650d7e', name: 'banana' },
+          },
+        ],
       };
 
       (fetchSearchResults as jest.Mock).mockImplementationOnce(() => {
@@ -74,24 +75,8 @@ describe('Elasticsearch Search', () => {
         params: { index_name: 'search-index-name' },
       });
 
-      expect(fetchSearchResults).toHaveBeenCalledWith(
-        mockClient,
-        'search-index-name',
-        'banana',
-        0,
-        25
-      );
-
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {
-          meta: {
-            page: {
-              current: 0,
-              size: 1,
-              total_pages: 1,
-              total_results: 1,
-            },
-          },
           results: mockData,
         },
 
@@ -125,22 +110,22 @@ describe('Elasticsearch Search', () => {
 
     it('searches returns first 25 search results by default', async () => {
       const mockData = {
-        _shards: { failed: 0, skipped: 0, successful: 2, total: 2 },
-        hits: {
-          hits: [
-            {
-              _id: '5a12292a0f5ae10021650d7e',
-              _index: 'search-regular-index',
-              _score: 4.437291,
-              _source: { id: '5a12292a0f5ae10021650d7e', name: 'banana' },
-            },
-          ],
-
-          max_score: null,
-          total: { relation: 'eq', value: 1 },
+        _meta: {
+          page: {
+            from: 0,
+            has_more_hits_than_total: false,
+            size: 25,
+            total: 26,
+          },
         },
-        timed_out: false,
-        took: 4,
+        data: [
+          {
+            _id: '5a12292a0f5ae10021650d7e',
+            _index: 'search-regular-index',
+            _score: 4.437291,
+            _source: { id: '5a12292a0f5ae10021650d7e', name: 'banana' },
+          },
+        ],
       };
 
       (fetchSearchResults as jest.Mock).mockImplementationOnce(() => {
@@ -161,14 +146,6 @@ describe('Elasticsearch Search', () => {
 
       expect(mockRouterNoQuery.response.ok).toHaveBeenCalledWith({
         body: {
-          meta: {
-            page: {
-              current: 0,
-              size: 1,
-              total_pages: 1,
-              total_results: 1,
-            },
-          },
           results: mockData,
         },
 

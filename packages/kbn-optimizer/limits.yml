@@ -1,6 +1,8 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 27596
+  aiAssistantManagementObservability: 19279
+  aiAssistantManagementSelection: 19146
   aiops: 10000
   alerting: 106936
   apm: 64385
@@ -28,7 +30,7 @@ pageLoadAssetSize:
   dashboard: 82025
   dashboardEnhanced: 65646
   data: 454087
-  datasetQuality: 35000
+  datasetQuality: 50624
   dataViewEditor: 28082
   dataViewFieldEditor: 27000
   dataViewManagement: 5100
@@ -124,7 +126,7 @@ pageLoadAssetSize:
   screenshotting: 22870
   searchprofiler: 67080
   security: 81771
-  securitySolution: 67584
+  securitySolution: 82780
   securitySolutionEss: 16573
   securitySolutionServerless: 62488
   serverless: 16573

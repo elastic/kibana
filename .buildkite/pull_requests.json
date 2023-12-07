@@ -13,8 +13,9 @@
       "commit_status_context": "kibana-ci",
       "build_on_commit": true,
       "build_on_comment": true,
-      "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))",
-      "always_trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))",
+      "build_drafts": false,
+      "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))|^\\/ci$",
+      "always_trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))|^\\/ci$",
       "skip_ci_labels": ["skip-ci", "jenkins-ci"],
       "skip_target_branches": ["6.8", "7.11", "7.12"],
       "enable_skippable_commits": true,
@@ -84,7 +85,8 @@
         "^\\.backportrc\\.json$",
         "^nav-kibana-dev\\.docnav\\.json$",
         "^src/dev/prs/kibana_qa_pr_list\\.json$",
-        "^\\.buildkite/pull_requests\\.json$"
+        "^\\.buildkite/pull_requests\\.json$",
+        "^\\.catalog-info\\.yaml$"
       ],
       "always_require_ci_on_changed": [
         "^docs/developer/plugin-list.asciidoc$",
