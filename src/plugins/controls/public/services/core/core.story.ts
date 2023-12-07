@@ -6,12 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { Observable } from 'rxjs';
-import { ControlsThemeService } from './types';
+import { ControlsCoreService } from './types';
 
-export type ThemeServiceFactory = PluginServiceFactory<ControlsThemeService>;
+export type CoreServiceFactory = PluginServiceFactory<ControlsCoreService>;
 
-export const themeServiceFactory: ThemeServiceFactory = () => ({
-  theme$: new Observable((subscriber) => subscriber.next({ darkMode: false })),
-});
+export const coreServiceFactory: CoreServiceFactory = () => {
+  const corePluginMock = coreMock.createStart();
+  return {
+    theme: {
+      theme$: new Observable((subscriber) => subscriber.next({ darkMode: false })),
+    },
+    i18n: corePluginMock.i18n,
+  };
+};
