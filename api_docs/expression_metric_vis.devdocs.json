@@ -442,7 +442,8 @@
             "label": "progressDirection",
             "description": [],
             "signature": [
-              "\"horizontal\" | \"vertical\""
+              "LayoutDirection",
+              " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
@@ -737,7 +738,8 @@
             "label": "progressDirection",
             "description": [],
             "signature": [
-              "\"horizontal\" | \"vertical\""
+              "LayoutDirection",
+              " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,

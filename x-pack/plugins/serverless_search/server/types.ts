@@ -8,6 +8,7 @@
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSearchPluginSetup {}
@@ -20,4 +21,5 @@ export interface StartDependencies {
 }
 export interface SetupDependencies {
   serverless: ServerlessPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }

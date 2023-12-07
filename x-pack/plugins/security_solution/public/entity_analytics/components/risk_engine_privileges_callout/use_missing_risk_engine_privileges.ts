@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { RiskEnginePrivilegesResponse } from '../../../../server/lib/entity_analytics/types';
+import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics/common';
 import { useRiskEnginePrivileges } from '../../api/hooks/use_risk_engine_privileges';
 import {
   RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
@@ -14,9 +14,13 @@ import {
 } from '../../../../common/risk_engine';
 
 const getMissingIndexPrivileges = (
-  privileges: RiskEnginePrivilegesResponse['privileges']['elasticsearch']['index']
+  privileges: EntityAnalyticsPrivileges['privileges']['elasticsearch']['index']
 ): MissingIndexPrivileges => {
   const missingIndexPrivileges: MissingIndexPrivileges = [];
+
+  if (!privileges) {
+    return missingIndexPrivileges;
+  }
 
   for (const [indexName, requiredPrivileges] of Object.entries(
     RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES
@@ -66,7 +70,7 @@ export const useMissingPrivileges = (): MissingPrivilegesResponse => {
     const { privileges } = privilegesResponse;
     const missinIndexPrivileges = getMissingIndexPrivileges(privileges.elasticsearch.index);
     const missingClusterPrivileges = RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES.filter(
-      (privilege) => !privileges.elasticsearch.cluster[privilege]
+      (privilege) => !privileges.elasticsearch.cluster?.[privilege]
     );
 
     return {

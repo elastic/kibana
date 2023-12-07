@@ -22,7 +22,7 @@ interface Props {
   activeAlerts?: number;
   slo: SLOWithSummaryResponse;
   rules: Array<Rule<SloRule>> | undefined;
-  handleCreateRule: () => void;
+  handleCreateRule?: () => void;
 }
 
 const Container = styled.div`

@@ -9,17 +9,13 @@ import {
   EuiAvatar,
   EuiButtonEmpty,
   EuiCard,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiPageTemplate,
   EuiPanel,
-  EuiSpacer,
   EuiText,
-  EuiThemeProvider,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -57,6 +53,7 @@ import { ConnectorsCallout } from './connectors_callout';
 import { ConnectorIngestionPanel } from './connectors_ingestion';
 import { PipelineButtonOverview } from './pipeline_button_overview';
 import { PipelinePanel } from './pipeline_panel';
+import { CloudDetailsPanel } from './overview/cloud_details';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
@@ -152,63 +149,7 @@ export const ElasticsearchOverview = () => {
         bottomBorder="extended"
         data-test-subj="cloud-details-section"
       >
-        <OverviewPanel
-          description={i18n.translate('xpack.serverlessSearch.cloudIdDetails.description', {
-            defaultMessage:
-              "You'll need your Cloud ID and Elasticsearch endpoint to identify and connect to your project.",
-          })}
-          leftPanelContent={
-            <EuiFlexGroup direction="column" gutterSize="xl">
-              <EuiFlexItem>
-                <EuiTitle size="xxxs">
-                  <h6>
-                    {i18n.translate('xpack.serverlessSearch.cloudIdDetails.id.title', {
-                      defaultMessage: 'Cloud ID',
-                    })}
-                  </h6>
-                </EuiTitle>
-                <EuiSpacer size="xs" />
-                <EuiThemeProvider colorMode="dark">
-                  <EuiPanel paddingSize="xs">
-                    <EuiCodeBlock
-                      isCopyable
-                      fontSize="m"
-                      className="serverlessSearchCloudDetailsCopyPanel"
-                    >
-                      {cloud.cloudId}
-                    </EuiCodeBlock>
-                  </EuiPanel>
-                </EuiThemeProvider>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="xxxs">
-                  <h6>
-                    {i18n.translate('xpack.serverlessSearch.cloudIdDetails.url.title', {
-                      defaultMessage: 'Elasticsearch Endpoint',
-                    })}
-                  </h6>
-                </EuiTitle>
-                <EuiSpacer size="xs" />
-                <EuiThemeProvider colorMode="dark">
-                  <EuiPanel paddingSize="xs">
-                    <EuiCodeBlock
-                      isCopyable
-                      transparentBackground
-                      fontSize="m"
-                      className="serverlessSearchCloudDetailsCopyPanel"
-                    >
-                      {cloud.elasticsearchUrl}
-                    </EuiCodeBlock>
-                  </EuiPanel>
-                </EuiThemeProvider>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          links={[]}
-          title={i18n.translate('xpack.serverlessSearch.cloudIdDetails.title', {
-            defaultMessage: 'Copy your connection details',
-          })}
-        />
+        <CloudDetailsPanel cloudId={cloud.cloudId} elasticsearchUrl={cloud.elasticsearchUrl} />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
         color="subdued"
