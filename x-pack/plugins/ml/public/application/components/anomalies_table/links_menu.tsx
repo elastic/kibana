@@ -273,10 +273,11 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
             const values = influencer.influencer_field_values;
 
             if (values.length > 0) {
-              return values
+              const escapedVals = values
                 .filter((value) => isDefined(value))
-                .map((value) => `"${fieldName}":"${escapeQuotes(value) ?? ''}"`)
-                .join(' OR ');
+                .map((value) => `"${fieldName}":"${escapeQuotes(value) ?? ''}"`);
+              // Ensure there's enclosing () if there are multiple field values,
+              return escapedVals.length > 1 ? `(${escapedVals.join(' OR ')})` : escapedVals[0];
             }
           })
           .join(' AND ');
