@@ -7,47 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { buildDocumentation, buildFunctionDocumentation } from './utils';
+import { FunctionDefinition } from './types';
 
-import type { AutocompleteCommandDefinition } from '../types';
-
-export const whereCommandDefinition: AutocompleteCommandDefinition[] = [
-  {
-    label: 'cidr_match',
-    insertText: 'cidr_match',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.cidrMatchDoc', {
-      defaultMessage:
-        'The function takes a first parameter of type IP, followed by one or more parameters evaluated to a CIDR specificatione.',
-    }),
-    documentation: {
-      value: buildDocumentation('cidr_match(grouped[T]): aggregated[T]', [
-        'from index | eval cidr="10.0.0.0/8" | where cidr_match(ip_field, "127.0.0.1/30", cidr)',
-      ]),
-    },
-    sortText: 'C',
-  },
-];
-
-interface FunctionDefinition {
-  name: string;
-  description: string;
-  signatures: Array<{
-    params: Array<{
-      name: string;
-      type: string | string[];
-      optional?: boolean;
-    }>;
-    infiniteParams?: boolean;
-    returnType: string;
-    examples?: string[];
-  }>;
-}
-
-const mathCommandFullDefinitions: FunctionDefinition[] = [
+export const evalFunctionsDefinitions: FunctionDefinition[] = [
   {
     name: 'round',
-    description: i18n.translate('monaco.esql.autocomplete.roundDoc', {
+    description: i18n.translate('monaco.esql.definitions.roundDoc', {
       defaultMessage:
         'Returns a number rounded to the decimal, specified by he closest integer value. The default is to round to an integer.',
     }),
@@ -55,39 +20,39 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval round_value = round(field)`],
+        examples: [`from index | eval round_value = round(field)`],
       },
     ],
   },
   {
     name: 'abs',
-    description: i18n.translate('monaco.esql.autocomplete.absDoc', {
+    description: i18n.translate('monaco.esql.definitions.absDoc', {
       defaultMessage: 'Returns the absolute value.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval abs_value = abs(field)`],
+        examples: [`from index | eval abs_value = abs(field)`],
       },
     ],
   },
   {
     name: 'log10',
-    description: i18n.translate('monaco.esql.autocomplete.log10Doc', {
+    description: i18n.translate('monaco.esql.definitions.log10Doc', {
       defaultMessage: 'Returns the log base 10.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval log10_value = log10(field)`],
+        examples: [`from index | eval log10_value = log10(field)`],
       },
     ],
   },
   {
     name: 'pow',
-    description: i18n.translate('monaco.esql.autocomplete.powDoc', {
+    description: i18n.translate('monaco.esql.definitions.powDoc', {
       defaultMessage:
         'Returns the the value of a base (first argument) raised to a power (second argument).',
     }),
@@ -98,31 +63,48 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
           { name: 'exponent', type: 'number' },
         ],
         returnType: 'number',
-        examples: ['from index where field="value" | eval s = POW(field, exponent)'],
+        examples: ['from index | eval s = POW(field, exponent)'],
       },
     ],
   },
   {
     name: 'concat',
-    description: i18n.translate('monaco.esql.autocomplete.concatDoc', {
+    description: i18n.translate('monaco.esql.definitions.concatDoc', {
       defaultMessage: 'Concatenates two or more strings.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'string' }],
         infiniteParams: true,
+        minParams: 1,
         returnType: 'string',
-        examples: [
-          'from index where field="value" | eval concatenated = concat(field1, "-", field2)',
+        examples: ['from index | eval concatenated = concat(field1, "-", field2)'],
+      },
+    ],
+  },
+  {
+    name: 'replace',
+    description: i18n.translate('monaco.esql.definitions.replaceDoc', {
+      defaultMessage:
+        'The function substitutes in the string (1st argument) any match of the regular expression (2nd argument) with the replacement string (3rd argument). If any of the arguments are NULL, the result is NULL.',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'field', type: 'string' },
+          { name: 'regexp', type: 'string' },
+          { name: 'replacement', type: 'string' },
         ],
+        returnType: 'string',
+        examples: ['from index | eval newStr = replace(field, "Hello", "World")'],
       },
     ],
   },
   {
     name: 'substring',
-    description: i18n.translate('monaco.esql.autocomplete.substringDoc', {
+    description: i18n.translate('monaco.esql.definitions.substringDoc', {
       defaultMessage:
-        'Returns a substring of a string, specified by a start position and an optional length. This example returns the first three characters of every last name.',
+        'Returns a substring of a string, specified by a start position and an optional length.',
     }),
     signatures: [
       {
@@ -132,26 +114,26 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
           { name: 'endIndex', type: 'number' },
         ],
         returnType: 'string',
-        examples: ['from index where field="value" | eval new_string = substring(field, 1, 3)'],
+        examples: ['from index | eval new_string = substring(field, 1, 3)'],
       },
     ],
   },
   {
     name: 'trim',
-    description: i18n.translate('monaco.esql.autocomplete.trimDoc', {
+    description: i18n.translate('monaco.esql.definitions.trimDoc', {
       defaultMessage: 'Removes leading and trailing whitespaces from strings.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'string' }],
         returnType: 'string',
-        examples: ['from index where field="value" | eval new_string = trim(field)'],
+        examples: ['from index | eval new_string = trim(field)'],
       },
     ],
   },
   {
     name: 'starts_with',
-    description: i18n.translate('monaco.esql.autocomplete.startsWithDoc', {
+    description: i18n.translate('monaco.esql.definitions.startsWithDoc', {
       defaultMessage:
         'Returns a boolean that indicates whether a keyword string starts with another string.',
     }),
@@ -162,13 +144,30 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
           { name: 'prefix', type: 'string' },
         ],
         returnType: 'boolean',
-        examples: ['from index where field="value" | eval new_string = starts_with(field, "a")'],
+        examples: ['from index | eval starts_with_a = starts_with(field, "a")'],
+      },
+    ],
+  },
+  {
+    name: 'ends_with',
+    description: i18n.translate('monaco.esql.definitions.endsWithDoc', {
+      defaultMessage:
+        'Returns a boolean that indicates whether a keyword string ends with another string:',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'field', type: 'string' },
+          { name: 'prefix', type: 'string' },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval ends_with_a = ends_with(field, "a")'],
       },
     ],
   },
   {
     name: 'split',
-    description: i18n.translate('monaco.esql.autocomplete.splitDoc', {
+    description: i18n.translate('monaco.esql.definitions.splitDoc', {
       defaultMessage: 'Splits a single valued string into multiple strings.',
     }),
     signatures: [
@@ -184,173 +183,183 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'to_string',
-    description: i18n.translate('monaco.esql.autocomplete.toStringDoc', {
+    alias: ['to_str'],
+    description: i18n.translate('monaco.esql.definitions.toStringDoc', {
       defaultMessage: 'Converts to string.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'string',
-        examples: [`from index where field="value"" | EVAL string = to_string(field)`],
+        examples: [`from index" | EVAL string = to_string(field)`],
       },
     ],
   },
   {
     name: 'to_boolean',
-    description: i18n.translate('monaco.esql.autocomplete.toBooleanDoc', {
+    alias: ['to_bool'],
+    description: i18n.translate('monaco.esql.definitions.toBooleanDoc', {
       defaultMessage: 'Converts to boolean.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'boolean',
-        examples: [`from index where field="value"" | EVAL bool = to_boolean(field)`],
+        examples: [`from index" | EVAL bool = to_boolean(field)`],
       },
     ],
   },
   {
     name: 'to_datetime',
-    description: i18n.translate('monaco.esql.autocomplete.toDateTimeDoc', {
+    alias: ['to_dt'],
+    description: i18n.translate('monaco.esql.definitions.toDateTimeDoc', {
       defaultMessage: 'Converts to date.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'date',
-        examples: [`from index where field="value"" | EVAL datetime = to_datetime(field)`],
+        examples: [`from index" | EVAL datetime = to_datetime(field)`],
       },
     ],
   },
   {
     name: 'to_degrees',
-    description: i18n.translate('monaco.esql.autocomplete.toDegreesDoc', {
+    description: i18n.translate('monaco.esql.definitions.toDegreesDoc', {
       defaultMessage: 'Coverts to degrees',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval degrees = to_degrees(field)`],
+        examples: [`from index | eval degrees = to_degrees(field)`],
       },
     ],
   },
   {
     name: 'to_double',
-    description: i18n.translate('monaco.esql.autocomplete.toDoubleDoc', {
+    alias: ['to_dbl'],
+    description: i18n.translate('monaco.esql.definitions.toDoubleDoc', {
       defaultMessage: 'Converts to double.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'number',
-        examples: [`from index where field="value"" | EVAL double = to_double(field)`],
+        examples: [`from index | EVAL double = to_double(field)`],
       },
     ],
   },
   {
     name: 'to_integer',
-    description: i18n.translate('monaco.esql.autocomplete.toIntegerDoc', {
+    alias: ['to_int'],
+    description: i18n.translate('monaco.esql.definitions.toIntegerDoc', {
       defaultMessage: 'Converts to integer.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'number',
-        examples: [`from index where field="value"" | EVAL integer = to_integer(field)`],
+        examples: [`from index | EVAL integer = to_integer(field)`],
       },
     ],
   },
   {
     name: 'to_long',
-    description: i18n.translate('monaco.esql.autocomplete.toLongDoc', {
+    description: i18n.translate('monaco.esql.definitions.toLongDoc', {
       defaultMessage: 'Converts to long.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'number',
-        examples: [`from index where field="value"" | EVAL long = to_long(field)`],
+        examples: [`from index | EVAL long = to_long(field)`],
       },
     ],
   },
   {
     name: 'to_radians',
-    description: i18n.translate('monaco.esql.autocomplete.toRadiansDoc', {
+    description: i18n.translate('monaco.esql.definitions.toRadiansDoc', {
       defaultMessage: 'Converts to radians',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval radians = to_radians(field)`],
+        examples: [`from index | eval radians = to_radians(field)`],
       },
     ],
   },
   {
     name: 'to_unsigned_long',
-    description: i18n.translate('monaco.esql.autocomplete.toUnsignedLongDoc', {
+    alias: ['to_ul', 'to_ulong'],
+    description: i18n.translate('monaco.esql.definitions.toUnsignedLongDoc', {
       defaultMessage: 'Converts to unsigned long.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'number',
-        examples: [
-          `from index where field="value"" | EVAL unsigned_long = to_unsigned_long(field)`,
-        ],
+        examples: [`from index | EVAL unsigned_long = to_unsigned_long(field)`],
       },
     ],
   },
   {
     name: 'to_ip',
-    description: i18n.translate('monaco.esql.autocomplete.toIpDoc', {
+    description: i18n.translate('monaco.esql.definitions.toIpDoc', {
       defaultMessage: 'Converts to ip.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'any' }],
-        returnType: 'string[]',
-        examples: [`from index where field="value"" | EVAL ip = to_ip(field)`],
+        returnType: 'ip',
+        examples: [`from index | EVAL ip = to_ip(field)`],
       },
     ],
   },
   {
     name: 'to_version',
-    description: i18n.translate('monaco.esql.autocomplete.toVersionDoc', {
+    alias: ['to_ver'],
+    description: i18n.translate('monaco.esql.definitions.toVersionDoc', {
       defaultMessage: 'Converts to version.',
     }),
     signatures: [
       {
-        params: [{ name: 'field', type: ['string', 'version'] }],
+        params: [{ name: 'field', type: 'string' }],
         returnType: 'version',
-        examples: [`from index where field="value"" | EVAL version = to_version(field)`],
+        examples: [`from index | EVAL version = to_version(stringField)`],
+      },
+      {
+        params: [{ name: 'field', type: 'version' }],
+        returnType: 'version',
+        examples: [`from index | EVAL version = to_version(versionField)`],
       },
     ],
   },
   {
     name: 'date_extract',
-    description: i18n.translate('monaco.esql.autocomplete.dateExtractDoc', {
+    description: i18n.translate('monaco.esql.definitions.dateExtractDoc', {
       defaultMessage: `Extracts parts of a date, like year, month, day, hour. The supported field types are those provided by java.time.temporal.ChronoField`,
     }),
     signatures: [
       {
         params: [
-          { name: 'field', type: 'date' },
           {
             name: 'date_part',
-            type: 'string',
+            type: 'chrono_literal',
           },
+          { name: 'field', type: 'date' },
         ],
         returnType: 'number',
         examples: [
-          `ROW date = DATE_PARSE("2022-05-06", "yyyy-MM-dd") | EVAL year = DATE_EXTRACT(date, "year")`,
+          `ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06") | EVAL year = DATE_EXTRACT("year", date)`,
         ],
       },
     ],
   },
   {
     name: 'date_format',
-    description: i18n.translate('monaco.esql.autocomplete.dateFormatDoc', {
+    description: i18n.translate('monaco.esql.definitions.dateFormatDoc', {
       defaultMessage: `Returns a string representation of a date in the provided format. If no format is specified, the "yyyy-MM-dd'T'HH:mm:ss.SSSZ" format is used.`,
     }),
     signatures: [
@@ -360,15 +369,13 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
           { name: 'format_string', type: 'string', optional: true },
         ],
         returnType: 'string',
-        examples: [
-          'from index where field="value" | eval hired = date_format(hire_date, "YYYY-MM-dd")',
-        ],
+        examples: ['from index | eval hired = date_format("YYYY-MM-dd", hire_date)'],
       },
     ],
   },
   {
     name: 'date_trunc',
-    description: i18n.translate('monaco.esql.autocomplete.dateTruncDoc', {
+    description: i18n.translate('monaco.esql.definitions.dateTruncDoc', {
       defaultMessage: `Rounds down a date to the closest interval. Intervals can be expressed using the timespan literal syntax.`,
     }),
     signatures: [
@@ -378,15 +385,13 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
           { name: 'field', type: 'date' },
         ],
         returnType: 'date',
-        examples: [
-          `from index where field="value" | eval year_hired = DATE_TRUNC(1 year, hire_date)`,
-        ],
+        examples: [`from index | eval year_hired = DATE_TRUNC(1 year, hire_date)`],
       },
     ],
   },
   {
     name: 'date_parse',
-    description: i18n.translate('monaco.esql.autocomplete.dateParseDoc', {
+    description: i18n.translate('monaco.esql.definitions.dateParseDoc', {
       defaultMessage: `Parse dates from strings.`,
     }),
     signatures: [
@@ -397,14 +402,14 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'date',
         examples: [
-          `from index where field="value" | eval year_hired = date_parse(hire_date, yyyy-MM-dd'T'HH:mm:ss.SSS'Z')`,
+          `from index | eval year_hired = date_parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", hire_date)`,
         ],
       },
     ],
   },
   {
     name: 'auto_bucket',
-    description: i18n.translate('monaco.esql.autocomplete.autoBucketDoc', {
+    description: i18n.translate('monaco.esql.definitions.autoBucketDoc', {
       defaultMessage: `Automatically bucket dates based on a given range and bucket target.`,
     }),
     signatures: [
@@ -417,7 +422,7 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'date',
         examples: [
-          'from index where field="value" | eval hd = auto_bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
+          'from index | eval hd = auto_bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
         ],
       },
       {
@@ -428,113 +433,124 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
           { name: 'endValue', type: 'number' },
         ],
         returnType: 'number',
-        examples: [
-          'from index where field="value" | eval bs = auto_bucket(salary, 20, 25324, 74999)',
-        ],
+        examples: ['from index | eval bs = auto_bucket(salary, 20, 25324, 74999)'],
       },
     ],
   },
   {
     name: 'is_finite',
-    description: i18n.translate('monaco.esql.autocomplete.isFiniteDoc', {
+    description: i18n.translate('monaco.esql.definitions.isFiniteDoc', {
       defaultMessage: 'Returns a boolean that indicates whether its input is a finite number.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'boolean',
-        examples: ['from index where field="value" | eval s = is_finite(field/0)'],
+        examples: ['from index | eval s = is_finite(field/0)'],
       },
     ],
   },
   {
     name: 'is_infinite',
-    description: i18n.translate('monaco.esql.autocomplete.isInfiniteDoc', {
+    description: i18n.translate('monaco.esql.definitions.isInfiniteDoc', {
       defaultMessage: 'Returns a boolean that indicates whether its input is infinite.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'boolean',
-        examples: ['from index where field="value" | eval s = is_infinite(field/0)'],
+        examples: ['from index | eval s = is_infinite(field/0)'],
+      },
+    ],
+  },
+  {
+    name: 'is_nan',
+    description: i18n.translate('monaco.esql.definitions.isNanDoc', {
+      defaultMessage: 'Returns a boolean that indicates whether its input is not a number.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'number' }],
+        returnType: 'boolean',
+        examples: ['row a = 1 | eval is_nan(a)'],
       },
     ],
   },
   {
     name: 'case',
-    description: i18n.translate('monaco.esql.autocomplete.caseDoc', {
+    description: i18n.translate('monaco.esql.definitions.caseDoc', {
       defaultMessage:
         'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.',
     }),
     signatures: [
       {
         params: [
-          { name: 'condition', type: 'booleanExpression' },
+          { name: 'condition', type: 'boolean' },
           { name: 'value', type: 'any' },
         ],
-        infiniteParams: true,
+        minParams: 3,
         returnType: 'any',
         examples: [
-          `from index where field="value" | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")`,
+          `from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")`,
         ],
       },
     ],
   },
   {
     name: 'length',
-    description: i18n.translate('monaco.esql.autocomplete.lengthDoc', {
+    description: i18n.translate('monaco.esql.definitions.lengthDoc', {
       defaultMessage: 'Returns the character length of a string.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'string' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval fn_length = length(field)`],
+        examples: [`from index | eval fn_length = length(field)`],
       },
     ],
   },
   {
     name: 'acos',
-    description: i18n.translate('monaco.esql.autocomplete.acosDoc', {
+    description: i18n.translate('monaco.esql.definitions.acosDoc', {
       defaultMessage: 'Inverse cosine trigonometric function',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval acos = acos(field)`],
+        examples: [`from index | eval acos = acos(field)`],
       },
     ],
   },
   {
     name: 'asin',
-    description: i18n.translate('monaco.esql.autocomplete.asinDoc', {
+    description: i18n.translate('monaco.esql.definitions.asinDoc', {
       defaultMessage: 'Inverse sine trigonometric function',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval asin = asin(field)`],
+        examples: [`from index | eval asin = asin(field)`],
       },
     ],
   },
   {
     name: 'atan',
-    description: i18n.translate('monaco.esql.autocomplete.atanDoc', {
+    description: i18n.translate('monaco.esql.definitions.atanDoc', {
       defaultMessage: 'Inverse tangent trigonometric function',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval atan = atan(field)`],
+        examples: [`from index | eval atan = atan(field)`],
       },
     ],
   },
   {
     name: 'atan2',
-    description: i18n.translate('monaco.esql.autocomplete.atan2Doc', {
+    description: i18n.translate('monaco.esql.definitions.atan2Doc', {
       defaultMessage:
         'The angle between the positive x-axis and the ray from the origin to the point (x , y) in the Cartesian plane',
     }),
@@ -545,13 +561,13 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
           { name: 'y', type: 'number' },
         ],
         returnType: 'number',
-        examples: [`from index where field="value" | eval atan2 = atan2(x, y)`],
+        examples: [`from index | eval atan2 = atan2(x, y)`],
       },
     ],
   },
   {
     name: 'coalesce',
-    description: i18n.translate('monaco.esql.autocomplete.coalesceDoc', {
+    description: i18n.translate('monaco.esql.definitions.coalesceDoc', {
       defaultMessage: 'Returns the first non-null value.',
     }),
     signatures: [
@@ -565,46 +581,46 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'cos',
-    description: i18n.translate('monaco.esql.autocomplete.cosDoc', {
+    description: i18n.translate('monaco.esql.definitions.cosDoc', {
       defaultMessage: 'Cosine trigonometric function',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval cos = cos(field)`],
+        examples: [`from index | eval cos = cos(field)`],
       },
     ],
   },
   {
     name: 'cosh',
-    description: i18n.translate('monaco.esql.autocomplete.coshDoc', {
+    description: i18n.translate('monaco.esql.definitions.coshDoc', {
       defaultMessage: 'Cosine hyperbolic function',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval cosh = cosh(field)`],
+        examples: [`from index | eval cosh = cosh(field)`],
       },
     ],
   },
   {
     name: 'floor',
-    description: i18n.translate('monaco.esql.autocomplete.floorDoc', {
+    description: i18n.translate('monaco.esql.definitions.floorDoc', {
       defaultMessage: 'Round a number down to the nearest integer.',
     }),
     signatures: [
       {
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
-        examples: [`from index where field="value" | eval a = floor(field)`],
+        examples: [`from index | eval a = floor(field)`],
       },
     ],
   },
   {
     name: 'greatest',
-    description: i18n.translate('monaco.esql.autocomplete.greatestDoc', {
+    description: i18n.translate('monaco.esql.definitions.greatestDoc', {
       defaultMessage: 'Returns the maximum value from many columns.',
     }),
     signatures: [
@@ -618,7 +634,7 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'left',
-    description: i18n.translate('monaco.esql.autocomplete.leftDoc', {
+    description: i18n.translate('monaco.esql.definitions.leftDoc', {
       defaultMessage:
         'Return the substring that extracts length chars from the string starting from the left.',
     }),
@@ -629,13 +645,13 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
           { name: 'length', type: 'number' },
         ],
         returnType: 'string',
-        examples: [`from index where field="value" | eval substr = left(field, 3)`],
+        examples: [`from index | eval substr = left(field, 3)`],
       },
     ],
   },
   {
     name: 'ltrim',
-    description: i18n.translate('monaco.esql.autocomplete.ltrimDoc', {
+    description: i18n.translate('monaco.esql.definitions.ltrimDoc', {
       defaultMessage: 'Removes leading whitespaces from strings.',
     }),
     signatures: [
@@ -648,7 +664,7 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'now',
-    description: i18n.translate('monaco.esql.autocomplete.nowDoc', {
+    description: i18n.translate('monaco.esql.definitions.nowDoc', {
       defaultMessage: 'Returns current date and time.',
     }),
     signatures: [
@@ -661,7 +677,7 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'right',
-    description: i18n.translate('monaco.esql.autocomplete.rightDoc', {
+    description: i18n.translate('monaco.esql.definitions.rightDoc', {
       defaultMessage:
         'Return the substring that extracts length chars from the string starting from the right.',
     }),
@@ -672,13 +688,13 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
           { name: 'length', type: 'number' },
         ],
         returnType: 'string',
-        examples: [`from index where field="value" | eval string = right(field, 3)`],
+        examples: [`from index | eval string = right(field, 3)`],
       },
     ],
   },
   {
     name: 'rtrim',
-    description: i18n.translate('monaco.esql.autocomplete.rtrimDoc', {
+    description: i18n.translate('monaco.esql.definitions.rtrimDoc', {
       defaultMessage: 'Removes trailing whitespaces from strings.',
     }),
     signatures: [
@@ -691,7 +707,7 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'sin',
-    description: i18n.translate('monaco.esql.autocomplete.sinDoc', {
+    description: i18n.translate('monaco.esql.definitions.sinDoc', {
       defaultMessage: 'Sine trigonometric function.',
     }),
     signatures: [
@@ -704,7 +720,7 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'sinh',
-    description: i18n.translate('monaco.esql.autocomplete.sinhDoc', {
+    description: i18n.translate('monaco.esql.definitions.sinhDoc', {
       defaultMessage: 'Sine hyperbolic function.',
     }),
     signatures: [
@@ -717,7 +733,7 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'sqrt',
-    description: i18n.translate('monaco.esql.autocomplete.sqrtDoc', {
+    description: i18n.translate('monaco.esql.definitions.sqrtDoc', {
       defaultMessage: 'Returns the square root of a number. ',
     }),
     signatures: [
@@ -730,7 +746,7 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'tan',
-    description: i18n.translate('monaco.esql.autocomplete.tanDoc', {
+    description: i18n.translate('monaco.esql.definitions.tanDoc', {
       defaultMessage: 'Tangent trigonometric function.',
     }),
     signatures: [
@@ -743,7 +759,7 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'tanh',
-    description: i18n.translate('monaco.esql.autocomplete.tanhDoc', {
+    description: i18n.translate('monaco.esql.definitions.tanhDoc', {
       defaultMessage: 'Tangent hyperbolic function.',
     }),
     signatures: [
@@ -754,167 +770,180 @@ const mathCommandFullDefinitions: FunctionDefinition[] = [
       },
     ],
   },
-].sort(({ name: a }, { name: b }) => a.localeCompare(b));
-
-function printArguments({
-  name,
-  type,
-  optional,
-  reference,
-}: {
-  name: string;
-  type: string | string[];
-  optional?: boolean;
-  reference?: string;
-}): string {
-  return `${name}${optional ? ':?' : ':'} ${Array.isArray(type) ? type.join(' | ') : type}`;
-}
-
-export const mathCommandDefinition: AutocompleteCommandDefinition[] =
-  mathCommandFullDefinitions.map(({ name, description, signatures }) => ({
-    label: name,
-    insertText: name,
-    kind: 1,
-    detail: description,
-    documentation: {
-      value: buildFunctionDocumentation(
-        signatures.map(({ params, returnType, infiniteParams, examples }) => ({
-          declaration: `${name}(${params.map(printArguments).join(', ')}${
-            infiniteParams ? ` ,[... ${params.map(printArguments)}]` : ''
-          }): ${returnType}`,
-          examples,
-        }))
-      ),
-    },
-    sortText: 'C',
-  }));
-
-export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = [
   {
-    label: 'avg',
-    insertText: 'avg',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.avgDoc', {
-      defaultMessage: 'Returns the average of the values in a field',
-    }),
-    documentation: {
-      value: buildDocumentation('avg(grouped[T]): aggregated[T]', [
-        'from index | stats average = avg(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
-    label: 'max',
-    insertText: 'max',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.maxDoc', {
-      defaultMessage: 'Returns the maximum value in a field.',
-    }),
-    documentation: {
-      value: buildDocumentation('max(grouped[T]): aggregated[T]', [
-        'from index | stats max = max(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
-    label: 'min',
-    insertText: 'min',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.minDoc', {
-      defaultMessage: 'Returns the minimum value in a field.',
-    }),
-    documentation: {
-      value: buildDocumentation('min(grouped[T]): aggregated[T]', [
-        'from index | stats min = min(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
-    label: 'sum',
-    insertText: 'sum',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.sumDoc', {
-      defaultMessage: 'Returns the sum of the values in a field.',
-    }),
-    documentation: {
-      value: buildDocumentation('sum(grouped[T]): aggregated[T]', [
-        'from index | stats sum = sum(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
-    label: 'count',
-    insertText: 'count',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.countDoc', {
-      defaultMessage: 'Returns the count of the values in a field.',
-    }),
-    documentation: {
-      value: buildDocumentation('count(grouped[T]): aggregated[T]', [
-        'from index | stats count = count(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
-    label: 'count_distinct',
-    insertText: 'count_distinct',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.countDistinctDoc', {
-      defaultMessage: 'Returns the count of distinct values in a field.',
-    }),
-    documentation: {
-      value: buildDocumentation('count(grouped[T]): aggregated[T]', [
-        'from index | stats count = count_distinct(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
-    label: 'median',
-    insertText: 'median',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.medianDoc', {
-      defaultMessage: 'Returns the 50% percentile.',
-    }),
-    documentation: {
-      value: buildDocumentation('count(grouped[T]): aggregated[T]', [
-        'from index | stats count = median(field)',
-      ]),
-    },
-    sortText: 'C',
-  },
-  {
-    label: 'median_absolute_deviation',
-    insertText: 'median_absolute_deviation',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.medianDeviationDoc', {
+    name: 'cidr_match',
+    description: i18n.translate('monaco.esql.definitions.cidrMatchDoc', {
       defaultMessage:
-        'Returns the median of each data point’s deviation from the median of the entire sample.',
+        'The function takes a first parameter of type IP, followed by one or more parameters evaluated to a CIDR specificatione.',
     }),
-    documentation: {
-      value: buildDocumentation('count(grouped[T]): aggregated[T]', [
-        'from index | stats count = median_absolute_deviation(field)',
-      ]),
-    },
-    sortText: 'C',
+    signatures: [
+      {
+        minParams: 2,
+        params: [
+          { name: 'ip', type: 'ip' },
+          { name: 'cidr_block', type: 'string' },
+        ],
+        returnType: 'boolean',
+        examples: [
+          'from index | where cidr_match(ip_field, "127.0.0.1/30")',
+          'from index | eval cidr="10.0.0.0/8" | where cidr_match(ip_field, "127.0.0.1/30", cidr)',
+        ],
+      },
+    ],
   },
   {
-    label: 'percentile',
-    insertText: 'percentile',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.percentiletDoc', {
-      defaultMessage: 'Returns the n percentile of a field.',
+    name: 'mv_avg',
+    description: i18n.translate('monaco.esql.definitions.mvAvgDoc', {
+      defaultMessage:
+        'Converts a multivalued field into a single valued field containing the average of all of the values.',
     }),
-    documentation: {
-      value: buildDocumentation('percentile(grouped[T]): aggregated[T]', [
-        'from index | stats pct = percentile(field, 90)',
-      ]),
-    },
-    sortText: 'C',
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'number[]' }],
+        returnType: 'number',
+        examples: ['row a = [1, 2, 3] | mv_avg(a)'],
+      },
+    ],
   },
-];
+  {
+    name: 'mv_concat',
+    description: i18n.translate('monaco.esql.definitions.mvConcatDoc', {
+      defaultMessage:
+        'Converts a multivalued string field into a single valued field containing the concatenation of all values separated by a delimiter',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'multivalue', type: 'string[]' },
+          { name: 'delimeter', type: 'string' },
+        ],
+        returnType: 'string',
+        examples: ['row a = ["1", "2", "3"] | mv_concat(a, ", ")'],
+      },
+    ],
+  },
+  {
+    name: 'mv_count',
+    description: i18n.translate('monaco.esql.definitions.mvCountDoc', {
+      defaultMessage:
+        'Converts a multivalued field into a single valued field containing a count of the number of values',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'any[]' }],
+        returnType: 'number',
+        examples: ['row a = [1, 2, 3] | eval mv_count(a)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_dedupe',
+    description: i18n.translate('monaco.esql.definitions.mvDedupeDoc', {
+      defaultMessage: 'Removes duplicates from a multivalued field',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'any[]' }],
+        returnType: 'any[]',
+        examples: ['row a = [2, 2, 3] | eval mv_dedupe(a)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_max',
+    description: i18n.translate('monaco.esql.definitions.mvMaxDoc', {
+      defaultMessage:
+        'Converts a multivalued field into a single valued field containing the maximum value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'number[]' }],
+        returnType: 'number',
+        examples: ['row a = [1, 2, 3] | eval mv_max(a)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_min',
+    description: i18n.translate('monaco.esql.definitions.mvMinDoc', {
+      defaultMessage:
+        'Converts a multivalued field into a single valued field containing the minimum value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'number[]' }],
+        returnType: 'number',
+        examples: ['row a = [1, 2, 3] | eval mv_min(a)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_median',
+    description: i18n.translate('monaco.esql.definitions.mvMedianDoc', {
+      defaultMessage:
+        'Converts a multivalued field into a single valued field containing the median value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'number[]' }],
+        returnType: 'number',
+        examples: ['row a = [1, 2, 3] | eval mv_median(a)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_sum',
+    description: i18n.translate('monaco.esql.definitions.mvSumDoc', {
+      defaultMessage:
+        'Converts a multivalued field into a single valued field containing the sum of all of the values.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'number[]' }],
+        returnType: 'number',
+        examples: ['row a = [1, 2, 3] | eval mv_sum(a)'],
+      },
+    ],
+  },
+  {
+    name: 'pi',
+    description: i18n.translate('monaco.esql.definitions.piDoc', {
+      defaultMessage: 'The ratio of a circle’s circumference to its diameter.',
+    }),
+    signatures: [
+      {
+        params: [],
+        returnType: 'number',
+        examples: ['row a = 1 | eval pi()'],
+      },
+    ],
+  },
+  {
+    name: 'e',
+    description: i18n.translate('monaco.esql.definitions.eDoc', {
+      defaultMessage: 'Euler’s number.',
+    }),
+    signatures: [
+      {
+        params: [],
+        returnType: 'number',
+        examples: ['row a = 1 | eval e()'],
+      },
+    ],
+  },
+  {
+    name: 'tau',
+    description: i18n.translate('monaco.esql.definitions.tauDoc', {
+      defaultMessage: 'The ratio of a circle’s circumference to its radius.',
+    }),
+    signatures: [
+      {
+        params: [],
+        returnType: 'number',
+        examples: ['row a = 1 | eval tau()'],
+      },
+    ],
+  },
+]
+  .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+  .map((def) => ({ ...def, supportedCommands: ['eval', 'where', 'row'] }));
