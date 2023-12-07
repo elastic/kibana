@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SLOViewSettings } from './slo_view_settings';
 
-export type SLOViewType = 'cardView' | 'listView';
+export type SLOView = 'cardView' | 'listView';
 
 interface Props {
   toggleCompactView: () => void;
   isCompact: boolean;
-  setSLOView: (view: SLOViewType) => void;
-  sloView: SLOViewType;
+  setSLOView: (view: SLOView) => void;
+  sloView: SLOView;
 }
 const toggleButtonsIcons = [
   {
@@ -43,7 +43,7 @@ export function ToggleSLOView({ sloView, setSLOView, toggleCompactView, isCompac
           })}
           options={toggleButtonsIcons}
           idSelected={sloView}
-          onChange={(id) => setSLOView(id as SLOViewType)}
+          onChange={(id) => setSLOView(id as SLOView)}
           isIconOnly
         />
       </EuiFlexItem>

@@ -11,10 +11,10 @@ import React, { useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { SlosView } from './slos_view';
 import { SLO_LIST_IS_COMPACT } from './slo_view_settings';
-import { SLOViewType, ToggleSLOView } from './toggle_slo_view';
+import { SLOView, ToggleSLOView } from './toggle_slo_view';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
-import { SloListSearchBar, SortField } from './slo_list_search_bar';
+import { SloListSearchBar, SortField, SortDirection } from './slo_list_search_bar';
 
 export interface Props {
   autoRefresh: boolean;
@@ -25,8 +25,10 @@ export function SloList({ autoRefresh }: Props) {
   const [page, setPage] = useState(state.page);
   const [query, setQuery] = useState(state.kqlQuery);
   const [sort, setSort] = useState<SortField>(state.sort.by);
-  const [direction] = useState<'asc' | 'desc'>(state.sort.direction);
-  const [sloView, setSLOView] = useState<SLOViewType>('cardView');
+  const [direction] = useState<SortDirection>(state.sort.direction);
+  const [sloView, setSloView] = useState<SLOView>(state.view);
+  const [isCompact, setIsCompact] = useLocalStorage<'true' | 'false'>(SLO_LIST_IS_COMPACT, 'true');
+  const isCompactView = isCompact === 'true';
 
   const {
     isLoading,
@@ -47,8 +49,6 @@ export function SloList({ autoRefresh }: Props) {
   const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
   const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
-  const [isCompact, setIsCompact] = useLocalStorage<'true' | 'false'>(SLO_LIST_IS_COMPACT, 'true');
-  const isCompactView = isCompact === 'true';
 
   const handlePageClick = (pageNumber: number) => {
     setPage(pageNumber);
@@ -67,6 +67,11 @@ export function SloList({ autoRefresh }: Props) {
     storeState({ page: 0, sort: { by: newSort, direction: state.sort.direction } });
   };
 
+  const handleChangeView = (newView: SLOView) => {
+    setSloView(newView);
+    storeState({ view: newView });
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
@@ -80,7 +85,7 @@ export function SloList({ autoRefresh }: Props) {
       <EuiFlexItem grow={false}>
         <ToggleSLOView
           sloView={sloView}
-          setSLOView={setSLOView}
+          setSLOView={handleChangeView}
           toggleCompactView={() =>
             isCompact === 'true' ? setIsCompact('false') : setIsCompact('true')
           }
