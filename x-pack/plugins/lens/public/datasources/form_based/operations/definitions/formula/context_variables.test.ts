@@ -221,10 +221,11 @@ describe('context variables', () => {
               from: 'now-15m',
               to: 'now',
             },
+            now: 1000000, // important to provide this to make the result consistent
           }),
         } as ExecutionContext<Adapters, ExecutionContextSearch>);
 
-        expect(result).toBe(900001);
+        expect(result).toBe(900000);
       });
     });
   });
