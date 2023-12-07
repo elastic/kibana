@@ -67,6 +67,8 @@ const ROLES = [
   },
 ];
 
+const FORBIDDEN_STATUS_CDOE = 403;
+
 const ALL_ROLE_NAMES = ROLES.map((role) => role.name);
 
 const allRolesExcept = (role: string) => ALL_ROLE_NAMES.filter((r) => r !== role);
@@ -81,10 +83,9 @@ const USERNAME_TO_ROLES = {
 
 export default ({ getService }: FtrProviderContext) => {
   const userHelper = usersAndRolesFactory(getService('security'));
-  describe('@ess Entity Analytics - Risk Engine Privileges API', () => {
+  describe('@ess Entity Analytics - Risk Engine Privileges', () => {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const riskEngineRoutesNoAuth = riskEngineRouteHelpersFactoryNoAuth(supertestWithoutAuth);
-
     async function createPrivilegeTestUsers() {
       const rolePromises = ROLES.map((role) => userHelper.createRole(role));
 
@@ -195,6 +196,42 @@ export default ({ getService }: FtrProviderContext) => {
             },
           },
         });
+      });
+    });
+
+    describe('Risk engine init API privilege check', () => {
+      it('returns 403 when the user doesnt have all risk engine privileges', async () => {
+        await riskEngineRoutesNoAuth.init(
+          {
+            username: 'no_cluster_manage_index_templates',
+            password: USER_PASSWORD,
+          },
+          FORBIDDEN_STATUS_CDOE
+        );
+      });
+    });
+
+    describe('Risk engine enable API privilege check', () => {
+      it('returns 403 when the user doesnt have all risk engine privileges', async () => {
+        await riskEngineRoutesNoAuth.enable(
+          {
+            username: 'no_cluster_manage_index_templates',
+            password: USER_PASSWORD,
+          },
+          FORBIDDEN_STATUS_CDOE
+        );
+      });
+    });
+
+    describe('Risk engine disable API privilege check', () => {
+      it('returns 403 when the user doesnt have all risk engine privileges', async () => {
+        await riskEngineRoutesNoAuth.disable(
+          {
+            username: 'no_cluster_manage_index_templates',
+            password: USER_PASSWORD,
+          },
+          FORBIDDEN_STATUS_CDOE
+        );
       });
     });
   });
