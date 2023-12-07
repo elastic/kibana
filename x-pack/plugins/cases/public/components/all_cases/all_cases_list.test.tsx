@@ -47,6 +47,7 @@ import { useLicense } from '../../common/use_license';
 import * as api from '../../containers/api';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/use_get_cases');
@@ -63,6 +64,7 @@ jest.mock('../app/use_available_owners', () => ({
 }));
 jest.mock('../../containers/use_update_case');
 jest.mock('../../common/use_license');
+jest.mock('../../containers/user_profiles/use_suggest_user_profiles');
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
@@ -74,6 +76,7 @@ const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useGetCategoriesMock = useGetCategories as jest.Mock;
+const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
@@ -164,6 +167,7 @@ describe('AllCasesListGeneric', () => {
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
     useUpdateCaseMock.mockReturnValue({ mutate: updateCaseProperty });
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+    useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
     mockKibana();
     moment.tz.setDefault('UTC');
     window.localStorage.clear();
@@ -1076,6 +1080,34 @@ describe('AllCasesListGeneric', () => {
           expect(
             screen.queryAllByTestId('options-filter-popover-button-assignees').length
           ).toBeGreaterThan(0);
+        });
+      });
+
+      it.only('should reset the assignees when deactivating the filter', async () => {
+        useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+
+        appMockRenderer.render(<AllCasesList />);
+
+        const assigneesButton = screen.getByTestId('options-filter-popover-button-assignees');
+        userEvent.click(assigneesButton);
+        // await waitForEuiPopoverOpen();
+        userEvent.click(screen.getByText('Damaged Raccoon'));
+        console.log(3);
+
+        expect(within(assigneesButton).getByLabelText('1 active filters')).toBeInTheDocument();
+
+        userEvent.click(screen.getByRole('button', { name: 'More' }));
+        console.log(4);
+        await waitForEuiPopoverOpen();
+        userEvent.click(screen.getByRole('option', { name: 'Assignees' }));
+        console.log(5);
+
+        expect(useGetCasesMock).toHaveBeenLastCalledWith({
+          filterOptions: {
+            ...DEFAULT_FILTER_OPTIONS,
+            assignees: [],
+          },
+          queryParams: DEFAULT_QUERY_PARAMS,
         });
       });
     });

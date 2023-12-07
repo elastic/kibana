@@ -89,7 +89,14 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
   }, [currentUserProfile, userProfiles, searchTerm]);
 
   const isLoadingData = isLoading || isLoadingSuggest;
-
+  console.log({
+    // selectedAssignees,
+    userProfiles,
+    // searchResultProfiles,
+    // owners,
+    // currentUserProfile,
+    // isLoadingSuggest,
+  });
   return (
     <UserProfilesPopover
       isOpen={isPopoverOpen}
