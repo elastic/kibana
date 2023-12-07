@@ -20,7 +20,7 @@ interface UseGetFeatureIdsResponse {
   ruleTypeIds: string[];
 }
 
-const featureIdsToMap = (data: FeatureIdsResponse): UseGetFeatureIdsResponse => {
+const transformResponseToFeatureIds = (data: FeatureIdsResponse): UseGetFeatureIdsResponse => {
   const localFeatureIds = new Set<string>();
   data?.aggregations?.consumer?.buckets?.forEach(
     ({ key, doc_count: docCount }: { key: string; doc_count: number }) => {
@@ -63,7 +63,7 @@ export const useGetFeatureIds = (alertIds: string[], enabled: boolean) => {
       });
     },
     {
-      select: featureIdsToMap,
+      select: transformResponseToFeatureIds,
       retry: false,
       enabled,
       onError: (error: ServerError) => {
