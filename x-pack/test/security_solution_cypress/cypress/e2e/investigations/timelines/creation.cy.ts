@@ -146,14 +146,14 @@ describe('Timelines', (): void => {
     }
   );
 
-  describe('shows the different timeline states', () => {
+  describe('shows the different timeline states', { tags: ['@ess', '@serverless'] }, () => {
     before(() => {
       login();
       deleteTimelines();
       visitWithTimeRange(TIMELINES_URL);
     });
 
-    it('should show the correct timeline status', { tags: ['@ess', '@serverless'] }, () => {
+    it('should show the correct timeline status', () => {
       createTimeline();
 
       // Unsaved
@@ -179,14 +179,14 @@ describe('Timelines', (): void => {
     });
   });
 
-  describe('saves timeline as new', () => {
+  describe('saves timeline as new', { tags: ['@ess', '@serverless'] }, () => {
     before(() => {
       login();
       deleteTimelines();
       visitWithTimeRange(TIMELINES_URL);
     });
 
-    it('should save timelines as new', { tags: ['@ess', '@serverless'] }, () => {
+    it('should save timelines as new', () => {
       cy.get(ROWS).should('have.length', '0');
 
       createTimeline();
