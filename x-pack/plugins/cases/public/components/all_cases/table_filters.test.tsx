@@ -165,6 +165,18 @@ describe('CasesTableFilters ', () => {
         "assignees": Array [
           "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
         ],
+        "category": Array [],
+        "customFields": Object {},
+        "owner": Array [],
+        "reporters": Array [],
+        "search": "",
+        "searchFields": Array [
+          "title",
+          "description",
+        ],
+        "severity": Array [],
+        "status": Array [],
+        "tags": Array [],
       }
     `);
   });
@@ -206,12 +218,11 @@ describe('CasesTableFilters ', () => {
   it('should remove assignee from selected assignees when assignee no longer exists', async () => {
     const overrideProps = {
       ...props,
-      initial: {
+      filterOptions: {
         ...DEFAULT_FILTER_OPTIONS,
         assignees: [
           // invalid profile uid
           '123',
-          'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
         ],
       },
     };
@@ -233,6 +244,18 @@ describe('CasesTableFilters ', () => {
         "assignees": Array [
           "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
         ],
+        "category": Array [],
+        "customFields": Object {},
+        "owner": Array [],
+        "reporters": Array [],
+        "search": "",
+        "searchFields": Array [
+          "title",
+          "description",
+        ],
+        "severity": Array [],
+        "status": Array [],
+        "tags": Array [],
       }
     `);
   });
@@ -304,6 +327,32 @@ describe('CasesTableFilters ', () => {
       appMockRender.render(<CasesTableFilters {...props} />);
 
       expect(screen.getByTestId('options-filter-popover-button-assignees')).toBeInTheDocument();
+    });
+
+    it('shuld reset the assignees when deactivating the filter', async () => {
+      const overrideProps = {
+        ...props,
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          assignees: ['u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0'],
+        },
+      };
+      const license = licensingMock.createLicense({
+        license: { type: 'platinum' },
+      });
+
+      appMockRender = createAppMockRenderer({ license });
+      appMockRender.render(<CasesTableFilters {...overrideProps} />);
+
+      // deactivate the assignees filter
+      userEvent.click(screen.getByRole('button', { name: 'More' }));
+      await waitForEuiPopoverOpen();
+      userEvent.click(screen.getByRole('option', { name: 'Assignees' }));
+
+      expect(onFilterChanged).toHaveBeenCalledWith({
+        ...DEFAULT_FILTER_OPTIONS,
+        assignees: [],
+      });
     });
   });
 
