@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RiskScoreEntity } from '../../../../../../../common/risk_engine';
+import { RiskScoreEntity } from '../../../../../../../common/entity_analytics/risk_engine';
 import { renderHook } from '@testing-library/react-hooks';
 import { wrapper } from '../../../mocks';
 import { useLensAttributes } from '../../../use_lens_attributes';

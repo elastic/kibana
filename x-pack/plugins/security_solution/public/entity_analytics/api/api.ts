@@ -23,7 +23,7 @@ import type {
   InitRiskEngineResponse,
   DisableRiskEngineResponse,
 } from '../../../server/lib/entity_analytics/types';
-import type { RiskScorePreviewRequestSchema } from '../../../common/risk_engine/risk_score_preview/request_schema';
+import type { RiskScorePreviewRequestSchema } from '../../../common/entity_analytics/risk_engine/risk_score_preview/request_schema';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics/common';
 
 /**

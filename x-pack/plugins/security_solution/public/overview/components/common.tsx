@@ -9,7 +9,7 @@ import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eu
 import React, { useCallback, useState } from 'react';
 import * as i18n from './translations';
 import { RiskScoreDocLink } from '../../explore/components/risk_score/risk_score_onboarding/risk_score_doc_link';
-import type { RiskScoreEntity } from '../../../common/risk_engine';
+import type { RiskScoreEntity } from '../../../common/entity_analytics/risk_engine';
 
 export const RiskScoreInfoTooltip: React.FC<{
   toolTipContent: React.ReactNode;
