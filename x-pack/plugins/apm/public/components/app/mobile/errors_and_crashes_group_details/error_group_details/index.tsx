@@ -9,7 +9,6 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';

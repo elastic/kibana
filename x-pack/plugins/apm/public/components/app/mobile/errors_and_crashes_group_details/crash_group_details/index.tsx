@@ -9,8 +9,6 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiProgress,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -24,11 +22,7 @@ import { useBreadcrumb } from '../../../../../context/breadcrumbs/use_breadcrumb
 import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
 import { useCrashGroupDistributionFetcher } from '../../../../../hooks/use_crash_group_distribution_fetcher';
-import {
-  FETCH_STATUS,
-  isPending,
-  useFetcher,
-} from '../../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { ErrorSampler } from '../../../error_group_details/error_sampler';
