@@ -434,6 +434,9 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
                   ]
                 : [],
           },
+          ...(ruleFields.enableThresholdSuppression && {
+            alert_suppression: { duration: ruleFields.groupByDuration },
+          }),
         }),
       }
     : isThreatMatchFields(ruleFields)
@@ -505,6 +508,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
             saved_id: ruleFields.queryBar.saved_id,
           }),
       };
+
   return {
     ...baseFields,
     ...typeFields,

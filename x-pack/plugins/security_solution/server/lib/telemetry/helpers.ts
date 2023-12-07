@@ -382,7 +382,7 @@ export class TelemetryTimelineFetcher {
     const eventId = event._source ? event._source['event.id'] : 'unknown';
     const alertUUID = event._source ? event._source['kibana.alert.uuid'] : 'unknown';
 
-    const entities = resolverEntity([event]);
+    const entities = resolverEntity([event], this.receiver.getExperimentalFeatures());
 
     // Build Tree
     const tree = await this.receiver.buildProcessTree(
