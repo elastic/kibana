@@ -8,13 +8,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { SlosView } from './slos_view';
-import { SLO_LIST_IS_COMPACT } from './slo_view_settings';
-import { SLOView, ToggleSLOView } from './toggle_slo_view';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
-import { SloListSearchBar, SortField, SortDirection } from './slo_list_search_bar';
+import { SlosView } from './slos_view';
+import { SloListSearchBar, SortDirection, SortField } from './slo_list_search_bar';
+import { SLOView, ToggleSLOView } from './toggle_slo_view';
 
 export interface Props {
   autoRefresh: boolean;
@@ -71,7 +69,7 @@ export function SloList({ autoRefresh }: Props) {
     storeState({ view: newView });
   };
 
-  const handleToggleCompact = () => {
+  const handleToggleCompactView = () => {
     const newCompact = !isCompact;
     setCompact(newCompact);
     storeState({ compact: newCompact });
@@ -90,8 +88,8 @@ export function SloList({ autoRefresh }: Props) {
       <EuiFlexItem grow={false}>
         <ToggleSLOView
           sloView={view}
-          setSLOView={handleChangeView}
-          toggleCompactView={handleToggleCompact}
+          onChangeView={handleChangeView}
+          onToggleCompactView={handleToggleCompactView}
           isCompact={isCompact}
         />
       </EuiFlexItem>

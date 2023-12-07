@@ -13,11 +13,12 @@ import { SLOViewSettings } from './slo_view_settings';
 export type SLOView = 'cardView' | 'listView';
 
 interface Props {
-  toggleCompactView: () => void;
+  onToggleCompactView: () => void;
+  onChangeView: (view: SLOView) => void;
   isCompact: boolean;
-  setSLOView: (view: SLOView) => void;
   sloView: SLOView;
 }
+
 const toggleButtonsIcons = [
   {
     id: `cardView`,
@@ -33,7 +34,12 @@ const toggleButtonsIcons = [
   },
 ];
 
-export function ToggleSLOView({ sloView, setSLOView, toggleCompactView, isCompact = true }: Props) {
+export function ToggleSLOView({
+  sloView,
+  onChangeView,
+  onToggleCompactView,
+  isCompact = true,
+}: Props) {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
@@ -43,12 +49,12 @@ export function ToggleSLOView({ sloView, setSLOView, toggleCompactView, isCompac
           })}
           options={toggleButtonsIcons}
           idSelected={sloView}
-          onChange={(id) => setSLOView(id as SLOView)}
+          onChange={(id) => onChangeView(id as SLOView)}
           isIconOnly
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SLOViewSettings toggleCompactView={toggleCompactView} isCompact={isCompact} />
+        <SLOViewSettings toggleCompactView={onToggleCompactView} isCompact={isCompact} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
