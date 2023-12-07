@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreTheme } from '@kbn/core/public';
-import { Observable } from 'rxjs';
+import { CoreStart } from '@kbn/core/public';
 
-export interface ControlsThemeService {
-  theme$: Observable<CoreTheme>;
+export interface ControlsCoreService {
+  i18n: CoreStart['i18n'];
+  theme: CoreStart['theme'];
 }
