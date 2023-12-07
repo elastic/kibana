@@ -107,18 +107,18 @@ interface RuleDetailsFlyoutProps {
   rule: RuleResponse;
   ruleActions?: React.ReactNode;
   size?: EuiFlyoutProps['size'];
+  extraTabs?: EuiTabbedContentTab[];
   dataTestSubj?: string;
   closeFlyout: () => void;
-  getRuleTabs?: (rule: RuleResponse, defaultTabs: EuiTabbedContentTab[]) => EuiTabbedContentTab[];
 }
 
 export const RuleDetailsFlyout = ({
   rule,
   ruleActions,
   size = 'm',
+  extraTabs = [],
   dataTestSubj,
   closeFlyout,
-  getRuleTabs,
 }: RuleDetailsFlyoutProps) => {
   const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
@@ -158,13 +158,12 @@ export const RuleDetailsFlyout = ({
   );
 
   const tabs = useMemo(() => {
-    const defaultTabs = [overviewTab];
     if (rule.note) {
-      defaultTabs.push(investigationGuideTab);
+      return [...extraTabs, overviewTab, investigationGuideTab];
+    } else {
+      return [...extraTabs, overviewTab];
     }
-
-    return getRuleTabs ? getRuleTabs(rule, defaultTabs) : defaultTabs;
-  }, [overviewTab, investigationGuideTab, rule, getRuleTabs]);
+  }, [overviewTab, investigationGuideTab, rule.note, extraTabs]);
 
   const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
   const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];

@@ -14,10 +14,7 @@ import { useInstalledSecurityJobs } from '../../../../../common/components/ml/ho
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { affectedJobIds } from '../../../../../detections/components/callouts/ml_job_compatibility_callout/affected_job_ids';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import type {
-  RuleSignatureId,
-  RuleResponse,
-} from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import {
   usePerformUpgradeAllRules,
@@ -270,15 +267,15 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     actions,
   ]);
 
-  const getRuleTabs = useCallback(
-    (rule: RuleResponse, defaultTabs: EuiTabbedContentTab[]): EuiTabbedContentTab[] => {
-      const activeRule = filteredRules.find(({ id }) => id === rule.id);
+  const extraTabs = useMemo<EuiTabbedContentTab[]>(() => {
+    const activeRule = previewedRule && filteredRules.find(({ id }) => id === previewedRule.id);
 
-      if (!activeRule) {
-        return defaultTabs;
-      }
+    if (!activeRule) {
+      return [];
+    }
 
-      const diffTab = {
+    return [
+      {
         id: 'updates',
         name: ruleDetailsI18n.UPDATES_TAB_LABEL,
         content: (
@@ -286,12 +283,9 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             <RuleDiffTab oldRule={activeRule.current_rule} newRule={activeRule.target_rule} />
           </TabContentPadding>
         ),
-      };
-
-      return [diffTab, ...defaultTabs];
-    },
-    [filteredRules]
-  );
+      },
+    ];
+  }, [previewedRule, filteredRules]);
 
   return (
     <UpgradePrebuiltRulesTableContext.Provider value={providerValue}>
@@ -323,7 +317,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
                 {i18n.UPDATE_BUTTON_LABEL}
               </EuiButton>
             }
-            getRuleTabs={isJsonPrebuiltRulesDiffingEnabled ? getRuleTabs : undefined}
+            extraTabs={extraTabs}
           />
         )}
       </>
