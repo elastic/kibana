@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -45,6 +46,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
   const [isPopOverOpen, setIsPopOverOpen] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const { deleteMlPipeline, detachMlPipeline } = useActions(PipelinesLogic);
+  const isSmallScreen = useIsWithinMaxBreakpoint('s');
   const showConfirmDeleteModal = () => {
     setShowConfirmDelete(true);
     setIsPopOverOpen(false);
@@ -68,18 +70,13 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
 
   return (
     <EuiPanel color="subdued">
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" gutterSize={isSmallScreen ? 'xs' : undefined}>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem>
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h4>{pipelineName ?? modelTitle}</h4>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} />
-              </EuiFlexGroup>
+              <EuiTitle size="xs">
+                <h4>{pipelineName ?? modelTitle}</h4>
+              </EuiTitle>
             </EuiFlexItem>
             {modelTitle && (
               <EuiFlexItem>

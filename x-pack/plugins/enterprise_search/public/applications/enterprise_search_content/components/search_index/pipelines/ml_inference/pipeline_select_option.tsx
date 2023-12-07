@@ -56,7 +56,7 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
           </EuiFlexItem>
           {pipeline.modelType.length > 0 && (
             <EuiFlexItem>
-              {/* Wrap in a div to prevent the badge from growing to a whole row on mobile*/}
+              {/* Wrap in a span to prevent the badge from growing to a whole row on mobile*/}
               <span>
                 <MLModelTypeBadge type={pipeline.modelType} />
               </span>
