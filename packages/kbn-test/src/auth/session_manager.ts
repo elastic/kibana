@@ -48,15 +48,15 @@ export class SamlSessionManager {
       protocol: options.hostOptions.protocol,
       hostname: options.hostOptions.hostname,
       port: options.hostOptions.port,
-    }
+    };
     this.kbnHost = Url.format(hostOptionsWithoutAuth);
     this.kbnClient = new KbnClient({
-       log: this.log,
-       url: Url.format({
-         ...hostOptionsWithoutAuth,
-         auth: `${options.hostOptions.username}:${options.hostOptions.password}`,
-       }),
-      });
+      log: this.log,
+      url: Url.format({
+        ...hostOptionsWithoutAuth,
+        auth: `${options.hostOptions.username}:${options.hostOptions.password}`,
+      }),
+    });
     this.sessionCache = new Map<Role, Session>();
     this.roleToUserMap = new Map<Role, User>();
   }

@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { SamlSessionManager, type SamlSessionManagerOptions, type HostOptions } from './session_manager';
+export {
+  SamlSessionManager,
+  type SamlSessionManagerOptions,
+  type HostOptions,
+} from './session_manager';
