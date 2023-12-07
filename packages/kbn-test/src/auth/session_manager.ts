@@ -13,13 +13,7 @@ import Url from 'url';
 import { KbnClient } from '../kbn_client';
 import { readCloudUsersFromFile } from './helper';
 import { createCloudSAMLSession, createLocalSAMLSession, Session } from './saml_auth';
-
-export interface User {
-  readonly email: string;
-  readonly password: string;
-}
-
-export type Role = string;
+import { Role, User } from './types';
 
 export interface HostOptions {
   protocol: 'http' | 'https';

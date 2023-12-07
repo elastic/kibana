@@ -7,17 +7,9 @@
  */
 
 import * as fs from 'fs';
-import { User } from './session_manager';
+import { Role, User } from './types';
 
-export const getProjectType = (serverArgs: string[]) => {
-  const svlArg = serverArgs.filter((arg) => arg.startsWith('--serverless'));
-  if (svlArg.length === 0) {
-    throw new Error('--serverless argument is missing in kbnTestServer.serverArgs');
-  }
-  return svlArg[0].split('=')[1];
-};
-
-export const readCloudUsersFromFile = (filePath: string): Array<[string, User]> => {
+export const readCloudUsersFromFile = (filePath: string): Array<[Role, User]> => {
   if (!fs.existsSync(filePath)) {
     throw new Error(`Please define user roles with email/password in ${filePath}`);
   }
@@ -26,5 +18,5 @@ export const readCloudUsersFromFile = (filePath: string): Array<[string, User]> 
     throw new Error(`'${filePath}' is empty: no roles are defined`);
   }
 
-  return Object.entries(JSON.parse(data)) as Array<[string, User]>;
+  return Object.entries(JSON.parse(data)) as Array<[Role, User]>;
 };

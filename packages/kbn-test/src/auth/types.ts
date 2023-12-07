@@ -31,3 +31,10 @@ export interface CreateSamlSessionParams {
   password: string;
   log: ToolingLog;
 }
+
+export interface User {
+  readonly email: string;
+  readonly password: string;
+}
+
+export type Role = string;
