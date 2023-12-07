@@ -137,6 +137,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
     });
 
+    it('should reflect the apply stop value without rounding', async () => {
+      // target item is 5722.774804505345
+      // so set a value slightly lower which can be rounded
+      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '5722.7747', {
+        clearWithKeyboard: true,
+      });
+      const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
+
+      // assert legend has a rounded value
+      expect(debugState?.legend!.items).to.eql([
+        { key: '5,722.775 - 8,529.2', name: '5,722.775 - 8,529.2', color: '#6092c0' },
+        { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#a8bfda' },
+        { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#ebeff5' },
+        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ecb385' },
+        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#e7664c' },
+      ]);
+      // assert the cell has the correct coloring despite the legend rounding
+      expect(debugState?.heatmap!.cells[debugState.heatmap!.cells.length - 1].fill).to.be(
+        'rgba(96, 146, 192, 1)' // rgba version of #6092c0
+      );
+    });
+
     it('should reset stop numbers when changing palette', async () => {
       await PageObjects.lens.changePaletteTo('status');
 
