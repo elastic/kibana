@@ -22,9 +22,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('returns valid user data for authenticated request', async () => {
       const { body, status } = await supertestWithoutAuth
-      .get('/internal/security/me')
-      .set(svlCommonApi.getInternalRequestHeader())
-      .set(credentials);
+        .get('/internal/security/me')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(credentials);
 
       const userData = await svlUserManager.getUserData('viewer');
 
