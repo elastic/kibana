@@ -28,8 +28,14 @@ import { LimitWarning } from '../limit_warnings';
 import { useLinkProps } from '../use_link_props';
 import { useColors } from '../use_colors';
 import { useFormattedDate } from './use_formatted_date';
-import { CopyablePanelField } from './copyable_panel_field';
 import { userSelectedResolverNode } from '../../store/actions';
+import {
+  CellActionsMode,
+  SecurityCellActions,
+  SecurityCellActionsTrigger,
+  SecurityCellActionType,
+} from '../../../common/components/cell_actions';
+import { getSourcererScopeId } from '../../../helpers';
 import type { State } from '../../../common/store/types';
 
 interface ProcessTableView {
@@ -70,7 +76,7 @@ export const NodeList = memo(({ id }: { id: string }) => {
         dataType: 'date',
         sortable: true,
         render(eventDate?: Date) {
-          return <NodeDetailTimestamp eventDate={eventDate} />;
+          return <NodeDetailTimestamp eventDate={eventDate} id={id} />;
         },
       },
     ],
@@ -204,12 +210,26 @@ function NodeDetailLink({ id, name, nodeID }: { id: string; name?: string; nodeI
 }
 
 // eslint-disable-next-line react/display-name
-const NodeDetailTimestamp = memo(({ eventDate }: { eventDate: Date | undefined }) => {
-  const formattedDate = useFormattedDate(eventDate);
+const NodeDetailTimestamp = memo(
+  ({ eventDate, id }: { eventDate: Date | undefined; id: string }) => {
+    const formattedDate = useFormattedDate(eventDate);
 
-  return formattedDate ? (
-    <CopyablePanelField textToCopy={formattedDate} content={formattedDate} />
-  ) : (
-    <span>{'—'}</span>
-  );
-});
+    return formattedDate ? (
+      <SecurityCellActions
+        data={{
+          field: '@timestamp',
+          value: formattedDate,
+        }}
+        triggerId={SecurityCellActionsTrigger.DEFAULT}
+        mode={CellActionsMode.HOVER_DOWN}
+        sourcererScopeId={getSourcererScopeId(id)}
+        metadata={{ scopeId: id }}
+        disabledActionTypes={[SecurityCellActionType.FILTER, SecurityCellActionType.TOGGLE_COLUMN]}
+      >
+        {formattedDate}
+      </SecurityCellActions>
+    ) : (
+      <span>{'—'}</span>
+    );
+  }
+);

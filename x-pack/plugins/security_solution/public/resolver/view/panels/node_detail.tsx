@@ -5,19 +5,32 @@
  * 2.0.
  */
 
-import type { HTMLAttributes } from 'react';
 import React, { memo, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import type { EuiDescriptionListProps } from '@elastic/eui';
-import { htmlIdGenerator, EuiSpacer, EuiTitle, EuiText, EuiTextColor, EuiLink } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+  EuiTextColor,
+  EuiLink,
+  EuiInMemoryTable,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
-import { StyledDescriptionList, StyledTitle } from './styles';
+import { StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { GeneratedText } from '../generated_text';
-import { CopyablePanelField } from './copyable_panel_field';
+import {
+  CellActionsMode,
+  SecurityCellActions,
+  SecurityCellActionsTrigger,
+  SecurityCellActionType,
+} from '../../../common/components/cell_actions';
+import { getSourcererScopeId } from '../../../helpers';
 import { Breadcrumbs } from './breadcrumbs';
 import { processPath, processPID } from '../../models/process_event';
 import * as nodeDataModel from '../../models/node_data';
@@ -34,8 +47,6 @@ import type { State } from '../../../common/store/types';
 const StyledCubeForProcess = styled(CubeForProcess)`
   position: relative;
 `;
-
-const COLUMN_WIDTH = ['fit-content(10em)', 'auto'];
 
 const nodeDetailError = i18n.translate('xpack.securitySolution.resolver.panel.nodeDetail.Error', {
   defaultMessage: 'Node details were unable to be retrieved',
@@ -65,6 +76,10 @@ export const NodeDetail = memo(function ({ id, nodeID }: { id: string; nodeID: s
   );
 });
 
+export interface NodeDetailsTableView {
+  title: string;
+  description: string;
+}
 /**
  * A description list view of all the Metadata that goes with a particular process event, like:
  * Created, PID, User/Domain, etc.
@@ -89,7 +104,7 @@ const NodeDetailView = memo(function ({
   const eventTime = eventModel.eventTimestamp(processEvent);
   const dateTime = useFormattedDate(eventTime);
 
-  const processInfoEntry: EuiDescriptionListProps['listItems'] = useMemo(() => {
+  const processInfoEntry: NodeDetailsTableView[] = useMemo(() => {
     const createdEntry = {
       title: '@timestamp',
       description: dateTime,
@@ -171,12 +186,7 @@ const NodeDetailView = memo(function ({
       .map((entry) => {
         return {
           ...entry,
-          description: (
-            <CopyablePanelField
-              textToCopy={String(entry.description)}
-              content={<GeneratedText>{String(entry.description)}</GeneratedText>}
-            />
-          ),
+          description: String(entry.description),
         };
       });
 
@@ -218,6 +228,53 @@ const NodeDetailView = memo(function ({
   });
 
   const titleID = useMemo(() => htmlIdGenerator('resolverTable')(), []);
+
+  const columns: Array<EuiBasicTableColumn<NodeDetailsTableView>> = [
+    {
+      field: 'title',
+      'data-test-subj': 'resolver:node-detail:entry-title',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.resolver.panel.nodeDetail.fieldTitle"
+          defaultMessage="Field"
+        />
+      ),
+      width: 'fit-content(8em)',
+      sortable: true,
+      render(fieldName: string) {
+        return <GeneratedText>{fieldName}</GeneratedText>;
+      },
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.resolver.panel.nodeDetail.valueTitle"
+          defaultMessage="Value"
+        />
+      ),
+      'data-test-subj': 'resolver:node-detail:entry-description',
+      render(data: NodeDetailsTableView) {
+        return (
+          <SecurityCellActions
+            data={{
+              field: data.title,
+              value: data.description,
+            }}
+            triggerId={SecurityCellActionsTrigger.DEFAULT}
+            mode={CellActionsMode.HOVER_DOWN}
+            sourcererScopeId={getSourcererScopeId(id)}
+            metadata={{ scopeId: id }}
+            disabledActionTypes={[
+              SecurityCellActionType.FILTER,
+              SecurityCellActionType.TOGGLE_COLUMN,
+            ]}
+          >
+            {data.description}
+          </SecurityCellActions>
+        );
+      },
+    },
+  ];
   return (
     <>
       <Breadcrumbs breadcrumbs={crumbs} />
@@ -248,25 +305,11 @@ const NodeDetailView = memo(function ({
         />
       </EuiLink>
       <EuiSpacer size="l" />
-      <StyledDescriptionList
+      <EuiInMemoryTable<NodeDetailsTableView>
         data-test-subj="resolver:node-detail"
-        type="column"
-        columnWidths={COLUMN_WIDTH}
-        align="left"
-        titleProps={
-          {
-            'data-test-subj': 'resolver:node-detail:entry-title',
-            className: 'desc-title',
-            // Casting this to allow data attribute
-          } as HTMLAttributes<HTMLElement>
-        }
-        descriptionProps={
-          {
-            'data-test-subj': 'resolver:node-detail:entry-description',
-          } as HTMLAttributes<HTMLElement>
-        }
-        compressed
-        listItems={processInfoEntry}
+        items={processInfoEntry}
+        columns={columns}
+        sorting
       />
     </>
   );
