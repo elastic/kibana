@@ -23,21 +23,19 @@ export const useJsonEditorModel = ({
 }) => {
   const chatService = useObservabilityAIAssistantChatService();
 
-  const functionDefinition = chatService
-    .getFunctions()
-    .find((func) => func.options.name === functionName);
+  const functionDefinition = chatService.getFunctions().find((func) => func.name === functionName);
 
   return useMemo(() => {
     if (!functionDefinition) {
       return {};
     }
 
-    const schema = { ...functionDefinition.options.parameters };
+    const schema = { ...functionDefinition.parameters };
 
     const initialJsonString = initialJson
       ? initialJson
-      : functionDefinition.options.parameters.properties
-      ? JSON.stringify(createInitializedObject(functionDefinition.options.parameters), null, 4)
+      : functionDefinition.parameters.properties
+      ? JSON.stringify(createInitializedObject(functionDefinition.parameters), null, 4)
       : '';
 
     languages.json.jsonDefaults.setDiagnosticsOptions({

@@ -90,14 +90,16 @@ export default function maintenanceWindowScopedQueryTests({ getService }: FtrPro
       });
 
       // Ensure we wrote the new maintenance window ID to the alert doc
-      const result = await es.search<Alert>({
-        index: alertAsDataIndex,
-        body: { query: { match_all: {} } },
-      });
+      await retry.try(async () => {
+        const result = await es.search<Alert>({
+          index: alertAsDataIndex,
+          body: { query: { match_all: {} } },
+        });
 
-      expect(result.hits.hits[0]?._source?.[ALERT_MAINTENANCE_WINDOW_IDS]).eql([
-        maintenanceWindow.id,
-      ]);
+        expect(result.hits.hits[0]?._source?.[ALERT_MAINTENANCE_WINDOW_IDS]).eql([
+          maintenanceWindow.id,
+        ]);
+      });
 
       await runSoon({
         id: rule.id,

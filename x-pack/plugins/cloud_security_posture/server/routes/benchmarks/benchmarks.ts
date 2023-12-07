@@ -7,15 +7,15 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AgentPolicy, ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { CspRuleTemplate } from '../../../common/schemas';
-import { CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { CspBenchmarkRule } from '../../../common/types/latest';
+import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   BENCHMARKS_ROUTE_PATH,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   POSTURE_TYPE_ALL,
 } from '../../../common/constants';
 import { benchmarksQueryParamsSchema } from '../../../common/schemas/benchmark';
-import type { Benchmark } from '../../../common/types';
+import type { Benchmark } from '../../../common/types_old';
 import {
   getBenchmarkFromPackagePolicy,
   getBenchmarkFilter,
@@ -28,7 +28,7 @@ import {
   getCspAgentPolicies,
   getCspPackagePolicies,
 } from '../../lib/fleet_util';
-import { BenchmarkId } from '../../../common/types';
+import { BenchmarkId } from '../../../common/types_old';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
@@ -36,8 +36,8 @@ export const getRulesCountForPolicy = async (
   soClient: SavedObjectsClientContract,
   benchmarkId: BenchmarkId
 ): Promise<number> => {
-  const rules = await soClient.find<CspRuleTemplate>({
-    type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  const rules = await soClient.find<CspBenchmarkRule>({
+    type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
     filter: getBenchmarkFilter(benchmarkId),
     perPage: 0,
   });
