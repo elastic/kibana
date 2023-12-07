@@ -70,7 +70,10 @@ export const config: PluginConfigDescriptor = {
     },
   },
   schema: configSchema,
-  deprecations: ({ unused }) => [unused('unsafe.thresholdRule.enabled', { level: 'warning' }), unused('unsafe.alertDetails.logs.enabled', { level: 'warning' })],
+  deprecations: ({ unused }) => [
+    unused('unsafe.thresholdRule.enabled', { level: 'warning' }),
+    unused('unsafe.alertDetails.logs.enabled', { level: 'warning' }),
+  ],
 };
 
 export type ObservabilityConfig = TypeOf<typeof configSchema>;
