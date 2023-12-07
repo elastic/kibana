@@ -71,24 +71,17 @@ export const GettingStarted = () => {
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
-  const [filteredCards, setFilteredCards] = useState<GuideCardConstants[]>();
+  const [filteredCards, setFilteredCards] = useState<GuideCardConstants[]>(guideCards);
   const { search } = useLocation();
   const query = parse(search);
   // using for A/B testing
   const [guideVersion] = useState<GuideVersion>(version);
   const useCase = query.useCase as GuideFilterValues;
-
-  const isTypeOfGuideFilterValue = (useCase: string | string[] | null) => {
-    if (guideVersion === 'classic') return 'all';
-    else return 'search';
-  };
-
   const [filter, setFilter] = useState<GuideFilterValues | GuideFilterValuesClassic>(
-    useCase !== null ? (useCase as GuideFilterValues) : isTypeOfGuideFilterValue(useCase)
+    guideVersion === 'classic' ? useCase ?? 'all' : useCase ?? 'search'
   );
 
   const history = useHistory();
-  console.log('filtered cards in getting started component', filteredCards);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -163,7 +156,7 @@ export const GettingStarted = () => {
   );
 
   // filter cards for solution and based on classic or new format
-  const guide = 'classic' ? guideCardsClassic : guideCards;
+  const guide = guideVersion === 'classic' ? guideCardsClassic : guideCards;
   useEffect(() => {
     const tempFiltered = guide.filter(({ solution }) => solution === filter);
     setFilteredCards(tempFiltered);

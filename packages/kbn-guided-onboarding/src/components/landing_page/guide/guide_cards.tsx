@@ -18,11 +18,11 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { css } from '@emotion/react';
 import { GuideId, GuideState } from '../../../types';
 import { GuideFilterValues } from './guide_filters';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCard } from './guide_card';
-import { css } from '@emotion/react';
 
 export type GuideCardSolutions = 'search' | 'observability' | 'security';
 
@@ -31,7 +31,7 @@ export interface GuideCardsProps {
   navigateToApp: ApplicationStart['navigateToApp'];
   activeFilter: GuideFilterValues;
   guidesState: GuideState[];
-  filteredCards?: GuideCardConstants[];
+  filteredCards: GuideCardConstants[];
   openModal: OverlayStart['openModal'];
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
@@ -42,16 +42,16 @@ export interface GuideCardsProps {
 }
 export const GuideCards = (props: GuideCardsProps) => {
   const { filteredCards } = props;
-  console.log(filteredCards)
+
   const stylingForSmallerScreens = css`
-  @media only screen and (max-width: 767px) {
-    align-items: center;
-  }
-`;
+    @media only screen and (max-width: 767px) {
+      align-items: center;
+    }
+  `;
   return (
     <EuiFlexGroup wrap alignItems="center" justifyContent="center">
       {filteredCards?.map((card, index) => (
-        <EuiFlexItem key={index} css={stylingForSmallerScreens} >
+        <EuiFlexItem key={index} css={stylingForSmallerScreens}>
           <GuideCard card={card} {...props} />
           <EuiSpacer size="m" />
         </EuiFlexItem>

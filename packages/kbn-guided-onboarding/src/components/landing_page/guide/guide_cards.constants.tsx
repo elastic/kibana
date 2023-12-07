@@ -40,7 +40,7 @@ export const guideCards: GuideCardConstants[] = [
       defaultMessage: 'Connect to the Elasticsearch API',
     }),
     telemetryId: 'onboarding--search--elasticsearchEndpointApi',
-    order: 1,
+    order: 0,
     openEndpointModal: true,
   },
   {
