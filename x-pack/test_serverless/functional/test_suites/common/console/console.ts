@@ -25,7 +25,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const PageObjects = getPageObjects(['svlCommonPage', 'common', 'console', 'header']);
 
-  describe('console app', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/172632
+  // FLAKY: https://github.com/elastic/kibana/issues/172668
+  describe.skip('console app', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       await PageObjects.svlCommonPage.login();
