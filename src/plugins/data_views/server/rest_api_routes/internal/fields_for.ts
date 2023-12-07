@@ -198,10 +198,9 @@ export const registerFieldForWildcard = async (
   // handler
   router.versioned.put({ path, access }).addVersion({ version, validate }, configuredHandler);
   router.versioned.post({ path, access }).addVersion({ version, validate }, configuredHandler);
-  router.versioned
-    .get({ path, access })
-    .addVersion(
-      { version, validate: { request: { query: querySchema }, response: validate.response } },
-      configuredHandler
-    );
+  router.versioned.get({ path, access }).addVersion(
+    // { version, validate: { request: { query: querySchema }, response: validate.response } },
+    { version, validate: { request: { query: querySchema } } },
+    configuredHandler
+  );
 };
