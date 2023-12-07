@@ -10,6 +10,7 @@ import { omit } from 'lodash';
 import { PassThrough } from 'stream';
 import expect from '@kbn/expect';
 import {
+  ConversationCreateEvent,
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
@@ -20,6 +21,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   const COMPLETE_API_URL = `/internal/observability_ai_assistant/chat/complete`;
 
@@ -75,153 +77,173 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       proxy.close();
     });
 
-    it.skip('returns a streaming response from the server', async () => {
-      await proxy.respond(async (simulator) => {
-        const receivedChunks: any[] = [];
+    it('returns a streaming response from the server', async () => {
+      const interceptor = proxy.intercept('conversation', () => true);
 
-        const passThrough = new PassThrough();
+      const receivedChunks: any[] = [];
 
-        supertest
-          .post(COMPLETE_API_URL)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            messages,
-            connectorId,
-            persist: false,
-          })
-          .pipe(passThrough);
+      const passThrough = new PassThrough();
 
-        passThrough.on('data', (chunk) => {
-          receivedChunks.push(chunk.toString());
-        });
+      supertest
+        .post(COMPLETE_API_URL)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          messages,
+          connectorId,
+          persist: false,
+        })
+        .pipe(passThrough);
 
-        await simulator.status(200);
-        const chunk = JSON.stringify(createOpenAiChunk('Hello'));
-
-        await simulator.write(`data: ${chunk.substring(0, 10)}`);
-        await simulator.write(`${chunk.substring(10)}\n`);
-        await simulator.complete();
-
-        await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
-
-        const parsedChunks = receivedChunks
-          .join('')
-          .split('\n')
-          .map((line) => line.trim())
-          .filter(Boolean)
-          .map((line) => JSON.parse(line) as StreamingChatResponseEvent);
-
-        expect(parsedChunks.length).to.be(2);
-        expect(omit(parsedChunks[0], 'id')).to.eql({
-          type: StreamingChatResponseEventType.ChatCompletionChunk,
-          message: {
-            content: 'Hello',
-          },
-        });
-
-        expect(omit(parsedChunks[1], 'id', 'message.@timestamp')).to.eql({
-          type: StreamingChatResponseEventType.MessageAdd,
-          message: {
-            message: {
-              content: 'Hello',
-              role: MessageRole.Assistant,
-              function_call: {
-                name: '',
-                arguments: '',
-                trigger: MessageRole.Assistant,
-              },
-            },
-          },
-        });
+      passThrough.on('data', (chunk) => {
+        receivedChunks.push(chunk.toString());
       });
-    });
 
-    it('creates a new conversation', async () => {
-      const lines = await proxy.respond(
-        async (titleSimulator) => {
-          return await proxy.respond(
-            async (chatSimulator) => {
-              const responsePromise = new Promise<Response>((resolve, reject) => {
-                supertest
-                  .post(COMPLETE_API_URL)
-                  .set('kbn-xsrf', 'foo')
-                  .send({
-                    messages,
-                    connectorId,
-                    persist: true,
-                  })
-                  .end((err, response) => {
-                    if (err) {
-                      return reject(err);
-                    }
-                    return resolve(response);
-                  });
-              });
+      const simulator = await interceptor.waitForIntercept();
 
-              await titleSimulator.status(200);
-              await titleSimulator.next('My generated title');
-              await titleSimulator.complete();
+      await simulator.status(200);
+      const chunk = JSON.stringify(createOpenAiChunk('Hello'));
 
-              await chatSimulator.status(200);
-              await chatSimulator.next('Hello');
-              await chatSimulator.next(' again');
-              await chatSimulator.complete();
+      await simulator.write(`data: ${chunk.substring(0, 10)}`);
+      await simulator.write(`${chunk.substring(10)}\n`);
+      await simulator.complete();
 
-              const response = await responsePromise;
+      await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
 
-              return String(response.body)
-                .split('\n')
-                .map((line) => line.trim())
-                .filter(Boolean)
-                .map((line) => JSON.parse(line) as StreamingChatResponseEvent);
-            },
-            async ({ data }) => {
-              return new Promise((resolve) => {
-                const body: CreateChatCompletionRequest = JSON.parse(data);
-                resolve(body.messages.length !== 1);
-              });
-            }
-          );
-        },
-        async ({ data }) => {
-          return new Promise((resolve) => {
-            const body: CreateChatCompletionRequest = JSON.parse(data);
-            resolve(body.messages.length === 1);
-          });
-        }
-      );
+      const parsedChunks = receivedChunks
+        .join('')
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => JSON.parse(line) as StreamingChatResponseEvent);
 
-      expect(omit(lines[0], 'id')).to.eql({
+      expect(parsedChunks.length).to.be(2);
+      expect(omit(parsedChunks[0], 'id')).to.eql({
         type: StreamingChatResponseEventType.ChatCompletionChunk,
         message: {
           content: 'Hello',
         },
       });
-      expect(omit(lines[1], 'id')).to.eql({
-        type: StreamingChatResponseEventType.ChatCompletionChunk,
-        message: {
-          content: ' again',
-        },
-      });
-      expect(omit(lines[2], 'id', 'message.@timestamp')).to.eql({
+
+      expect(omit(parsedChunks[1], 'id', 'message.@timestamp')).to.eql({
         type: StreamingChatResponseEventType.MessageAdd,
         message: {
           message: {
-            content: 'Hello again',
+            content: 'Hello',
+            role: MessageRole.Assistant,
             function_call: {
-              arguments: '',
               name: '',
+              arguments: '',
               trigger: MessageRole.Assistant,
             },
-            role: MessageRole.Assistant,
           },
         },
       });
-      expect(omit(lines[3], 'conversation.id', 'conversation.last_updated')).to.eql({
-        type: StreamingChatResponseEventType.ConversationCreate,
-        conversation: {
-          title: 'My generated title',
-        },
+    });
+
+    describe('when creating a new conversation', async () => {
+      let lines: StreamingChatResponseEvent[];
+      before(async () => {
+        const titleInterceptor = proxy.intercept(
+          'title',
+          (body) => (JSON.parse(body) as CreateChatCompletionRequest).messages.length === 1
+        );
+
+        const conversationInterceptor = proxy.intercept(
+          'conversation',
+          (body) => (JSON.parse(body) as CreateChatCompletionRequest).messages.length !== 1
+        );
+
+        const responsePromise = new Promise<Response>((resolve, reject) => {
+          supertest
+            .post(COMPLETE_API_URL)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              messages,
+              connectorId,
+              persist: true,
+            })
+            .end((err, response) => {
+              if (err) {
+                return reject(err);
+              }
+              return resolve(response);
+            });
+        });
+
+        const [conversationSimulator, titleSimulator] = await Promise.all([
+          conversationInterceptor.waitForIntercept(),
+          titleInterceptor.waitForIntercept(),
+        ]);
+
+        await titleSimulator.status(200);
+        await titleSimulator.next('My generated title');
+        await titleSimulator.complete();
+
+        await conversationSimulator.status(200);
+        await conversationSimulator.next('Hello');
+        await conversationSimulator.next(' again');
+        await conversationSimulator.complete();
+
+        const response = await responsePromise;
+
+        lines = String(response.body)
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .map((line) => JSON.parse(line) as StreamingChatResponseEvent);
+      });
+
+      it('creates a new conversation', async () => {
+        expect(omit(lines[0], 'id')).to.eql({
+          type: StreamingChatResponseEventType.ChatCompletionChunk,
+          message: {
+            content: 'Hello',
+          },
+        });
+        expect(omit(lines[1], 'id')).to.eql({
+          type: StreamingChatResponseEventType.ChatCompletionChunk,
+          message: {
+            content: ' again',
+          },
+        });
+        expect(omit(lines[2], 'id', 'message.@timestamp')).to.eql({
+          type: StreamingChatResponseEventType.MessageAdd,
+          message: {
+            message: {
+              content: 'Hello again',
+              function_call: {
+                arguments: '',
+                name: '',
+                trigger: MessageRole.Assistant,
+              },
+              role: MessageRole.Assistant,
+            },
+          },
+        });
+        expect(omit(lines[3], 'conversation.id', 'conversation.last_updated')).to.eql({
+          type: StreamingChatResponseEventType.ConversationCreate,
+          conversation: {
+            title: 'My generated title',
+          },
+        });
+      });
+
+      after(async () => {
+        const createdConversationId = lines.filter(
+          (line): line is ConversationCreateEvent =>
+            line.type === StreamingChatResponseEventType.ConversationCreate
+        )[0]?.conversation.id;
+
+        await observabilityAIAssistantAPIClient
+          .writeUser({
+            endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+            params: {
+              path: {
+                conversationId: createdConversationId,
+              },
+            },
+          })
+          .expect(200);
       });
     });
 

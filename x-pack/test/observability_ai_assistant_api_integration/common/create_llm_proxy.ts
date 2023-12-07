@@ -10,15 +10,15 @@ import http, { type Server } from 'http';
 import { once, pull } from 'lodash';
 import { createOpenAiChunk } from './create_openai_chunk';
 
-type RequestHandler = (
-  request: http.IncomingMessage,
-  response: http.ServerResponse<http.IncomingMessage> & { req: http.IncomingMessage }
-) => void;
+type Request = http.IncomingMessage;
+type Response = http.ServerResponse<http.IncomingMessage> & { req: http.IncomingMessage };
 
-type RequestFilterFunction = ({}: {
-  request: http.IncomingMessage;
-  data: string;
-}) => Promise<boolean>;
+type RequestHandler = (request: Request, response: Response) => void;
+
+interface RequestInterceptor {
+  name: string;
+  when: (body: string) => boolean;
+}
 
 export interface LlmResponseSimulator {
   status: (code: number) => Promise<void>;
@@ -38,32 +38,33 @@ export interface LlmResponseSimulator {
 export class LlmProxy {
   server: Server;
 
-  requestHandlers: Array<{
-    filter?: RequestFilterFunction;
-    handler: RequestHandler;
-  }> = [];
+  interceptors: Array<RequestInterceptor & { handle: RequestHandler }> = [];
 
   constructor(private readonly port: number) {
     this.server = http
       .createServer(async (request, response) => {
-        const handlers = this.requestHandlers.concat();
-        for (let i = 0; i < handlers.length; i++) {
-          const handler = handlers[i];
-          let data: string = '';
-          await new Promise<void>((resolve, reject) => {
-            request.on('data', (chunk) => {
-              data += chunk.toString();
-            });
-            request.on('close', () => {
-              resolve();
-            });
+        const interceptors = this.interceptors.concat();
+
+        const body = await new Promise<string>((resolve, reject) => {
+          let concatenated = '';
+          request.on('data', (chunk) => {
+            concatenated += chunk.toString();
           });
-          if (!handler.filter || (await handler.filter({ data, request }))) {
-            pull(this.requestHandlers, handler);
-            handler.handler(request, response);
+          request.on('close', () => {
+            resolve(concatenated);
+          });
+        });
+
+        while (interceptors.length) {
+          const interceptor = interceptors.shift()!;
+          if (interceptor.when(body)) {
+            pull(this.interceptors, interceptor);
+            interceptor.handle(request, response);
             return;
           }
         }
+
+        throw new Error('No interceptors found to handle request');
       })
       .listen(port);
   }
@@ -72,79 +73,70 @@ export class LlmProxy {
     return this.port;
   }
 
+  clear() {
+    this.interceptors.length = 0;
+  }
+
   close() {
     this.server.close();
   }
 
-  respond<T>(
-    cb: (simulator: LlmResponseSimulator) => Promise<T>,
-    filter?: RequestFilterFunction
-  ): Promise<T> {
-    return Promise.race([
-      new Promise<T>((outerPromiseResolve, outerPromiseReject) => {
-        const requestHandlerPromise = new Promise<Parameters<RequestHandler>>((resolve) => {
-          this.requestHandlers.push({
-            filter,
-            handler: (request, response) => {
-              resolve([request, response]);
-            },
-          });
+  intercept(
+    name: string,
+    when: RequestInterceptor['when']
+  ): {
+    waitForIntercept: () => Promise<LlmResponseSimulator>;
+  } {
+    const waitForInterceptPromise = Promise.race([
+      new Promise<LlmResponseSimulator>((outerResolve, outerReject) => {
+        this.interceptors.push({
+          name,
+          when,
+          handle: (request, response) => {
+            function write(chunk: string) {
+              return new Promise<void>((resolve) => response.write(chunk, () => resolve()));
+            }
+            function end() {
+              return new Promise<void>((resolve) => response.end(resolve));
+            }
+
+            const simulator: LlmResponseSimulator = {
+              status: once(async (status: number) => {
+                response.writeHead(status, {
+                  'Content-Type': 'text/event-stream',
+                  'Cache-Control': 'no-cache',
+                  Connection: 'keep-alive',
+                });
+              }),
+              next: (msg) => {
+                const chunk = createOpenAiChunk(msg);
+                return write(`data: ${JSON.stringify(chunk)}\n`);
+              },
+              write: (chunk: string) => {
+                return write(chunk);
+              },
+              complete: async () => {
+                await write('data: [DONE]');
+                await end();
+              },
+              error: async (error) => {
+                await write(`data: ${JSON.stringify({ error })}`);
+                await end();
+              },
+            };
+
+            outerResolve(simulator);
+          },
         });
-
-        function write(chunk: string) {
-          return withResponse(
-            (response) => new Promise<void>((resolve) => response.write(chunk, () => resolve()))
-          );
-        }
-        function end() {
-          return withResponse((response) => {
-            return new Promise<void>((resolve) => response.end(resolve));
-          });
-        }
-
-        function withResponse(responseCb: (response: Parameters<RequestHandler>[1]) => void) {
-          return requestHandlerPromise.then(([request, response]) => {
-            return responseCb(response);
-          });
-        }
-
-        cb({
-          status: once((status: number) => {
-            return withResponse((response) => {
-              response.writeHead(status, {
-                'Content-Type': 'text/event-stream',
-                'Cache-Control': 'no-cache',
-                Connection: 'keep-alive',
-              });
-            });
-          }),
-          next: (msg) => {
-            const chunk = createOpenAiChunk(msg);
-            return write(`data: ${JSON.stringify(chunk)}\n`);
-          },
-          write: (chunk: string) => {
-            return write(chunk);
-          },
-          complete: async () => {
-            await write('data: [DONE]');
-            await end();
-          },
-          error: async (error) => {
-            await write(`data: ${JSON.stringify({ error })}`);
-            await end();
-          },
-        })
-          .then((result) => {
-            outerPromiseResolve(result);
-          })
-          .catch((err) => {
-            outerPromiseReject(err);
-          });
       }),
-      new Promise<T>((_, reject) => {
+      new Promise<LlmResponseSimulator>((_, reject) => {
         setTimeout(() => reject(new Error('Operation timed out')), 5000);
       }),
     ]);
+
+    return {
+      waitForIntercept: () => waitForInterceptPromise,
+    };
   }
 }
 
