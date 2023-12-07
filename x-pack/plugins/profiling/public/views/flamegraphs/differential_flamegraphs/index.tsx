@@ -131,8 +131,8 @@ export function DifferentialFlameGraphsView() {
                     totalCPU: state.data.primaryFlamegraph.TotalCPU,
                     totalCount: state.data.primaryFlamegraph.TotalSamples,
                     scaleFactor: isNormalizedByTime ? baselineTime : baseline,
-                    totalAnnualCO2Kgs: state.data.primaryFlamegraph.TotalAnnualCO2Kgs,
-                    totalAnnualCostUSD: state.data.primaryFlamegraph.TotalAnnualCostsUSD,
+                    totalAnnualCO2Kgs: state.data.primaryFlamegraph.TotalAnnualCO2KgsItems[0],
+                    totalAnnualCostUSD: state.data.primaryFlamegraph.TotalAnnualCostsUSDItems[0],
                   }
                 : undefined
             }
@@ -144,8 +144,8 @@ export function DifferentialFlameGraphsView() {
                     totalCPU: state.data.comparisonFlamegraph.TotalCPU,
                     totalCount: state.data.comparisonFlamegraph.TotalSamples,
                     scaleFactor: isNormalizedByTime ? comparisonTime : comparison,
-                    totalAnnualCO2Kgs: state.data.comparisonFlamegraph.TotalAnnualCO2Kgs,
-                    totalAnnualCostUSD: state.data.comparisonFlamegraph.TotalAnnualCostsUSD,
+                    totalAnnualCO2Kgs: state.data.comparisonFlamegraph.TotalAnnualCO2KgsItems[0],
+                    totalAnnualCostUSD: state.data.comparisonFlamegraph.TotalAnnualCostsUSDItems[0],
                   }
                 : undefined
             }
