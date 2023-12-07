@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
     categories: [
       {
         category: {
-          job_id: 'test_top_cat',
+          job_id: catJobId,
           category_id: 3,
           terms:
             'failed to execute bulk item index index testing-twitter-pycon-realtime doc source n/a actual length max length',
@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
       },
       {
         category: {
-          job_id: 'test_top_cat',
+          job_id: catJobId,
           category_id: 4,
           terms: 'creating index cause api templates shards mappings doc',
           regex: '.*?creating.+?index.+?cause.+?api.+?templates.+?shards.+?mappings.+?doc.*',
@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
       },
       {
         category: {
-          job_id: 'test_top_cat',
+          job_id: catJobId,
           category_id: 9,
           terms: 'All shards failed for phase query',
           regex: '.*?All.+?shards.+?failed.+?for.+?phase.+?query.*',
@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
       },
       {
         category: {
-          job_id: 'test_top_cat',
+          job_id: catJobId,
           category_id: 8,
           terms: 'snapshot pycon-twitter-daily-backup started',
           regex: '.*?snapshot.+?pycon-twitter-daily-backup.+?started.*',
@@ -139,7 +139,7 @@ export default ({ getService }: FtrProviderContext) => {
       },
       {
         category: {
-          job_id: 'test_top_cat',
+          job_id: catJobId,
           category_id: 5,
           terms: 'INFO o.e.m.j.JvmGcMonitorService node-1 gc overhead spent collecting in the last',
           regex:
