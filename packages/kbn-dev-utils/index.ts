@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-// test comment
-
 export {
   CA_CERT_PATH,
   CA_TRUSTED_FINGERPRINT,
