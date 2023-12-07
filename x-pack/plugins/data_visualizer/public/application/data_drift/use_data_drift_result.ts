@@ -29,7 +29,7 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { computeChi2PValue, type Histogram } from '@kbn/ml-chi2test';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 
-import type { AggregationsRangeBucketKeys } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsMultiTermsBucketKeys } from '@elastic/elasticsearch/lib/api/types';
 import { createMergedEsQuery } from '../index_data_visualizer/utils/saved_search_utils';
 import { useDataVisualizerKibana } from '../kibana_context';
 
@@ -459,12 +459,19 @@ const fetchComparisonDriftedData = async ({
   );
 
   const fieldsWithNoOverlap = new Set<string>();
+  const rangesAggs = rangesResp?.aggregations?.sample
+    ? rangesResp.aggregations.sample
+    : rangesResp?.aggregations;
   for (const { field } of fields) {
-    if (rangesResp.aggregations[`${field}_ranges`]) {
-      const buckets = rangesResp.aggregations[`${field}_ranges`]
-        .buckets as AggregationsRangeBucketKeys[];
+    if (
+      isPopulatedObject<
+        string,
+        estypes.AggregationsMultiBucketAggregateBase<AggregationsMultiTermsBucketKeys>
+      >(rangesAggs, [`${field}_ranges`])
+    ) {
+      const buckets = rangesAggs[`${field}_ranges`].buckets;
 
-      if (buckets) {
+      if (Array.isArray(buckets)) {
         const totalSumOfAllBuckets = buckets.reduce((acc, bucket) => acc + bucket.doc_count, 0);
 
         const fractions = buckets.map((bucket) => ({
@@ -475,7 +482,7 @@ const fetchComparisonDriftedData = async ({
         if (totalSumOfAllBuckets > 0) {
           driftedRequestAggs[`${field}_ks_test`] = {
             bucket_count_ks_test: {
-              buckets_path: `${field}_ranges>_count`,
+              buckets_path: `${field}_ranges > _count`,
               alternative: ['two_sided'],
               ...(totalSumOfAllBuckets > 0
                 ? { fractions: fractions.map((bucket) => Number(bucket.fraction.toFixed(3))) }
@@ -870,6 +877,7 @@ export const useFetchDataComparisonResult = (
                 signal,
               }),
           });
+
           if (isReturnedError(driftedRespAggs)) {
             setResult({
               data: undefined,

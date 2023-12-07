@@ -814,6 +814,23 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.ProfilingEmptyState",
+        "type": "Function",
+        "tags": [],
+        "label": "ProfilingEmptyState",
+        "description": [],
+        "signature": [
+          "() => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/profiling_empty_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.Prompt",
         "type": "Function",
         "tags": [],
@@ -2553,20 +2570,6 @@
             "label": "cls",
             "description": [],
             "signature": [
-              "number | null"
-            ],
-            "path": "x-pack/plugins/observability_shared/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-public.UXMetrics.fid",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "fid",
-            "description": [],
-            "signature": [
               "number | null | undefined"
             ],
             "path": "x-pack/plugins/observability_shared/public/types.ts",
@@ -2594,6 +2597,9 @@
             "tags": [],
             "label": "tbt",
             "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/observability_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2619,6 +2625,9 @@
             "tags": [],
             "label": "coreVitalPages",
             "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/observability_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2631,21 +2640,7 @@
             "label": "lcpRanks",
             "description": [],
             "signature": [
-              "number[]"
-            ],
-            "path": "x-pack/plugins/observability_shared/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-public.UXMetrics.fidRanks",
-            "type": "Array",
-            "tags": [],
-            "label": "fidRanks",
-            "description": [],
-            "signature": [
-              "number[]"
+              "number[] | undefined"
             ],
             "path": "x-pack/plugins/observability_shared/public/types.ts",
             "deprecated": false,
@@ -2659,7 +2654,49 @@
             "label": "clsRanks",
             "description": [],
             "signature": [
-              "number[]"
+              "number[] | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.UXMetrics.inp",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "inp",
+            "description": [],
+            "signature": [
+              "number | null | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.UXMetrics.hasINP",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasINP",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.UXMetrics.inpRanks",
+            "type": "Array",
+            "tags": [],
+            "label": "inpRanks",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
             ],
             "path": "x-pack/plugins/observability_shared/public/types.ts",
             "deprecated": false,

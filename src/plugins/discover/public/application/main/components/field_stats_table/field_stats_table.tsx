@@ -20,6 +20,8 @@ import {
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { DiscoverStateContainer } from '../../services/discover_state';
@@ -120,7 +122,9 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     trackUiMetric,
     searchSessionId,
   } = props;
-  const totalHits$ = stateContainer?.dataState.data$.totalHits$;
+  const totalHits = useObservable(stateContainer?.dataState.data$.totalHits$ ?? of(undefined));
+  const totalDocuments = useMemo(() => totalHits?.result, [totalHits]);
+
   const services = useDiscoverServices();
   const [embeddable, setEmbeddable] = useState<
     | ErrorEmbeddable
@@ -173,7 +177,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         onAddFilter,
         sessionId: searchSessionId,
         fieldsToFetch: stateContainer?.dataState.data$.availableFields$?.getValue().fields,
-        totalDocuments: totalHits$ ? totalHits$.getValue()?.result : undefined,
+        totalDocuments,
         samplingOption: {
           mode: 'normal_sampling',
           shardSize: 5000,
@@ -191,7 +195,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     filters,
     onAddFilter,
     searchSessionId,
-    totalHits$,
+    totalDocuments,
     stateContainer,
   ]);
 
