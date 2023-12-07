@@ -115,7 +115,7 @@ export const deleteEndpointExceptionList = () => {
 
 export const deleteTimelines = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  rootRequest({
+  return rootRequest({
     method: 'POST',
     url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
     body: {
