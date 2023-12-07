@@ -17,7 +17,6 @@ import { Role, User } from './types';
 const log = new ToolingLog();
 
 const cookieInstance = Cookie.parse('sid=kbn_cookie_value; Path=/; Expires=Wed, 01 Oct 2023 07:00:00 GMT')!;
-cookieInstance.cookieString;
 const email = 'testuser@elastic.com';
 const fullname = 'Test User';
 
@@ -42,7 +41,6 @@ const get = jest.fn();
 
 beforeEach(() => {
   jest.resetAllMocks();
-
   jest.requireMock('../kbn_client/kbn_client').KbnClient.mockImplementation(() => ({ version: { get } }));
   get.mockImplementationOnce(() => Promise.resolve('8.12.0'));
 
@@ -122,7 +120,7 @@ describe('SamlSessionManager', () => {
         expect(credentials).toEqual({Cookie: `${cloudCookieInstance.cookieString()}`});
       });
     
-      test(`'getSessionCookieForRole' should call 'createLocalSAMLSession' only once for the same role`, async () => {
+      test(`'getSessionCookieForRole' should call 'createCloudSAMLSession' only once for the same role`, async () => {
         const samlSessionManager = new SamlSessionManager({hostOptions, log, isCloud});
         await samlSessionManager.getSessionCookieForRole('viewer');
         await samlSessionManager.getSessionCookieForRole('admin');
@@ -135,12 +133,6 @@ describe('SamlSessionManager', () => {
         const samlSessionManager = new SamlSessionManager({hostOptions, log, isCloud});
         const data = await samlSessionManager.getUserData('viewer');
         expect(data).toEqual({email: cloudEmail, fullname: cloudFullname})
-      });
-
-      test(`'getSessionCookieForRole' throws error when roles does not exist`, async () => {
-        const nonExistingRole = 'tester';
-        const samlSessionManager = new SamlSessionManager({hostOptions, log, isCloud});
-        await expect(samlSessionManager.getSessionCookieForRole(nonExistingRole)).rejects.toThrow(`User with '${nonExistingRole}' role is not defined`);
       });
 
       test(`throws error when roles does not exist`, async () => {
