@@ -270,30 +270,13 @@ export const ControlGroupStrings = {
     },
     /** TODO: These translations aren't used but they will be once https://github.com/elastic/kibana/issues/162985 is resolved */
     querySync: {
-      getQuerySettingsTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.searchSettingsTitle', {
-          defaultMessage: 'Sync with query bar',
+      getUseGlobalFiltersTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.useGlobalFilters', {
+          defaultMessage: 'Apply global filters to controls',
         }),
-      getQuerySettingsSubtitle: () =>
-        i18n.translate('controls.controlGroup.management.query.useAllSearchSettingsTitle', {
-          defaultMessage:
-            'Keeps the control group in sync with the query bar by applying time range, filter pills, and queries from the query bar',
-        }),
-      getAdvancedSettingsTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.advancedSettings', {
-          defaultMessage: 'Advanced',
-        }),
-      getIgnoreTimerangeTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.ignoreTimerange', {
-          defaultMessage: 'Ignore timerange',
-        }),
-      getIgnoreQueryTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.ignoreQuery', {
-          defaultMessage: 'Ignore query bar',
-        }),
-      getIgnoreFilterPillsTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.ignoreFilterPills', {
-          defaultMessage: 'Ignore filter pills',
+      getUseGlobalTimeRangeTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.useGlobalTimeRange', {
+          defaultMessage: 'Apply global time range to controls',
         }),
     },
   },
