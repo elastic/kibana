@@ -10,7 +10,7 @@ import mockFs from 'mock-fs';
 import { existsSync, readdirSync } from 'fs';
 import { chromium } from '../chromium';
 import { download } from './download';
-import { md5 } from './checksum';
+import { sha256 } from './checksum';
 import { ensureBrowserDownloaded } from './ensure_downloaded';
 import { LevelLogger } from '../../lib';
 
@@ -28,18 +28,18 @@ describe.skip('ensureBrowserDownloaded', () => {
       warning: jest.fn(),
     } as unknown as typeof logger;
 
-    (md5 as jest.MockedFunction<typeof md5>).mockImplementation(
+    (sha256 as jest.MockedFunction<typeof sha256>).mockImplementation(
       async (packagePath) =>
         chromium.paths.packages.find(
           (packageInfo) => chromium.paths.resolvePath(packageInfo) === packagePath
-        )?.archiveChecksum ?? 'some-md5'
+        )?.archiveChecksum ?? 'some-sha256'
     );
 
     (download as jest.MockedFunction<typeof download>).mockImplementation(
       async (_url, packagePath) =>
         chromium.paths.packages.find(
           (packageInfo) => chromium.paths.resolvePath(packageInfo) === packagePath
-        )?.archiveChecksum ?? 'some-md5'
+        )?.archiveChecksum ?? 'some-sha256'
     );
 
     mockFs();
@@ -73,8 +73,8 @@ describe.skip('ensureBrowserDownloaded', () => {
     await expect(ensureBrowserDownloaded(logger)).rejects.toBeInstanceOf(Error);
   });
 
-  it('should reject when downloaded md5 hash is different', async () => {
-    (download as jest.MockedFunction<typeof download>).mockResolvedValue('random-md5');
+  it('should reject when downloaded sha256 hash is different', async () => {
+    (download as jest.MockedFunction<typeof download>).mockResolvedValue('random-sha256');
 
     await expect(ensureBrowserDownloaded(logger)).rejects.toBeInstanceOf(Error);
   });
@@ -110,8 +110,8 @@ describe.skip('ensureBrowserDownloaded', () => {
       ]);
     });
 
-    it('should download again if md5 hash different', async () => {
-      (md5 as jest.MockedFunction<typeof md5>).mockResolvedValueOnce('random-md5');
+    it('should download again if sha256 hash different', async () => {
+      (sha256 as jest.MockedFunction<typeof sha256>).mockResolvedValueOnce('random-sha256');
       await ensureBrowserDownloaded(logger);
 
       expect(download).toHaveBeenCalledTimes(1);

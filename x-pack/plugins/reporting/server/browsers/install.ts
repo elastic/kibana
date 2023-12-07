@@ -12,7 +12,7 @@ import * as Rx from 'rxjs';
 import { GenericLevelLogger } from '../lib/level_logger';
 import { ChromiumArchivePaths } from './chromium';
 import { ensureBrowserDownloaded } from './download';
-import { md5 } from './download/checksum';
+import { sha256 } from './download/checksum';
 import { extract } from './extract';
 
 /**
@@ -36,7 +36,7 @@ export function installBrowser(
 
   const backgroundInstall = async () => {
     const binaryPath = paths.getBinaryPath(pkg);
-    const binaryChecksum = await md5(binaryPath).catch(() => '');
+    const binaryChecksum = await sha256(binaryPath).catch(() => '');
 
     if (binaryChecksum !== pkg.binaryChecksum) {
       logger.warning(

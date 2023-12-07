@@ -4170,10 +4170,10 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@puppeteer/browsers@1.7.1":
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/@puppeteer/browsers/-/browsers-1.7.1.tgz#04f1e3aec4b87f50a7acc8f64be2149bda014f0a"
-  integrity sha512-nIb8SOBgDEMFY2iS2MdnUZOg2ikcYchRrBoF+wtdjieRFKR2uGRipHY/oFLo+2N6anDualyClPzGywTHRGrLfw==
+"@puppeteer/browsers@1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@puppeteer/browsers/-/browsers-1.8.0.tgz#fb6ee61de15e7f0e67737aea9f9bab1512dbd7d8"
+  integrity sha512-TkRHIV6k2D8OlUe8RtG+5jgOF/H98Myx0M6AOafC8DdNVOFiBSFa5cpRDtpm8LXOa9sVwe0+e6Q3FC56X/DZfg==
   dependencies:
     debug "4.3.4"
     extract-zip "2.0.1"
@@ -4181,7 +4181,7 @@
     proxy-agent "6.3.1"
     tar-fs "3.0.4"
     unbzip2-stream "1.4.3"
-    yargs "17.7.1"
+    yargs "17.7.2"
 
 "@redux-saga/core@^1.1.3":
   version "1.1.3"
@@ -7916,7 +7916,7 @@ ansi-styles@^2.0.1, ansi-styles@^2.2.1:
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-2.2.1.tgz#b432dd3358b634cf75e1e4664368240533c1ddbe"
   integrity sha1-tDLdM1i2NM914eRmQ2gkBTPB3b4=
 
-ansi-styles@^3.2.0, ansi-styles@^3.2.1:
+ansi-styles@^3.2.1:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-3.2.1.tgz#41fbb20243e50b12be0f04b8dedbf07520ce841d"
   integrity sha512-VT0ZI6kZRdTh8YyJw3SMbYm/u+NqfsAxEpWO0Pf9sq8/e94WxxOpPKx9FR1FlyCtOVDNOQ+8ntlqFxiRc+r5qA==
@@ -7934,11 +7934,6 @@ ansi-styles@^5.0.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-5.2.0.tgz#07449690ad45777d1924ac2abb2fc8895dba836b"
   integrity sha512-Cxwpt2SfTzTtXcfOlzGEee8O+c+MmUgGrNiBcXnuWxuFJHe6a5Hz7qwhwe5OgaSYI0IJvkLqWX1ASG+cJOkEiA==
-
-ansi-styles@^6.1.0:
-  version "6.2.1"
-  resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-6.2.1.tgz#0e62320cf99c21afff3b3012192546aacbfb05c5"
-  integrity sha512-bN798gFfQX+viw3R7yrGWRqnrN2oRkEkUjjl4JNn4E8GxxbjtG3FbrEIIY3l8/hrwUwIeCZvi4QuOTP4MErVug==
 
 ansi-to-html@^0.6.11:
   version "0.6.13"
@@ -9999,10 +9994,10 @@ chromedriver@^119.0.1:
     proxy-from-env "^1.1.0"
     tcp-port-used "^1.0.2"
 
-chromium-bidi@0.4.28:
-  version "0.4.28"
-  resolved "https://registry.yarnpkg.com/chromium-bidi/-/chromium-bidi-0.4.28.tgz#05befef4f3f19003198237245780d1c60e6f4dbc"
-  integrity sha512-2HZ74QlAApJrEwcGlU/sUu0s4VS+FI3CJ09Toc9aE9VemMyhHZXeaROQgJKNRaYMUTUx6qIv1cLBs3F+vfgjSw==
+chromium-bidi@0.4.33:
+  version "0.4.33"
+  resolved "https://registry.yarnpkg.com/chromium-bidi/-/chromium-bidi-0.4.33.tgz#9a9aba5a5b07118c8e7d6405f8ee79f47418dd1d"
+  integrity sha512-IxoFM5WGQOIAd95qrSXzJUv4eXIrh+RvU3rwwqIiwYuvfE7U/Llj4fejbsJnjJMUYCuGtVQsY2gv7oGl4aTNSQ==
   dependencies:
     mitt "3.0.1"
     urlpattern-polyfill "9.0.0"
@@ -12261,10 +12256,10 @@ detective@^5.0.2:
     defined "^1.0.0"
     minimist "^1.1.1"
 
-devtools-protocol@0.0.1179426:
-  version "0.0.1179426"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1179426.tgz#c4c3ee671efae868395569123002facbbbffa267"
-  integrity sha512-KKC7IGwdOr7u9kTGgjUvGTov/z1s2H7oHi3zKCdR9eSDyCPia5CBi4aRhtp7d8uR7l0GS5UTDw3TjKGu5CqINg==
+devtools-protocol@0.0.1203626:
+  version "0.0.1203626"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1203626.tgz#4366a4c81a7e0d4fd6924e9182c67f1e5941e820"
+  integrity sha512-nEzHZteIUZfGCZtTiS1fRpC8UZmsfD1SiyPvaUNvS13dvKf666OAm8YTi0+Ca3n1nLEyu49Cy4+dPWpaHFJk9g==
 
 dezalgo@^1.0.0, dezalgo@^1.0.4:
   version "1.0.4"
@@ -23236,26 +23231,26 @@ pupa@^2.1.1:
   dependencies:
     escape-goat "^2.0.0"
 
-puppeteer-core@21.3.6:
-  version "21.3.6"
-  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-21.3.6.tgz#5507fafb790692ff887e368de71a1c5a0d08af1e"
-  integrity sha512-ZH6tjTdRXwW2fx5W3jBbG+yUVQdDfZW1kjfwvWwMzsnKEli5ZwV70Zp97GOebHQHrK8zM3vX5VqI9sd48c9PnQ==
+puppeteer-core@21.5.2:
+  version "21.5.2"
+  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-21.5.2.tgz#6d3de4efb2ae65f1ee072043787b75594e88035f"
+  integrity sha512-v4T0cWnujSKs+iEfmb8ccd7u4/x8oblEyKqplqKnJ582Kw8PewYAWvkH4qUWhitN3O2q9RF7dzkvjyK5HbzjLA==
   dependencies:
-    "@puppeteer/browsers" "1.7.1"
-    chromium-bidi "0.4.28"
+    "@puppeteer/browsers" "1.8.0"
+    chromium-bidi "0.4.33"
     cross-fetch "4.0.0"
     debug "4.3.4"
-    devtools-protocol "0.0.1179426"
+    devtools-protocol "0.0.1203626"
     ws "8.14.2"
 
-puppeteer@21.3.6:
-  version "21.3.6"
-  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-21.3.6.tgz#961a44cd532ab5344ed53d7714aa56b4602ace10"
-  integrity sha512-ulK9+KLvdaVsG0EKbKyw/DCXCz88rsnrvIJg9tY8AmkGR01AxI4ZJTH9BJl1OE7cLfh2vxjBvY+xfvJod6rfgw==
+puppeteer@21.5.2:
+  version "21.5.2"
+  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-21.5.2.tgz#0a4a72175c0fd0944d6486f4734807e1671d527b"
+  integrity sha512-BaAGJOq8Fl6/cck6obmwaNLksuY0Bg/lIahCLhJPGXBFUD2mCffypa4A592MaWnDcye7eaHmSK9yot0pxctY8A==
   dependencies:
-    "@puppeteer/browsers" "1.7.1"
+    "@puppeteer/browsers" "1.8.0"
     cosmiconfig "8.3.6"
-    puppeteer-core "21.3.6"
+    puppeteer-core "21.5.2"
 
 pure-rand@^6.0.0:
   version "6.0.2"
@@ -26589,14 +26584,6 @@ string-width@^1.0.1, string-width@^1.0.2:
     is-fullwidth-code-point "^3.0.0"
     strip-ansi "^6.0.0"
 
-string-width@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/string-width/-/string-width-2.1.1.tgz#ab93f27a8dc13d28cac815c462143a6d9012ae9e"
-  integrity sha512-nOqH59deCq9SRHlxq1Aw85Jnt4w6KvLKqWVik6oA9ZklXLNIOlqg4F2yrT1MVaTjAqvVwdfeZ7w7aCvJD7ugkw==
-  dependencies:
-    is-fullwidth-code-point "^2.0.0"
-    strip-ansi "^4.0.0"
-
 string-width@^3.0.0, string-width@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-3.1.0.tgz#22767be21b62af1081574306f69ac51b62203961"
@@ -26606,7 +26593,7 @@ string-width@^3.0.0, string-width@^3.1.0:
     is-fullwidth-code-point "^2.0.0"
     strip-ansi "^5.1.0"
 
-string-width@^5.0.1, string-width@^5.1.2:
+string-width@^5.1.2:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-5.1.2.tgz#14f8daec6d81e7221d2a357e668cab73bdbca794"
   integrity sha512-HnLOCR3vjcY8beoNLtcjZ5/nxn2afmME6lhrDrebokqMap+XbeW8n9TXpPDOqdGK5qcI3oT0GKTW6wC7EMiVqA==
@@ -26713,7 +26700,7 @@ stringify-object@^3.2.1:
   dependencies:
     ansi-regex "^5.0.1"
 
-strip-ansi@5.2.0, strip-ansi@^5.0.0, strip-ansi@^5.1.0, strip-ansi@^5.2.0:
+strip-ansi@5.2.0, strip-ansi@^5.1.0, strip-ansi@^5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-5.2.0.tgz#8c9a536feb6afc962bdfa5b104a5091c1ad9c0ae"
   integrity sha512-DuRs1gKbBqsMKIZlrffwlug8MHkcnpjs5VPmL1PAh+mA30U0DTotfDZ0d2UUsXpPmPmMMJ6W773MaA3J+lbiWA==
@@ -26726,13 +26713,6 @@ strip-ansi@^3.0.0, strip-ansi@^3.0.1:
   integrity sha1-ajhfuIU9lS1f8F0Oiq+UJ43GPc8=
   dependencies:
     ansi-regex "^2.0.0"
-
-strip-ansi@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-4.0.0.tgz#a8479022eb1ac368a871389b635262c505ee368f"
-  integrity sha1-qEeQIusaw2iocTibY1JixQXuNo8=
-  dependencies:
-    ansi-regex "^3.0.0"
 
 strip-ansi@^7.0.1:
   version "7.1.0"
@@ -29857,7 +29837,7 @@ workerpool@6.2.1:
   resolved "https://registry.yarnpkg.com/workerpool/-/workerpool-6.2.1.tgz#46fc150c17d826b86a008e5a4508656777e9c343"
   integrity sha512-ILEIE97kDZvF9Wb9f6h5aXK4swSlKGUcOEGiIYb2OOu/IrDU9iwj0fD//SsA6E5ibwJxpEvhullJY4Sl4GcpAw==
 
-"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
+"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@7.0.0, wrap-ansi@^2.0.0, wrap-ansi@^3.0.1, wrap-ansi@^5.1.0, wrap-ansi@^6.2.0, wrap-ansi@^7.0.0, wrap-ansi@^8.1.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
@@ -29865,49 +29845,6 @@ workerpool@6.2.1:
     ansi-styles "^4.0.0"
     string-width "^4.1.0"
     strip-ansi "^6.0.0"
-
-wrap-ansi@^2.0.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-2.1.0.tgz#d8fc3d284dd05794fe84973caecdd1cf824fdd85"
-  integrity sha1-2Pw9KE3QV5T+hJc8rs3Rz4JP3YU=
-  dependencies:
-    string-width "^1.0.1"
-    strip-ansi "^3.0.1"
-
-wrap-ansi@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-3.0.1.tgz#288a04d87eda5c286e060dfe8f135ce8d007f8ba"
-  integrity sha1-KIoE2H7aXChuBg3+jxNc6NAH+Lo=
-  dependencies:
-    string-width "^2.1.1"
-    strip-ansi "^4.0.0"
-
-wrap-ansi@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-5.1.0.tgz#1fd1f67235d5b6d0fee781056001bfb694c03b09"
-  integrity sha512-QC1/iN/2/RPVJ5jYK8BGttj5z83LmSKmvbvrXPNCLZSEb32KKVDJDl/MOt2N01qU2H/FkzEa9PKto1BqDjtd7Q==
-  dependencies:
-    ansi-styles "^3.2.0"
-    string-width "^3.0.0"
-    strip-ansi "^5.0.0"
-
-wrap-ansi@^6.2.0:
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-6.2.0.tgz#e9393ba07102e6c91a3b221478f0257cd2856e53"
-  integrity sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==
-  dependencies:
-    ansi-styles "^4.0.0"
-    string-width "^4.1.0"
-    strip-ansi "^6.0.0"
-
-wrap-ansi@^8.1.0:
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-8.1.0.tgz#56dc22368ee570face1b49819975d9b9a5ead214"
-  integrity sha512-si7QWI6zUMq56bESFvagtmzMdGOtoxfR+Sez11Mobfc7tm+VkUckk9bW2UeffTGVUbOksxmSw0AA2gs8g71NCQ==
-  dependencies:
-    ansi-styles "^6.1.0"
-    string-width "^5.0.1"
-    strip-ansi "^7.0.1"
 
 wrappy@1:
   version "1.0.2"
@@ -30177,10 +30114,10 @@ yargs@16.2.0, yargs@^16.2.0:
     y18n "^5.0.5"
     yargs-parser "^20.2.2"
 
-yargs@17.7.1:
-  version "17.7.1"
-  resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.7.1.tgz#34a77645201d1a8fc5213ace787c220eabbd0967"
-  integrity sha512-cwiTb08Xuv5fqF4AovYacTFNxk62th7LKJ6BL9IGUpTJrWoU7/7WdQGTP2SjKf1dUNBGzDd28p/Yfs/GI6JrLw==
+yargs@17.7.2, yargs@^17.3.1:
+  version "17.7.2"
+  resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.7.2.tgz#991df39aca675a192b816e1e0363f9d75d2aa269"
+  integrity sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==
   dependencies:
     cliui "^8.0.1"
     escalade "^3.1.1"
@@ -30235,19 +30172,6 @@ yargs@^17.2.1, yargs@^17.6.0:
     string-width "^4.2.3"
     y18n "^5.0.5"
     yargs-parser "^21.0.0"
-
-yargs@^17.3.1:
-  version "17.7.2"
-  resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.7.2.tgz#991df39aca675a192b816e1e0363f9d75d2aa269"
-  integrity sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==
-  dependencies:
-    cliui "^8.0.1"
-    escalade "^3.1.1"
-    get-caller-file "^2.0.5"
-    require-directory "^2.1.1"
-    string-width "^4.2.3"
-    y18n "^5.0.5"
-    yargs-parser "^21.1.1"
 
 yargs@^3.15.0:
   version "3.32.0"
