@@ -221,18 +221,22 @@ export const waitForHostToEnroll = async (
   if (!awaitMetadata) {
     return found;
   }
-  log.info('Querying indicies');
+  log.info('Querying indices');
 
   log.info(
     JSON.stringify(
-      await esClient?.indices.getSettings({
-        index: ['.fleet-agents', '.metrics-endpoint.metadata_united_default'],
+      await esClient?.search({
+        index: [
+          '.fleet-agents',
+          '.metrics-endpoint.metadata_current_default',
+          '.metrics-endpoint.metadata_united_default',
+        ],
       }),
       null,
       2
     )
   );
-  log.info('Succesfully queries indicies.');
+  log.info('Successfully queried indices.');
 
   log.info(`Awaiting host to show up in Metadata`);
 
@@ -244,16 +248,6 @@ export const waitForHostToEnroll = async (
   let metadataFound: HostInfo | undefined;
 
   while (!metadataFound && !hasTimedOutMetadataLookup()) {
-    log.info(
-      JSON.stringify(
-        await esClient.transport.request({
-          method: 'GET',
-          path: `_transform/endpoint.metadata_united-default-8.11.0/_stats`,
-        }),
-        null,
-        2
-      )
-    );
     metadataFound = await retryOnError(
       async () =>
         fetchEndpointMetadataList(kbnClient).then((response) => {
