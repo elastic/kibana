@@ -6,15 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { FunctionRegistrationParameters } from '.';
 import { CorrelationsEventType } from '../../common/assistant/constants';
-import { callApmApi } from '../services/rest/create_call_apm_api';
+import { getApmCorrelationValues } from '../routes/assistant_functions/get_apm_correlation_values';
 
 export function registerGetApmCorrelationsFunction({
+  apmEventClient,
   registerFunction,
-}: {
-  registerFunction: RegisterFunctionDefinition;
-}) {
+}: FunctionRegistrationParameters) {
   registerFunction(
     {
       name: 'get_apm_correlations',
@@ -113,12 +112,12 @@ export function registerGetApmCorrelationsFunction({
       } as const,
     },
     async ({ arguments: args }, signal) => {
-      return callApmApi('POST /internal/apm/assistant/get_correlation_values', {
-        signal,
-        params: {
-          body: args,
-        },
-      });
+      return {
+        content: await getApmCorrelationValues({
+          arguments: args as any,
+          apmEventClient,
+        }),
+      };
     }
   );
 }

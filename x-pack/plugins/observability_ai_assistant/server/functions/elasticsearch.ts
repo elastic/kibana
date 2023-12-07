@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import type { Serializable } from '@kbn/utility-types';
-import type { RegisterFunctionDefinition } from '../../common/types';
-import type { ObservabilityAIAssistantService } from '../types';
+import type { FunctionRegistrationParameters } from '.';
 
 export function registerElasticsearchFunction({
-  service,
   registerFunction,
-}: {
-  service: ObservabilityAIAssistantService;
-  registerFunction: RegisterFunctionDefinition;
-}) {
+  resources,
+}: FunctionRegistrationParameters) {
   registerFunction(
     {
       name: 'elasticsearch',
@@ -43,19 +38,16 @@ export function registerElasticsearchFunction({
         required: ['method', 'path'] as const,
       },
     },
-    ({ arguments: { method, path, body } }, signal) => {
-      return service
-        .callApi(`POST /internal/observability_ai_assistant/functions/elasticsearch`, {
-          signal,
-          params: {
-            body: {
-              method,
-              path,
-              body,
-            },
-          },
-        })
-        .then((response) => ({ content: response as Serializable }));
+    async ({ arguments: { method, path, body } }) => {
+      const response = await (
+        await resources.context.core
+      ).elasticsearch.client.asCurrentUser.transport.request({
+        method,
+        path,
+        body,
+      });
+
+      return { content: response };
     }
   );
 }
