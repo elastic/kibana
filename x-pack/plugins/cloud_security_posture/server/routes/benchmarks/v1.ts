@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 import {
   PackagePolicyClient,
@@ -21,60 +20,48 @@ import {
 } from '../../lib/fleet_util';
 import { createBenchmarks } from './utilities';
 
-export const getBenchmark = async (
+export const getBenchmarks = async (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyClient,
   query: any,
   agentPolicyService: AgentPolicyServiceInterface,
   agentService: AgentService,
-  logger: Logger,
-  responseOk?: any,
-  responseError?: any
+  logger: Logger
 ) => {
   const excludeVulnMgmtPackages = true;
-  try {
-    const packagePolicies: ListResult<PackagePolicy> = await getCspPackagePolicies(
-      soClient,
-      packagePolicyService,
-      CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-      query,
-      POSTURE_TYPE_ALL,
-      excludeVulnMgmtPackages
-    );
 
-    const agentPolicies = await getCspAgentPolicies(
-      soClient,
-      packagePolicies.items,
-      agentPolicyService
-    );
+  const packagePolicies: ListResult<PackagePolicy> = await getCspPackagePolicies(
+    soClient,
+    packagePolicyService,
+    CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+    query,
+    POSTURE_TYPE_ALL,
+    excludeVulnMgmtPackages
+  );
 
-    const agentStatusesByAgentPolicyId = await getAgentStatusesByAgentPolicies(
-      agentService,
-      agentPolicies,
-      logger
-    );
+  const agentPolicies = await getCspAgentPolicies(
+    soClient,
+    packagePolicies.items,
+    agentPolicyService
+  );
 
-    const benchmarks = await createBenchmarks(
-      soClient,
-      agentPolicies,
-      agentStatusesByAgentPolicyId,
-      packagePolicies.items
-    );
+  const agentStatusesByAgentPolicyId = await getAgentStatusesByAgentPolicies(
+    agentService,
+    agentPolicies,
+    logger
+  );
 
-    const getBenchmarkResponse = {
-      ...packagePolicies,
-      items: benchmarks,
-    };
+  const benchmarks = await createBenchmarks(
+    soClient,
+    agentPolicies,
+    agentStatusesByAgentPolicyId,
+    packagePolicies.items
+  );
 
-    return responseOk({
-      body: getBenchmarkResponse,
-    });
-  } catch (err) {
-    const error = transformError(err);
-    logger.error(`Failed to fetch benchmarks ${err}`);
-    return responseError({
-      body: { message: error.message },
-      statusCode: error.statusCode,
-    });
-  }
+  const getBenchmarkResponse = {
+    ...packagePolicies,
+    items: benchmarks,
+  };
+
+  return getBenchmarkResponse;
 };

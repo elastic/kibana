@@ -77,12 +77,11 @@ export const createBenchmarks = (
   );
 };
 
-export const getBenchmarks = async (
+export const createBenchmarksV2 = async (
   soClient: SavedObjectsClientContract,
-  cspContext?: any
+  esClient?: any
 ): Promise<BenchmarkVersion2[]> => {
   // Returns a list of benchmark based on their Version and Benchmark ID
-  const esClient = cspContext.esClient.asCurrentUser;
   const benchmarksResponse = await soClient.find<CspRuleTemplate>({
     type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
     aggs: {

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { BENCHMARKS_ROUTE_PATH } from '../../../common/constants';
 import { benchmarksQueryParamsSchema } from '../../../common/schemas/benchmark';
 import { CspRouter } from '../../types';
-import { getBenchmark as benchmarkApi1 } from './v1';
-import { getBenchmark as benchmarkApi2 } from './v2';
+import { getBenchmarks as getBenchmarksV1 } from './v1';
+import { getBenchmarks as getBenchmarksV2 } from './v2';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
@@ -36,16 +37,26 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
           return response.forbidden();
         }
         const cspContext = await context.csp;
-        return benchmarkApi1(
-          cspContext.soClient,
-          cspContext.packagePolicyService,
-          request.query,
-          cspContext.agentPolicyService,
-          cspContext.agentService,
-          cspContext.logger,
-          response.ok,
-          response.customError
-        );
+        try {
+          const cspBenchmarks = await getBenchmarksV1(
+            cspContext.soClient,
+            cspContext.packagePolicyService,
+            request.query,
+            cspContext.agentPolicyService,
+            cspContext.agentService,
+            cspContext.logger
+          );
+          return response.ok({
+            body: cspBenchmarks,
+          });
+        } catch (err) {
+          const error = transformError(err);
+          cspContext.logger.error(`Failed to fetch benchmarks ${err}`);
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
+        }
       }
     )
     .addVersion(
@@ -62,16 +73,27 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
           return response.forbidden();
         }
         const cspContext = await context.csp;
-        return benchmarkApi2(
-          cspContext,
-          cspContext.soClient,
-          cspContext.packagePolicyService,
-          request.query,
-          cspContext.agentPolicyService,
-          cspContext.agentService,
-          cspContext.logger,
-          response.ok,
-          response.customError
-        );
+        const esClient = cspContext.esClient.asCurrentUser;
+        try {
+          const cspBenchmarks = await getBenchmarksV2(
+            esClient,
+            cspContext.soClient,
+            cspContext.packagePolicyService,
+            request.query,
+            cspContext.agentPolicyService,
+            cspContext.agentService,
+            cspContext.logger
+          );
+          return response.ok({
+            body: cspBenchmarks,
+          });
+        } catch (err) {
+          const error = transformError(err);
+          cspContext.logger.error(`Failed to fetch benchmarks ${err}`);
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
+        }
       }
     );
