@@ -6,15 +6,17 @@
  */
 
 import type { ResponseActionsClient } from './types';
+import type {
+  ResponseActionsClientUpdateCasesOptions,
+  ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
+  ResponseActionsClientWriteActionResponseToEndpointIndexOptions,
+} from './base_response_actions_client';
 import { ResponseActionsClientImpl } from './base_response_actions_client';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   ActionDetails,
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
-import type { ResponseActionsRequestBody } from '../../../../common/api/endpoint';
-import type { CreateActionPayload } from '../../services/actions/create/types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
@@ -26,12 +28,14 @@ import { ResponseActionsNotSupportedError } from '../../services/actions/clients
 import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { CasesByAlertIDParams } from '@kbn/cases-plugin/server/client/cases/get';
+import type { Logger } from '@kbn/logging';
 
 describe('`ResponseActionsClientImpl` class', () => {
   let esClient: ElasticsearchClientMock;
   let endpointAppContextService: EndpointAppContextService;
   let baseClassMock: MockClassWithExposedProtectedMembers;
   let casesClient: CasesClientMock;
+  let logger: Logger;
 
   beforeEach(async () => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
@@ -41,6 +45,7 @@ describe('`ResponseActionsClientImpl` class', () => {
     endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
     endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
 
+    logger = endpointAppContextService.createLogger();
     baseClassMock = new MockClassWithExposedProtectedMembers({
       esClient,
       casesClient,
@@ -74,6 +79,8 @@ describe('`ResponseActionsClientImpl` class', () => {
     const KNOWN_ALERT_ID_2 = 'alert-2';
     const KNOWN_ALERT_ID_3 = 'alert-3';
 
+    let updateCasesOptions: Required<ResponseActionsClientUpdateCasesOptions>;
+
     beforeEach(async () => {
       (casesClient.cases.getCasesByAlertID as jest.Mock).mockImplementation(
         async ({ alertID }: CasesByAlertIDParams) => {
@@ -92,17 +99,76 @@ describe('`ResponseActionsClientImpl` class', () => {
           throw new Error('test: alert id not found');
         }
       );
+
+      updateCasesOptions = {
+        command: 'isolate',
+        caseIds: ['case-999'],
+        alertIds: [KNOWN_ALERT_ID_1, KNOWN_ALERT_ID_2, KNOWN_ALERT_ID_3],
+        comment: 'this is a case comment',
+        hosts: [
+          {
+            hostId: '1-2-3',
+            hostname: 'foo-one',
+          },
+          {
+            hostId: '4-5-6',
+            hostname: 'foo-two',
+          },
+        ],
+      };
     });
 
-    it.todo('should do nothing if no caseIds nor alertIds are provided');
+    it('should do nothing if no caseIds nor alertIds are provided', async () => {
+      updateCasesOptions.caseIds.length = 0;
+      updateCasesOptions.alertIds.length = 0;
+      await baseClassMock.updateCases(updateCasesOptions);
 
-    it.todo('should do nothing if no hosts were provided');
+      expect(casesClient.cases.getCasesByAlertID).not.toHaveBeenCalled();
+      expect(casesClient.attachments.bulkCreate).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        "Nothing to do. 'caseIds' and 'alertIds' are empty"
+      );
+    });
 
-    it.todo('should do nothing if cases client was not provided');
+    it('should do nothing if no hosts were provided', async () => {
+      updateCasesOptions.hosts.length = 0;
+      await baseClassMock.updateCases(updateCasesOptions);
 
-    it.todo('should retrieve case IDs from alerts if alertIds was provided');
+      expect(casesClient.cases.getCasesByAlertID).not.toHaveBeenCalled();
+      expect(casesClient.attachments.bulkCreate).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith("Nothing to do. 'hosts' is empty");
+    });
 
-    it.todo('should not error is retrieving case id for alert fails');
+    it('should do nothing if cases client was not provided', async () => {
+      const mockInstance = new MockClassWithExposedProtectedMembers({
+        esClient,
+        endpointService: endpointAppContextService,
+        username: 'foo',
+      });
+      await mockInstance.updateCases(updateCasesOptions);
+
+      expect(casesClient.cases.getCasesByAlertID).not.toHaveBeenCalled();
+      expect(casesClient.attachments.bulkCreate).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'No CasesClient available. Skipping updates to Cases!'
+      );
+    });
+
+    it('should retrieve caseIds from alerts if alertIds was provided', async () => {
+      await baseClassMock.updateCases(updateCasesOptions);
+
+      expect(casesClient.cases.getCasesByAlertID).toHaveBeenCalledTimes(3);
+    });
+
+    it('should not error is retrieving case id for alert fails', async () => {
+      updateCasesOptions.alertIds.push('invalid-alert-id');
+      await baseClassMock.updateCases(updateCasesOptions);
+
+      expect(casesClient.cases.getCasesByAlertID).toHaveBeenCalledTimes(4);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringMatching(/Attempt to get cases for alertID \[invalid-alert-id\]/)
+      );
+    });
 
     it.todo('should do nothing if alertIDs were not associated with any cases');
 
@@ -137,26 +203,8 @@ describe('`ResponseActionsClientImpl` class', () => {
 });
 
 class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
-  public async updateCases({
-    command,
-    hosts,
-    caseIds = [],
-    alertIds = [],
-    comment = '',
-  }: {
-    command: ResponseActionsApiCommandNames;
-    hosts: Array<{ hostname: string; endpointId: string }>;
-    caseIds?: string[];
-    alertIds?: string[];
-    comment?: string;
-  }): Promise<void> {
-    return super.updateCases({
-      command,
-      hosts,
-      caseIds,
-      alertIds,
-      comment,
-    });
+  public async updateCases(options: ResponseActionsClientUpdateCasesOptions): Promise<void> {
+    return super.updateCases(options);
   }
 
   public async fetchActionDetails<T extends ActionDetails = ActionDetails>(
@@ -166,29 +214,14 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
   }
 
   public async writeActionRequestToEndpointIndex(
-    actionRequest: ResponseActionsRequestBody &
-      Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name'>
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
   ): Promise<LogsEndpointAction> {
     return super.writeActionRequestToEndpointIndex(actionRequest);
   }
 
-  public async writeActionResponseToEndpointIndex<TOutputContent extends object = object>({
-    actionId,
-    error,
-    agentId,
-    data,
-  }: { agentId: LogsEndpointActionResponse['agent']['id']; actionId: string } & Pick<
-    LogsEndpointActionResponse,
-    'error'
-  > &
-    Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>): Promise<
-    LogsEndpointActionResponse<TOutputContent>
-  > {
-    return super.writeActionResponseToEndpointIndex({
-      actionId,
-      error,
-      agentId,
-      data,
-    });
+  public async writeActionResponseToEndpointIndex<TOutputContent extends object = object>(
+    options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions
+  ): Promise<LogsEndpointActionResponse<TOutputContent>> {
+    return super.writeActionResponseToEndpointIndex<TOutputContent>(options);
   }
 }

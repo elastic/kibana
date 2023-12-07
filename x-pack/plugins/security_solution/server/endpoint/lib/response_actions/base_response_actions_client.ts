@@ -65,6 +65,33 @@ export interface ResponseActionsClientOptions {
   username: string;
 }
 
+export interface ResponseActionsClientUpdateCasesOptions {
+  /** The Response Action that was taken */
+  command: ResponseActionsApiCommandNames;
+  /** the list of hosts that received the response action `command` */
+  hosts: Array<{
+    hostname: string;
+    hostId: string;
+  }>;
+  caseIds?: string[];
+  /** If defined, any case that the alert is included in will also receive an update */
+  alertIds?: string[];
+  /** Comment to include in the Case attachment */
+  comment?: string;
+}
+
+export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
+  ResponseActionsRequestBody &
+    Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name'>;
+
+export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
+  TOutputContent extends object = object
+> = {
+  agentId: LogsEndpointActionResponse['agent']['id'];
+  actionId: string;
+} & Pick<LogsEndpointActionResponse, 'error'> &
+  Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>;
+
 /**
  * Base class for a Response Actions client
  */
@@ -93,20 +120,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
     caseIds = [],
     alertIds = [],
     comment = '',
-  }: {
-    /** The Response Action that was taken */
-    command: ResponseActionsApiCommandNames;
-    /** the list of hosts that received the response action `command` */
-    hosts: Array<{
-      hostname: string;
-      endpointId: string;
-    }>;
-    caseIds?: string[];
-    /** If defined, any case that the alert is included in will also receive an update */
-    alertIds?: string[];
-    /** Comment to include in the Case attachment */
-    comment?: string;
-  }): Promise<void> {
+  }: ResponseActionsClientUpdateCasesOptions): Promise<void> {
     if (caseIds.length === 0 && alertIds.length === 0) {
       this.log.debug(`Nothing to do. 'caseIds' and 'alertIds' are empty`);
       return;
@@ -147,6 +161,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
     const allCases = [...new Set([...caseIds, ...casesFromAlertIds])];
 
     if (allCases.length === 0) {
+      this.log.debug(`Nothing to do. Alert IDs are not tied to Cases`);
       return;
     }
 
@@ -157,7 +172,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
       type: AttachmentType.actions,
       comment,
       actions: {
-        targets: hosts,
+        targets: hosts.map(({ hostId: endpointId, hostname }) => ({ endpointId, hostname })),
         type: command,
       },
       owner: APP_ID,
@@ -203,8 +218,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
    * @protected
    */
   protected async writeActionRequestToEndpointIndex(
-    actionRequest: ResponseActionsRequestBody &
-      Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name'>
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
   ): Promise<LogsEndpointAction> {
     const doc: LogsEndpointAction = {
       '@timestamp': new Date().toISOString(),
@@ -272,11 +286,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
     error,
     agentId,
     data,
-  }: {
-    agentId: LogsEndpointActionResponse['agent']['id'];
-    actionId: string;
-  } & Pick<LogsEndpointActionResponse, 'error'> &
-    Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>): Promise<
+  }: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>): Promise<
     LogsEndpointActionResponse<TOutputContent>
   > {
     const timestamp = new Date().toISOString();
