@@ -61,7 +61,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/securitysolution-grouping",
-    "@kbn/cloud-security-posture-plugin"
   ],
   "exclude": ["target/**/*"]
 }
