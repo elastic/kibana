@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { i18n } from '@kbn/i18n';
-import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { callApmApi } from '../services/rest/create_call_apm_api';
+import type { FunctionRegistrationParameters } from '.';
+import { getApmAlertsClient } from '../lib/helpers/get_apm_alerts_client';
+import { getMlClient } from '../lib/helpers/get_ml_client';
+import { getApmServiceSummary } from '../routes/assistant_functions/get_apm_service_summary';
 import { NON_EMPTY_STRING } from '../utils/non_empty_string_ref';
 
 export function registerGetApmServiceSummaryFunction({
+  resources,
+  apmEventClient,
   registerFunction,
-}: {
-  registerFunction: RegisterFunctionDefinition;
-}) {
+}: FunctionRegistrationParameters) {
   registerFunction(
     {
       name: 'get_apm_service_summary',
@@ -58,12 +61,33 @@ alerts and anomalies.`,
       } as const,
     },
     async ({ arguments: args }, signal) => {
-      return callApmApi('GET /internal/apm/assistant/get_service_summary', {
-        signal,
-        params: {
-          query: args,
-        },
-      });
+      const { context, request, plugins, logger } = resources;
+
+      const [annotationsClient, esClient, apmAlertsClient, mlClient] =
+        await Promise.all([
+          plugins.observability.setup.getScopedAnnotationsClient(
+            context,
+            request
+          ),
+          context.core.then(
+            (coreContext): ElasticsearchClient =>
+              coreContext.elasticsearch.client.asCurrentUser
+          ),
+          getApmAlertsClient(resources),
+          getMlClient(resources),
+        ]);
+
+      return {
+        content: await getApmServiceSummary({
+          apmEventClient,
+          annotationsClient,
+          esClient,
+          apmAlertsClient,
+          mlClient,
+          logger,
+          arguments: args,
+        }),
+      };
     }
   );
 }
