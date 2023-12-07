@@ -5,21 +5,25 @@
  * 2.0.
  */
 
+import { decodeOrThrow, jsonRt } from '@kbn/io-ts-utils';
 import type { Serializable } from '@kbn/utility-types';
 import dedent from 'dedent';
-import { last, omit } from 'lodash';
-import { CreateChatCompletionResponse } from 'openai';
 import * as t from 'io-ts';
-import { decodeOrThrow, jsonRt } from '@kbn/io-ts-utils';
-import { Message, MessageRole, RegisterFunctionDefinition } from '../../common/types';
-import type { ObservabilityAIAssistantService } from '../types';
+import { last, omit } from 'lodash';
+import { lastValueFrom } from 'rxjs';
+import { MessageRole, type Message } from '../../common/types';
+import { concatenateOpenAiChunks } from '../../common/utils/concatenate_openai_chunks';
+import { processOpenAiStream } from '../../common/utils/process_openai_stream';
+import type { ObservabilityAIAssistantClient } from '../service/client';
+import type { RegisterFunction } from '../service/types';
+import { streamIntoObservable } from '../service/util/stream_into_observable';
 
 export function registerRecallFunction({
-  service,
+  client,
   registerFunction,
 }: {
-  service: ObservabilityAIAssistantService;
-  registerFunction: RegisterFunctionDefinition;
+  client: ObservabilityAIAssistantClient;
+  registerFunction: RegisterFunction;
 }) {
   registerFunction(
     {
@@ -89,7 +93,7 @@ export function registerRecallFunction({
 
       const suggestions = await retrieveSuggestions({
         userMessage,
-        service,
+        client,
         signal,
         contexts,
         queries,
@@ -106,7 +110,7 @@ export function registerRecallFunction({
         systemMessage,
         userMessage,
         queries,
-        service,
+        client,
         connectorId,
         signal,
       });
@@ -121,13 +125,13 @@ export function registerRecallFunction({
 async function retrieveSuggestions({
   userMessage,
   queries,
-  service,
+  client,
   contexts,
   signal,
 }: {
   userMessage?: Message;
   queries: string[];
-  service: ObservabilityAIAssistantService;
+  client: ObservabilityAIAssistantClient;
   contexts: Array<'apm' | 'lens'>;
   signal: AbortSignal;
 }) {
@@ -136,33 +140,21 @@ async function retrieveSuggestions({
       ? [userMessage.message.content, ...queries]
       : queries;
 
-  const recallResponse = await service.callApi(
-    'POST /internal/observability_ai_assistant/functions/recall',
-    {
-      params: {
-        body: {
-          queries: queriesWithUserPrompt,
-          contexts,
-        },
-      },
-      signal,
-    }
-  );
+  const recallResponse = await client.recall({
+    queries: queriesWithUserPrompt,
+    contexts,
+  });
 
   return recallResponse.entries.map((entry) => omit(entry, 'labels', 'is_correction', 'score'));
 }
 
 const scoreFunctionRequestRt = t.type({
-  choices: t.tuple([
-    t.type({
-      message: t.type({
-        function_call: t.type({
-          name: t.literal('score'),
-          arguments: t.string,
-        }),
-      }),
+  message: t.type({
+    function_call: t.type({
+      name: t.literal('score'),
+      arguments: t.string,
     }),
-  ]),
+  }),
 });
 
 const scoreFunctionArgumentsRt = t.type({
@@ -179,7 +171,7 @@ async function scoreSuggestions({
   systemMessage,
   userMessage,
   queries,
-  service,
+  client,
   connectorId,
   signal,
 }: {
@@ -187,7 +179,7 @@ async function scoreSuggestions({
   systemMessage: Message;
   userMessage?: Message;
   queries: string[];
-  service: ObservabilityAIAssistantService;
+  client: ObservabilityAIAssistantClient;
   connectorId: string;
   signal: AbortSignal;
 }) {
@@ -251,24 +243,21 @@ async function scoreSuggestions({
     contexts: ['core'],
   };
 
-  const response = (await service.callApi('POST /internal/observability_ai_assistant/chat', {
-    params: {
-      query: {
-        stream: false,
-      },
-      body: {
+  const response = await lastValueFrom(
+    streamIntoObservable(
+      await client.chat({
         connectorId,
         messages: [extendedSystemMessage, newUserMessage],
         functions: [scoreFunction],
         functionCall: 'score',
-      },
-    },
-    signal,
-  })) as CreateChatCompletionResponse;
+        signal,
+      })
+    ).pipe(processOpenAiStream(), concatenateOpenAiChunks())
+  );
 
   const scoreFunctionRequest = decodeOrThrow(scoreFunctionRequestRt)(response);
   const { scores } = decodeOrThrow(jsonRt.pipe(scoreFunctionArgumentsRt))(
-    scoreFunctionRequest.choices[0].message.function_call.arguments
+    scoreFunctionRequest.message.function_call.arguments
   );
 
   if (scores.length === 0) {
