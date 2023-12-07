@@ -84,6 +84,17 @@ export const loadESOutput = () =>
     hosts: ['https://bla.co'],
   });
 
+export const loadRemoteESOutput = () =>
+  loadOutput({
+    name: 'remote_es',
+    type: 'remote_elasticsearch',
+    is_default: false,
+    is_default_monitoring: false,
+    hosts: ['https://bla.co'],
+    secrets: { service_token: 'token' },
+    preset: 'balanced',
+  });
+
 export const loadLogstashOutput = () =>
   loadOutput({
     name: 'ls',
