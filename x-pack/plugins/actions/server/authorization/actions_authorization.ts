@@ -73,10 +73,9 @@ export class ActionsAuthorization {
           ? operationAlias[operation](authorization)
           : [authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation)];
 
-        // FIXME:PT clean up
-        // if (operation === 'execute' && !actionTypeId) {
-        //   throw new Error('actionTypeId required to authorize execution of actions');
-        // }
+        if (operation === 'execute' && !actionTypeId) {
+          throw new Error('actionTypeId required to authorize execution of actions');
+        }
 
         const { hasAllRequested } = await checkPrivileges({
           kibana: [
