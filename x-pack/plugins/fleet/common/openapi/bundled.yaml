@@ -4566,9 +4566,9 @@ components:
           type: string
           nullable: true
         unenroll_timeout:
-          type: number
+          type: integer
         inactivity_timeout:
-          type: number
+          type: integer
         package_policies:
           description: >-
             This field is present only when retrieving a single agent policy, or
@@ -4647,9 +4647,9 @@ components:
           type: string
           nullable: true
         unenroll_timeout:
-          type: number
+          type: integer
         inactivity_timeout:
-          type: number
+          type: integer
         agent_features:
           type: array
           items:
@@ -4697,9 +4697,9 @@ components:
           type: string
           nullable: true
         unenroll_timeout:
-          type: number
+          type: integer
         inactivity_timeout:
-          type: number
+          type: integer
         agent_features:
           type: array
           items:
@@ -5130,6 +5130,14 @@ components:
           type: string
         config:
           type: object
+        preset:
+          type: string
+          enum:
+            - balanced
+            - custom
+            - throughput
+            - scale
+            - latency
         config_yaml:
           type: string
         ssl:
@@ -5451,6 +5459,14 @@ components:
           type: string
         config:
           type: object
+        preset:
+          type: string
+          enum:
+            - balanced
+            - custom
+            - throughput
+            - scale
+            - latency
         config_yaml:
           type: string
         ssl:

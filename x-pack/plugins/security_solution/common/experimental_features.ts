@@ -94,6 +94,11 @@ export const allowedExperimentalValues = Object.freeze({
    */
   assistantModelEvaluation: false,
 
+  /**
+   * Enables Retrieval Augmented Generation (RAG) on Alerts in the assistant
+   */
+  assistantRagOnAlerts: false,
+
   /*
    * Enables the new user details flyout displayed on the Alerts page and timeline.
    *
@@ -141,6 +146,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental Entity Analytics Asset Criticality feature
    */
   entityAnalyticsAssetCriticalityEnabled: false,
+
+  /*
+   * Enables experimental Experimental S1 integration data to be available in Analyzer
+   */
+  sentinelOneDataInAnalyzerEnabled: false,
 
   /**
    * Enables SentinelOne manual host manipulation actions
