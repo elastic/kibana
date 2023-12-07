@@ -56,15 +56,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('heatmapChart');
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
-
       // assert axes
-      expect(debugState.axes!.x[0].labels).to.eql(['win 8', 'win xp', 'win 7', 'ios', 'osx']);
-      expect(debugState.axes!.y[0].labels).to.eql(['']);
-      expect(debugState.heatmap!.cells.length).to.eql(5);
-      expect(debugState.legend!.items).to.eql([
+      expect(debugState?.axes!.x[0].labels).to.eql(['win 8', 'win xp', 'win 7', 'ios', 'osx']);
+      expect(debugState?.axes!.y[0].labels).to.eql(['']);
+      expect(debugState?.heatmap!.cells.length).to.eql(5);
+      expect(debugState?.legend!.items).to.eql([
         {
           color: '#006837',
           key: '1,322 - 1,717.5',
@@ -94,13 +90,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('heatmapChart');
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
-
-      expect(debugState.axes!.x[0].labels).to.eql(['*']);
-      expect(debugState.axes!.y[0].labels).to.eql(['win 8', 'win xp', 'win 7', 'ios', 'osx']);
-      expect(debugState.heatmap!.cells.length).to.eql(5);
+      expect(debugState?.axes!.x[0].labels).to.eql(['*']);
+      expect(debugState?.axes!.y[0].labels).to.eql(['win 8', 'win xp', 'win 7', 'ios', 'osx']);
+      expect(debugState?.heatmap!.cells.length).to.eql(5);
     });
 
     it('should respect heatmap colors number', async () => {
@@ -118,11 +110,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('heatmapChart');
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
-
-      expect(debugState.legend!.items).to.eql([
+      expect(debugState?.legend!.items).to.eql([
         { key: '1,322 - 1,585.667', name: '1,322 - 1,585.667', color: '#006837' },
         { key: '1,585.667 - 1,849.333', name: '1,585.667 - 1,849.333', color: '#4CB15D' },
         { key: '1,849.333 - 2,113', name: '1,849.333 - 2,113', color: '#B7E075' },
@@ -154,11 +142,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('heatmapChart');
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
-
-      expect(debugState.legend!.items).to.eql([
+      expect(debugState?.legend!.items).to.eql([
         {
           color: '#006837',
           key: '0 - 100',

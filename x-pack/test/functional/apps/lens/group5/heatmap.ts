@@ -40,12 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('heatmap', 'heat');
       const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
 
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
-
       // assert axes
-      expect(debugState.axes!.x[0].labels).to.eql([
+      expect(debugState?.axes!.x[0].labels).to.eql([
         '97.220.3.248',
         '169.228.188.120',
         '78.83.247.30',
@@ -53,13 +49,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '93.28.27.24',
         'Other',
       ]);
-      expect(debugState.axes!.y[0].labels).to.eql(['']);
+      expect(debugState?.axes!.y[0].labels).to.eql(['']);
 
       // assert cells
-      expect(debugState.heatmap!.cells.length).to.eql(6);
+      expect(debugState?.heatmap!.cells.length).to.eql(6);
 
       // assert legend
-      expect(debugState.legend!.items).to.eql([
+      expect(debugState?.legend!.items).to.eql([
         { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#6092c0' },
         { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#a8bfda' },
         { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#ebeff5' },
@@ -80,12 +76,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
 
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
-
       // assert legend has changed
-      expect(debugState.legend!.items).to.eql([
+      expect(debugState?.legend!.items).to.eql([
         { key: '7,125.997 - 8,529.22', name: '7,125.997 - 8,529.22', color: '#6092c0' },
         { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#a8bfda' },
         { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#ebeff5' },
@@ -98,12 +90,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
       const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
 
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
-
       // assert legend has changed
-      expect(debugState.legend!.items).to.eql([
+      expect(debugState?.legend!.items).to.eql([
         { key: '7,125.99 - 8,529.2', name: '7,125.99 - 8,529.2', color: '#6092c0' },
         { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#a8bfda' },
         { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#ebeff5' },
@@ -123,12 +111,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
 
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
-
       // assert legend has changed
-      expect(debugState.legend!.items).to.eql([
+      expect(debugState?.legend!.items).to.eql([
         { key: '0 - 8,529.2', name: '0 - 8,529.2', color: '#6092c0' },
         { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#a8bfda' },
         { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#ebeff5' },
@@ -164,12 +148,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
 
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
-
       // assert legend has changed
-      expect(debugState.legend!.items).to.eql([
+      expect(debugState?.legend!.items).to.eql([
         { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#209280' },
         { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#54b399' },
         { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#d6bf57' },
@@ -183,12 +163,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
 
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
-
       // assert legend has not changed
-      expect(debugState.legend!.items).to.eql([
+      expect(debugState?.legend!.items).to.eql([
         { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#209280' },
         { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#54b399' },
         { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#d6bf57' },
@@ -205,9 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.selectValue('lnsLeftAxisTitle-select', 'Auto');
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
+
       expect(debugState?.axes?.y?.[0].title).to.eql('Average of bytes');
     });
   });
