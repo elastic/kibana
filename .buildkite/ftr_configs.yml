@@ -214,6 +214,7 @@ enabled:
   - x-pack/test/api_integration/apis/stats/config.ts
   - x-pack/test/api_integration/apis/status/config.ts
   - x-pack/test/api_integration/apis/synthetics/config.ts
+  - x-pack/test/api_integration/apis/slos/config.ts
   - x-pack/test/api_integration/apis/telemetry/config.ts
   - x-pack/test/api_integration/apis/transform/config.ts
   - x-pack/test/api_integration/apis/upgrade_assistant/config.ts
@@ -498,5 +499,3 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/default_license/exception_lists_items/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/default_license/lists_items/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/default_license/lists_items/configs/ess.config.ts
-
-
