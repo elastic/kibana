@@ -11,6 +11,17 @@ export const logExplorerAppTitle = i18n.translate('xpack.observabilityLogExplore
   defaultMessage: 'Log Explorer',
 });
 
+export const logsAppTitle = i18n.translate('xpack.observabilityLogExplorer.logsAppTitle', {
+  defaultMessage: 'Logs',
+});
+
+export const observabilityAppTitle = i18n.translate(
+  'xpack.observabilityLogExplorer.observabilityAppTitle',
+  {
+    defaultMessage: 'Observability',
+  }
+);
+
 export const betaBadgeTitle = i18n.translate('xpack.observabilityLogExplorer.betaBadgeTitle', {
   defaultMessage: 'Beta',
 });

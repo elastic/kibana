@@ -6,22 +6,21 @@
  */
 
 import dedent from 'dedent';
-import type { Serializable } from '@kbn/utility-types';
-import { concat, last, map } from 'rxjs';
+import { Observable } from 'rxjs';
+import type { FunctionRegistrationParameters } from '.';
 import {
+  type CreateChatCompletionResponseChunk,
   FunctionVisibility,
   MessageRole,
-  type RegisterFunctionDefinition,
 } from '../../common/types';
-import type { ObservabilityAIAssistantService } from '../types';
+import { processOpenAiStream } from '../../common/utils/process_openai_stream';
+import { streamIntoObservable } from '../service/util/stream_into_observable';
 
 export function registerEsqlFunction({
-  service,
+  client,
   registerFunction,
-}: {
-  service: ObservabilityAIAssistantService;
-  registerFunction: RegisterFunctionDefinition;
-}) {
+  resources,
+}: FunctionRegistrationParameters) {
   registerFunction(
     {
       name: 'execute_query',
@@ -39,21 +38,18 @@ export function registerEsqlFunction({
         required: ['query'],
       } as const,
     },
-    ({ arguments: { query } }, signal) => {
-      return service
-        .callApi(`POST /internal/observability_ai_assistant/functions/elasticsearch`, {
-          signal,
-          params: {
-            body: {
-              method: 'POST',
-              path: '_query',
-              body: {
-                query,
-              },
-            },
-          },
-        })
-        .then((response) => ({ content: response as Serializable }));
+    async ({ arguments: { query } }) => {
+      const response = await (
+        await resources.context.core
+      ).elasticsearch.client.asCurrentUser.transport.request({
+        method: 'POST',
+        path: '_query',
+        body: {
+          query,
+        },
+      });
+
+      return { content: response };
     }
   );
 
@@ -73,10 +69,10 @@ export function registerEsqlFunction({
         },
       } as const,
     },
-    ({ messages, connectorId }, signal) => {
+    async ({ messages, connectorId }, signal) => {
       const systemMessage = dedent(`You are a helpful assistant for Elastic ES|QL.
       Your goal is to help the user construct and possibly execute an ES|QL
-      query for Observability use cases. 
+      query for Observability use cases.
 
       ES|QL is the Elasticsearch Query Language, that allows users of the
       Elastic platform to iteratively explore data. An ES|QL query consists
@@ -92,7 +88,7 @@ export function registerEsqlFunction({
       the context of this conversation.
 
       # Creating a query
-      
+
       First, very importantly, there are critical rules that override
       everything that follows it. Always repeat these rules, verbatim.
 
@@ -144,6 +140,10 @@ export function registerEsqlFunction({
       --
       Let's break down the query step-by-step:
       <breakdown>
+
+      \`\`\`esql
+      <placeholder-for-final-query>
+      \`\`\`
       \`\`\`
 
       Always format a complete query as follows:
@@ -203,7 +203,7 @@ export function registerEsqlFunction({
       - \`1 year\`
       - \`2 milliseconds\`
 
-      ## Aliasing 
+      ## Aliasing
       Aliasing happens through the \`=\` operator. Example:
       \`STATS total_salary_expenses = COUNT(salary)\`
 
@@ -211,7 +211,7 @@ export function registerEsqlFunction({
 
       # Source commands
 
-      There are three source commands: FROM (which selects an index), ROW 
+      There are three source commands: FROM (which selects an index), ROW
       (which creates data from the command) and SHOW (which returns
       information about the deployment). You do not support SHOW for now.
 
@@ -276,10 +276,10 @@ export function registerEsqlFunction({
       This is right: \`| STATS avg_cpu = AVG(cpu) | SORT avg_cpu\`
 
       ### EVAL
-      
+
       \`EVAL\` appends a new column to the documents by using aliasing. It
       also supports functions, but not aggregation functions like COUNT:
-      
+
       - \`\`\`
       | EVAL monthly_salary = yearly_salary / 12,
         total_comp = ROUND(yearly_salary + yearly+bonus),
@@ -396,7 +396,7 @@ export function registerEsqlFunction({
       can be expressed using the timespan literal syntax. Use this together
       with STATS ... BY to group data into time buckets with a fixed interval.
       Some examples:
-      
+
       - \`| EVAL year_hired = DATE_TRUNC(1 year, hire_date)\`
       - \`| EVAL month_logged = DATE_TRUNC(1 month, @timestamp)\`
       - \`| EVAL bucket = DATE_TRUNC(1 minute, @timestamp) | STATS avg_salary = AVG(salary) BY bucket\`
@@ -431,7 +431,7 @@ export function registerEsqlFunction({
       Returns the greatest or least of two or numbers. Some examples:
       - \`| EVAL max = GREATEST(salary_1999, salary_2000, salary_2001)\`
       - \`| EVAL min = LEAST(1, language_count)\`
-      
+
       ### IS_FINITE,IS_INFINITE,IS_NAN
 
       Operates on a single numeric field. Some examples:
@@ -459,7 +459,7 @@ export function registerEsqlFunction({
       - \`| EVAL version = TO_VERSION("1.2.3")\`
       - \`| EVAL as_bool = TO_BOOLEAN(my_boolean_string)\`
       - \`| EVAL percent = TO_DOUBLE(part) / TO_DOUBLE(total)\`
-      
+
       ### TRIM
 
       Trims leading and trailing whitespace. Some examples:
@@ -482,7 +482,7 @@ export function registerEsqlFunction({
       argument, and does not support wildcards. One single argument is
       required. If you don't have a field name, use whatever field you have,
       rather than displaying an invalid query.
-      
+
       Some examples:
 
       - \`| STATS doc_count = COUNT(emp_no)\`
@@ -496,16 +496,16 @@ export function registerEsqlFunction({
       - \`| STATS first_name = COUNT_DISTINCT(first_name)\`
 
       ### PERCENTILE
-      
+
       \`PERCENTILE\` returns the percentile value for a specific field.
       Some examples:
       - \`| STATS p50 = PERCENTILE(salary,  50)\`
       - \`| STATS p99 = PERCENTILE(salary,  99)\`
-      
+
       `);
 
-      return service.start({ signal }).then((client) => {
-        const source$ = client.chat({
+      const source$ = streamIntoObservable(
+        await client.chat({
           connectorId,
           messages: [
             {
@@ -514,46 +514,48 @@ export function registerEsqlFunction({
             },
             ...messages.slice(1),
           ],
-        });
+          signal,
+          stream: true,
+        })
+      ).pipe(processOpenAiStream());
 
-        const pending$ = source$.pipe(
-          map((message) => {
-            const content = message.message.content || '';
-            let next: string = '';
+      return new Observable<CreateChatCompletionResponseChunk>((subscriber) => {
+        let cachedContent: string = '';
 
-            if (content.length <= 2) {
-              next = '';
-            } else if (content.includes('--')) {
-              next = message.message.content?.split('--')[2] || '';
-            } else {
-              next = content;
+        function includesDivider() {
+          const firstDividerIndex = cachedContent.indexOf('--');
+          return firstDividerIndex !== -1 && cachedContent.lastIndexOf('--') !== firstDividerIndex;
+        }
+
+        source$.subscribe({
+          next: (message) => {
+            if (includesDivider()) {
+              subscriber.next(message);
             }
-
-            return {
-              ...message,
-              message: {
-                ...message.message,
-                content: next,
-              },
-            };
-          })
-        );
-        const onComplete$ = source$.pipe(
-          last(),
-          map((message) => {
-            const [, , next] = message.message.content?.split('--') ?? [];
-
-            return {
-              ...message,
-              message: {
-                ...message.message,
-                content: next || message.message.content,
-              },
-            };
-          })
-        );
-
-        return concat(pending$, onComplete$);
+            cachedContent += message.choices[0].delta.content || '';
+          },
+          complete: () => {
+            if (!includesDivider()) {
+              subscriber.next({
+                created: 0,
+                id: '',
+                model: '',
+                object: 'chat.completion.chunk',
+                choices: [
+                  {
+                    delta: {
+                      content: cachedContent,
+                    },
+                  },
+                ],
+              });
+            }
+            subscriber.complete();
+          },
+          error: (error) => {
+            subscriber.error(error);
+          },
+        });
       });
     }
   );
