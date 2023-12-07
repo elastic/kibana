@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useEffect } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { EventKind } from '../shared/constants/event_kinds';
@@ -64,11 +64,17 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
   };
 
   // If flyout is open in preview mode, do not reload with stale information
-  window.addEventListener('beforeunload', () => {
-    if (isPreview) {
-      closeFlyout();
-    }
-  });
+  useEffect(() => {
+    const beforeUnloadHandler = () => {
+      if (isPreview) {
+        closeFlyout();
+      }
+    };
+    window.addEventListener('beforeunload', beforeUnloadHandler);
+    return () => {
+      window.removeEventListener('beforeunload', beforeUnloadHandler);
+    };
+  }, [isPreview, closeFlyout]);
 
   return (
     <>
