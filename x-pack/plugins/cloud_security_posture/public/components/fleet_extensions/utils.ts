@@ -14,6 +14,9 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import merge from 'lodash/merge';
+import semverValid from 'semver/functions/valid';
+import semverCoerce from 'semver/functions/coerce';
+import semverLt from 'semver/functions/lt';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_EKS,
@@ -276,3 +279,9 @@ export const getCspmCloudShellDefaultValue = (packageInfo: PackageInfo): string 
 export const getAwsCredentialsType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
 ): AwsCredentialsType | undefined => input.streams[0].vars?.['aws.credentials.type'].value;
+
+export const isBelowMinVersion = (version: string, minVersion: string) => {
+  const semanticVersion = semverValid(version);
+  const versionNumberOnly = semverCoerce(semanticVersion) || '';
+  return semverLt(versionNumberOnly, minVersion);
+};

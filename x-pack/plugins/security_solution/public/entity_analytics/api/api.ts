@@ -12,6 +12,7 @@ import {
   RISK_ENGINE_DISABLE_URL,
   RISK_ENGINE_INIT_URL,
   RISK_ENGINE_PRIVILEGES_URL,
+  ASSET_CRITICALITY_PRIVILEGES_URL,
 } from '../../../common/constants';
 
 import { KibanaServices } from '../../common/lib/kibana';
@@ -21,9 +22,9 @@ import type {
   GetRiskEngineStatusResponse,
   InitRiskEngineResponse,
   DisableRiskEngineResponse,
-  RiskEnginePrivilegesResponse,
 } from '../../../server/lib/entity_analytics/types';
 import type { RiskScorePreviewRequestSchema } from '../../../common/risk_engine/risk_score_preview/request_schema';
+import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics/common';
 
 /**
  * Fetches preview risks scores
@@ -91,9 +92,22 @@ export const disableRiskEngine = async (): Promise<DisableRiskEngineResponse> =>
 /**
  * Get risk engine privileges
  */
-export const fetchRiskEnginePrivileges = async (): Promise<RiskEnginePrivilegesResponse> => {
-  return KibanaServices.get().http.fetch<RiskEnginePrivilegesResponse>(RISK_ENGINE_PRIVILEGES_URL, {
+export const fetchRiskEnginePrivileges = async (): Promise<EntityAnalyticsPrivileges> => {
+  return KibanaServices.get().http.fetch<EntityAnalyticsPrivileges>(RISK_ENGINE_PRIVILEGES_URL, {
     version: '1',
     method: 'GET',
   });
+};
+
+/**
+ * Get asset criticality privileges
+ */
+export const fetchAssetCriticalityPrivileges = async (): Promise<EntityAnalyticsPrivileges> => {
+  return KibanaServices.get().http.fetch<EntityAnalyticsPrivileges>(
+    ASSET_CRITICALITY_PRIVILEGES_URL,
+    {
+      version: '1',
+      method: 'GET',
+    }
+  );
 };
