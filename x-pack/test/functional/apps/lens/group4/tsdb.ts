@@ -912,7 +912,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.lens.waitForVisualization('xyVisChart');
             const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
             const bars = data?.bars![0].bars;
-            const columnsToCheck = bars.length / 2;
+            const columnsToCheck = bars ? bars.length / 2 : 0;
             // due to the flaky nature of exact check here, we're going to relax it
             // as long as there's data before and after it is ok
             log.info('Check count before the downgrade');
@@ -922,7 +922,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             );
             log.info('Check count after the downgrade');
             // later there are only documents for the upgraded stream
-            expect(sumFirstNValues(columnsToCheck, [...bars].reverse())).to.be.greaterThan(
+            expect(sumFirstNValues(columnsToCheck, [...(bars ?? [])].reverse())).to.be.greaterThan(
               TEST_DOC_COUNT - 1
             );
           });
@@ -953,7 +953,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.lens.waitForVisualization('xyVisChart');
             const dataBefore = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
             const barsBefore = dataBefore?.bars![0].bars;
-            expect(barsBefore.some(({ y }) => y)).to.eql(true);
+            expect(barsBefore?.some(({ y }) => y)).to.eql(true);
 
             // check after the downgrade
             await PageObjects.lens.goToTimeRange(
