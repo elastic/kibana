@@ -13,7 +13,7 @@ import type { StartPlugins } from '../../../../plugin';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { InitRiskEngineResultResponse } from '../../types';
-
+import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
 export const riskEngineInitRoute = (
   router: SecuritySolutionPluginRouter,
   getStartServices: StartServicesAccessor<StartPlugins>
@@ -26,59 +26,62 @@ export const riskEngineInitRoute = (
         tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     })
-    .addVersion({ version: '1', validate: {} }, async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      const securitySolution = await context.securitySolution;
-      const [_, { taskManager }] = await getStartServices();
-      const riskEngineDataClient = securitySolution.getRiskEngineDataClient();
-      const riskScoreDataClient = securitySolution.getRiskScoreDataClient();
-      const spaceId = securitySolution.getSpaceId();
+    .addVersion(
+      { version: '1', validate: {} },
+      withRiskEnginePrivilegeCheck(getStartServices, async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        const securitySolution = await context.securitySolution;
+        const [_, { taskManager }] = await getStartServices();
+        const riskEngineDataClient = securitySolution.getRiskEngineDataClient();
+        const riskScoreDataClient = securitySolution.getRiskScoreDataClient();
+        const spaceId = securitySolution.getSpaceId();
 
-      try {
-        if (!taskManager) {
-          return siemResponse.error({
-            statusCode: 400,
-            body: TASK_MANAGER_UNAVAILABLE_ERROR,
+        try {
+          if (!taskManager) {
+            return siemResponse.error({
+              statusCode: 400,
+              body: TASK_MANAGER_UNAVAILABLE_ERROR,
+            });
+          }
+
+          const initResult = await riskEngineDataClient.init({
+            taskManager,
+            namespace: spaceId,
+            riskScoreDataClient,
           });
-        }
 
-        const initResult = await riskEngineDataClient.init({
-          taskManager,
-          namespace: spaceId,
-          riskScoreDataClient,
-        });
+          const initResultResponse: InitRiskEngineResultResponse = {
+            risk_engine_enabled: initResult.riskEngineEnabled,
+            risk_engine_resources_installed: initResult.riskEngineResourcesInstalled,
+            risk_engine_configuration_created: initResult.riskEngineConfigurationCreated,
+            legacy_risk_engine_disabled: initResult.legacyRiskEngineDisabled,
+            errors: initResult.errors,
+          };
 
-        const initResultResponse: InitRiskEngineResultResponse = {
-          risk_engine_enabled: initResult.riskEngineEnabled,
-          risk_engine_resources_installed: initResult.riskEngineResourcesInstalled,
-          risk_engine_configuration_created: initResult.riskEngineConfigurationCreated,
-          legacy_risk_engine_disabled: initResult.legacyRiskEngineDisabled,
-          errors: initResult.errors,
-        };
+          if (
+            !initResult.riskEngineEnabled ||
+            !initResult.riskEngineResourcesInstalled ||
+            !initResult.riskEngineConfigurationCreated
+          ) {
+            return siemResponse.error({
+              statusCode: 400,
+              body: {
+                message: initResultResponse.errors.join('\n'),
+                full_error: initResultResponse,
+              },
+              bypassErrorFormat: true,
+            });
+          }
+          return response.ok({ body: { result: initResultResponse } });
+        } catch (e) {
+          const error = transformError(e);
 
-        if (
-          !initResult.riskEngineEnabled ||
-          !initResult.riskEngineResourcesInstalled ||
-          !initResult.riskEngineConfigurationCreated
-        ) {
           return siemResponse.error({
-            statusCode: 400,
-            body: {
-              message: initResultResponse.errors.join('\n'),
-              full_error: initResultResponse,
-            },
+            statusCode: error.statusCode,
+            body: { message: error.message, full_error: JSON.stringify(e) },
             bypassErrorFormat: true,
           });
         }
-        return response.ok({ body: { result: initResultResponse } });
-      } catch (e) {
-        const error = transformError(e);
-
-        return siemResponse.error({
-          statusCode: error.statusCode,
-          body: { message: error.message, full_error: JSON.stringify(e) },
-          bypassErrorFormat: true,
-        });
-      }
-    });
+      })
+    );
 };
