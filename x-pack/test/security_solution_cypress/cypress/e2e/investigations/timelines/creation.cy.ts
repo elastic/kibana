@@ -147,12 +147,10 @@ describe('Timelines', (): void => {
   );
 
   describe('shows the different timeline states', { tags: ['@ess', '@serverless'] }, () => {
-    before((done) => {
+    before(() => {
       login();
-      deleteTimelines().then(() => {
-        done();
-        visitWithTimeRange(TIMELINES_URL);
-      });
+      deleteTimelines();
+      visitWithTimeRange(TIMELINES_URL);
     });
 
     it('should show the correct timeline status', () => {
@@ -184,10 +182,8 @@ describe('Timelines', (): void => {
   describe('saves timeline as new', { tags: ['@ess', '@serverless'] }, () => {
     before(() => {
       login();
-      deleteTimelines().then(() => {
-        done();
-        visitWithTimeRange(TIMELINES_URL);
-      });
+      deleteTimelines();
+      visitWithTimeRange(TIMELINES_URL);
     });
 
     it('should save timelines as new', () => {
