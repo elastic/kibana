@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,22 +20,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { CoreStart } from '@kbn/core/public';
-import { concatMap, delay, Observable, of } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
+import { useFetchStream } from '@kbn/ml-response-stream/client';
 
 export interface StreamingResponseProps {
   http: CoreStart['http'];
   prompt: string;
   selectedConnectorId: string;
+  initialIsOpen?: boolean;
 }
-
-export interface PromptObservableState {
-  chunks: Chunk[];
-  message?: string;
-  error?: string;
-  loading: boolean;
-}
-
 interface ChunkChoice {
   index: 0;
   delta: { role: string; content: string };
@@ -75,117 +67,42 @@ export const StreamingResponse = ({
   http,
   prompt,
   selectedConnectorId,
+  initialIsOpen = false,
 }: StreamingResponseProps) => {
   const { euiTheme } = useEuiTheme();
-  const [hasOpened, setHasOpened] = useState(false);
+  const [hasOpened, setHasOpened] = useState(initialIsOpen);
 
-  const response$ = useMemo(() => {
-    return hasOpened
-      ? new Observable<PromptObservableState>((observer) => {
-          observer.next({ chunks: [], loading: true });
+  const { errors, start, cancel, data, isRunning } = useFetchStream(
+    http,
+    `/internal/examples/execute_gen_ai_connector`,
+    undefined,
+    {
+      connector_id: selectedConnectorId,
+      prompt,
+    },
+    { reducer: streamReducer, initialState: '' }
+  );
 
-          http
-            .post(`/internal/examples/execute_gen_ai_connector`, {
-              body: JSON.stringify({
-                connector_id: selectedConnectorId,
-                prompt,
-              }),
-              asResponse: true,
-              rawResponse: true,
-            })
-            .then((response) => {
-              const status = response.response?.status;
+  // Start fetching when the accordion was opened
+  useEffect(() => {
+    if (hasOpened && !isRunning && errors.length === 0 && data === '') {
+      start();
+    }
+  }, [data, errors, hasOpened, isRunning, start]);
 
-              if (!status || status >= 400) {
-                throw new Error(response.response?.statusText || 'Unexpected error');
-              }
+  // Cancel fetching when the component unmounts
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => cancel, []);
 
-              const reader = response.response.body?.getReader();
-
-              if (!reader) {
-                throw new Error('Could not get reader from response');
-              }
-
-              const decoder = new TextDecoder();
-
-              const chunks: Chunk[] = [];
-
-              let prev: string = '';
-
-              function read() {
-                reader!.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
-                  try {
-                    if (done) {
-                      observer.next({
-                        chunks,
-                        message: getMessageFromChunks(chunks),
-                        loading: false,
-                      });
-                      observer.complete();
-                      return;
-                    }
-
-                    let lines: string[] = (prev + decoder.decode(value)).split('\n');
-
-                    const lastLine: string = lines[lines.length - 1];
-
-                    const isPartialChunk: boolean = !!lastLine && lastLine !== 'data: [DONE]';
-
-                    if (isPartialChunk) {
-                      prev = lastLine;
-                      lines.pop();
-                    } else {
-                      prev = '';
-                    }
-
-                    lines = lines
-                      .map((str) => str.substr(6))
-                      .filter((str) => !!str && str !== '[DONE]');
-
-                    const nextChunks: Chunk[] = lines.map((line) => JSON.parse(line));
-
-                    nextChunks.forEach((chunk) => {
-                      chunks.push(chunk);
-                      observer.next({
-                        chunks,
-                        message: getMessageFromChunks(chunks),
-                        loading: true,
-                      });
-                    });
-                  } catch (err) {
-                    observer.error(err);
-                    return;
-                  }
-                  read();
-                });
-              }
-
-              read();
-
-              return () => {
-                reader.cancel();
-              };
-            })
-            .catch((err) => {
-              observer.next({ chunks: [], error: err.message, loading: false });
-            });
-        }).pipe(concatMap((value) => of(value).pipe(delay(50))))
-      : new Observable<PromptObservableState>(() => {});
-  }, [http, hasOpened, prompt, selectedConnectorId]);
-
-  const response = useObservable(response$);
-
-  useEffect(() => {}, [response$]);
-
-  let content = response?.message ?? '';
+  let content = data;
 
   let state: 'init' | 'loading' | 'streaming' | 'error' | 'complete' = 'init';
 
-  if (response?.loading) {
+  if (isRunning) {
     state = content ? 'streaming' : 'loading';
-  } else if (response && 'error' in response && response.error) {
+  } else if (errors.length > 0) {
     state = 'error';
-    content = response.error;
+    content = errors.join('\n');
   } else if (content) {
     state = 'complete';
   }
@@ -252,7 +169,7 @@ export const StreamingResponse = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        initialIsOpen={false}
+        initialIsOpen={initialIsOpen}
         onToggle={() => {
           setHasOpened(true);
         }}
@@ -264,10 +181,9 @@ export const StreamingResponse = ({
   );
 };
 
-function getMessageFromChunks(chunks: Chunk[]) {
-  let message = '';
-  chunks.forEach((chunk) => {
-    message += chunk.choices[0]?.delta.content ?? '';
-  });
-  return message;
+function streamReducer(state: string, action: Chunk | Chunk[]) {
+  return `${state}${[action]
+    .flat()
+    .map((chunk) => chunk.choices[0]?.delta.content ?? '')
+    .join('')}`;
 }

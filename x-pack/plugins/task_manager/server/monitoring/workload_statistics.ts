@@ -12,7 +12,7 @@ import { JsonObject } from '@kbn/utility-types';
 import { keyBy, mapValues } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { AggregationResultOf } from '@kbn/es-types';
-import { AggregatedStatProvider } from './runtime_statistics_aggregator';
+import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskStore } from '../task_store';

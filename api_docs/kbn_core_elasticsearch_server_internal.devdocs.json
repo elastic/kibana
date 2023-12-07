@@ -27,7 +27,7 @@
         "label": "isInlineScriptingEnabled",
         "description": [],
         "signature": [
-          "({ client, }: { client: ",
+          "({ client, maxRetries, maxRetryDelay, }: { client: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
             "scope": "common",
@@ -35,7 +35,7 @@
             "section": "def-common.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
-          "; }) => Promise<boolean>"
+          "; maxRetries?: number | undefined; maxRetryDelay?: number | undefined; }) => Promise<boolean>"
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/is_scripting_enabled.ts",
         "deprecated": false,
@@ -46,7 +46,7 @@
             "id": "def-common.isInlineScriptingEnabled.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  client,\n}",
+            "label": "{\n  client,\n  maxRetries = 20,\n  maxRetryDelay = 64,\n}",
             "description": [],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/is_scripting_enabled.ts",
             "deprecated": false,
@@ -198,7 +198,7 @@
                   "SearchResponse",
                   "<TDocument, TAggregations>>; }; helpers: ",
                   "default",
-                  "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -1160,6 +1160,8 @@
                   "default",
                   "; ssl: ",
                   "default",
+                  "; synonyms: ",
+                  "default",
                   "; tasks: ",
                   "default",
                   "; termsEnum: { (this: That, params: ",
@@ -1279,6 +1281,34 @@
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/is_scripting_enabled.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-elasticsearch-server-internal",
+                "id": "def-common.isInlineScriptingEnabled.$1.maxRetries",
+                "type": "number",
+                "tags": [],
+                "label": "maxRetries",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/is_scripting_enabled.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-elasticsearch-server-internal",
+                "id": "def-common.isInlineScriptingEnabled.$1.maxRetryDelay",
+                "type": "number",
+                "tags": [],
+                "label": "maxRetryDelay",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/is_scripting_enabled.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1347,6 +1377,43 @@
         "returnComment": [
           "boolean 'true' if the status code is 404 and the Elasticsearch product header is missing/unexpected value"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-server-internal",
+        "id": "def-common.isRetryableEsClientError",
+        "type": "Function",
+        "tags": [],
+        "label": "isRetryableEsClientError",
+        "description": [
+          "\nReturns true if the given elasticsearch error should be retried\nby retry-based resiliency systems such as the SO migration, false otherwise."
+        ],
+        "signature": [
+          "(e: ",
+          "ElasticsearchClientError",
+          ") => boolean"
+        ],
+        "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/retryable_es_client_errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
+            "id": "def-common.isRetryableEsClientError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "e",
+            "description": [],
+            "signature": [
+              "ElasticsearchClientError"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/retryable_es_client_errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -1489,6 +1556,20 @@
             "tags": [],
             "label": "cluster_version",
             "description": [],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/get_cluster_info.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
+            "id": "def-common.ClusterInfo.cluster_build_flavor",
+            "type": "string",
+            "tags": [],
+            "label": "cluster_build_flavor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/get_cluster_info.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1856,7 +1937,7 @@
               "SearchResponse",
               "<TDocument, TAggregations>>; }; helpers: ",
               "default",
-              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -2818,6 +2899,8 @@
               "default",
               "; ssl: ",
               "default",
+              "; synonyms: ",
+              "default",
               "; tasks: ",
               "default",
               "; termsEnum: { (this: That, params: ",
@@ -3005,7 +3088,7 @@
         "label": "ElasticsearchConfigType",
         "description": [],
         "signature": [
-          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{} & { delay: moment.Duration; }>; readonly requestTimeout: moment.Duration; readonly compression: boolean; readonly customHeaders: Record<string, string>; readonly hosts: string | string[]; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly maxIdleSockets: number; readonly idleSocketTimeout: moment.Duration; readonly requestHeadersWhitelist: string | string[]; readonly shardTimeout: moment.Duration; readonly pingTimeout: moment.Duration; readonly logQueries: boolean; readonly apiVersion: string; readonly ignoreVersionMismatch: boolean; readonly skipStartupConnectionCheck: boolean; readonly apisToRedactInLogs: Readonly<{ method?: string | undefined; } & { path: string; }>[]; }"
+          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{} & { delay: moment.Duration; }>; readonly hosts: string | string[]; readonly requestTimeout: moment.Duration; readonly compression: boolean; readonly customHeaders: Record<string, string>; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly maxIdleSockets: number; readonly idleSocketTimeout: moment.Duration; readonly requestHeadersWhitelist: string | string[]; readonly shardTimeout: moment.Duration; readonly pingTimeout: moment.Duration; readonly logQueries: boolean; readonly apiVersion: string; readonly ignoreVersionMismatch: boolean; readonly skipStartupConnectionCheck: boolean; readonly apisToRedactInLogs: Readonly<{ method?: string | undefined; } & { path: string; }>[]; }"
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_config.ts",
         "deprecated": false,
@@ -3303,7 +3386,7 @@
             "section": "def-common.ConditionalType",
             "text": "ConditionalType"
           },
-          "<false, boolean, boolean>; skipStartupConnectionCheck: ",
+          "<true, boolean, boolean>; skipStartupConnectionCheck: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",

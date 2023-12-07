@@ -110,6 +110,7 @@ describe.each(listType)('Policy details %s artifact delete modal', (type) => {
           })
         ),
         path: '/api/exception_lists/items',
+        version: '2023-10-31',
       });
     });
   });

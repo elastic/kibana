@@ -30,16 +30,20 @@ import {
   TRUNCATE_MAX_HEIGHT,
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
-  ENABLE_SQL,
-} from '../common';
+  ENABLE_ESQL,
+} from '@kbn/discover-utils';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
 const technicalPreviewLabel = i18n.translate('discover.advancedSettings.technicalPreviewLabel', {
   defaultMessage: 'technical preview',
 });
 
-export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, UiSettingsParams> = (
-  docLinks: DocLinksServiceSetup
+export const getUiSettings: (
+  docLinks: DocLinksServiceSetup,
+  enableValidations: boolean
+) => Record<string, UiSettingsParams> = (
+  docLinks: DocLinksServiceSetup,
+  enableValidations: boolean
 ) => ({
   [DEFAULT_COLUMNS_SETTING]: {
     name: i18n.translate('discover.advancedSettings.defaultColumnsTitle', {
@@ -51,7 +55,9 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
         'Columns displayed by default in the Discover app. If empty, a summary of the document will be displayed.',
     }),
     category: ['discover'],
-    schema: schema.arrayOf(schema.string()),
+    schema: enableValidations
+      ? schema.arrayOf(schema.string(), { maxSize: 50 })
+      : schema.arrayOf(schema.string()),
   },
   [MAX_DOC_FIELDS_DISPLAYED]: {
     name: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedTitle', {
@@ -199,6 +205,7 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
           '</a>',
       },
     }),
+    requiresPageReload: true,
     category: ['discover'],
     schema: schema.boolean(),
     metric: {
@@ -206,7 +213,6 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
       name: 'discover:useLegacyDataGrid',
     },
   },
-
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
       defaultMessage: 'Modify columns when changing data views',
@@ -308,18 +314,18 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
   },
-  [ENABLE_SQL]: {
-    name: i18n.translate('discover.advancedSettings.enableSQLTitle', {
-      defaultMessage: 'Enable SQL',
+  [ENABLE_ESQL]: {
+    name: i18n.translate('discover.advancedSettings.enableESQLTitle', {
+      defaultMessage: 'Enable ES|QL',
     }),
-    value: false,
-    description: i18n.translate('discover.advancedSettings.enableSQLDescription', {
+    value: true,
+    description: i18n.translate('discover.advancedSettings.enableESQLDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} This tech preview feature is highly experimental--do not rely on this for production saved searches, visualizations or dashboards. This setting enables SQL as a text-based query language in Discover and Lens. If you have feedback on this experience please reach out to us on {link}',
+        '{technicalPreviewLabel} This tech preview feature is highly experimental--do not rely on this for production saved searches, visualizations or dashboards. This setting enables ES|QL in Discover. If you have feedback on this experience please reach out to us on {link}',
       values: {
         link:
           `<a href="https://discuss.elastic.co/c/elastic-stack/kibana" target="_blank" rel="noopener">` +
-          i18n.translate('discover.advancedSettings.enableSQL.discussLinkText', {
+          i18n.translate('discover.advancedSettings.enableESQL.discussLinkText', {
             defaultMessage: 'discuss.elastic.co/c/elastic-stack/kibana',
           }) +
           '</a>',

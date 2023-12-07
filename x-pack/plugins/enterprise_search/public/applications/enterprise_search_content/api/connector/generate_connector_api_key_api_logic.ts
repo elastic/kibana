@@ -8,7 +8,7 @@
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-interface ApiKey {
+export interface ApiKey {
   api_key: string;
   encoded: string;
   id: string;

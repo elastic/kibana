@@ -6,32 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { FlyoutPanel } from './types';
+import { FlyoutPanelProps } from './types';
 import { initialState, reducer, State } from './reducer';
 import { Action, ActionType } from './actions';
 
-const rightPanel1: FlyoutPanel = {
+const rightPanel1: FlyoutPanelProps = {
   id: 'right1',
-  path: ['path'],
+  path: { tab: 'tab' },
 };
-const leftPanel1: FlyoutPanel = {
+const leftPanel1: FlyoutPanelProps = {
   id: 'left1',
   params: { id: 'id' },
 };
-const previewPanel1: FlyoutPanel = {
+const previewPanel1: FlyoutPanelProps = {
   id: 'preview1',
   state: { id: 'state' },
 };
 
-const rightPanel2: FlyoutPanel = {
+const rightPanel2: FlyoutPanelProps = {
   id: 'right2',
-  path: ['path'],
+  path: { tab: 'tab' },
 };
-const leftPanel2: FlyoutPanel = {
+const leftPanel2: FlyoutPanelProps = {
   id: 'left2',
   params: { id: 'id' },
 };
-const previewPanel2: FlyoutPanel = {
+const previewPanel2: FlyoutPanelProps = {
   id: 'preview2',
   state: { id: 'state' },
 };

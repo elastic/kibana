@@ -12,12 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { Role, RoleMapping } from '../../../../../common/model';
+import { AddRoleTemplateButton } from './add_role_template_button';
+import { RoleTemplateEditor } from './role_template_editor';
+import type { Role, RoleMapping } from '../../../../../common';
 import { isRoleDeprecated } from '../../../../../common/model';
 import { RoleComboBox } from '../../../role_combo_box';
 import type { RolesAPIClient } from '../../../roles';
-import { AddRoleTemplateButton } from './add_role_template_button';
-import { RoleTemplateEditor } from './role_template_editor';
 
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;

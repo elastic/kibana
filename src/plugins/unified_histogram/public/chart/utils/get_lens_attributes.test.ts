@@ -172,8 +172,11 @@ describe('getLensAttributes', () => {
               ],
               "legend": Object {
                 "isVisible": true,
+                "legendSize": "xlarge",
                 "position": "right",
+                "shouldTruncate": false,
               },
+              "minBarHeight": 2,
               "preferredSeriesType": "bar_stacked",
               "showCurrentTimeMarker": true,
               "tickLabelsVisibilitySettings": Object {
@@ -346,8 +349,11 @@ describe('getLensAttributes', () => {
               ],
               "legend": Object {
                 "isVisible": true,
+                "legendSize": "xlarge",
                 "position": "right",
+                "shouldTruncate": false,
               },
+              "minBarHeight": 2,
               "preferredSeriesType": "bar_stacked",
               "showCurrentTimeMarker": true,
               "tickLabelsVisibilitySettings": Object {
@@ -502,8 +508,11 @@ describe('getLensAttributes', () => {
               ],
               "legend": Object {
                 "isVisible": true,
+                "legendSize": "xlarge",
                 "position": "right",
+                "shouldTruncate": false,
               },
+              "minBarHeight": 2,
               "preferredSeriesType": "bar_stacked",
               "showCurrentTimeMarker": true,
               "tickLabelsVisibilitySettings": Object {
@@ -630,7 +639,7 @@ describe('getLensAttributes', () => {
                   },
                   "fieldName": "",
                   "query": Object {
-                    "sql": "SELECT Dest, AvgTicketPrice FROM \\"kibana_sample_data_flights\\"",
+                    "esql": "FROM \\"kibana_sample_data_flights\\"",
                   },
                 },
                 "layers": Object {
@@ -669,7 +678,7 @@ describe('getLensAttributes', () => {
                     ],
                     "index": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
                     "query": Object {
-                      "sql": "SELECT Dest, AvgTicketPrice FROM \\"kibana_sample_data_flights\\"",
+                      "esql": "FROM kibana_sample_data_flights | keep Dest, AvgTicketPrice",
                     },
                     "timeField": "timestamp",
                   },

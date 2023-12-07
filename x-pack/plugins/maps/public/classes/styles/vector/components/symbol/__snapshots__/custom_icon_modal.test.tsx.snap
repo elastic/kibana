@@ -198,7 +198,6 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
           color="danger"
           data-test-subj="mapsCustomIconForm-submit"
           onClick={[Function]}
-          size="m"
         >
           Delete
         </EuiButton>
@@ -207,12 +206,10 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="mapsCustomIconForm-submit"
           fill={true}
           isDisabled={false}
           onClick={[Function]}
-          size="m"
         >
           Save
         </EuiButton>
@@ -289,12 +286,10 @@ exports[`should render an empty custom icon modal 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="mapsCustomIconForm-submit"
           fill={true}
           isDisabled={true}
           onClick={[Function]}
-          size="m"
         >
           Save
         </EuiButton>

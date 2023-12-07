@@ -446,6 +446,9 @@ export default function ({ getService }: FtrProviderContext) {
         sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
+        // Let's make sure that created tokens are available for search.
+        await getService('es').indices.refresh({ index: '.security-tokens' });
+
         // Let's delete tokens from `.security-tokens` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index after
         // some period of time.

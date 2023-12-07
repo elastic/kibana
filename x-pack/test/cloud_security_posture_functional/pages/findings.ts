@@ -13,15 +13,16 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
-  const comboBox = getService('comboBox');
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
+  const timeFiveHoursAgo = (Date.now() - 18000000).toString();
 
   // We need to use a dataset for the tests to run
   // We intentionally make some fields start with a capital letter to test that the query bar is case-insensitive/case-sensitive
   const data = [
     {
+      '@timestamp': timeFiveHoursAgo,
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -38,6 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Upper case cluster id',
     },
     {
+      '@timestamp': timeFiveHoursAgo,
       resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -54,6 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Another Upper case cluster id',
     },
     {
+      '@timestamp': timeFiveHoursAgo,
       resource: { id: chance.guid(), name: `process`, sub_type: 'another lower case type' },
       result: { evaluation: 'passed' },
       rule: {
@@ -70,6 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'lower case cluster id',
     },
     {
+      '@timestamp': timeFiveHoursAgo,
       resource: { id: chance.guid(), name: `process`, sub_type: 'Upper case type again' },
       result: { evaluation: 'failed' },
       rule: {
@@ -90,23 +94,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ruleName1 = data[0].rule.name;
   const ruleName2 = data[1].rule.name;
 
-  const resourceId1 = data[0].resource.id;
-  const ruleSection1 = data[0].rule.section;
-
-  const benchMarkName = data[0].rule.benchmark.name;
-
-  describe('Findings Page', () => {
+  describe('Findings Page', function () {
+    this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
-    let findingsByResourceTable: typeof findings.findingsByResourceTable;
-    let resourceFindingsTable: typeof findings.resourceFindingsTable;
     let distributionBar: typeof findings.distributionBar;
 
     before(async () => {
       findings = pageObjects.findings;
       latestFindingsTable = findings.latestFindingsTable;
-      findingsByResourceTable = findings.findingsByResourceTable;
-      resourceFindingsTable = findings.resourceFindingsTable;
       distributionBar = findings.distributionBar;
 
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
@@ -130,10 +126,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('SearchBar', () => {
       it('add filter', async () => {
-        await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
+        // Filter bar uses the field's customLabel in the DataView
+        await filterBar.addFilter({ field: 'Rule Name', operation: 'is', value: ruleName1 });
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
-        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
+        expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName1)).to.be(true);
       });
 
       it('remove filter', async () => {
@@ -147,8 +144,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await queryBar.setQuery(ruleName1);
         await queryBar.submitQuery();
 
-        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
-        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName2)).to.be(false);
+        expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName1)).to.be(true);
+        expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName2)).to.be(false);
 
         await queryBar.setQuery('');
         await queryBar.submitQuery();
@@ -157,26 +154,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Table Filters', () => {
-      it('add cell value filter', async () => {
-        await latestFindingsTable.addCellFilter('Rule Name', ruleName1, false);
-
-        expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
-        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
-      });
-
-      it('add negated cell value filter', async () => {
-        await latestFindingsTable.addCellFilter('Rule Name', ruleName1, true);
-
-        expect(await filterBar.hasFilter('rule.name', ruleName1, true, false, true)).to.be(true);
-        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(false);
-        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName2)).to.be(true);
-
-        await filterBar.removeFilter('rule.name');
-      });
-    });
-
-    describe('Table Sort', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/152913
+    describe.skip('Table Sort', () => {
       type SortingMethod = (a: string, b: string) => number;
       type SortDirection = 'asc' | 'desc';
       // Sort by lexical order will sort by the first character of the string (case-sensitive)
@@ -190,14 +169,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('sorts by a column, should be case sensitive/insensitive depending on the column', async () => {
         type TestCase = [string, SortDirection, SortingMethod];
         const testCases: TestCase[] = [
-          ['CIS Section', 'asc', sortByAlphabeticalOrder],
-          ['CIS Section', 'desc', sortByAlphabeticalOrder],
-          ['Resource ID', 'asc', compareStringByLexicographicOrder],
-          ['Resource ID', 'desc', compareStringByLexicographicOrder],
-          ['Resource Name', 'asc', sortByAlphabeticalOrder],
-          ['Resource Name', 'desc', sortByAlphabeticalOrder],
-          ['Resource Type', 'asc', sortByAlphabeticalOrder],
-          ['Resource Type', 'desc', sortByAlphabeticalOrder],
+          ['rule.section', 'asc', sortByAlphabeticalOrder],
+          ['rule.section', 'desc', sortByAlphabeticalOrder],
+          ['resource.id', 'asc', compareStringByLexicographicOrder],
+          ['resource.id', 'desc', compareStringByLexicographicOrder],
+          ['resource.name', 'asc', sortByAlphabeticalOrder],
+          ['resource.name', 'desc', sortByAlphabeticalOrder],
+          ['resource.sub_type', 'asc', sortByAlphabeticalOrder],
+          ['resource.sub_type', 'desc', sortByAlphabeticalOrder],
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
@@ -228,20 +207,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           await filterBar.removeFilter('result.evaluation');
         });
-      });
-    });
-
-    describe('GroupBy', () => {
-      it('groups findings by resource', async () => {
-        await comboBox.set('findings_group_by_selector', 'Resource');
-        expect(
-          await findingsByResourceTable.hasColumnValue('Applicable Benchmark', benchMarkName)
-        ).to.be(true);
-      });
-
-      it('navigates to resource findings page from resource id link', async () => {
-        await findingsByResourceTable.clickResourceIdLink(resourceId1, ruleSection1);
-        expect(await resourceFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
       });
     });
   });

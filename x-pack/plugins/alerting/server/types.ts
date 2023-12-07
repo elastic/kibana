@@ -28,7 +28,11 @@ import { Filter } from '@kbn/es-query';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
-import { RulesSettingsClient, RulesSettingsFlappingClient } from './rules_settings_client';
+import {
+  RulesSettingsClient,
+  RulesSettingsFlappingClient,
+  RulesSettingsQueryDelayClient,
+} from './rules_settings_client';
 import { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
 import {
@@ -135,6 +139,7 @@ export interface RuleExecutorOptions<
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
   maintenanceWindowIds?: string[];
+  getTimeRange: (timeWindow?: string) => { dateStart: string; dateEnd: string };
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -165,16 +170,6 @@ export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
-export interface GetSummarizedAlertsFnOpts {
-  start?: Date;
-  end?: Date;
-  executionUuid?: string;
-  ruleId: string;
-  spaceId: string;
-  excludedAlertInstanceIds: string[];
-  alertsFilter?: AlertsFilter | null;
-}
-
 export type AlertHit = Alert & {
   _id: string;
   _index: string;
@@ -183,6 +178,9 @@ export interface SummarizedAlertsChunk {
   count: number;
   data: AlertHit[];
 }
+
+export type ScopedQueryAlerts = Record<string, string[]>;
+
 export interface SummarizedAlerts {
   new: SummarizedAlertsChunk;
   ongoing: SummarizedAlertsChunk;
@@ -191,7 +189,6 @@ export interface SummarizedAlerts {
 export interface CombinedSummarizedAlerts extends SummarizedAlerts {
   all: SummarizedAlertsChunk;
 }
-export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
   rule: Pick<SanitizedRule<Params>, 'id'> &
     Omit<Partial<SanitizedRule<Params>>, 'viewInAppRelativeUrl'>;
@@ -208,7 +205,11 @@ interface ComponentTemplateSpec {
   fieldMap: FieldMap;
 }
 
-export interface IRuleTypeAlerts {
+export type FormatAlert<AlertData extends RuleAlertData> = (
+  alert: Partial<AlertData>
+) => Partial<AlertData>;
+
+export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   /**
    * Specifies the target alerts-as-data resource
    * for this rule type. All alerts created with the same
@@ -257,6 +258,11 @@ export interface IRuleTypeAlerts {
    * Optional secondary alias to use. This alias should not include the namespace.
    */
   secondaryAlias?: string;
+
+  /**
+   * Optional function to format each alert in summarizedAlerts right after fetching them.
+   */
+  formatAlert?: FormatAlert<AlertData>;
 }
 
 export interface RuleType<
@@ -289,6 +295,7 @@ export interface RuleType<
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>,
     AlertData
   >;
+  category: string;
   producer: string;
   actionVariables?: {
     context?: ActionVariable[];
@@ -305,8 +312,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
-  getSummarizedAlerts?: GetSummarizedAlertsFn;
-  alerts?: IRuleTypeAlerts;
+  alerts?: IRuleTypeAlerts<AlertData>;
   /**
    * Determines whether framework should
    * automatically make recovery determination. Defaults to true.
@@ -373,6 +379,7 @@ export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
 export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
 export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
+export type RulesSettingsQueryDelayClientApi = PublicMethodsOf<RulesSettingsQueryDelayClient>;
 
 export type MaintenanceWindowClientApi = PublicMethodsOf<MaintenanceWindowClient>;
 
@@ -437,6 +444,9 @@ export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   };
 }
 
+/**
+ * @deprecated in favor of Rule
+ */
 export interface RawRule extends SavedObjectAttributes {
   enabled: boolean;
   name: string;
@@ -470,3 +480,5 @@ export interface RawRule extends SavedObjectAttributes {
   revision: number;
   running?: boolean | null;
 }
+
+export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

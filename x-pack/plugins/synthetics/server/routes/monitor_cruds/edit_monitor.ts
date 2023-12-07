@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { mergeWith } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './add_monitor_project';
+import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
+import { mergeSourceMonitor } from './helper';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import {
@@ -18,6 +20,7 @@ import {
   SyntheticsMonitorWithSecretsAttributes,
   SyntheticsMonitor,
   ConfigKey,
+  MonitorLocations,
 } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { validateMonitor } from './monitor_validation';
@@ -27,6 +30,7 @@ import {
   formatTelemetryUpdateEvent,
 } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
+import { mapSavedObjectToMonitor } from './helper';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -38,10 +42,10 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     }),
     body: schema.any(),
   },
+  writeAccess: true,
   handler: async (routeContext): Promise<any> => {
     const { request, response, savedObjectsClient, server } = routeContext;
-    const { encryptedSavedObjects, logger } = server;
-    const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
+    const { logger } = server;
     const monitor = request.body as SyntheticsMonitor;
     const { monitorId } = request.params;
 
@@ -54,23 +58,29 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       /* Decrypting the previous monitor before editing ensures that all existing fields remain
        * on the object, even in flows where decryption does not take place, such as the enabled tab
        * on the monitor list table. We do not decrypt monitors in bulk for the monitor list table */
-      const decryptedPreviousMonitor =
-        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-          syntheticsMonitorType,
-          monitorId,
-          {
-            namespace: previousMonitor.namespaces?.[0],
-          }
-        );
+      const decryptedPreviousMonitor = await getDecryptedMonitor(
+        server,
+        monitorId,
+        previousMonitor.namespaces?.[0]!
+      );
       const normalizedPreviousMonitor = normalizeSecrets(decryptedPreviousMonitor).attributes;
 
-      const editedMonitor = mergeWith(normalizedPreviousMonitor, monitor, customizer);
+      const editedMonitor = mergeSourceMonitor(normalizedPreviousMonitor, monitor);
 
       const validationResult = validateMonitor(editedMonitor as MonitorFields);
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details, payload } = validationResult;
         return response.badRequest({ body: { message, attributes: { details, ...payload } } });
+      }
+
+      const err = await validatePermissions(routeContext, editedMonitor.locations);
+      if (err) {
+        return response.forbidden({
+          body: {
+            message: err,
+          },
+        });
       }
 
       const monitorWithRevision = {
@@ -113,7 +123,9 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         });
       }
 
-      return editedMonitorSavedObject;
+      return mapSavedObjectToMonitor(
+        editedMonitorSavedObject as SavedObject<EncryptedSyntheticsMonitorAttributes>
+      );
     } catch (updateErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(updateErr)) {
         return getMonitorNotFoundResponse(response, monitorId);
@@ -228,9 +240,24 @@ export const syncEditedMonitor = async ({
   }
 };
 
-// Ensure that METADATA is merged deeply, to protect AAD and prevent decryption errors
-const customizer = (_: any, srcValue: any, key: string) => {
-  if (key !== ConfigKey.METADATA) {
-    return srcValue;
+export const validatePermissions = async (
+  { server, response, request }: RouteContext,
+  monitorLocations: MonitorLocations
+) => {
+  const hasPublicLocations = monitorLocations?.some((loc) => loc.isServiceManaged);
+  if (!hasPublicLocations) {
+    return;
+  }
+
+  const elasticManagedLocationsEnabled =
+    Boolean(
+      (
+        await server.coreStart?.capabilities.resolveCapabilities(request, {
+          capabilityPath: 'uptime.*',
+        })
+      ).uptime.elasticManagedLocationsEnabled
+    ) ?? true;
+  if (!elasticManagedLocationsEnabled) {
+    return ELASTIC_MANAGED_LOCATIONS_DISABLED;
   }
 };

@@ -6,7 +6,7 @@
  */
 
 import { format, ALLOWED_FIELDS } from './formatter';
-import { DataStream } from '../../../../../../common/runtime_types';
+import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
 import {
   DEFAULT_FIELDS,
   PROFILE_VALUES_ENUM,
@@ -96,10 +96,23 @@ describe('format', () => {
     };
   });
 
+  it('leaves un-nested fields as is', () => {
+    const projectSourceContent = 'UUUUUUUIJLVIK';
+    formValues['source.project.content'] = projectSourceContent;
+    formValues['ssl.verification_mode'] = 'full';
+    formValues.type = 'browser';
+    expect(format(formValues)).toEqual(
+      expect.objectContaining({
+        ['source.project.content']: projectSourceContent,
+        ['ssl.verification_mode']: 'full',
+      })
+    );
+  });
+
   it.each([[true], [false]])('correctly formats form fields to monitor type', (enabled) => {
     formValues.enabled = enabled;
     expect(format(formValues)).toEqual({
-      ...DEFAULT_FIELDS[DataStream.HTTP],
+      ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
       __ui: {
         is_tls_enabled: false,
       },
@@ -232,7 +245,7 @@ describe('format', () => {
         },
       };
       expect(format(browserFormFields)).toEqual({
-        ...DEFAULT_FIELDS[DataStream.BROWSER],
+        ...DEFAULT_FIELDS[MonitorTypeEnum.BROWSER],
         __ui: {
           script_source: {
             file_name: fileName,
@@ -301,7 +314,7 @@ describe('format', () => {
         },
       })
     ).toEqual({
-      ...DEFAULT_FIELDS[DataStream.HTTP],
+      ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
       __ui: {
         is_tls_enabled: isTLSEnabled,
       },

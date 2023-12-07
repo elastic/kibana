@@ -390,7 +390,7 @@
                 "section": "def-common.ResponseAction",
                 "text": "ResponseAction"
               },
-              "[]"
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
@@ -799,7 +799,7 @@
         "label": "SelectorCondition",
         "description": [],
         "signature": [
-          "\"containerImageFullName\" | \"containerImageName\" | \"containerImageTag\" | \"kubernetesClusterId\" | \"kubernetesClusterName\" | \"kubernetesNamespace\" | \"kubernetesPodLabel\" | \"kubernetesPodName\" | \"targetFilePath\" | \"ignoreVolumeFiles\" | \"ignoreVolumeMounts\" | \"operation\" | \"processExecutable\" | \"processName\" | \"sessionLeaderInteractive\""
+          "\"operation\" | \"containerImageFullName\" | \"containerImageName\" | \"containerImageTag\" | \"kubernetesClusterId\" | \"kubernetesClusterName\" | \"kubernetesNamespace\" | \"kubernetesPodLabel\" | \"kubernetesPodName\" | \"targetFilePath\" | \"ignoreVolumeFiles\" | \"ignoreVolumeMounts\" | \"processExecutable\" | \"processName\" | \"sessionLeaderInteractive\""
         ],
         "path": "x-pack/plugins/cloud_defend/common/v1.ts",
         "deprecated": false,

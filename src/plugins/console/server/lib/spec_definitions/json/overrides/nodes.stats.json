@@ -1,0 +1,39 @@
+{
+  "nodes.stats": {
+    "url_components": {
+      "metrics": [
+        "_all",
+        "breaker",
+        "discovery",
+        "fs",
+        "http",
+        "indexing_pressure",
+        "indices",
+        "jvm",
+        "os",
+        "process",
+        "thread_pool",
+        "transport"
+      ],
+      "index_metric": [
+        "_all",
+        "bulk",
+        "completion",
+        "docs",
+        "fielddata",
+        "flush",
+        "get",
+        "indexing",
+        "merge",
+        "query_cache",
+        "refresh",
+        "request_cache",
+        "search",
+        "segments",
+        "shard_stats",
+        "store",
+        "warmer"
+      ]
+    }
+  }
+}

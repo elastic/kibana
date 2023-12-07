@@ -20,8 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('assets index template', () => {
-      it('should be installed', async () => {
+    describe('assets index templates', () => {
+      it('should always be installed', async () => {
         await esSupertest.get('/_index_template/assets').expect(200);
       });
     });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CommentType } from '@kbn/cases-plugin/common/api';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createAndUploadFile } from '../../../../cases_api_integration/common/lib/api';
 import { OBSERVABILITY_FILE_KIND } from '../../../../cases_api_integration/common/lib/constants';
@@ -30,11 +30,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
       await cases.api.createAttachment({
         caseId: caseIdMetrics,
-        params: { comment: 'test comment', type: CommentType.user, owner: 'observability' },
+        params: { comment: 'test comment', type: AttachmentType.user, owner: 'observability' },
       });
       await cases.api.createAttachment({
         caseId: caseIdMetrics,
-        params: { comment: '2nd test comment', type: CommentType.user, owner: 'observability' },
+        params: { comment: '2nd test comment', type: AttachmentType.user, owner: 'observability' },
       });
 
       const { id: caseIdLogs, version: caseVersionLogs } = await cases.api.createCase({
@@ -56,7 +56,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       const { version: caseVersionMonitoring } = await cases.api.createAttachment({
         caseId: caseIdMonitoring,
-        params: { comment: 'test comment', type: CommentType.user, owner: 'observability' },
+        params: { comment: 'test comment', type: AttachmentType.user, owner: 'observability' },
       });
 
       await cases.api.setStatus(caseIdMonitoring, caseVersionMonitoring, 'in-progress');
@@ -95,6 +95,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         1400,
         1024
       );
+    });
+
+    it('case settings screenshot', async () => {
+      await cases.navigation.navigateToApp('observability/cases', 'cases-all-title');
+      await testSubjects.click('configure-case-button');
+      await commonScreenshots.takeScreenshot('add-case-connector', screenshotDirectories);
     });
   });
 }

@@ -6,8 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ConnectorMappings } from '../../common/types/domain';
-import type { Case } from '../../common/api';
+import type { Case, ConnectorMappings } from '../../common/types/domain';
 import type { CasesClientGetAlertsResponse } from '../client/alerts/types';
 import type { CasesClientFactory } from '../client/factory';
 import type { RegisterActionType } from '../types';

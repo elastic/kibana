@@ -1,23 +1,105 @@
 {
   "cat.transforms": {
     "url_params": {
-      "from": 0,
-      "size": 0,
-      "allow_no_match": "__flag__",
-      "format": "",
-      "h": [],
-      "help": "__flag__",
-      "s": [],
-      "time": [
-        "d",
-        "h",
-        "m",
-        "s",
-        "ms",
-        "micros",
-        "nanos"
+      "format": [
+        "text"
       ],
-      "v": "__flag__"
+      "h": [
+        "changes_last_detection_time",
+        "checkpoint",
+        "checkpoint_duration_time_exp_avg",
+        "checkpoint_progress",
+        "create_time",
+        "delete_time",
+        "description",
+        "dest_index",
+        "documents_deleted",
+        "documents_indexed",
+        "docs_per_second",
+        "documents_processed",
+        "frequency",
+        "id",
+        "index_failure",
+        "index_time",
+        "index_total",
+        "indexed_documents_exp_avg",
+        "last_search_time",
+        "max_page_search_size",
+        "pages_processed",
+        "pipeline",
+        "processed_documents_exp_avg",
+        "processing_time",
+        "reason",
+        "search_failure",
+        "search_time",
+        "search_total",
+        "source_index",
+        "state",
+        "transform_type",
+        "trigger_count",
+        "version"
+      ],
+      "help": "__flag__",
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "s": [
+        "changes_last_detection_time",
+        "checkpoint",
+        "checkpoint_duration_time_exp_avg",
+        "checkpoint_progress",
+        "create_time",
+        "delete_time",
+        "description",
+        "dest_index",
+        "documents_deleted",
+        "documents_indexed",
+        "docs_per_second",
+        "documents_processed",
+        "frequency",
+        "id",
+        "index_failure",
+        "index_time",
+        "index_total",
+        "indexed_documents_exp_avg",
+        "last_search_time",
+        "max_page_search_size",
+        "pages_processed",
+        "pipeline",
+        "processed_documents_exp_avg",
+        "processing_time",
+        "reason",
+        "search_failure",
+        "search_time",
+        "search_total",
+        "source_index",
+        "state",
+        "transform_type",
+        "trigger_count",
+        "version"
+      ],
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_match": "__flag__",
+      "from": "",
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ],
+      "size": [
+        "100"
+      ]
     },
     "methods": [
       "GET"
@@ -26,6 +108,10 @@
       "_cat/transforms",
       "_cat/transforms/{transform_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-transforms.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-transforms.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

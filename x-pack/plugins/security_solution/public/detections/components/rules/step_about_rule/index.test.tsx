@@ -69,6 +69,7 @@ export const stepDefineStepMLRule: DefineStepRule = {
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
+  enableThresholdSuppression: false,
 };
 
 describe('StepAboutRuleComponent', () => {
@@ -274,6 +275,7 @@ describe('StepAboutRuleComponent', () => {
           technique: [],
         },
       ],
+      investigationFields: [],
     };
 
     await act(async () => {
@@ -333,6 +335,7 @@ describe('StepAboutRuleComponent', () => {
           technique: [],
         },
       ],
+      investigationFields: [],
     };
 
     await act(async () => {

@@ -190,13 +190,6 @@ export default {
         required: true,
       },
     },
-    listTypeSpecificIndexPatternFilter: {
-      description:
-        '`(pattern: DataViewBase, type: ExceptionListType) => DataViewBase` - callback invoked when index patterns filtered. Optional to be used if you would only like certain fields displayed.',
-      type: {
-        required: false,
-      },
-    },
     onChange: {
       description:
         '`(arg: OnChangeProps) => void` - callback invoked any time builder update to propagate changes up to parent.',

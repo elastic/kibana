@@ -56,7 +56,14 @@ export const FieldList: React.FC<FieldListProps> = ({
       css={containerStyle}
       className={className}
     >
-      {isProcessing && <EuiProgress size="xs" color="accent" position="absolute" />}
+      {isProcessing && (
+        <EuiProgress
+          size="xs"
+          color="accent"
+          position="absolute"
+          data-test-subj={`${dataTestSubject}Loading`}
+        />
+      )}
       {!!prepend && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
       <EuiFlexItem grow={true}>{children}</EuiFlexItem>
       {!!append && <EuiFlexItem grow={false}>{append}</EuiFlexItem>}

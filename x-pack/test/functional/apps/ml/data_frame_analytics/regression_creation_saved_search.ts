@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('regression saved search creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote_small');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote_small', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote_small', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded('ft_farequote_small');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded('ft_farequote_small');
       await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded(
@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await ml.api.cleanMlIndices();
       await ml.testResources.deleteSavedSearches();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote_small');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote_small');
     });
 
     const dateNow = Date.now();
@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'responsetime',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           source: 'ft_farequote_small',
           runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
@@ -94,7 +94,6 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '10mb',
                   'Version',
-                  '8.10.0',
                 ],
               },
               {
@@ -162,7 +161,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'responsetime',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           source: 'ft_farequote_small',
           runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
@@ -183,7 +182,6 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '10mb',
                   'Version',
-                  '8.10.0',
                 ],
               },
               {
@@ -251,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'responsetime',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           source: 'ft_farequote_small',
           runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
@@ -266,14 +264,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: [
-                  'STOPPED',
-                  'Create time',
-                  'Model memory limit',
-                  '5mb',
-                  'Version',
-                  '8.10.0',
-                ],
+                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '5mb', 'Version'],
               },
               {
                 section: 'stats',
@@ -340,7 +331,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'responsetime',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           source: 'ft_farequote_small',
           runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
@@ -355,14 +346,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: [
-                  'STOPPED',
-                  'Create time',
-                  'Model memory limit',
-                  '5mb',
-                  'Version',
-                  '8.10.0',
-                ],
+                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '5mb', 'Version'],
               },
               {
                 section: 'stats',
@@ -417,7 +401,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
-          await ml.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
+          await ml.testResources.deleteDataViewByTitle(testData.destinationIndex);
         });
 
         it('loads the data frame analytics wizard', async () => {
@@ -503,6 +487,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
 
+          await ml.testExecution.logTestStep('displays the create data view switch');
+          await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchExists();
+          await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchCheckState(true);
+
           await ml.testExecution.logTestStep('continues to the validation step');
           await ml.dataFrameAnalyticsCreation.continueToValidationStep();
 
@@ -512,18 +500,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
-
-          await ml.testExecution.logTestStep('sets the create data view switch');
-          await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
-            testData.createIndexPattern
-          );
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {
           await ml.testExecution.logTestStep('creates and starts the analytics job');
           await ml.dataFrameAnalyticsCreation.assertCreateButtonExists();
-          await ml.dataFrameAnalyticsCreation.assertStartJobCheckboxCheckState(true);
+          await ml.dataFrameAnalyticsCreation.assertStartJobSwitchCheckState(true);
           await ml.dataFrameAnalyticsCreation.createAnalyticsJob(testData.jobId);
 
           await ml.testExecution.logTestStep('finishes analytics processing');

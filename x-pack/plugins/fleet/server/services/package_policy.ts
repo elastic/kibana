@@ -117,6 +117,7 @@ import {
   extractAndUpdateSecrets,
   extractAndWriteSecrets,
   deleteSecretsIfNotReferenced as deleteSecrets,
+  isSecretStorageEnabled,
 } from './secrets';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
@@ -243,8 +244,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
       validatePackagePolicyOrThrow(enrichedPackagePolicy, pkgInfo);
 
-      const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
-      if (secretsStorageEnabled) {
+      if (await isSecretStorageEnabled(esClient, soClient)) {
         const secretsRes = await extractAndWriteSecrets({
           packagePolicy: { ...enrichedPackagePolicy, inputs },
           packageInfo: pkgInfo,
@@ -705,6 +705,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const logger = appContextService.getLogger();
       logger.error(`An error occurred executing "packagePolicyUpdate" callback: ${error}`);
       logger.error(error);
+      if (error.apiPassThrough) {
+        throw error;
+      }
       enrichedPackagePolicy = packagePolicyUpdate;
     }
 
@@ -747,15 +750,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-      const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
-      if (secretsStorageEnabled) {
+      if (await isSecretStorageEnabled(esClient, soClient)) {
         const secretsRes = await extractAndUpdateSecrets({
           oldPackagePolicy,
           packagePolicyUpdate: { ...restOfPackagePolicy, inputs },
           packageInfo: pkgInfo,
           esClient,
         });
-
         restOfPackagePolicy = secretsRes.packagePolicyUpdate;
         secretReferences = secretsRes.secretReferences;
         secretsToDelete = secretsRes.secretsToDelete;
@@ -914,9 +915,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
           if (pkgInfo) {
             validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-            const { secretsStorage: secretsStorageEnabled } =
-              appContextService.getExperimentalFeatures();
-            if (secretsStorageEnabled) {
+            if (await isSecretStorageEnabled(esClient, soClient)) {
               const secretsRes = await extractAndUpdateSecrets({
                 oldPackagePolicy,
                 packagePolicyUpdate: { ...restOfPackagePolicy, inputs },
@@ -1162,13 +1161,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         ...new Set(result.filter((r) => r.success && r.policy_id).map((r) => r.policy_id!)),
       ];
 
+      const agentPoliciesWithEndpointPackagePolicies = result.reduce((acc, cur) => {
+        if (cur.success && cur.policy_id && cur.package?.name === 'endpoint') {
+          return acc.add(cur.policy_id);
+        }
+        return acc;
+      }, new Set());
+
       const agentPolicies = await agentPolicyService.getByIDs(soClient, uniquePolicyIdsR);
 
       for (const policyId of uniquePolicyIdsR) {
         const agentPolicy = agentPolicies.find((p) => p.id === policyId);
         if (agentPolicy) {
+          // is the agent policy attached to package policy with endpoint
           await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
             user: options?.user,
+            removeProtection: agentPoliciesWithEndpointPackagePolicies.has(policyId),
           });
         }
       }
@@ -1853,16 +1861,23 @@ function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: 
   }
 }
 
-function getInputsWithStreamIds(
+// the option `allEnabled` is only used to generate inputs integration templates where everything is enabled by default
+// it shouldn't be used in the normal install flow
+export function getInputsWithStreamIds(
   packagePolicy: NewPackagePolicy,
-  packagePolicyId: string
+  packagePolicyId?: string,
+  allEnabled?: boolean
 ): PackagePolicy['inputs'] {
   return packagePolicy.inputs.map((input) => {
     return {
       ...input,
+      enabled: !!allEnabled ? true : input.enabled,
       streams: input.streams.map((stream) => ({
         ...stream,
-        id: `${input.type}-${stream.data_stream.dataset}-${packagePolicyId}`,
+        enabled: !!allEnabled ? true : stream.enabled,
+        id: packagePolicyId
+          ? `${input.type}-${stream.data_stream.dataset}-${packagePolicyId}`
+          : `${input.type}-${stream.data_stream.dataset}`,
       })),
     };
   });

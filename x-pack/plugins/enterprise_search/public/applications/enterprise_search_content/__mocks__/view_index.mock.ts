@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
-
 import {
   ConnectorStatus,
   DisplayType,
   FieldType,
-  FilteringPolicy,
-  FilteringRuleRule,
   FilteringValidationState,
   SyncStatus,
-} from '../../../../common/types/connectors';
+} from '@kbn/search-connectors';
+
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 
 import {
   ApiViewIndex,
@@ -87,8 +85,8 @@ export const connectorIndex: ConnectorViewIndex = {
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: FilteringPolicy.INCLUDE,
-              rule: FilteringRuleRule.REGEX,
+              policy: 'include',
+              rule: 'regex',
               updated_at: expect.any(String),
               value: '.*',
             },
@@ -111,8 +109,8 @@ export const connectorIndex: ConnectorViewIndex = {
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: FilteringPolicy.INCLUDE,
-              rule: FilteringRuleRule.REGEX,
+              policy: 'include',
+              rule: 'regex',
               updated_at: expect.any(String),
               value: '.*',
             },
@@ -217,8 +215,8 @@ export const crawlerIndex: CrawlerViewIndex = {
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: FilteringPolicy.INCLUDE,
-              rule: FilteringRuleRule.REGEX,
+              policy: 'include',
+              rule: 'regex',
               updated_at: expect.any(String),
               value: '.*',
             },
@@ -241,8 +239,8 @@ export const crawlerIndex: CrawlerViewIndex = {
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: FilteringPolicy.INCLUDE,
-              rule: FilteringRuleRule.REGEX,
+              policy: 'include',
+              rule: 'regex',
               updated_at: expect.any(String),
               value: '.*',
             },

@@ -16,6 +16,7 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { AuthenticatedUser } from '@kbn/security-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
@@ -66,7 +67,7 @@ export const renderApp = (
   const { history } = params;
   const { application, chrome, http, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
-  const { charts, cloud, guidedOnboarding, lens, security, share } = plugins;
+  const { charts, cloud, guidedOnboarding, lens, security, share, ml } = plugins;
 
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
   externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
@@ -84,6 +85,19 @@ export const renderApp = (
 
   resetContext({ createStore: true });
   const store = getContext().store;
+  let user: AuthenticatedUser | null = null;
+  try {
+    security.authc
+      .getCurrentUser()
+      .then((newUser) => {
+        user = newUser;
+      })
+      .catch(() => {
+        user = null;
+      });
+  } catch {
+    user = null;
+  }
 
   const unmountKibanaLogic = mountKibanaLogic({
     application,
@@ -96,6 +110,7 @@ export const renderApp = (
     history,
     isSidebarEnabled,
     lens,
+    ml,
     navigateToUrl,
     productAccess,
     productFeatures,
@@ -109,6 +124,7 @@ export const renderApp = (
     setDocTitle: chrome.docTitle.change,
     share,
     uiSettings,
+    user,
   });
   const unmountLicensingLogic = mountLicensingLogic({
     canManageLicense: core.application.capabilities.management?.stack?.license_management,

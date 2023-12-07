@@ -14,9 +14,9 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/std",
-    "@kbn/core-http-browser",
     "@kbn/core-http-browser-mocks",
-    "@kbn/core-capabilities-common"
+    "@kbn/core-capabilities-common",
+    "@kbn/core-http-browser-internal"
   ],
   "exclude": [
     "target/**/*",

@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
 import { ProductFeatures } from './types';
-import { IngestPipelineParams } from './types/connectors';
 
 export const SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.search.productName', {
   defaultMessage: 'Search',
@@ -45,19 +46,19 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
-export const ESRE_PLUGIN = {
-  ID: 'enterpriseSearchEsre',
-  NAME: i18n.translate('xpack.enterpriseSearch.esre.productName', {
-    defaultMessage: 'ESRE',
+export const AI_SEARCH_PLUGIN = {
+  ID: 'enterpriseSearchAISearch',
+  NAME: i18n.translate('xpack.enterpriseSearch.aiSearch.productName', {
+    defaultMessage: 'AI Search',
   }),
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.esre.navTitle', {
-    defaultMessage: 'ESRE',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.aiSearch.navTitle', {
+    defaultMessage: 'AI Search',
   }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.esre.description', {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.aiSearch.description', {
     defaultMessage:
       'Toolkit for enabling developers to build AI search-powered applications using the Elastic platform.',
   }),
-  URL: '/app/enterprise_search/esre',
+  URL: '/app/enterprise_search/ai_search',
   LOGO: 'logoEnterpriseSearch',
 };
 
@@ -79,7 +80,7 @@ export const ANALYTICS_PLUGIN = {
 };
 
 export const ELASTICSEARCH_PLUGIN = {
-  ID: 'elasticsearch',
+  ID: 'enterpriseSearchElasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.elasticsearch.productName', {
     defaultMessage: 'Elasticsearch',
   }),
@@ -196,7 +197,7 @@ export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
   extract_binary_content: true,
   name: DEFAULT_PIPELINE_NAME,
   reduce_whitespace: true,
-  run_ml_inference: false,
+  run_ml_inference: true,
 };
 
 export interface DefaultConnectorsPipelineMeta {
@@ -229,3 +230,7 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
 };
 
 export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';
+export const PLUGIN_ID = 'enterpriseSearch';
+
+export const CONNECTOR_NATIVE_TYPE = 'native';
+export const CONNECTOR_CLIENTS_TYPE = 'connector_clients';

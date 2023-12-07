@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should let the user return back to Visualize if no changes were made', async () => {
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -43,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should let the user return back to Visualize but show a warning modal if changes happened in Lens', async () => {
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -72,7 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should let the user return back to Visualize with no modal if changes have been saved in Lens', async () => {
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {

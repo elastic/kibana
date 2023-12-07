@@ -51,6 +51,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           status_change_threshold: 10,
         })
         .expect(200);
+      await supertest
+        .post(`/internal/alerting/rules/settings/_query_delay`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          delay: 10,
+        })
+        .expect(200);
     });
 
     beforeEach(async () => {
@@ -78,11 +85,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.waitForDeleted('centerJustifiedSpinner');
 
       // Flapping enabled by default
-      await testSubjects.missingOrFail('rulesSettingsModalFlappingOffPrompt');
+      await testSubjects.missingOrFail('rulesSettingsFlappingOffPrompt');
 
-      await testSubjects.existOrFail('rulesSettingsModalEnableSwitch');
+      await testSubjects.existOrFail('rulesSettingsFlappingEnableSwitch');
       await testSubjects.existOrFail('lookBackWindowRangeInput');
       await testSubjects.existOrFail('statusChangeThresholdRangeInput');
+
+      await testSubjects.missingOrFail('queryDelayRangeInput');
 
       const lookBackWindowInput = await testSubjects.find('lookBackWindowRangeInput');
       const statusChangeThresholdInput = await testSubjects.find('statusChangeThresholdRangeInput');
@@ -92,6 +101,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       expect(lookBackWindowValue).to.eql('10');
       expect(statusChangeThresholdValue).to.eql('10');
+
+      // Enable query delay tests once feature flag is removed
+      // await testSubjects.existOrFail('queryDelayRangeInput');
+      // const queryDelayInput = await testSubjects.find('queryDelayRangeInput');
+      // const queryDelayValue = await queryDelayInput.getAttribute('value');
+      // expect(queryDelayValue).to.eql('10');
     });
 
     it('should allow the user to modify rules settings', async () => {
@@ -110,8 +125,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(lookBackWindowValue).to.eql('15');
       expect(statusChangeThresholdValue).to.eql('5');
 
-      await testSubjects.click('rulesSettingsModalEnableSwitch');
-      await testSubjects.existOrFail('rulesSettingsModalFlappingOffPrompt');
+      // Enable query delay tests once feature flag is removed
+      // await dragRangeInput('queryDelayRangeInput', 5, 'left');
+      // let queryDelayInput = await testSubjects.find('queryDelayRangeInput');
+      // let queryDelayValue = await queryDelayInput.getAttribute('value');
+      // expect(queryDelayValue).to.eql('5');
+
+      await testSubjects.click('rulesSettingsFlappingEnableSwitch');
+      await testSubjects.existOrFail('rulesSettingsFlappingOffPrompt');
 
       // Save
       await testSubjects.click('rulesSettingsModalSaveButton');
@@ -123,8 +144,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.waitForDeleted('centerJustifiedSpinner');
 
       // Flapping initially disabled
-      await testSubjects.existOrFail('rulesSettingsModalFlappingOffPrompt');
-      await testSubjects.click('rulesSettingsModalEnableSwitch');
+      await testSubjects.existOrFail('rulesSettingsFlappingOffPrompt');
+      await testSubjects.click('rulesSettingsFlappingEnableSwitch');
 
       lookBackWindowInput = await testSubjects.find('lookBackWindowRangeInput');
       statusChangeThresholdInput = await testSubjects.find('statusChangeThresholdRangeInput');
@@ -134,6 +155,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       expect(lookBackWindowValue).to.eql('15');
       expect(statusChangeThresholdValue).to.eql('5');
+
+      // Enable query delay tests once feature flag is removed
+      // queryDelayInput = await testSubjects.find('queryDelayRangeInput');
+      // queryDelayValue = await queryDelayInput.getAttribute('value');
+      // expect(queryDelayValue).to.eql('5');
     });
   });
 };

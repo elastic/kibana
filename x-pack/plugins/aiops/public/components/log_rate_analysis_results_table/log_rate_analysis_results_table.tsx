@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
-import { orderBy } from 'lodash';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { orderBy, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
@@ -14,8 +14,10 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiCode,
   EuiIcon,
   EuiIconTip,
+  EuiText,
   EuiTableSortingType,
   EuiToolTip,
 } from '@elastic/eui';
@@ -25,8 +27,10 @@ import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+
+import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
 
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 
@@ -47,10 +51,14 @@ const NOT_AVAILABLE = '--';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'pValue';
+const DEFAULT_SORT_FIELD_ZERO_DOCS_FALLBACK = 'doc_count';
 const DEFAULT_SORT_DIRECTION = 'asc';
+const DEFAULT_SORT_DIRECTION_ZERO_DOCS_FALLBACK = 'desc';
+
+const TRUNCATE_TEXT_LINES = 3;
 
 interface LogRateAnalysisResultsTableProps {
-  significantTerms: SignificantTerm[];
+  significantItems: SignificantItem[];
   dataView: DataView;
   loading: boolean;
   isExpandedRow?: boolean;
@@ -60,10 +68,11 @@ interface LogRateAnalysisResultsTableProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  zeroDocsFallback?: boolean;
 }
 
 export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> = ({
-  significantTerms,
+  significantItems,
   dataView,
   loading,
   isExpandedRow,
@@ -71,22 +80,29 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   timeRangeMs,
   barColorOverride,
   barHighlightColorOverride,
+  zeroDocsFallback = false,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
   const dataViewId = dataView.id;
 
   const {
-    pinnedSignificantTerm,
-    selectedSignificantTerm,
-    setPinnedSignificantTerm,
-    setSelectedSignificantTerm,
+    pinnedGroup,
+    pinnedSignificantItem,
+    selectedGroup,
+    selectedSignificantItem,
+    setPinnedSignificantItem,
+    setSelectedSignificantItem,
   } = useLogRateAnalysisResultsTableRowContext();
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<keyof SignificantTerm>(DEFAULT_SORT_FIELD);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
+  const [sortField, setSortField] = useState<keyof SignificantItem>(
+    zeroDocsFallback ? DEFAULT_SORT_FIELD_ZERO_DOCS_FALLBACK : DEFAULT_SORT_FIELD
+  );
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(
+    zeroDocsFallback ? DEFAULT_SORT_DIRECTION_ZERO_DOCS_FALLBACK : DEFAULT_SORT_DIRECTION
+  );
 
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
@@ -104,27 +120,61 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   const viewInDiscoverAction = useViewInDiscoverAction(dataViewId);
   const viewInLogPatternAnalysisAction = useViewInLogPatternAnalysisAction(dataViewId);
 
-  const columns: Array<EuiBasicTableColumn<SignificantTerm>> = [
+  const columns: Array<EuiBasicTableColumn<SignificantItem>> = [
     {
       'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnFieldName',
       field: 'fieldName',
       name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.fieldNameLabel', {
         defaultMessage: 'Field name',
       }),
-      render: (_, { fieldName, fieldValue }) => (
-        <>
-          <FieldStatsPopover
-            dataView={dataView}
-            fieldName={fieldName}
-            fieldValue={fieldValue}
-            fieldStatsServices={fieldStatsServices}
-            dslQuery={searchQuery}
-            timeRangeMs={timeRangeMs}
-          />
-          {fieldName}
-        </>
-      ),
+      render: (_, { fieldName, fieldValue, key, type, doc_count: count }) => {
+        const dslQuery =
+          type === SIGNIFICANT_ITEM_TYPE.KEYWORD
+            ? searchQuery
+            : getCategoryQuery(fieldName, [
+                {
+                  key,
+                  count,
+                  examples: [],
+                },
+              ]);
+        return (
+          <>
+            {type === SIGNIFICANT_ITEM_TYPE.KEYWORD && (
+              <FieldStatsPopover
+                dataView={dataView}
+                fieldName={fieldName}
+                fieldValue={type === SIGNIFICANT_ITEM_TYPE.KEYWORD ? fieldValue : key}
+                fieldStatsServices={fieldStatsServices}
+                dslQuery={dslQuery}
+                timeRangeMs={timeRangeMs}
+              />
+            )}
+            {type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN && (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.aiops.fieldContextPopover.descriptionTooltipLogPattern',
+                  {
+                    defaultMessage:
+                      'The field value for this field shows an example of the identified significant text field pattern.',
+                  }
+                )}
+              >
+                <EuiIcon
+                  type="aggregate"
+                  data-test-subj={'aiopsLogPatternIcon'}
+                  css={{ marginLeft: euiTheme.euiSizeS, marginRight: euiTheme.euiSizeXS }}
+                  size="m"
+                />
+              </EuiToolTip>
+            )}
+
+            <span title={fieldName}>{fieldName}</span>
+          </>
+        );
+      },
       sortable: true,
+      truncateText: true,
       valign: 'middle',
     },
     {
@@ -133,9 +183,22 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.fieldValueLabel', {
         defaultMessage: 'Field value',
       }),
-      render: (_, { fieldValue }) => String(fieldValue),
+      render: (_, { fieldValue, type }) => (
+        <span title={String(fieldValue)}>
+          {type === 'keyword' ? (
+            String(fieldValue)
+          ) : (
+            <EuiText size="xs">
+              <EuiCode language="log" transparentBackground css={{ paddingInline: '0px' }}>
+                {String(fieldValue)}
+              </EuiCode>
+            </EuiText>
+          )}
+        </span>
+      ),
       sortable: true,
       textOnly: true,
+      truncateText: { lines: TRUNCATE_TEXT_LINES },
       valign: 'middle',
     },
     {
@@ -181,7 +244,10 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       sortable: true,
       valign: 'middle',
     },
-    {
+  ];
+
+  if (!zeroDocsFallback) {
+    columns.push({
       'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnPValue',
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
@@ -205,8 +271,9 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       render: (pValue: number | null) => pValue?.toPrecision(3) ?? NOT_AVAILABLE,
       sortable: true,
       valign: 'middle',
-    },
-    {
+    });
+
+    columns.push({
       'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnImpact',
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
@@ -230,27 +297,28 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
         </EuiToolTip>
       ),
       render: (_, { pValue }) => {
-        if (!pValue) return NOT_AVAILABLE;
+        if (typeof pValue !== 'number') return NOT_AVAILABLE;
         const label = getFailedTransactionsCorrelationImpactLabel(pValue);
         return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
       },
       sortable: true,
       valign: 'middle',
-    },
-    {
-      'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnAction',
-      name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.actionsColumnName', {
-        defaultMessage: 'Actions',
-      }),
-      actions: [
-        ...(viewInDiscoverAction ? [viewInDiscoverAction] : []),
-        ...(viewInLogPatternAnalysisAction ? [viewInLogPatternAnalysisAction] : []),
-        copyToClipBoardAction,
-      ],
-      width: ACTIONS_COLUMN_WIDTH,
-      valign: 'middle',
-    },
-  ];
+    });
+  }
+
+  columns.push({
+    'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnAction',
+    name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.actionsColumnName', {
+      defaultMessage: 'Actions',
+    }),
+    actions: [
+      ...(viewInDiscoverAction ? [viewInDiscoverAction] : []),
+      ...(viewInLogPatternAnalysisAction ? [viewInLogPatternAnalysisAction] : []),
+      copyToClipBoardAction,
+    ],
+    width: ACTIONS_COLUMN_WIDTH,
+    valign: 'middle',
+  });
 
   if (isExpandedRow === true) {
     columns.unshift({
@@ -296,12 +364,12 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
 
   const { pagination, pageOfItems, sorting } = useMemo(() => {
     const pageStart = pageIndex * pageSize;
-    const itemCount = significantTerms?.length ?? 0;
+    const itemCount = significantItems?.length ?? 0;
 
-    let items: SignificantTerm[] = significantTerms ?? [];
+    let items: SignificantItem[] = significantItems ?? [];
 
     const sortIteratees = [
-      (item: SignificantTerm) => {
+      (item: SignificantItem) => {
         if (item && typeof item[sortField] === 'string') {
           // @ts-ignore Object is possibly null or undefined
           return item[sortField].toLowerCase();
@@ -313,11 +381,11 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
 
     // Only if the table is sorted by p-value, add a secondary sort by doc count.
     if (sortField === 'pValue') {
-      sortIteratees.push((item: SignificantTerm) => item.doc_count);
+      sortIteratees.push((item: SignificantItem) => item.doc_count);
       sortDirections.push(sortDirection);
     }
 
-    items = orderBy(significantTerms, sortIteratees, sortDirections);
+    items = orderBy(significantItems, sortIteratees, sortDirections);
 
     return {
       pageOfItems: items.slice(pageStart, pageStart + pageSize),
@@ -334,13 +402,59 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
         },
       },
     };
-  }, [pageIndex, pageSize, sortField, sortDirection, significantTerms]);
+  }, [pageIndex, pageSize, sortField, sortDirection, significantItems]);
 
-  const getRowStyle = (significantTerm: SignificantTerm) => {
+  useEffect(() => {
+    // If no row is hovered or pinned or the user switched to a new page,
+    // fall back to set the first row into a hovered state to make the
+    // main document count chart show a comparison view by default.
     if (
-      pinnedSignificantTerm &&
-      pinnedSignificantTerm.fieldName === significantTerm.fieldName &&
-      pinnedSignificantTerm.fieldValue === significantTerm.fieldValue
+      (selectedSignificantItem === null ||
+        !pageOfItems.some((item) => isEqual(item, selectedSignificantItem))) &&
+      pinnedSignificantItem === null &&
+      pageOfItems.length > 0 &&
+      selectedGroup === null &&
+      pinnedGroup === null
+    ) {
+      setSelectedSignificantItem(pageOfItems[0]);
+    }
+
+    // If a user switched pages and a pinned row is no longer visible
+    // on the current page, set the status of pinned rows back to `null`.
+    if (
+      pinnedSignificantItem !== null &&
+      !pageOfItems.some((item) => isEqual(item, pinnedSignificantItem)) &&
+      selectedGroup === null &&
+      pinnedGroup === null
+    ) {
+      setPinnedSignificantItem(null);
+    }
+  }, [
+    selectedGroup,
+    selectedSignificantItem,
+    setSelectedSignificantItem,
+    setPinnedSignificantItem,
+    pageOfItems,
+    pinnedGroup,
+    pinnedSignificantItem,
+  ]);
+
+  // When the analysis results table unmounts,
+  // make sure to reset any hovered or pinned rows.
+  useEffect(
+    () => () => {
+      setSelectedSignificantItem(null);
+      setPinnedSignificantItem(null);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const getRowStyle = (significantItem: SignificantItem) => {
+    if (
+      pinnedSignificantItem &&
+      pinnedSignificantItem.fieldName === significantItem.fieldName &&
+      pinnedSignificantItem.fieldValue === significantItem.fieldValue
     ) {
       return {
         backgroundColor: primaryBackgroundColor,
@@ -348,9 +462,9 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     }
 
     if (
-      selectedSignificantTerm &&
-      selectedSignificantTerm.fieldName === significantTerm.fieldName &&
-      selectedSignificantTerm.fieldValue === significantTerm.fieldValue
+      selectedSignificantItem &&
+      selectedSignificantItem.fieldName === significantItem.fieldName &&
+      selectedSignificantItem.fieldValue === significantItem.fieldValue
     ) {
       return {
         backgroundColor: euiTheme.euiColorLightestShade,
@@ -378,27 +492,29 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       onChange={onChange}
       pagination={pagination.totalItemCount > pagination.pageSize ? pagination : undefined}
       loading={false}
-      sorting={sorting as EuiTableSortingType<SignificantTerm>}
-      rowProps={(significantTerm) => {
+      sorting={sorting as EuiTableSortingType<SignificantItem>}
+      rowProps={(significantItem) => {
         return {
-          'data-test-subj': `aiopsLogRateAnalysisResultsTableRow row-${significantTerm.fieldName}-${significantTerm.fieldValue}`,
+          'data-test-subj': `aiopsLogRateAnalysisResultsTableRow row-${significantItem.fieldName}-${significantItem.fieldValue}`,
           onClick: () => {
             if (
-              significantTerm.fieldName === pinnedSignificantTerm?.fieldName &&
-              significantTerm.fieldValue === pinnedSignificantTerm?.fieldValue
+              significantItem.fieldName === pinnedSignificantItem?.fieldName &&
+              significantItem.fieldValue === pinnedSignificantItem?.fieldValue
             ) {
-              setPinnedSignificantTerm(null);
+              setPinnedSignificantItem(null);
             } else {
-              setPinnedSignificantTerm(significantTerm);
+              setPinnedSignificantItem(significantItem);
             }
           },
           onMouseEnter: () => {
-            setSelectedSignificantTerm(significantTerm);
+            if (pinnedSignificantItem === null) {
+              setSelectedSignificantItem(significantItem);
+            }
           },
           onMouseLeave: () => {
-            setSelectedSignificantTerm(null);
+            setSelectedSignificantItem(null);
           },
-          style: getRowStyle(significantTerm),
+          style: getRowStyle(significantItem),
         };
       }}
     />

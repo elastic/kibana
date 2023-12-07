@@ -30,6 +30,7 @@ OS="$(uname)"
 ARCH="$(uname -m)"
 os=linux
 arch=x86_64
+cfg=/opt/Elastic/Agent/elastic-agent.yml
 if [ "${OS}" == "Linux" ]; then
   if [ "${ARCH}" == "aarch64" ]; then
     arch=arm64
@@ -39,6 +40,7 @@ elif [ "${OS}" == "Darwin" ]; then
   if [ "${ARCH}" == "arm64" ]; then
     arch=aarch64
   fi
+  cfg=/Library/Elastic/Agent/elastic-agent.yml
 else
   fail "this script is only supported on linux and macOS"
 fi
@@ -54,12 +56,20 @@ updateStepProgress() {
   local STEPNAME="$1"
   local STATUS="$2" # "incomplete" | "complete" | "disabled" | "loading" | "warning" | "danger" | "current"
   local MESSAGE=${3:-}
+  local PAYLOAD=${4:-}
+  local data=""
+  if [ -z "$PAYLOAD" ]; then
+    data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\"}"
+  else
+    data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\", \"payload\":${PAYLOAD}}"
+  fi
   curl --request POST \
-    --url "${API_ENDPOINT}/custom_logs/${ONBOARDING_ID}/step/${STEPNAME}" \
+    --url "${API_ENDPOINT}/flow/${ONBOARDING_ID}/step/${STEPNAME}" \
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \
-    --data "{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\"}" \
+    --header "x-elastic-internal-origin: Kibana" \
+    --data "$data" \
     --output /dev/null \
     --no-progress-meter
 }
@@ -122,14 +132,22 @@ waitForElasticAgentStatus
 if [ "$?" -ne 0 ]; then
   updateStepProgress "ea-status" "warning" "Unable to determine agent status"
 fi
-ELASTIC_AGENT_STATE="$(elastic-agent status | grep -m1 State | sed 's/State: //')"
-ELASTIC_AGENT_MESSAGE="$(elastic-agent status | grep -m1 Message | sed 's/Message: //')"
-if [ "${ELASTIC_AGENT_STATE}" = "HEALTHY" ] && [ "${ELASTIC_AGENT_MESSAGE}" = "Running" ]; then
-  echo "Elastic Agent running"
-  echo "Download and save configuration to /opt/Elastic/Agent/elastic-agent.yml"
-  updateStepProgress "ea-status" "complete"
+
+# https://www.elastic.co/guide/en/fleet/current/elastic-agent-cmd-options.html#elastic-agent-status-command
+ELASTIC_AGENT_STATES=(STARTING CONFIGURING HEALTHY DEGRADED FAILED STOPPING UPGRADING ROLLBACK)
+
+# Get elastic-agent status in json format | removing extra states in the json | finding "state":value | removing , | removing "state": | trimming the result
+ELASTIC_AGENT_STATE="$(elastic-agent status --output json | sed -n '/components/q;p' | grep state | sed 's/\(.*\),/\1 /' | sed 's/"state": //' | sed 's/\s//g')"
+# Get elastic-agent status in json format | removing extra states in the json | finding "message":value | removing , | removing "message": | trimming the result | removing ""
+ELASTIC_AGENT_MESSAGE="$(elastic-agent status --output json | sed -n '/components/q;p' | grep message | sed 's/\(.*\),/\1 /' | sed 's/"message": //' | sed 's/\s//g' | sed 's/\"//g')"
+# Get elastic-agent status in json format | removing extra ids in the json | finding "id":value | removing , | removing "id": | trimming the result | removing ""
+ELASTIC_AGENT_ID="$(elastic-agent status --output json | sed -n '/components/q;p' | grep id | sed 's/\(.*\),/\1 /' | sed 's/"id": //' | sed 's/\s//g' | sed 's/\"//g')"
+if [ "${ELASTIC_AGENT_STATE}" = "2" ] && [ "${ELASTIC_AGENT_MESSAGE}" = "Running" ]; then
+  echo "Elastic Agent running (id: ${ELASTIC_AGENT_ID})"
+  echo "Download and save configuration to ${cfg}"
+  updateStepProgress "ea-status" "complete" "" "{\"agentId\": \"${ELASTIC_AGENT_ID}\"}"
 else
-  updateStepProgress "ea-status" "warning" "Expected agent status HEALTHY / Running but got ${ELASTIC_AGENT_STATE} / ${ELASTIC_AGENT_MESSAGE}"
+  updateStepProgress "ea-status" "warning" "Expected agent status HEALTHY / Running but got ${ELASTIC_AGENT_STATES[ELASTIC_AGENT_STATE]} / ${ELASTIC_AGENT_MESSAGE}"
 fi
 
 downloadElasticAgentConfig() {
@@ -140,8 +158,9 @@ downloadElasticAgentConfig() {
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \
+    --header "x-elastic-internal-origin: Kibana" \
     --no-progress-meter \
-    --output /opt/Elastic/Agent/elastic-agent.yml
+    --output ${cfg}
 
   if [ "$?" -eq 0 ]; then
     echo "Downloaded elastic-agent.yml"
@@ -154,7 +173,7 @@ downloadElasticAgentConfig() {
 
 if [ "${AUTO_DOWNLOAD_CONFIG}" == "autoDownloadConfig=1" ]; then
   downloadElasticAgentConfig
-  echo "Done with standalone Elastic Agent setup for custom logs. Look for streaming logs to arrive in Kibana"
+  echo "Done with standalone Elastic Agent setup. Look for streaming logs to arrive in Kibana"
 else
-  echo "Done with standalone Elastic Agent setup for custom logs. Make sure to add your configuration to /opt/Elastic/Agent/elastic-agent.yml, then look for streaming logs to arrive in Kibana"
+  echo "Done with standalone Elastic Agent setup. Make sure to add your configuration to ${cfg}, then look for streaming logs to arrive in Kibana"
 fi

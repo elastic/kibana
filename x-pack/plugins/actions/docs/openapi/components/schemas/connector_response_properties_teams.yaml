@@ -7,6 +7,8 @@ required:
   - is_preconfigured
   - name
 properties:
+  config:
+    type: object
   connector_type_id:
     type: string
     description: The type of connector.
@@ -21,6 +23,10 @@ properties:
     $ref: 'is_missing_secrets.yaml'
   is_preconfigured:
     $ref: 'is_preconfigured.yaml'
+  is_system_action:
+    $ref: 'is_system_action.yaml'
   name:
     type: string
     description: The display name for the connector.
+  referenced_by_count:
+    $ref: 'referenced_by_count.yaml'

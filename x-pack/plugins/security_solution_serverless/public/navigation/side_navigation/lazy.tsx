@@ -6,11 +6,12 @@
  */
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import type { SideNavComponent } from '@kbn/core-chrome-browser';
 
 const SecuritySideNavigationLazy = lazy(() => import('./side_navigation'));
 
-export const SecuritySideNavigation = () => (
+export const SecuritySideNavigation: SideNavComponent = (props) => (
   <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-    <SecuritySideNavigationLazy />
+    <SecuritySideNavigationLazy {...props} />
   </Suspense>
 );

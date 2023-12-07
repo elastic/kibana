@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  DataStream,
+  MonitorTypeEnum,
   MonitorFields,
   ScheduleUnit,
   SourceType,
@@ -19,12 +19,12 @@ import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { SyntheticsServerSetup } from '../../types';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocationAttributes = {
     id: 'policyId',
     label: 'Test Location',
-    concurrentMonitors: 1,
     agentPolicyId: 'policyId',
     isServiceManaged: false,
   };
@@ -77,6 +77,7 @@ describe('SyntheticsPrivateLocation', () => {
     },
     coreStart: {
       savedObjects: savedObjectsServiceMock.createStartContract(),
+      elasticsearch: elasticsearchServiceMock.createStart(),
     },
   } as unknown as SyntheticsServerSetup;
 
@@ -93,7 +94,6 @@ describe('SyntheticsPrivateLocation', () => {
       try {
         await syntheticsPrivateLocation.createPackagePolicies(
           [{ config: testConfig, globalParams: {} }],
-          {} as unknown as KibanaRequest,
           [mockPrivateLocation],
           'test-space'
         );
@@ -116,7 +116,6 @@ describe('SyntheticsPrivateLocation', () => {
       try {
         await syntheticsPrivateLocation.editMonitors(
           [{ config: testConfig, globalParams: {} }],
-          {} as unknown as KibanaRequest,
           [mockPrivateLocation],
           'test-space'
         );
@@ -152,11 +151,7 @@ describe('SyntheticsPrivateLocation', () => {
       },
     });
     try {
-      await syntheticsPrivateLocation.deleteMonitors(
-        [testConfig],
-        {} as unknown as KibanaRequest,
-        'test-space'
-      );
+      await syntheticsPrivateLocation.deleteMonitors([testConfig], 'test-space');
     } catch (e) {
       expect(e).toEqual(new Error(error));
     }
@@ -165,7 +160,7 @@ describe('SyntheticsPrivateLocation', () => {
   it('formats monitors stream properly', () => {
     const test = formatSyntheticsPolicy(
       testMonitorPolicy,
-      DataStream.BROWSER,
+      MonitorTypeEnum.BROWSER,
       dummyBrowserConfig,
       {}
     );
@@ -265,7 +260,7 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   fields: Record<string, string | boolean>;
   fields_under_root: boolean;
 } = {
-  type: DataStream.BROWSER,
+  type: MonitorTypeEnum.BROWSER,
   enabled: true,
   schedule: { unit: ScheduleUnit.MINUTES, number: '10' },
   'service.name': 'test service',

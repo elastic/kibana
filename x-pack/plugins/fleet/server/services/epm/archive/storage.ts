@@ -19,6 +19,7 @@ import type {
   InstallSource,
   PackageAssetReference,
 } from '../../../../common/types';
+import { PackageInvalidArchiveError, PackageNotFoundError } from '../../../errors';
 
 import { appContextService } from '../../app_context';
 
@@ -70,13 +71,13 @@ export async function archiveEntryToESDocument(opts: {
 
   // validation: filesize? asset type? anything else
   if (dataUtf8.length > currentMaxAssetBytes) {
-    throw new Error(
+    throw new PackageInvalidArchiveError(
       `File at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`
     );
   }
 
   if (dataBase64.length > currentMaxAssetBytes) {
-    throw new Error(
+    throw new PackageInvalidArchiveError(
       `After base64 encoding file at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`
     );
   }
@@ -113,7 +114,7 @@ export async function saveArchiveEntries(opts: {
   const bulkBody = await Promise.all(
     paths.map((path) => {
       const buffer = getArchiveEntry(path);
-      if (!buffer) throw new Error(`Could not find ArchiveEntry at ${path}`);
+      if (!buffer) throw new PackageNotFoundError(`Could not find ArchiveEntry at ${path}`);
       const { name, version } = packageInfo;
       return archiveEntryToBulkCreateObject({ path, buffer, name, version, installSource });
     })
@@ -215,12 +216,11 @@ export const getEsPackage = async (
       setArchiveEntry(path, buffer);
       paths.push(path);
     }
-    paths.push(path);
     if (buffer && filterAssetPathForParseAndVerifyArchive(path)) {
       assetsMap[path] = buffer;
     }
   });
-  // // Add asset references to cache
+  // Add asset references to cache
   setArchiveFilelist({ name: pkgName, version: pkgVersion }, paths);
 
   const packageInfo = parseAndVerifyArchive(paths, assetsMap);

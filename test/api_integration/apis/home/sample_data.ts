@@ -17,7 +17,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   const MILLISECOND_IN_WEEK = 1000 * 60 * 60 * 24 * 7;
   const SPACES = ['default', 'other'];
-  const FLIGHTS_OVERVIEW_DASHBOARD_ID = '7adfa750-4c81-11e8-b3d7-01146121b73d'; // default ID of the flights overview dashboard
+  /**
+   * default ID of the flights overview dashboard
+   * @see src/plugins/home/server/services/sample_data/data_sets/flights/index.ts
+   */
+  const FLIGHTS_OVERVIEW_DASHBOARD_ID = '7adfa750-4c81-11e8-b3d7-01146121b73d';
   const FLIGHTS_CANVAS_APPLINK_PATH =
     '/app/canvas#/workpad/workpad-a474e74b-aedc-47c3-894a-db77e62c41e0'; // includes default ID of the flights canvas applink path
 
@@ -63,19 +67,17 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
 
           expect(resp.body).to.eql({
-            elasticsearchIndicesCreated: { kibana_sample_data_flights: 13059 },
+            elasticsearchIndicesCreated: { kibana_sample_data_flights: 13014 },
             kibanaSavedObjectsLoaded: 8,
           });
         });
 
-        // Failing: See https://github.com/elastic/kibana/issues/121051
+        // FLAKY: https://github.com/elastic/kibana/issues/166572
         describe.skip('dates', () => {
           it('should load elasticsearch index containing sample data with dates relative to current time', async () => {
             const resp = await es.search<{ timestamp: string }>({
               index: 'kibana_sample_data_flights',
-              body: {
-                sort: [{ timestamp: { order: 'desc' } }],
-              },
+              sort: [{ timestamp: { order: 'desc' } }],
             });
 
             const doc = resp.hits.hits[0];
@@ -91,9 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             const resp = await es.search<{ timestamp: string }>({
               index: 'kibana_sample_data_flights',
-              body: {
-                sort: [{ timestamp: { order: 'desc' } }],
-              },
+              sort: [{ timestamp: { order: 'desc' } }],
             });
 
             const doc = resp.hits.hits[0];

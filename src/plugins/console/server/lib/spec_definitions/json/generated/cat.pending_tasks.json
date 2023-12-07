@@ -1,22 +1,23 @@
 {
   "cat.pending_tasks": {
     "url_params": {
-      "format": "",
-      "local": "__flag__",
-      "master_timeout": "",
+      "format": [
+        "text"
+      ],
       "h": [],
       "help": "__flag__",
-      "s": [],
-      "time": [
-        "d",
-        "h",
-        "m",
-        "s",
-        "ms",
-        "micros",
-        "nanos"
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
       ],
-      "v": "__flag__"
+      "s": [],
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
     },
     "methods": [
       "GET"
@@ -24,6 +25,10 @@
     "patterns": [
       "_cat/pending_tasks"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-pending-tasks.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-pending-tasks.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

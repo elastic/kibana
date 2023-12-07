@@ -8,6 +8,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import React, { useCallback } from 'react';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
@@ -32,7 +33,10 @@ import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/
 import { importRules } from '../../../rule_management/logic';
 import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
-import { SuperHeader } from './super_header';
+import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
+import { HeaderPage } from '../../../../common/components/header_page';
+import { RulesPageTourComponent } from '../../components/rules_table/alternative_tour/tour';
+import { useIsEsqlRuleTypeEnabled } from '../../../rule_creation/hooks';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -40,11 +44,17 @@ const RulesPageComponent: React.FC = () => {
   const kibanaServices = useKibana().services;
   const { navigateToApp } = kibanaServices.application;
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
+  const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
   const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
   const invalidateRules = useCallback(() => {
     invalidateFindRulesQuery();
     invalidateFetchRuleManagementFilters();
-  }, [invalidateFindRulesQuery, invalidateFetchRuleManagementFilters]);
+    invalidateFetchCoverageOverviewQuery();
+  }, [
+    invalidateFindRulesQuery,
+    invalidateFetchRuleManagementFilters,
+    invalidateFetchCoverageOverviewQuery,
+  ]);
 
   const [
     {
@@ -62,6 +72,8 @@ const RulesPageComponent: React.FC = () => {
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
 
+  const isEsqlRuleTypeEnabled = useIsEsqlRuleTypeEnabled();
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -76,6 +88,18 @@ const RulesPageComponent: React.FC = () => {
     });
     return null;
   }
+
+  const addNewRuleButton = (
+    <SecuritySolutionLinkButton
+      data-test-subj="create-new-rule"
+      fill
+      iconType="plusInCircle"
+      isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+      deepLinkId={SecurityPageName.rulesCreate}
+    >
+      {i18n.ADD_NEW_RULE}
+    </SecuritySolutionLinkButton>
+  );
 
   return (
     <>
@@ -103,7 +127,7 @@ const RulesPageComponent: React.FC = () => {
 
       <RulesTableContextProvider>
         <SecuritySolutionPageWrapper>
-          <SuperHeader>
+          <HeaderPage title={i18n.PAGE_TITLE}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
               <EuiFlexItem grow={false}>
                 <AddElasticRulesButton isDisabled={!canUserCRUD || loading} />
@@ -131,19 +155,18 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <SecuritySolutionLinkButton
-                  data-test-subj="create-new-rule"
-                  fill
-                  iconType="plusInCircle"
-                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
-                  deepLinkId={SecurityPageName.rulesCreate}
-                >
-                  {i18n.ADD_NEW_RULE}
-                </SecuritySolutionLinkButton>
+                {isEsqlRuleTypeEnabled ? (
+                  <RulesPageTourComponent>{addNewRuleButton}</RulesPageTourComponent>
+                ) : (
+                  addNewRuleButton
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
-          </SuperHeader>
-          <MaintenanceWindowCallout kibanaServices={kibanaServices} />
+          </HeaderPage>
+          <MaintenanceWindowCallout
+            kibanaServices={kibanaServices}
+            categories={[DEFAULT_APP_CATEGORIES.security.id]}
+          />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>

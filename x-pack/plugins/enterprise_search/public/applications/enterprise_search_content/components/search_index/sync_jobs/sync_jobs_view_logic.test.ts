@@ -9,16 +9,11 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea
 
 import moment from 'moment';
 
+import { ConnectorSyncJob, SyncJobType, SyncStatus, TriggerMethod } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError, Status } from '../../../../../../common/types/api';
 
-import {
-  ConnectorSyncJob,
-  SyncJobType,
-  SyncStatus,
-  TriggerMethod,
-} from '../../../../../../common/types/connectors';
 import { FetchSyncJobsApiLogic } from '../../../api/connector/fetch_sync_jobs_api_logic';
 
 import { IndexViewLogic } from '../index_view_logic';
@@ -33,10 +28,9 @@ const DEFAULT_VALUES = {
   syncJobsData: undefined,
   syncJobsLoading: true,
   syncJobsPagination: {
-    from: 0,
-    has_more_hits_than_total: false,
-    size: 10,
-    total: 0,
+    pageIndex: 0,
+    pageSize: 10,
+    totalItemCount: 0,
   },
   syncJobsStatus: Status.IDLE,
 };
@@ -121,10 +115,9 @@ describe('SyncJobsViewLogic', () => {
           },
           syncJobsLoading: false,
           syncJobsPagination: {
-            from: 40,
-            has_more_hits_than_total: false,
-            size: 20,
-            total: 50,
+            pageIndex: 2,
+            pageSize: 20,
+            totalItemCount: 50,
           },
           syncJobsStatus: Status.SUCCESS,
         });
@@ -157,7 +150,7 @@ describe('SyncJobsViewLogic', () => {
               completed_at: null,
               deleted_document_count: 0,
               duration: expect.anything(),
-              lastSync: syncJob.created_at,
+              lastSync: null,
               status: SyncStatus.IN_PROGRESS,
             },
           ],
@@ -181,10 +174,9 @@ describe('SyncJobsViewLogic', () => {
           },
           syncJobsLoading: false,
           syncJobsPagination: {
-            from: 40,
-            has_more_hits_than_total: false,
-            size: 20,
-            total: 50,
+            pageIndex: 2,
+            pageSize: 20,
+            totalItemCount: 50,
           },
           syncJobsStatus: Status.SUCCESS,
         });

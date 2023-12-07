@@ -21,9 +21,12 @@ import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
 import { useKibana } from '../common/lib/kibana';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
+import { useLoadRuleTypesQuery } from './hooks/use_load_rule_types_query';
 
 const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
-const LogsList = lazy(() => import('./sections/logs_list/components/logs_list'));
+const LogsList = lazy(
+  () => import('./sections/rule_details/components/global_rule_event_log_list')
+);
 const AlertsPage = lazy(() => import('./sections/alerts_table/alerts_page'));
 
 export interface MatchParams {
@@ -39,6 +42,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
   const { chrome, setBreadcrumbs } = useKibana().services;
   const isInternalAlertsTableEnabled = getIsExperimentalFeatureEnabled('internalAlertsTable');
+  const { authorizedToReadAnyRules } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
 
   const tabs: Array<{
     id: Section;
@@ -52,10 +56,14 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     ),
   });
 
-  tabs.push({
-    id: 'logs',
-    name: <FormattedMessage id="xpack.triggersActionsUI.home.logsTabTitle" defaultMessage="Logs" />,
-  });
+  if (authorizedToReadAnyRules) {
+    tabs.push({
+      id: 'logs',
+      name: (
+        <FormattedMessage id="xpack.triggersActionsUI.home.logsTabTitle" defaultMessage="Logs" />
+      ),
+    });
+  }
 
   if (isInternalAlertsTableEnabled) {
     tabs.push({

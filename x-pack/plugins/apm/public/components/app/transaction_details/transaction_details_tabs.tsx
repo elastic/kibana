@@ -9,7 +9,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { EuiPanel, EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiSpacer,
+  EuiTabs,
+  EuiTab,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 
 import { XYBrushEvent } from '@elastic/charts';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -133,16 +140,20 @@ export function TransactionDetailsTabs() {
       </EuiTabs>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
-        <TabContent
-          {...{
-            clearChartSelection,
-            onFilter,
-            sampleRangeFrom,
-            sampleRangeTo,
-            selectSampleFromChartSelection,
-            traceSamplesFetchResult,
-          }}
-        />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <TabContent
+              {...{
+                clearChartSelection,
+                onFilter,
+                sampleRangeFrom,
+                sampleRangeTo,
+                selectSampleFromChartSelection,
+                traceSamplesFetchResult,
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     </>
   );

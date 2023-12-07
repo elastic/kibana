@@ -18,8 +18,10 @@ import {
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { RadioGroup } from './csp_boxed_radio_group';
+import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
 import { AwsCredentialsForm } from './aws_credentials_form/aws_credentials_form';
 import { EksCredentialsForm } from './eks_credentials_form';
+import { GcpCredentialsForm } from './gcp_credential_form';
 
 interface PolicyTemplateSelectorProps {
   selectedTemplate: CloudSecurityPolicyTemplate;
@@ -71,6 +73,7 @@ interface PolicyTemplateVarsFormProps {
   packageInfo: PackageInfo;
   onChange: PackagePolicyReplaceDefineStepExtensionComponentProps['onChange'];
   setIsValid: (isValid: boolean) => void;
+  disabled: boolean;
 }
 
 export const PolicyTemplateVarsForm = ({ input, ...props }: PolicyTemplateVarsFormProps) => {
@@ -79,6 +82,10 @@ export const PolicyTemplateVarsForm = ({ input, ...props }: PolicyTemplateVarsFo
       return <AwsCredentialsForm {...props} input={input} />;
     case 'cloudbeat/cis_eks':
       return <EksCredentialsForm {...props} input={input} />;
+    case 'cloudbeat/cis_gcp':
+      return <GcpCredentialsForm {...props} input={input} />;
+    case 'cloudbeat/cis_azure':
+      return <AzureCredentialsForm {...props} input={input} />;
     default:
       return null;
   }
@@ -107,6 +114,7 @@ export const PolicyTemplateInfo = ({ postureType }: PolicyTemplateInfoProps) => 
         <EuiCallOut
           iconType="iInCircle"
           color="primary"
+          data-test-subj="additionalChargeCalloutTestSubj"
           title={
             <FormattedMessage
               id="xpack.csp.fleetIntegration.cnvm.additionalChargesCalloutTitle"

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, from } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import {
   AppDeepLink,
   AppMountParameters,
@@ -22,47 +22,51 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { LOG_EXPLORER_LOCATOR_ID, LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type {
+  NavigationEntry,
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
-  NavigationEntry,
 } from '@kbn/observability-shared-plugin/public';
-import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { BehaviorSubject, from } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
+import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import {
+  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantPluginStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import {
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
-import { RulesLocatorDefinition } from './locators/rules';
-import { RuleDetailsLocatorDefinition } from './locators/rule_details';
-import { SloDetailsLocatorDefinition } from './locators/slo_details';
-import { SloEditLocatorDefinition } from './locators/slo_edit';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { firstValueFrom } from 'rxjs';
+
 import { observabilityAppId, observabilityFeatureId } from '../common';
-import { registerDataHandler } from './context/has_data_context/data_handler';
-import {
-  createObservabilityRuleTypeRegistry,
-  ObservabilityRuleTypeRegistry,
-} from './rules/create_observability_rule_type_registry';
-import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
-import { createUseRulesLink } from './hooks/create_use_rules_link';
 import {
   ALERTS_PATH,
   CASES_PATH,
@@ -70,9 +74,19 @@ import {
   OVERVIEW_PATH,
   RULES_PATH,
   SLOS_PATH,
-} from './routes/paths';
-import { createCoPilotService } from './context/co_pilot_context/create_co_pilot_service';
-import { type CoPilotService } from './typings/co_pilot';
+} from '../common/locators/paths';
+import { registerDataHandler } from './context/has_data_context/data_handler';
+import { createUseRulesLink } from './hooks/create_use_rules_link';
+import { RulesLocatorDefinition } from './locators/rules';
+import { RuleDetailsLocatorDefinition } from './locators/rule_details';
+import { SloDetailsLocatorDefinition } from './locators/slo_details';
+import { SloEditLocatorDefinition } from './locators/slo_edit';
+import { SloListLocatorDefinition } from './locators/slo_list';
+import {
+  createObservabilityRuleTypeRegistry,
+  ObservabilityRuleTypeRegistry,
+} from './rules/create_observability_rule_type_registry';
+import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 
 export interface ConfigSchema {
   unsafe: {
@@ -80,10 +94,13 @@ export interface ConfigSchema {
       metrics: {
         enabled: boolean;
       };
-      logs: {
+      logs?: {
         enabled: boolean;
       };
       uptime: {
+        enabled: boolean;
+      };
+      observability: {
         enabled: boolean;
       };
     };
@@ -91,39 +108,36 @@ export interface ConfigSchema {
       enabled: boolean;
     };
   };
-  compositeSlo: { enabled: boolean };
-  aiAssistant?: {
-    enabled: boolean;
-    feedback: {
-      enabled: boolean;
-    };
-  };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
-
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  embeddable: EmbeddableSetup;
+  uiActions: UiActionsSetup;
+  licensing: LicensingPluginSetup;
 }
-
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
   cases: CasesUiStart;
   charts: ChartsPluginStart;
+  contentManagement: ContentManagementPublicStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
   exploratoryView: ExploratoryViewPublicStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   security: SecurityPluginStart;
   share: SharePluginStart;
@@ -133,8 +147,11 @@ export interface ObservabilityPublicPluginsStart {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
   cloud?: CloudStart;
+  aiops: AiopsPluginStart;
+  serverless?: ServerlessPluginStart;
+  uiSettings: IUiSettingsClient;
+  uiActions: UiActionsStart;
 }
-
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
 export class Plugin
@@ -149,8 +166,6 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
-
-  private coPilotService: CoPilotService | undefined;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -226,8 +241,11 @@ export class Plugin
     const sloDetailsLocator = pluginsSetup.share.url.locators.create(
       new SloDetailsLocatorDefinition()
     );
-
     const sloEditLocator = pluginsSetup.share.url.locators.create(new SloEditLocatorDefinition());
+    const sloListLocator = pluginsSetup.share.url.locators.create(new SloListLocatorDefinition());
+
+    const logExplorerLocator =
+      pluginsSetup.share.url.locators.get<LogExplorerLocatorParams>(LOG_EXPLORER_LOCATOR_ID);
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
@@ -247,6 +265,7 @@ export class Plugin
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         usageCollection: pluginsSetup.usageCollection,
+        isServerless: !!pluginsStart.serverless,
       });
     };
 
@@ -281,7 +300,45 @@ export class Plugin
 
     coreSetup.application.register(app);
 
-    registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
+    registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry, logExplorerLocator);
+
+    const assertPlatinumLicense = async () => {
+      const licensing = await pluginsSetup.licensing;
+      const license = await firstValueFrom(licensing.license$);
+
+      const hasPlatinumLicense = license.hasAtLeast('platinum');
+      if (hasPlatinumLicense) {
+        const registerSloOverviewEmbeddableFactory = async () => {
+          const { SloOverviewEmbeddableFactoryDefinition } = await import(
+            './embeddable/slo/overview/slo_embeddable_factory'
+          );
+          const factory = new SloOverviewEmbeddableFactoryDefinition(coreSetup.getStartServices);
+          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
+        };
+        registerSloOverviewEmbeddableFactory();
+        const registerSloAlertsEmbeddableFactory = async () => {
+          const { SloAlertsEmbeddableFactoryDefinition } = await import(
+            './embeddable/slo/alerts/slo_alerts_embeddable_factory'
+          );
+          const factory = new SloAlertsEmbeddableFactoryDefinition(
+            coreSetup.getStartServices,
+            kibanaVersion
+          );
+          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
+        };
+        registerSloAlertsEmbeddableFactory();
+
+        const registerAsyncSloAlertsUiActions = async () => {
+          if (pluginsSetup.uiActions) {
+            const { registerSloAlertsUiActions } = await import('./ui_actions');
+            registerSloAlertsUiActions(pluginsSetup.uiActions, coreSetup);
+          }
+        };
+        registerAsyncSloAlertsUiActions();
+      }
+    };
+
+    assertPlatinumLicense();
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
@@ -296,6 +353,14 @@ export class Plugin
         icon: 'logoObservability',
         path: `${OBSERVABILITY_BASE_PATH}/`,
         order: 200,
+        isVisible: (capabilities) => {
+          const obs = capabilities.catalogue[observabilityFeatureId];
+          const uptime = capabilities.catalogue.uptime;
+          const infra = capabilities.catalogue.infra;
+          const apm = capabilities.catalogue.apm;
+
+          return obs || uptime || infra || apm;
+        },
       });
     }
 
@@ -343,12 +408,6 @@ export class Plugin
       )
     );
 
-    this.coPilotService = createCoPilotService({
-      enabled: !!config.aiAssistant?.enabled,
-      http: coreSetup.http,
-      trackingEnabled: !!config.aiAssistant?.feedback.enabled,
-    });
-
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
@@ -357,7 +416,7 @@ export class Plugin
       ruleDetailsLocator,
       sloDetailsLocator,
       sloEditLocator,
-      getCoPilotService: () => this.coPilotService!,
+      sloListLocator,
     };
   }
 
@@ -384,10 +443,20 @@ export class Plugin
       alertsTableConfigurationRegistry.register(alertsTableConfig);
     });
 
+    const getAsyncSloEmbeddableAlertsTableConfiguration = async () => {
+      const { getSloAlertsTableConfiguration } = await import(
+        './components/alerts_table/slo/get_slo_alerts_table_configuration'
+      );
+      return getSloAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
+    };
+
+    getAsyncSloEmbeddableAlertsTableConfiguration().then((alertsTableConfig) => {
+      alertsTableConfigurationRegistry.register(alertsTableConfig);
+    });
+
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
-      getCoPilotService: () => this.coPilotService!,
     };
   }
 }

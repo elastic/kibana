@@ -3,8 +3,8 @@
 # Extract Kibana and make various file manipulations.
 ################################################################################
 ARG BASE_REGISTRY=registry1.dso.mil
-ARG BASE_IMAGE=redhat/ubi/ubi8
-ARG BASE_TAG=8.7
+ARG BASE_IMAGE=ironbank/redhat/ubi/ubi9
+ARG BASE_TAG=9.3
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} as prep_files
 

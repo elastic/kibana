@@ -50,6 +50,9 @@ const mockLayer = {
   hasErrors: () => {
     return false;
   },
+  getErrors: () => {
+    return [];
+  },
   hasLegendDetails: () => {
     return true;
   },

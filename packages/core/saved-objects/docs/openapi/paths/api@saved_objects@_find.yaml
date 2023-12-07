@@ -1,0 +1,107 @@
+get:
+  summary: Retrieve a paginated set of Kibana saved objects.
+  operationId: findSavedObjects
+  deprecated: true
+  tags:
+    - saved objects
+  parameters:
+    - in: query
+      name: aggs
+      description: >
+        An aggregation structure, serialized as a string. The field format is similar to filter, meaning that to use a saved object type attribute in the aggregation, the `savedObjectType.attributes.title: "myTitle"` format must be used. For root fields, the syntax is `savedObjectType.rootField`.
+        NOTE: As objects change in Kibana, the results on each page of the response also change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.
+      schema:
+        type: string
+    - in: query
+      name: default_search_operator
+      description: The default operator to use for the `simple_query_string`.
+      schema:
+        type: string
+    - in: query
+      name: fields
+      description: The fields to return in the attributes key of the response.
+      schema:
+        oneOf:
+          - type: string
+          - type: array
+    - in: query
+      name: filter
+      description: >
+        The filter is a KQL string with the caveat that if you filter with an attribute from your saved object type, it should look like that: `savedObjectType.attributes.title: "myTitle"`.
+        However, if you use a root attribute of a saved object such as `updated_at`, you will have to define your filter like that: `savedObjectType.updated_at > 2018-12-22`.
+      schema:
+        type: string
+    - in: query
+      name: has_no_reference
+      description: Filters to objects that do not have a relationship with the type and identifier combination.
+      schema:
+        type: object
+    - in: query
+      name: has_no_reference_operator
+      description: The operator to use for the `has_no_reference` parameter. Either `OR` or `AND`. Defaults to `OR`.
+      schema:
+        type: string
+    - in: query
+      name: has_reference
+      description: Filters to objects that have a relationship with the type and ID combination.
+      schema:
+        type: object
+    - in: query
+      name: has_reference_operator
+      description: The operator to use for the `has_reference` parameter. Either `OR` or `AND`. Defaults to `OR`.
+      schema:
+        type: string
+    - in: query
+      name: page
+      description: The page of objects to return.
+      schema:
+        type: integer
+    - in: query
+      name: per_page
+      description: The number of objects to return per page.
+      schema:
+        type: integer
+    - in: query
+      name: search
+      description: An Elasticsearch `simple_query_string` query that filters the objects in the response.
+      schema:
+        type: string
+    - in: query
+      name: search_fields
+      description: The fields to perform the `simple_query_string` parsed query against.
+      schema:
+        oneOf:
+          - type: string
+          - type: array
+    - in: query
+      name: sort_field
+      description: >
+        Sorts the response.
+        Includes "root" and "type" fields.
+        "root" fields exist for all saved objects, such as "updated_at".
+        "type" fields are specific to an object type, such as fields returned in the attributes key of the response.
+        When a single type is defined in the type parameter, the "root" and "type" fields are allowed, and validity checks are made in that order.
+        When multiple types are defined in the type parameter, only "root" fields are allowed.
+      schema:
+        type: string
+    - in: query
+      name: type
+      description: The saved object types to include.
+      required: true
+      schema:
+        oneOf:
+          - type: string
+          - type: array
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+         application/json:
+          schema:
+            type: object
+    '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../components/schemas/400_response.yaml'

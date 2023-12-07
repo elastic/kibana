@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import type { SavedQueryResponse } from './types';
 import type { SavedQuerySavedObject } from '../../common/types';
@@ -15,6 +15,8 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { convertECSMappingToObject } from '../utils';
+import type { ReadSavedQueryRequestParamsSchema } from '../../../common/api/saved_query/read_saved_query_route';
+import { readSavedQueryRequestParamsSchema } from '../../../common/api/saved_query/read_saved_query_route';
 
 export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -28,9 +30,10 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: schema.object({
-              id: schema.string(),
-            }),
+            params: buildRouteValidation<
+              typeof readSavedQueryRequestParamsSchema,
+              ReadSavedQueryRequestParamsSchema
+            >(readSavedQueryRequestParamsSchema),
           },
         },
       },
@@ -61,6 +64,7 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           description,
           id,
           interval,
+          timeout,
           platform,
           query,
           removed,
@@ -82,6 +86,7 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           version,
           ecs_mapping: ecsMapping,
           interval,
+          timeout,
           platform,
           query,
           updated_at: updatedAt,

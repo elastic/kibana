@@ -8,11 +8,6 @@
 // actual mocks
 export const expandLiteralStrings = jest.fn();
 export const XJsonMode = jest.fn();
-export const useRequest = jest.fn(() => ({
-  isLoading: false,
-  error: null,
-  data: undefined,
-}));
 export const getSavedSearch = jest.fn();
 
 // just passing through the reimports

@@ -19,20 +19,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('change point detection', async function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
-      await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await ml.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
     it(`loads the change point detection page`, async () => {
       // Start navigation from the base of the ML app.
       await ml.navigation.navigateToMl();
       await elasticChart.setNewChartUiDebugFlag(true);
-      await aiops.changePointDetectionPage.navigateToIndexPatternSelection();
+      await aiops.changePointDetectionPage.navigateToDataViewSelection();
       await ml.jobSourceSelection.selectSourceForChangePointDetection('ft_ecommerce');
       await aiops.changePointDetectionPage.assertChangePointDetectionPageExists();
     });
@@ -65,9 +65,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage.selectSplitField(0, 'geoip.city_name');
       await aiops.changePointDetectionPage.getTable(0).waitForTableToLoad();
       const result = await aiops.changePointDetectionPage.getTable(0).parseTable();
-      expect(result.length).to.eql(5);
+      // the aggregation may return different results (+-1)
+      expect(result.length).to.be.above(4);
       // assert asc sorting by p_value is applied
-      expect(parseFloat(result[0].pValue)).to.be.lessThan(parseFloat(result[4].pValue));
+      expect(parseFloat(result[0].pValue)).to.be.lessThan(parseFloat(result[3].pValue));
     });
 
     it('allows change point selection for detailed view', async () => {
@@ -83,6 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage
         .getTable(0)
         .invokeAction(0, 'aiopsChangePointFilterForValue');
+      await aiops.changePointDetectionPage.getTable(0).waitForTableToLoad();
       const resultFor = await aiops.changePointDetectionPage.getTable(0).parseTable();
       expect(resultFor.length).to.eql(1);
     });
@@ -91,6 +93,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage.assertPanelExist(0);
       await aiops.changePointDetectionPage.addChangePointConfig();
       await aiops.changePointDetectionPage.assertPanelExist(1);
+    });
+
+    it('attaches change point charts to a dashboard', async () => {
+      await aiops.changePointDetectionPage.assertPanelExist(0);
+      await aiops.changePointDetectionPage.attachChartsToDashboard(0, {
+        applyTimeRange: true,
+        maxSeries: 1,
+      });
     });
   });
 }

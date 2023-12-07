@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CommentType } from '../../../api';
+import { AttachmentType } from '../attachment/v1';
 import { UserActionTypes } from './action/v1';
 import { UserActionsRt } from './v1';
 
@@ -17,7 +17,7 @@ describe('User actions', () => {
         payload: {
           comment: {
             comment: 'this is a sample comment',
-            type: CommentType.user,
+            type: AttachmentType.user,
             owner: 'cases',
           },
         },

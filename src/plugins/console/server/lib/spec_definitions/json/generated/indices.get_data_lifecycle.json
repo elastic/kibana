@@ -1,12 +1,16 @@
 {
   "indices.get_data_lifecycle": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "expand_wildcards": [
+        "all",
         "open",
         "closed",
         "hidden",
-        "none",
-        "all"
+        "none"
       ],
       "include_defaults": "__flag__"
     },
@@ -16,6 +20,10 @@
     "patterns": [
       "_data_stream/{name}/_lifecycle"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/dlm-get-lifecycle.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams-get-lifecycle.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

@@ -6,6 +6,10 @@
     "patterns": [
       "_internal/desired_balance"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/delete-desired-balance.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/delete-desired-balance.html",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
   }
 }

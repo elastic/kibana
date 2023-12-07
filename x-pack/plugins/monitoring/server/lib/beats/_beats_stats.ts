@@ -9,6 +9,18 @@ import { upperFirst } from 'lodash';
 import type { BeatsElasticsearchResponse, BucketCount } from './types';
 
 export const getDiffCalculation = (max: number | null, min: number | null) => {
+  /*
+    Note: This function calculates the delta between the first and last document in the time range
+    in order to display in the UI. If both the first and last document have the same counter value
+    reported, which may happen when events are not happening continuously, the UI will display 0.
+    Another case where the UI might display confusing information is in case the Beat was not
+    monitored from the start, in which case the first ingested document will have a non 0 counter
+    value. As an example, if Filebeat has ingested 30 000 lines when the monitoring starts, the
+    first document will have the counter set to 30 000, if another 20 000 documents are collected
+    the delta will only show 20 000 rather than the counter value of 50 000. The fact that the
+    counter "started" (from the perspective of monitoring) at 30 000 is lost.
+  */
+
   // no need to test max >= 0, but min <= 0 which is normal for a derivative after restart
   // because we are aggregating/collapsing on ephemeral_ids
   if (max !== null && min !== null && max >= 0 && min >= 0 && max >= min) {

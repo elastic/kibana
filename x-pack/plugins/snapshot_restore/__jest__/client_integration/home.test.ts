@@ -454,13 +454,13 @@ describe('<SnapshotRestoreHome />', () => {
       test('should display an empty prompt', () => {
         const { exists } = testBed;
 
-        expect(exists('emptyPrompt')).toBe(true);
+        expect(exists('snapshotListEmpty')).toBe(true);
       });
 
       test('should invite the user to first register a repository', () => {
         const { find, exists } = testBed;
-        expect(find('emptyPrompt.title').text()).toBe('Start by registering a repository');
-        expect(exists('emptyPrompt.registerRepositoryButton')).toBe(true);
+        expect(find('snapshotListEmpty.title').text()).toBe('Start by registering a repository');
+        expect(exists('snapshotListEmpty.registerRepositoryButton')).toBe(true);
       });
     });
 
@@ -755,13 +755,11 @@ describe('<SnapshotRestoreHome />', () => {
 
             describe('summary tab', () => {
               test('should set the correct summary values', () => {
-                const { version, versionId, uuid, indices } = snapshot1;
+                const { version, uuid, indices } = snapshot1;
 
                 const { find } = testBed;
 
-                expect(find('snapshotDetail.version.value').text()).toBe(
-                  `${version} / ${versionId}`
-                );
+                expect(find('snapshotDetail.version.value').text()).toBe(version);
                 expect(find('snapshotDetail.uuid.value').text()).toBe(uuid);
                 expect(find('snapshotDetail.state.value').text()).toBe('Snapshot complete');
                 expect(find('snapshotDetail.includeGlobalState.value').text()).toEqual('Yes');

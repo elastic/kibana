@@ -18,11 +18,11 @@ import { splitPkgKey as split } from '../../../../common/services';
 import { KibanaAssetType } from '../../../types';
 import type {
   AssetsGroupedByServiceByType,
-  CategoryId,
   CategorySummaryList,
   RegistryPackage,
   RegistrySearchResults,
   GetCategoriesRequest,
+  GetPackagesRequest,
   PackageVerificationResult,
   ArchivePackage,
   BundledPackage,
@@ -43,6 +43,7 @@ import {
   PackageNotFoundError,
   RegistryResponseError,
   PackageFailedVerificationError,
+  PackageUnsupportedMediaTypeError,
 } from '../../../errors';
 
 import { getBundledPackageByName } from '../packages/bundled_packages';
@@ -54,19 +55,14 @@ import { verifyPackageArchiveSignature } from '../packages/package_verification'
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
 
-export interface SearchParams {
-  category?: CategoryId;
-  prerelease?: boolean;
-  // deprecated
-  experimental?: boolean;
-}
-
 export const splitPkgKey = split;
 
 export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
   `${name}-${version}`;
 
-export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
+export async function fetchList(
+  params?: GetPackagesRequest['query']
+): Promise<RegistrySearchResults> {
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
   if (params) {
@@ -78,7 +74,7 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
     }
   }
 
-  setKibanaVersion(url);
+  setConstraints(url);
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
@@ -110,7 +106,7 @@ async function _fetchFindLatestPackage(
     );
 
     if (!ignoreConstraints) {
-      setKibanaVersion(url);
+      setConstraints(url);
     }
 
     try {
@@ -226,8 +222,12 @@ export async function fetchFile(filePath: string): Promise<Response> {
 }
 
 function setKibanaVersion(url: URL) {
+  const config = appContextService.getConfig();
+
   const disableVersionCheck =
-    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? false;
+    (config?.developer?.disableRegistryVersionCheck ?? false) ||
+    config?.internal?.registry?.kibanaVersionCheckEnabled === false;
+
   if (disableVersionCheck) {
     return;
   }
@@ -237,6 +237,31 @@ function setKibanaVersion(url: URL) {
   if (kibanaVersion) {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
+}
+
+function setSpecVersion(url: URL) {
+  const specMin = appContextService.getConfig()?.internal?.registry?.spec?.min;
+  const specMax = appContextService.getConfig()?.internal?.registry?.spec?.max;
+
+  if (specMin) {
+    url.searchParams.set('spec.min', specMin);
+  }
+  if (specMax) {
+    url.searchParams.set('spec.max', specMax);
+  }
+}
+
+function setCapabilities(url: URL) {
+  const capabilities = appContextService.getConfig()?.internal?.registry?.capabilities;
+  if (capabilities && capabilities.length > 0) {
+    url.searchParams.set('capabilities', capabilities.join(','));
+  }
+}
+
+function setConstraints(url: URL) {
+  setKibanaVersion(url);
+  setCapabilities(url);
+  setSpecVersion(url);
 }
 
 export async function fetchCategories(
@@ -253,7 +278,7 @@ export async function fetchCategories(
     }
   }
 
-  setKibanaVersion(url);
+  setConstraints(url);
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
@@ -340,8 +365,11 @@ export async function getPackage(
 
 function ensureContentType(archivePath: string) {
   const contentType = mime.lookup(archivePath);
+
   if (!contentType) {
-    throw new Error(`Unknown compression format for '${archivePath}'. Please use .zip or .gz`);
+    throw new PackageUnsupportedMediaTypeError(
+      `Unknown compression format for '${archivePath}'. Please use .zip or .gz`
+    );
   }
   return contentType;
 }

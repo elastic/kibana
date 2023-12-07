@@ -18,6 +18,7 @@ export const registerGetRoute = ({
 }: RouteDependencies) => {
   router.get(
     {
+      // this endpoint is used by the data views plugin, see https://github.com/elastic/kibana/issues/152708
       path: addBasePath('/indices'),
       validate: false,
     },

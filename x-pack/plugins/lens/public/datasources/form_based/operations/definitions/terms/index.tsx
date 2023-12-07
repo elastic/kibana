@@ -45,6 +45,8 @@ import {
   getFieldsByValidationState,
   isSortableByColumn,
   isPercentileRankSortable,
+  isPercentileSortable,
+  getOtherBucketSwitchDefault,
 } from './helpers';
 import {
   DEFAULT_MAX_DOC_COUNT,
@@ -53,6 +55,7 @@ import {
   supportedTypes,
 } from './constants';
 import { IncludeExcludeRow } from './include_exclude_options';
+import { shouldShowTimeSeriesOption } from '../../../pure_utils';
 
 export function supportsRarityRanking(field?: IndexPatternField) {
   // these es field types can't be sorted by rarity
@@ -309,7 +312,11 @@ export const termsOperation: OperationDefinition<
       const orderColumn = layer.columns[column.params.orderBy.columnId];
       orderBy = String(orderedColumnIds.indexOf(column.params.orderBy.columnId));
       // percentile rank with non integer value should default to alphabetical order
-      if (!orderColumn || !isPercentileRankSortable(orderColumn)) {
+      if (
+        !orderColumn ||
+        !isPercentileRankSortable(orderColumn) ||
+        !isPercentileSortable(orderColumn)
+      ) {
         orderBy = '_key';
       }
     }
@@ -379,9 +386,9 @@ export const termsOperation: OperationDefinition<
       }),
     }).toAst();
   },
-  getDefaultLabel: (column, indexPattern) =>
+  getDefaultLabel: (column, columns, indexPattern) =>
     ofName(
-      indexPattern.getFieldByName(column.sourceField)?.displayName,
+      indexPattern?.getFieldByName(column.sourceField)?.displayName,
       column.params.secondaryFields?.length,
       column.params.orderBy.type === 'rare',
       column.params.orderBy.type === 'significant',
@@ -591,6 +598,12 @@ export const termsOperation: OperationDefinition<
           operationSupportMatrix={operationSupportMatrix}
           onChange={onFieldSelectChange}
           invalidFields={invalidFields}
+          showTimeSeriesDimensions={shouldShowTimeSeriesOption(
+            layer,
+            indexPattern,
+            groupId,
+            dimensionGroups
+          )}
         />
       </EuiFormRow>
     );
@@ -721,6 +734,7 @@ The top values of a specified field ranked by the chosen metric.
                   params: {
                     ...currentColumn.params,
                     size: value,
+                    otherBucket: getOtherBucketSwitchDefault(currentColumn, value),
                   },
                 },
               } as Record<string, TermsIndexPatternColumn>,

@@ -34,9 +34,9 @@ export function createAnnotationsClient(params: {
   const initIndex = () =>
     createOrUpdateIndex({
       index,
+      mappings,
       client: esClient,
       logger,
-      mappings,
     });
 
   function ensureGoldLicense<T extends (...args: any[]) => any>(fn: T): T {

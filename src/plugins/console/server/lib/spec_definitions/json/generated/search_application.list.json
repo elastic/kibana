@@ -1,9 +1,13 @@
 {
   "search_application.list": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "q": "",
-      "from": 0,
-      "size": 0
+      "from": "",
+      "size": ""
     },
     "methods": [
       "GET"
@@ -11,6 +15,10 @@
     "patterns": [
       "_application/search_application"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/list-search-applications.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/list-search-applications.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

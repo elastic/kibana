@@ -8,10 +8,10 @@
 import { uniq } from 'lodash';
 
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
+import type { HasPrivilegesResponse } from '@kbn/security-plugin-types-server';
 
-import { GLOBAL_RESOURCE } from '../../common/constants';
 import { checkPrivilegesFactory } from './check_privileges';
-import type { HasPrivilegesResponse } from './types';
 
 const application = 'kibana-our_application';
 

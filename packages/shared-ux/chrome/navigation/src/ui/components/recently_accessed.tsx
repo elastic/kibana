@@ -6,18 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { EuiCollapsibleNavGroup, EuiSideNav, EuiSideNavItemType } from '@elastic/eui';
+import { EuiCollapsibleNavItem } from '@elastic/eui';
 import React, { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
 import { RecentItem } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
-import { navigationStyles as styles } from '../../styles';
 
 import { getI18nStrings } from '../i18n_strings';
 
 export interface Props {
+  /**
+   * Optional observable for recently accessed items. If not provided, the
+   * recently items from the Chrome service will be used.
+   */
   recentlyAccessed$?: Observable<RecentItem[]>;
   /**
    * If true, the recently accessed list will be collapsed by default.
@@ -38,36 +41,31 @@ export const RecentlyAccessed: FC<Props> = ({
     return null;
   }
 
-  const navItems: Array<EuiSideNavItemType<unknown>> = [
-    {
-      name: '', // no list header title
-      id: 'recents_root',
-      items: recentlyAccessed.map((recent) => {
-        const { id, label, link } = recent;
-        const href = basePath.prepend(link);
+  const navItems = recentlyAccessed.map((recent) => {
+    const { id, label, link } = recent;
+    const href = basePath.prepend(link);
 
-        return {
-          id,
-          name: label,
-          href,
-          onClick: (e: React.MouseEvent) => {
-            e.preventDefault();
-            navigateToUrl(href);
-          },
-        };
-      }),
-    },
-  ];
+    return {
+      id,
+      title: label,
+      href,
+      onClick: (e: React.MouseEvent) => {
+        e.preventDefault();
+        navigateToUrl(href);
+      },
+    };
+  });
 
   return (
-    <EuiCollapsibleNavGroup
+    <EuiCollapsibleNavItem
       title={strings.recentlyAccessed}
-      iconType="clock"
-      isCollapsible={true}
-      initialIsOpen={!defaultIsCollapsed}
+      icon="clock"
+      iconProps={{ size: 'm' }}
+      accordionProps={{
+        initialIsOpen: !defaultIsCollapsed,
+      }}
       data-test-subj={`nav-bucket-recentlyAccessed`}
-    >
-      <EuiSideNav items={navItems} css={styles.euiSideNavItems} />
-    </EuiCollapsibleNavGroup>
+      items={navItems}
+    />
   );
 };

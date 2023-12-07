@@ -6,9 +6,9 @@
  */
 
 import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../common/lib/kibana';
@@ -19,9 +19,9 @@ import { useUpdatePack } from './use_update_pack';
 import { PACKS_ID } from './constants';
 import type { PackSavedObject } from './types';
 
-const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
-`;
+const euiLoadingSpinnerCss = ({ euiTheme }: UseEuiTheme) => ({
+  marginRight: euiTheme.size.s,
+});
 
 interface ActiveStateSwitchProps {
   disabled?: boolean;
@@ -91,11 +91,12 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
 
   return (
     <>
-      {isLoading && <StyledEuiLoadingSpinner />}
+      {isLoading && <EuiLoadingSpinner css={euiLoadingSpinnerCss} />}
       <EuiSwitch
         checked={!!item.enabled}
         disabled={!permissions.writePacks || isLoading}
         showLabel={false}
+        aria-label={item.name}
         label=""
         onChange={handleToggleActiveClick}
       />

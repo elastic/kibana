@@ -565,6 +565,11 @@ exports[`XYChart component it renders area 1`] = `
               "label": [Function],
               "onSelect": [Function],
             },
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
           ]
         }
         headerFormatter={[Function]}
@@ -592,6 +597,7 @@ exports[`XYChart component it renders area 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        locale="en"
         noResults={
           <EmptyPlaceholder
             className="xyChart__empty"
@@ -1094,6 +1100,7 @@ exports[`XYChart component it renders area 1`] = `
             },
           }
         }
+        isDarkMode={false}
         layers={
           Array [
             Object {
@@ -1193,6 +1200,7 @@ exports[`XYChart component it renders area 1`] = `
             },
           ]
         }
+        minBarHeight={1}
         paletteService={
           Object {
             "get": [Function],
@@ -1568,6 +1576,11 @@ exports[`XYChart component it renders bar 1`] = `
               "label": [Function],
               "onSelect": [Function],
             },
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
           ]
         }
         headerFormatter={[Function]}
@@ -1595,6 +1608,7 @@ exports[`XYChart component it renders bar 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        locale="en"
         noResults={
           <EmptyPlaceholder
             className="xyChart__empty"
@@ -2097,6 +2111,7 @@ exports[`XYChart component it renders bar 1`] = `
             },
           }
         }
+        isDarkMode={false}
         layers={
           Array [
             Object {
@@ -2196,6 +2211,7 @@ exports[`XYChart component it renders bar 1`] = `
             },
           ]
         }
+        minBarHeight={1}
         paletteService={
           Object {
             "get": [Function],
@@ -2571,6 +2587,11 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "label": [Function],
               "onSelect": [Function],
             },
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
           ]
         }
         headerFormatter={[Function]}
@@ -2598,6 +2619,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        locale="en"
         noResults={
           <EmptyPlaceholder
             className="xyChart__empty"
@@ -3100,6 +3122,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             },
           }
         }
+        isDarkMode={false}
         layers={
           Array [
             Object {
@@ -3199,6 +3222,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             },
           ]
         }
+        minBarHeight={1}
         paletteService={
           Object {
             "get": [Function],
@@ -3574,6 +3598,11 @@ exports[`XYChart component it renders line 1`] = `
               "label": [Function],
               "onSelect": [Function],
             },
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
           ]
         }
         headerFormatter={[Function]}
@@ -3601,6 +3630,7 @@ exports[`XYChart component it renders line 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        locale="en"
         noResults={
           <EmptyPlaceholder
             className="xyChart__empty"
@@ -4103,6 +4133,7 @@ exports[`XYChart component it renders line 1`] = `
             },
           }
         }
+        isDarkMode={false}
         layers={
           Array [
             Object {
@@ -4202,6 +4233,7 @@ exports[`XYChart component it renders line 1`] = `
             },
           ]
         }
+        minBarHeight={1}
         paletteService={
           Object {
             "get": [Function],
@@ -4577,6 +4609,11 @@ exports[`XYChart component it renders stacked area 1`] = `
               "label": [Function],
               "onSelect": [Function],
             },
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
           ]
         }
         headerFormatter={[Function]}
@@ -4604,6 +4641,7 @@ exports[`XYChart component it renders stacked area 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        locale="en"
         noResults={
           <EmptyPlaceholder
             className="xyChart__empty"
@@ -5106,6 +5144,7 @@ exports[`XYChart component it renders stacked area 1`] = `
             },
           }
         }
+        isDarkMode={false}
         layers={
           Array [
             Object {
@@ -5205,6 +5244,7 @@ exports[`XYChart component it renders stacked area 1`] = `
             },
           ]
         }
+        minBarHeight={1}
         paletteService={
           Object {
             "get": [Function],
@@ -5580,6 +5620,11 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "label": [Function],
               "onSelect": [Function],
             },
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
           ]
         }
         headerFormatter={[Function]}
@@ -5607,6 +5652,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        locale="en"
         noResults={
           <EmptyPlaceholder
             className="xyChart__empty"
@@ -6109,6 +6155,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
             },
           }
         }
+        isDarkMode={false}
         layers={
           Array [
             Object {
@@ -6208,6 +6255,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
             },
           ]
         }
+        minBarHeight={1}
         paletteService={
           Object {
             "get": [Function],
@@ -6583,6 +6631,11 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "label": [Function],
               "onSelect": [Function],
             },
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
           ]
         }
         headerFormatter={[Function]}
@@ -6610,6 +6663,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         }
         legendPosition="top"
         legendSize={130}
+        locale="en"
         noResults={
           <EmptyPlaceholder
             className="xyChart__empty"
@@ -7112,6 +7166,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             },
           }
         }
+        isDarkMode={false}
         layers={
           Array [
             Object {
@@ -7211,6 +7266,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             },
           ]
         }
+        minBarHeight={1}
         paletteService={
           Object {
             "get": [Function],
@@ -7616,6 +7672,11 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "label": [Function],
               "onSelect": [Function],
             },
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
           ]
         }
         headerFormatter={[Function]}
@@ -7643,6 +7704,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
         }
         legendPosition="top"
         legendSize={130}
+        locale="en"
         noResults={
           <EmptyPlaceholder
             className="xyChart__empty"
@@ -8341,6 +8403,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
             },
           }
         }
+        isDarkMode={false}
         layers={
           Array [
             Object {
@@ -8440,6 +8503,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
             },
           ]
         }
+        minBarHeight={1}
         paletteService={
           Object {
             "get": [Function],
@@ -8857,6 +8921,11 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "label": [Function],
               "onSelect": [Function],
             },
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
           ]
         }
         headerFormatter={[Function]}
@@ -8884,6 +8953,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         }
         legendPosition="top"
         legendSize={130}
+        locale="en"
         noResults={
           <EmptyPlaceholder
             className="xyChart__empty"
@@ -9577,6 +9647,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             },
           }
         }
+        isDarkMode={false}
         layers={
           Array [
             Object {
@@ -9676,6 +9747,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             },
           ]
         }
+        minBarHeight={1}
         paletteService={
           Object {
             "get": [Function],
@@ -10091,6 +10163,11 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "label": [Function],
               "onSelect": [Function],
             },
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
           ]
         }
         headerFormatter={[Function]}
@@ -10118,6 +10195,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
         }
         legendPosition="top"
         legendSize={130}
+        locale="en"
         noResults={
           <EmptyPlaceholder
             className="xyChart__empty"
@@ -10811,6 +10889,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             },
           }
         }
+        isDarkMode={false}
         layers={
           Array [
             Object {
@@ -10910,6 +10989,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             },
           ]
         }
+        minBarHeight={1}
         paletteService={
           Object {
             "get": [Function],

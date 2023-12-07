@@ -46,7 +46,8 @@ const routes = [
   updateRoutes.registerUpdateDataViewRoute,
   updateRoutes.registerUpdateDataViewRouteLegacy,
   ...Object.values(scriptedRoutes),
-  swapReferencesRoute,
+  swapReferencesRoute({ previewRoute: false }),
+  swapReferencesRoute({ previewRoute: true }),
 ];
 
 export { routes };

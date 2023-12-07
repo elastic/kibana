@@ -8,6 +8,7 @@
 import { ApmFields, apm, Instance } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -17,7 +18,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
   const numTransactions = 100;
 
   return {
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const urls = ['GET /order', 'POST /basket', 'DELETE /basket', 'GET /products'];
 
       const successfulTimestamps = range.ratePerMinute(180);
@@ -68,14 +69,17 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         return [successfulTraceEvents, failedTraceEvents, metricsets];
       };
 
-      return logger.perf('generating_apm_events', () =>
-        instances
-          .flatMap((instance) =>
-            transactionNames.map((transactionName) => ({ instance, transactionName }))
-          )
-          .flatMap(({ instance, transactionName }, index) =>
-            instanceSpans(instance, transactionName)
-          )
+      return withClient(
+        apmEsClient,
+        logger.perf('generating_apm_events', () =>
+          instances
+            .flatMap((instance) =>
+              transactionNames.map((transactionName) => ({ instance, transactionName }))
+            )
+            .flatMap(({ instance, transactionName }, index) =>
+              instanceSpans(instance, transactionName)
+            )
+        )
       );
     },
   };

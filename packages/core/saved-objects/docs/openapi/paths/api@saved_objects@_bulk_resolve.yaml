@@ -1,0 +1,36 @@
+post:
+  summary: Retrieve multiple Kibana saved objects by identifier using any legacy URL aliases if they exist.
+  operationId: bulkResolveSavedObjects
+  deprecated: true
+  description: >
+    Under certain circumstances when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features.
+    When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID.
+    In such a scenario, that object can be retrieved by the bulk resolve API using either its new ID or its old ID.
+  tags:
+    - saved objects
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            type: object
+  responses:
+    '200':
+      description: > 
+        Indicates a successful call.
+        NOTE: This HTTP response code indicates that the bulk operation succeeded. 
+        Errors pertaining to individual objects will be returned in the response body. 
+      content:
+         application/json:
+          schema:
+            type: object
+    '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/400_response.yaml'

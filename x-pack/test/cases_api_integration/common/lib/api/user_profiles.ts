@@ -9,10 +9,13 @@ import type SuperTest from 'supertest';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 
 import { INTERNAL_SUGGEST_USER_PROFILES_URL } from '@kbn/cases-plugin/common/constants';
-import { SuggestUserProfilesRequest } from '@kbn/cases-plugin/common/api';
 import { UserProfileService } from '@kbn/cases-plugin/server/services';
-import { UserProfileAvatarData } from '@kbn/security-plugin/common';
-import { UserProfile, UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type {
+  UserProfile,
+  UserProfileAvatarData,
+  UserProfileWithAvatar,
+} from '@kbn/user-profile-components';
+import { SuggestUserProfilesRequest } from '@kbn/cases-plugin/common/types/api';
 import { superUser } from '../authentication/users';
 import { User } from '../authentication/types';
 import { getSpaceUrlPrefix } from './helpers';

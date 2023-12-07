@@ -11,13 +11,11 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
+import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
 import { UMUpdateBadge } from '../lib/lib';
 import {
@@ -129,32 +127,37 @@ const Application = (props: UptimeAppProps) => {
                 cases: startPlugins.cases,
               }}
             >
-              <Router history={appMountParameters.history}>
-                <EuiThemeProvider darkMode={darkMode}>
-                  <UptimeRefreshContextProvider>
-                    <UptimeSettingsContextProvider {...props}>
-                      <UptimeThemeContextProvider darkMode={darkMode}>
-                        <UptimeStartupPluginsContextProvider {...startPlugins}>
-                          <UptimeDataViewContextProvider dataViews={startPlugins.dataViews}>
-                            <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
-                              <RedirectAppLinks
-                                className={APP_WRAPPER_CLASS}
-                                application={core.application}
-                              >
-                                <InspectorContextProvider>
-                                  <UptimeAlertsFlyoutWrapper />
-                                  <PageRouter />
-                                  <ActionMenu appMountParameters={appMountParameters} />
-                                </InspectorContextProvider>
-                              </RedirectAppLinks>
-                            </div>
-                          </UptimeDataViewContextProvider>
-                        </UptimeStartupPluginsContextProvider>
-                      </UptimeThemeContextProvider>
-                    </UptimeSettingsContextProvider>
-                  </UptimeRefreshContextProvider>
-                </EuiThemeProvider>
-              </Router>
+              <ObservabilityAIAssistantProvider
+                value={startPlugins.observabilityAIAssistant.service}
+              >
+                <Router history={appMountParameters.history}>
+                  <EuiThemeProvider darkMode={darkMode}>
+                    <UptimeRefreshContextProvider>
+                      <UptimeSettingsContextProvider {...props}>
+                        <UptimeThemeContextProvider darkMode={darkMode}>
+                          <UptimeStartupPluginsContextProvider {...startPlugins}>
+                            <UptimeDataViewContextProvider dataViews={startPlugins.dataViews}>
+                              <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
+                                <RedirectAppLinks
+                                  coreStart={{
+                                    application: core.application,
+                                  }}
+                                >
+                                  <InspectorContextProvider>
+                                    <UptimeAlertsFlyoutWrapper />
+                                    <PageRouter />
+                                    <ActionMenu appMountParameters={appMountParameters} />
+                                  </InspectorContextProvider>
+                                </RedirectAppLinks>
+                              </div>
+                            </UptimeDataViewContextProvider>
+                          </UptimeStartupPluginsContextProvider>
+                        </UptimeThemeContextProvider>
+                      </UptimeSettingsContextProvider>
+                    </UptimeRefreshContextProvider>
+                  </EuiThemeProvider>
+                </Router>
+              </ObservabilityAIAssistantProvider>
             </KibanaContextProvider>
           </ReduxProvider>
         </KibanaThemeProvider>

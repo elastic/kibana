@@ -10,19 +10,20 @@ import { useParams } from 'react-router-dom';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useMonitorQueryFilters } from '../monitor_details/hooks/use_monitor_query_filters';
 import { ClientPluginsStart } from '../../../../plugin';
-import { useSelectedLocation } from '../monitor_details/hooks/use_selected_location';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 
-export const NetworkTimingsBreakdown = ({ monitorId }: { monitorId: string }) => {
+export const NetworkTimingsBreakdown = ({ monitorQueryId }: { monitorQueryId: string }) => {
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
   const { stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
 
-  const selectedLocation = useSelectedLocation();
-  if (!selectedLocation) {
+  const { locationFilter } = useMonitorQueryFilters();
+
+  if (!locationFilter) {
     return <LoadingState />;
   }
 
@@ -44,7 +45,7 @@ export const NetworkTimingsBreakdown = ({ monitorId }: { monitorId: string }) =>
             dataType: 'synthetics',
             name: 'Network timings',
             selectedMetricField: 'network_timings',
-            reportDefinitions: { 'monitor.id': [monitorId] },
+            reportDefinitions: { 'monitor.id': [monitorQueryId] },
             time: {
               from: 'now-24h/h',
               to: 'now',
@@ -54,10 +55,7 @@ export const NetworkTimingsBreakdown = ({ monitorId }: { monitorId: string }) =>
                 field: 'synthetics.step.index',
                 values: [stepIndex],
               },
-              {
-                field: 'observer.geo.name',
-                values: [selectedLocation.label],
-              },
+              ...locationFilter,
             ],
           },
         ]}

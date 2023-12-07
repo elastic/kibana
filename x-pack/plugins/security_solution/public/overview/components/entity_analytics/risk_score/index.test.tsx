@@ -53,7 +53,7 @@ const defaultProps = {
   inspect: null,
   refetch: () => {},
   isModuleEnabled: true,
-  isLicenseValid: true,
+  isAuthorized: true,
   loading: false,
 };
 const mockUseRiskScore = useRiskScore as jest.Mock;
@@ -156,7 +156,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
         {
           '@timestamp': '1234567899',
           [riskEntity]: {
-            name: 'testUsermame',
+            name: 'testUsername',
             risk: {
               rule_risks: [],
               calculated_level: RiskSeverity.high,

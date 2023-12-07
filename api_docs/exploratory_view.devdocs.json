@@ -797,7 +797,7 @@
             "label": "align",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
+              "\"right\" | \"left\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -1169,26 +1169,6 @@
           },
           {
             "parentPluginId": "exploratoryView",
-            "id": "def-public.ExploratoryViewPublicPluginsStart.guidedOnboarding",
-            "type": "Object",
-            "tags": [],
-            "label": "guidedOnboarding",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "guidedOnboarding",
-                "scope": "public",
-                "docId": "kibGuidedOnboardingPluginApi",
-                "section": "def-public.GuidedOnboardingPluginStart",
-                "text": "GuidedOnboardingPluginStart"
-              }
-            ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "exploratoryView",
             "id": "def-public.ExploratoryViewPublicPluginsStart.lens",
             "type": "Object",
             "tags": [],
@@ -1428,6 +1408,26 @@
                 "text": "HomePublicPluginStart"
               },
               " | undefined"
+            ],
+            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "exploratoryView",
+            "id": "def-public.ExploratoryViewPublicPluginsStart.observabilityAIAssistant",
+            "type": "Object",
+            "tags": [],
+            "label": "observabilityAIAssistant",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ObservabilityAIAssistantPluginStart",
+                "text": "ObservabilityAIAssistantPluginStart"
+              }
             ],
             "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
             "deprecated": false,

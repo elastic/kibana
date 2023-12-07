@@ -25,7 +25,7 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   const getInstallationSavedObject = async (name: string, version: string) => {
-    const res = await supertest.get(`/api/fleet/epm/packages/${name}-${version}`).expect(200);
+    const res = await supertest.get(`/api/fleet/epm/packages/${name}/${version}`).expect(200);
     return res.body.item.savedObject.attributes;
   };
 
@@ -229,11 +229,11 @@ export default function (providerContext: FtrProviderContext) {
         .send({ agentPolicyId });
       // uninstall endpoint package
       await supertest
-        .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
+        .delete(`/api/fleet/epm/packages/endpoint/8.6.1`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
       await supertest
-        .delete(`/api/fleet/epm/packages/input_package-1.0.0`)
+        .delete(`/api/fleet/epm/packages/input_package/1.0.0`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
     });

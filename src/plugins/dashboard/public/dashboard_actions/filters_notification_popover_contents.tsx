@@ -52,7 +52,11 @@ export function FiltersNotificationPopoverContents({
       setFilters(embeddableFilters);
       if (embeddableQuery) {
         if (isOfQueryType(embeddableQuery)) {
-          setQueryString(embeddableQuery.query as string);
+          if (typeof embeddableQuery.query === 'string') {
+            setQueryString(embeddableQuery.query);
+          } else {
+            setQueryString(JSON.stringify(embeddableQuery.query, null, 2));
+          }
         } else {
           const language = getAggregateQueryMode(embeddableQuery);
           setQueryLanguage(language);
@@ -76,11 +80,11 @@ export function FiltersNotificationPopoverContents({
           <EuiFormRow
             label={dashboardFilterNotificationActionStrings.getQueryTitle()}
             display="rowCompressed"
+            fullWidth
           >
             <EuiCodeBlock
               language={queryLanguage}
-              paddingSize="none"
-              transparentBackground
+              paddingSize="s"
               aria-labelledby={`${dashboardFilterNotificationActionStrings.getQueryTitle()}: ${queryString}`}
               tabIndex={0} // focus so that keyboard controls will not skip over the code block
             >
@@ -89,7 +93,7 @@ export function FiltersNotificationPopoverContents({
           </EuiFormRow>
         )}
         {filters && filters.length > 0 && (
-          <EuiFormRow label={dashboardFilterNotificationActionStrings.getFiltersTitle()}>
+          <EuiFormRow label={dashboardFilterNotificationActionStrings.getFiltersTitle()} fullWidth>
             <EuiFlexGroup wrap={true} gutterSize="xs">
               <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
             </EuiFlexGroup>

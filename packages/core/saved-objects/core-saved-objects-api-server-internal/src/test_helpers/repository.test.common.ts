@@ -103,7 +103,7 @@ export const expectErrorConflict = (obj: TypeIdTuple, overrides?: Record<string,
 export const expectErrorInvalidType = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
   expectErrorResult(obj, createUnsupportedTypeErrorPayload(obj.type), overrides);
 
-export const KIBANA_VERSION = '2.0.0';
+export const KIBANA_VERSION = '8.8.0';
 export const ALLOWED_CONVERT_VERSION = '8.0.0';
 export const CUSTOM_INDEX_TYPE = 'customIndex';
 /** This type has namespaceType: 'agnostic'. */
@@ -439,7 +439,7 @@ export const getMockGetResponse = (
   }
   const namespaceId = namespaces[0] === 'default' ? undefined : namespaces[0];
 
-  return {
+  const result = {
     // NOTE: Elasticsearch returns more fields (_index, _type) but the SavedObjectsRepository method ignores these
     found: true,
     _id: `${registry.isSingleNamespace(type) && namespaceId ? `${namespaceId}:` : ''}${type}:${id}`,
@@ -464,11 +464,14 @@ export const getMockGetResponse = (
       ...mockTimestampFields,
     } as SavedObjectsRawDocSource,
   } as estypes.GetResponse<SavedObjectsRawDocSource>;
+  return result;
 };
 
 export const getMockMgetResponse = (
   registry: SavedObjectTypeRegistry,
-  objects: Array<TypeIdTuple & { found?: boolean; initialNamespaces?: string[] }>,
+  objects: Array<
+    TypeIdTuple & { found?: boolean; initialNamespaces?: string[]; originId?: string }
+  >,
   namespace?: string
 ) =>
   ({
@@ -489,35 +492,6 @@ expect.extend({
   },
 });
 
-export const mockUpdateResponse = (
-  client: ElasticsearchClientMock,
-  type: string,
-  id: string,
-  options?: SavedObjectsUpdateOptions,
-  namespaces?: string[],
-  originId?: string
-) => {
-  client.update.mockResponseOnce(
-    {
-      _id: `${type}:${id}`,
-      ...mockVersionProps,
-      result: 'updated',
-      // don't need the rest of the source for test purposes, just the namespace and namespaces attributes
-      get: {
-        _source: {
-          namespaces: namespaces ?? [options?.namespace ?? 'default'],
-          namespace: options?.namespace,
-
-          // If the existing saved object contains an originId attribute, the operation will return it in the result.
-          // The originId parameter is just used for test purposes to modify the mock cluster call response.
-          ...(!!originId && { originId }),
-        },
-      },
-    } as estypes.UpdateResponse,
-    { statusCode: 200 }
-  );
-};
-
 export const updateSuccess = async <T extends Partial<unknown>>(
   client: ElasticsearchClientMock,
   repository: SavedObjectsRepository,
@@ -528,20 +502,40 @@ export const updateSuccess = async <T extends Partial<unknown>>(
   options?: SavedObjectsUpdateOptions,
   internalOptions: {
     originId?: string;
-    mockGetResponseValue?: estypes.GetResponse;
+    mockGetResponseAsNotFound?: estypes.GetResponse;
   } = {},
   objNamespaces?: string[]
 ) => {
-  const { mockGetResponseValue, originId } = internalOptions;
-  if (registry.isMultiNamespace(type)) {
-    const mockGetResponse =
-      mockGetResponseValue ??
-      getMockGetResponse(registry, { type, id }, objNamespaces ?? options?.namespace);
-    client.get.mockResponseOnce(mockGetResponse, { statusCode: 200 });
+  const { mockGetResponseAsNotFound, originId } = internalOptions;
+  const mockGetResponse =
+    mockGetResponseAsNotFound ??
+    getMockGetResponse(registry, { type, id, originId }, objNamespaces ?? options?.namespace);
+  client.get.mockResponseOnce(mockGetResponse, { statusCode: 200 });
+  if (!mockGetResponseAsNotFound) {
+    // index doc from existing doc
+    client.index.mockResponseImplementation((params) => {
+      return {
+        body: {
+          _id: params.id,
+          ...mockVersionProps,
+        } as estypes.CreateResponse,
+      };
+    });
   }
-  mockUpdateResponse(client, type, id, options, objNamespaces, originId);
+  if (mockGetResponseAsNotFound) {
+    // upsert case: create the doc. (be careful here, we're also sending mockGetResponseValue as { found: false })
+    client.create.mockResponseImplementation((params) => {
+      return {
+        body: {
+          _id: params.id,
+          ...mockVersionProps,
+        } as estypes.CreateResponse,
+      };
+    });
+  }
+
   const result = await repository.update(type, id, attributes, options);
-  expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
+  expect(client.get).toHaveBeenCalled(); // not asserting on the number of calls here, we end up testing the test mocks and not the actual implementation
   return result;
 };
 
@@ -657,10 +651,10 @@ export const getMockBulkUpdateResponse = (
   objects: TypeIdTuple[],
   options?: SavedObjectsBulkUpdateOptions,
   originId?: string
-) =>
-  ({
+) => {
+  return {
     items: objects.map(({ type, id }) => ({
-      update: {
+      index: {
         _id: `${
           registry.isSingleNamespace(type) && options?.namespace ? `${options?.namespace}:` : ''
         }${type}:${id}`,
@@ -675,7 +669,8 @@ export const getMockBulkUpdateResponse = (
         result: 'updated',
       },
     })),
-  } as estypes.BulkResponse);
+  } as estypes.BulkResponse;
+};
 
 export const bulkUpdateSuccess = async (
   client: ElasticsearchClientMock,
@@ -686,19 +681,26 @@ export const bulkUpdateSuccess = async (
   originId?: string,
   multiNamespaceSpace?: string // the space for multi namespace objects returned by mock mget (this is only needed for space ext testing)
 ) => {
-  const multiNamespaceObjects = objects.filter(({ type }) => registry.isMultiNamespace(type));
-  if (multiNamespaceObjects?.length) {
-    const response = getMockMgetResponse(
-      registry,
-      multiNamespaceObjects,
-      multiNamespaceSpace ?? options?.namespace
-    );
-    client.mget.mockResponseOnce(response);
+  let mockedMgetResponse;
+  const validObjects = objects.filter(({ type }) => registry.getType(type) !== undefined);
+  const multiNamespaceObjects = validObjects.filter(({ type }) => registry.isMultiNamespace(type));
+
+  if (validObjects?.length) {
+    if (multiNamespaceObjects.length > 0) {
+      mockedMgetResponse = getMockMgetResponse(
+        registry,
+        validObjects,
+        multiNamespaceSpace ?? options?.namespace
+      );
+    } else {
+      mockedMgetResponse = getMockMgetResponse(registry, validObjects);
+    }
+    client.mget.mockResponseOnce(mockedMgetResponse);
   }
   const response = getMockBulkUpdateResponse(registry, objects, options, originId);
   client.bulk.mockResponseOnce(response);
   const result = await repository.bulkUpdate(objects, options);
-  expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
+  expect(client.mget).toHaveBeenCalledTimes(validObjects?.length ? 1 : 0);
   return result;
 };
 

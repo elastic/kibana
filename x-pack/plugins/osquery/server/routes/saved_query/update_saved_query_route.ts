@@ -6,9 +6,9 @@
  */
 
 import { filter, some } from 'lodash';
-import { schema } from '@kbn/config-schema';
 
 import type { IRouter } from '@kbn/core/server';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { isSavedQueryPrebuilt } from './utils';
 import { PLUGIN_ID } from '../../../common';
@@ -16,6 +16,14 @@ import { savedQuerySavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 import type { UpdateSavedQueryResponse } from './types';
+import type {
+  UpdateSavedQueryRequestBodySchema,
+  UpdateSavedQueryRequestParamsSchema,
+} from '../../../common/api/saved_query/update_saved_query_route';
+import {
+  updateSavedQueryRequestBodySchema,
+  updateSavedQueryRequestParamsSchema,
+} from '../../../common/api/saved_query/update_saved_query_route';
 
 export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -29,33 +37,14 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: schema.object({
-              id: schema.string(),
-            }),
-            body: schema.object(
-              {
-                id: schema.string(),
-                query: schema.string(),
-                description: schema.maybe(schema.string()),
-                interval: schema.maybe(schema.number()),
-                snapshot: schema.maybe(schema.boolean()),
-                removed: schema.maybe(schema.boolean()),
-                platform: schema.maybe(schema.string()),
-                version: schema.maybe(schema.string()),
-                ecs_mapping: schema.maybe(
-                  schema.recordOf(
-                    schema.string(),
-                    schema.object({
-                      field: schema.maybe(schema.string()),
-                      value: schema.maybe(
-                        schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
-                      ),
-                    })
-                  )
-                ),
-              },
-              { unknowns: 'allow' }
-            ),
+            params: buildRouteValidation<
+              typeof updateSavedQueryRequestParamsSchema,
+              UpdateSavedQueryRequestParamsSchema
+            >(updateSavedQueryRequestParamsSchema),
+            body: buildRouteValidation<
+              typeof updateSavedQueryRequestBodySchema,
+              UpdateSavedQueryRequestBodySchema
+            >(updateSavedQueryRequestBodySchema),
           },
         },
       },
@@ -71,6 +60,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           query,
           version,
           interval,
+          timeout,
           snapshot,
           removed,
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -113,6 +103,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             query,
             version,
             interval,
+            timeout,
             snapshot,
             removed,
             ecs_mapping: convertECSMappingToArray(ecs_mapping),
@@ -144,6 +135,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           version: attributes.version,
           ecs_mapping: attributes.ecs_mapping,
           interval: attributes.interval,
+          timeout: attributes.timeout,
           platform: attributes.platform,
           query: attributes.query,
           updated_at: attributes.updated_at,

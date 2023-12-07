@@ -6,7 +6,7 @@
  */
 
 export enum API_URLS {
-  DYNAMIC_SETTINGS = `/internal/uptime/dynamic_settings`,
+  DYNAMIC_SETTINGS = `/api/uptime/settings`,
   INDEX_STATUS = '/internal/uptime/index_status',
   MONITOR_LIST = `/internal/uptime/monitor/list`,
   MONITOR_LOCATIONS = `/internal/uptime/monitor/locations`,
@@ -34,4 +34,6 @@ export enum API_URLS {
   DELETE_RULE = '/api/alerting/rule/',
   RULES_FIND = '/api/alerting/rules/_find',
   CONNECTOR_TYPES = '/api/actions/connector_types',
+
+  SYNTHETICS_HAS_INTEGRATION_MONITORS = '/internal/synthetics/fleet/has_integration_monitors',
 }

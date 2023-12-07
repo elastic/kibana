@@ -79,6 +79,13 @@
           "id": "kibBuildingBlocks"
         },
         {
+          "id": "kibDevDocsSecurityIntro"
+        },
+        {
+          "id": "kibDevFeaturePrivileges",
+          "label": "Feature Privileges"
+        },
+        {
           "id": "kibDevDocsSavedObjectsIntro",
           "label": "Saved objects"
         },
@@ -177,12 +184,35 @@
         },
         {
           "id": "kibDevTutorialScreenshotting"
+        },
+        {
+          "id": "kibDevTutorialsContentManagementOnboarding"
+        },
+        {
+          "id": "kibDevTutorialsServerlessProjectNavigation"
+        }
+      ]
+    },
+    {
+      "label": "Serverless",
+      "items": [
+        {
+          "id": "ktServerlessReleaseOverview"
+        },
+        {
+          "id": "ktCustomServerlessImage"
         }
       ]
     },
     {
       "label": "Contributors Newsletters",
       "items": [
+        {
+          "id": "kibSeptember2023ContributorNewsletter"
+        },
+        {
+          "id": "kibJuly2023ContributorNewsletter"
+        },
         {
           "id": "kibMay2023ContributorNewsletter"
         },
@@ -394,6 +424,9 @@
         },
         {
           "id": "kibNewsfeedPluginApi"
+        },
+        {
+          "id": "kibNotificationsPluginApi"
         },
         {
           "id": "kibObservabilityPluginApi"

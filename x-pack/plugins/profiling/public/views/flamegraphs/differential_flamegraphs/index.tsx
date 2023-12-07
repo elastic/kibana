@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../../../components/flamegraph';
 import { NormalizationMode, NormalizationOptions } from '../../../components/normalization_menu';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
-import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
+import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { DifferentialFlameGraphSearchPanel } from './differential_flame_graph_search_panel';
+import { FramesSummary } from '../../../components/frames_summary';
+import { AsyncStatus } from '../../../hooks/use_async';
 
 export function DifferentialFlameGraphsView() {
   const {
@@ -36,7 +38,6 @@ export function DifferentialFlameGraphsView() {
   } = useProfilingParams('/flamegraphs/differential');
   const routePath = useProfilingRoutePath();
   const profilingRouter = useProfilingRouter();
-  const [showInformationWindow, setShowInformationWindow] = useState(false);
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
@@ -55,15 +56,15 @@ export function DifferentialFlameGraphsView() {
       return Promise.all([
         fetchElasticFlamechart({
           http,
-          timeFrom: timeRange.inSeconds.start,
-          timeTo: timeRange.inSeconds.end,
+          timeFrom: new Date(timeRange.start).getTime(),
+          timeTo: new Date(timeRange.end).getTime(),
           kuery,
         }),
-        comparisonTimeRange.inSeconds.start && comparisonTimeRange.inSeconds.end
+        comparisonTimeRange.start && comparisonTimeRange.end
           ? fetchElasticFlamechart({
               http,
-              timeFrom: comparisonTimeRange.inSeconds.start,
-              timeTo: comparisonTimeRange.inSeconds.end,
+              timeFrom: new Date(comparisonTimeRange.start).getTime(),
+              timeTo: new Date(comparisonTimeRange.end).getTime(),
               kuery: comparisonKuery,
             })
           : Promise.resolve(undefined),
@@ -75,13 +76,13 @@ export function DifferentialFlameGraphsView() {
       });
     },
     [
-      timeRange.inSeconds.start,
-      timeRange.inSeconds.end,
-      kuery,
-      comparisonTimeRange.inSeconds.start,
-      comparisonTimeRange.inSeconds.end,
-      comparisonKuery,
       fetchElasticFlamechart,
+      timeRange.start,
+      timeRange.end,
+      kuery,
+      comparisonTimeRange.start,
+      comparisonTimeRange.end,
+      comparisonKuery,
     ]
   );
 
@@ -105,10 +106,6 @@ export function DifferentialFlameGraphsView() {
 
   const isNormalizedByTime = normalizationMode === NormalizationMode.Time;
 
-  function toggleShowInformationWindow() {
-    setShowInformationWindow((prev) => !prev);
-  }
-
   function handleSearchTextChange(newSearchText: string) {
     // @ts-expect-error Code gets too complicated to satisfy TS constraints
     profilingRouter.push(routePath, { query: { ...query, searchText: newSearchText } });
@@ -117,11 +114,43 @@ export function DifferentialFlameGraphsView() {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
-        <DifferentialFlameGraphSearchPanel
-          comparisonMode={comparisonMode}
-          normalizationMode={normalizationMode}
-          normalizationOptions={normalizationOptions}
-        />
+        <EuiPanel hasShadow={false} color="subdued">
+          <DifferentialFlameGraphSearchPanel
+            comparisonMode={comparisonMode}
+            normalizationMode={normalizationMode}
+            normalizationOptions={normalizationOptions}
+          />
+          <EuiSpacer />
+          <FramesSummary
+            isLoading={state.status === AsyncStatus.Loading}
+            baseValue={
+              state.data?.primaryFlamegraph
+                ? {
+                    duration: totalSeconds,
+                    selfCPU: state.data.primaryFlamegraph.SelfCPU,
+                    totalCPU: state.data.primaryFlamegraph.TotalCPU,
+                    totalCount: state.data.primaryFlamegraph.TotalSamples,
+                    scaleFactor: isNormalizedByTime ? baselineTime : baseline,
+                    totalAnnualCO2Kgs: state.data.primaryFlamegraph.TotalAnnualCO2Kgs,
+                    totalAnnualCostUSD: state.data.primaryFlamegraph.TotalAnnualCostsUSD,
+                  }
+                : undefined
+            }
+            comparisonValue={
+              state.data?.comparisonFlamegraph
+                ? {
+                    duration: totalComparisonSeconds,
+                    selfCPU: state.data.comparisonFlamegraph.SelfCPU,
+                    totalCPU: state.data.comparisonFlamegraph.TotalCPU,
+                    totalCount: state.data.comparisonFlamegraph.TotalSamples,
+                    scaleFactor: isNormalizedByTime ? comparisonTime : comparison,
+                    totalAnnualCO2Kgs: state.data.comparisonFlamegraph.TotalAnnualCO2Kgs,
+                    totalAnnualCostUSD: state.data.comparisonFlamegraph.TotalAnnualCostsUSD,
+                  }
+                : undefined
+            }
+          />
+        </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
         <AsyncComponent {...state} style={{ height: '100%' }} size="xl">
@@ -132,8 +161,6 @@ export function DifferentialFlameGraphsView() {
             comparisonMode={comparisonMode}
             baseline={isNormalizedByTime ? baselineTime : baseline}
             comparison={isNormalizedByTime ? comparisonTime : comparison}
-            showInformationWindow={showInformationWindow}
-            toggleShowInformationWindow={toggleShowInformationWindow}
             searchText={searchText}
             onChangeSearchText={handleSearchTextChange}
           />

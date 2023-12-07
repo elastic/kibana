@@ -27,12 +27,11 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
-import type { Observable } from 'rxjs';
-import type { CoreTheme, OverlayStart } from '@kbn/core/public';
+import type { I18nStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { numberValidator } from '@kbn/ml-agg-utils';
-import { isCloudTrial } from '../services/ml_server_info';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { getNewJobLimits, isCloudTrial } from '../services/ml_server_info';
 import {
   composeValidators,
   dictionaryValidator,
@@ -43,7 +42,7 @@ import { ModelItem } from './models_list';
 interface DeploymentSetupProps {
   config: ThreadingParams;
   onConfigChange: (config: ThreadingParams) => void;
-  errors: Partial<Record<keyof ThreadingParams, object>>;
+  errors: Partial<Record<keyof ThreadingParams, Record<string, unknown>>>;
   isUpdate?: boolean;
   deploymentsParams?: Record<string, ThreadingParams>;
 }
@@ -67,6 +66,11 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
   isUpdate,
   deploymentsParams,
 }) => {
+  const {
+    total_ml_processors: totalMlProcessors,
+    max_single_ml_node_processors: maxSingleMlNodeProcessors,
+  } = getNewJobLimits();
+
   const numOfAllocation = config.numOfAllocations;
   const threadsPerAllocations = config.threadsPerAllocations;
 
@@ -77,17 +81,20 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
 
   const threadsPerAllocationsOptions = useMemo(
     () =>
-      new Array(THREADS_MAX_EXPONENT).fill(null).map((v, i) => {
-        const value = Math.pow(2, i);
-        const id = value.toString();
+      new Array(THREADS_MAX_EXPONENT)
+        .fill(null)
+        .map((v, i) => Math.pow(2, i))
+        .filter(maxSingleMlNodeProcessors ? (v) => v <= maxSingleMlNodeProcessors : (v) => true)
+        .map((value) => {
+          const id = value.toString();
 
-        return {
-          id,
-          label: id,
-          value,
-        };
-      }),
-    []
+          return {
+            id,
+            label: id,
+            value,
+          };
+        }),
+    [maxSingleMlNodeProcessors]
   );
 
   const disableThreadingControls = config.priority === 'low';
@@ -252,11 +259,28 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
           }
           hasChildLabel={false}
           isDisabled={disableThreadingControls}
+          isInvalid={!!errors.numOfAllocations}
+          error={
+            errors?.numOfAllocations?.min ? (
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsMinError"
+                defaultMessage="At least one allocation is required."
+              />
+            ) : errors?.numOfAllocations?.max ? (
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsMaxError"
+                defaultMessage="Cannot exceed {max} - the total number of ML processors."
+                values={{ max: totalMlProcessors }}
+              />
+            ) : null
+          }
         >
           <EuiFieldNumber
             disabled={disableThreadingControls}
+            isInvalid={!!errors.numOfAllocations}
             fullWidth
             min={1}
+            max={totalMlProcessors}
             step={1}
             name={'numOfAllocations'}
             value={disableThreadingControls ? 1 : numOfAllocation}
@@ -347,6 +371,8 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 }) => {
   const isUpdate = !!initialParams;
 
+  const { total_ml_processors: totalMlProcessors } = getNewJobLimits();
+
   const [config, setConfig] = useState<ThreadingParams>(
     initialParams ?? {
       numOfAllocations: 1,
@@ -374,7 +400,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 
   const numOfAllocationsValidator = composeValidators(
     requiredValidator(),
-    numberValidator({ min: 1, integerOnly: true })
+    numberValidator({ min: 1, max: totalMlProcessors, integerOnly: true })
   );
 
   const numOfAllocationsErrors = numOfAllocationsValidator(config.numOfAllocations);
@@ -497,7 +523,12 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
  * @param theme$
  */
 export const getUserInputModelDeploymentParamsProvider =
-  (overlays: OverlayStart, theme$: Observable<CoreTheme>, startModelDeploymentDocUrl: string) =>
+  (
+    overlays: OverlayStart,
+    theme: ThemeServiceStart,
+    i18nStart: I18nStart,
+    startModelDeploymentDocUrl: string
+  ) =>
   (
     model: ModelItem,
     initialParams?: ThreadingParams,
@@ -507,30 +538,28 @@ export const getUserInputModelDeploymentParamsProvider =
       try {
         const modalSession = overlays.openModal(
           toMountPoint(
-            wrapWithTheme(
-              <StartUpdateDeploymentModal
-                startModelDeploymentDocUrl={startModelDeploymentDocUrl}
-                initialParams={initialParams}
-                modelAndDeploymentIds={deploymentIds}
-                model={model}
-                onConfigChange={(config) => {
-                  modalSession.close();
+            <StartUpdateDeploymentModal
+              startModelDeploymentDocUrl={startModelDeploymentDocUrl}
+              initialParams={initialParams}
+              modelAndDeploymentIds={deploymentIds}
+              model={model}
+              onConfigChange={(config) => {
+                modalSession.close();
 
-                  const resultConfig = { ...config };
-                  if (resultConfig.priority === 'low') {
-                    resultConfig.numOfAllocations = 1;
-                    resultConfig.threadsPerAllocations = 1;
-                  }
+                const resultConfig = { ...config };
+                if (resultConfig.priority === 'low') {
+                  resultConfig.numOfAllocations = 1;
+                  resultConfig.threadsPerAllocations = 1;
+                }
 
-                  resolve(resultConfig);
-                }}
-                onClose={() => {
-                  modalSession.close();
-                  resolve();
-                }}
-              />,
-              theme$
-            )
+                resolve(resultConfig);
+              }}
+              onClose={() => {
+                modalSession.close();
+                resolve();
+              }}
+            />,
+            { theme, i18n: i18nStart }
           )
         );
       } catch (e) {

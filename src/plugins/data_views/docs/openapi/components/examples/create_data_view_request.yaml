@@ -1,0 +1,16 @@
+summary: Create a data view with runtime fields.
+value:
+  {
+    "data_view": {
+      "title": "logstash-*",
+      "name": "My Logstash data view",
+      "runtimeFieldMap": {
+        "runtime_shape_name": {
+          "type": "keyword",
+          "script": {
+            "source": "emit(doc['shape_name'].value)"
+          }
+        }
+      }
+    }
+  }

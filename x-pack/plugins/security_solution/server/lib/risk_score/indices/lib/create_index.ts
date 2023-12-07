@@ -4,19 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-export const createEsIndexBodySchema = schema.object({
-  index: schema.string({ minLength: 1 }),
-  mappings: schema.maybe(
-    schema.oneOf([schema.string(), schema.recordOf(schema.string({ minLength: 1 }), schema.any())])
-  ),
-});
-
-type CreateEsIndexBodySchema = TypeOf<typeof createEsIndexBodySchema>;
+import type { CreateEsIndexRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
 export const createIndex = async ({
   esClient,
@@ -25,7 +15,7 @@ export const createIndex = async ({
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-  options: CreateEsIndexBodySchema;
+  options: CreateEsIndexRequestBody;
 }) => {
   try {
     await esClient.indices.create({

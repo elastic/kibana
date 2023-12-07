@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 import { VisualizeInput } from '../../..';
 import { ByValueVisInstance, VisualizeServices, IEditorController } from '../../types';
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
-import { getEditBreadcrumbs } from '../breadcrumbs';
+import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from '../breadcrumbs';
 
 export const useVisByValue = (
   services: VisualizeServices,
@@ -33,6 +33,7 @@ export const useVisByValue = (
       application: { navigateToApp },
       stateTransferService,
       visEditorsRegistry,
+      serverless,
     } = services;
     const getVisInstance = async () => {
       if (!valueInput || loaded.current || !visEditorRef.current) {
@@ -59,9 +60,16 @@ export const useVisByValue = (
       const redirectToOrigin = originatingApp
         ? () => navigateToApp(originatingApp, { path: originatingPath })
         : undefined;
-      chrome?.setBreadcrumbs(
-        getEditBreadcrumbs({ byValue: true, originatingAppName, redirectToOrigin })
-      );
+
+      if (serverless?.setBreadcrumbs) {
+        serverless.setBreadcrumbs(
+          getEditServerlessBreadcrumbs({ byValue: true, originatingAppName, redirectToOrigin })
+        );
+      } else {
+        chrome?.setBreadcrumbs(
+          getEditBreadcrumbs({ byValue: true, originatingAppName, redirectToOrigin })
+        );
+      }
 
       loaded.current = true;
       setState({

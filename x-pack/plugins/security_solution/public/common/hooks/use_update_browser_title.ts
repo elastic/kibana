@@ -6,14 +6,14 @@
  */
 
 import { useEffect } from 'react';
-import { getLinkInfo } from '../links';
-import { useRouteSpy } from '../utils/route/use_route_spy';
+import { useNavLinks } from '../links/nav_links';
+import { useFindAppLinksByPath } from '../links/use_find_app_links_by_path';
 
 export const useUpdateBrowserTitle = () => {
-  const [{ pageName }] = useRouteSpy();
-  const linkInfo = getLinkInfo(pageName);
+  const navLinks = useNavLinks();
+  const linkInfo = useFindAppLinksByPath(navLinks);
 
   useEffect(() => {
     document.title = `${linkInfo?.title ?? ''} - Kibana`;
-  }, [pageName, linkInfo]);
+  }, [linkInfo]);
 };

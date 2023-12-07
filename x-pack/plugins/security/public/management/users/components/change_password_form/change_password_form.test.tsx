@@ -12,9 +12,9 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import type { User } from '../../../../../common/model';
-import { userAPIClientMock } from '../../index.mock';
 import { ChangePasswordForm } from './change_password_form';
+import type { User } from '../../../../../common';
+import { userAPIClientMock } from '../../index.mock';
 
 function getCurrentPasswordField(wrapper: ReactWrapper<any>) {
   return wrapper.find(EuiFieldPassword).filter('[data-test-subj="currentPassword"]');

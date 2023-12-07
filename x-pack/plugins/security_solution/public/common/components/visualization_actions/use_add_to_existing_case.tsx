@@ -5,10 +5,11 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
-import { CommentType, LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { AttachmentType, LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 
-import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
+import { APP_ID } from '../../../../common';
+import { useKibana } from '../../lib/kibana';
 import { ADD_TO_CASE_SUCCESS } from './translations';
 import type { LensAttributes } from './types';
 
@@ -21,14 +22,14 @@ export const useAddToExistingCase = ({
   lensAttributes: LensAttributes | null;
   timeRange: { from: string; to: string } | null;
 }) => {
-  const userCasesPermissions = useGetUserCasesPermissions();
   const { cases } = useKibana().services;
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const attachments = useMemo(() => {
     return [
       {
         persistableStateAttachmentState: { attributes: lensAttributes, timeRange },
         persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
-        type: CommentType.persistableState as const,
+        type: AttachmentType.persistableState as const,
       },
     ] as CaseAttachmentsWithoutOwner;
   }, [lensAttributes, timeRange]);

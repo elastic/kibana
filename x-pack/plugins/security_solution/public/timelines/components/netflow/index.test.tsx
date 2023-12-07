@@ -134,7 +134,7 @@ const getNetflowInstance = () => (
   />
 );
 
-jest.mock('../../../common/components/link_to');
+jest.mock('../../../common/components/links/link_props');
 
 describe('Netflow', () => {
   test('renders correctly against snapshot', () => {

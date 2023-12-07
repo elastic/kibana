@@ -15,3 +15,9 @@ export interface Prompt {
   isDefault?: boolean; // TODO: Should be renamed to isImmutable as this flag is used to prevent users from deleting prompts
   isNewConversationDefault?: boolean;
 }
+
+export interface KnowledgeBaseConfig {
+  alerts: boolean;
+  assistantLangChain: boolean;
+  latestAlerts: number;
+}

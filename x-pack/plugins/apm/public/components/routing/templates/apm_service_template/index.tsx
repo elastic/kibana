@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingLogo,
@@ -13,26 +14,28 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
-  EuiBadge,
 } from '@elastic/eui';
-import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import { omit } from 'lodash';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
+  isAWSLambdaAgentName,
+  isAzureFunctionsAgentName,
   isMobileAgentName,
   isRumAgentName,
-  isAWSLambdaAgent,
-  isAzureFunctionsAgent,
-  isServerlessAgent,
+  isRumOrMobileAgentName,
+  isServerlessAgentName,
 } from '../../../../../common/agent_name';
+import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
+import { ServerlessType } from '../../../../../common/serverless';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
 import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/service_anomaly_timeseries/service_anomaly_timeseries_context';
+import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
@@ -45,9 +48,6 @@ import { ServiceIcons } from '../../../shared/service_icons';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
-import { ServerlessType } from '../../../../../common/serverless';
-import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
-import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -60,7 +60,9 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'infrastructure'
     | 'service-map'
     | 'logs'
-    | 'alerts';
+    | 'alerts'
+    | 'profiling'
+    | 'dashboards';
   hidden?: boolean;
 };
 
@@ -88,7 +90,7 @@ function TemplateWithContext({
   const {
     path: { serviceName },
     query,
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, environment },
   } = useApmParams('/services/{serviceName}/*');
   const history = useHistory();
   const location = useLocation();
@@ -138,6 +140,7 @@ function TemplateWithContext({
                 <EuiFlexItem grow={false}>
                   <ServiceIcons
                     serviceName={serviceName}
+                    environment={environment}
                     start={start}
                     end={end}
                   />
@@ -180,13 +183,13 @@ export function isMetricsTabHidden({
   serverlessType?: ServerlessType;
   isAwsLambdaEnabled?: boolean;
 }) {
-  if (isAWSLambdaAgent(serverlessType)) {
+  if (isAWSLambdaAgentName(serverlessType)) {
     return !isAwsLambdaEnabled;
   }
   return (
     !agentName ||
     isRumAgentName(agentName) ||
-    isAzureFunctionsAgent(serverlessType)
+    isAzureFunctionsAgentName(serverlessType)
   );
 }
 
@@ -202,7 +205,7 @@ export function isInfraTabHidden({
   return (
     !agentName ||
     isRumAgentName(agentName) ||
-    isServerlessAgent(serverlessType) ||
+    isServerlessAgentName(serverlessType) ||
     !isInfraTabAvailable
   );
 }
@@ -314,7 +317,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
-      append: isServerlessAgent(serverlessType) && (
+      append: isServerlessAgentName(serverlessType) && (
         <TechnicalPreviewBadge icon="beaker" />
       ),
       hidden: isMetricsTabHidden({
@@ -358,13 +361,13 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
-      append: isServerlessAgent(serverlessType) && (
+      append: isServerlessAgentName(serverlessType) && (
         <TechnicalPreviewBadge icon="beaker" />
       ),
       hidden:
         !agentName ||
         isRumAgentName(agentName) ||
-        isAzureFunctionsAgent(serverlessType),
+        isAzureFunctionsAgentName(serverlessType),
     },
     {
       key: 'alerts',
@@ -390,6 +393,37 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Alerts',
       }),
       hidden: !(isAlertingAvailable && canReadAlerts),
+    },
+    {
+      key: 'profiling',
+      href: router.link('/services/{serviceName}/profiling', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.profilingTabLabel', {
+        defaultMessage: 'Universal Profiling',
+      }),
+      hidden:
+        isRumOrMobileAgentName(agentName) ||
+        isAWSLambdaAgentName(serverlessType),
+      append: (
+        <EuiBadge color="accent">
+          {i18n.translate('xpack.apm.universalProfiling.newLabel', {
+            defaultMessage: 'New',
+          })}
+        </EuiBadge>
+      ),
+    },
+    {
+      key: 'dashboards',
+      href: router.link('/services/{serviceName}/dashboards', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.dashboardsTabLabel', {
+        defaultMessage: 'Dashboards',
+      }),
+      append: <TechnicalPreviewBadge icon="beaker" />,
     },
   ];
 

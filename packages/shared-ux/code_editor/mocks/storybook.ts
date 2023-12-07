@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
-
-import type { Props as CodeEditorProps } from '@kbn/code-editor-types';
+import type { CodeEditorProps } from '../code_editor';
 
 type PropArguments = Pick<
   CodeEditorProps,
@@ -15,12 +14,11 @@ type PropArguments = Pick<
   | 'value'
   | 'aria-label'
   | 'allowFullScreen'
-  | 'useDarkTheme'
   | 'transparentBackground'
   | 'placeholder'
 >;
 
-export type Params = Record<keyof PropArguments, any>;
+export type CodeEditorStorybookParams = Record<keyof PropArguments, any>;
 
 /**
  * Storybook mock for the `CodeEditor` component
@@ -58,12 +56,6 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
       },
       defaultValue: false,
     },
-    useDarkTheme: {
-      control: {
-        type: 'boolean',
-      },
-      defaultValue: false,
-    },
     transparentBackground: {
       control: {
         type: 'boolean',
@@ -81,13 +73,12 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
   serviceArguments = {};
   dependencies = [];
 
-  getProps(params?: Params): CodeEditorProps {
+  getProps(params?: CodeEditorStorybookParams): CodeEditorProps {
     return {
       languageId: this.getArgumentValue('languageId', params),
       value: this.getArgumentValue('value', params),
       'aria-label': this.getArgumentValue('aria-label', params),
       allowFullScreen: this.getArgumentValue('allowFullScreen', params),
-      useDarkTheme: this.getArgumentValue('useDarkTheme', params),
       transparentBackground: this.getArgumentValue('transparentBackground', params),
       placeholder: this.getArgumentValue('placeholder', params),
     };

@@ -7,7 +7,11 @@
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -44,6 +48,7 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const eventLogger = eventLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -54,10 +59,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
@@ -66,6 +73,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   eventLogger,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -248,11 +257,11 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1'], false);
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
-  test('disables the rule with calling event log to "recover" the alert instances from the task state', async () => {
+  test('disables the rule with calling event log to untrack the alert instances from the task state', async () => {
     const scheduledTaskId = '1';
     taskManager.get.mockResolvedValue({
       id: scheduledTaskId,
@@ -322,13 +331,13 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1'], false);
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls[0][0]).toStrictEqual({
       event: {
-        action: 'recovered-instance',
+        action: 'untracked-instance',
         category: ['alerts'],
         kind: 'alert',
       },
@@ -356,7 +365,7 @@ describe('disable()', () => {
         ],
         space_ids: ['default'],
       },
-      message: "instance '1' has recovered due to the rule was disabled",
+      message: "instance '1' has been untracked because the rule was disabled",
       rule: {
         category: '123',
         id: '1',
@@ -366,7 +375,7 @@ describe('disable()', () => {
     });
   });
 
-  test('disables the rule even if unable to retrieve task manager doc to generate recovery event log events', async () => {
+  test('disables the rule even if unable to retrieve task manager doc to generate untrack event log events', async () => {
     taskManager.get.mockRejectedValueOnce(new Error('Fail'));
     await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
@@ -407,12 +416,12 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1'], false);
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(0);
     expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
-      `rulesClient.disable('1') - Could not write recovery events - Fail`
+      `rulesClient.disable('1') - Could not write untrack events - Fail`
     );
   });
 
@@ -452,7 +461,7 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1'], false);
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 

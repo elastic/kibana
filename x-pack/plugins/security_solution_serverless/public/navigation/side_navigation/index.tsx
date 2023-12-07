@@ -6,15 +6,9 @@
  */
 import React from 'react';
 
-import type { SideNavComponent } from '@kbn/core-chrome-browser/src/project_navigation';
+import type { SideNavComponent } from '@kbn/core-chrome-browser';
 import { SecuritySideNavigation } from './lazy';
-import { KibanaServicesProvider, type Services } from '../../common/services';
+import { withServicesProvider, type Services } from '../../common/services';
 
 export const getSecuritySideNavComponent = (services: Services): SideNavComponent =>
-  function SecuritySideNavComponent() {
-    return (
-      <KibanaServicesProvider services={services}>
-        <SecuritySideNavigation />
-      </KibanaServicesProvider>
-    );
-  };
+  React.memo(withServicesProvider(SecuritySideNavigation, services));

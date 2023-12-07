@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { CASES_URL, MAX_COMMENTS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
-import { CommentType } from '@kbn/cases-plugin/common/api';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getPostCaseRequest,
@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       expect(caseComments.comments.length).to.eql(1);
-      expect(caseComments.comments[0].type).to.eql(CommentType.user);
+      expect(caseComments.comments[0].type).to.eql(AttachmentType.user);
     });
 
     describe('unhappy paths', () => {

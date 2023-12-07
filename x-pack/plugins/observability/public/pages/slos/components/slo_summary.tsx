@@ -6,13 +6,11 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
-import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-import { useKibana } from '../../../utils/kibana_react';
+import { useSloFormattedSummary } from '../hooks/use_slo_summary';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { SloSparkline } from './slo_sparkline';
 
 export interface Props {
@@ -22,21 +20,15 @@ export interface Props {
 }
 
 export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoading }: Props) {
-  const { uiSettings } = useKibana().services;
-  const percentFormat = uiSettings.get('format:percent:defaultPattern');
+  const { sliValue, sloTarget, errorBudgetRemaining } = useSloFormattedSummary(slo);
   const isSloFailed = slo.summary.status === 'VIOLATED' || slo.summary.status === 'DEGRADING';
   const titleColor = isSloFailed ? 'danger' : '';
   const errorBudgetBurnDownData = formatHistoricalData(historicalSummary, 'error_budget_remaining');
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
-  const errorBudgetRemaining =
-    slo.summary.errorBudget.remaining <= 0
-      ? Math.trunc(slo.summary.errorBudget.remaining * 100) / 100
-      : slo.summary.errorBudget.remaining;
-
   return (
     <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="l" responsive={false}>
-      <EuiFlexItem grow={false} style={{ width: 200 }}>
+      <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
         <EuiFlexGroup
           direction="row"
           responsive={false}
@@ -48,13 +40,9 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
             <EuiStat
               description={i18n.translate('xpack.observability.slo.slo.stats.objective', {
                 defaultMessage: '{objective} target',
-                values: { objective: numeral(slo.objective.target).format(percentFormat) },
+                values: { objective: sloTarget },
               })}
-              title={
-                slo.summary.status === 'NO_DATA'
-                  ? NOT_AVAILABLE_LABEL
-                  : numeral(slo.summary.sliValue).format(percentFormat)
-              }
+              title={sliValue}
               textAlign="right"
               titleColor={titleColor}
               titleSize="m"
@@ -73,7 +61,7 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false} style={{ width: 220 }}>
+      <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
         <EuiFlexGroup
           direction="row"
           responsive={false}
@@ -87,7 +75,7 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
                 defaultMessage: 'Budget remaining',
               })}
               textAlign="right"
-              title={numeral(errorBudgetRemaining).format(percentFormat)}
+              title={errorBudgetRemaining}
               titleColor={titleColor}
               titleSize="m"
               reverse

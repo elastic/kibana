@@ -60,6 +60,7 @@ const HiddenUseField = styled(UseField)`
   display: none;
 `;
 
+// eslint-disable-next-line react/display-name
 export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string }) => {
   const dispatch = useDispatch();
   const isInit = useRef(true);

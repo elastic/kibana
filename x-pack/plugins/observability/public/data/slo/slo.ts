@@ -6,8 +6,8 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { v1 as uuidv1 } from 'uuid';
-import { FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { v4 as uuidv4 } from 'uuid';
+import { ALL_VALUE, FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   buildDegradingSummary,
   buildHealthySummary,
@@ -62,6 +62,8 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
       isEstimated: false,
     },
   },
+  groupBy: ALL_VALUE,
+  instanceId: ALL_VALUE,
   tags: ['k8s', 'production', 'critical'],
   enabled: true,
   createdAt: now,
@@ -149,5 +151,5 @@ export function buildForecastedSlo(
 }
 
 export function buildSlo(params: Partial<SLOWithSummaryResponse> = {}): SLOWithSummaryResponse {
-  return cloneDeep({ ...baseSlo, id: uuidv1(), ...params });
+  return cloneDeep({ ...baseSlo, id: uuidv4(), ...params });
 }

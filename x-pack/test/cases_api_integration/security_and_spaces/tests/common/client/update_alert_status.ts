@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Cases, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
+import { Cases, CaseStatuses, AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { postCaseReq } from '../../../../common/lib/mock';
@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
           alertId: signalID,
           index: defaultSignalsIndex,
           rule: { id: 'test-rule-id', name: 'test-index-id' },
-          type: CommentType.alert,
+          type: AttachmentType.alert,
           owner: 'securitySolutionFixture',
         },
       });
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
           alertId: signalID2,
           index: defaultSignalsIndex,
           rule: { id: 'test-rule-id', name: 'test-index-id' },
-          type: CommentType.alert,
+          type: AttachmentType.alert,
           owner: 'securitySolutionFixture',
         },
       });

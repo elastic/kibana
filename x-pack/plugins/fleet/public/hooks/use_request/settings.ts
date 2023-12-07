@@ -10,6 +10,8 @@ import { useQuery } from '@tanstack/react-query';
 import { settingsRoutesService } from '../../services';
 import type { PutSettingsResponse, PutSettingsRequest, GetSettingsResponse } from '../../types';
 
+import { API_VERSIONS } from '../../../common/constants';
+
 import type { RequestError } from './use_request';
 import { sendRequest, sendRequestForRq, useRequest } from './use_request';
 
@@ -18,6 +20,7 @@ export function useGetSettingsQuery() {
     sendRequestForRq<GetSettingsResponse>({
       method: 'get',
       path: settingsRoutesService.getInfoPath(),
+      version: API_VERSIONS.public.v1,
     })
   );
 }
@@ -26,6 +29,7 @@ export function useGetSettings() {
   return useRequest<GetSettingsResponse>({
     method: 'get',
     path: settingsRoutesService.getInfoPath(),
+    version: API_VERSIONS.public.v1,
   });
 }
 
@@ -33,6 +37,7 @@ export function sendGetSettings() {
   return sendRequest<GetSettingsResponse>({
     method: 'get',
     path: settingsRoutesService.getInfoPath(),
+    version: API_VERSIONS.public.v1,
   });
 }
 
@@ -40,6 +45,7 @@ export function sendPutSettings(body: PutSettingsRequest['body']) {
   return sendRequest<PutSettingsResponse>({
     method: 'put',
     path: settingsRoutesService.getUpdatePath(),
+    version: API_VERSIONS.public.v1,
     body,
   });
 }

@@ -9,7 +9,7 @@
 import { SavedSearch, SavedSearchAttributes } from '.';
 
 export const fromSavedSearchAttributes = (
-  id: string,
+  id: string | undefined,
   attributes: SavedSearchAttributes,
   tags: string[] | undefined,
   searchSource: SavedSearch['searchSource']
@@ -32,5 +32,6 @@ export const fromSavedSearchAttributes = (
   timeRange: attributes.timeRange,
   refreshInterval: attributes.refreshInterval,
   rowsPerPage: attributes.rowsPerPage,
+  sampleSize: attributes.sampleSize,
   breakdownField: attributes.breakdownField,
 });

@@ -25,9 +25,11 @@
       "unifiedSearch",
       "charts",
       "savedObjectsFinder",
-      "savedObjectsManagement"
+      "savedObjectsManagement",
+      "contentManagement",
     ],
     "optionalPlugins": [
+      "dataViewEditor",
       "security",
       "usageCollection",
       "spaces",

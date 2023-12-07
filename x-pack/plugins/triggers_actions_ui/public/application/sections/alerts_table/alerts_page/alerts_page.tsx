@@ -10,8 +10,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { getAlertsTableStateLazy } from '../../../../common/get_alerts_table_state';
 import { PLUGIN_ID } from '../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
-import { AlertsTableConfigurationRegistry } from '../../../../types';
-import { TypeRegistry } from '../../../type_registry';
+import { AlertTableConfigRegistry } from '../../../alert_table_config_registry';
 
 const consumers = [
   AlertConsumers.APM,
@@ -24,13 +23,11 @@ const AlertsPage: React.FunctionComponent = () => {
   const { alertsTableConfigurationRegistry } = useKibana().services;
 
   const alertStateProps = {
-    alertsTableConfigurationRegistry:
-      alertsTableConfigurationRegistry as TypeRegistry<AlertsTableConfigurationRegistry>,
+    alertsTableConfigurationRegistry: alertsTableConfigurationRegistry as AlertTableConfigRegistry,
     configurationId: PLUGIN_ID,
     id: `internal-alerts-page`,
     featureIds: consumers,
     query: { bool: { must: [] } },
-    showExpandToDetails: true,
   };
 
   return (

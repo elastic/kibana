@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiCallOut,
   EuiCode,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -26,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../../../../../common/constants';
+import { stripSearchPrefix } from '../../../../../common/utils/strip_search_prefix';
 
 import { docLinks } from '../../../shared/doc_links';
 
@@ -52,11 +54,14 @@ export const SearchIndexIndexMappings: React.FC = () => {
   const indexToShow =
     selectedIndexType === 'content-index'
       ? indexName
-      : indexName.replace('search-', CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX);
+      : stripSearchPrefix(indexName, CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX);
   const { makeRequest: makeMappingRequest } = useActions(mappingsWithPropsApiLogic(indexToShow));
-  const { data: mappingData } = useValues(mappingsWithPropsApiLogic(indexToShow));
+  const { data: mappingData, error } = useValues(mappingsWithPropsApiLogic(indexToShow));
   const shouldShowAccessControlSwitch =
     hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
+  const isAccessControlIndexNotFound =
+    shouldShowAccessControlSwitch && error?.body?.statusCode === 404;
+
   useEffect(() => {
     makeMappingRequest({ indexName: indexToShow });
   }, [indexToShow, indexName]);
@@ -76,9 +81,27 @@ export const SearchIndexIndexMappings: React.FC = () => {
               </EuiFlexItem>
             )}
             <EuiFlexItem grow>
-              <EuiCodeBlock language="json" isCopyable>
-                {JSON.stringify(mappingData, null, 2)}
-              </EuiCodeBlock>
+              {isAccessControlIndexNotFound ? (
+                <EuiCallOut
+                  size="m"
+                  title={i18n.translate(
+                    'xpack.enterpriseSearch.content.searchIndex.mappings.noIndex.title',
+                    { defaultMessage: 'Access Control Index not found' }
+                  )}
+                  iconType="iInCircle"
+                >
+                  <p>
+                    {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.noIndex', {
+                      defaultMessage:
+                        "An Access Control Index won't be created until you enable document-level security and run your first access control sync.",
+                    })}
+                  </p>
+                </EuiCallOut>
+              ) : (
+                <EuiCodeBlock language="json" isCopyable>
+                  {JSON.stringify(mappingData, null, 2)}
+                </EuiCodeBlock>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

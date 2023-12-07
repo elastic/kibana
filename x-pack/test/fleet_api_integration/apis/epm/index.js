@@ -46,5 +46,7 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./install_dynamic_template_metric'));
     loadTestFile(require.resolve('./routing_rules'));
     loadTestFile(require.resolve('./install_runtime_field'));
+    loadTestFile(require.resolve('./get_templates_inputs'));
+    loadTestFile(require.resolve('./data_views'));
   });
 }

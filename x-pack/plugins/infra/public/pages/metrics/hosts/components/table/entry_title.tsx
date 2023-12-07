@@ -5,37 +5,35 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip, IconType } from '@elastic/eui';
-import { TimeRange } from '@kbn/es-query';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { encode } from '@kbn/rison';
-import type { CloudProvider, HostNodeRow } from '../../hooks/use_hosts_table';
-
-const cloudIcons: Record<CloudProvider, IconType> = {
-  gcp: 'logoGCP',
-  aws: 'logoAWS',
-  azure: 'logoAzure',
-  unknownProvider: 'cloudSunny',
-};
+import { CloudProviderIcon } from '@kbn/custom-icons';
+import { useNodeDetailsRedirect } from '../../../../link_to';
+import type { HostNodeRow } from '../../hooks/use_hosts_table';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
 interface EntryTitleProps {
   onClick: () => void;
-  time: TimeRange;
   title: HostNodeRow['title'];
 }
 
-export const EntryTitle = ({ onClick, time, title }: EntryTitleProps) => {
+export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
   const { name, cloudProvider } = title;
+  const { getNodeDetailUrl } = useNodeDetailsRedirect();
+  const { parsedDateRange } = useUnifiedSearchContext();
 
   const link = useLinkProps({
-    app: 'metrics',
-    pathname: `/detail/host/${name}`,
-    search: {
-      _a: encode({ time: { ...time, interval: '>=1m' } }),
-    },
+    ...getNodeDetailUrl({
+      assetId: name,
+      assetType: 'host',
+      search: {
+        from: parsedDateRange?.from ? new Date(parsedDateRange?.from).getTime() : undefined,
+        to: parsedDateRange?.to ? new Date(parsedDateRange.to).getTime() : undefined,
+        name,
+      },
+    }),
   });
 
-  const iconType = (cloudProvider && cloudIcons[cloudProvider]) || cloudIcons.unknownProvider;
   const providerName = cloudProvider ?? 'Unknown';
 
   return (
@@ -47,7 +45,7 @@ export const EntryTitle = ({ onClick, time, title }: EntryTitleProps) => {
     >
       <EuiFlexItem grow={false}>
         <EuiToolTip delay="long" content={providerName}>
-          <EuiIcon type={iconType} size="m" title={name} />
+          <CloudProviderIcon cloudProvider={cloudProvider} size="m" title={name} />
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="eui-textTruncate" onClick={onClick}>

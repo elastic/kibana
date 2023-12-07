@@ -17,7 +17,7 @@ import type { LensAppLocatorParams } from '../../common/locator/locator';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
-import { AddUserMessages, EditorFrameInstance, UserMessage, UserMessagesGetter } from '../types';
+import { AddUserMessages, EditorFrameInstance, UserMessagesGetter } from '../types';
 import { Document } from '../persistence/saved_object_store';
 
 import {
@@ -26,12 +26,10 @@ import {
   useLensSelector,
   useLensDispatch,
   LensAppState,
-  DispatchSetState,
   selectSavedObjectFormat,
   updateIndexPatterns,
-  updateDatasourceState,
   selectActiveDatasourceId,
-  selectFrameDatasourceAPI,
+  selectFramePublicAPI,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
@@ -42,10 +40,7 @@ import {
   createIndexPatternService,
 } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
-import {
-  filterAndSortUserMessages,
-  getApplicationUserMessages,
-} from './get_application_user_messages';
+import { useApplicationUserMessages } from './get_application_user_messages';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -94,12 +89,13 @@ export function App({
     dashboardFeatureFlag,
     locator,
     share,
+    serverless,
   } = lensAppServices;
 
   const saveAndExit = useRef<() => void>();
 
   const dispatch = useLensDispatch();
-  const dispatchSetState: DispatchSetState = useCallback(
+  const dispatchSetState = useCallback(
     (state: Partial<LensAppState>) => dispatch(setState(state)),
     [dispatch]
   );
@@ -154,7 +150,7 @@ export function App({
 
   useExecutionContext(executionContext, {
     type: 'application',
-    id: savedObjectId || 'new',
+    id: savedObjectId || 'new', // TODO: this doesn't consider when lens is saved by value
     page: 'editor',
   });
 
@@ -189,7 +185,7 @@ export function App({
       ) {
         return actions.confirm(
           i18n.translate('xpack.lens.app.unsavedWorkMessage', {
-            defaultMessage: 'Leave Lens with unsaved work?',
+            defaultMessage: 'Leave with unsaved changes?',
           }),
           i18n.translate('xpack.lens.app.unsavedWorkTitle', {
             defaultMessage: 'Unsaved changes',
@@ -289,8 +285,18 @@ export function App({
         },
       });
     }
-    breadcrumbs.push({ text: currentDocTitle });
-    chrome.setBreadcrumbs(breadcrumbs);
+
+    const currentDocBreadcrumb: EuiBreadcrumb = { text: currentDocTitle };
+    breadcrumbs.push(currentDocBreadcrumb);
+    if (serverless?.setBreadcrumbs) {
+      // TODO: https://github.com/elastic/kibana/issues/163488
+      // for now, serverless breadcrumbs only set the title,
+      // the rest of the breadcrumbs are handled by the serverless navigation
+      // the serverless navigation is not yet aware of the byValue/originatingApp context
+      serverless.setBreadcrumbs(currentDocBreadcrumb);
+    } else {
+      chrome.setBreadcrumbs(breadcrumbs);
+    }
   }, [
     dashboardFeatureFlag.allowByValueEmbeddables,
     getOriginatingAppName,
@@ -301,6 +307,7 @@ export function App({
     isLinkedToOriginatingApp,
     persistedDoc,
     initialContext,
+    serverless,
   ]);
 
   const switchDatasource = useCallback(() => {
@@ -498,99 +505,25 @@ export function App({
 
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
 
-  const frameDatasourceAPI = useLensSelector((state) =>
-    selectFrameDatasourceAPI(state, datasourceMap)
-  );
+  const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
 
-  const [userMessages, setUserMessages] = useState<UserMessage[]>([]);
-
-  useEffect(() => {
-    setUserMessages([
-      ...(activeDatasourceId
-        ? datasourceMap[activeDatasourceId].getUserMessages(
-            datasourceStates[activeDatasourceId].state,
-            {
-              frame: frameDatasourceAPI,
-              setState: (newStateOrUpdater) => {
-                dispatch(
-                  updateDatasourceState({
-                    newDatasourceState:
-                      typeof newStateOrUpdater === 'function'
-                        ? newStateOrUpdater(datasourceStates[activeDatasourceId].state)
-                        : newStateOrUpdater,
-                    datasourceId: activeDatasourceId,
-                  })
-                );
-              },
-            }
-          )
-        : []),
-      ...(visualization.activeId && visualization.state
-        ? visualizationMap[visualization.activeId]?.getUserMessages?.(visualization.state, {
-            frame: frameDatasourceAPI,
-          }) ?? []
-        : []),
-      ...getApplicationUserMessages({
-        visualizationType: persistedDoc?.visualizationType,
-        visualizationMap,
-        visualization,
-        activeDatasource: activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-        activeDatasourceState: activeDatasourceId ? datasourceStates[activeDatasourceId] : null,
-        core: coreStart,
-        dataViews: frameDatasourceAPI.dataViews,
-      }),
-    ]);
-  }, [
-    activeDatasourceId,
+  const { getUserMessages, addUserMessages } = useApplicationUserMessages({
     coreStart,
-    datasourceMap,
-    datasourceStates,
+    framePublicAPI,
+    activeDatasourceId,
+    datasourceState:
+      activeDatasourceId && datasourceStates[activeDatasourceId]
+        ? datasourceStates[activeDatasourceId]
+        : null,
+    datasource:
+      activeDatasourceId && datasourceMap[activeDatasourceId]
+        ? datasourceMap[activeDatasourceId]
+        : null,
     dispatch,
-    frameDatasourceAPI,
-    persistedDoc?.visualizationType,
-    visualization,
-    visualizationMap,
-  ]);
-
-  // these are messages managed from other parts of Lens
-  const [additionalUserMessages, setAdditionalUserMessages] = useState<Record<string, UserMessage>>(
-    {}
-  );
-
-  const getUserMessages: UserMessagesGetter = (locationId, filterArgs) =>
-    filterAndSortUserMessages(
-      [...userMessages, ...Object.values(additionalUserMessages)],
-      locationId,
-      filterArgs ?? {}
-    );
-
-  const addUserMessages: AddUserMessages = (messages) => {
-    const newMessageMap = {
-      ...additionalUserMessages,
-    };
-
-    const addedMessageIds: string[] = [];
-    messages.forEach((message) => {
-      if (!newMessageMap[message.uniqueId]) {
-        addedMessageIds.push(message.uniqueId);
-        newMessageMap[message.uniqueId] = message;
-      }
-    });
-
-    if (addedMessageIds.length) {
-      setAdditionalUserMessages(newMessageMap);
-    }
-
-    return () => {
-      const withMessagesRemoved = {
-        ...additionalUserMessages,
-      };
-
-      addedMessageIds.forEach((id) => delete withMessagesRemoved[id]);
-
-      setAdditionalUserMessages(withMessagesRemoved);
-    };
-  };
+    visualization: visualization.activeId ? visualizationMap[visualization.activeId] : undefined,
+    visualizationType: visualization.activeId,
+    visualizationState: visualization,
+  });
 
   return (
     <>
@@ -677,16 +610,16 @@ export function App({
       {isGoBackToVizEditorModalVisible && (
         <EuiConfirmModal
           maxWidth={600}
-          title={i18n.translate('xpack.lens.app.goBackModalTitle', {
-            defaultMessage: 'Discard changes?',
+          title={i18n.translate('xpack.lens.app.unsavedWorkTitle', {
+            defaultMessage: 'Unsaved changes',
           })}
           onCancel={() => setIsGoBackToVizEditorModalVisible(false)}
           onConfirm={navigateToVizEditor}
           cancelButtonText={i18n.translate('xpack.lens.app.goBackModalCancelBtn', {
             defaultMessage: 'Cancel',
           })}
-          confirmButtonText={i18n.translate('xpack.lens.app.goBackModalTitle', {
-            defaultMessage: 'Discard changes?',
+          confirmButtonText={i18n.translate('xpack.lens.app.unsavedWorkConfirmBtn', {
+            defaultMessage: 'Discard changes',
           })}
           buttonColor="danger"
           defaultFocusedButton="confirm"
@@ -694,7 +627,7 @@ export function App({
         >
           {i18n.translate('xpack.lens.app.goBackModalMessage', {
             defaultMessage:
-              'The changes you have made here are not backwards compatible with your original {contextOriginatingApp} visualization. Are you sure you want to discard these unsaved changes and return to {contextOriginatingApp}?',
+              'Your changes here won’t work with your original {contextOriginatingApp} visualization. Leave with unsaved changes and return to {contextOriginatingApp}?',
             values: { contextOriginatingApp },
           })}
         </EuiConfirmModal>

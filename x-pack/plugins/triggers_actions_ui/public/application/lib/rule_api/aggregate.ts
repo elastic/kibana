@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { AsApiContract } from '@kbn/actions-plugin/common';
-import { RuleAggregationFormattedResult } from '@kbn/alerting-plugin/common';
+import { AggregateRulesResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { mapFiltersToKql } from './map_filters_to_kql';
 import {
@@ -14,6 +14,7 @@ import {
   rewriteBodyRes,
   rewriteTagsBodyRes,
   GetRuleTagsResponse,
+  AggregateRulesResponse,
 } from './aggregate_helpers';
 
 export async function loadRuleTags({
@@ -43,7 +44,8 @@ export async function loadRuleAggregations({
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
   tagsFilter,
-}: LoadRuleAggregationsProps): Promise<RuleAggregationFormattedResult> {
+  filterConsumers,
+}: LoadRuleAggregationsProps): Promise<AggregateRulesResponse> {
   const filters = mapFiltersToKql({
     typesFilter,
     actionTypesFilter,
@@ -51,7 +53,7 @@ export async function loadRuleAggregations({
     ruleStatusesFilter,
     tagsFilter,
   });
-  const res = await http.post<AsApiContract<RuleAggregationFormattedResult>>(
+  const res = await http.post<AggregateRulesResponseBody>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {
       body: JSON.stringify({
@@ -59,6 +61,7 @@ export async function loadRuleAggregations({
         search: searchText,
         filter: filters.length ? filters.join(' and ') : undefined,
         default_search_operator: 'AND',
+        filter_consumers: filterConsumers,
       }),
     }
   );

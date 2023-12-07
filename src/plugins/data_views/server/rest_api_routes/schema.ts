@@ -26,6 +26,7 @@ export const dataViewSpecSchema = schema.object({
     schema.arrayOf(
       schema.object({
         value: schema.string(),
+        clientId: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
       })
     )
   ),
@@ -45,6 +46,7 @@ export const dataViewSpecSchema = schema.object({
   runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSchema)),
   name: schema.maybe(schema.string()),
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  allowHidden: schema.maybe(schema.boolean()),
 });
 
 export const dataViewsRuntimeResponseSchema = schema.object({

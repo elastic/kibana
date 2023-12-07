@@ -43,6 +43,8 @@ export interface NumberValueFormat {
   params?: {
     decimals: number;
     suffix?: string;
+    fromUnit?: string;
+    toUnit?: string;
   };
 }
 

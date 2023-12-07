@@ -19,23 +19,19 @@ export const defaultNavigation: DevToolsNodeDefinition = {
   }),
   id: 'rootNav:devtools',
   icon: 'editorCodeBlock',
+  renderAs: 'accordion',
   children: [
     {
-      id: 'root',
-      children: [
-        {
-          link: 'dev_tools:console',
-        },
-        {
-          link: 'dev_tools:searchprofiler',
-        },
-        {
-          link: 'dev_tools:grokdebugger',
-        },
-        {
-          link: 'dev_tools:painless_lab',
-        },
-      ],
+      link: 'dev_tools:console',
+    },
+    {
+      link: 'dev_tools:searchprofiler',
+    },
+    {
+      link: 'dev_tools:grokdebugger',
+    },
+    {
+      link: 'dev_tools:painless_lab',
     },
   ],
 };

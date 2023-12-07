@@ -45,10 +45,14 @@ const ruleTypes = [
       context: [],
       state: [],
     },
+    category: 'test',
     producer: 'test',
     enabledInLicense: true,
     minimumScheduleInterval: '1m',
     defaultScheduleInterval: '10m',
+    hasAlertsMappings: false,
+    hasFieldsForAAD: false,
+    validLegacyConsumers: [],
   } as RegistryAlertTypeWithAuth,
 ];
 

@@ -29,7 +29,7 @@ import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
 import {
   DataFilters,
-  ESSearchSourceResponseMeta,
+  DataRequestMeta,
   MapExtent,
   Timeslice,
   VectorSourceRequestMeta,
@@ -43,11 +43,9 @@ export interface SourceStatus {
   isDeprecated?: boolean;
 }
 
-export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
-
 export interface GeoJsonWithMeta {
   data: FeatureCollection;
-  meta?: GeoJsonFetchMeta;
+  meta?: DataRequestMeta;
 }
 
 export interface BoundsRequestMeta {
@@ -113,7 +111,6 @@ export interface IVectorSource extends ISource {
    */
   getSyncMeta(dataFilters: DataFilters): object | null;
 
-  createField({ fieldName }: { fieldName: string }): IField;
   hasTooltipProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
@@ -143,14 +140,6 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return false;
   }
 
-  createField({ fieldName }: { fieldName: string }): IField {
-    throw new Error('Not implemented');
-  }
-
-  getFieldByName(fieldName: string): IField | null {
-    return this.createField({ fieldName });
-  }
-
   isFilterByMapBounds() {
     return false;
   }
@@ -172,6 +161,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   async getFields(): Promise<IField[]> {
     return [];
+  }
+
+  getFieldByName(fieldName: string): IField | null {
+    throw new Error('Must implement VectorSource#getFieldByName');
   }
 
   async getLeftJoinFields(): Promise<IField[]> {

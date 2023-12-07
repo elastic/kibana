@@ -26,6 +26,554 @@
     "interfaces": [
       {
         "parentPluginId": "discover",
+        "id": "def-public.DiscoverAppState",
+        "type": "Interface",
+        "tags": [],
+        "label": "DiscoverAppState",
+        "description": [],
+        "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.columns",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [
+              "\nColumns displayed in the table"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [
+              "\nArray of applied filters"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.grid",
+            "type": "Object",
+            "tags": [],
+            "label": "grid",
+            "description": [
+              "\nData Grid related state"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "common",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-common.UnifiedDataTableSettings",
+                "text": "UnifiedDataTableSettings"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.hideChart",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideChart",
+            "description": [
+              "\nHide chart"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [
+              "\nid of the used data view"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.interval",
+            "type": "string",
+            "tags": [],
+            "label": "interval",
+            "description": [
+              "\nUsed interval of the histogram"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.query",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "\nLucence or KQL query"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.sort",
+            "type": "Array",
+            "tags": [],
+            "label": "sort",
+            "description": [
+              "\nArray of the used sorting [[field,direction],...]"
+            ],
+            "signature": [
+              "string[][] | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.savedQuery",
+            "type": "string",
+            "tags": [],
+            "label": "savedQuery",
+            "description": [
+              "\nid of the used saved query"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.viewMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "viewMode",
+            "description": [
+              "\nTable view: Documents vs Field Statistics"
+            ],
+            "signature": [
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.VIEW_MODE",
+                "text": "VIEW_MODE"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.hideAggregatedPreview",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideAggregatedPreview",
+            "description": [
+              "\nHide mini distribution/preview charts when in Field Statistics mode"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.rowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "rowHeight",
+            "description": [
+              "\nDocument explorer row height option"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.rowsPerPage",
+            "type": "number",
+            "tags": [],
+            "label": "rowsPerPage",
+            "description": [
+              "\nNumber of rows in the grid per page"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.sampleSize",
+            "type": "number",
+            "tags": [],
+            "label": "sampleSize",
+            "description": [
+              "\nCustom sample size"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.breakdownField",
+            "type": "string",
+            "tags": [],
+            "label": "breakdownField",
+            "description": [
+              "\nBreakdown field of chart"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.DiscoverCustomizationService",
+        "type": "Interface",
+        "tags": [],
+        "label": "DiscoverCustomizationService",
+        "description": [],
+        "path": "src/plugins/discover/public/customizations/customization_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverCustomizationService.set",
+            "type": "Function",
+            "tags": [],
+            "label": "set",
+            "description": [],
+            "signature": [
+              "(customization: ",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.DiscoverCustomization",
+                "text": "DiscoverCustomization"
+              },
+              ") => void"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.DiscoverCustomizationService.set.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "customization",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "discover",
+                    "scope": "public",
+                    "docId": "kibDiscoverPluginApi",
+                    "section": "def-public.DiscoverCustomization",
+                    "text": "DiscoverCustomization"
+                  }
+                ],
+                "path": "src/plugins/discover/public/customizations/customization_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverCustomizationService.get$",
+            "type": "Function",
+            "tags": [],
+            "label": "get$",
+            "description": [],
+            "signature": [
+              "<TCustomizationId extends \"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\">(id: TCustomizationId) => ",
+              "Observable",
+              "<Extract<",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.FlyoutCustomization",
+                "text": "FlyoutCustomization"
+              },
+              ", { id: TCustomizationId; }> | Extract<",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.SearchBarCustomization",
+                "text": "SearchBarCustomization"
+              },
+              ", { id: TCustomizationId; }> | Extract<",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.TopNavCustomization",
+                "text": "TopNavCustomization"
+              },
+              ", { id: TCustomizationId; }> | Extract<",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.UnifiedHistogramCustomization",
+                "text": "UnifiedHistogramCustomization"
+              },
+              ", { id: TCustomizationId; }> | undefined>"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.DiscoverCustomizationService.get$.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "TCustomizationId"
+                ],
+                "path": "src/plugins/discover/public/customizations/customization_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverCustomizationService.enable",
+            "type": "Function",
+            "tags": [],
+            "label": "enable",
+            "description": [],
+            "signature": [
+              "(id: \"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\") => void"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.DiscoverCustomizationService.enable.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\""
+                ],
+                "path": "src/plugins/discover/public/customizations/customization_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverCustomizationService.disable",
+            "type": "Function",
+            "tags": [],
+            "label": "disable",
+            "description": [],
+            "signature": [
+              "(id: \"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\") => void"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.DiscoverCustomizationService.disable.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\""
+                ],
+                "path": "src/plugins/discover/public/customizations/customization_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.DiscoverProfileOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "DiscoverProfileOptions",
+        "description": [],
+        "path": "src/plugins/discover/public/customizations/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverProfileOptions.customize",
+            "type": "Function",
+            "tags": [],
+            "label": "customize",
+            "description": [],
+            "signature": [
+              "(options: ",
+              "CustomizationCallbackContext",
+              ") => void | (() => void) | Promise<void | (() => void)>"
+            ],
+            "path": "src/plugins/discover/public/customizations/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.DiscoverProfileOptions.customize.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "CustomizationCallbackContext"
+                ],
+                "path": "src/plugins/discover/public/customizations/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverProfileOptions.deepLinks",
+            "type": "Array",
+            "tags": [],
+            "label": "deepLinks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.AppDeepLink",
+                "text": "AppDeepLink"
+              },
+              "<string>[] | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-public.DiscoverStateContainer",
         "type": "Interface",
         "tags": [],
@@ -35,6 +583,22 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverStateContainer.globalState",
+            "type": "Object",
+            "tags": [],
+            "label": "globalState",
+            "description": [
+              "\nGlobal State, the _g part of the URL"
+            ],
+            "signature": [
+              "DiscoverGlobalStateContainer"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "discover",
             "id": "def-public.DiscoverStateContainer.appState",
@@ -110,6 +674,28 @@
           },
           {
             "parentPluginId": "discover",
+            "id": "def-public.DiscoverStateContainer.stateStorage",
+            "type": "Object",
+            "tags": [],
+            "label": "stateStorage",
+            "description": [
+              "\nState of url, allows updating and subscribing to url changes"
+            ],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.IKbnUrlStateStorage",
+                "text": "IKbnUrlStateStorage"
+              }
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.DiscoverStateContainer.searchSessionManager",
             "type": "Object",
             "tags": [],
@@ -144,7 +730,7 @@
                 "section": "def-public.SavedSearch",
                 "text": "SavedSearch"
               },
-              " | undefined>; onCreateDefaultAdHocDataView: (dataViewSpec: ",
+              " | undefined>; createAndAppendAdHocDataView: (dataViewSpec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -152,7 +738,15 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ") => Promise<void>; onDataViewCreated: (dataView: ",
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ">; onDataViewCreated: (dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -200,9 +794,271 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ") => void; undoSavedSearchChanges: () => void; updateAdHocDataViewId: () => void; }"
+              ") => void; undoSavedSearchChanges: () => Promise<",
+              {
+                "pluginId": "savedSearch",
+                "scope": "public",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-public.SavedSearch",
+                "text": "SavedSearch"
+              },
+              ">; updateAdHocDataViewId: () => void; }"
             ],
             "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.FlyoutContentActions",
+        "type": "Interface",
+        "tags": [],
+        "label": "FlyoutContentActions",
+        "description": [],
+        "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutContentActions.addFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "addFilter",
+            "description": [],
+            "signature": [
+              "DocViewFilterFn",
+              " | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutContentActions.addColumn",
+            "type": "Function",
+            "tags": [],
+            "label": "addColumn",
+            "description": [],
+            "signature": [
+              "(column: string) => void"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.FlyoutContentActions.addColumn.$1",
+                "type": "string",
+                "tags": [],
+                "label": "column",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutContentActions.removeColumn",
+            "type": "Function",
+            "tags": [],
+            "label": "removeColumn",
+            "description": [],
+            "signature": [
+              "(column: string) => void"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.FlyoutContentActions.removeColumn.$1",
+                "type": "string",
+                "tags": [],
+                "label": "column",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.FlyoutContentProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FlyoutContentProps",
+        "description": [],
+        "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutContentProps.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.FlyoutContentActions",
+                "text": "FlyoutContentActions"
+              }
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutContentProps.doc",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              "DataTableRecord"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutContentProps.renderDefaultContent",
+            "type": "Function",
+            "tags": [],
+            "label": "renderDefaultContent",
+            "description": [],
+            "signature": [
+              "() => React.ReactNode"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.FlyoutCustomization",
+        "type": "Interface",
+        "tags": [],
+        "label": "FlyoutCustomization",
+        "description": [],
+        "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutCustomization.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"flyout\""
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutCustomization.size",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "Property",
+              ".Width<string | number> | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutCustomization.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutCustomization.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "{ defaultActions?: ",
+              "FlyoutDefaultActions",
+              " | undefined; getActionItems?: (() => ",
+              "FlyoutActionItem",
+              "[]) | undefined; }"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutCustomization.Content",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "Content",
+            "description": [],
+            "signature": [
+              "React.ComponentType<",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.FlyoutContentProps",
+                "text": "FlyoutContentProps"
+              },
+              "> | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -263,7 +1119,24 @@
                 "docId": "kibSavedSearchPluginApi",
                 "section": "def-public.SavedSearch",
                 "text": "SavedSearch"
-              }
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.ISearchEmbeddable.hasTimeRange",
+            "type": "Function",
+            "tags": [],
+            "label": "hasTimeRange",
+            "description": [],
+            "signature": [
+              "() => boolean"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
             "deprecated": false,
@@ -276,172 +1149,194 @@
       },
       {
         "parentPluginId": "discover",
-        "id": "def-public.SearchInput",
+        "id": "def-public.SearchBarCustomization",
         "type": "Interface",
         "tags": [],
-        "label": "SearchInput",
+        "label": "SearchBarCustomization",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "discover",
-            "scope": "public",
-            "docId": "kibDiscoverPluginApi",
-            "section": "def-public.SearchInput",
-            "text": "SearchInput"
-          },
-          " extends ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          }
-        ],
-        "path": "src/plugins/discover/public/embeddable/types.ts",
+        "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discover",
-            "id": "def-public.SearchInput.timeRange",
-            "type": "Object",
+            "id": "def-public.SearchBarCustomization.id",
+            "type": "string",
             "tags": [],
-            "label": "timeRange",
+            "label": "id",
             "description": [],
             "signature": [
-              "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+              "\"search_bar\""
             ],
-            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
-            "id": "def-public.SearchInput.timeslice",
-            "type": "Object",
-            "tags": [],
-            "label": "timeslice",
-            "description": [],
-            "signature": [
-              "[number, number] | undefined"
-            ],
-            "path": "src/plugins/discover/public/embeddable/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.SearchInput.query",
-            "type": "Object",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/discover/public/embeddable/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.SearchInput.filters",
-            "type": "Array",
-            "tags": [],
-            "label": "filters",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/plugins/discover/public/embeddable/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.SearchInput.hidePanelTitles",
+            "id": "def-public.SearchBarCustomization.CustomDataViewPicker",
             "type": "CompoundType",
             "tags": [],
-            "label": "hidePanelTitles",
+            "label": "CustomDataViewPicker",
+            "description": [],
+            "signature": [
+              "React.ComponentType<{}> | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SearchBarCustomization.PrependFilterBar",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "PrependFilterBar",
+            "description": [],
+            "signature": [
+              "React.ComponentType<{}> | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SearchBarCustomization.CustomSearchBar",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "CustomSearchBar",
+            "description": [],
+            "signature": [
+              "React.ComponentType<",
+              {
+                "pluginId": "navigation",
+                "scope": "public",
+                "docId": "kibNavigationPluginApi",
+                "section": "def-public.TopNavMenuProps",
+                "text": "TopNavMenuProps"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              ">> | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SearchBarCustomization.hideDataViewPicker",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideDataViewPicker",
             "description": [],
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.TopNavCustomization",
+        "type": "Interface",
+        "tags": [],
+        "label": "TopNavCustomization",
+        "description": [],
+        "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.TopNavCustomization.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"top_nav\""
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
-            "id": "def-public.SearchInput.columns",
-            "type": "Array",
+            "id": "def-public.TopNavCustomization.defaultMenu",
+            "type": "Object",
             "tags": [],
-            "label": "columns",
+            "label": "defaultMenu",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              "TopNavDefaultMenu",
+              " | undefined"
             ],
-            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
-            "id": "def-public.SearchInput.sort",
-            "type": "Array",
+            "id": "def-public.TopNavCustomization.getMenuItems",
+            "type": "Function",
             "tags": [],
-            "label": "sort",
+            "label": "getMenuItems",
             "description": [],
             "signature": [
-              "SortOrder",
-              "[] | undefined"
+              "(() => ",
+              "TopNavMenuItem",
+              "[]) | undefined"
             ],
-            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.TopNavCustomization.defaultBadges",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultBadges",
+            "description": [],
+            "signature": [
+              "TopNavDefaultBadges",
+              " | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
-            "id": "def-public.SearchInput.rowHeight",
-            "type": "number",
+            "id": "def-public.TopNavCustomization.getBadges",
+            "type": "Function",
             "tags": [],
-            "label": "rowHeight",
+            "label": "getBadges",
             "description": [],
             "signature": [
-              "number | undefined"
+              "(() => ",
+              "TopNavBadge",
+              "[]) | undefined"
             ],
-            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
             "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.SearchInput.rowsPerPage",
-            "type": "number",
-            "tags": [],
-            "label": "rowsPerPage",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/discover/public/embeddable/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -485,6 +1380,156 @@
       },
       {
         "parentPluginId": "discover",
+        "id": "def-public.DiscoverContainerProps",
+        "type": "Type",
+        "tags": [],
+        "label": "DiscoverContainerProps",
+        "description": [],
+        "signature": [
+          "{ isLoading?: boolean | undefined; overrideServices: Partial<",
+          "DiscoverServices",
+          ">; scopedHistory: ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.ScopedHistory",
+            "text": "ScopedHistory"
+          },
+          "<unknown>; customizationCallbacks: ",
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.CustomizationCallback",
+            "text": "CustomizationCallback"
+          },
+          "[]; }"
+        ],
+        "path": "src/plugins/discover/public/components/discover_container/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.DiscoverCustomization",
+        "type": "Type",
+        "tags": [],
+        "label": "DiscoverCustomization",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.FlyoutCustomization",
+            "text": "FlyoutCustomization"
+          },
+          " | ",
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.SearchBarCustomization",
+            "text": "SearchBarCustomization"
+          },
+          " | ",
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.TopNavCustomization",
+            "text": "TopNavCustomization"
+          },
+          " | ",
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.UnifiedHistogramCustomization",
+            "text": "UnifiedHistogramCustomization"
+          }
+        ],
+        "path": "src/plugins/discover/public/customizations/customization_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.DiscoverProfileId",
+        "type": "Type",
+        "tags": [],
+        "label": "DiscoverProfileId",
+        "description": [],
+        "signature": [
+          "string"
+        ],
+        "path": "src/plugins/discover/public/customizations/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.RegisterCustomizationProfile",
+        "type": "Type",
+        "tags": [],
+        "label": "RegisterCustomizationProfile",
+        "description": [],
+        "signature": [
+          "(id: string, options: ",
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.DiscoverProfileOptions",
+            "text": "DiscoverProfileOptions"
+          },
+          ") => void"
+        ],
+        "path": "src/plugins/discover/public/customizations/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.RegisterCustomizationProfile.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/discover/public/customizations/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.RegisterCustomizationProfile.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.DiscoverProfileOptions",
+                "text": "DiscoverProfileOptions"
+              }
+            ],
+            "path": "src/plugins/discover/public/customizations/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-public.SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID",
         "type": "string",
         "tags": [],
@@ -508,7 +1553,59 @@
         "signature": [
           "\"search\""
         ],
-        "path": "src/plugins/discover/common/index.ts",
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.SearchInput",
+        "type": "Type",
+        "tags": [],
+        "label": "SearchInput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "savedSearch",
+            "scope": "public",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-public.SearchByValueInput",
+            "text": "SearchByValueInput"
+          },
+          " | ",
+          {
+            "pluginId": "savedSearch",
+            "scope": "public",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-public.SearchByReferenceInput",
+            "text": "SearchByReferenceInput"
+          }
+        ],
+        "path": "src/plugins/discover/public/embeddable/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.UnifiedHistogramCustomization",
+        "type": "Type",
+        "tags": [],
+        "label": "UnifiedHistogramCustomization",
+        "description": [],
+        "signature": [
+          "UnifiedHistogramCustomizationId & Pick<",
+          {
+            "pluginId": "unifiedHistogram",
+            "scope": "public",
+            "docId": "kibUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramContainerProps",
+            "text": "UnifiedHistogramContainerProps"
+          },
+          ", \"onBrushEnd\" | \"disabledActions\" | \"onFilter\" | \"withDefaultActions\">"
+        ],
+        "path": "src/plugins/discover/public/customizations/customization_types/histogram_customization.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -526,24 +1623,6 @@
       "deprecated": false,
       "trackAdoption": false,
       "children": [
-        {
-          "parentPluginId": "discover",
-          "id": "def-public.DiscoverSetup.docViews",
-          "type": "Object",
-          "tags": [],
-          "label": "docViews",
-          "description": [],
-          "signature": [
-            "{ addDocView(docViewRaw: ",
-            "DocViewInput",
-            " | ",
-            "DocViewInputFn",
-            "): void; }"
-          ],
-          "path": "src/plugins/discover/public/plugin.tsx",
-          "deprecated": false,
-          "trackAdoption": false
-        },
         {
           "parentPluginId": "discover",
           "id": "def-public.DiscoverSetup.locator",
@@ -607,64 +1686,89 @@
         },
         {
           "parentPluginId": "discover",
-          "id": "def-public.DiscoverStart.customize",
-          "type": "Function",
+          "id": "def-public.DiscoverStart.DiscoverContainer",
+          "type": "CompoundType",
           "tags": [],
-          "label": "customize",
+          "label": "DiscoverContainer",
           "description": [],
           "signature": [
-            "(profileName: string, callback: ",
+            "React.ComponentClass<",
             {
               "pluginId": "discover",
               "scope": "public",
               "docId": "kibDiscoverPluginApi",
-              "section": "def-public.CustomizationCallback",
-              "text": "CustomizationCallback"
+              "section": "def-public.DiscoverContainerProps",
+              "text": "DiscoverContainerProps"
+            },
+            ", any> | React.FunctionComponent<",
+            {
+              "pluginId": "discover",
+              "scope": "public",
+              "docId": "kibDiscoverPluginApi",
+              "section": "def-public.DiscoverContainerProps",
+              "text": "DiscoverContainerProps"
+            },
+            ">"
+          ],
+          "path": "src/plugins/discover/public/plugin.tsx",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "discover",
+          "id": "def-public.DiscoverStart.registerCustomizationProfile",
+          "type": "Function",
+          "tags": [],
+          "label": "registerCustomizationProfile",
+          "description": [],
+          "signature": [
+            "(id: string, options: ",
+            {
+              "pluginId": "discover",
+              "scope": "public",
+              "docId": "kibDiscoverPluginApi",
+              "section": "def-public.DiscoverProfileOptions",
+              "text": "DiscoverProfileOptions"
             },
             ") => void"
           ],
           "path": "src/plugins/discover/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false,
+          "returnComment": [],
           "children": [
             {
               "parentPluginId": "discover",
-              "id": "def-public.DiscoverStart.customize.$1",
+              "id": "def-public.DiscoverStart.registerCustomizationProfile.$1",
               "type": "string",
               "tags": [],
-              "label": "profileName",
+              "label": "id",
               "description": [],
-              "signature": [
-                "string"
-              ],
-              "path": "src/plugins/discover/public/plugin.tsx",
+              "path": "src/plugins/discover/public/customizations/types.ts",
               "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
+              "trackAdoption": false
             },
             {
               "parentPluginId": "discover",
-              "id": "def-public.DiscoverStart.customize.$2",
-              "type": "Function",
+              "id": "def-public.DiscoverStart.registerCustomizationProfile.$2",
+              "type": "Object",
               "tags": [],
-              "label": "callback",
+              "label": "options",
               "description": [],
               "signature": [
                 {
                   "pluginId": "discover",
                   "scope": "public",
                   "docId": "kibDiscoverPluginApi",
-                  "section": "def-public.CustomizationCallback",
-                  "text": "CustomizationCallback"
+                  "section": "def-public.DiscoverProfileOptions",
+                  "text": "DiscoverProfileOptions"
                 }
               ],
-              "path": "src/plugins/discover/public/plugin.tsx",
+              "path": "src/plugins/discover/public/customizations/types.ts",
               "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
+              "trackAdoption": false
             }
-          ],
-          "returnComment": []
+          ]
         }
       ],
       "lifecycle": "start",
@@ -1568,66 +2672,6 @@
       },
       {
         "parentPluginId": "discover",
-        "id": "def-common.CONTEXT_DEFAULT_SIZE_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "CONTEXT_DEFAULT_SIZE_SETTING",
-        "description": [],
-        "signature": [
-          "\"context:defaultSize\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.CONTEXT_STEP_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "CONTEXT_STEP_SETTING",
-        "description": [],
-        "signature": [
-          "\"context:step\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.CONTEXT_TIE_BREAKER_FIELDS_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "CONTEXT_TIE_BREAKER_FIELDS_SETTING",
-        "description": [],
-        "signature": [
-          "\"context:tieBreakerFields\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.DEFAULT_COLUMNS_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_COLUMNS_SETTING",
-        "description": [],
-        "signature": [
-          "\"defaultColumns\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
         "id": "def-common.DISCOVER_APP_LOCATOR",
         "type": "string",
         "tags": [],
@@ -1673,111 +2717,6 @@
       },
       {
         "parentPluginId": "discover",
-        "id": "def-common.DOC_HIDE_TIME_COLUMN_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "DOC_HIDE_TIME_COLUMN_SETTING",
-        "description": [],
-        "signature": [
-          "\"doc_table:hideTimeColumn\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.DOC_TABLE_LEGACY",
-        "type": "string",
-        "tags": [],
-        "label": "DOC_TABLE_LEGACY",
-        "description": [],
-        "signature": [
-          "\"doc_table:legacy\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.ENABLE_SQL",
-        "type": "string",
-        "tags": [],
-        "label": "ENABLE_SQL",
-        "description": [],
-        "signature": [
-          "\"discover:enableSql\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.FIELDS_LIMIT_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "FIELDS_LIMIT_SETTING",
-        "description": [],
-        "signature": [
-          "\"fields:popularLimit\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.HIDE_ANNOUNCEMENTS",
-        "type": "string",
-        "tags": [],
-        "label": "HIDE_ANNOUNCEMENTS",
-        "description": [],
-        "signature": [
-          "\"hideAnnouncements\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.MAX_DOC_FIELDS_DISPLAYED",
-        "type": "string",
-        "tags": [],
-        "label": "MAX_DOC_FIELDS_DISPLAYED",
-        "description": [],
-        "signature": [
-          "\"discover:maxDocFieldsDisplayed\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.MODIFY_COLUMNS_ON_SWITCH",
-        "type": "string",
-        "tags": [],
-        "label": "MODIFY_COLUMNS_ON_SWITCH",
-        "description": [],
-        "signature": [
-          "\"discover:modifyColumnsOnSwitch\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],
@@ -1785,156 +2724,6 @@
         "description": [],
         "signature": [
           "\"discover\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.ROW_HEIGHT_OPTION",
-        "type": "string",
-        "tags": [],
-        "label": "ROW_HEIGHT_OPTION",
-        "description": [],
-        "signature": [
-          "\"discover:rowHeightOption\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.SAMPLE_ROWS_PER_PAGE_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "SAMPLE_ROWS_PER_PAGE_SETTING",
-        "description": [],
-        "signature": [
-          "\"discover:sampleRowsPerPage\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.SAMPLE_SIZE_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "SAMPLE_SIZE_SETTING",
-        "description": [],
-        "signature": [
-          "\"discover:sampleSize\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.SEARCH_EMBEDDABLE_TYPE",
-        "type": "string",
-        "tags": [],
-        "label": "SEARCH_EMBEDDABLE_TYPE",
-        "description": [],
-        "signature": [
-          "\"search\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.SEARCH_FIELDS_FROM_SOURCE",
-        "type": "string",
-        "tags": [],
-        "label": "SEARCH_FIELDS_FROM_SOURCE",
-        "description": [],
-        "signature": [
-          "\"discover:searchFieldsFromSource\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.SEARCH_ON_PAGE_LOAD_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "SEARCH_ON_PAGE_LOAD_SETTING",
-        "description": [],
-        "signature": [
-          "\"discover:searchOnPageLoad\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.SHOW_FIELD_STATISTICS",
-        "type": "string",
-        "tags": [],
-        "label": "SHOW_FIELD_STATISTICS",
-        "description": [],
-        "signature": [
-          "\"discover:showFieldStatistics\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.SHOW_MULTIFIELDS",
-        "type": "string",
-        "tags": [],
-        "label": "SHOW_MULTIFIELDS",
-        "description": [],
-        "signature": [
-          "\"discover:showMultiFields\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.SORT_DEFAULT_ORDER_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "SORT_DEFAULT_ORDER_SETTING",
-        "description": [],
-        "signature": [
-          "\"discover:sort:defaultOrder\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-common.TRUNCATE_MAX_HEIGHT",
-        "type": "string",
-        "tags": [],
-        "label": "TRUNCATE_MAX_HEIGHT",
-        "description": [],
-        "signature": [
-          "\"truncate:maxHeight\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,

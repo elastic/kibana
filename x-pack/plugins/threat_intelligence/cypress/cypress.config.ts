@@ -38,6 +38,8 @@ export default defineCypressConfig({
   viewportHeight: 946,
   viewportWidth: 1680,
   env: {
+    grepFilterSpecs: true,
+    grepTags: '@ess',
     protocol: 'http',
     hostname: 'localhost',
     configport: '5601',
@@ -45,6 +47,10 @@ export default defineCypressConfig({
   e2e: {
     baseUrl: 'http://localhost:5601',
     experimentalMemoryManagement: true,
-    specPattern: './cypress/e2e/**/*.cy.ts',
+    setupNodeEvents(on, config) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('@cypress/grep/src/plugin')(config);
+      return config;
+    },
   },
 });

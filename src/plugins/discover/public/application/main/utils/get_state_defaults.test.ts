@@ -10,7 +10,7 @@ import { getStateDefaults } from './get_state_defaults';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
-import { savedSearchMock, savedSearchMockWithSQL } from '../../../__mocks__/saved_search';
+import { savedSearchMock, savedSearchMockWithESQL } from '../../../__mocks__/saved_search';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
@@ -36,6 +36,7 @@ describe('getStateDefaults', () => {
         "query": undefined,
         "rowHeight": undefined,
         "rowsPerPage": undefined,
+        "sampleSize": undefined,
         "savedQuery": undefined,
         "sort": Array [
           Array [
@@ -70,6 +71,7 @@ describe('getStateDefaults', () => {
         "query": undefined,
         "rowHeight": undefined,
         "rowsPerPage": undefined,
+        "sampleSize": undefined,
         "savedQuery": undefined,
         "sort": Array [],
         "viewMode": undefined,
@@ -81,7 +83,7 @@ describe('getStateDefaults', () => {
     const actualForUndefinedViewMode = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: {
-        ...savedSearchMockWithSQL,
+        ...savedSearchMockWithESQL,
         viewMode: undefined,
       },
     });
@@ -90,7 +92,7 @@ describe('getStateDefaults', () => {
     const actualForTextBasedWithInvalidViewMode = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: {
-        ...savedSearchMockWithSQL,
+        ...savedSearchMockWithESQL,
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
       },
     });
@@ -99,7 +101,7 @@ describe('getStateDefaults', () => {
     const actualForTextBasedWithValidViewMode = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: {
-        ...savedSearchMockWithSQL,
+        ...savedSearchMockWithESQL,
         viewMode: VIEW_MODE.DOCUMENT_LEVEL,
       },
     });

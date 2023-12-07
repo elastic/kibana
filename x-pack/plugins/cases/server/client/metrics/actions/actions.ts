@@ -6,7 +6,8 @@
  */
 
 import { merge } from 'lodash';
-import type { SingleCaseMetricsResponse } from '../../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../../common/types/api';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 import { Operations } from '../../../authorization';
 import { createCaseError } from '../../../common/error';
 import { SingleCaseAggregationHandler } from '../single_case_aggregation_handler';
@@ -18,7 +19,7 @@ export class Actions extends SingleCaseAggregationHandler {
     super(
       options,
       new Map<string, AggregationBuilder<SingleCaseMetricsResponse>>([
-        ['actions.isolateHost', new IsolateHostActions()],
+        [CaseMetricsFeature.ACTIONS_ISOLATE_HOST, new IsolateHostActions()],
       ])
     );
   }

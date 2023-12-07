@@ -27,6 +27,10 @@ export function registerAnalyticsContextProvider(
       cluster_name: { type: 'keyword', _meta: { description: 'The Cluster Name' } },
       cluster_uuid: { type: 'keyword', _meta: { description: 'The Cluster UUID' } },
       cluster_version: { type: 'keyword', _meta: { description: 'The Cluster version' } },
+      cluster_build_flavor: {
+        type: 'keyword',
+        _meta: { description: 'The Cluster build flavor', optional: true },
+      },
     },
   });
 }

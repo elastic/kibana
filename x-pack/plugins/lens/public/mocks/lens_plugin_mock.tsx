@@ -21,7 +21,9 @@ export const lensPluginMock = {
       SaveModalComponent: jest.fn(() => {
         return <span>Lens Save Modal Component</span>;
       }),
-      EditLensConfigPanelApi: jest.fn().mockResolvedValue(<span>Lens Config Panel Component</span>),
+      EditLensConfigPanelApi: jest
+        .fn()
+        .mockResolvedValue(() => <span>Lens Config Panel Component</span>),
       canUseEditor: jest.fn(() => true),
       navigateToPrefilledEditor: jest.fn(),
       getXyVisTypes: jest

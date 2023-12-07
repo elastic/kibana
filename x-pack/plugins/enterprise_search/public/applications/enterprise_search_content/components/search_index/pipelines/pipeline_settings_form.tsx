@@ -10,7 +10,8 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IngestPipelineParams } from '../../../../../../common/types/connectors';
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
 import { SettingsCheckableCard } from '../../shared/settings_checkable_card/settings_checkable_card';
 
 interface PipelineSettingsFormProps {

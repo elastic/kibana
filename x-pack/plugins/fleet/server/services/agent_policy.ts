@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit, isEqual, keyBy, groupBy } from 'lodash';
+import { omit, isEqual, keyBy, groupBy, pick } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
 import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
@@ -21,6 +21,8 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
+import { policyHasEndpointSecurity } from '../../common/services';
 
 import { populateAssignedAgentsCount } from '../routes/agent_policy/handlers';
 
@@ -113,7 +115,10 @@ class AgentPolicyService {
     id: string,
     agentPolicy: Partial<AgentPolicySOAttributes>,
     user?: AuthenticatedUser,
-    options: { bumpRevision: boolean } = { bumpRevision: true }
+    options: { bumpRevision: boolean; removeProtection: boolean } = {
+      bumpRevision: true,
+      removeProtection: false,
+    }
   ): Promise<AgentPolicy> {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
@@ -136,6 +141,12 @@ class AgentPolicyService {
       );
     }
 
+    const logger = appContextService.getLogger();
+
+    if (options.removeProtection) {
+      logger.warn(`Setting tamper protection for Agent Policy ${id} to false`);
+    }
+
     await validateOutputForPolicy(
       soClient,
       agentPolicy,
@@ -145,11 +156,14 @@ class AgentPolicyService {
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
       ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
+      ...(options.removeProtection
+        ? { is_protected: false }
+        : { is_protected: agentPolicy.is_protected }),
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
 
-    if (options.bumpRevision) {
+    if (options.bumpRevision || options.removeProtection) {
       await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', id);
     }
 
@@ -239,6 +253,14 @@ class AgentPolicyService {
 
     this.checkTamperProtectionLicense(agentPolicy);
 
+    const logger = appContextService.getLogger();
+
+    if (agentPolicy?.is_protected) {
+      logger.warn(
+        'Agent policy requires Elastic Defend integration to set tamper protection to true'
+      );
+    }
+
     await this.requireUniqueName(soClient, agentPolicy);
 
     await validateOutputForPolicy(soClient, agentPolicy);
@@ -253,7 +275,7 @@ class AgentPolicyService {
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
         schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
-        is_protected: agentPolicy.is_protected ?? false,
+        is_protected: false,
       } as AgentPolicy,
       options
     );
@@ -490,6 +512,17 @@ class AgentPolicyService {
     }
 
     this.checkTamperProtectionLicense(agentPolicy);
+    await this.checkForValidUninstallToken(agentPolicy, id);
+
+    const logger = appContextService.getLogger();
+
+    if (agentPolicy?.is_protected && !policyHasEndpointSecurity(existingAgentPolicy)) {
+      logger.warn(
+        'Agent policy requires Elastic Defend integration to set tamper protection to true'
+      );
+      // force agent policy to be false if elastic defend is not present
+      agentPolicy.is_protected = false;
+    }
 
     if (existingAgentPolicy.is_managed && !options?.force) {
       Object.entries(agentPolicy)
@@ -530,14 +563,22 @@ class AgentPolicyService {
     if (!baseAgentPolicy) {
       throw new Error('Agent policy not found');
     }
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { namespace, monitoring_enabled } = baseAgentPolicy;
     const newAgentPolicy = await this.create(
       soClient,
       esClient,
       {
-        namespace,
-        monitoring_enabled,
+        ...pick(baseAgentPolicy, [
+          'namespace',
+          'monitoring_enabled',
+          'inactivity_timeout',
+          'unenroll_timeout',
+          'agent_features',
+          'overrides',
+          'data_output_id',
+          'monitoring_output_id',
+          'download_source_id',
+          'fleet_server_host_id',
+        ]),
         ...newAgentPolicyProps,
       },
       options
@@ -571,7 +612,23 @@ class AgentPolicyService {
       );
     }
 
-    // Get updated agent policy
+    // Tamper protection is dependent on endpoint package policy
+    // Match tamper protection setting to the original policy
+    if (baseAgentPolicy.is_protected) {
+      await this._update(
+        soClient,
+        esClient,
+        newAgentPolicy.id,
+        { is_protected: true },
+        options?.user,
+        {
+          bumpRevision: false,
+          removeProtection: false,
+        }
+      );
+    }
+
+    // Get updated agent policy with package policies and adjusted tamper protection
     const updatedAgentPolicy = await this.get(soClient, newAgentPolicy.id, true);
     if (!updatedAgentPolicy) {
       throw new Error('Copied agent policy not found');
@@ -586,9 +643,12 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser; removeProtection?: boolean }
   ): Promise<AgentPolicy> {
-    const res = await this._update(soClient, esClient, id, {}, options?.user);
+    const res = await this._update(soClient, esClient, id, {}, options?.user, {
+      bumpRevision: true,
+      removeProtection: options?.removeProtection ?? false,
+    });
 
     return res;
   }
@@ -970,6 +1030,7 @@ class AgentPolicyService {
   public async getFullAgentConfigMap(
     soClient: SavedObjectsClientContract,
     id: string,
+    agentVersion: string,
     options?: { standalone: boolean }
   ): Promise<string | null> {
     const fullAgentPolicy = await getFullAgentPolicy(soClient, id, options);
@@ -990,10 +1051,7 @@ class AgentPolicyService {
       };
 
       const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
-      const updateManifestVersion = elasticAgentStandaloneManifest.replace(
-        'VERSION',
-        appContextService.getKibanaVersion()
-      );
+      const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
       return [fixedAgentYML, updateManifestVersion].join('\n');
     } else {
@@ -1003,12 +1061,10 @@ class AgentPolicyService {
 
   public async getFullAgentManifest(
     fleetServer: string,
-    enrolToken: string
+    enrolToken: string,
+    agentVersion: string
   ): Promise<string | null> {
-    const updateManifestVersion = elasticAgentManagedManifest.replace(
-      'VERSION',
-      appContextService.getKibanaVersion()
-    );
+    const updateManifestVersion = elasticAgentManagedManifest.replace('VERSION', agentVersion);
     let updateManifest = updateManifestVersion;
     if (fleetServer !== '') {
       updateManifest = updateManifest.replace('https://fleet-server:8220', fleetServer);
@@ -1155,6 +1211,24 @@ class AgentPolicyService {
   private checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {
     if (agentPolicy?.is_protected && !licenseService.isPlatinum()) {
       throw new FleetUnauthorizedError('Tamper protection requires Platinum license');
+    }
+  }
+  private async checkForValidUninstallToken(
+    agentPolicy: { is_protected?: boolean },
+    policyId: string
+  ): Promise<void> {
+    if (agentPolicy?.is_protected) {
+      const uninstallTokenService = appContextService.getUninstallTokenService();
+
+      const uninstallTokenError = await uninstallTokenService?.checkTokenValidityForPolicy(
+        policyId
+      );
+
+      if (uninstallTokenError) {
+        throw new Error(
+          `Cannot enable Agent Tamper Protection: ${uninstallTokenError.error.message}`
+        );
+      }
     }
   }
 }

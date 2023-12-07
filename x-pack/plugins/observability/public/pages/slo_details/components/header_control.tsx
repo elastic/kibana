@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
+import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useKibana } from '../../../utils/kibana_react';
 import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
@@ -18,12 +19,11 @@ import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
-import { paths } from '../../../routes/paths';
+import { paths } from '../../../../common/locators/paths';
 import {
   transformSloResponseToCreateSloForm,
   transformCreateSLOFormToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
-import { SloDeleteConfirmationModal } from '../../slos/components/slo_delete_confirmation_modal';
 import type { RulesParams } from '../../../locators/rules';
 
 export interface Props {
@@ -33,13 +33,14 @@ export interface Props {
 
 export function HeaderControl({ isLoading, slo }: Props) {
   const {
-    application: { navigateToUrl },
+    application: { navigateToUrl, capabilities },
     http: { basePath },
     share: {
       url: { locators },
     },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
+  const hasApmReadCapabilities = capabilities.apm.show;
   const { hasWriteCapabilities } = useCapabilities();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -202,6 +203,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
                 <EuiContextMenuItem
                   key="exploreInApm"
                   icon="bullseye"
+                  disabled={!hasApmReadCapabilities}
                   onClick={handleNavigateToApm}
                   data-test-subj="sloDetailsHeaderControlPopoverExploreInApm"
                 >
@@ -250,6 +252,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
           canChangeTrigger={false}
           onClose={onCloseRuleFlyout}
           initialValues={{ name: `${slo.name} burn rate`, params: { sloId: slo.id } }}
+          useRuleProducer
         />
       ) : null}
 

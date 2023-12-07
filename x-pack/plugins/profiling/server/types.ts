@@ -12,22 +12,31 @@ import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server'
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import {
+  ProfilingDataAccessPluginSetup,
+  ProfilingDataAccessPluginStart,
+} from '@kbn/profiling-data-access-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 
 export interface ProfilingPluginSetupDeps {
   observability: ObservabilityPluginSetup;
   features: FeaturesPluginSetup;
-  cloud: CloudSetup;
-  fleet: FleetSetupContract;
+  cloud?: CloudSetup;
+  fleet?: FleetSetupContract;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  profilingDataAccess: ProfilingDataAccessPluginSetup;
+  security?: SecurityPluginSetup;
 }
 
 export interface ProfilingPluginStartDeps {
   observability: {};
   features: {};
-  cloud: CloudStart;
-  fleet: FleetStartContract;
+  cloud?: CloudStart;
+  fleet?: FleetStartContract;
   spaces?: SpacesPluginStart;
+  profilingDataAccess: ProfilingDataAccessPluginStart;
+  security?: SecurityPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

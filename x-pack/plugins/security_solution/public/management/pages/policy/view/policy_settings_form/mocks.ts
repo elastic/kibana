@@ -44,7 +44,7 @@ export const getPolicySettingsFormTestSubjects = (
   const antivirusTestSubj = genTestSubj.withPrefix('antivirusRegistration');
   const attackSurfaceTestSubj = genTestSubj.withPrefix('attackSurface');
 
-  const testSubj = {
+  return {
     form: genTestSubj(),
 
     malware: {
@@ -95,6 +95,7 @@ export const getPolicySettingsFormTestSubjects = (
       enableDisableSwitch: behaviourTestSubj('enableDisableSwitch'),
       protectionPreventRadio: behaviourTestSubj('protectionLevel-preventRadio'),
       protectionDetectRadio: behaviourTestSubj('protectionLevel-detectRadio'),
+      reputationServiceCheckbox: behaviourTestSubj('reputationService-checkbox'),
       notifyUserCheckbox: behaviourTestSubj('notifyUser-checkbox'),
       osValuesContainer: behaviourTestSubj('osValues'),
       rulesCallout: behaviourTestSubj('rulesCallout'),
@@ -164,8 +165,6 @@ export const getPolicySettingsFormTestSubjects = (
       },
     },
   };
-
-  return testSubj;
 };
 
 export const expectIsViewOnly = (ele: HTMLElement): void => {
@@ -193,6 +192,7 @@ export const exactMatchText = (text: string): RegExp => {
  * @param policy
  * @param turnOff
  * @param includePopup
+ * @param includeBlocklist
  */
 export const setMalwareMode = (
   policy: PolicyConfig,

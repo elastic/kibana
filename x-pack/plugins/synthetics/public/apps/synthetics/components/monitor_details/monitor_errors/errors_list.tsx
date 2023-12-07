@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import moment from 'moment';
-import { ErrorDetailsLink } from '../../common/links/error_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
+import { ErrorDetailsLink } from '../../common/links/error_details_link';
 import { Ping, PingState } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
@@ -45,12 +45,10 @@ export const ErrorsList = ({
   errorStates,
   upStates,
   loading,
-  location,
 }: {
   errorStates: PingState[];
   upStates: PingState[];
   loading: boolean;
-  location: ReturnType<typeof useSelectedLocation>;
 }) => {
   const { monitorId: configId } = useParams<{ monitorId: string }>();
 
@@ -65,10 +63,10 @@ export const ErrorsList = ({
   const history = useHistory();
 
   const formatter = useDateFormat();
+  const selectedLocation = useSelectedLocation();
 
   const { latestPing } = useMonitorLatestPing({
     monitorId: configId,
-    locationLabel: location?.label,
   });
 
   const lastErrorTestRun = errorStates?.sort((a, b) => {
@@ -89,7 +87,7 @@ export const ErrorsList = ({
             configId={configId}
             stateId={item.state?.id!}
             label={formatter(item.state!.started_at)}
-            locationId={location?.id}
+            locationId={selectedLocation?.id}
           />
         );
 
@@ -181,7 +179,9 @@ export const ErrorsList = ({
       return {
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
-          history.push(`/monitor/${configId}/errors/${state.id}?locationId=${location?.id}`);
+          history.push(
+            `/monitor/${configId}/errors/${state.id}?locationId=${selectedLocation?.id}`
+          );
         },
       };
     }

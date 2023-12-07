@@ -17,7 +17,10 @@ export type EmbeddableFactoryDefinition<
   T = unknown
 > =
   // Required parameters
-  Pick<EmbeddableFactory<I, O, E, T>, 'create' | 'type' | 'isEditable' | 'getDisplayName'> &
+  Pick<
+    EmbeddableFactory<I, O, E, T>,
+    'create' | 'type' | 'latestVersion' | 'isEditable' | 'getDisplayName'
+  > &
     // Optional parameters
     Partial<
       Pick<

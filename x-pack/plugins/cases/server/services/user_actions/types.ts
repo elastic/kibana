@@ -11,7 +11,6 @@ import type {
   Logger,
   ISavedObjectsSerializer,
   SavedObjectsRawDoc,
-  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { AuditLogger } from '@kbn/security-plugin/server';
@@ -22,25 +21,25 @@ import type {
   ConnectorUserAction,
   PushedUserAction,
   UserActionType,
-} from '../../../common/types/domain';
-import type { CaseAssignees } from '../../../common/api/cases/assignee';
-import type {
-  CaseAttributes,
-  CasePostRequest,
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
-  CommentRequest,
   User,
-} from '../../../common/api';
+  CaseAssignees,
+  CaseCustomFields,
+} from '../../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
 } from '../../common/types/user_actions';
 import type { IndexRefresh } from '../types';
-import type { CaseSavedObjectTransformed } from '../../common/types/case';
-import type { UserActionFindRequest } from '../../../common/types/api';
+import type { PatchCasesArgs } from '../cases/types';
+import type {
+  AttachmentRequest,
+  CasePostRequest,
+  UserActionFindRequest,
+} from '../../../common/types/api';
 
 export interface BuilderParameters {
   title: {
@@ -93,6 +92,9 @@ export interface BuilderParameters {
   };
   category: {
     parameters: { payload: { category: string | null } };
+  };
+  customFields: {
+    parameters: { payload: { customFields: CaseCustomFields } };
   };
 }
 
@@ -237,6 +239,17 @@ export interface UserActionsStatsAggsResult {
   };
 }
 
+export interface MultipleCasesUserActionsTotalAggsResult {
+  references: {
+    caseUserActions: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+}
+
 export interface ParticipantsAggsResult {
   participants: {
     buckets: Array<{
@@ -282,21 +295,30 @@ export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (
   items: Item[]
 ) => UserActionParameters<ActionType>['payload'];
 
-export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
-  originalCases: CaseSavedObjectTransformed[];
-  updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
+export interface BuildUserActionsDictParams {
+  updatedCases: PatchCasesArgs;
   user: User;
+}
+
+export type UserActionsDict = Record<string, UserActionEvent[]>;
+
+export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
+  builtUserActions: UserActionEvent[];
 }
 
 export interface BulkCreateAttachmentUserAction
   extends Omit<CommonUserActionArgs, 'owner'>,
     IndexRefresh {
-  attachments: Array<{ id: string; owner: string; attachment: CommentRequest }>;
+  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequest }>;
 }
 
-export type CreateUserActionClient<T extends keyof BuilderParameters> = CreateUserAction<T> &
-  CommonUserActionArgs &
-  IndexRefresh;
+export type CreateUserActionArgs<T extends keyof BuilderParameters> = {
+  userAction: CreateUserAction<T> & CommonUserActionArgs;
+} & IndexRefresh;
+
+export type BulkCreateUserActionArgs<T extends keyof BuilderParameters> = {
+  userActions: Array<CreateUserAction<T> & CommonUserActionArgs>;
+} & IndexRefresh;
 
 export interface CreateUserActionES<T> extends IndexRefresh {
   attributes: T;

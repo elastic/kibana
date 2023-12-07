@@ -12,3 +12,7 @@ export const AUTOCOMPLETE_DEFINITIONS_FOLDER = resolve(
   __dirname,
   '../../server/lib/spec_definitions/json'
 );
+
+export const GENERATED_SUBFOLDER = 'generated';
+export const OVERRIDES_SUBFOLDER = 'overrides';
+export const MANUAL_SUBFOLDER = 'manual';

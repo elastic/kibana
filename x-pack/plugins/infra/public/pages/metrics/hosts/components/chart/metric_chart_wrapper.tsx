@@ -6,9 +6,9 @@
  */
 import React, { useEffect, useRef, CSSProperties } from 'react';
 import { Chart, Metric, type MetricWNumber, type MetricWTrend } from '@elastic/charts';
-import { EuiPanel, EuiToolTip } from '@elastic/eui';
-import styled from 'styled-components';
-import { ChartLoader } from '../../../../../common/visualizations/lens/chart_loader';
+import { EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { ChartPlaceholder } from '../../../../../components/lens';
 
 export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 'subtitle'> {
   id: string;
@@ -16,11 +16,11 @@ export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 
   value: number;
   toolTip: React.ReactNode;
   style?: CSSProperties;
-  ['data-test-subj']?: string;
 }
 
 export const MetricChartWrapper = React.memo(
   ({ color, extra, id, loading, value, subtitle, title, toolTip, style, ...props }: Props) => {
+    const euiTheme = useEuiTheme();
     const loadedOnce = useRef(false);
 
     useEffect(() => {
@@ -42,27 +42,30 @@ export const MetricChartWrapper = React.memo(
     };
 
     return (
-      <EuiPanel hasShadow={false} paddingSize="none" {...props}>
-        <ChartLoader loading={loading} loadedOnce={loadedOnce.current} style={style}>
+      <EuiPanel {...props} hasShadow={false} paddingSize="none" data-test-subj={id}>
+        {loading && !loadedOnce.current ? (
+          <ChartPlaceholder style={style} />
+        ) : (
           <EuiToolTip
             className="eui-fullWidth"
             delay="regular"
             content={toolTip}
             anchorClassName="eui-fullWidth"
           >
-            <KPIChartStyled size={style}>
+            <Chart
+              size={style}
+              css={css`
+                .echMetric {
+                  border-radius: ${euiTheme.euiTheme.border.radius.medium};
+                  pointer-events: none;
+                }
+              `}
+            >
               <Metric id={id} data={[[metricsData]]} />
-            </KPIChartStyled>
+            </Chart>
           </EuiToolTip>
-        </ChartLoader>
+        )}
       </EuiPanel>
     );
   }
 );
-
-const KPIChartStyled = styled(Chart)`
-  .echMetric {
-    border-radius: ${(p) => p.theme.eui.euiBorderRadius};
-    pointer-events: none;
-  }
-`;

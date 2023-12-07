@@ -16,6 +16,7 @@ import { useMlKibana } from '../../contexts/kibana';
 import { MlPageHeader } from '../../components/page_header';
 import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { JobsActionMenu } from '../components/jobs_action_menu';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
@@ -42,6 +43,8 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
   const {
     services: { docLinks },
   } = useMlKibana();
+
+  const { showNodeInfo } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.anomalyDetection;
   return (
     <>
@@ -56,6 +59,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
         lastRefresh={lastRefresh}
         jobsViewState={pageState}
         onJobsViewStateUpdate={setPageState}
+        showNodeInfo={showNodeInfo}
       />
       <HelpMenu docLink={helpLink} />
     </>

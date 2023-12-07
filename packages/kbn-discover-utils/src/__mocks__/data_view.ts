@@ -92,6 +92,10 @@ export const buildDataViewMock = ({
     return dataViewFields.find((field) => field.name === fieldName);
   };
 
+  dataViewFields.getByType = (type: string) => {
+    return dataViewFields.filter((field) => field.type === type);
+  };
+
   dataViewFields.getAll = () => {
     return dataViewFields;
   };
@@ -104,7 +108,7 @@ export const buildDataViewMock = ({
     fields: dataViewFields,
     type: 'default',
     getName: () => name,
-    getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
+    getComputedFields: () => ({ docvalueFields: [], scriptFields: {} }),
     getSourceFiltering: () => ({}),
     getIndexPattern: () => `${name}-title`,
     getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
@@ -114,6 +118,7 @@ export const buildDataViewMock = ({
     isTimeNanosBased: () => false,
     isPersisted: () => true,
     toSpec: () => ({}),
+    toMinimalSpec: () => ({}),
     getTimeField: () => {
       return dataViewFields.find((field) => field.name === timeFieldName);
     },

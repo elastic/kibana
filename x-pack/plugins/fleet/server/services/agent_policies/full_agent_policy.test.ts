@@ -283,6 +283,20 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should return a policy with monitoring enabled but no logs/metrics if keep_monitoring_alive is true', async () => {
+    mockAgentPolicy({
+      keep_monitoring_alive: true,
+    });
+
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy?.agent?.monitoring).toEqual({
+      enabled: true,
+      logs: false,
+      metrics: false,
+    });
+  });
+
   it('should get the permissions for monitoring', async () => {
     mockAgentPolicy({
       namespace: 'testnamespace',
@@ -471,6 +485,7 @@ describe('transformOutputToFullPolicyOutput', () => {
         "hosts": Array [
           "http://host.fr",
         ],
+        "preset": "balanced",
         "type": "elasticsearch",
       }
     `);
@@ -495,6 +510,7 @@ ssl.test: 123
         "hosts": Array [
           "http://host.fr",
         ],
+        "preset": "balanced",
         "ssl.ca_trusted_fingerprint": "fingerprint123",
         "ssl.test": 123,
         "test": 1234,
@@ -527,6 +543,7 @@ ssl.test: 123
         "hosts": Array [
           "http://host.fr",
         ],
+        "preset": "balanced",
         "proxy_url": "https://proxy1.fr",
         "type": "elasticsearch",
       }
@@ -553,6 +570,7 @@ ssl.test: 123
           "http://host.fr",
         ],
         "password": "\${ES_PASSWORD}",
+        "preset": "balanced",
         "type": "elasticsearch",
         "username": "\${ES_USERNAME}",
       }

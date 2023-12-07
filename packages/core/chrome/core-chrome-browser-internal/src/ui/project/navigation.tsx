@@ -6,52 +6,41 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { css } from '@emotion/react';
-import { EuiCollapsibleNav, EuiCollapsibleNavProps, useIsWithinMinBreakpoint } from '@elastic/eui';
+import React, { useEffect, useRef } from 'react';
+import { EuiCollapsibleNavBeta } from '@elastic/eui';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-const SIZE_EXPANDED = 248;
-const SIZE_COLLAPSED = 48;
+const LOCAL_STORAGE_IS_COLLAPSED_KEY = 'PROJECT_NAVIGATION_COLLAPSED' as const;
 
-export interface ProjectNavigationProps {
-  isOpen: boolean;
-  closeNav: () => void;
-  button: EuiCollapsibleNavProps['button'];
-}
+export const ProjectNavigation: React.FC<{
+  toggleSideNav: (isVisible: boolean) => void;
+}> = ({ children, toggleSideNav }) => {
+  const isMounted = useRef(false);
+  const [isCollapsed, setIsCollapsed] = useLocalStorage(LOCAL_STORAGE_IS_COLLAPSED_KEY, false);
+  const onCollapseToggle = (nextIsCollapsed: boolean) => {
+    setIsCollapsed(nextIsCollapsed);
+    toggleSideNav(nextIsCollapsed);
+  };
 
-export const ProjectNavigation: React.FC<ProjectNavigationProps> = ({
-  children,
-  isOpen,
-  closeNav,
-  button,
-}) => {
-  const collabsibleNavCSS = css`
-    border-inline-end-width: 1,
-    display: flex,
-    flex-direction: row,
-  `;
-
-  // on small screen isOpen hides the nav,
-  // on larger screen isOpen makes it smaller
-  const DOCKED_BREAKPOINT = 's' as const;
-  const isCollapsible = useIsWithinMinBreakpoint(DOCKED_BREAKPOINT);
-  const isVisible = isCollapsible ? true : isOpen;
-  const isCollapsed = isCollapsible ? !isOpen : false;
+  useEffect(() => {
+    if (!isMounted.current && isCollapsed !== undefined) {
+      toggleSideNav(isCollapsed);
+    }
+    isMounted.current = true;
+  }, [isCollapsed, toggleSideNav]);
 
   return (
-    <EuiCollapsibleNav
-      css={collabsibleNavCSS}
-      isOpen={isVisible}
-      showButtonIfDocked={true}
-      onClose={closeNav}
-      isDocked={true}
-      size={isCollapsed ? SIZE_COLLAPSED : SIZE_EXPANDED}
-      hideCloseButton={false}
-      dockedBreakpoint={DOCKED_BREAKPOINT}
-      ownFocus={false}
-      button={button}
+    <EuiCollapsibleNavBeta
+      data-test-subj="projectLayoutSideNav"
+      initialIsCollapsed={isCollapsed}
+      onCollapseToggle={onCollapseToggle}
+      css={
+        isCollapsed
+          ? undefined
+          : { overflow: 'visible', clipPath: 'polygon(0 0, 300% 0, 300% 100%, 0 100%)' }
+      }
     >
-      {!isCollapsed && children}
-    </EuiCollapsibleNav>
+      {children}
+    </EuiCollapsibleNavBeta>
   );
 };

@@ -7,13 +7,26 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import {
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { EndpointActionsClient } from '../../services/actions/clients';
+import type {
   NoParametersRequestSchema,
-  KillOrSuspendProcessRequestSchema,
-  EndpointActionGetFileSchema,
+  ResponseActionsRequestBody,
+  ExecuteActionRequestBody,
+  ResponseActionGetFileRequestBody,
+  UploadActionApiRequestBody,
+} from '../../../../common/api/endpoint';
+import {
   ExecuteActionRequestSchema,
-  type ResponseActionBodySchema,
-} from '../../../../common/endpoint/schema/actions';
+  EndpointActionGetFileSchema,
+  IsolateRouteRequestSchema,
+  KillProcessRouteRequestSchema,
+  SuspendProcessRouteRequestSchema,
+  UnisolateRouteRequestSchema,
+  GetProcessesRouteRequestSchema,
+  UploadActionRequestSchema,
+} from '../../../../common/api/endpoint';
+
 import {
   ISOLATE_HOST_ROUTE_V2,
   UNISOLATE_HOST_ROUTE_V2,
@@ -24,13 +37,14 @@ import {
   UNISOLATE_HOST_ROUTE,
   GET_FILE_ROUTE,
   EXECUTE_ROUTE,
+  UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointActionDataParameterTypes,
   ResponseActionParametersWithPidOrEntityId,
   ResponseActionsExecuteParameters,
   ActionDetails,
-  HostMetadata,
+  KillOrSuspendProcessRequestBody,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -39,8 +53,7 @@ import type {
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
-import { registerActionFileUploadRoute } from './file_upload_handler';
-import { updateCases } from '../../services/actions/create/update_cases';
+import { errorHandler } from '../error_handler';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -61,7 +74,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: NoParametersRequestSchema,
+          request: IsolateRouteRequestSchema,
         },
       },
       withEndpointAuthz({ all: ['canIsolateHost'] }, logger, redirectHandler(ISOLATE_HOST_ROUTE_V2))
@@ -80,7 +93,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: NoParametersRequestSchema,
+          request: UnisolateRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -100,7 +113,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: NoParametersRequestSchema,
+          request: IsolateRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -120,7 +133,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: NoParametersRequestSchema,
+          request: UnisolateRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -140,7 +153,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: KillOrSuspendProcessRequestSchema,
+          request: KillProcessRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -163,7 +176,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: KillOrSuspendProcessRequestSchema,
+          request: SuspendProcessRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -186,7 +199,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: NoParametersRequestSchema,
+          request: GetProcessesRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -236,7 +249,33 @@ export function registerResponseActionRoutes(
       )
     );
 
-  registerActionFileUploadRoute(router, endpointContext);
+  router.versioned
+    .post({
+      access: 'public',
+      path: UPLOAD_ROUTE,
+      options: {
+        authRequired: true,
+        tags: ['access:securitySolution'],
+        body: {
+          accepts: ['multipart/form-data'],
+          output: 'stream',
+          maxBytes: endpointContext.serverConfig.maxUploadResponseActionFileBytes,
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: UploadActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'upload')
+      )
+    );
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
@@ -245,43 +284,76 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 ): RequestHandler<
   unknown,
   unknown,
-  TypeOf<typeof ResponseActionBodySchema>,
+  ResponseActionsRequestBody,
   SecuritySolutionRequestHandlerContext
 > {
+  const logger = endpointContext.logFactory.get('responseActionsHandler');
+
   return async (context, req, res) => {
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
-
-    let action: ActionDetails;
+    const casesClient = await endpointContext.service.getCasesClient(req);
+    const actionsClient = new EndpointActionsClient({
+      esClient,
+      casesClient,
+      endpointContext,
+      username: user?.username ?? 'unknown',
+    });
 
     try {
-      const createActionPayload = { ...req.body, command, user };
-      const endpointData = await endpointContext.service
-        .getEndpointMetadataService()
-        .getMetadataForEndpoints(esClient, [...new Set(createActionPayload.endpoint_ids)]);
-      const agentIds = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
+      let action: ActionDetails;
 
-      action = await endpointContext.service
-        .getActionCreateService()
-        .createAction(createActionPayload, agentIds);
+      switch (command) {
+        case 'isolate':
+          action = await actionsClient.isolate(req.body);
+          break;
 
-      // update cases
-      const casesClient = await endpointContext.service.getCasesClient(req);
-      await updateCases({ casesClient, createActionPayload, endpointData });
-    } catch (err) {
-      return res.customError({
-        statusCode: 500,
-        body: err,
+        case 'unisolate':
+          action = await actionsClient.release(req.body);
+          break;
+
+        case 'running-processes':
+          action = await actionsClient.runningProcesses(req.body);
+          break;
+
+        case 'execute':
+          action = await actionsClient.execute(req.body as ExecuteActionRequestBody);
+          break;
+
+        case 'suspend-process':
+          action = await actionsClient.suspendProcess(req.body as KillOrSuspendProcessRequestBody);
+          break;
+
+        case 'kill-process':
+          action = await actionsClient.killProcess(req.body as KillOrSuspendProcessRequestBody);
+          break;
+
+        case 'get-file':
+          action = await actionsClient.getFile(req.body as ResponseActionGetFileRequestBody);
+          break;
+
+        case 'upload':
+          action = await actionsClient.upload(req.body as UploadActionApiRequestBody);
+          break;
+
+        default:
+          throw new CustomHttpRequestError(
+            `No handler found for response action command: [${command}]`,
+            501
+          );
+      }
+
+      const { action: actionId, ...data } = action;
+
+      return res.ok({
+        body: {
+          action: actionId,
+          data,
+        },
       });
+    } catch (err) {
+      return errorHandler(logger, res, err);
     }
-
-    const { action: actionId, ...data } = action;
-    return res.ok({
-      body: {
-        action: actionId,
-        data,
-      },
-    });
   };
 }
 

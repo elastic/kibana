@@ -16,7 +16,7 @@ import {
 import { KibanaServices } from '../../../../lib/kibana';
 import { licenseService } from '../../../../hooks/use_license';
 import type { DefaultTimeRangeSetting } from '../../../../utils/default_date_settings';
-import { renderer as Renderer } from '.';
+import { plugin, renderer as Renderer } from '.';
 import type { InvestigateInTimelineButtonProps } from '../../../event_details/table/investigate_in_timeline_button';
 
 jest.mock('../../../../lib/kibana');
@@ -128,5 +128,27 @@ describe('insight component renderer', () => {
         ''
       );
     });
+  });
+});
+
+describe('plugin', () => {
+  it('renders insightsUpsellingMessage when provided', () => {
+    const insightsUpsellingMessage = 'test message';
+    const result = plugin({ insightsUpsellingMessage });
+
+    expect(result.button.label).toEqual(insightsUpsellingMessage);
+  });
+
+  it('disables the button when insightsUpsellingMessage is provided', () => {
+    const insightsUpsellingMessage = 'test message';
+    const result = plugin({ insightsUpsellingMessage });
+
+    expect(result.button.isDisabled).toBeTruthy();
+  });
+
+  it('show investigate message when insightsUpsellingMessage is not provided', () => {
+    const result = plugin({ insightsUpsellingMessage: null });
+
+    expect(result.button.label).toEqual('Investigate');
   });
 });

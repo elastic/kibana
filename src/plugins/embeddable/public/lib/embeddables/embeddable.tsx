@@ -17,6 +17,7 @@ import { IContainer } from '../containers';
 import { EmbeddableError, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
 import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
+import { EmbeddableAppContext } from '../../embeddable_panel/types';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   if (input.hidePanelTitles) return '';
@@ -94,13 +95,16 @@ export abstract class Embeddable<
         this.onResetInput(newInput);
       });
     }
-
     this.getOutput$()
       .pipe(
         map(({ title }) => title || ''),
         distinctUntilChanged()
       )
       .subscribe((title) => this.renderComplete.setTitle(title));
+  }
+
+  public getAppContext(): EmbeddableAppContext | undefined {
+    return this.parent?.getAppContext();
   }
 
   public reportsEmbeddableLoad() {

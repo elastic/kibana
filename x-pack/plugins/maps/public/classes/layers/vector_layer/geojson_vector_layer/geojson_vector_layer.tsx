@@ -28,13 +28,12 @@ import { DataRequestContext } from '../../../../actions';
 import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
 import { ISource } from '../../../sources/source';
 import { IVectorSource } from '../../../sources/vector_source';
-import { AbstractLayer, LayerIcon } from '../../layer';
+import { AbstractLayer, LayerMessage, LayerIcon } from '../../layer';
 import {
   AbstractVectorLayer,
   noResultsIcon,
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
 } from '../vector_layer';
-import { DataRequestAbortError } from '../../../util/data_request';
 import { getFeatureCollectionBounds } from '../../../util/get_feature_collection_bounds';
 import { syncGeojsonSourceData } from './geojson_source_data';
 import { performInnerJoins } from './perform_inner_joins';
@@ -61,6 +60,10 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
   }
 
   isLayerLoading(zoom: number) {
+    if (!this.isVisible() || !this.showAtZoomLevel(zoom)) {
+      return false;
+    }
+
     const isSourceLoading = super.isLayerLoading(zoom);
     if (isSourceLoading) {
       return true;
@@ -152,6 +155,24 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       await this.getSource().getSupportedShapeTypes(),
       this.getCurrentStyle().getDynamicPropertiesArray()
     );
+  }
+
+  getErrors(): LayerMessage[] {
+    const errors = super.getErrors();
+
+    this.getValidJoins().forEach((join) => {
+      const joinDescriptor = join.toDescriptor();
+      if (joinDescriptor.error) {
+        errors.push({
+          title: i18n.translate('xpack.maps.geojsonVectorLayer.joinErrorTitle', {
+            defaultMessage: `An error occurred when adding join metrics to layer features`,
+          }),
+          body: joinDescriptor.error,
+        });
+      }
+    });
+
+    return errors;
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap) {
@@ -288,12 +309,10 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
         sourceResult,
         joinStates,
         syncContext.updateSourceData,
-        syncContext.onJoinError
+        syncContext.setJoinError
       );
     } catch (error) {
-      if (!(error instanceof DataRequestAbortError)) {
-        throw error;
-      }
+      // Error used to stop execution flow. Error state stored in data request and displayed to user in layer legend.
     }
   }
 

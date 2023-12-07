@@ -10,7 +10,7 @@ export {
   AnnotationEditorControls,
   annotationsIconSet,
 } from './components/annotation_editor_controls';
-export { EventAnnotationGroupTableList, getAnnotationAccessor } from './components';
+export { getAnnotationAccessor } from './components';
 export {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,

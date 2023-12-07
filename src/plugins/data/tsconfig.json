@@ -25,7 +25,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/data-views-plugin",
     "@kbn/screenshot-mode-plugin",
-    "@kbn/task-manager-plugin",
     "@kbn/security-plugin",
     "@kbn/expressions-plugin",
     "@kbn/field-types",
@@ -38,8 +37,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/management-plugin",
     "@kbn/test-jest-helpers",
-    "@kbn/core-notifications-browser-mocks",
-    "@kbn/std",
     "@kbn/i18n-react",
     "@kbn/analytics",
     "@kbn/core-http-browser",
@@ -49,7 +46,10 @@
     "@kbn/core-application-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-utils-server",
-    "@kbn/data-service"
+    "@kbn/data-service",
+    "@kbn/react-kibana-context-render",
+    "@kbn/search-response-warnings",
+    "@kbn/shared-ux-link-redirect-app"
   ],
   "exclude": [
     "target/**/*",

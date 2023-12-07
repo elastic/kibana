@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
+import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
@@ -38,10 +39,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     esTestIndexToolDataStream,
     createEsDocumentsInGroups,
     createGroupedEsDocumentsInGroups,
+    removeAllAADDocs,
+    getAllAADDocs,
   } = getRuleServices(getService);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/154073
-  describe.skip('rule', async () => {
+  describe('rule', async () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
@@ -67,6 +69,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await esTestIndexTool.destroy();
       await esTestIndexToolOutput.destroy();
       await deleteDataStream(es, ES_TEST_DATA_STREAM_NAME);
+      await removeAllAADDocs();
     });
 
     [
@@ -136,6 +139,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         await initData();
 
         const docs = await waitForDocs(2);
+        const messagePattern =
+          /Document count is \d+.?\d* in the last 20s in .kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
+
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
           const { previousTimestamp, hits } = doc._source;
@@ -143,8 +149,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
           expect(name).to.be('always fire');
           expect(title).to.be(`rule 'always fire' matched query`);
-          const messagePattern =
-            /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
 
@@ -156,6 +160,18 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             expect(previousTimestamp).not.to.be.empty();
           }
         }
+
+        const aadDocs = await getAllAADDocs(1);
+
+        const alertDoc = aadDocs.body.hits.hits[0]._source;
+        expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+        expect(alertDoc['kibana.alert.title']).to.be("rule 'always fire' matched query");
+        expect(alertDoc['kibana.alert.evaluation.conditions']).to.be(
+          'Number of matching documents is greater than -1'
+        );
+        const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
+        expect(value).greaterThan(0);
+        expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
       })
     );
 
@@ -242,7 +258,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(name).to.be('always fire');
           expect(title).to.be(`rule 'always fire' matched query`);
           const messagePattern =
-            /rule 'always fire' is active:\n\n- Value: \d+.?\d*\n- Conditions Met: Number of matching documents where avg of testedValue is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /Document count is \d+.?\d* in the last 20s in .kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
 
@@ -345,7 +361,76 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           const titlePattern = /rule 'always fire' matched query for group group-\d/;
           expect(title).to.match(titlePattern);
           const messagePattern =
-            /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents for group \"group-\d\" is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /Document count is \d+.?\d* in the last 20s for group-\d+ in .kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
+          expect(message).to.match(messagePattern);
+          expect(hits).not.to.be.empty();
+
+          expect(previousTimestamp).to.be.empty();
+        }
+      })
+    );
+
+    [
+      [
+        'esQuery',
+        async () => {
+          await createRule({
+            name: 'always fire',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            groupBy: 'top',
+            termField: ['group', 'testedValue'],
+            termSize: 2,
+          });
+        },
+      ] as const,
+      [
+        'searchSource',
+        async () => {
+          const esTestDataView = await indexPatterns.create(
+            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
+            { override: true },
+            getUrlPrefix(Spaces.space1.id)
+          );
+          await createRule({
+            name: 'always fire',
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+            groupBy: 'top',
+            termField: ['group', 'testedValue'],
+            termSize: 2,
+          });
+        },
+      ] as const,
+    ].forEach(([searchType, initData]) =>
+      it(`runs correctly: threshold on grouped with multi term hit count < > for ${searchType} search type`, async () => {
+        // write documents from now to the future end date in groups
+        await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+        await initData();
+
+        const docs = await waitForDocs(2);
+        for (let i = 0; i < docs.length; i++) {
+          const doc = docs[i];
+          const { previousTimestamp, hits } = doc._source;
+          const { name, title, message } = doc._source.params;
+
+          expect(name).to.be('always fire');
+          const titlePattern = /rule 'always fire' matched query for group group-\d/;
+          expect(title).to.match(titlePattern);
+          const messagePattern =
+            /Document count is \d+.?\d* in the last 20s for group-\d+,\d+ in .kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
 
@@ -450,7 +535,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           const titlePattern = /rule 'always fire' matched query for group group-\d/;
           expect(title).to.match(titlePattern);
           const messagePattern =
-            /rule 'always fire' is active:\n\n- Value: \d+.?\d*\n- Conditions Met: Number of matching documents for group \"group-\d\" where avg of testedValue is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /Document count is \d+.?\d* in the last 20s for group-\d+ in .kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
 
@@ -538,7 +623,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(name).to.be('always fire');
           expect(title).to.be(`rule 'always fire' matched query`);
           const messagePattern =
-            /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /Document count is \d+.?\d* in the last 20s in .kibana-alerting-test-data (?:index|data view). ./;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
 
@@ -648,7 +733,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(name).to.be('fires once');
           expect(title).to.be(`rule 'fires once' matched query`);
           const messagePattern =
-            /rule 'fires once' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than or equal to 0 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /Document count is \d+.?\d* in the last 20s in .kibana-alerting-test-data (?:index|data view). Alert when greater than or equal to 0./;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
           expect(previousTimestamp).to.be.empty();
@@ -708,7 +793,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(name).to.be('always fire');
           expect(title).to.be(`rule 'always fire' matched query`);
           const messagePattern =
-            /rule 'always fire' is active:\n\n- Value: 0+\n- Conditions Met: Number of matching documents is less than 1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /Document count is \d+.?\d* in the last 20s in .kibana-alerting-test-data (?:index|data view). Alert when less than 1./;
           expect(message).to.match(messagePattern);
           expect(hits).to.be.empty();
 
@@ -773,11 +858,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       it(`runs correctly and populates recovery context for ${searchType} search type`, async () => {
         await initData();
 
-        // delay to let rule run once before adding data
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        await createEsDocumentsInGroups(1, endDate);
-
-        const docs = await waitForDocs(2);
+        let docs = await waitForDocs(1);
         const activeDoc = docs[0];
         const {
           name: activeName,
@@ -790,9 +871,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(activeTitle).to.be(`rule 'fire then recovers' matched query`);
         expect(activeValue).to.be('0');
         expect(activeMessage).to.match(
-          /rule 'fire then recovers' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is less than 1 over 4s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/
+          /Document count is \d+.?\d* in the last 4s in .kibana-alerting-test-data (?:index|data view). Alert when less than 1./
         );
 
+        await createEsDocumentsInGroups(1, endDate);
+        docs = await waitForDocs(2);
         const recoveredDoc = docs[1];
         const {
           name: recoveredName,
@@ -803,7 +886,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(recoveredName).to.be('fire then recovers');
         expect(recoveredTitle).to.be(`rule 'fire then recovers' recovered`);
         expect(recoveredMessage).to.match(
-          /rule 'fire then recovers' is recovered:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is NOT less than 1 over 4s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/
+          /Document count is \d+.?\d* in the last 4s in .kibana-alerting-test-data (?:index|data view). Alert when less than 1./
         );
       })
     );
@@ -892,7 +975,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(name).to.be('always fire');
           expect(title).to.be(`rule 'always fire' matched query`);
           const messagePattern =
-            /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /Document count is \d+.?\d* in the last 20s in test-data-stream (?:index|data view). Alert when greater than -1./;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
 
@@ -924,12 +1007,13 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         });
 
         const docs = await waitForDocs(2);
-
+        const messagePattern =
+          /Document count is \d+.?\d* in the last 300s in .kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
         expect(docs[0]._source.hits.length).greaterThan(0);
-        expect(docs[0]._source.params.message).to.match(/rule 'always fire' is active/);
+        expect(docs[0]._source.params.message).to.match(messagePattern);
 
         expect(docs[1]._source.hits.length).to.be(0);
-        expect(docs[1]._source.params.message).to.match(/rule 'always fire' is recovered/);
+        expect(docs[1]._source.params.message).to.match(messagePattern);
       });
 
       it('excludes hits from the previous rule run when excludeHitsFromPreviousRun is undefined', async () => {
@@ -947,12 +1031,13 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         });
 
         const docs = await waitForDocs(2);
-
+        const messagePattern =
+          /Document count is \d+.?\d* in the last 300s in .kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
         expect(docs[0]._source.hits.length).greaterThan(0);
-        expect(docs[0]._source.params.message).to.match(/rule 'always fire' is active/);
+        expect(docs[0]._source.params.message).to.match(messagePattern);
 
         expect(docs[1]._source.hits.length).to.be(0);
-        expect(docs[1]._source.params.message).to.match(/rule 'always fire' is recovered/);
+        expect(docs[1]._source.params.message).to.match(messagePattern);
       });
 
       it('does not exclude hits from the previous rule run when excludeHitsFromPreviousRun is false', async () => {
@@ -971,12 +1056,13 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         });
 
         const docs = await waitForDocs(2);
-
+        const messagePattern =
+          /Document count is \d+.?\d* in the last 300s in .kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
         expect(docs[0]._source.hits.length).greaterThan(0);
-        expect(docs[0]._source.params.message).to.match(/rule 'always fire' is active/);
+        expect(docs[0]._source.params.message).to.match(messagePattern);
 
         expect(docs[1]._source.hits.length).greaterThan(0);
-        expect(docs[1]._source.params.message).to.match(/rule 'always fire' is active/);
+        expect(docs[1]._source.params.message).to.match(messagePattern);
       });
     });
 
@@ -1000,11 +1086,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(docs[0]._source.hits.length).greaterThan(0);
         const messagePattern =
-          /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than 0 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+          /Document count is \d+.?\d* in the last 20s in .kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
         expect(docs[0]._source.params.message).to.match(messagePattern);
 
         expect(docs[1]._source.hits.length).to.be(0);
-        expect(docs[1]._source.params.message).to.match(/rule 'always fire' is recovered/);
+        expect(docs[1]._source.params.message).to.match(messagePattern);
       });
     });
 
@@ -1032,7 +1118,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       aggType?: string;
       aggField?: string;
       groupBy?: string;
-      termField?: string;
+      termField?: string | string[];
       termSize?: number;
     }
 

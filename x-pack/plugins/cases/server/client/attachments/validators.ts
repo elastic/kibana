@@ -10,7 +10,7 @@ import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
 } from '../../../common/utils/attachments';
-import type { CommentRequest } from '../../../common/api';
+import type { AttachmentRequest } from '../../../common/types/api';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
@@ -19,7 +19,7 @@ export const validateRegisteredAttachments = ({
   persistableStateAttachmentTypeRegistry,
   externalReferenceAttachmentTypeRegistry,
 }: {
-  query: CommentRequest;
+  query: AttachmentRequest;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
 }) => {

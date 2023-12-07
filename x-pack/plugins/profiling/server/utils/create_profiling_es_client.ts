@@ -10,8 +10,12 @@ import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  BaseFlameGraph,
+  ProfilingStatusResponse,
+  StackTraceResponse,
+} from '@kbn/profiling-utils';
 import { withProfilingSpan } from './with_profiling_span';
-import { ProfilingStatusResponse, StackTraceResponse } from '../../common/stack_traces';
 
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
   promise: T,
@@ -33,9 +37,14 @@ export interface ProfilingESClient {
   profilingStacktraces({}: {
     query: QueryDslQueryContainer;
     sampleSize: number;
+    durationSeconds: number;
   }): Promise<StackTraceResponse>;
-  profilingStatus(): Promise<ProfilingStatusResponse>;
+  profilingStatus(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;
+  profilingFlamegraph({}: {
+    query: QueryDslQueryContainer;
+    sampleSize: number;
+  }): Promise<BaseFlameGraph>;
 }
 
 export function createProfilingEsClient({
@@ -67,7 +76,7 @@ export function createProfilingEsClient({
 
       return unwrapEsResponse(promise);
     },
-    profilingStacktraces({ query, sampleSize }) {
+    profilingStacktraces({ query, sampleSize, durationSeconds }) {
       const controller = new AbortController();
 
       const promise = withProfilingSpan('_profiling/stacktraces', () => {
@@ -79,6 +88,7 @@ export function createProfilingEsClient({
               body: {
                 query,
                 sample_size: sampleSize,
+                requested_duration: durationSeconds,
               },
             },
             {
@@ -93,7 +103,7 @@ export function createProfilingEsClient({
 
       return unwrapEsResponse(promise) as Promise<StackTraceResponse>;
     },
-    profilingStatus() {
+    profilingStatus({ waitForResourcesCreated = false } = {}) {
       const controller = new AbortController();
 
       const promise = withProfilingSpan('_profiling/status', () => {
@@ -101,7 +111,9 @@ export function createProfilingEsClient({
           esClient.transport.request(
             {
               method: 'GET',
-              path: encodeURI('/_profiling/status'),
+              path: encodeURI(
+                `/_profiling/status?wait_for_resources_created=${waitForResourcesCreated}`
+              ),
             },
             {
               signal: controller.signal,
@@ -117,6 +129,27 @@ export function createProfilingEsClient({
     },
     getEsClient() {
       return esClient;
+    },
+    profilingFlamegraph({ query, sampleSize }) {
+      const controller = new AbortController();
+
+      const promise = withProfilingSpan('_profiling/flamegraph', () => {
+        return esClient.transport.request(
+          {
+            method: 'POST',
+            path: encodeURI('/_profiling/flamegraph'),
+            body: {
+              query,
+              sample_size: sampleSize,
+            },
+          },
+          {
+            signal: controller.signal,
+            meta: true,
+          }
+        );
+      });
+      return unwrapEsResponse(promise) as Promise<BaseFlameGraph>;
     },
   };
 }

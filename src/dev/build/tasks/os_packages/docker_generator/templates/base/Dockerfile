@@ -126,7 +126,13 @@ COPY --chown=1000:0 config/serverless.yml /usr/share/kibana/config/serverless.ym
 COPY --chown=1000:0 config/serverless.es.yml /usr/share/kibana/config/serverless.es.yml
 COPY --chown=1000:0 config/serverless.oblt.yml /usr/share/kibana/config/serverless.oblt.yml
 COPY --chown=1000:0 config/serverless.security.yml /usr/share/kibana/config/serverless.security.yml
+# Supportability enhancement: enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
+RUN echo '\n--heapsnapshot-signal=SIGUSR2' >> config/node.options
+RUN echo '--diagnostic-dir=./data' >> config/node.options
 {{/serverless}}
+{{^opensslLegacyProvider}}
+RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
+{{/opensslLegacyProvider}}
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
@@ -193,4 +199,4 @@ CMD ["/usr/local/bin/kibana-docker"]
 {{/cloud}}
 
 
-USER kibana
+USER 1000

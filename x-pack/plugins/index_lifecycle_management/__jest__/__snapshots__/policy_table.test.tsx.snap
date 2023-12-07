@@ -37,68 +37,71 @@ Array [
 `;
 
 exports[`policy table shows empty state when there are no policies 1`] = `
-<div
-  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter emotion-euiPanel-grow-m-l-subdued"
-  role="main"
+<section
+  class="emotion-euiPageSection-grow-l-center-transparent"
 >
   <div
-    class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
+    class="emotion-euiPageSection__content-l-center"
   >
     <div
-      class="euiEmptyPrompt__main"
+      class="euiPanel euiPanel--plain euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-plain-hasShadow"
     >
       <div
-        class="euiEmptyPrompt__icon"
-      >
-        <span
-          color="subdued"
-          data-euiicon-type="managementApp"
-        />
-      </div>
-      <div
-        class="euiEmptyPrompt__content"
+        class="euiEmptyPrompt__main"
       >
         <div
-          class="euiEmptyPrompt__contentInner"
+          class="euiEmptyPrompt__icon"
         >
-          <h1
-            class="euiTitle emotion-euiTitle-m"
-          >
-            Create your first index lifecycle policy
-          </h1>
-          <div
-            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          <span
+            color="subdued"
+            data-euiicon-type="managementApp"
           />
+        </div>
+        <div
+          class="euiEmptyPrompt__content"
+        >
           <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+            class="euiEmptyPrompt__contentInner"
           >
-            <p>
-               An index lifecycle policy helps you manage your indices as they age.
-            </p>
-          </div>
-          <div
-            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-          />
-          <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-            data-test-subj="createPolicyButton"
-            type="button"
-          >
-            <span
-              class="emotion-euiButtonDisplayContent"
+            <h1
+              class="euiTitle emotion-euiTitle-m"
+            >
+              Create your first index lifecycle policy
+            </h1>
+            <div
+              class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+            />
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <p>
+                 An index lifecycle policy helps you manage your indices as they age.
+              </p>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+            />
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+              data-test-subj="createPolicyButton"
+              type="button"
             >
               <span
-                color="inherit"
-                data-euiicon-type="plusInCircle"
-              />
-              Create policy
-            </span>
-          </button>
+                class="emotion-euiButtonDisplayContent"
+              >
+                <span
+                  color="inherit"
+                  data-euiicon-type="plusInCircle"
+                />
+                Create policy
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+</section>
 `;
 
 exports[`policy table sorts when linked index templates header is clicked 1`] = `

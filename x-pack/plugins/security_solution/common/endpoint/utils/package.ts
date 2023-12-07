@@ -9,22 +9,25 @@ import type { AxiosResponse } from 'axios';
 
 import type { KbnClient } from '@kbn/test';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
-import { epmRouteService } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS, epmRouteService } from '@kbn/fleet-plugin/common';
+import { usageTracker } from '../data_loaders/usage_tracker';
 
-export const getEndpointPackageInfo = async (
-  kbnClient: KbnClient
-): Promise<GetInfoResponse['item']> => {
-  const path = epmRouteService.getInfoPath('endpoint');
-  const endpointPackage = (
-    (await kbnClient.request({
-      path,
-      method: 'GET',
-    })) as AxiosResponse<GetInfoResponse>
-  ).data.item;
+export const getEndpointPackageInfo = usageTracker.track(
+  'getEndpointPackageInfo',
+  async (kbnClient: KbnClient): Promise<GetInfoResponse['item']> => {
+    const path = epmRouteService.getInfoPath('endpoint');
+    const endpointPackage = (
+      (await kbnClient.request({
+        path,
+        headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
+        method: 'GET',
+      })) as AxiosResponse<GetInfoResponse>
+    ).data.item;
 
-  if (!endpointPackage) {
-    throw new Error('EPM Endpoint package was not found!');
+    if (!endpointPackage) {
+      throw new Error('EPM Endpoint package was not found!');
+    }
+
+    return endpointPackage;
   }
-
-  return endpointPackage;
-};
+);

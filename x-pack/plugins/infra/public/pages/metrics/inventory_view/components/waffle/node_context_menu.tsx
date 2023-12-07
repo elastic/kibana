@@ -21,12 +21,12 @@ import {
   ActionMenuDivider,
   useLinkProps,
 } from '@kbn/observability-shared-plugin/public';
+import { findInventoryModel, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
-import { getNodeDetailUrl } from '../../../../link_to';
-import { findInventoryModel, findInventoryFields } from '../../../../../../common/inventory_models';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { useNodeDetailsRedirect } from '../../../../link_to';
 import { navigateToUptime } from '../../lib/navigate_to_uptime';
 
 interface Props {
@@ -38,6 +38,7 @@ interface Props {
 
 export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme(
   ({ options, currentTime, node, nodeType }) => {
+    const { getNodeDetailUrl } = useNodeDetailsRedirect();
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const inventoryModel = findInventoryModel(nodeType);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
@@ -63,7 +64,16 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     const inventoryId = useMemo(() => {
       if (nodeType === 'host') {
         if (node.ip) {
-          return { label: <EuiCode>host.ip</EuiCode>, value: node.ip };
+          return {
+            label: (
+              <EuiCode>
+                {i18n.translate('xpack.infra.inventoryId.host.ipCodeLabel', {
+                  defaultMessage: 'host.ip',
+                })}
+              </EuiCode>
+            ),
+            value: node.ip,
+          };
         }
       } else {
         const { id } = findInventoryFields(nodeType);
@@ -77,10 +87,13 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
 
     const nodeDetailMenuItemLinkProps = useLinkProps({
       ...getNodeDetailUrl({
-        nodeType,
-        nodeId: node.id,
-        from: nodeDetailFrom,
-        to: currentTime,
+        assetType: nodeType,
+        assetId: node.id,
+        search: {
+          from: nodeDetailFrom,
+          to: currentTime,
+          name: node.name,
+        },
       }),
     });
     const apmTracesMenuItemLinkProps = useLinkProps({
@@ -167,7 +180,10 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
             )}
             <SectionLinks>
               <SectionLink data-test-subj="viewLogsContextMenuItem" {...nodeLogsMenuItem} />
-              <SectionLink {...nodeDetailMenuItem} />
+              <SectionLink
+                data-test-subj="viewAssetDetailsContextMenuItem"
+                {...nodeDetailMenuItem}
+              />
               <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
               <SectionLink {...uptimeMenuItem} color={'primary'} />
             </SectionLinks>

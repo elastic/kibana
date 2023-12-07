@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import type { HTMLAttributes } from 'react';
 import React, { memo, useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -37,16 +35,19 @@ const StyledCubeForProcess = styled(CubeForProcess)`
   position: relative;
 `;
 
+const COLUMN_WIDTH = ['fit-content(10em)', 'auto'];
+
 const nodeDetailError = i18n.translate('xpack.securitySolution.resolver.panel.nodeDetail.Error', {
   defaultMessage: 'Node details were unable to be retrieved',
 });
 
+// eslint-disable-next-line react/display-name
 export const NodeDetail = memo(function ({ id, nodeID }: { id: string; nodeID: string }) {
   const processEvent = useSelector((state: State) =>
-    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer.analyzerById[id])(nodeID))
+    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
   );
   const nodeStatus = useSelector((state: State) =>
-    selectors.nodeDataStatus(state.analyzer.analyzerById[id])(nodeID)
+    selectors.nodeDataStatus(state.analyzer[id])(nodeID)
   );
 
   return nodeStatus === 'loading' ? (
@@ -68,6 +69,7 @@ export const NodeDetail = memo(function ({ id, nodeID }: { id: string; nodeID: s
  * A description list view of all the Metadata that goes with a particular process event, like:
  * Created, PID, User/Domain, etc.
  */
+// eslint-disable-next-line react/display-name
 const NodeDetailView = memo(function ({
   id,
   processEvent,
@@ -79,10 +81,10 @@ const NodeDetailView = memo(function ({
 }) {
   const processName = eventModel.processNameSafeVersion(processEvent);
   const nodeState = useSelector((state: State) =>
-    selectors.nodeDataStatus(state.analyzer.analyzerById[id])(nodeID)
+    selectors.nodeDataStatus(state.analyzer[id])(nodeID)
   );
   const relatedEventTotal = useSelector((state: State) => {
-    return selectors.relatedEventTotalCount(state.analyzer.analyzerById[id])(nodeID);
+    return selectors.relatedEventTotalCount(state.analyzer[id])(nodeID);
   });
   const eventTime = eventModel.eventTimestamp(processEvent);
   const dateTime = useFormattedDate(eventTime);
@@ -249,6 +251,7 @@ const NodeDetailView = memo(function ({
       <StyledDescriptionList
         data-test-subj="resolver:node-detail"
         type="column"
+        columnWidths={COLUMN_WIDTH}
         align="left"
         titleProps={
           {

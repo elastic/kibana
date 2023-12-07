@@ -11,15 +11,10 @@ import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import type { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
-import type { Space } from '../../../common';
-import { ALL_SPACES_ID } from '../../../common/constants';
-import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal';
-import { getSpacesContextProviderWrapper } from '../../spaces_context';
-import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { AliasTable } from './alias_table';
 import { NoSpacesAvailable } from './no_spaces_available';
 import { RelativesFooter } from './relatives_footer';
@@ -27,6 +22,11 @@ import { SelectableSpacesControl } from './selectable_spaces_control';
 import { ShareModeControl } from './share_mode_control';
 import { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
 import { ShareToSpaceForm } from './share_to_space_form';
+import type { Space } from '../../../common';
+import { ALL_SPACES_ID } from '../../../common/constants';
+import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal';
+import { getSpacesContextProviderWrapper } from '../../spaces_context';
+import { spacesManagerMock } from '../../spaces_manager/mocks';
 
 interface SetupOpts {
   mockSpaces?: Space[];
@@ -386,6 +386,110 @@ describe('ShareToSpaceFlyout', () => {
     expect(mockToastNotifications.addSuccess).toHaveBeenCalledTimes(1);
     expect(mockToastNotifications.addError).not.toHaveBeenCalled();
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  describe('handles related objects correctly', () => {
+    const relatedObject = {
+      type: 'index-pattern',
+      id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+      spaces: ['my-active-space', 'space-1'],
+      inboundReferences: [
+        {
+          type: 'dashboard',
+          id: 'my-dash',
+          name: 'foo',
+        },
+      ],
+    };
+
+    it('adds spaces to related objects when only adding spaces', async () => {
+      const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
+        await setup({
+          additionalShareableReferences: [relatedObject],
+        });
+
+      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+
+      changeSpaceSelection(wrapper, ['space-1', 'space-2']);
+      await clickButton(wrapper, 'save');
+
+      const expectedObjects: Array<{ type: string; id: string }> = [
+        savedObjectToShare,
+        relatedObject,
+      ].map(({ type, id }) => ({
+        type,
+        id,
+      }));
+      expect(mockSpacesManager.updateSavedObjectsSpaces).toBeCalledTimes(1);
+      expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
+        expectedObjects,
+        ['space-2'],
+        []
+      );
+
+      expect(mockToastNotifications.addSuccess).toHaveBeenCalledTimes(1);
+      expect(mockToastNotifications.addError).not.toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not remove spaces from related objects when only removing spaces', async () => {
+      const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
+        await setup({
+          additionalShareableReferences: [relatedObject],
+        });
+
+      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+
+      changeSpaceSelection(wrapper, []);
+      await clickButton(wrapper, 'save');
+
+      expect(mockSpacesManager.updateSavedObjectsSpaces).toBeCalledTimes(1);
+      expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
+        [{ type: savedObjectToShare.type, id: savedObjectToShare.id }],
+        [],
+        ['space-1']
+      );
+
+      expect(mockToastNotifications.addSuccess).toHaveBeenCalledTimes(1);
+      expect(mockToastNotifications.addError).not.toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('adds spaces but does not remove spaces from related objects when adding and removing spaces', async () => {
+      const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
+        await setup({
+          additionalShareableReferences: [relatedObject],
+        });
+
+      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+
+      changeSpaceSelection(wrapper, ['space-2', 'space-3']);
+      await clickButton(wrapper, 'save');
+
+      expect(mockSpacesManager.updateSavedObjectsSpaces).toBeCalledTimes(2);
+      expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenNthCalledWith(
+        1,
+        [{ type: savedObjectToShare.type, id: savedObjectToShare.id }],
+        ['space-2', 'space-3'],
+        ['space-1']
+      );
+      expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenNthCalledWith(
+        2,
+        [{ type: relatedObject.type, id: relatedObject.id }],
+        ['space-2', 'space-3'],
+        []
+      );
+
+      expect(mockToastNotifications.addSuccess).toHaveBeenCalledTimes(1);
+      expect(mockToastNotifications.addError).not.toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('correctly renders share mode control', () => {

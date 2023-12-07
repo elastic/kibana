@@ -1,0 +1,35 @@
+openapi: 3.0.0
+info:
+  title: Error Schema
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    ErrorSchema:
+      type: object
+      required:
+        - error
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        rule_id:
+          $ref: './rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+        list_id:
+          type: string
+          minLength: 1
+        item_id:
+          type: string
+          minLength: 1
+        error:
+          type: object
+          required:
+            - status_code
+            - message
+          properties:
+            status_code:
+              type: integer
+              minimum: 400
+            message:
+              type: string

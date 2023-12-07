@@ -7,7 +7,7 @@
 
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 
-type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M' | 'Y';
+type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 
 interface Duration {
   value: number;

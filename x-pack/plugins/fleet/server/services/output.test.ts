@@ -9,8 +9,11 @@ import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/serv
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
-import type { OutputSOAttributes } from '../types';
+import type { Logger } from '@kbn/logging';
 
+import { RESERVED_CONFIG_YML_KEYS } from '../../common/constants';
+
+import type { OutputSOAttributes } from '../types';
 import { OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 
 import { outputService, outputIdToUuid } from './output';
@@ -27,6 +30,17 @@ const mockedAppContextService = appContextService as jest.Mocked<typeof appConte
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
+
+mockedAppContextService.getLogger.mockImplementation(() => {
+  return {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  } as unknown as Logger;
+});
+
+mockedAppContextService.getExperimentalFeatures.mockReturnValue({});
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
@@ -690,6 +704,144 @@ describe('Output Service', () => {
         { id: 'output-1' }
       );
     });
+
+    it('should throw when a remote es output is attempted to be created as default data output', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+
+      await expect(
+        outputService.create(
+          soClient,
+          esClientMock,
+          {
+            is_default: true,
+            is_default_monitoring: false,
+            name: 'Test',
+            type: 'remote_elasticsearch',
+          },
+          { id: 'output-1' }
+        )
+      ).rejects.toThrow(
+        `Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.`
+      );
+    });
+
+    it('should set preset: balanced by default when creating a new ES output', async () => {
+      const soClient = getMockedSoClient({});
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'elasticsearch',
+        },
+        {
+          id: 'output-1',
+        }
+      );
+
+      expect(soClient.create).toBeCalledWith(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        // Preset should be inferred as balanced if not provided
+        expect.objectContaining({
+          preset: 'balanced',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should set preset: custom when config_yaml contains a reserved key', async () => {
+      const soClient = getMockedSoClient({});
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'elasticsearch',
+          config_yaml: `
+            bulk_max_size: 1000
+          `,
+        },
+        {
+          id: 'output-1',
+        }
+      );
+
+      expect(soClient.create).toBeCalledWith(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          preset: 'custom',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should honor preset: custom in attributes', async () => {
+      const soClient = getMockedSoClient({});
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'elasticsearch',
+          config_yaml: `
+            some_non_reserved_key: foo
+          `,
+          preset: 'custom',
+        },
+        {
+          id: 'output-1',
+        }
+      );
+
+      expect(soClient.create).toBeCalledWith(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          preset: 'custom',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should throw an error when preset: balanced is provided but config_yaml contains a reserved key', async () => {
+      const soClient = getMockedSoClient({});
+
+      expect(
+        outputService.create(
+          soClient,
+          esClientMock,
+          {
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'Test',
+            type: 'elasticsearch',
+            config_yaml: `
+            bulk_max_size: 1000
+          `,
+            preset: 'balanced',
+          },
+          {
+            id: 'output-1',
+          }
+        )
+      ).rejects.toThrow(
+        `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
+          ', '
+        )}`
+      );
+
+      expect(soClient.create).not.toBeCalled();
+    });
   });
 
   describe('update', () => {
@@ -897,6 +1049,7 @@ describe('Output Service', () => {
         type: 'elasticsearch',
         hosts: ['http://test:4343'],
         ssl: null,
+        preset: 'balanced',
       });
     });
 
@@ -916,9 +1069,9 @@ describe('Output Service', () => {
         type: 'elasticsearch',
         hosts: ['http://test:4343'],
         auth_type: null,
+        connection_type: null,
         broker_timeout: null,
-        broker_ack_reliability: null,
-        broker_buffer_size: null,
+        required_acks: null,
         client_id: null,
         compression: null,
         compression_level: null,
@@ -935,6 +1088,7 @@ describe('Output Service', () => {
         headers: null,
         username: null,
         version: null,
+        preset: 'balanced',
       });
     });
 
@@ -1033,13 +1187,14 @@ describe('Output Service', () => {
         ca_sha256: null,
         ca_trusted_fingerprint: null,
         auth_type: null,
+        connection_type: null,
         broker_timeout: null,
-        broker_ack_reliability: null,
-        broker_buffer_size: null,
+        required_acks: null,
         client_id: null,
         compression: null,
         compression_level: null,
         hash: null,
+        ssl: null,
         key: null,
         partition: null,
         password: null,
@@ -1257,10 +1412,13 @@ describe('Output Service', () => {
         hosts: ['test:4343'],
         ca_sha256: null,
         ca_trusted_fingerprint: null,
+        password: null,
+        username: null,
+        ssl: null,
+        sasl: null,
         broker_timeout: 10,
-        broker_ack_reliability: 'Wait for local commit',
-        broker_buffer_size: 256,
-        client_id: 'Elastic Agent',
+        required_acks: 1,
+        client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
         partition: 'hash',
@@ -1285,11 +1443,14 @@ describe('Output Service', () => {
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         hosts: ['test:4343'],
         broker_timeout: 10,
-        broker_ack_reliability: 'Wait for local commit',
-        broker_buffer_size: 256,
+        required_acks: 1,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
-        client_id: 'Elastic Agent',
+        password: null,
+        username: null,
+        ssl: null,
+        sasl: null,
+        client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
         partition: 'hash',
@@ -1310,25 +1471,28 @@ describe('Output Service', () => {
 
       await outputService.update(soClient, esClientMock, 'output-test', {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
       });
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
-        client_id: 'Elastic Agent',
+        password: null,
+        username: null,
+        ssl: null,
+        sasl: null,
+        client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
         partition: 'hash',
         timeout: 30,
         version: '1.0.0',
         broker_timeout: 10,
-        broker_ack_reliability: 'Wait for local commit',
-        broker_buffer_size: 256,
+        required_acks: 1,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -1354,7 +1518,7 @@ describe('Output Service', () => {
         'output-test',
         {
           type: 'kafka',
-          hosts: ['http://test:4343'],
+          hosts: ['test:4343'],
           is_default: true,
         },
         {
@@ -1364,19 +1528,22 @@ describe('Output Service', () => {
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
-        client_id: 'Elastic Agent',
+        password: null,
+        username: null,
+        ssl: null,
+        sasl: null,
+        client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
         partition: 'hash',
         timeout: 30,
         version: '1.0.0',
         broker_timeout: 10,
-        broker_ack_reliability: 'Wait for local commit',
-        broker_buffer_size: 256,
+        required_acks: 1,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -1396,25 +1563,28 @@ describe('Output Service', () => {
 
       await outputService.update(soClient, esClientMock, 'output-test', {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
       });
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
-        client_id: 'Elastic Agent',
+        password: null,
+        username: null,
+        ssl: null,
+        sasl: null,
+        client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
         partition: 'hash',
         timeout: 30,
         version: '1.0.0',
         broker_timeout: 10,
-        broker_ack_reliability: 'Wait for local commit',
-        broker_buffer_size: 256,
+        required_acks: 1,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -1438,7 +1608,7 @@ describe('Output Service', () => {
         'output-test',
         {
           type: 'kafka',
-          hosts: ['http://test:4343'],
+          hosts: ['test:4343'],
           is_default: true,
         },
         {
@@ -1448,19 +1618,22 @@ describe('Output Service', () => {
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
-        client_id: 'Elastic Agent',
+        password: null,
+        username: null,
+        ssl: null,
+        sasl: null,
+        client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
         partition: 'hash',
         timeout: 30,
         version: '1.0.0',
         broker_timeout: 10,
-        broker_ack_reliability: 'Wait for local commit',
-        broker_buffer_size: 256,
+        required_acks: 1,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -1468,6 +1641,23 @@ describe('Output Service', () => {
         'synthetics_policy',
         { data_output_id: 'output-test' },
         { force: true }
+      );
+    });
+
+    it('should throw when a remote es output is attempted to be updated as default data output', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+
+      await expect(
+        outputService.update(soClient, esClientMock, 'output-test', {
+          is_default: true,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'remote_elasticsearch',
+        })
+      ).rejects.toThrow(
+        `Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.`
       );
     });
   });
@@ -1607,6 +1797,48 @@ describe('Output Service', () => {
       const hosts = outputService.getDefaultESHosts();
 
       expect(hosts).toEqual(['http://localhost:9200']);
+    });
+  });
+
+  describe('getLatestOutputHealth', () => {
+    it('should return unknown state if no hits', async () => {
+      esClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [],
+        },
+      } as any);
+
+      const response = await outputService.getLatestOutputHealth(esClientMock, 'id');
+
+      expect(response).toEqual({
+        state: 'UNKNOWN',
+        message: '',
+        timestamp: '',
+      });
+    });
+
+    it('should return state from hits', async () => {
+      esClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                state: 'DEGRADED',
+                message: 'connection error',
+                '@timestamp': '2023-11-30T14:25:31Z',
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const response = await outputService.getLatestOutputHealth(esClientMock, 'id');
+
+      expect(response).toEqual({
+        state: 'DEGRADED',
+        message: 'connection error',
+        timestamp: '2023-11-30T14:25:31Z',
+      });
     });
   });
 });

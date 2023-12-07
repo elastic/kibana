@@ -8,12 +8,10 @@
 
 export { PluginsService } from './plugins_service';
 export type {
-  PluginsServiceSetup,
-  PluginsServiceStart,
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart,
   DiscoveredPlugins,
 } from './plugins_service';
 export { config } from './plugins_config';
-/** @internal */
-export { isNewPlatformPlugin } from './discovery';
 export type { PluginDependencies } from './types';
 export { PluginWrapper } from './plugin';

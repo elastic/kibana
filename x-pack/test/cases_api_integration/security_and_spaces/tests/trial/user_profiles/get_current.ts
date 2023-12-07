@@ -6,9 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { CaseStatuses, CommentType } from '@kbn/cases-plugin/common';
-import { User } from '@kbn/cases-plugin/common/api';
-import { CreateCaseUserAction } from '@kbn/cases-plugin/common/types/domain';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import { CreateCaseUserAction, User, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { setupSuperUserProfile } from '../../../../common/lib/api/user_profiles';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { superUser } from '../../../../common/lib/authentication/users';
@@ -216,7 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
                 id: patchedCase.comments![0].id,
                 version: patchedCase.comments![0].version,
                 comment: 'a new comment',
-                type: CommentType.user,
+                type: AttachmentType.user,
                 owner: 'securitySolutionFixture',
               },
               auth: null,
@@ -251,7 +250,7 @@ export default function ({ getService }: FtrProviderContext) {
                 id: patchedCase.comments![0].id,
                 version: patchedCase.comments![0].version,
                 comment: 'a new comment',
-                type: CommentType.user,
+                type: AttachmentType.user,
                 owner: 'securitySolutionFixture',
               },
             });

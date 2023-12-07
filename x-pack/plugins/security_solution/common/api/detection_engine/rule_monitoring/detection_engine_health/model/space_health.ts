@@ -6,7 +6,7 @@
  */
 
 import type { HealthParameters, HealthSnapshot } from './health_metadata';
-import type { RuleExecutionStats, RuleStats, StatsHistory } from './health_stats';
+import type { HealthOverviewStats, HealthOverviewState, HealthHistory } from './health_stats';
 
 /**
  * Health calculation parameters for the current Kibana space.
@@ -18,27 +18,27 @@ export type SpaceHealthParameters = HealthParameters;
  */
 export interface SpaceHealthSnapshot extends HealthSnapshot {
   /**
-   * Health stats at the moment of the calculation request.
+   * Health state at the moment of the calculation request.
    */
-  stats_at_the_moment: SpaceHealthStatsAtTheMoment;
+  state_at_the_moment: SpaceHealthState;
 
   /**
    * Health stats calculated over the interval specified in the health parameters.
    */
-  stats_over_interval: SpaceHealthStatsOverInterval;
+  stats_over_interval: SpaceHealthStats;
 
   /**
    * History of change of the same health stats during the interval.
    */
-  history_over_interval: StatsHistory<SpaceHealthStatsOverInterval>;
+  history_over_interval: HealthHistory<SpaceHealthStats>;
 }
 
 /**
- * Health stats at the moment of the calculation request.
+ * Health state at the moment of the calculation request.
  */
-export type SpaceHealthStatsAtTheMoment = RuleStats;
+export type SpaceHealthState = HealthOverviewState;
 
 /**
  * Health stats calculated over a given interval.
  */
-export type SpaceHealthStatsOverInterval = RuleExecutionStats;
+export type SpaceHealthStats = HealthOverviewStats;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Case } from '../../../common/api';
+import type { Case } from '../../../common/types/domain';
 import { format } from './itsm_format';
 
 describe('ITSM formatter', () => {

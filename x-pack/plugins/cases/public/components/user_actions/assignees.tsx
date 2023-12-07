@@ -8,10 +8,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import React, { memo } from 'react';
-import type { AssigneesUserAction } from '../../../common/types/domain';
+import type { AssigneesUserAction, User } from '../../../common/types/domain';
 import { UserActionActions } from '../../../common/types/domain';
 import type { SnakeToCamelCase } from '../../../common/types';
-import type { User } from '../../../common/api';
 import { getName } from '../user_profiles/display_name';
 import type { Assignee } from '../user_profiles/types';
 import { UserToolTip } from '../user_profiles/user_tooltip';

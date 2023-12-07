@@ -34,7 +34,7 @@ export interface UsageStats {
   'discover:searchFieldsFromSource': boolean;
   'discover:showFieldStatistics': boolean;
   'discover:showMultiFields': boolean;
-  'discover:enableSql': boolean;
+  'discover:enableESQL': boolean;
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'observability:enableInspectEsQueries': boolean;
@@ -63,6 +63,8 @@ export interface UsageStats {
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;
   'securitySolution:enableNewsFeed': boolean;
+  'securitySolution:enableExpandableFlyout': boolean;
+  'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
   'securitySolution:enableCcsWarning': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
@@ -134,8 +136,8 @@ export interface UsageStats {
   'labs:canvas:useDataService': boolean;
   'labs:presentation:timeToPresent': boolean;
   'labs:dashboard:enable_ui': boolean;
+  'labs:dashboard:linksPanel': boolean;
   'labs:dashboard:deferBelowFold': boolean;
-  'labs:dashboard:dashboardControls': boolean;
   'discover:rowHeightOption': number;
   hideAnnouncements: boolean;
   isDefaultIndexMigrated: boolean;
@@ -149,7 +151,15 @@ export interface UsageStats {
   'observability:apmServiceInventoryOptimizedSorting': boolean;
   'observability:apmTraceExplorerTab': boolean;
   'observability:apmEnableCriticalPath': boolean;
+  'observability:apmEnableProfilingIntegration': boolean;
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
+  'observability:profilingPerVCPUWattX86': number;
+  'observability:profilingPervCPUWattArm64': number;
+  'observability:profilingCo2PerKWH': number;
+  'observability:profilingDatacenterPUE': number;
+  'observability:profilingUseLegacyCo2Calculation': boolean;
+  'observability:profilingCostPervCPUPerHour': number;
+  'observability:profilingAWSCostDiscountRate': number;
 }

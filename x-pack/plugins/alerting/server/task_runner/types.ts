@@ -6,9 +6,10 @@
  */
 
 import { KibanaRequest, Logger } from '@kbn/core/server';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, DecoratedError } from '@kbn/task-manager-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import { IAlertsClient } from '../alerts_client/types';
 import { Alert } from '../alert';
 import { TaskRunnerContext } from './task_runner_factory';
 import {
@@ -32,7 +33,7 @@ export interface RuleTaskRunResult {
   state: RuleTaskState;
   monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
-  hasError: boolean;
+  taskRunError?: DecoratedError;
 }
 
 // This is the state of the alerting task after rule execution, which includes run metrics plus the task state
@@ -86,16 +87,23 @@ export interface ExecutionHandlerOptions<
   ruleLabel: string;
   previousStartedAt: Date | null;
   actionsClient: PublicMethodsOf<ActionsClient>;
-  maintenanceWindowIds?: string[];
+  alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
 }
 
-export interface Executable<
+export type Executable<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
-> {
+> = {
   action: RuleAction;
-  alert?: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
-  summarizedAlerts?: CombinedSummarizedAlerts;
-}
+} & (
+  | {
+      alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
+      summarizedAlerts?: never;
+    }
+  | {
+      alert?: never;
+      summarizedAlerts: CombinedSummarizedAlerts;
+    }
+);

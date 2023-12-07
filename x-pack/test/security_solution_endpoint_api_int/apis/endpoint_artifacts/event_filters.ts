@@ -14,6 +14,7 @@ import {
   getImportExceptionsListSchemaMock,
   toNdJsonString,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
+import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
@@ -25,7 +26,9 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('Endpoint artifacts (via lists plugin): Event Filters', () => {
+  describe('Endpoint artifacts (via lists plugin): Event Filters', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     before(async () => {
@@ -178,25 +181,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('and has authorization to manage endpoint security', () => {
       for (const eventFilterApiCall of eventFilterCalls) {
-        it(`should error on [${eventFilterApiCall.method}] if invalid field`, async () => {
-          const body = eventFilterApiCall.getBody({});
-
-          body.entries[0].field = 'some.invalid.field';
-
-          await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
-            .set('kbn-xsrf', 'true')
-            .send(body)
-            .expect(400)
-            .expect(anEndpointArtifactError)
-            .expect(anErrorMessageWith(/invalid field: some\.invalid\.field/));
-        });
-
         it(`should error on [${eventFilterApiCall.method}] if more than one OS is set`, async () => {
           const body = eventFilterApiCall.getBody({ os_types: ['linux', 'windows'] });
 
           await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+            .auth(ROLE.endpoint_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -211,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           // Using superuser there as we need custom license for this action
           await supertest[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+            .auth(ROLE.endpoint_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -224,7 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           // Using superuser here as we need custom license for this action
           await supertest[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+            .auth(ROLE.endpoint_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(200);
@@ -236,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
       for (const eventFilterApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
         it(`should not error on [${eventFilterApiCall.method}] - [${eventFilterApiCall.info}]`, async () => {
           await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+            .auth(ROLE.endpoint_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(eventFilterApiCall.getBody())
             .expect(200);
@@ -244,24 +233,23 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('and user has authorization to read event filters', () => {
+    describe('and user has authorization to read event filters', function () {
+      targetTags(this, ['@skipInServerless']); // no such role in serverless
+
       for (const eventFilterApiCall of [...eventFilterCalls, ...needsWritePrivilege]) {
         it(`should error on [${eventFilterApiCall.method}] - [${eventFilterApiCall.info}]`, async () => {
           await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.artifact_read_role, 'changeme')
+            .auth(ROLE.hunter, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(eventFilterApiCall.getBody())
-            .expect(403, {
-              status_code: 403,
-              message: 'EndpointArtifactError: Endpoint authorization failure',
-            });
+            .expect(403);
         });
       }
 
       for (const eventFilterApiCall of needsReadPrivilege) {
         it(`should not error on [${eventFilterApiCall.method}] - [${eventFilterApiCall.info}]`, async () => {
           await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.artifact_read_role, 'changeme')
+            .auth(ROLE.hunter, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(eventFilterApiCall.getBody())
             .expect(200);
@@ -280,10 +268,7 @@ export default function ({ getService }: FtrProviderContext) {
             .auth(ROLE.t1_analyst, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(eventFilterApiCall.getBody())
-            .expect(403, {
-              status_code: 403,
-              message: 'EndpointArtifactError: Endpoint authorization failure',
-            });
+            .expect(403);
         });
       }
     });

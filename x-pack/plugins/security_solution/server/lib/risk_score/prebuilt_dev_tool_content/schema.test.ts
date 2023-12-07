@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { ReadConsoleRequestSchema } from './schema';
+import { readConsoleRequestBody } from '../../../../common/api/entity_analytics/risk_score';
 
 describe('ReadConsoleRequestSchema', () => {
   it('should throw error', () => {
-    expect(() => ReadConsoleRequestSchema.params.validate({ console_id: '123' })).toThrow();
+    expect(() => readConsoleRequestBody.params.validate({ console_id: '123' })).toThrow();
   });
 
   it.each([['enable_host_risk_score', 'enable_user_risk_score']])(
     'should allow console_id %p',
     async (template) => {
-      expect(ReadConsoleRequestSchema.params.validate({ console_id: template })).toEqual({
+      expect(readConsoleRequestBody.params.validate({ console_id: template })).toEqual({
         console_id: template,
       });
     }

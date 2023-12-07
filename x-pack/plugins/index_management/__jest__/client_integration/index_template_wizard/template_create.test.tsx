@@ -8,7 +8,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import '../../../test/global_mocks';
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment } from '../helpers';
 
@@ -103,12 +102,12 @@ describe('<TemplateCreate />', () => {
     httpRequestsMockHelpers.setLoadNodesPluginsResponse([]);
 
     // disable all react-beautiful-dnd development warnings
-    (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = true;
+    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = true;
   });
 
   afterAll(() => {
     jest.useRealTimers();
-    (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = false;
+    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = false;
   });
 
   describe('composable index template', () => {
@@ -533,6 +532,13 @@ describe('<TemplateCreate />', () => {
       await actions.completeStepOne({
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
+        dataStream: {},
+        lifecycle: {
+          enabled: true,
+          value: 1,
+          unit: 'd',
+        },
+        allowAutoCreate: true,
       });
       // Component templates
       await actions.completeStepTwo('test_component_template_1');
@@ -559,6 +565,8 @@ describe('<TemplateCreate />', () => {
           body: JSON.stringify({
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
+            allowAutoCreate: true,
+            dataStream: {},
             _kbnMeta: {
               type: 'default',
               hasDatastream: false,
@@ -581,6 +589,10 @@ describe('<TemplateCreate />', () => {
                 },
               },
               aliases: ALIASES,
+              lifecycle: {
+                enabled: true,
+                data_retention: '1d',
+              },
             },
           }),
         })
@@ -620,6 +632,11 @@ describe('<TemplateCreate />', () => {
       name: TEMPLATE_NAME,
       indexPatterns: DEFAULT_INDEX_PATTERNS,
       dataStream: {},
+      lifecycle: {
+        enabled: true,
+        value: 1,
+        unit: 'd',
+      },
     });
 
     await act(async () => {
@@ -630,8 +647,15 @@ describe('<TemplateCreate />', () => {
       `${API_BASE_PATH}/index_templates/simulate`,
       expect.objectContaining({
         body: JSON.stringify({
+          template: {
+            lifecycle: {
+              enabled: true,
+              data_retention: '1d',
+            },
+          },
           index_patterns: DEFAULT_INDEX_PATTERNS,
           data_stream: {},
+          allow_auto_create: false,
         }),
       })
     );

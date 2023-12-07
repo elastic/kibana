@@ -6,7 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import { expandableFlyoutStateFromEventMeta } from '../../../flyout/url/expandable_flyout_state_from_event_meta';
+import { expandableFlyoutStateFromEventMeta } from '../../../flyout/document_details/shared/hooks/url/expandable_flyout_state_from_event_meta';
 
 export interface ResolveFlyoutParamsConfig {
   index: string;

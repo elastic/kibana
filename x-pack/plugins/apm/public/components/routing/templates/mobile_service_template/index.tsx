@@ -29,7 +29,13 @@ import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from '../apm_service_template/analyze_data_button';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
-  key: 'overview' | 'transactions' | 'service-map' | 'alerts';
+  key:
+    | 'overview'
+    | 'transactions'
+    | 'dependencies'
+    | 'errors-and-crashes'
+    | 'service-map'
+    | 'alerts';
   hidden?: boolean;
 };
 
@@ -57,7 +63,7 @@ function TemplateWithContext({
   const {
     path: { serviceName },
     query,
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, environment },
   } = useApmParams('/mobile-services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -116,12 +122,10 @@ function TemplateWithContext({
                 <EuiFlexItem grow={false}>
                   <ServiceIcons
                     serviceName={serviceName}
+                    environment={environment}
                     start={start}
                     end={end}
                   />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <TechnicalPreviewBadge />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -187,6 +191,26 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
           defaultMessage: 'Transactions',
         }
       ),
+    },
+    {
+      key: 'dependencies',
+      href: router.link('/mobile-services/{serviceName}/dependencies', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
+        defaultMessage: 'Dependencies',
+      }),
+    },
+    {
+      key: 'errors-and-crashes',
+      href: router.link('/mobile-services/{serviceName}/errors-and-crashes', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.serviceDetails.mobileErrorsTabLabel', {
+        defaultMessage: 'Errors & Crashes',
+      }),
     },
     {
       key: 'service-map',

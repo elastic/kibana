@@ -14,12 +14,13 @@ import {
   createServer,
   getListenerOptions,
   getServerOptions,
+  setTlsConfig,
   getRequestId,
 } from '@kbn/server-http-tools';
 
 import type { Duration } from 'moment';
-import { firstValueFrom, Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
+import { take, pairwise } from 'rxjs/operators';
 import apm from 'elastic-apm-node';
 // @ts-expect-error no type definition
 import Brok from 'brok';
@@ -58,6 +59,7 @@ import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
+import { StaticAssets, type InternalStaticAssets } from './static_assets';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -130,7 +132,12 @@ export interface HttpServerSetup {
    * @param router {@link IRouter} - a router with registered route handlers.
    */
   registerRouterAfterListening: (router: IRouter) => void;
+  /**
+   * Register a static directory to be served by the Kibana server
+   * @note Static assets may be served over CDN
+   */
   registerStaticDir: (path: string, dirPath: string) => void;
+  staticAssets: InternalStaticAssets;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
@@ -154,9 +161,15 @@ export type LifecycleRegistrar = Pick<
   | 'registerOnPreResponse'
 >;
 
+export interface HttpServerSetupOptions {
+  config$: Observable<HttpConfig>;
+  executionContext?: InternalExecutionContextSetup;
+}
+
 export class HttpServer {
   private server?: Server;
   private config?: HttpConfig;
+  private subscriptions: Subscription[] = [];
   private registeredRouters = new Set<IRouter>();
   private authRegistered = false;
   private cookieSessionStorageCreated = false;
@@ -203,13 +216,16 @@ export class HttpServer {
     }
   }
 
-  public async setup(
-    config: HttpConfig,
-    executionContext?: InternalExecutionContextSetup
-  ): Promise<HttpServerSetup> {
+  public async setup({
+    config$,
+    executionContext,
+  }: HttpServerSetupOptions): Promise<HttpServerSetup> {
+    const config = await firstValueFrom(config$);
+    this.config = config;
+
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
-    this.config = config;
+
     this.server = createServer(serverOptions, listenerOptions);
     await this.server.register([HapiStaticFiles]);
     if (config.compression.brotli.enabled) {
@@ -221,6 +237,29 @@ export class HttpServer {
       });
     }
 
+    // only hot-reloading TLS config - don't need to subscribe if TLS is initially disabled,
+    // given we can't hot-switch from/to enabled/disabled.
+    if (config.ssl.enabled) {
+      const configSubscription = config$
+        .pipe(pairwise())
+        .subscribe(([{ ssl: prevSslConfig }, { ssl: newSslConfig }]) => {
+          if (prevSslConfig.enabled !== newSslConfig.enabled) {
+            this.log.warn(
+              'Incompatible TLS config change detected - TLS cannot be toggled without a full server reboot.'
+            );
+            return;
+          }
+
+          const sameConfig = newSslConfig.isEqualTo(prevSslConfig);
+
+          if (!sameConfig) {
+            this.log.info('TLS configuration change detected - reloading TLS configuration.');
+            setTlsConfig(this.server!, newSslConfig);
+          }
+        });
+      this.subscriptions.push(configSubscription);
+    }
+
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
     this.setupRequestStateAssignment(config, executionContext);
@@ -230,10 +269,13 @@ export class HttpServer {
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();
 
+    const staticAssets = new StaticAssets(basePathService, config.cdn);
+
     return {
       registerRouter: this.registerRouter.bind(this),
       registerRouterAfterListening: this.registerRouterAfterListening.bind(this),
       registerStaticDir: this.registerStaticDir.bind(this),
+      staticAssets,
       registerOnPreRouting: this.registerOnPreRouting.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerAuth: this.registerAuth.bind(this),
@@ -399,8 +441,10 @@ export class HttpServer {
     const log = this.logger.get('http', 'server', 'response');
 
     this.handleServerResponseEvent = (request) => {
-      const { message, meta } = getEcsResponseLog(request, this.log);
-      log.debug(message!, meta);
+      if (log.isLevelEnabled('debug')) {
+        const { message, meta } = getEcsResponseLog(request, this.log);
+        log.debug(message!, meta);
+      }
     };
 
     this.server.events.on('response', this.handleServerResponseEvent);
@@ -587,6 +631,7 @@ export class HttpServer {
         },
       },
       options: {
+        app: { access: 'public' },
         auth: false,
         cache: {
           privacy: 'public',
@@ -602,7 +647,7 @@ export class HttpServer {
     // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
     const validate = isSafeMethod(route.method) ? undefined : { payload: true };
     const { authRequired, tags, body = {}, timeout } = route.options;
-    const { accepts: allow, maxBytes, output, parse } = body;
+    const { accepts: allow, override, maxBytes, output, parse } = body;
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
@@ -629,9 +674,12 @@ export class HttpServer {
         // (All NP routes are already required to specify their own validation in order to access the payload)
         validate,
         // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
-        payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
+        payload: [allow, override, maxBytes, output, parse, timeout?.payload].some(
+          (x) => x !== undefined
+        )
           ? {
               allow,
+              override,
               maxBytes,
               output,
               parse,

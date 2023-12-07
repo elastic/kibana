@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isEmpty } from 'lodash';
+import { firstValueFrom } from 'rxjs';
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import type {
   AlertInstanceContext,
@@ -22,14 +25,18 @@ import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
 import { findThresholdSignals } from './find_threshold_signals';
 import { getThresholdBucketFilters } from './get_threshold_bucket_filters';
 import { getThresholdSignalHistory } from './get_threshold_signal_history';
+import { bulkCreateSuppressedThresholdAlerts } from './bulk_create_suppressed_threshold_alerts';
+import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
+import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 
 import type {
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   WrapHits,
+  RunOpts,
 } from '../types';
-import type { ThresholdAlertState } from './types';
+import type { ThresholdAlertState, ThresholdSignalHistory } from './types';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
@@ -38,6 +45,7 @@ import {
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from './build_signal_history';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { getSignalHistory, transformBulkCreatedItemsToHits } from './utils';
 
 export const thresholdExecutor = async ({
   inputIndex,
@@ -58,6 +66,9 @@ export const thresholdExecutor = async ({
   exceptionFilter,
   unprocessedExceptions,
   inputIndexFields,
+  spaceId,
+  runOpts,
+  licensing,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -77,6 +88,9 @@ export const thresholdExecutor = async ({
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
   inputIndexFields: DataViewFieldBase[];
+  spaceId: string;
+  runOpts: RunOpts<ThresholdRuleParams>;
+  licensing: LicensingPluginSetup;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -86,6 +100,9 @@ export const thresholdExecutor = async ({
     if (exceptionsWarning) {
       result.warningMessages.push(exceptionsWarning);
     }
+
+    const license = await firstValueFrom(licensing.license$);
+    const hasPlatinumLicense = license.hasAtLeast('platinum');
 
     // Get state or build initial state (on upgrade)
     const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
@@ -98,22 +115,10 @@ export const thresholdExecutor = async ({
           ruleDataReader,
         });
 
-    if (state.initialized) {
-      // Clean up any signal history that has fallen outside the window
-      const toDelete: string[] = [];
-      for (const [hash, entry] of Object.entries(signalHistory)) {
-        if (entry.lastSignalTimestamp < tuple.from.valueOf()) {
-          toDelete.push(hash);
-        }
-      }
-      for (const hash of toDelete) {
-        delete signalHistory[hash];
-      }
-    }
-
+    const validSignalHistory = getSignalHistory(state, signalHistory, tuple);
     // Eliminate dupes
     const bucketFilters = await getThresholdBucketFilters({
-      signalHistory,
+      signalHistory: validSignalHistory,
       aggregatableTimestampField,
     });
 
@@ -146,44 +151,63 @@ export const thresholdExecutor = async ({
       aggregatableTimestampField,
     });
 
-    // Build and index new alerts
+    const alertSuppression = completeRule.ruleParams.alertSuppression;
 
-    const createResult = await bulkCreateThresholdSignals({
-      buckets,
-      completeRule,
-      filter: esFilter,
-      services,
-      inputIndexPattern: inputIndex,
-      signalsIndex: ruleParams.outputIndex,
-      startedAt,
-      from: tuple.from.toDate(),
-      signalHistory,
-      bulkCreate,
-      wrapHits,
-      ruleExecutionLogger,
+    let createResult: GenericBulkCreateResponse<BaseFieldsLatest>;
+    let newSignalHistory: ThresholdSignalHistory;
+
+    if (
+      alertSuppression?.duration &&
+      runOpts?.experimentalFeatures?.alertSuppressionForThresholdRuleEnabled &&
+      hasPlatinumLicense
+    ) {
+      const suppressedResults = await bulkCreateSuppressedThresholdAlerts({
+        buckets,
+        completeRule,
+        services,
+        inputIndexPattern: inputIndex,
+        startedAt,
+        from: tuple.from.toDate(),
+        to: tuple.to.toDate(),
+        ruleExecutionLogger,
+        spaceId,
+        runOpts,
+      });
+      createResult = suppressedResults.bulkCreateResult;
+
+      newSignalHistory = buildThresholdSignalHistory({
+        alerts: suppressedResults.unsuppressedAlerts,
+      });
+    } else {
+      createResult = await bulkCreateThresholdSignals({
+        buckets,
+        completeRule,
+        filter: esFilter,
+        services,
+        inputIndexPattern: inputIndex,
+        signalsIndex: ruleParams.outputIndex,
+        startedAt,
+        from: tuple.from.toDate(),
+        signalHistory: validSignalHistory,
+        bulkCreate,
+        wrapHits,
+        ruleExecutionLogger,
+      });
+
+      newSignalHistory = buildThresholdSignalHistory({
+        alerts: transformBulkCreatedItemsToHits(createResult.createdItems),
+      });
+    }
+
+    addToSearchAfterReturn({
+      current: result,
+      next: { ...createResult, success: createResult.success && isEmpty(searchErrors) },
     });
-
-    addToSearchAfterReturn({ current: result, next: createResult });
 
     result.errors.push(...previousSearchErrors);
     result.errors.push(...searchErrors);
     result.warningMessages.push(...warnings);
     result.searchAfterTimes = searchDurations;
-
-    const createdAlerts = createResult.createdItems.map((alert) => {
-      const { _id, _index, ...source } = alert;
-      return {
-        _id,
-        _index,
-        _source: {
-          ...source,
-        },
-      } as SearchHit<unknown>;
-    });
-
-    const newSignalHistory = buildThresholdSignalHistory({
-      alerts: createdAlerts,
-    });
 
     return {
       ...result,
@@ -191,7 +215,7 @@ export const thresholdExecutor = async ({
         ...state,
         initialized: true,
         signalHistory: {
-          ...signalHistory,
+          ...validSignalHistory,
           ...newSignalHistory,
         },
       },

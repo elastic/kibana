@@ -13,7 +13,7 @@ import { intersection } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { rawRuleSchema } from './raw_rule_schema';
+import { stateSchemaByVersion } from '@kbn/alerting-state-types';
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,
@@ -21,6 +21,7 @@ import {
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
+  IRuleTypeAlerts,
 } from './types';
 import {
   RecoveredActionGroup,
@@ -36,8 +37,12 @@ import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_n
 import { InMemoryMetrics } from './monitoring';
 import { AlertingRulesConfig } from '.';
 import { AlertsService } from './alerts_service/alerts_service';
+import { getRuleTypeIdValidLegacyConsumers } from './rule_type_registry_deprecated_consumers';
+import { AlertingConfig } from './config';
+import { rawRuleSchemaV1 } from './saved_objects/schemas/raw_rule';
 
 export interface ConstructorOptions {
+  config: AlertingConfig;
   logger: Logger;
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
@@ -46,6 +51,7 @@ export interface ConstructorOptions {
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   inMemoryMetrics: InMemoryMetrics;
   alertsService: AlertsService | null;
+  latestRuleVersion: number;
 }
 
 export interface RegistryRuleType
@@ -56,6 +62,7 @@ export interface RegistryRuleType
     | 'recoveryActionGroup'
     | 'defaultActionGroupId'
     | 'actionVariables'
+    | 'category'
     | 'producer'
     | 'minimumLicenseRequired'
     | 'isExportable'
@@ -66,6 +73,9 @@ export interface RegistryRuleType
   > {
   id: string;
   enabledInLicense: boolean;
+  hasFieldsForAAD: boolean;
+  hasAlertsMappings: boolean;
+  validLegacyConsumers: string[];
 }
 
 /**
@@ -98,6 +108,7 @@ export type NormalizedRuleType<
   RecoveryActionGroupId extends string,
   AlertData extends RuleAlertData
 > = {
+  validLegacyConsumers: string[];
   actionGroups: Array<ActionGroup<ActionGroupIds | RecoveryActionGroupId>>;
 } & Omit<
   RuleType<
@@ -140,6 +151,7 @@ export type UntypedNormalizedRuleType = NormalizedRuleType<
 >;
 
 export class RuleTypeRegistry {
+  private readonly config: AlertingConfig;
   private readonly logger: Logger;
   private readonly taskManager: TaskManagerSetupContract;
   private readonly ruleTypes: Map<string, UntypedNormalizedRuleType> = new Map();
@@ -149,8 +161,10 @@ export class RuleTypeRegistry {
   private readonly licensing: LicensingPluginSetup;
   private readonly inMemoryMetrics: InMemoryMetrics;
   private readonly alertsService: AlertsService | null;
+  private readonly latestRuleVersion: number;
 
   constructor({
+    config,
     logger,
     taskManager,
     taskRunnerFactory,
@@ -159,7 +173,9 @@ export class RuleTypeRegistry {
     minimumScheduleInterval,
     inMemoryMetrics,
     alertsService,
+    latestRuleVersion,
   }: ConstructorOptions) {
+    this.config = config;
     this.logger = logger;
     this.taskManager = taskManager;
     this.taskRunnerFactory = taskRunnerFactory;
@@ -168,6 +184,7 @@ export class RuleTypeRegistry {
     this.minimumScheduleInterval = minimumScheduleInterval;
     this.inMemoryMetrics = inMemoryMetrics;
     this.alertsService = alertsService;
+    this.latestRuleVersion = latestRuleVersion;
   }
 
   public has(id: string) {
@@ -269,17 +286,19 @@ export class RuleTypeRegistry {
       ActionGroupIds,
       RecoveryActionGroupId,
       AlertData
-    >(ruleType);
+    >(ruleType, this.config);
 
     this.ruleTypes.set(
       ruleTypeIdSchema.validate(ruleType.id),
       /** stripping the typing is required in order to store the RuleTypes in a Map */
       normalizedRuleType as unknown as UntypedNormalizedRuleType
     );
+
     this.taskManager.registerTaskDefinitions({
       [`alerting:${ruleType.id}`]: {
         title: ruleType.name,
         timeout: ruleType.ruleTaskTimeout,
+        stateSchemaByVersion,
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,
@@ -296,11 +315,12 @@ export class RuleTypeRegistry {
           spaceId: schema.string(),
           consumer: schema.maybe(schema.string()),
         }),
-        indirectParamsSchema: rawRuleSchema,
+        indirectParamsSchema: rawRuleSchemaV1,
       },
     });
+
     if (this.alertsService && ruleType.alerts) {
-      this.alertsService.register(ruleType.alerts);
+      this.alertsService.register(ruleType.alerts as IRuleTypeAlerts);
     }
 
     // No need to notify usage on basic alert types
@@ -361,33 +381,37 @@ export class RuleTypeRegistry {
   }
 
   public list(): Set<RegistryRuleType> {
-    return new Set(
-      Array.from(this.ruleTypes).map(
-        ([
-          id,
-          {
-            name,
-            actionGroups,
-            recoveryActionGroup,
-            defaultActionGroupId,
-            actionVariables,
-            producer,
-            minimumLicenseRequired,
-            isExportable,
-            ruleTaskTimeout,
-            defaultScheduleInterval,
-            doesSetRecoveryContext,
-            alerts,
-            getSummarizedAlerts,
-            fieldsForAAD,
-          },
-        ]: [string, UntypedNormalizedRuleType]) => ({
+    const mapRuleTypes: Array<[string, UntypedNormalizedRuleType]> = Array.from(this.ruleTypes);
+    const tempRegistryRuleType = mapRuleTypes.map<RegistryRuleType>(
+      ([
+        id,
+        {
+          name,
+          actionGroups,
+          recoveryActionGroup,
+          defaultActionGroupId,
+          actionVariables,
+          category,
+          producer,
+          minimumLicenseRequired,
+          isExportable,
+          ruleTaskTimeout,
+          defaultScheduleInterval,
+          doesSetRecoveryContext,
+          alerts,
+          fieldsForAAD,
+          validLegacyConsumers,
+        },
+      ]) => {
+        // KEEP the type here to be safe if not the map is  ignoring it for some reason
+        const ruleType: RegistryRuleType = {
           id,
           name,
           actionGroups,
           recoveryActionGroup,
           defaultActionGroupId,
           actionVariables,
+          category,
           producer,
           minimumLicenseRequired,
           isExportable,
@@ -399,16 +423,24 @@ export class RuleTypeRegistry {
             name,
             minimumLicenseRequired
           ).isValid,
-          hasGetSummarizedAlerts: !!getSummarizedAlerts,
+          fieldsForAAD,
           hasFieldsForAAD: Boolean(fieldsForAAD),
+          hasAlertsMappings: !!alerts,
+          validLegacyConsumers,
           ...(alerts ? { alerts } : {}),
-        })
-      )
+        };
+        return ruleType;
+      }
     );
+    return new Set(tempRegistryRuleType);
   }
 
   public getAllTypes(): string[] {
     return [...this.ruleTypes.keys()];
+  }
+
+  public getLatestRuleVersion() {
+    return this.latestRuleVersion;
   }
 }
 
@@ -439,7 +471,8 @@ function augmentActionGroupsWithReserved<
     ActionGroupIds,
     RecoveryActionGroupId,
     AlertData
-  >
+  >,
+  config: AlertingConfig
 ): NormalizedRuleType<
   Params,
   ExtractedParams,
@@ -487,7 +520,9 @@ function augmentActionGroupsWithReserved<
 
   return {
     ...ruleType,
+    ...(config?.rules?.overwriteProducer ? { producer: config.rules.overwriteProducer } : {}),
     actionGroups: [...actionGroups, ...reservedActionGroups],
     recoveryActionGroup: recoveryActionGroup ?? RecoveredActionGroup,
+    validLegacyConsumers: getRuleTypeIdValidLegacyConsumers(id),
   };
 }

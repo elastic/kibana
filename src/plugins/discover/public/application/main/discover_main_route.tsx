@@ -22,7 +22,7 @@ import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
 import { DiscoverStateContainer, getDiscoverStateContainer } from './services/discover_state';
 import { DiscoverMainApp } from './discover_main_app';
-import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
+import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -34,6 +34,7 @@ import {
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
+import type { DiscoverDisplayMode } from '../types';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -44,9 +45,10 @@ interface DiscoverLandingParams {
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
+  mode?: DiscoverDisplayMode;
 }
 
-export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRouteProps) {
+export function DiscoverMainRoute({ customizationCallbacks, mode = 'standalone' }: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
   const {
@@ -58,10 +60,12 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
     dataViewEditor,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
+
   const stateContainer = useSingleton<DiscoverStateContainer>(() =>
     getDiscoverStateContainer({
       history,
       services,
+      mode,
     })
   );
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
@@ -103,7 +107,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       const hasUserDataViewValue = await data.dataViews.hasData
         .hasUserDataView()
         .catch(() => false);
-      const hasESDataValue = isDev || (await data.dataViews.hasData.hasESData().catch(() => false));
+      const hasESDataValue = await data.dataViews.hasData.hasESData().catch(() => false);
       setHasUserDataView(hasUserDataViewValue);
       setHasESData(hasESDataValue);
 
@@ -112,14 +116,14 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
         return false;
       }
 
-      let defaultDataView: DataView | null = null;
+      let defaultDataViewExists: boolean = false;
       try {
-        defaultDataView = await data.dataViews.getDefaultDataView({ displayErrors: false });
+        defaultDataViewExists = await data.dataViews.defaultDataViewExists();
       } catch (e) {
         //
       }
 
-      if (!defaultDataView) {
+      if (!defaultDataViewExists) {
         setShowNoDataPage(true);
         return false;
       }
@@ -128,7 +132,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       setError(e);
       return false;
     }
-  }, [data.dataViews, isDev, savedSearchId]);
+  }, [data.dataViews, savedSearchId]);
 
   const loadSavedSearch = useCallback(
     async (nextDataView?: DataView) => {
@@ -146,21 +150,17 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
           dataView: nextDataView,
           dataViewSpec: historyLocationState?.dataViewSpec,
         });
+        if (mode === 'standalone') {
+          if (currentSavedSearch?.id) {
+            chrome.recentlyAccessed.add(
+              getSavedSearchFullPathUrl(currentSavedSearch.id),
+              currentSavedSearch.title ?? '',
+              currentSavedSearch.id
+            );
+          }
 
-        if (currentSavedSearch?.id) {
-          chrome.recentlyAccessed.add(
-            getSavedSearchFullPathUrl(currentSavedSearch.id),
-            currentSavedSearch.title ?? '',
-            currentSavedSearch.id
-          );
+          setBreadcrumbs({ services, titleBreadcrumbText: currentSavedSearch?.title ?? undefined });
         }
-
-        chrome.setBreadcrumbs(
-          currentSavedSearch && currentSavedSearch.title
-            ? getSavedSearchBreadcrumbs({ id: currentSavedSearch.title, services })
-            : getRootBreadcrumbs({ services })
-        );
-
         setLoading(false);
         if (services.analytics) {
           const loadSavedSearchDuration = window.performance.now() - loadSavedSearchStartTime;
@@ -205,6 +205,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       core.theme,
       basePath,
       toastNotifications,
+      mode,
     ]
   );
 
@@ -253,11 +254,12 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
           // We've already called this, so we can optimize the analytics services to
           // use the already-retrieved data to avoid a double-call.
-          hasESData: () => Promise.resolve(isDev ? true : hasESData),
+          hasESData: () => Promise.resolve(hasESData),
           hasUserDataView: () => Promise.resolve(hasUserDataView),
         },
       },
       dataViewEditor,
+      noDataPage: services.noDataPage,
     };
 
     return (
@@ -278,8 +280,10 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
   return (
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
-        <DiscoverMainAppMemoized stateContainer={stateContainer} />
+        <DiscoverMainAppMemoized stateContainer={stateContainer} mode={mode} />
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>
   );
 }
+// eslint-disable-next-line import/no-default-export
+export default DiscoverMainRoute;

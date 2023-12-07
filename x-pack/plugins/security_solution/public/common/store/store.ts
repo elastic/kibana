@@ -51,7 +51,7 @@ import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
-import type { AnalyzerOuterState } from '../../resolver/types';
+import type { AnalyzerState } from '../../resolver/types';
 import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
 import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
 import { sourcererActions } from './sourcerer';
@@ -69,6 +69,7 @@ export const createStoreFactory = async (
   try {
     if (coreStart.application.capabilities[SERVER_APP_ID].show === true) {
       signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+        version: '2023-10-31',
         method: 'GET',
       });
     }
@@ -133,10 +134,8 @@ export const createStoreFactory = async (
     groups: initialGroupingState,
   };
 
-  const analyzerInitialState: AnalyzerOuterState = {
-    analyzer: {
-      analyzerById: {},
-    },
+  const analyzerInitialState: AnalyzerState = {
+    analyzer: {},
   };
 
   const timelineReducer = reduceReducers(
@@ -170,6 +169,7 @@ export const createStoreFactory = async (
 
   return createStore(initialState, rootReducer, libs$.pipe(pluck('kibana')), storage, [
     ...(subPlugins.management.store.middleware ?? []),
+    ...(subPlugins.explore.store.middleware ?? []),
     ...[resolverMiddlewareFactory(dataAccessLayerFactory(coreStart)) ?? []],
   ]);
 };
@@ -177,7 +177,6 @@ export const createStoreFactory = async (
 const timelineActionsWithNonserializablePayloads = [
   timelineActions.updateTimeline.type,
   timelineActions.addTimeline.type,
-  timelineActions.updateAutoSaveMsg.type,
   timelineActions.initializeTimelineSettings.type,
 ];
 
@@ -201,14 +200,6 @@ const actionSanitizer = (action: AnyAction) => {
         payload: {
           ...payload,
           timeline: sanitizeTimelineModel(payload.timeline),
-        },
-      };
-    } else if (type === timelineActions.updateAutoSaveMsg.type) {
-      return {
-        ...action,
-        payload: {
-          ...payload,
-          newTimelineModel: sanitizeTimelineModel(payload.newTimelineModel),
         },
       };
     } else if (type === timelineActions.initializeTimelineSettings.type) {
@@ -273,6 +264,10 @@ export const createStore = (
     actionsBlacklist: ['USER_MOVED_POINTER', 'USER_SET_RASTER_SIZE'],
     actionSanitizer: actionSanitizer as EnhancerOptions['actionSanitizer'],
     stateSanitizer: stateSanitizer as EnhancerOptions['stateSanitizer'],
+    // uncomment the following to enable redux action tracing
+    // https://github.com/zalmoxisus/redux-devtools-extension/commit/64717bb9b3534ff616d9db56c2be680627c7b09d#diff-182cb140f8a0fd8bc37bbdcdad07bbadb9aebeb2d1b8ed026acd6132f2c88ce8R10
+    // trace: true,
+    // traceLimit: 100,
   };
 
   const composeEnhancers = composeWithDevTools(enhancerOptions);

@@ -13,7 +13,10 @@ export { applyBulkEditOperation } from './apply_bulk_edit_operation';
 export { buildKueryNodeFilter } from './build_kuery_node_filter';
 export { generateAPIKeyName } from './generate_api_key_name';
 export * from './mapped_params_utils';
-export { apiKeyAsAlertAttributes } from './api_key_as_alert_attributes';
+export {
+  apiKeyAsAlertAttributes,
+  apiKeyAsRuleDomainProperties,
+} from './api_key_as_alert_attributes';
 export * from './inject_references';
 export { parseDate } from './parse_date';
 export { includeFieldsRequiredForAuthentication } from './include_fields_required_for_authentication';

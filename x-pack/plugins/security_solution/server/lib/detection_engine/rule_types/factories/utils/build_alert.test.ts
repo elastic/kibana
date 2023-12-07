@@ -19,6 +19,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_URL,
   ALERT_UUID,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
   EVENT_ACTION,
@@ -165,6 +166,7 @@ describe('buildAlert', () => {
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         query: 'user.name: root or user.name: admin',
         filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
+        investigation_fields: undefined,
       },
       [ALERT_RULE_INDICES]: completeRule.ruleParams.index,
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
@@ -232,6 +234,7 @@ describe('buildAlert', () => {
       [ALERT_URL]: expectedAlertUrl,
       [ALERT_UUID]: alertUuid,
       [ALERT_WORKFLOW_TAGS]: [],
+      [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
     };
     expect(alert).toEqual(expected);
   });
@@ -358,6 +361,7 @@ describe('buildAlert', () => {
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         query: 'user.name: root or user.name: admin',
         filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
+        investigation_fields: undefined,
       },
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         actions: [],
@@ -424,6 +428,7 @@ describe('buildAlert', () => {
       [ALERT_URL]: expectedAlertUrl,
       [ALERT_UUID]: alertUuid,
       [ALERT_WORKFLOW_TAGS]: [],
+      [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
     };
     expect(alert).toEqual(expected);
   });

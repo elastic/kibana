@@ -10,6 +10,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
+import { useGetProtectionsUnavailableComponent } from '../../hooks/use_get_protections_unavailable_component';
 import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import { useLicense } from '../../../../../../../common/hooks/use_license';
 import { SettingLockedCard } from '../setting_locked_card';
@@ -52,6 +53,7 @@ export const AttackSurfaceReductionCard = memo<AttackSurfaceReductionCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
     const isChecked = policy.windows.attack_surface_reduction.credential_hardening.enabled;
     const isEditMode = mode === 'edit';
     const label = isChecked ? SWITCH_ENABLED_LABEL : SWITCH_DISABLED_LABEL;
@@ -67,6 +69,10 @@ export const AttackSurfaceReductionCard = memo<AttackSurfaceReductionCardProps>(
       },
       [onChange, policy]
     );
+
+    if (!isProtectionsAllowed) {
+      return null;
+    }
 
     if (!isPlatinumPlus) {
       return (

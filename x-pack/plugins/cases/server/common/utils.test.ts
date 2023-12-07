@@ -8,13 +8,6 @@
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import type {
-  Case,
-  CommentAttributes,
-  CommentRequest,
-  CommentRequestUserType,
-} from '../../common/api';
-import { CaseSeverity, CommentType } from '../../common/api';
 import {
   flattenCaseSavedObject,
   transformNewComment,
@@ -33,23 +26,41 @@ import {
   getCaseViewPath,
   isSOError,
   countUserAttachments,
+  isPersistableStateOrExternalReference,
 } from './utils';
 import { newCase } from '../routes/api/__mocks__/request_responses';
 import { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import { mockCases, mockCaseComments } from '../mocks';
 import { createAlertAttachment, createUserAttachment } from '../services/attachments/test_utils';
-import type { CaseConnector } from '../../common/types/domain';
-import { ConnectorTypes } from '../../common/types/domain';
+import type {
+  AttachmentAttributes,
+  Case,
+  CaseConnector,
+  UserCommentAttachmentPayload,
+} from '../../common/types/domain';
+import {
+  ConnectorTypes,
+  CaseSeverity,
+  AttachmentType,
+  CustomFieldTypes,
+} from '../../common/types/domain';
+import type { AttachmentRequest } from '../../common/types/api';
+import {
+  createAlertRequests,
+  createExternalReferenceRequests,
+  createPersistableStateRequests,
+  createUserRequests,
+} from './limiter_checker/test_utils';
 
 interface CommentReference {
   ids: string[];
-  comments: CommentRequest[];
+  comments: AttachmentRequest[];
 }
 
 function createCommentFindResponse(
   commentRequests: CommentReference[]
-): SavedObjectsFindResponse<CommentAttributes> {
-  const resp: SavedObjectsFindResponse<CommentAttributes> = {
+): SavedObjectsFindResponse<AttachmentAttributes> {
+  const resp: SavedObjectsFindResponse<AttachmentAttributes> = {
     page: 0,
     per_page: 0,
     total: 0,
@@ -77,6 +88,21 @@ function createCommentFindResponse(
 }
 
 describe('common utils', () => {
+  const connector: CaseConnector = {
+    id: '123',
+    name: 'My connector',
+    type: ConnectorTypes.jira,
+    fields: { issueType: 'Task', priority: 'High', parent: null },
+  };
+
+  const customFields = [
+    {
+      key: 'string_custom_field_1',
+      type: CustomFieldTypes.TEXT as const,
+      value: 'this is a text field value',
+    },
+  ];
+
   describe('transformNewCase', () => {
     beforeAll(() => {
       jest.useFakeTimers();
@@ -86,13 +112,6 @@ describe('common utils', () => {
     afterAll(() => {
       jest.useRealTimers();
     });
-
-    const connector: CaseConnector = {
-      id: '123',
-      name: 'My connector',
-      type: ConnectorTypes.jira,
-      fields: { issueType: 'Task', priority: 'High', parent: null },
-    };
 
     it('transform correctly', () => {
       const myCase = {
@@ -128,6 +147,7 @@ describe('common utils', () => {
             "full_name": "Elastic",
             "username": "elastic",
           },
+          "customFields": Array [],
           "description": "A description",
           "duration": null,
           "external_service": null,
@@ -182,6 +202,7 @@ describe('common utils', () => {
             "full_name": "Elastic",
             "username": "elastic",
           },
+          "customFields": Array [],
           "description": "A description",
           "duration": null,
           "external_service": null,
@@ -240,6 +261,72 @@ describe('common utils', () => {
             "full_name": "Elastic",
             "username": "elastic",
           },
+          "customFields": Array [],
+          "description": "A description",
+          "duration": null,
+          "external_service": null,
+          "owner": "securitySolution",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "severity": "low",
+          "status": "open",
+          "tags": Array [
+            "new",
+            "case",
+          ],
+          "title": "My new case",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
+    });
+
+    it('transform correctly with customFields provided', () => {
+      const myCase = {
+        newCase: {
+          ...newCase,
+          connector,
+          customFields,
+        },
+        user: {
+          email: 'elastic@elastic.co',
+          full_name: 'Elastic',
+          username: 'elastic',
+        },
+      };
+
+      const res = transformNewCase(myCase);
+
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "assignees": Array [],
+          "category": null,
+          "closed_at": null,
+          "closed_by": null,
+          "connector": Object {
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic",
+            "username": "elastic",
+          },
+          "customFields": Array [
+            Object {
+              "key": "string_custom_field_1",
+              "type": "text",
+              "value": "this is a text field value",
+            },
+          ],
           "description": "A description",
           "duration": null,
           "external_service": null,
@@ -298,6 +385,7 @@ describe('common utils', () => {
                 "full_name": "elastic",
                 "username": "elastic",
               },
+              "customFields": Array [],
               "description": "This is a brand new case of a bad meanie defacing data",
               "duration": null,
               "external_service": null,
@@ -340,6 +428,7 @@ describe('common utils', () => {
                 "full_name": "elastic",
                 "username": "elastic",
               },
+              "customFields": Array [],
               "description": "Oh no, a bad meanie destroying data!",
               "duration": null,
               "external_service": null,
@@ -386,6 +475,7 @@ describe('common utils', () => {
                 "full_name": "elastic",
                 "username": "elastic",
               },
+              "customFields": Array [],
               "description": "Oh no, a bad meanie going LOLBins all over the place!",
               "duration": null,
               "external_service": null,
@@ -436,6 +526,7 @@ describe('common utils', () => {
                 "full_name": "elastic",
                 "username": "elastic",
               },
+              "customFields": Array [],
               "description": "Oh no, a bad meanie going LOLBins all over the place!",
               "duration": null,
               "external_service": null,
@@ -467,6 +558,86 @@ describe('common utils', () => {
           "page": 1,
           "per_page": 10,
           "total": 4,
+        }
+      `);
+    });
+
+    it('transforms correctly case with customFields', () => {
+      const casesMap = new Map<string, Case>();
+      const theCase = { ...mockCases[0] };
+
+      theCase.attributes = { ...theCase.attributes, customFields };
+      casesMap.set(theCase.id, flattenCaseSavedObject({ savedObject: theCase }));
+
+      const res = transformCases({
+        casesMap,
+        countOpenCases: 2,
+        countInProgressCases: 2,
+        countClosedCases: 2,
+        page: 1,
+        perPage: 10,
+        total: casesMap.size,
+      });
+
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "cases": Array [
+            Object {
+              "assignees": Array [],
+              "category": null,
+              "closed_at": null,
+              "closed_by": null,
+              "comments": Array [],
+              "connector": Object {
+                "fields": null,
+                "id": "none",
+                "name": "none",
+                "type": ".none",
+              },
+              "created_at": "2019-11-25T21:54:48.952Z",
+              "created_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "customFields": Array [
+                Object {
+                  "key": "string_custom_field_1",
+                  "type": "text",
+                  "value": "this is a text field value",
+                },
+              ],
+              "description": "This is a brand new case of a bad meanie defacing data",
+              "duration": null,
+              "external_service": null,
+              "id": "mock-id-1",
+              "owner": "securitySolution",
+              "settings": Object {
+                "syncAlerts": true,
+              },
+              "severity": "low",
+              "status": "open",
+              "tags": Array [
+                "defacement",
+              ],
+              "title": "Super Bad Security Issue",
+              "totalAlerts": 0,
+              "totalComment": 0,
+              "updated_at": "2019-11-25T21:54:48.952Z",
+              "updated_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "version": "WzAsMV0=",
+            },
+          ],
+          "count_closed_cases": 2,
+          "count_in_progress_cases": 2,
+          "count_open_cases": 2,
+          "page": 1,
+          "per_page": 10,
+          "total": 1,
         }
       `);
     });
@@ -503,6 +674,7 @@ describe('common utils', () => {
             "full_name": "elastic",
             "username": "elastic",
           },
+          "customFields": Array [],
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
           "duration": null,
           "external_service": null,
@@ -561,6 +733,7 @@ describe('common utils', () => {
             "full_name": "elastic",
             "username": "elastic",
           },
+          "customFields": Array [],
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
           "duration": null,
           "external_service": null,
@@ -642,6 +815,7 @@ describe('common utils', () => {
             "full_name": "elastic",
             "username": "elastic",
           },
+          "customFields": Array [],
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
           "duration": null,
           "external_service": null,
@@ -698,6 +872,69 @@ describe('common utils', () => {
             "full_name": "elastic",
             "username": "elastic",
           },
+          "customFields": Array [],
+          "description": "This is a brand new case of a bad meanie defacing data",
+          "duration": null,
+          "external_service": null,
+          "id": "mock-id-1",
+          "owner": "securitySolution",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "severity": "low",
+          "status": "open",
+          "tags": Array [
+            "defacement",
+          ],
+          "title": "Super Bad Security Issue",
+          "totalAlerts": 0,
+          "totalComment": 2,
+          "updated_at": "2019-11-25T21:54:48.952Z",
+          "updated_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+          "version": "WzAsMV0=",
+        }
+      `);
+    });
+
+    it('flattens correctly with customFields', () => {
+      const theCase = { ...mockCases[0] };
+      theCase.attributes = { ...theCase.attributes, customFields };
+
+      const res = flattenCaseSavedObject({
+        savedObject: theCase,
+        totalComment: 2,
+      });
+
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "assignees": Array [],
+          "category": null,
+          "closed_at": null,
+          "closed_by": null,
+          "comments": Array [],
+          "connector": Object {
+            "fields": null,
+            "id": "none",
+            "name": "none",
+            "type": ".none",
+          },
+          "created_at": "2019-11-25T21:54:48.952Z",
+          "created_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+          "customFields": Array [
+            Object {
+              "key": "string_custom_field_1",
+              "type": "text",
+              "value": "this is a text field value",
+            },
+          ],
           "description": "This is a brand new case of a bad meanie defacing data",
           "duration": null,
           "external_service": null,
@@ -783,7 +1020,7 @@ describe('common utils', () => {
     it('transforms correctly', () => {
       const comment = {
         comment: 'A comment',
-        type: CommentType.user as const,
+        type: AttachmentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: 'elastic@elastic.co',
         full_name: 'Elastic',
@@ -815,7 +1052,7 @@ describe('common utils', () => {
     it('transform correctly without optional fields', () => {
       const comment = {
         comment: 'A comment',
-        type: CommentType.user as const,
+        type: AttachmentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
         owner: SECURITY_SOLUTION_OWNER,
       };
@@ -845,7 +1082,7 @@ describe('common utils', () => {
     it('transform correctly with optional fields as null', () => {
       const comment = {
         comment: 'A comment',
-        type: CommentType.user as const,
+        type: AttachmentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: null,
         full_name: null,
@@ -883,7 +1120,9 @@ describe('common utils', () => {
           createCommentFindResponse([
             {
               ids: ['1'],
-              comments: [{ comment: '', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER }],
+              comments: [
+                { comment: '', type: AttachmentType.user, owner: SECURITY_SOLUTION_OWNER },
+              ],
             },
           ]).saved_objects[0]
         )
@@ -900,7 +1139,7 @@ describe('common utils', () => {
                 {
                   alertId: ['a', 'b', 'c'],
                   index: '',
-                  type: CommentType.alert,
+                  type: AttachmentType.alert,
                   rule: {
                     id: 'rule-id-1',
                     name: 'rule-name-1',
@@ -927,7 +1166,7 @@ describe('common utils', () => {
                   alertId: ['a', 'b'],
                   index: '',
                   owner: SECURITY_SOLUTION_OWNER,
-                  type: CommentType.alert,
+                  type: AttachmentType.alert,
                   rule: {
                     id: 'rule-id-1',
                     name: 'rule-name-1',
@@ -936,7 +1175,7 @@ describe('common utils', () => {
                 {
                   comment: '',
                   owner: SECURITY_SOLUTION_OWNER,
-                  type: CommentType.user,
+                  type: AttachmentType.user,
                 },
               ],
             },
@@ -956,7 +1195,7 @@ describe('common utils', () => {
                   owner: SECURITY_SOLUTION_OWNER,
                   alertId: ['a', 'b'],
                   index: '',
-                  type: CommentType.alert,
+                  type: AttachmentType.alert,
                   rule: {
                     id: 'rule-id-1',
                     name: 'rule-name-1',
@@ -970,7 +1209,7 @@ describe('common utils', () => {
                 {
                   owner: SECURITY_SOLUTION_OWNER,
                   comment: '',
-                  type: CommentType.user,
+                  type: AttachmentType.user,
                 },
               ],
             },
@@ -995,7 +1234,7 @@ describe('common utils', () => {
                   owner: SECURITY_SOLUTION_OWNER,
                   alertId: ['a', 'b'],
                   index: '',
-                  type: CommentType.alert,
+                  type: AttachmentType.alert,
                   rule: {
                     id: 'rule-id-1',
                     name: 'rule-name-1',
@@ -1027,7 +1266,7 @@ describe('common utils', () => {
                   owner: SECURITY_SOLUTION_OWNER,
                   alertId: ['a', 'b'],
                   index: '',
-                  type: CommentType.alert,
+                  type: AttachmentType.alert,
                   rule: {
                     id: 'rule-id-1',
                     name: 'rule-name-1',
@@ -1166,7 +1405,7 @@ describe('common utils', () => {
           attributes: {
             comment: currentCommentString,
           },
-        } as SavedObject<CommentRequestUserType>
+        } as SavedObject<UserCommentAttachmentPayload>
       );
 
       const expectedReferences = [
@@ -1351,6 +1590,27 @@ describe('common utils', () => {
       const attachments = [createAlertAttachment()];
 
       expect(countUserAttachments(attachments)).toBe(0);
+    });
+  });
+
+  describe('isPersistableStateOrExternalReference', () => {
+    it('returns true for persistable state request', () => {
+      expect(isPersistableStateOrExternalReference(createPersistableStateRequests(1)[0])).toBe(
+        true
+      );
+    });
+
+    it('returns true for external reference request', () => {
+      expect(isPersistableStateOrExternalReference(createExternalReferenceRequests(1)[0])).toBe(
+        true
+      );
+    });
+
+    it('returns false for other request types', () => {
+      expect(isPersistableStateOrExternalReference(createUserRequests(1)[0])).toBe(false);
+      expect(isPersistableStateOrExternalReference(createAlertRequests(1, 'alert-id')[0])).toBe(
+        false
+      );
     });
   });
 });

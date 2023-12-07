@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getHttp } from '../../../../kibana_services';
-import { CreateDocSourceResp, IndexSourceMappings } from '../../../../../common/types';
+import { CreateDocSourceResp } from '../../../../../common/types';
 import { INDEX_SOURCE_API_PATH } from '../../../../../common/constants';
 
 export const createNewIndexAndPattern = async ({
@@ -14,10 +15,10 @@ export const createNewIndexAndPattern = async ({
   defaultMappings = {},
 }: {
   indexName: string;
-  defaultMappings: IndexSourceMappings | {};
+  defaultMappings: MappingTypeMapping | {};
 }) => {
   return await getHttp().fetch<CreateDocSourceResp>({
-    path: `/${INDEX_SOURCE_API_PATH}`,
+    path: INDEX_SOURCE_API_PATH,
     method: 'POST',
     version: '1',
     body: JSON.stringify({

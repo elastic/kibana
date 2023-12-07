@@ -55,7 +55,7 @@ export const searchConfigSchema = schema.object({
      *  Block and wait until the search is completed up to the timeout (see es async_search's `wait_for_completion_timeout`)
      *  TODO: we should optimize this as 100ms is likely not optimal (https://github.com/elastic/kibana/issues/143277)
      */
-    waitForCompletion: schema.duration({ defaultValue: '100ms' }),
+    waitForCompletion: schema.duration({ defaultValue: '200ms' }),
     /**
      *  How long the async search needs to be available after each search poll. Ongoing async searches and any saved search results are deleted after this period.
      *  (see es async_search's `keep_alive`)
@@ -71,7 +71,7 @@ export const searchConfigSchema = schema.object({
      * How long to wait before polling the async_search after the previous poll response.
      * If not provided, then default dynamic interval with backoff is used.
      */
-    pollInterval: schema.maybe(schema.number({ min: 1000 })),
+    pollInterval: schema.maybe(schema.number({ min: 200 })),
   }),
   aggs: schema.object({
     shardDelay: schema.object({
@@ -86,6 +86,10 @@ export const searchConfigSchema = schema.object({
 
 export const configSchema = schema.object({
   search: searchConfigSchema,
+  /**
+   * Turns on/off limit validations for the registered uiSettings.
+   */
+  enableUiSettingsValidations: schema.boolean({ defaultValue: false }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { CreateAPIKeyParams } from '@kbn/security-plugin/server';
+import type {
+  CreateRestAPIKeyParams,
+  CreateRestAPIKeyWithKibanaPrivilegesParams,
+} from '@kbn/security-plugin/server';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 
@@ -60,7 +63,7 @@ export async function generateTransformSecondaryAuthHeaders({
 }: {
   authorizationHeader: HTTPAuthorizationHeader | null | undefined;
   logger: Logger;
-  createParams?: CreateAPIKeyParams;
+  createParams?: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams;
   username?: string;
   pkgName?: string;
   pkgVersion?: string;

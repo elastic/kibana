@@ -32,7 +32,10 @@ const getJobTypeList = () => (
   </>
 );
 
-export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
+export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType }> = ({
+  hasMissingJobNode,
+  theme,
+}) => {
   const [showJobTypes, setShowJobTypes] = useState<boolean>(false);
 
   return (
@@ -74,6 +77,21 @@ export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
+            <span className="mlJobMapLegend__ingestPipeline" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.ml.dataframe.analyticsMap.legend.ingestPipelineLabel"
+                defaultMessage="ingest pipeline"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
             <span className="mlJobMapLegend__transform" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -107,6 +125,23 @@ export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {hasMissingJobNode ? (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <span className="mlJobMapLegend__analyticsMissing" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analyticsMap.legend.missingAnalyticsJobLabel"
+                  defaultMessage="missing analytics job"
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>

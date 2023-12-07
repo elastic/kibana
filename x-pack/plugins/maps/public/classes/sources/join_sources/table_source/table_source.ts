@@ -54,12 +54,11 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     return `table source ${uuidv4()}`;
   }
 
-  async getPropertiesMap(
+  async getJoinMetrics(
     requestMeta: VectorSourceRequestMeta,
-    leftSourceName: string,
-    leftFieldName: string,
+    layerName: string,
     registerCancelCallback: (callback: () => void) => void
-  ): Promise<PropertiesMap> {
+  ) {
     const propertiesMap: PropertiesMap = new Map<string, BucketProperties>();
 
     const columnNames = this._descriptor.__columns.map((column) => {
@@ -86,7 +85,10 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
       }
     }
 
-    return propertiesMap;
+    return {
+      joinMetrics: propertiesMap,
+      warnings: [],
+    };
   }
 
   getTermField(): IField {
@@ -137,14 +139,6 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
   hasTooltipProperties(): boolean {
     return false;
-  }
-
-  createField({ fieldName }: { fieldName: string }): IField {
-    const field = this.getFieldByName(fieldName);
-    if (!field) {
-      throw new Error(`Cannot find field for ${fieldName}`);
-    }
-    return field;
   }
 
   async getBoundsForFilters(

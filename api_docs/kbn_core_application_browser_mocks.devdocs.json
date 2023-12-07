@@ -174,7 +174,7 @@
             "label": "createInternalStartContract",
             "description": [],
             "signature": [
-              "() => jest.Mocked<",
+              "(currentAppId?: string | undefined) => jest.Mocked<",
               "InternalApplicationStart",
               ">"
             ],
@@ -182,7 +182,22 @@
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
-            "children": []
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-application-browser-mocks",
+                "id": "def-common.applicationServiceMock.createInternalStartContract.$1",
+                "type": "string",
+                "tags": [],
+                "label": "currentAppId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-application-browser-mocks",

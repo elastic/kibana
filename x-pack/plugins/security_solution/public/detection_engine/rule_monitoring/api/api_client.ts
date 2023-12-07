@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omitBy, isUndefined } from 'lodash';
 import dateMath from '@kbn/datemath';
 
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -28,6 +29,7 @@ import type {
 export const api: IRuleMonitoringApiClient = {
   setupDetectionEngineHealthApi: async (): Promise<void> => {
     await http().fetch(SETUP_HEALTH_URL, {
+      version: '1',
       method: 'POST',
     });
   },
@@ -35,19 +37,38 @@ export const api: IRuleMonitoringApiClient = {
   fetchRuleExecutionEvents: (
     args: FetchRuleExecutionEventsArgs
   ): Promise<GetRuleExecutionEventsResponse> => {
-    const { ruleId, eventTypes, logLevels, sortOrder, page, perPage, signal } = args;
+    const {
+      ruleId,
+      searchTerm,
+      eventTypes,
+      logLevels,
+      dateRange,
+      sortOrder,
+      page,
+      perPage,
+      signal,
+    } = args;
 
     const url = getRuleExecutionEventsUrl(ruleId);
+    const startDate = dateMath.parse(dateRange?.start ?? '')?.toISOString();
+    const endDate = dateMath.parse(dateRange?.end ?? '', { roundUp: true })?.toISOString();
 
     return http().fetch<GetRuleExecutionEventsResponse>(url, {
       method: 'GET',
-      query: {
-        event_types: eventTypes?.join(','),
-        log_levels: logLevels?.join(','),
-        sort_order: sortOrder,
-        page,
-        per_page: perPage,
-      },
+      version: '1',
+      query: omitBy(
+        {
+          search_term: searchTerm?.length ? searchTerm : undefined,
+          event_types: eventTypes?.length ? eventTypes.join(',') : undefined,
+          log_levels: logLevels?.length ? logLevels.join(',') : undefined,
+          date_start: startDate,
+          date_end: endDate,
+          sort_order: sortOrder,
+          page,
+          per_page: perPage,
+        },
+        isUndefined
+      ),
       signal,
     });
   },
@@ -74,6 +95,7 @@ export const api: IRuleMonitoringApiClient = {
 
     return http().fetch<GetRuleExecutionResultsResponse>(url, {
       method: 'GET',
+      version: '1',
       query: {
         start: startDate?.utc().toISOString(),
         end: endDate?.utc().toISOString(),

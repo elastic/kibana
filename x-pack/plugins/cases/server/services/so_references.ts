@@ -12,10 +12,10 @@ import type {
 } from '@kbn/core/server';
 import { isEqual, uniqWith } from 'lodash';
 import type {
-  CommentAttributes,
-  CommentAttributesNoSO,
-  CommentPatchAttributes,
-} from '../../common/api';
+  AttachmentAttributes,
+  AttachmentAttributesNoSO,
+  AttachmentPatchAttributes,
+} from '../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import {
   injectPersistableReferencesToSO,
@@ -84,7 +84,7 @@ export const injectAttachmentSOAttributesFromRefs = (
 };
 
 export const injectAttachmentSOAttributesFromRefsForPatch = (
-  updatedAttributes: CommentPatchAttributes,
+  updatedAttributes: AttachmentPatchAttributes,
   savedObject: SavedObjectsUpdateResponse<AttachmentPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): SavedObjectsUpdateResponse<AttachmentTransformedAttributes> => {
@@ -115,7 +115,7 @@ interface ExtractionResults {
 }
 
 export const extractAttachmentSORefsFromAttributes = (
-  attributes: CommentAttributes | CommentPatchAttributes,
+  attributes: AttachmentAttributes | AttachmentPatchAttributes,
   references: SavedObjectReference[],
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): ExtractionResults => {
@@ -125,7 +125,7 @@ export const extractAttachmentSORefsFromAttributes = (
     transformedFields,
     references: refsWithExternalRefId,
     didDeleteOperation,
-  } = soExtractor.extractFieldsToReferences<CommentAttributesNoSO>({
+  } = soExtractor.extractFieldsToReferences<AttachmentAttributesNoSO>({
     data: attributes,
     existingReferences: references,
   });

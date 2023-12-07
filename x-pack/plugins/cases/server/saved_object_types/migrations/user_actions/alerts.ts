@@ -10,8 +10,8 @@ import type {
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import type { CommentRequestAlertType } from '../../../../common/api';
-import { CommentType } from '../../../../common/api';
+import type { AlertAttachmentPayload } from '../../../../common/types/domain';
+import { AttachmentType } from '../../../../common/types/domain';
 import { GENERATED_ALERT } from '../constants';
 import { logError } from '../utils';
 import type { UserActionVersion800 } from './types';
@@ -84,7 +84,7 @@ function isAlertUserAction(newValue?: unknown | null): newValue is AlertCommentO
   return (
     unsafeAlertData !== undefined &&
     unsafeAlertData !== null &&
-    (unsafeAlertData.type === GENERATED_ALERT || unsafeAlertData.type === CommentType.alert)
+    (unsafeAlertData.type === GENERATED_ALERT || unsafeAlertData.type === AttachmentType.alert)
   );
 }
 
@@ -97,6 +97,6 @@ function isCreateComment(action?: string, actionFields?: string[]): boolean {
   );
 }
 
-type AlertCommentOptional = Partial<Omit<CommentRequestAlertType, 'type'>> & {
-  type: CommentType.alert | typeof GENERATED_ALERT;
+type AlertCommentOptional = Partial<Omit<AlertAttachmentPayload, 'type'>> & {
+  type: AttachmentType.alert | typeof GENERATED_ALERT;
 };

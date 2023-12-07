@@ -13,6 +13,35 @@ import { CspRuleTemplate } from './schemas';
 import { findCspRuleTemplateRequest } from './schemas/csp_rule_template_api/get_csp_rule_template';
 import { getComplianceDashboardSchema } from './schemas/stats';
 
+export type AwsCredentialsType =
+  | 'assume_role'
+  | 'direct_access_keys'
+  | 'temporary_keys'
+  | 'shared_credentials'
+  | 'cloud_formation';
+
+export type AwsCredentialsTypeFieldMap = {
+  [key in AwsCredentialsType]: string[];
+};
+
+export type GcpCredentialsType = 'credentials-file' | 'credentials-json';
+
+export type GcpCredentialsTypeFieldMap = {
+  [key in GcpCredentialsType]: string[];
+};
+
+export type AzureCredentialsType =
+  | 'arm_template'
+  | 'service_principal_with_client_secret'
+  | 'service_principal_with_client_certificate'
+  | 'service_principal_with_client_username_and_password'
+  | 'managed_identity'
+  | 'manual';
+
+export type AzureCredentialsTypeFieldMap = {
+  [key in AzureCredentialsType]: string[];
+};
+
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
 export type PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';
@@ -51,11 +80,30 @@ export interface Cluster {
   trend: PostureTrend[];
 }
 
+export interface BenchmarkData {
+  meta: {
+    benchmarkId: CspFinding['rule']['benchmark']['id'];
+    benchmarkVersion: CspFinding['rule']['benchmark']['version'];
+    benchmarkName: CspFinding['rule']['benchmark']['name'];
+    assetCount: number;
+  };
+  stats: Stats;
+  groupedFindingsEvaluation: GroupedFindingsEvaluation[];
+  trend: PostureTrend[];
+}
+
 export interface ComplianceDashboardData {
   stats: Stats;
   groupedFindingsEvaluation: GroupedFindingsEvaluation[];
   clusters: Cluster[];
   trend: PostureTrend[];
+}
+
+export interface ComplianceDashboardDataV2 {
+  stats: Stats;
+  groupedFindingsEvaluation: GroupedFindingsEvaluation[];
+  trend: PostureTrend[];
+  benchmarks: BenchmarkData[];
 }
 
 export type CspStatusCode =
@@ -105,6 +153,7 @@ export interface Benchmark {
 
 export type BenchmarkId = CspRuleTemplateMetadata['benchmark']['id'];
 export type BenchmarkName = CspRuleTemplateMetadata['benchmark']['name'];
+export type RuleSection = CspRuleTemplateMetadata['section'];
 
 // Fleet Integration types
 export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];

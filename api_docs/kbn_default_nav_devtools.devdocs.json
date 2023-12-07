@@ -61,7 +61,7 @@
             "section": "def-common.NavigationID",
             "text": "NavigationID"
           },
-          "> & { children: NonEmptyArray<",
+          "> & { children: ",
           {
             "pluginId": "@kbn/core-chrome-browser",
             "scope": "common",
@@ -93,7 +93,7 @@
             "section": "def-common.NavigationID",
             "text": "NavigationID"
           },
-          ">>; }"
+          ">[]; }"
         ],
         "path": "packages/default-nav/devtools/default_navigation.ts",
         "deprecated": false,
@@ -131,13 +131,10 @@
           {
             "parentPluginId": "@kbn/default-nav-devtools",
             "id": "def-common.defaultNavigation.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/default-nav/devtools/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -169,13 +166,27 @@
           },
           {
             "parentPluginId": "@kbn/default-nav-devtools",
+            "id": "def-common.defaultNavigation.renderAs",
+            "type": "string",
+            "tags": [],
+            "label": "renderAs",
+            "description": [],
+            "signature": [
+              "\"accordion\""
+            ],
+            "path": "packages/default-nav/devtools/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-devtools",
             "id": "def-common.defaultNavigation.children",
-            "type": "Object",
+            "type": "Array",
             "tags": [],
             "label": "children",
             "description": [],
             "signature": [
-              "[{ id: \"root\"; children: [{ link: \"dev_tools:console\"; }, { link: \"dev_tools:searchprofiler\"; }, { link: \"dev_tools:grokdebugger\"; }, { link: \"dev_tools:painless_lab\"; }]; }]"
+              "({ link: \"dev_tools:console\"; } | { link: \"dev_tools:searchprofiler\"; } | { link: \"dev_tools:grokdebugger\"; } | { link: \"dev_tools:painless_lab\"; })[]"
             ],
             "path": "packages/default-nav/devtools/default_navigation.ts",
             "deprecated": false,

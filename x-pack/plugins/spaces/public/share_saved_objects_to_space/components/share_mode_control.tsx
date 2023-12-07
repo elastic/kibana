@@ -22,11 +22,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { SelectableSpacesControl } from './selectable_spaces_control';
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { useSpaces } from '../../spaces_context';
 import type { SpacesDataEntry } from '../../types';
 import type { ShareOptions } from '../types';
-import { SelectableSpacesControl } from './selectable_spaces_control';
 
 interface Props {
   spaces: SpacesDataEntry[];
@@ -75,7 +75,10 @@ const ALL_SPACES_PROHIBITED_TOOLTIP = (
     )}
     content={i18n.translate(
       'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.allSpacesProhibitedTooltipContent',
-      { defaultMessage: 'A copy of this saved object exists in at least one other space.' }
+      {
+        defaultMessage:
+          'A copy of this saved object or a related object exists in at least one other space.',
+      }
     )}
     position="left"
     type="iInCircle"

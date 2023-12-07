@@ -37,6 +37,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           environment,
           kuery,
           indexLifecyclePhase,
+          start,
+          end,
         },
       },
     });

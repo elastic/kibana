@@ -23,7 +23,12 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
+import { PLUGIN_ID } from '../common';
+import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
+import { ObservabilityOnboardingPluginLocators } from './locators';
+import { ConfigSchema } from '.';
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
@@ -31,12 +36,21 @@ export type ObservabilityOnboardingPluginStart = void;
 export interface ObservabilityOnboardingPluginSetupDeps {
   data: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
+  share: SharePluginSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDeps {
   http: HttpStart;
   data: DataPublicPluginStart;
   observability: ObservabilityPublicStart;
+}
+
+export interface ObservabilityOnboardingPluginContextValue {
+  core: CoreStart;
+  plugins: ObservabilityOnboardingPluginSetupDeps;
+  data: DataPublicPluginStart;
+  observability: ObservabilityPublicStart;
+  config: ConfigSchema;
 }
 
 export class ObservabilityOnboardingPlugin
@@ -46,6 +60,8 @@ export class ObservabilityOnboardingPlugin
       ObservabilityOnboardingPluginStart
     >
 {
+  private locators?: ObservabilityOnboardingPluginLocators;
+
   constructor(private ctx: PluginInitializerContext) {}
 
   public setup(
@@ -67,7 +83,7 @@ export class ObservabilityOnboardingPlugin
         navLinkStatus: isServerlessEnabled
           ? AppNavLinkStatus.visible
           : AppNavLinkStatus.hidden,
-        id: 'observabilityOnboarding',
+        id: PLUGIN_ID,
         title: 'Observability Onboarding',
         order: 8500,
         euiIconType: 'logoObservability',
@@ -96,9 +112,23 @@ export class ObservabilityOnboardingPlugin
         },
       });
     }
+
+    this.locators = {
+      onboarding: plugins.share.url.locators.create(
+        new ObservabilityOnboardingLocatorDefinition()
+      ),
+    };
+
+    return {
+      locators: this.locators,
+    };
   }
   public start(
     core: CoreStart,
     plugins: ObservabilityOnboardingPluginStartDeps
-  ) {}
+  ) {
+    return {
+      locators: this.locators,
+    };
+  }
 }

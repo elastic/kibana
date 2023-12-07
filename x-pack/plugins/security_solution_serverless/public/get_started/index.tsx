@@ -7,18 +7,18 @@
 
 import React from 'react';
 
-import { KibanaServicesProvider, type Services } from '../common/services';
+import { ServicesProvider, type Services } from '../common/services';
 import { GetStarted } from './lazy';
 import type { SecurityProductTypes } from '../../common/config';
 
 export const getSecurityGetStartedComponent = (
   services: Services,
   productTypes: SecurityProductTypes
-): React.ComponentType =>
-  function GetStartedComponent() {
+): React.ComponentType<{ indicesExist?: boolean }> =>
+  function GetStartedComponent({ indicesExist }: { indicesExist?: boolean }) {
     return (
-      <KibanaServicesProvider services={services}>
-        <GetStarted productTypes={productTypes} />
-      </KibanaServicesProvider>
+      <ServicesProvider services={services}>
+        <GetStarted productTypes={productTypes} indicesExist={indicesExist} />
+      </ServicesProvider>
     );
   };

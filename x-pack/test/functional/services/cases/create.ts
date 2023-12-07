@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CasesCommon } from './common';

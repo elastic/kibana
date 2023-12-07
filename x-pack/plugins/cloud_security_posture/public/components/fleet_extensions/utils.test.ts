@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { getMaxPackageName, getPostureInputHiddenVars, getPosturePolicy } from './utils';
+import {
+  getMaxPackageName,
+  getPostureInputHiddenVars,
+  getPosturePolicy,
+  getCspmCloudShellDefaultValue,
+  isBelowMinVersion,
+} from './utils';
 import { getMockPolicyAWS, getMockPolicyK8s, getMockPolicyEKS } from './mocks';
+import type { PackageInfo } from '@kbn/fleet-plugin/common';
 
 describe('getPosturePolicy', () => {
   for (const [name, getPolicy, expectedVars] of [
@@ -121,5 +128,155 @@ describe('getMaxPackageName', () => {
     const result = getMaxPackageName(packageName, packagePolicies);
 
     expect(result).toBe('kspm-1');
+  });
+});
+
+describe('getCspmCloudShellDefaultValue', () => {
+  it('should return empty string when policy_templates is missing', () => {
+    const packagePolicy = { name: 'test' } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('');
+  });
+
+  it('should return empty string when policy_templates.name is not cspm', () => {
+    const packagePolicy = { name: 'test', policy_templates: [{ name: 'kspm' }] } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('');
+  });
+
+  it('should return empty string when policy_templates.inputs is missing', () => {
+    const packagePolicy = { name: 'test', policy_templates: [{ name: 'cspm' }] } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('');
+  });
+
+  it('should return empty string when policy_templates.inputs is empty', () => {
+    const packagePolicy = {
+      name: 'test',
+      policy_templates: [
+        {
+          title: '',
+          description: '',
+          name: 'cspm',
+          inputs: [{}],
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('');
+  });
+
+  it('should return empty string when policy_templates.inputs is undefined', () => {
+    const packagePolicy = {
+      name: 'test',
+      policy_templates: [
+        {
+          title: '',
+          description: '',
+          name: 'cspm',
+          inputs: undefined,
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('');
+  });
+
+  it('should return empty string when policy_templates.inputs.vars does not have cloud_shell_url', () => {
+    const packagePolicy = {
+      name: 'test',
+      policy_templates: [
+        {
+          title: '',
+          description: '',
+          name: 'cspm',
+          inputs: [{ vars: [{ name: 'cloud_shell_url_FAKE' }] }],
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('');
+  });
+
+  it('should return empty string when policy_templates.inputs.varshave cloud_shell_url but no default', () => {
+    const packagePolicy = {
+      name: 'test',
+      policy_templates: [
+        {
+          title: '',
+          description: '',
+          name: 'cspm',
+          inputs: [{ vars: [{ name: 'cloud_shell_url' }] }],
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('');
+  });
+
+  it('should cloud shell url when policy_templates.inputs.vars have cloud_shell_url', () => {
+    const packagePolicy = {
+      name: 'test',
+      policy_templates: [
+        {
+          title: '',
+          description: '',
+          name: 'cspm',
+          inputs: [
+            {
+              vars: [
+                { name: 'cloud_shell_url_FAKE', default: 'URL_FAKE' },
+                { name: 'cloud_shell_url', default: 'URL' },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('URL');
+  });
+});
+
+describe('isBelowMinVersion', () => {
+  test.each([
+    ['1.2.3', '2.0.0', true], // Version '1.2.3' is below '2.0.0', expect true
+    ['1.2.3-preview20', '2.0.0', true], // Version '1.2.3-preview20' is below '2.0.0', expect true
+    ['2.0.0', '1.2.3', false], // Version '2.0.0' is not below '1.2.3', expect false
+    ['1.2.3', '1.2.3', false], // Version '1.2.3' is not below itself, expect false
+  ])('returns expected boolean for version and minVersion', (version, minVersion, expected) => {
+    const result = isBelowMinVersion(version, minVersion);
+
+    expect(result).toBe(expected);
+  });
+
+  test.each([
+    ['invalid', '1.0.0'], // Invalid version, expect error
+    ['1.2', '1.0.0'], // Invalid version, expect error
+    ['', '1.0.0'], // Empty version, expect error
+    ['1.0.0', ''], // Empty minVersion, expect error
+    ['', ''], // Empty version and minVersion, expect error
+  ])('semver return errors when invalid versions are used', (version, minVersion) => {
+    try {
+      isBelowMinVersion(version, minVersion);
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
   });
 });

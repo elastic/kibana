@@ -83,8 +83,22 @@
     "@kbn/core-overlays-browser-mocks",
     "@kbn/core-theme-browser-mocks",
     "@kbn/event-annotation-components",
+    "@kbn/content-management-utils",
+    "@kbn/serverless",
+    "@kbn/ebt-tools",
+    "@kbn/chart-expressions-common",
+    "@kbn/search-response-warnings",
+    "@kbn/logging",
+    "@kbn/core-plugins-server",
+    "@kbn/text-based-languages",
+    "@kbn/field-utils",
+    "@kbn/panel-loader",
+    "@kbn/shared-ux-button-toolbar",
+    "@kbn/cell-actions",
+    "@kbn/calculate-width-from-char-count",
+    "@kbn/discover-utils"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

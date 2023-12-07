@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 
-import { EuiLink, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiLink, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -46,7 +46,7 @@ export const NoDeprecationsPrompt: FunctionComponent<Props> = ({
   navigateToOverviewPage,
 }) => {
   return (
-    <EuiEmptyPrompt
+    <EuiPageTemplate.EmptyPrompt
       iconType="check"
       data-test-subj="noDeprecationsPrompt"
       title={<h2>{i18nTexts.getEmptyPromptTitle(deprecationType)}</h2>}

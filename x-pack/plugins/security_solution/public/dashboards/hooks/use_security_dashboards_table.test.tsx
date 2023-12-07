@@ -16,7 +16,8 @@ import {
   useSecurityDashboardsTableColumns,
   useSecurityDashboardsTableItems,
 } from './use_security_dashboards_table';
-import * as telemetry from '../../common/lib/telemetry';
+import { METRIC_TYPE, TELEMETRY_EVENT } from '../../common/lib/telemetry/constants';
+import * as telemetry from '../../common/lib/telemetry/track';
 import { SecurityPageName } from '../../../common/constants';
 import * as linkTo from '../../common/components/link_to';
 import { getDashboardsByTagIds } from '../../common/containers/dashboards/api';
@@ -175,10 +176,7 @@ describe('Security Dashboards Table hooks', () => {
     );
 
     result.getByText(mockReturnDashboardTitle).click();
-    expect(spyTrack).toHaveBeenCalledWith(
-      telemetry.METRIC_TYPE.CLICK,
-      telemetry.TELEMETRY_EVENT.DASHBOARD
-    );
+    expect(spyTrack).toHaveBeenCalledWith(METRIC_TYPE.CLICK, TELEMETRY_EVENT.DASHBOARD);
   });
 
   it('should land on SecuritySolution dashboard view page when dashboard title clicked', async () => {

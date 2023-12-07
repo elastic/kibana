@@ -10,8 +10,9 @@ import pMap from 'p-map';
 import { chunk } from 'lodash';
 import type { SavedObjectsBulkDeleteObject } from '@kbn/core/server';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
-import type { CasesDeleteRequest } from '../../../common/api';
-import { CasesDeleteRequestRt, decodeWithExcessOrThrow } from '../../../common/api';
+import type { CasesDeleteRequest } from '../../../common/types/api';
+import { CasesDeleteRequestRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,

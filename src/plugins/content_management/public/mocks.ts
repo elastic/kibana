@@ -23,6 +23,7 @@ const createStartContract = (): ContentManagementPublicStart => {
       update: jest.fn(),
       delete: jest.fn(),
       search: jest.fn(),
+      mSearch: jest.fn(),
     } as unknown as ContentManagementPublicStart['client'],
     registry: {
       get: jest.fn(),

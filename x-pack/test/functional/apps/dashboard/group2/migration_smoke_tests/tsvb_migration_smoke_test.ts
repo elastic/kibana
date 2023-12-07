@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render all panels on the dashboard', async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.loadSavedDashboard('TSVB Index Pattern Smoke Test');
 
         // dashboard should load properly
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render all panels on the dashboard', async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.loadSavedDashboard('TSVB 7.13.3');
 
         // dashboard should load properly

@@ -7,7 +7,11 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { APMTransactionDurationIndicator, APMTransactionErrorRateIndicator } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  APMTransactionDurationIndicator,
+  APMTransactionErrorRateIndicator,
+} from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../../utils/kibana_react';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
@@ -48,7 +52,7 @@ export function ApmIndicatorOverview({ indicator }: Props) {
               )}
             </EuiBadge>
           </EuiFlexItem>
-          {environment !== '*' && (
+          {environment !== ALL_VALUE && (
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow" href={link}>
                 {i18n.translate(
@@ -58,7 +62,7 @@ export function ApmIndicatorOverview({ indicator }: Props) {
               </EuiBadge>
             </EuiFlexItem>
           )}
-          {transactionType !== '*' && (
+          {transactionType !== ALL_VALUE && (
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow" href={link}>
                 {i18n.translate(
@@ -68,7 +72,7 @@ export function ApmIndicatorOverview({ indicator }: Props) {
               </EuiBadge>
             </EuiFlexItem>
           )}
-          {transactionName !== '*' && (
+          {transactionName !== ALL_VALUE && (
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow" href={link}>
                 {i18n.translate(

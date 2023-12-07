@@ -7,58 +7,81 @@
 import { TooltipContainer } from '@elastic/charts';
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
   EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
-import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates';
+import { profilingUseLegacyCo2Calculation } from '@kbn/observability-plugin/common';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { TooltipRow } from './tooltip_row';
+import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 interface Props {
-  isRoot: boolean;
-  label: string;
-  countInclusive: number;
-  countExclusive: number;
-  totalSamples: number;
-  totalSeconds: number;
+  annualCO2KgsInclusive: number;
+  annualCostsUSDInclusive: number;
   baselineScaleFactor?: number;
-  comparisonScaleFactor?: number;
-  comparisonCountInclusive?: number;
+  comparisonAnnualCO2KgsInclusive?: number;
+  comparisonAnnualCostsUSDInclusive?: number;
   comparisonCountExclusive?: number;
+  comparisonCountInclusive?: number;
+  comparisonScaleFactor?: number;
   comparisonTotalSamples?: number;
   comparisonTotalSeconds?: number;
-  samplingRate?: number;
+  countExclusive: number;
+  countInclusive: number;
+  inline: boolean;
+  isRoot: boolean;
+  label: string;
   onShowMoreClick?: () => void;
+  parentLabel?: string;
+  totalSamples: number;
+  totalSeconds: number;
 }
 
 export function FlameGraphTooltip({
-  isRoot,
-  label,
-  countInclusive,
-  countExclusive,
-  totalSamples,
-  totalSeconds,
+  annualCO2KgsInclusive,
+  annualCostsUSDInclusive,
   baselineScaleFactor,
-  comparisonScaleFactor,
-  comparisonCountInclusive,
+  comparisonAnnualCO2KgsInclusive,
+  comparisonAnnualCostsUSDInclusive,
   comparisonCountExclusive,
+  comparisonCountInclusive,
+  comparisonScaleFactor,
   comparisonTotalSamples,
   comparisonTotalSeconds,
-  samplingRate,
+  countExclusive,
+  countInclusive,
+  inline,
+  isRoot,
+  label,
   onShowMoreClick,
+  parentLabel,
+  totalSamples,
+  totalSeconds,
 }: Props) {
+  const {
+    start: { core },
+  } = useProfilingDependencies();
+  const shouldUseLegacyCo2Calculation = core.uiSettings.get<boolean>(
+    profilingUseLegacyCo2Calculation
+  );
+
   const theme = useEuiTheme();
+  const calculateImpactEstimates = useCalculateImpactEstimate();
 
   const impactEstimates = calculateImpactEstimates({
     countExclusive,
@@ -80,14 +103,37 @@ export function FlameGraphTooltip({
         })
       : undefined;
 
-  const prependString = samplingRate === 1.0 ? ' ' : '~';
-
   return (
     <TooltipContainer>
       <EuiPanel paddingSize="s">
         <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>{label}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xxxs">
+              <EuiText>{label}</EuiText>
+            </EuiTitle>
+          </EuiFlexItem>
+
           <EuiHorizontalRule margin="none" style={{ background: theme.euiTheme.border.color }} />
+          {inline && (
+            <EuiCallOut
+              css={css`
+                p {
+                  display: flex;
+                }
+              `}
+              color="primary"
+              title={
+                <EuiText size="xs">
+                  {i18n.translate('xpack.profiling.flameGraphTooltip.inlineCallout', {
+                    defaultMessage: 'This function has been inlined by {parentLabel}',
+                    values: { parentLabel },
+                  })}
+                </EuiText>
+              }
+              size="s"
+              iconType="iInCircle"
+            />
+          )}
           {isRoot === false && (
             <>
               <TooltipRow
@@ -99,12 +145,11 @@ export function FlameGraphTooltip({
                     labelStyle={{ fontWeight: 'bold' }}
                   />
                 }
-                value={impactEstimates.percentage}
-                comparison={comparisonImpactEstimates?.percentage}
+                value={impactEstimates.totalCPU.percentage}
+                comparison={comparisonImpactEstimates?.totalCPU.percentage}
                 formatValue={asPercentage}
                 showDifference
                 formatDifferenceAsPercentage
-                prependValue={prependString}
               />
               <TooltipRow
                 label={
@@ -115,12 +160,11 @@ export function FlameGraphTooltip({
                     labelStyle={{ fontWeight: 'bold' }}
                   />
                 }
-                value={impactEstimates.percentageNoChildren}
-                comparison={comparisonImpactEstimates?.percentageNoChildren}
+                value={impactEstimates.selfCPU.percentage}
+                comparison={comparisonImpactEstimates?.selfCPU.percentage}
                 showDifference
                 formatDifferenceAsPercentage
                 formatValue={asPercentage}
-                prependValue={prependString}
               />
             </>
           )}
@@ -138,29 +182,42 @@ export function FlameGraphTooltip({
             }
             showDifference
             formatDifferenceAsPercentage={false}
-            prependValue={prependString}
           />
           <TooltipRow
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedCo2', {
               defaultMessage: `Annualized CO2`,
             })}
-            value={impactEstimates.annualizedCo2}
-            comparison={comparisonImpactEstimates?.annualizedCo2}
-            formatValue={asWeight}
+            value={
+              shouldUseLegacyCo2Calculation
+                ? impactEstimates.totalCPU.annualizedCo2
+                : annualCO2KgsInclusive
+            }
+            comparison={
+              shouldUseLegacyCo2Calculation
+                ? comparisonImpactEstimates?.totalCPU.annualizedCo2
+                : comparisonAnnualCO2KgsInclusive
+            }
+            formatValue={(value) => asWeight(value, 'kgs')}
             showDifference
             formatDifferenceAsPercentage={false}
-            prependValue={prependString}
           />
           <TooltipRow
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedDollarCost', {
               defaultMessage: `Annualized dollar cost`,
             })}
-            value={impactEstimates.annualizedDollarCost}
-            comparison={comparisonImpactEstimates?.annualizedDollarCost}
+            value={
+              shouldUseLegacyCo2Calculation
+                ? impactEstimates.totalCPU.annualizedDollarCost
+                : annualCostsUSDInclusive
+            }
+            comparison={
+              shouldUseLegacyCo2Calculation
+                ? comparisonImpactEstimates?.totalCPU.annualizedDollarCost
+                : comparisonAnnualCostsUSDInclusive
+            }
             formatValue={asCost}
             showDifference
             formatDifferenceAsPercentage={false}
-            prependValue={prependString}
           />
           {onShowMoreClick && (
             <>
@@ -169,7 +226,12 @@ export function FlameGraphTooltip({
                 style={{ background: theme.euiTheme.border.color }}
               />
               <EuiFlexItem>
-                <EuiButtonEmpty size="s" iconType="inspect" onClick={onShowMoreClick}>
+                <EuiButtonEmpty
+                  data-test-subj="profilingFlameGraphTooltipButton"
+                  size="s"
+                  iconType="inspect"
+                  onClick={onShowMoreClick}
+                >
                   <EuiText size="xs">
                     {i18n.translate('xpack.profiling.flameGraphTooltip.showMoreButton', {
                       defaultMessage: `Show more information`,

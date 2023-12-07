@@ -7,8 +7,6 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 
-import { bundledPackagesLocation, getPackagesArgs } from './packages';
-
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
@@ -22,11 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.fleet.developer.bundledPackageLocation=${bundledPackagesLocation}`,
-        ...getPackagesArgs(),
-      ],
+      serverArgs: [...xPackAPITestsConfig.get('kbnTestServer.serverArgs')],
     },
   };
 }

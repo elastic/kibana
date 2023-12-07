@@ -20,12 +20,12 @@ import React, { Component, lazy, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { CustomizeSpaceAvatar } from './customize_space_avatar';
 import { getSpaceAvatarComponent, getSpaceColor, getSpaceInitials } from '../../../space_avatar';
 import type { SpaceValidator } from '../../lib';
 import { toSpaceIdentifier } from '../../lib';
 import type { FormValues } from '../manage_space_page';
 import { SectionPanel } from '../section_panel';
-import { CustomizeSpaceAvatar } from './customize_space_avatar';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>

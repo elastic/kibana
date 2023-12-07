@@ -24,6 +24,7 @@ import { pluginServices } from '../../services/plugin_services';
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
 
 interface Props {
+  isDisabled?: boolean;
   /** Handler for creating new visualization of a specified type */
   createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
   /** Handler for creating a new embeddable of a specified type */
@@ -43,7 +44,7 @@ interface UnwrappedEmbeddableFactory {
   isEditable: boolean;
 }
 
-export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => {
+export const EditorMenu = ({ createNewVisType, createNewEmbeddable, isDisabled }: Props) => {
   const {
     embeddable,
     visualizations: {
@@ -103,10 +104,11 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
   const promotedVisTypes = getSortedVisTypesByGroup(VisGroups.PROMOTED);
   const aggsBasedVisTypes = getSortedVisTypesByGroup(VisGroups.AGGBASED);
   const toolVisTypes = getSortedVisTypesByGroup(VisGroups.TOOLS);
-  const visTypeAliases = getVisTypeAliases().sort(
-    ({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
+  const visTypeAliases = getVisTypeAliases()
+    .sort(({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
       a === b ? 0 : a ? -1 : 1
-  );
+    )
+    .filter(({ disableCreate }: VisTypeAlias) => !disableCreate);
 
   const factories = unwrappedEmbeddableFactories.filter(
     ({ isEditable, factory: { type, canCreateNew, isContainerType } }) =>
@@ -273,6 +275,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
         defaultMessage: 'Add panel',
       })}
+      isDisabled={isDisabled}
       size="s"
       iconType="plusInCircle"
       panelPaddingSize="none"

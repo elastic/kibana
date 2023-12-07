@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import type { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/types';
+import { isString } from 'lodash/fp';
 import * as i18n from './translations';
 import { HeaderSection } from '../header_section';
 import { Panel } from '../panel';
@@ -42,6 +43,7 @@ import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/uti
 import { VisualizationEmbeddable } from '../visualization_actions/visualization_embeddable';
 import { MatrixHistogramChartContent } from './chart_content';
 import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
+import type { SourcererScopeName } from '../../store/sourcerer/model';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
@@ -64,8 +66,10 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     stackByOptions: MatrixHistogramOption[];
     subtitle?: string | GetSubTitle;
     scopeId?: string;
+    sourcererScopeId?: SourcererScopeName;
     title: string | GetTitle;
     hideQueryToggle?: boolean;
+    applyGlobalQueriesAndFilters?: boolean;
   };
 
 const DEFAULT_PANEL_HEIGHT = 300;
@@ -112,11 +116,13 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   startDate,
   subtitle,
   scopeId,
+  sourcererScopeId,
   title,
   titleSize,
   yTickFormatter,
   skip,
   hideQueryToggle = false,
+  applyGlobalQueriesAndFilters = true,
 }) => {
   const visualizationId = `${id}-embeddable`;
   const dispatch = useDispatch();
@@ -258,9 +264,20 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 
   const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
   const extraVisualizationOptions = useMemo(
-    () => ({ dnsIsPtrIncluded: isPtrIncluded ?? false }),
-    [isPtrIncluded]
+    () => ({
+      dnsIsPtrIncluded: isPtrIncluded ?? false,
+      filters: filterQuery
+        ? [
+            {
+              query: isString(filterQuery) ? JSON.parse(filterQuery) : filterQuery,
+              meta: {},
+            },
+          ]
+        : undefined,
+    }),
+    [isPtrIncluded, filterQuery]
   );
+
   if (hideHistogram) {
     return null;
   }
@@ -329,6 +346,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
           {toggleStatus ? (
             isChartEmbeddablesEnabled ? (
               <VisualizationEmbeddable
+                scopeId={sourcererScopeId}
+                applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
                 data-test-subj="embeddable-matrix-histogram"
                 extraOptions={extraVisualizationOptions}
                 getLensAttributes={getLensAttributes}

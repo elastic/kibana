@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiPageBody,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
@@ -69,7 +69,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
 
   return (
     <EuiPageBody restrictWidth={true} data-test-subj="overview">
-      <EuiPageContentBody color="transparent" paddingSize="none">
+      <EuiPageSection color="transparent" paddingSize="none">
         <EuiPageHeader
           bottomBorder
           pageTitle={i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
@@ -135,7 +135,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             ].filter(Boolean) as EuiStepProps[]
           }
         />
-      </EuiPageContentBody>
+      </EuiPageSection>
     </EuiPageBody>
   );
 });

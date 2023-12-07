@@ -28,24 +28,17 @@ export function toMinutes(duration: Duration) {
       return duration.value * 7 * 24 * 60;
     case 'M':
       return duration.value * 30 * 24 * 60;
-    case 'Y':
-      return duration.value * 365 * 24 * 60;
+    default:
+      assertNever(duration.unit);
   }
-
-  assertNever(duration.unit);
 }
 
-export function toMomentUnitOfTime(unit: string): moment.unitOfTime.Diff | undefined {
+export function toCalendarAlignedMomentUnitOfTime(unit: string): moment.unitOfTime.StartOf {
   switch (unit) {
-    case 'd':
-      return 'days';
+    default:
     case 'w':
-      return 'weeks';
+      return 'isoWeek';
     case 'M':
       return 'months';
-    case 'Q':
-      return 'quarters';
-    case 'Y':
-      return 'years';
   }
 }

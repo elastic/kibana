@@ -17,7 +17,7 @@ import {
   euiPaletteWarm,
   euiPaletteForStatus,
   euiPaletteForTemperature,
-  euiPaletteComplimentary,
+  euiPaletteComplementary,
   euiPaletteColorBlindBehindText,
 } from '@elastic/eui';
 import type { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from '@kbn/coloring';
@@ -277,7 +277,7 @@ export const buildPalettes: (
       title: i18n.translate('charts.palettes.complimentaryLabel', {
         defaultMessage: 'Complimentary',
       }),
-      ...buildGradient('complimentary', euiPaletteComplimentary),
+      ...buildGradient('complimentary', euiPaletteComplementary),
     },
     negative: {
       title: i18n.translate('charts.palettes.negativeLabel', { defaultMessage: 'Negative' }),

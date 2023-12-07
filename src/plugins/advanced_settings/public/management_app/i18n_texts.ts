@@ -13,7 +13,7 @@ export const i18nTexts = {
     defaultMessage: 'Space Settings',
   }),
   defaultSpaceCalloutTitle: i18n.translate('advancedSettings.defaultSpaceCalloutTitle', {
-    defaultMessage: 'Changes will affect the `default` space',
+    defaultMessage: 'Changes will affect the current space.',
   }),
   defaultSpaceCalloutSubtitle: i18n.translate('advancedSettings.defaultSpaceCalloutSubtitle', {
     defaultMessage:

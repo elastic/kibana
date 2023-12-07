@@ -7,9 +7,9 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import type { HostItem, HostsFields } from '../common';
+import type { HostsFields } from '../../../../api/search_strategy/hosts/model/sort';
+import type { HostItem } from '../common';
 import type { CursorType, Direction, Inspect, Maybe, PageInfoPaginated } from '../../../common';
-import type { RequestOptionsPaginated } from '../..';
 
 export interface HostsEdges {
   node: HostItem;
@@ -21,10 +21,6 @@ export interface HostsStrategyResponse extends IEsSearchResponse {
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
-}
-
-export interface HostsRequestOptions extends RequestOptionsPaginated<HostsFields> {
-  defaultIndex: string[];
 }
 
 export interface HostsSortField {

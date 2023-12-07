@@ -300,8 +300,8 @@ describe('convertMathToFormulaColumn', () => {
 
   it.each`
     expression                               | expected
-    ${'params._interval'}                    | ${'interval()'}
-    ${'params._interval + params._interval'} | ${'interval() + interval()'}
+    ${'params._interval'}                    | ${'time_range()'}
+    ${'params._interval + params._interval'} | ${'time_range() + time_range()'}
     ${'params._all'}                         | ${null}
     ${'params._all + params.interval'}       | ${null}
     ${'params._timestamp'}                   | ${null}

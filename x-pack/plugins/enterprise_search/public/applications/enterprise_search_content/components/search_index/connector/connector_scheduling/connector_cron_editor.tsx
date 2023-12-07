@@ -13,8 +13,9 @@ import { EuiFlexItem, EuiFlexGroup, EuiButton, EuiButtonEmpty } from '@elastic/e
 
 import { i18n } from '@kbn/i18n';
 
+import { ConnectorScheduling, SyncJobType } from '@kbn/search-connectors';
+
 import { Status } from '../../../../../../../common/types/api';
-import { ConnectorScheduling, SyncJobType } from '../../../../../../../common/types/connectors';
 import { CronEditor } from '../../../../../shared/cron_editor';
 import { Frequency } from '../../../../../shared/cron_editor/types';
 import { UpdateConnectorSchedulingApiLogic } from '../../../../api/connector/update_connector_scheduling_api_logic';

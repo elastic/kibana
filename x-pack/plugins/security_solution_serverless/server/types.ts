@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { CoreSetup, ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { PluginSetupContract, PluginStartContract } from '@kbn/features-plugin/server';
 import type {
@@ -12,12 +12,18 @@ import type {
   PluginStart as SecuritySolutionPluginStart,
 } from '@kbn/security-solution-plugin/server';
 import type {
-  TaskManagerSetupContract as TaskManagerPluginSetup,
-  TaskManagerStartContract as TaskManagerPluginStart,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+
+import type { ServerlessPluginSetup } from '@kbn/serverless/server';
+import type { ProductTier } from '../common/product';
+
+import type { ServerlessSecurityConfig } from './config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginSetup {}
@@ -28,16 +34,19 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
   security: SecurityPluginSetup;
   securitySolution: SecuritySolutionPluginSetup;
   securitySolutionEss: SecuritySolutionEssPluginSetup;
+  serverless: ServerlessPluginSetup;
   features: PluginSetupContract;
-  ml: MlPluginSetup;
-  taskManager: TaskManagerPluginSetup;
+  taskManager: TaskManagerSetupContract;
+  cloud: CloudSetup;
+  actions: ActionsPluginSetupContract;
 }
 
 export interface SecuritySolutionServerlessPluginStartDeps {
   security: SecurityPluginStart;
   securitySolution: SecuritySolutionPluginStart;
   features: PluginStartContract;
-  taskManager: TaskManagerPluginStart;
+  taskManager: TaskManagerStartContract;
+  fleet: FleetStartContract;
 }
 
 export interface UsageRecord {
@@ -60,5 +69,56 @@ export interface UsageMetrics {
 export interface UsageSource {
   id: string;
   instance_group_id: string;
-  instance_group_type: string;
+  metadata?: UsageSourceMetadata;
+}
+
+export interface UsageSourceMetadata {
+  tier?: Tier;
+}
+
+export type Tier = ProductTier | 'none';
+
+export interface SecurityUsageReportingTaskSetupContractOptions {
+  lookBackLimitMinutes?: number;
+}
+
+export interface SecurityUsageReportingTaskSetupContract {
+  core: CoreSetup;
+  logFactory: LoggerFactory;
+  config: ServerlessSecurityConfig;
+  taskManager: TaskManagerSetupContract;
+  cloudSetup: CloudSetup;
+  taskType: string;
+  taskTitle: string;
+  version: string;
+  meteringCallback: MeteringCallback;
+  options?: SecurityUsageReportingTaskSetupContractOptions;
+}
+
+export interface SecurityUsageReportingTaskStartContract {
+  taskManager: TaskManagerStartContract;
+  interval: string;
+}
+
+export type MeteringCallback = (
+  metringCallbackInput: MeteringCallbackInput
+) => Promise<UsageRecord[]>;
+
+export interface MeteringCallbackInput {
+  esClient: ElasticsearchClient;
+  cloudSetup: CloudSetup;
+  logger: Logger;
+  taskId: string;
+  lastSuccessfulReport: Date;
+  abortController: AbortController;
+  config: ServerlessSecurityConfig;
+}
+
+export interface MetringTaskProperties {
+  taskType: string;
+  taskTitle: string;
+  meteringCallback: MeteringCallback;
+  interval: string;
+  periodSeconds: number;
+  version: string;
 }

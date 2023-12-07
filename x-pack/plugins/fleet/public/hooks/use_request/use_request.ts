@@ -109,6 +109,7 @@ export const useConditionalRequest = <D = any, E = RequestError>(
         path: config.path,
         query: config.query,
         body: config.body,
+        version: config.version,
       });
       if (res.error) {
         throw res.error;

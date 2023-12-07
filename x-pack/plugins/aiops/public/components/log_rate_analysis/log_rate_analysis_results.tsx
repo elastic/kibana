@@ -23,15 +23,21 @@ import {
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
-import { useFetchStream } from '@kbn/aiops-utils';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import { useFetchStream } from '@kbn/ml-response-stream/client';
+import {
+  LOG_RATE_ANALYSIS_TYPE,
+  type LogRateAnalysisType,
+  type WindowParameters,
+} from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
+import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
-import type { AiopsApiLogRateAnalysis } from '../../../common/api';
+import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis/schema';
+import type { AiopsLogRateAnalysisSchemaSignificantItem } from '../../../common/api/log_rate_analysis/schema_v2';
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import {
   getGroupTableItems,
   LogRateAnalysisResultsTable,
@@ -40,6 +46,7 @@ import {
 import { useLogRateAnalysisResultsTableRowContext } from '../log_rate_analysis_results_table/log_rate_analysis_results_table_row_provider';
 
 import { FieldFilterPopover } from './field_filter_popover';
+import { LogRateAnalysisTypeCallOut } from './log_rate_analysis_type_callout';
 
 const groupResultsMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.groupedSwitchLabel.groupResults',
@@ -68,9 +75,16 @@ const groupResultsOnMessage = i18n.translate(
 const resultsGroupedOffId = 'aiopsLogRateAnalysisGroupingOff';
 const resultsGroupedOnId = 'aiopsLogRateAnalysisGroupingOn';
 
+/**
+ * Interface for log rate analysis results data.
+ */
 export interface LogRateAnalysisResultsData {
-  significantTerms: SignificantTerm[];
-  significantTermsGroups: SignificantTermGroup[];
+  /** The type of analysis, whether it's a spike or dip */
+  analysisType: LogRateAnalysisType;
+  /** Statistically significant field/value items. */
+  significantItems: SignificantItem[];
+  /** Statistically significant groups of field/value items. */
+  significantItemsGroups: SignificantItemGroup[];
 }
 
 /**
@@ -79,6 +93,8 @@ export interface LogRateAnalysisResultsData {
 interface LogRateAnalysisResultsProps {
   /** The data view to analyze. */
   dataView: DataView;
+  /** The type of analysis, whether it's a spike or dip */
+  analysisType?: LogRateAnalysisType;
   /** Start timestamp filter */
   earliest: number;
   /** End timestamp filter */
@@ -100,10 +116,13 @@ interface LogRateAnalysisResultsProps {
   barHighlightColorOverride?: string;
   /** Optional callback that exposes data of the completed analysis */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
+  /** Identifier to indicate the plugin utilizing the component */
+  embeddingOrigin: string;
 }
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   dataView,
+  analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
   earliest,
   isBrushCleared,
   latest,
@@ -115,21 +134,22 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
+  embeddingOrigin,
 }) => {
   const { http } = useAiopsAppContext();
-  const basePath = http.basePath.get() ?? '';
 
   const { clearAllRowState } = useLogRateAnalysisResultsTableRowContext();
 
+  const [currentAnalysisType, setCurrentAnalysisType] = useState<LogRateAnalysisType | undefined>();
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
   >();
   const [groupResults, setGroupResults] = useState<boolean>(false);
   const [groupSkipFields, setGroupSkipFields] = useState<string[]>([]);
   const [uniqueFieldNames, setUniqueFieldNames] = useState<string[]>([]);
-  const [overrides, setOverrides] = useState<
-    AiopsApiLogRateAnalysis['body']['overrides'] | undefined
-  >(undefined);
+  const [overrides, setOverrides] = useState<AiopsLogRateAnalysisSchema['overrides'] | undefined>(
+    undefined
+  );
   const [shouldStart, setShouldStart] = useState(false);
   const [toggleIdSelected, setToggleIdSelected] = useState(resultsGroupedOffId);
 
@@ -146,7 +166,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     setOverrides({
       loaded: 0,
       remainingFieldCandidates: [],
-      significantTerms: data.significantTerms.filter((d) => !skippedFields.includes(d.fieldName)),
+      significantItems: data.significantItems.filter(
+        (d) => !skippedFields.includes(d.fieldName)
+      ) as AiopsLogRateAnalysisSchemaSignificantItem[],
       regroupOnly: true,
     });
     startHandler(true, false);
@@ -158,9 +180,10 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     data,
     isRunning,
     errors: streamErrors,
-  } = useFetchStream<AiopsApiLogRateAnalysis, typeof basePath>(
-    `${basePath}/internal/aiops/log_rate_analysis`,
-    '1',
+  } = useFetchStream<AiopsLogRateAnalysisSchema<'2'>, typeof streamReducer>(
+    http,
+    '/internal/aiops/log_rate_analysis',
+    '2',
     {
       start: earliest,
       end: latest,
@@ -170,17 +193,28 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       index: dataView.getIndexPattern(),
       grouping: true,
       flushFix: true,
-      ...windowParameters,
+      // If analysis type is `spike`, pass on window parameters as is,
+      // if it's `dip`, swap baseline and deviation.
+      ...(analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+        ? windowParameters
+        : {
+            baselineMin: windowParameters.deviationMin,
+            baselineMax: windowParameters.deviationMax,
+            deviationMin: windowParameters.baselineMin,
+            deviationMax: windowParameters.baselineMax,
+          }),
       overrides,
       sampleProbability,
     },
-    { reducer: streamReducer, initialState }
+    { reducer: streamReducer, initialState },
+    { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin }
   );
 
-  const { significantTerms } = data;
+  const { significantItems, zeroDocsFallback } = data;
+
   useEffect(
-    () => setUniqueFieldNames(uniq(significantTerms.map((d) => d.fieldName)).sort()),
-    [significantTerms]
+    () => setUniqueFieldNames(uniq(significantItems.map((d) => d.fieldName)).sort()),
+    [significantItems]
   );
 
   useEffect(() => {
@@ -192,13 +226,18 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         ((Array.isArray(remainingFieldCandidates) && remainingFieldCandidates.length > 0) ||
           groupsMissing)
       ) {
-        setOverrides({ loaded, remainingFieldCandidates, significantTerms: data.significantTerms });
+        setOverrides({
+          loaded,
+          remainingFieldCandidates,
+          significantItems: data.significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
+        });
       } else {
         setOverrides(undefined);
         if (onAnalysisCompleted) {
           onAnalysisCompleted({
-            significantTerms: data.significantTerms,
-            significantTermsGroups: data.significantTermsGroups,
+            analysisType,
+            significantItems: data.significantItems,
+            significantItemsGroups: data.significantItemsGroups,
           });
         }
       }
@@ -209,7 +248,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const errors = useMemo(() => [...streamErrors, ...data.errors], [streamErrors, data.errors]);
 
   // Start handler clears possibly hovered or pinned
-  // significant terms on analysis refresh.
+  // significant items on analysis refresh.
   function startHandler(continueAnalysis = false, resetGroupButton = true) {
     if (!continueAnalysis) {
       setOverrides(undefined);
@@ -223,6 +262,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       clearAllRowState();
     }
 
+    setCurrentAnalysisType(analysisType);
     setCurrentAnalysisWindowParameters(windowParameters);
 
     // We trigger hooks updates above so we cannot directly call `start()` here
@@ -239,14 +279,15 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   }, [shouldStart]);
 
   useEffect(() => {
+    setCurrentAnalysisType(analysisType);
     setCurrentAnalysisWindowParameters(windowParameters);
     start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const groupTableItems = useMemo(
-    () => getGroupTableItems(data.significantTermsGroups),
-    [data.significantTermsGroups]
+    () => getGroupTableItems(data.significantItemsGroups),
+    [data.significantItemsGroups]
   );
 
   const shouldRerunAnalysis = useMemo(
@@ -256,7 +297,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     [currentAnalysisWindowParameters, windowParameters]
   );
 
-  const showLogRateAnalysisResultsTable = data?.significantTerms.length > 0;
+  const showLogRateAnalysisResultsTable = data?.significantItems.length > 0;
   const groupItemCount = groupTableItems.reduce((p, c) => {
     return p + c.groupItemsSortedByUniqueness.length;
   }, 0);
@@ -323,6 +364,16 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           />
         </EuiFlexItem>
       </ProgressControls>
+      {showLogRateAnalysisResultsTable && currentAnalysisType !== undefined && (
+        <>
+          <EuiSpacer size="s" />
+          <LogRateAnalysisTypeCallOut
+            analysisType={currentAnalysisType}
+            zeroDocsFallback={zeroDocsFallback}
+          />
+          <EuiSpacer size="xs" />
+        </>
+      )}
       {errors.length > 0 ? (
         <>
           <EuiSpacer size="xs" />
@@ -348,7 +399,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
               )}
               {overrides !== undefined ? (
                 <p>
-                  <EuiButton size="s" onClick={() => startHandler(true)}>
+                  <EuiButton
+                    data-test-subj="aiopsLogRateAnalysisResultsTryToContinueAnalysisButton"
+                    size="s"
+                    onClick={() => startHandler(true)}
+                  >
                     <FormattedMessage
                       id="xpack.aiops.logRateAnalysis.page.tryToContinueAnalysisButtonText"
                       defaultMessage="Try to continue analysis"
@@ -384,7 +439,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             <p>
               <FormattedMessage
                 id="xpack.aiops.logRateAnalysis.page.noResultsPromptBody"
-                defaultMessage="Try to adjust the baseline and deviation time ranges and rerun the analysis. If you still get no results, there might be no statistically significant entities contributing to this spike in log rates."
+                defaultMessage="Try to adjust the baseline and deviation time ranges and rerun the analysis. If you still get no results, there might be no statistically significant entities contributing to this deviation in log rate."
               />
             </p>
           }
@@ -405,7 +460,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       >
         {showLogRateAnalysisResultsTable && groupResults ? (
           <LogRateAnalysisResultsGroupsTable
-            significantTerms={data.significantTerms}
+            significantItems={data.significantItems}
             groupTableItems={groupTableItems}
             loading={isRunning}
             dataView={dataView}
@@ -413,17 +468,19 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            zeroDocsFallback={zeroDocsFallback}
           />
         ) : null}
         {showLogRateAnalysisResultsTable && !groupResults ? (
           <LogRateAnalysisResultsTable
-            significantTerms={data.significantTerms}
+            significantItems={data.significantItems}
             loading={isRunning}
             dataView={dataView}
             timeRangeMs={timeRangeMs}
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            zeroDocsFallback={zeroDocsFallback}
           />
         ) : null}
       </div>

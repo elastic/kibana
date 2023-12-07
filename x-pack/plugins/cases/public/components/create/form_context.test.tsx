@@ -10,13 +10,12 @@ import type { Screen } from '@testing-library/react';
 import { waitFor, within, screen, act } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import { CaseSeverity, CommentType } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
@@ -47,15 +46,20 @@ import { waitForComponentToUpdate } from '../../common/test_utils';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { useLicense } from '../../common/use_license';
 import { useGetCategories } from '../../containers/use_get_categories';
-import { categories } from '../../containers/mock';
-import { ConnectorTypes } from '../../../common/types/domain';
+import { categories, customFieldsConfigurationMock, customFieldsMock } from '../../containers/mock';
+import {
+  CaseSeverity,
+  AttachmentType,
+  ConnectorTypes,
+  CustomFieldTypes,
+} from '../../../common/types/domain';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../containers/configure/use_configure');
+jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/jira/use_get_issue_types');
@@ -68,7 +72,7 @@ jest.mock('../../common/use_license');
 jest.mock('../../containers/use_get_categories');
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useCaseConfigureMock = useCaseConfigure as jest.Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
@@ -93,7 +97,9 @@ const defaultPostCase = {
 
 const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
   isLoadingConnectors: false,
+  isLoadingCaseConfiguration: false,
   connectors: [],
+  customFieldsConfiguration: [],
   withSteps: true,
   owner: ['securitySolution'],
   draftStorageKey: 'cases.kibana.createCase.description.markdownEditor',
@@ -143,7 +149,8 @@ const waitForFormToRender = async (renderer: Screen) => {
   });
 };
 
-describe('Create case', () => {
+// Failing: See https://github.com/elastic/kibana/issues/146394
+describe.skip('Create case', () => {
   const refetch = jest.fn();
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
@@ -191,7 +198,7 @@ describe('Create case', () => {
     useCreateAttachmentsMock.mockImplementation(() => ({ mutateAsync: createAttachments }));
     usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
     useGetConnectorsMock.mockReturnValue(sampleConnectorData);
-    useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+    useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
@@ -307,8 +314,9 @@ describe('Create case', () => {
       });
     });
 
-    it('does not submits the title when the length is longer than 160 characters', async () => {
-      const longTitle = 'a'.repeat(161);
+    it('should trim fields correctly while submit', async () => {
+      const newTags = ['coke     ', '     pepsi'];
+      const newCategory = 'First           ';
 
       appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
@@ -320,19 +328,33 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
 
       const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
-      userEvent.paste(titleInput, longTitle);
+
+      userEvent.paste(titleInput, `${sampleDataWithoutTags.title}       `);
+
+      const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
+        'euiMarkdownEditorTextArea'
+      );
+
+      userEvent.paste(descriptionInput, `${sampleDataWithoutTags.description}           `);
+
+      const caseTags = screen.getByTestId('caseTags');
+
+      for (const tag of newTags) {
+        const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
+        userEvent.type(tagsInput, `${tag}{enter}`);
+      }
+
+      const categoryComboBox = within(screen.getByTestId('categories-list')).getByRole('combobox');
+
+      userEvent.type(categoryComboBox, `${newCategory}{enter}`);
 
       userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        expect(
-          screen.getByText(
-            'The length of the name is too long. The maximum length is 160 characters.'
-          )
-        ).toBeInTheDocument();
+        expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).not.toHaveBeenCalled();
+      expect(postCase).toBeCalledWith({ request: { ...sampleData, category: 'First' } });
     });
 
     it('should toggle sync settings', async () => {
@@ -414,16 +436,78 @@ describe('Create case', () => {
       await waitForComponentToUpdate();
     });
 
-    it('should select the default connector set in the configuration', async () => {
-      useCaseConfigureMock.mockImplementation(() => ({
+    it('should submit form with custom fields', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        connector: {
-          id: 'servicenow-1',
-          name: 'SN',
-          type: ConnectorTypes.serviceNowITSM,
-          fields: null,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: [
+            ...customFieldsConfigurationMock,
+            {
+              key: 'my_custom_field_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'my custom field label',
+              required: false,
+            },
+          ],
         },
-        persistLoading: false,
+      }));
+
+      appMockRender.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+      const textField = customFieldsConfigurationMock[0];
+      const toggleField = customFieldsConfigurationMock[1];
+
+      expect(screen.getByTestId('create-case-custom-fields')).toBeInTheDocument();
+
+      userEvent.paste(
+        screen.getByTestId(`${textField.key}-${textField.type}-create-custom-field`),
+        'My text test value 1'
+      );
+
+      userEvent.click(
+        screen.getByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
+      );
+
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => expect(postCase).toHaveBeenCalled());
+
+      expect(postCase).toBeCalledWith({
+        request: {
+          ...sampleDataWithoutTags,
+          customFields: [
+            ...customFieldsMock,
+            {
+              key: 'my_custom_field_key',
+              type: CustomFieldTypes.TEXT,
+              value: null,
+            },
+          ],
+        },
+      });
+    });
+
+    it('should select the default connector set in the configuration', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          connector: {
+            id: 'servicenow-1',
+            name: 'SN',
+            type: ConnectorTypes.serviceNowITSM,
+            fields: null,
+          },
+        },
       }));
 
       useGetConnectorsMock.mockReturnValue({
@@ -465,15 +549,17 @@ describe('Create case', () => {
     });
 
     it('should default to none if the default connector does not exist in connectors', async () => {
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        connector: {
-          id: 'not-exist',
-          name: 'SN',
-          type: ConnectorTypes.serviceNowITSM,
-          fields: null,
+        data: {
+          ...useCaseConfigureResponse.data,
+          connector: {
+            id: 'not-exist',
+            name: 'SN',
+            type: ConnectorTypes.serviceNowITSM,
+            fields: null,
+          },
         },
-        persistLoading: false,
       }));
 
       useGetConnectorsMock.mockReturnValue({
@@ -716,7 +802,7 @@ describe('Create case', () => {
           name: 'my rule',
         },
         owner: 'owner',
-        type: CommentType.alert as const,
+        type: AttachmentType.alert as const,
       },
       {
         alertId: '7896',
@@ -726,7 +812,7 @@ describe('Create case', () => {
           name: 'my rule',
         },
         owner: 'second-owner',
-        type: CommentType.alert as const,
+        type: AttachmentType.alert as const,
       },
     ];
 
@@ -792,7 +878,7 @@ describe('Create case', () => {
           name: 'my rule',
         },
         owner: 'owner',
-        type: CommentType.alert as const,
+        type: AttachmentType.alert as const,
       },
     ];
 

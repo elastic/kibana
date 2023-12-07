@@ -97,7 +97,6 @@ describe('SyntheticsMonitorClient', () => {
       },
       isServiceManaged: false,
       agentPolicyId: `loc-${n}`,
-      concurrentMonitors: 1,
     };
   });
 
@@ -133,7 +132,6 @@ describe('SyntheticsMonitorClient', () => {
 
     await client.addMonitors(
       [{ monitor, id }],
-      mockRequest,
       savedObjectsClientMock,
       privateLocations,
       'test-space'
@@ -208,6 +206,7 @@ describe('SyntheticsMonitorClient', () => {
         params: {
           username: 'elastic',
         },
+        spaceId: 'test-space',
       },
     ]);
     expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
@@ -223,7 +222,6 @@ describe('SyntheticsMonitorClient', () => {
 
     await client.deleteMonitors(
       [monitor as unknown as SyntheticsMonitorWithId],
-      mockRequest,
       savedObjectsClientMock,
       'test-space'
     );

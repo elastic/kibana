@@ -24,6 +24,16 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.cleanMlIndices();
     });
 
+    it('returns trained model stats', async () => {
+      const { body, status } = await supertest
+        .get(`/internal/ml/trained_models/_stats`)
+        .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+        .set(getCommonRequestHeader('1'));
+      ml.api.assertResponseStatusCode(200, status, body);
+
+      expect(body.count).to.eql(3);
+    });
+
     it('returns trained model stats by id', async () => {
       const { body, status } = await supertest
         .get(`/internal/ml/trained_models/dfa_regression_model_n_0/_stats`)

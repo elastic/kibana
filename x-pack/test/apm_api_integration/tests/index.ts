@@ -14,7 +14,9 @@ const envGrepFiles = process.env.APM_TEST_GREP_FILES as string;
 function getGlobPattern() {
   try {
     const envGrepFilesParsed = JSON.parse(envGrepFiles as string) as string[];
-    return envGrepFilesParsed.map((pattern) => `**/${pattern}**`);
+    return envGrepFilesParsed.map((pattern) => {
+      return pattern.includes('spec') ? `**/${pattern}**` : `**/${pattern}**.spec.ts`;
+    });
   } catch (e) {
     // ignore
   }
@@ -24,7 +26,8 @@ function getGlobPattern() {
 export default function apmApiIntegrationTests({ getService, loadTestFile }: FtrProviderContext) {
   const registry = getService('registry');
 
-  describe('APM API tests', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/172772
+  describe.skip('APM API tests', function () {
     const filePattern = getGlobPattern();
     const tests = globby.sync(filePattern, { cwd });
 

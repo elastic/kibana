@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { CoreStart } from '@kbn/core/public';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { RulesPage } from './rules';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
@@ -27,30 +28,23 @@ jest.mock('../../utils/kibana_react', () => ({
 jest.mock('@kbn/observability-shared-plugin/public');
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
-  useLoadRuleTypes: jest.fn(),
+  useLoadRuleTypesQuery: jest.fn(),
 }));
 
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
-  appMountParameters: {} as AppMountParameters,
+  appMountParameters: {
+    setHeaderActionMenu: () => {},
+  } as unknown as AppMountParameters,
   config: {
     unsafe: {
       slo: { enabled: false },
       alertDetails: {
         apm: { enabled: false },
-        logs: { enabled: false },
         metrics: { enabled: false },
         uptime: { enabled: false },
+        observability: { enabled: false },
       },
       thresholdRule: { enabled: false },
-    },
-    compositeSlo: {
-      enabled: false,
-    },
-    aiAssistant: {
-      enabled: false,
-      feedback: {
-        enabled: false,
-      },
     },
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
@@ -60,7 +54,7 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   plugins: {} as ObservabilityPublicPluginsStart,
 }));
 
-const { useLoadRuleTypes } = jest.requireMock('@kbn/triggers-actions-ui-plugin/public');
+const { useLoadRuleTypesQuery } = jest.requireMock('@kbn/triggers-actions-ui-plugin/public');
 
 describe('RulesPage with all capabilities', () => {
   async function setup() {
@@ -70,44 +64,61 @@ describe('RulesPage with all capabilities', () => {
           enabledInLicense: true,
           id: '1',
           name: 'test rule',
+          actionGroups: [{ id: 'default', name: 'Default' }],
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+          actionVariables: { context: [], state: [] },
+          defaultActionGroupId: 'default',
+          producer: ALERTS_FEATURE_ID,
+          minimumLicenseRequired: 'basic',
+          authorizedConsumers: {
+            [ALERTS_FEATURE_ID]: { all: true },
+          },
+          ruleTaskTimeout: '1m',
         },
         '2': {
           enabledInLicense: true,
           id: '2',
           name: 'test rule ok',
+          actionGroups: [{ id: 'default', name: 'Default' }],
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+          actionVariables: { context: [], state: [] },
+          defaultActionGroupId: 'default',
+          producer: ALERTS_FEATURE_ID,
+          minimumLicenseRequired: 'basic',
+          authorizedConsumers: {
+            [ALERTS_FEATURE_ID]: { all: true },
+          },
+          ruleTaskTimeout: '1m',
         },
         '3': {
           enabledInLicense: true,
           id: '3',
           name: 'test rule pending',
+          actionGroups: [{ id: 'default', name: 'Default' }],
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+          actionVariables: { context: [], state: [] },
+          defaultActionGroupId: 'default',
+          producer: ALERTS_FEATURE_ID,
+          minimumLicenseRequired: 'basic',
+          authorizedConsumers: {
+            [ALERTS_FEATURE_ID]: { all: true },
+          },
+          ruleTaskTimeout: '1m',
         },
       })
     );
 
-    const ruleTypes = [
-      {
-        id: 'test_rule_type',
-        name: 'some rule type',
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-        actionVariables: { context: [], state: [] },
-        defaultActionGroupId: 'default',
-        producer: ALERTS_FEATURE_ID,
-        minimumLicenseRequired: 'basic',
-        enabledInLicense: true,
-        authorizedConsumers: {
-          [ALERTS_FEATURE_ID]: { all: true },
-        },
-        ruleTaskTimeout: '1m',
+    useLoadRuleTypesQuery.mockReturnValue({
+      ruleTypesState: {
+        data: ruleTypeIndex,
       },
-    ];
-
-    useLoadRuleTypes.mockReturnValue({
-      ruleTypes,
-      ruleTypeIndex,
     });
 
-    return render(<RulesPage />);
+    return render(
+      <IntlProvider locale="en">
+        <RulesPage />
+      </IntlProvider>
+    );
   }
 
   it('should render a page template', async () => {
@@ -134,9 +145,29 @@ describe('RulesPage with show only capability', () => {
           enabledInLicense: true,
           id: '1',
           name: 'test rule',
+          actionGroups: [{ id: 'default', name: 'Default' }],
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+          actionVariables: { context: [], state: [] },
+          defaultActionGroupId: 'default',
+          producer: ALERTS_FEATURE_ID,
+          minimumLicenseRequired: 'basic',
+          authorizedConsumers: {
+            [ALERTS_FEATURE_ID]: { read: true, all: false },
+          },
+          ruleTaskTimeout: '1m',
         },
         '2': {
           enabledInLicense: true,
+          actionGroups: [{ id: 'default', name: 'Default' }],
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+          actionVariables: { context: [], state: [] },
+          defaultActionGroupId: 'default',
+          producer: ALERTS_FEATURE_ID,
+          minimumLicenseRequired: 'basic',
+          authorizedConsumers: {
+            [ALERTS_FEATURE_ID]: { read: true, all: false },
+          },
+          ruleTaskTimeout: '1m',
           id: '2',
           name: 'test rule ok',
         },
@@ -144,28 +175,25 @@ describe('RulesPage with show only capability', () => {
           enabledInLicense: true,
           id: '3',
           name: 'test rule pending',
+          actionGroups: [{ id: 'default', name: 'Default' }],
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+          actionVariables: { context: [], state: [] },
+          defaultActionGroupId: 'default',
+          producer: ALERTS_FEATURE_ID,
+          minimumLicenseRequired: 'basic',
+          authorizedConsumers: {
+            [ALERTS_FEATURE_ID]: { read: true, all: false },
+          },
+          ruleTaskTimeout: '1m',
         },
       })
     );
 
-    const ruleTypes = [
-      {
-        id: 'test_rule_type',
-        name: 'some rule type',
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-        actionVariables: { context: [], state: [] },
-        defaultActionGroupId: 'default',
-        producer: ALERTS_FEATURE_ID,
-        minimumLicenseRequired: 'basic',
-        enabledInLicense: true,
-        authorizedConsumers: {
-          [ALERTS_FEATURE_ID]: { read: true, all: false },
-        },
-        ruleTaskTimeout: '1m',
+    useLoadRuleTypesQuery.mockReturnValue({
+      ruleTypesState: {
+        data: ruleTypeIndex,
       },
-    ];
-    useLoadRuleTypes.mockReturnValue({ ruleTypes, ruleTypeIndex });
+    });
 
     return render(<RulesPage />);
   }

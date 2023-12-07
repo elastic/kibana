@@ -77,7 +77,6 @@ interface EventCollectionCardComponent {
   displayName?: string | undefined;
 }
 
-// eslint-disable-next-line react/display-name
 export const EventCollectionCard = memo(
   <T extends OperatingSystem>({
     policy,
@@ -110,6 +109,8 @@ export const EventCollectionCard = memo(
           defaultMessage: 'Event collection',
         })}
         supportedOss={[os]}
+        mode={mode}
+        selected={selectedCount > 0}
         rightCorner={
           <EuiText size="s" color="subdued" data-test-subj={getTestId('selectedCount')}>
             {i18n.translate(
@@ -135,7 +136,7 @@ export const EventCollectionCard = memo(
 
         <div data-test-subj={getTestId('options')}>
           {options.map(({ name, protectionField }) => {
-            const keyPath = `${policyOs}.events.${protectionField}`;
+            const keyPath = `${policyOs}.events.${String(protectionField)}`;
 
             return (
               <EventCheckbox
@@ -166,7 +167,7 @@ export const EventCollectionCard = memo(
               indented,
               isDisabled,
             }) => {
-              const keyPath = `${policyOs}.events.${protectionField}`;
+              const keyPath = `${policyOs}.events.${String(protectionField)}`;
               const isChecked = get(policy, keyPath);
               const fieldString = protectionField as string;
 

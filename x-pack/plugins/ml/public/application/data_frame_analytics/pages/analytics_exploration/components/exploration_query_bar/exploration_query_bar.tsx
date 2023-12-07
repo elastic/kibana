@@ -18,16 +18,14 @@ import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { QueryErrorMessage } from '@kbn/ml-error-utils';
 
+import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { PLUGIN_ID } from '../../../../../../../common/constants/app';
 import { Dictionary } from '../../../../../../../common/types/common';
-import {
-  SEARCH_QUERY_LANGUAGE,
-  SearchQueryLanguage,
-} from '../../../../../../../common/constants/search';
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 export interface ExplorationQueryBarProps {
-  indexPattern: DataView;
+  dataView: DataView;
   setSearchQuery: (update: {
     queryString: string;
     query?: estypes.QueryDslQueryContainer;
@@ -43,7 +41,7 @@ export interface ExplorationQueryBarProps {
 }
 
 export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
-  indexPattern,
+  dataView,
   setSearchQuery,
   filters,
   query,
@@ -56,17 +54,8 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   );
 
   const { services } = useMlKibana();
-  const {
-    unifiedSearch,
-    data,
-    storage,
-    appName,
-    notifications,
-    http,
-    docLinks,
-    uiSettings,
-    dataViews,
-  } = services;
+  const { unifiedSearch, data, storage, notifications, http, docLinks, uiSettings, dataViews } =
+    services;
 
   const searchChangeHandler = (q: Query) => setSearchInput(q);
 
@@ -110,7 +99,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
         case SEARCH_QUERY_LANGUAGE.KUERY:
           convertedQuery = toElasticsearchQuery(
             fromKueryExpression(query.query as string),
-            indexPattern
+            dataView
           );
           break;
         case SEARCH_QUERY_LANGUAGE.LUCENE:
@@ -192,7 +181,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
             <QueryStringInput
               bubbleSubmitEvent={false}
               query={searchInput}
-              indexPatterns={[indexPattern]}
+              indexPatterns={[dataView]}
               onChange={searchChangeHandler}
               onSubmit={searchSubmitHandler}
               placeholder={
@@ -209,7 +198,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
               disableAutoFocus={true}
               dataTestSubj="mlDFAnalyticsQueryInput"
               languageSwitcherPopoverAnchorPosition="rightDown"
-              appName={appName}
+              appName={PLUGIN_ID}
               deps={{
                 unifiedSearch,
                 notifications,

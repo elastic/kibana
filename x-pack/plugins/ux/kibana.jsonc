@@ -1,10 +1,10 @@
 {
   "type": "plugin",
   "id": "@kbn/ux-plugin",
-  "owner": "@elastic/uptime",
+  "owner": "@elastic/obs-ux-infra_services-team",
   "plugin": {
     "id": "ux",
-    "server": false,
+    "server": true,
     "browser": true,
     "configPath": ["xpack", "ux"],
     "requiredPlugins": [
@@ -15,8 +15,8 @@
       "licensing",
       "triggersActionsUi",
       "observabilityShared",
+      "observabilityAIAssistant",
       "embeddable",
-      "infra",
       "inspector",
       "apm"
     ],

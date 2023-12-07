@@ -55,13 +55,14 @@ export const getDataProvider = (
   field: string,
   id: string,
   value: string | string[],
-  operator: QueryOperator = IS_OPERATOR
+  operator: QueryOperator = IS_OPERATOR,
+  excluded: boolean = false
 ): DataProvider => ({
   and: [],
   enabled: true,
   id: escapeDataProviderId(id),
   name: field,
-  excluded: false,
+  excluded,
   kqlQuery: '',
   queryMatch: {
     field,
@@ -75,9 +76,10 @@ export const getDataProviderAnd = (
   field: string,
   id: string,
   value: string | string[],
-  operator: QueryOperator = IS_OPERATOR
+  operator: QueryOperator = IS_OPERATOR,
+  excluded: boolean = false
 ): DataProvidersAnd => {
-  const { and, ...dataProvider } = getDataProvider(field, id, value, operator);
+  const { and, ...dataProvider } = getDataProvider(field, id, value, operator, excluded);
   return dataProvider;
 };
 

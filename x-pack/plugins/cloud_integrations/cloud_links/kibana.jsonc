@@ -11,6 +11,12 @@
       "cloud",
       "security",
       "guidedOnboarding"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "requiredPlugins": [
+      "share"
     ]
   }
 }

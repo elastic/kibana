@@ -7,6 +7,7 @@
 
 import { dataStreamRouteService } from '../../services';
 import type { GetDataStreamsResponse } from '../../types';
+import { API_VERSIONS } from '../../../common/constants';
 
 import { useRequest, sendRequest } from './use_request';
 
@@ -14,6 +15,7 @@ export const useGetDataStreams = () => {
   return useRequest<GetDataStreamsResponse>({
     path: dataStreamRouteService.getListPath(),
     method: 'get',
+    version: API_VERSIONS.public.v1,
   });
 };
 

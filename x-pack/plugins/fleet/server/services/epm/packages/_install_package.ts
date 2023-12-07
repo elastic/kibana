@@ -57,6 +57,7 @@ import {
   installIndexTemplatesAndPipelines,
 } from './install';
 import { withPackageSpan } from './utils';
+import { clearLatestFailedAttempts } from './install_errors_helpers';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path
@@ -77,6 +78,8 @@ export async function _installPackage({
   force,
   verificationResult,
   authorizationHeader,
+  ignoreMappingUpdateErrors,
+  skipDataStreamRollover,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -93,24 +96,38 @@ export async function _installPackage({
   force?: boolean;
   verificationResult?: PackageVerificationResult;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  ignoreMappingUpdateErrors?: boolean;
+  skipDataStreamRollover?: boolean;
 }): Promise<AssetReference[]> {
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
 
   try {
     // if some installation already exists
     if (installedPkg) {
+      const isStatusInstalling = installedPkg.attributes.install_status === 'installing';
+      const hasExceededTimeout =
+        Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
+        MAX_TIME_COMPLETE_INSTALL;
+
       // if the installation is currently running, don't try to install
       // instead, only return already installed assets
-      if (
-        installedPkg.attributes.install_status === 'installing' &&
-        Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
-          MAX_TIME_COMPLETE_INSTALL
-      ) {
-        throw new ConcurrentInstallOperationError(
-          `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
-            pkgVersion || 'unknown'
-          } detected, aborting.`
-        );
+      if (isStatusInstalling && hasExceededTimeout) {
+        // If this is a forced installation, ignore the timeout and restart the installation anyway
+        if (force) {
+          await restartInstallation({
+            savedObjectsClient,
+            pkgName,
+            pkgVersion,
+            installSource,
+            verificationResult,
+          });
+        } else {
+          throw new ConcurrentInstallOperationError(
+            `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
+              pkgVersion || 'unknown'
+            } detected, aborting.`
+          );
+        }
       } else {
         // if no installation is running, or the installation has been running longer than MAX_TIME_COMPLETE_INSTALL
         // (it might be stuck) update the saved object and proceed
@@ -144,6 +161,7 @@ export async function _installPackage({
         installedPkg,
         logger,
         spaceId,
+        assetTags: packageInfo?.asset_tags,
       })
     );
     // Necessary to avoid async promise rejection warning
@@ -237,7 +255,10 @@ export async function _installPackage({
 
     // update current backing indices of each data stream
     await withPackageSpan('Update write indices', () =>
-      updateCurrentWriteIndices(esClient, logger, indexTemplates)
+      updateCurrentWriteIndices(esClient, logger, indexTemplates, {
+        ignoreMappingUpdateErrors,
+        skipDataStreamRollover,
+      })
     );
 
     ({ esReferences } = await withPackageSpan('Install transforms', () =>
@@ -313,6 +334,10 @@ export async function _installPackage({
         install_status: 'installed',
         package_assets: packageAssetRefs,
         install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
+        latest_install_failed_attempts: clearLatestFailedAttempts(
+          pkgVersion,
+          installedPkg?.attributes.latest_install_failed_attempts ?? []
+        ),
       })
     );
 

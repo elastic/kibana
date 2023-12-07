@@ -1,11 +1,17 @@
 {
   "ml.get_calendar_events": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "end": [],
+      "from": "",
       "job_id": "",
-      "start": "",
-      "end": "",
-      "from": 0,
-      "size": 0
+      "size": [
+        "100"
+      ],
+      "start": []
     },
     "methods": [
       "GET"
@@ -13,6 +19,10 @@
     "patterns": [
       "_ml/calendars/{calendar_id}/events"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-calendar-event.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-calendar-event.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

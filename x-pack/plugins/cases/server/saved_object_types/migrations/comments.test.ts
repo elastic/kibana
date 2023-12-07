@@ -16,8 +16,8 @@ import {
   getLensVisualizations,
   parseCommentString,
 } from '../../../common/utils/markdown_plugins/utils';
-import type { AttributesTypePersistableState } from '../../../common/api';
-import { CommentType } from '../../../common/api';
+import type { PersistableStateAttachmentAttributes } from '../../../common/types/domain';
+import { AttachmentType } from '../../../common/types/domain';
 
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
@@ -336,7 +336,7 @@ describe('comments migrations', () => {
     describe('persistable state lens migrations', () => {
       it('migrates correctly persistable state lens attachments', () => {
         const persistableAttachment =
-          mockCaseComments[6] as SavedObject<AttributesTypePersistableState>;
+          mockCaseComments[6] as SavedObject<PersistableStateAttachmentAttributes>;
         const persistableAttachmentState =
           persistableAttachment.attributes.persistableStateAttachmentState;
 
@@ -372,7 +372,7 @@ describe('comments migrations', () => {
 
       it('logs and do not throw in case of a migration error', () => {
         const persistableAttachment =
-          mockCaseComments[6] as SavedObject<AttributesTypePersistableState>;
+          mockCaseComments[6] as SavedObject<PersistableStateAttachmentAttributes>;
 
         const migrateFunction = jest.fn().mockImplementation(() => {
           throw new Error('an error');
@@ -431,7 +431,7 @@ describe('comments migrations', () => {
       attributes: {
         comment,
         owner: 'cases',
-        type: CommentType.user,
+        type: AttachmentType.user,
         created_at: '2021-07-19T08:41:29.951Z',
         created_by: {
           email: null,
@@ -582,7 +582,7 @@ describe('comments migrations', () => {
         id: '123',
         type: 'abc',
         attributes: {
-          type: CommentType.alert,
+          type: AttachmentType.alert,
           rule: {
             id: '123',
             name: 'hello',
@@ -622,7 +622,7 @@ describe('comments migrations', () => {
         id: '123',
         type: 'abc',
         attributes: {
-          type: CommentType.alert,
+          type: AttachmentType.alert,
           rule: {
             id: '123',
             name: 'hello',

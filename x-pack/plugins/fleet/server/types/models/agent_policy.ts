@@ -19,6 +19,12 @@ function validateNonEmptyString(val: string) {
 
 const TWO_WEEKS_SECONDS = 1209600;
 
+function isInteger(n: number) {
+  if (!Number.isInteger(n)) {
+    return `${n} is not a valid integer`;
+  }
+}
+
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
   name: schema.string({ minLength: 1, validate: validateNonEmptyString }),
@@ -28,13 +34,18 @@ export const AgentPolicyBaseSchema = {
   has_fleet_server: schema.maybe(schema.boolean()),
   is_default: schema.maybe(schema.boolean()),
   is_default_fleet_server: schema.maybe(schema.boolean()),
-  unenroll_timeout: schema.maybe(schema.number({ min: 0 })),
-  inactivity_timeout: schema.number({ min: 0, defaultValue: TWO_WEEKS_SECONDS }),
+  unenroll_timeout: schema.maybe(schema.number({ min: 0, validate: isInteger })),
+  inactivity_timeout: schema.number({
+    min: 0,
+    defaultValue: TWO_WEEKS_SECONDS,
+    validate: isInteger,
+  }),
   monitoring_enabled: schema.maybe(
     schema.arrayOf(
       schema.oneOf([schema.literal(dataTypes.Logs), schema.literal(dataTypes.Metrics)])
     )
   ),
+  keep_monitoring_alive: schema.maybe(schema.boolean({ defaultValue: false })),
   data_output_id: schema.maybe(schema.nullable(schema.string())),
   monitoring_output_id: schema.maybe(schema.nullable(schema.string())),
   download_source_id: schema.maybe(schema.nullable(schema.string())),

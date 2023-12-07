@@ -69,5 +69,6 @@ function kibanaHeaders() {
     Accept: 'application/json',
     'Content-Type': 'application/json',
     'kbn-xsrf': 'kibana',
+    'elastic-api-version': '2023-10-31',
   };
 }

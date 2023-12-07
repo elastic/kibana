@@ -7,7 +7,7 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
-import { streamFactory } from '@kbn/aiops-utils';
+import { streamFactory } from '@kbn/ml-response-stream/server';
 
 import {
   errorAction,
@@ -17,12 +17,12 @@ import {
   deleteEntityAction,
   ReducerStreamApiAction,
 } from '../../common/api/reducer_stream';
-import { API_ENDPOINT } from '../../common/api';
+import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
 
 export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
   router.versioned
     .post({
-      path: API_ENDPOINT.REDUCER_STREAM,
+      path: RESPONSE_STREAM_API_ENDPOINT.REDUCER_STREAM,
       access: 'internal',
     })
     .addVersion(
@@ -60,7 +60,8 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
         const { end, push, responseWithHeaders } = streamFactory<ReducerStreamApiAction>(
           request.headers,
           logger,
-          request.body.compressResponse
+          request.body.compressResponse,
+          request.body.flushFix
         );
 
         const entities = [

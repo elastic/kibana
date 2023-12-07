@@ -22,6 +22,7 @@ import type { LinuxPolicyProtection, MacPolicyProtection, PolicyProtection } fro
 
 export interface ProtectionSettingCardSwitchProps extends PolicyFormComponentCommonProps {
   protection: PolicyProtection;
+  selected: boolean;
   protectionLabel?: string;
   osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
   additionalOnSwitchChange?: ({
@@ -44,12 +45,12 @@ export const ProtectionSettingCardSwitch = React.memo(
     onChange,
     policy,
     mode,
+    selected,
     'data-test-subj': dataTestSubj,
   }: ProtectionSettingCardSwitchProps) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isEditMode = mode === 'edit';
-    const selected = (policy && policy.windows[protection].mode) !== ProtectionModes.off;
 
     const switchLabel = useMemo(() => {
       return i18n.translate('xpack.securitySolution.endpoint.policy.details.protectionsEnabled', {
@@ -84,6 +85,11 @@ export const ProtectionSettingCardSwitch = React.memo(
                 newPayload[os].popup[protection as LinuxPolicyProtection].enabled =
                   event.target.checked;
               }
+              if (protection === 'behavior_protection') {
+                newPayload.windows.behavior_protection.reputation_service = false;
+                newPayload.mac.behavior_protection.reputation_service = false;
+                newPayload.linux.behavior_protection.reputation_service = false;
+              }
             }
           }
         } else {
@@ -96,6 +102,11 @@ export const ProtectionSettingCardSwitch = React.memo(
               newPayload[os][protection as LinuxPolicyProtection].mode = ProtectionModes.prevent;
             }
             if (isPlatinumPlus) {
+              if (protection === 'behavior_protection') {
+                newPayload.windows.behavior_protection.reputation_service = true;
+                newPayload.mac.behavior_protection.reputation_service = true;
+                newPayload.linux.behavior_protection.reputation_service = true;
+              }
               if (os === 'windows') {
                 newPayload[os].popup[protection].enabled = event.target.checked;
               } else if (os === 'mac') {

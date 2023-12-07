@@ -8,7 +8,7 @@
 
 import { ImportResolver } from '@kbn/import-resolver';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { Rule } from 'eslint';
+import type { Rule } from 'eslint';
 import { RUNNING_IN_EDITOR } from './helpers/running_in_editor';
 
 let importResolverCache: ImportResolver | undefined;

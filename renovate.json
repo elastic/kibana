@@ -119,6 +119,27 @@
       "enabled": true
     },
     {
+      "groupName": "LaunchDarkly",
+      "matchPackageNames": [
+        "launchdarkly-js-client-sdk",
+        "launchdarkly-node-server-sdk"
+      ],
+      "reviewers": [
+        "team:kibana-security",
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Security",
+        "Team:Core",
+        "backport:prev-minor"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "APM",
       "matchPackageNames": [
         "elastic-apm-node",
@@ -138,6 +159,24 @@
       ],
       "enabled": true,
       "prCreation": "immediate"
+    },
+    {
+      "groupName": "ansi-regex",
+      "matchPackageNames": [
+        "ansi-regex"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:skip"
+      ],
+      "enabled": true
     },
     {
       "groupName": "babel",
@@ -238,11 +277,8 @@
     },
     {
       "groupName": "cypress",
-      "matchPackageNames": [
-        "eslint-plugin-cypress"
-      ],
       "matchPackagePatterns": [
-        "^cypress"
+        "cypress"
       ],
       "reviewers": [
         "Team:apm",
@@ -258,8 +294,26 @@
       "enabled": true
     },
     {
+      "groupName": "security solution modules",
+      "matchPackageNames": [
+        "zod",
+        "langchain"
+      ],
+      "reviewers": [
+        "Team: SecuritySolution"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team: SecuritySolution"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "platform security modules",
       "matchPackageNames": [
+        "css.escape",
         "node-forge",
         "formik",
         "@types/node-forge",
@@ -267,7 +321,8 @@
         "tough-cookie",
         "@types/tough-cookie",
         "xml-crypto",
-        "@types/xml-crypto"
+        "@types/xml-crypto",
+        "@kayahr/text-encoding"
       ],
       "reviewers": [
         "team:kibana-security"
@@ -403,11 +458,37 @@
       "matchPackagePatterns": [
         "^@storybook"
       ],
+      "excludePackageNames": [
+        "@storybook/testing-react"
+      ],
       "labels": [
         "Team:Operations",
-        "release_note:skip"
+        "release_note:skip",
+        "ci:build-storybooks",
+        "backport:skip"
       ],
-      "enabled": true
+      "enabled": true,
+      "allowedVersions": "<7.0"
+    },
+    {
+      "groupName": "@storybook/testing-react",
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "matchPackageNames": [
+        "@storybook/testing-react"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "ci:build-storybooks",
+        "backport:skip"
+      ],
+      "enabled": true,
+      "allowedVersions": "<2.0"
     },
     {
       "groupName": "react-query",

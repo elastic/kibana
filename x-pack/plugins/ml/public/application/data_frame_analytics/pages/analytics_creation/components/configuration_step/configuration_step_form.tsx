@@ -34,6 +34,7 @@ import {
   TRAINING_PERCENT_MAX,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { DataGrid } from '@kbn/ml-data-grid';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   EuiComboBoxWithFieldStats,
@@ -62,7 +63,6 @@ import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
 import { useSavedSearch, SavedSearchQuery } from './use_saved_search';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
 
 import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
@@ -356,9 +356,9 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const indexPatternFieldsTableItems = useMemo(() => {
-    if (indexData?.indexPatternFields !== undefined) {
-      return indexData.indexPatternFields.map((field) => ({
+  const dataViewFieldsTableItems = useMemo(() => {
+    if (indexData?.dataViewFields !== undefined) {
+      return indexData.dataViewFields.map((field) => ({
         name: field,
         is_included: false,
         is_required: false,
@@ -366,7 +366,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     }
     return [];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [`${indexData?.indexPatternFields}`]);
+  }, [`${indexData?.dataViewFields}`]);
 
   useEffect(() => {
     if (typeof savedSearchQueryStr === 'string') {
@@ -377,11 +377,11 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
   useEffect(() => {
     if (isJobTypeWithDepVar) {
-      const indexPatternRuntimeFields = getCombinedRuntimeMappings(selectedDataView);
+      const dataViewRuntimeFields = getCombinedRuntimeMappings(selectedDataView);
       let runtimeOptions;
 
-      if (indexPatternRuntimeFields) {
-        runtimeOptions = getRuntimeDepVarOptions(jobType, indexPatternRuntimeFields);
+      if (dataViewRuntimeFields) {
+        runtimeOptions = getRuntimeDepVarOptions(jobType, dataViewRuntimeFields);
       }
 
       loadDepVarOptions(form, runtimeOptions);
@@ -527,7 +527,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       legendType: getScatterplotMatrixLegendType(jobType),
       searchQuery: jobConfigQuery,
       runtimeMappings,
-      indexPattern: selectedDataView,
+      dataView: selectedDataView,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -571,7 +571,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   const tableItems =
     includesTableItems.length > 0 && !noDocsContainMappedFields
       ? includesTableItems
-      : indexPatternFieldsTableItems;
+      : dataViewFieldsTableItems;
 
   return (
     <FieldStatsFlyoutProvider
@@ -592,7 +592,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
             fullWidth
           >
             <ExplorationQueryBar
-              indexPattern={selectedDataView}
+              dataView={selectedDataView}
               setSearchQuery={setJobConfigQuery}
               query={query}
             />

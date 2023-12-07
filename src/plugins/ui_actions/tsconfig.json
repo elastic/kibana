@@ -13,6 +13,7 @@
     "@kbn/i18n",
     "@kbn/es-query",
     "@kbn/ui-actions-browser",
+    "@kbn/expressions-plugin",
   ],
   "exclude": [
     "target/**/*",

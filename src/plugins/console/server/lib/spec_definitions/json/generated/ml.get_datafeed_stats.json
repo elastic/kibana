@@ -1,6 +1,10 @@
 {
   "ml.get_datafeed_stats": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_match": "__flag__"
     },
     "methods": [
@@ -10,6 +14,10 @@
       "_ml/datafeeds/{datafeed_id}/_stats",
       "_ml/datafeeds/_stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-datafeed-stats.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-datafeed-stats.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

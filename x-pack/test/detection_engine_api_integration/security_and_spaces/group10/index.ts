@@ -17,7 +17,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./get_rule_execution_results'));
     loadTestFile(require.resolve('./import_rules'));
     loadTestFile(require.resolve('./import_export_rules'));
-    loadTestFile(require.resolve('./legacy_actions_migrations'));
     loadTestFile(require.resolve('./read_rules'));
     loadTestFile(require.resolve('./resolve_read_rules'));
     loadTestFile(require.resolve('./update_rules'));
@@ -26,19 +25,5 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./perform_bulk_action'));
     loadTestFile(require.resolve('./perform_bulk_action_dry_run'));
     loadTestFile(require.resolve('./patch_rules'));
-    loadTestFile(require.resolve('./read_privileges'));
-    loadTestFile(require.resolve('./open_close_signals'));
-    loadTestFile(require.resolve('./get_signals_migration_status'));
-    loadTestFile(require.resolve('./create_signals_migrations'));
-    loadTestFile(require.resolve('./finalize_signals_migrations'));
-    loadTestFile(require.resolve('./delete_signals_migrations'));
-    loadTestFile(require.resolve('./timestamps'));
-    loadTestFile(require.resolve('./runtime'));
-    loadTestFile(require.resolve('./throttle'));
-    loadTestFile(require.resolve('./ignore_fields'));
-    loadTestFile(require.resolve('./migrations'));
-    loadTestFile(require.resolve('./risk_engine_install_resources'));
-    loadTestFile(require.resolve('./risk_engine'));
-    loadTestFile(require.resolve('./set_alert_tags'));
   });
 };

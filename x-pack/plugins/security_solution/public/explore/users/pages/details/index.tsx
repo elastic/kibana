@@ -64,6 +64,7 @@ import { UsersType } from '../../store/model';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { LandingPageComponent } from '../../../../common/components/landing_page';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
 
 const QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
@@ -73,7 +74,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   usersDetailsPagePath,
 }) => {
   const dispatch = useDispatch();
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.hostsPageEvents) ?? timelineDefaults).graphEventId
@@ -102,7 +103,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [detailName]
   );
 
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
+    useSourcererDataView();
 
   const [rawFilteredQuery, kqlError] = useMemo(() => {
     try {
@@ -174,7 +176,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
+            <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -241,7 +243,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               navTabs={navTabsUsersDetails(
                 detailName,
                 hasMlUserPermissions(capabilities),
-                isPlatinumOrTrialLicense
+                hasEntityAnalyticsCapability
               )}
             />
             <EuiSpacer />

@@ -17,10 +17,9 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase, Filter } from '@kbn/es-query';
-import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction as AlertingRuleAction } from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import type { FieldValueTimeline } from '../../../components/rules/pick_timeline';
 import type { FieldValueThreshold } from '../../../components/rules/threshold_input';
@@ -33,7 +32,9 @@ import type {
   RuleNameOverride,
   SetupGuide,
   TimestampOverride,
-  AlertSuppressionMissingFields,
+  AlertSuppressionMissingFieldsStrategy,
+  InvestigationFields,
+  RuleAction,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -89,6 +90,7 @@ export interface AboutStepRule {
   riskScore: AboutStepRiskScore;
   references: string[];
   falsePositives: string[];
+  investigationFields: string[];
   license: string;
   ruleNameOverride: string;
   tags: string[];
@@ -155,7 +157,8 @@ export interface DefineStepRule {
   groupByFields: string[];
   groupByRadioSelection: GroupByOptions;
   groupByDuration: Duration;
-  suppressionMissingFields?: AlertSuppressionMissingFields;
+  suppressionMissingFields?: AlertSuppressionMissingFieldsStrategy;
+  enableThresholdSuppression: boolean;
 }
 
 export interface QueryDefineStep {
@@ -172,7 +175,7 @@ export interface QueryDefineStep {
 
 export interface Duration {
   value: number;
-  unit: string;
+  unit: 's' | 'm' | 'h';
 }
 
 export interface ScheduleStepRule {
@@ -182,7 +185,7 @@ export interface ScheduleStepRule {
 }
 
 export interface ActionsStepRule {
-  actions: RuleAction[];
+  actions: AlertingRuleAction[];
   responseActions?: RuleResponseAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
@@ -238,6 +241,7 @@ export interface AboutStepRuleJson {
   timestamp_override?: TimestampOverride;
   timestamp_override_fallback_disabled?: boolean;
   note?: string;
+  investigation_fields?: InvestigationFields;
 }
 
 export interface ScheduleStepRuleJson {
@@ -248,7 +252,7 @@ export interface ScheduleStepRuleJson {
 }
 
 export interface ActionsStepRuleJson {
-  actions: RuleAlertAction[];
+  actions: RuleAction[];
   response_actions?: ResponseAction[];
   enabled: boolean;
   throttle?: string | null;

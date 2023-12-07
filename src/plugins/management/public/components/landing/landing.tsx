@@ -12,6 +12,7 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageBody } from '@elastic/eui';
 import { CardsNavigation } from '@kbn/management-cards-navigation';
+
 import { useAppContext } from '../management_app/management_context';
 
 interface ManagementLandingPageProps {
@@ -37,6 +38,7 @@ export const ManagementLandingPage = ({
           sections={sections}
           appBasePath={appBasePath}
           hideLinksTo={cardsNavigationConfig?.hideLinksTo}
+          extendedCardNavigationDefinitions={cardsNavigationConfig?.extendCardNavDefinitions}
         />
       </EuiPageBody>
     );

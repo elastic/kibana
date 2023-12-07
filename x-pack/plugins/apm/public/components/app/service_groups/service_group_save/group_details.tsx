@@ -18,6 +18,7 @@ import {
   EuiFormRow,
   useColorPickerState,
   EuiText,
+  isValidHex,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
@@ -44,6 +45,7 @@ export function GroupDetails({
   const [color, setColor, colorPickerErrors] = useColorPickerState(
     serviceGroup?.color || '#5094C4'
   );
+
   const [description, setDescription] = useState<string | undefined>(
     serviceGroup?.description
   );
@@ -53,7 +55,7 @@ export function GroupDetails({
       if (serviceGroup.color) {
         setColor(serviceGroup.color, {
           hex: serviceGroup.color,
-          isValid: true,
+          isValid: isValidHex(color),
         });
       }
       setDescription(serviceGroup.description);
@@ -61,7 +63,7 @@ export function GroupDetails({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceGroup]); // setColor omitted: new reference each render
 
-  const isInvalidColor = !!colorPickerErrors?.length;
+  const isInvalidColor = !!colorPickerErrors?.length || !isValidHex(color);
   const isInvalidName = !name;
   const isInvalid = isInvalidName || isInvalidColor;
 
@@ -121,13 +123,17 @@ export function GroupDetails({
                           'xpack.apm.serviceGroups.groupDetailsForm.invalidColorError',
                           {
                             defaultMessage:
-                              'Please provide a valid color value',
+                              'Please provide a valid HEX color value',
                           }
                         )
                       : undefined
                   }
                 >
-                  <EuiColorPicker onChange={setColor} color={color} />
+                  <EuiColorPicker
+                    onChange={setColor}
+                    color={color}
+                    isInvalid={isInvalidColor}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>

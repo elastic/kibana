@@ -19,8 +19,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   ForLastExpression,
@@ -32,6 +32,19 @@ import { debounce, omit } from 'lodash';
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import {
+  findInventoryModel,
+  awsEC2SnapshotMetricTypes,
+  awsRDSSnapshotMetricTypes,
+  awsS3SnapshotMetricTypes,
+  awsSQSSnapshotMetricTypes,
+  containerSnapshotMetricTypes,
+  hostSnapshotMetricTypes,
+  podSnapshotMetricTypes,
+  InventoryItemType,
+  SnapshotMetricType,
+  SnapshotMetricTypeRT,
+} from '@kbn/metrics-data-access-plugin/common';
+import {
   Comparator,
   FilterQuery,
   InventoryMetricConditions,
@@ -41,19 +54,6 @@ import {
   SnapshotCustomMetricInput,
   SnapshotCustomMetricInputRT,
 } from '../../../../common/http_api/snapshot_api';
-import { findInventoryModel } from '../../../../common/inventory_models';
-import { awsEC2SnapshotMetricTypes } from '../../../../common/inventory_models/aws_ec2';
-import { awsRDSSnapshotMetricTypes } from '../../../../common/inventory_models/aws_rds';
-import { awsS3SnapshotMetricTypes } from '../../../../common/inventory_models/aws_s3';
-import { awsSQSSnapshotMetricTypes } from '../../../../common/inventory_models/aws_sqs';
-import { containerSnapshotMetricTypes } from '../../../../common/inventory_models/container';
-import { hostSnapshotMetricTypes } from '../../../../common/inventory_models/host';
-import { podSnapshotMetricTypes } from '../../../../common/inventory_models/pod';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-  SnapshotMetricTypeRT,
-} from '../../../../common/inventory_models/types';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import {
   DerivedIndexPattern,
@@ -149,8 +149,8 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const onFilterChange = useCallback(
-    (filter: any) => {
-      setRuleParams('filterQueryText', filter || '');
+    (filter: string) => {
+      setRuleParams('filterQueryText', filter ?? '');
       try {
         setRuleParams(
           'filterQuery',
@@ -257,7 +257,7 @@ export const Expressions: React.FC<Props> = (props) => {
       preFillAlertCriteria();
     }
 
-    if (!ruleParams.filterQuery) {
+    if (ruleParams.filterQuery === undefined) {
       preFillAlertFilter();
     }
 
@@ -268,7 +268,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
   return (
     <>
-      <EuiSpacer size={'m'} />
+      <EuiSpacer size="m" />
       <EuiText size="xs">
         <h4>
           <FormattedMessage
@@ -277,18 +277,18 @@ export const Expressions: React.FC<Props> = (props) => {
           />
         </h4>
       </EuiText>
-      <StyledExpression>
-        <StyledExpressionRow>
-          <NonCollapsibleExpression>
+      <div css={StyledExpressionCss}>
+        <EuiFlexGroup css={StyledExpressionRowCss}>
+          <div css={NonCollapsibleExpressionCss}>
             <NodeTypeExpression
               options={nodeTypes}
               value={ruleParams.nodeType || 'host'}
               onChange={updateNodeType}
             />
-          </NonCollapsibleExpression>
-        </StyledExpressionRow>
-      </StyledExpression>
-      <EuiSpacer size={'xs'} />
+          </div>
+        </EuiFlexGroup>
+      </div>
+      <EuiSpacer size="xs" />
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (
@@ -315,7 +315,7 @@ export const Expressions: React.FC<Props> = (props) => {
           );
         })}
 
-      <NonCollapsibleExpression>
+      <div css={NonCollapsibleExpressionCss}>
         <ForLastExpression
           timeWindowSize={timeSize}
           timeWindowUnit={timeUnit}
@@ -323,15 +323,15 @@ export const Expressions: React.FC<Props> = (props) => {
           onChangeWindowSize={updateTimeSize}
           onChangeWindowUnit={updateTimeUnit}
         />
-      </NonCollapsibleExpression>
+      </div>
 
       <div>
         <EuiButtonEmpty
           data-test-subj="infraExpressionsAddConditionButton"
-          color={'primary'}
-          iconSide={'left'}
-          flush={'left'}
-          iconType={'plusInCircleFilled'}
+          color="primary"
+          iconSide="left"
+          flush="left"
+          iconType="plusInCircleFilled"
           onClick={addExpression}
         >
           <FormattedMessage
@@ -341,7 +341,7 @@ export const Expressions: React.FC<Props> = (props) => {
         </EuiButtonEmpty>
       </div>
 
-      <EuiSpacer size={'m'} />
+      <EuiSpacer size="m" />
       <EuiCheckbox
         id="metrics-alert-no-data-toggle"
         label={
@@ -363,7 +363,7 @@ export const Expressions: React.FC<Props> = (props) => {
         onChange={(e) => setRuleParams('alertOnNoData', e.target.checked)}
       />
 
-      <EuiSpacer size={'m'} />
+      <EuiSpacer size="m" />
 
       <EuiFormRow
         label={i18n.translate('xpack.infra.metrics.alertFlyout.filterLabel', {
@@ -375,14 +375,14 @@ export const Expressions: React.FC<Props> = (props) => {
         fullWidth
         display="rowCompressed"
       >
-        {(metadata && (
+        {metadata ? (
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
             onSubmit={onFilterChange}
             onChange={debouncedOnFilterChange}
             value={ruleParams.filterQueryText}
           />
-        )) || (
+        ) : (
           <EuiFieldSearch
             data-test-subj="infraExpressionsFieldSearch"
             onChange={handleFieldSearchChange}
@@ -392,7 +392,7 @@ export const Expressions: React.FC<Props> = (props) => {
         )}
       </EuiFormRow>
 
-      <EuiSpacer size={'m'} />
+      <EuiSpacer size="m" />
     </>
   );
 };
@@ -415,21 +415,21 @@ interface ExpressionRowProps {
   fields: DerivedIndexPattern['fields'];
 }
 
-const NonCollapsibleExpression = euiStyled.div`
+const NonCollapsibleExpressionCss = css`
   margin-left: 28px;
 `;
 
-const StyledExpressionRow = euiStyled(EuiFlexGroup)`
+const StyledExpressionRowCss = css`
   display: flex;
   flex-wrap: wrap;
   margin: 0 -4px;
 `;
 
-const StyledExpression = euiStyled.div`
+const StyledExpressionCss = css`
   padding: 0 4px;
 `;
 
-const StyledHealth = euiStyled(EuiHealth)`
+const StyledHealthCss = css`
   margin-left: 4px;
 `;
 
@@ -578,6 +578,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
+            data-test-subj="infraExpressionRowButton"
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
             onClick={toggle}
             aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
@@ -587,8 +588,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         </EuiFlexItem>
 
         <EuiFlexItem grow>
-          <StyledExpressionRow>
-            <StyledExpression>
+          <EuiFlexGroup css={StyledExpressionRowCss}>
+            <div css={StyledExpressionCss}>
               <MetricExpression
                 metric={{
                   value: metric!,
@@ -606,29 +607,30 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 customMetric={customMetric}
                 fields={fields}
               />
-            </StyledExpression>
+            </div>
             {!displayWarningThreshold && criticalThresholdExpression}
-          </StyledExpressionRow>
+          </EuiFlexGroup>
           {displayWarningThreshold && (
             <>
-              <StyledExpressionRow>
+              <EuiFlexGroup css={StyledExpressionRowCss}>
                 {criticalThresholdExpression}
-                <StyledHealth color="danger">
+                <EuiHealth css={StyledHealthCss} color="danger">
                   <FormattedMessage
                     id="xpack.infra.metrics.alertFlyout.criticalThreshold"
                     defaultMessage="Alert"
                   />
-                </StyledHealth>
-              </StyledExpressionRow>
-              <StyledExpressionRow>
+                </EuiHealth>
+              </EuiFlexGroup>
+              <EuiFlexGroup css={StyledExpressionRowCss}>
                 {warningThresholdExpression}
-                <StyledHealth color="warning">
+                <EuiHealth css={StyledHealthCss} color="warning">
                   <FormattedMessage
                     id="xpack.infra.metrics.alertFlyout.warningThreshold"
                     defaultMessage="Warning"
                   />
-                </StyledHealth>
+                </EuiHealth>
                 <EuiButtonIcon
+                  data-test-subj="infraExpressionRowButton"
                   aria-label={i18n.translate(
                     'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
                     {
@@ -637,23 +639,23 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   )}
                   iconSize="s"
                   color="text"
-                  iconType={'minusInCircleFilled'}
+                  iconType="minusInCircleFilled"
                   onClick={toggleWarningThreshold}
                 />
-              </StyledExpressionRow>
+              </EuiFlexGroup>
             </>
           )}
           {!displayWarningThreshold && (
             <>
               {' '}
-              <EuiSpacer size={'xs'} />
-              <StyledExpressionRow>
+              <EuiSpacer size="xs" />
+              <EuiFlexGroup css={StyledExpressionRowCss}>
                 <EuiButtonEmpty
                   data-test-subj="infraExpressionRowAddWarningThresholdButton"
-                  color={'primary'}
-                  flush={'left'}
+                  color="primary"
+                  flush="left"
                   size="xs"
-                  iconType={'plusInCircleFilled'}
+                  iconType="plusInCircleFilled"
                   onClick={toggleWarningThreshold}
                 >
                   <FormattedMessage
@@ -661,25 +663,34 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                     defaultMessage="Add warning threshold"
                   />
                 </EuiButtonEmpty>
-              </StyledExpressionRow>
+              </EuiFlexGroup>
             </>
           )}
         </EuiFlexItem>
         {canDelete && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
+              data-test-subj="infraExpressionRowButton"
               aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
                 defaultMessage: 'Remove condition',
               })}
-              color={'danger'}
-              iconType={'trash'}
+              color="danger"
+              iconType="trash"
               onClick={() => remove(expressionId)}
             />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {isExpanded ? <div style={{ padding: '0 0 0 28px' }}>{children}</div> : null}
-      <EuiSpacer size={'s'} />
+      {isExpanded ? (
+        <div
+          css={css`
+            padding: 0 0 0 28px;
+          `}
+        >
+          {children}
+        </div>
+      ) : null}
+      <EuiSpacer size="s" />
     </>
   );
 };
@@ -694,7 +705,7 @@ const ThresholdElement: React.FC<{
 }> = ({ updateComparator, updateThreshold, threshold, metric, comparator, errors }) => {
   return (
     <>
-      <StyledExpression>
+      <div css={StyledExpressionCss}>
         <ThresholdExpression
           thresholdComparator={comparator || Comparator.GT}
           threshold={threshold}
@@ -702,14 +713,14 @@ const ThresholdElement: React.FC<{
           onChangeSelectedThreshold={updateThreshold}
           errors={errors}
         />
-      </StyledExpression>
+      </div>
       {metric && (
         <div
-          style={{
-            alignSelf: 'center',
-          }}
+          css={css`
+            align-self: center;
+          `}
         >
-          <EuiText size={'s'}>{metricUnit[metric]?.label || ''}</EuiText>
+          <EuiText size="s">{metricUnit[metric]?.label || ''}</EuiText>
         </div>
       )}
     </>

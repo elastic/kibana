@@ -347,10 +347,10 @@
       },
       {
         "parentPluginId": "@kbn/ml-data-grid",
-        "id": "def-common.getFieldsFromKibanaIndexPattern",
+        "id": "def-common.getFieldsFromKibanaDataView",
         "type": "Function",
         "tags": [],
-        "label": "getFieldsFromKibanaIndexPattern",
+        "label": "getFieldsFromKibanaDataView",
         "description": [
           "\nRetrieves fields from a Kibana data view."
         ],
@@ -371,7 +371,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-data-grid",
-            "id": "def-common.getFieldsFromKibanaIndexPattern.$1",
+            "id": "def-common.getFieldsFromKibanaDataView.$1",
             "type": "Object",
             "tags": [],
             "label": "dataView",
@@ -1000,15 +1000,9 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined, pagination: ",
-          {
-            "pluginId": "@kbn/ml-data-grid",
-            "scope": "common",
-            "docId": "kibKbnMlDataGridPluginApi",
-            "section": "def-common.IndexPagination",
-            "text": "IndexPagination"
-          },
-          ", tableItems: ",
+          " | undefined, pagination: Required<Pick<",
+          "EuiDataGridPaginationProps",
+          ", \"pageSize\" | \"pageIndex\">>, tableItems: ",
           {
             "pluginId": "@kbn/ml-data-grid",
             "scope": "common",
@@ -1073,13 +1067,9 @@
               "- The pagination settings."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/ml-data-grid",
-                "scope": "common",
-                "docId": "kibKbnMlDataGridPluginApi",
-                "section": "def-common.IndexPagination",
-                "text": "IndexPagination"
-              }
+              "Required<Pick<",
+              "EuiDataGridPaginationProps",
+              ", \"pageSize\" | \"pageIndex\">>"
             ],
             "path": "x-pack/packages/ml/data_grid/lib/common.ts",
             "deprecated": false,
@@ -2063,15 +2053,9 @@
               "\nSetter function for pagination."
             ],
             "signature": [
-              "(value: React.SetStateAction<",
-              {
-                "pluginId": "@kbn/ml-data-grid",
-                "scope": "common",
-                "docId": "kibKbnMlDataGridPluginApi",
-                "section": "def-common.IndexPagination",
-                "text": "IndexPagination"
-              },
-              ">) => void"
+              "(value: React.SetStateAction<Required<Pick<",
+              "EuiDataGridPaginationProps",
+              ", \"pageSize\" | \"pageIndex\">>>) => void"
             ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
@@ -2145,7 +2129,9 @@
               "\nSetter function for the sorting columns."
             ],
             "signature": [
-              "(value: React.SetStateAction<{ id: string; direction: \"asc\" | \"desc\"; }[]>) => void"
+              "(value: React.SetStateAction<",
+              "EuiDataGridColumnSortingConfig",
+              "[]>) => void"
             ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
@@ -2293,7 +2279,8 @@
               "\nSorting columns."
             ],
             "signature": [
-              "{ id: string; direction: \"asc\" | \"desc\"; }[]"
+              "EuiDataGridColumnSortingConfig",
+              "[]"
             ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
@@ -2502,12 +2489,12 @@
           },
           {
             "parentPluginId": "@kbn/ml-data-grid",
-            "id": "def-common.UseIndexDataReturnType.indexPatternFields",
+            "id": "def-common.UseIndexDataReturnType.dataViewFields",
             "type": "Array",
             "tags": [],
-            "label": "indexPatternFields",
+            "label": "dataViewFields",
             "description": [
-              "\nOptional index pattern fields."
+              "\nOptional data view fields."
             ],
             "signature": [
               "string[] | undefined"

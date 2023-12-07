@@ -16,11 +16,14 @@ import { DetectPreventProtectionLevel } from '../detect_prevent_protection_level
 import { SettingCard } from '../setting_card';
 import type { PolicyFormComponentCommonProps } from '../../types';
 import type { Immutable } from '../../../../../../../../common/endpoint/types';
-import { PolicyOperatingSystem } from '../../../../../../../../common/endpoint/types';
+import {
+  PolicyOperatingSystem,
+  ProtectionModes,
+} from '../../../../../../../../common/endpoint/types';
 import type { RansomwareProtectionOSes } from '../../../../types';
 import { useLicense } from '../../../../../../../common/hooks/use_license';
 import { SettingLockedCard } from '../setting_locked_card';
-import { RelatedDetectionRulesCallout } from '../related_detection_rules_callout';
+import { useGetProtectionsUnavailableComponent } from '../../hooks/use_get_protections_unavailable_component';
 
 const RANSOMEWARE_OS_VALUES: Immutable<RansomwareProtectionOSes[]> = [
   PolicyOperatingSystem.windows,
@@ -38,14 +41,21 @@ export type RansomwareProtectionCardProps = PolicyFormComponentCommonProps;
 export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const protection = 'ransomware';
+    const selected = (policy && policy.windows[protection].mode) !== ProtectionModes.off;
+
     const protectionLabel = i18n.translate(
       'xpack.securitySolution.endpoint.policy.protections.ransomware',
       {
         defaultMessage: 'Ransomware protections',
       }
     );
+
+    if (!isProtectionsAllowed) {
+      return null;
+    }
 
     if (!isPlatinumPlus) {
       return (
@@ -63,8 +73,11 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
         })}
         supportedOss={[OperatingSystem.WINDOWS]}
         dataTestSubj={getTestId()}
+        selected={selected}
+        mode={mode}
         rightCorner={
           <ProtectionSettingCardSwitch
+            selected={selected}
             policy={policy}
             onChange={onChange}
             mode={mode}
@@ -93,8 +106,6 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
           data-test-subj={getTestId('notifyUser')}
         />
         <EuiSpacer size="m" />
-
-        <RelatedDetectionRulesCallout data-test-subj={getTestId('rulesCallout')} />
       </SettingCard>
     );
   }

@@ -26,6 +26,7 @@ export {
   useForm,
   useFormContext,
   UseMultiFields,
+  useFormData,
   VALIDATION_TYPES,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 

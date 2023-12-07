@@ -56,14 +56,19 @@ describe('ruleTypesRoute', () => {
           context: [],
           state: [],
         },
+        category: 'test',
         producer: 'test',
         enabledInLicense: true,
         defaultScheduleInterval: '10m',
         doesSetRecoveryContext: false,
-        hasGetSummarizedAlerts: true,
+        hasAlertsMappings: true,
+        hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
-    const expectedResult: Array<AsApiContract<RegistryAlertTypeWithAuth>> = [
+    const expectedResult: Array<
+      AsApiContract<Omit<RegistryAlertTypeWithAuth, 'validLegacyConsumers'>>
+    > = [
       {
         id: '1',
         name: 'name',
@@ -85,9 +90,10 @@ describe('ruleTypesRoute', () => {
           context: [],
           state: [],
         },
+        category: 'test',
         producer: 'test',
         enabled_in_license: true,
-        has_get_summarized_alerts: true,
+        has_alerts_mappings: true,
         has_fields_for_a_a_d: false,
       },
     ];
@@ -110,12 +116,13 @@ describe('ruleTypesRoute', () => {
               "state": Array [],
             },
             "authorized_consumers": Object {},
+            "category": "test",
             "default_action_group_id": "default",
             "default_schedule_interval": "10m",
             "does_set_recovery_context": false,
             "enabled_in_license": true,
+            "has_alerts_mappings": true,
             "has_fields_for_a_a_d": false,
-            "has_get_summarized_alerts": true,
             "id": "1",
             "is_exportable": true,
             "minimum_license_required": "basic",
@@ -167,8 +174,12 @@ describe('ruleTypesRoute', () => {
           context: [],
           state: [],
         },
+        category: 'test',
         producer: 'alerts',
         enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
 
@@ -220,8 +231,12 @@ describe('ruleTypesRoute', () => {
           context: [],
           state: [],
         },
+        category: 'test',
         producer: 'alerts',
         enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
 

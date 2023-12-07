@@ -10,13 +10,13 @@ import { Router } from '@kbn/shared-ux-router';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
+import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SyntheticsDataViewContextProvider } from './contexts/synthetics_data_view_context';
 import { SyntheticsAppProps } from './contexts';
 
 import {
@@ -69,6 +69,8 @@ const Application = (props: SyntheticsAppProps) => {
 
   store.dispatch(setBasePath(basePath));
 
+  const queryClient = new QueryClient();
+
   return (
     <EuiErrorBoundary>
       <i18nCore.Context>
@@ -82,47 +84,56 @@ const Application = (props: SyntheticsAppProps) => {
           }}
         >
           <ReduxProvider store={store}>
-            <KibanaContextProvider
-              services={{
-                ...core,
-                ...plugins,
-                storage,
-                data: startPlugins.data,
-                inspector: startPlugins.inspector,
-                triggersActionsUi: startPlugins.triggersActionsUi,
-                observability: startPlugins.observability,
-                observabilityShared: startPlugins.observabilityShared,
-                exploratoryView: startPlugins.exploratoryView,
-                cases: startPlugins.cases,
-                spaces: startPlugins.spaces,
-                fleet: startPlugins.fleet,
-              }}
-            >
-              <Router history={appMountParameters.history}>
-                <EuiThemeProvider darkMode={darkMode}>
-                  <SyntheticsRefreshContextProvider>
-                    <SyntheticsSettingsContextProvider {...props}>
-                      <SyntheticsThemeContextProvider darkMode={darkMode}>
-                        <SyntheticsStartupPluginsContextProvider {...startPlugins}>
-                          <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
-                            <RedirectAppLinks
-                              className={APP_WRAPPER_CLASS}
-                              application={core.application}
-                            >
-                              <InspectorContextProvider>
-                                <PageRouter />
-                                <ActionMenu appMountParameters={appMountParameters} />
-                                <TestNowModeFlyoutContainer />
-                              </InspectorContextProvider>
-                            </RedirectAppLinks>
-                          </div>
-                        </SyntheticsStartupPluginsContextProvider>
-                      </SyntheticsThemeContextProvider>
-                    </SyntheticsSettingsContextProvider>
-                  </SyntheticsRefreshContextProvider>
-                </EuiThemeProvider>
-              </Router>
-            </KibanaContextProvider>
+            <QueryClientProvider client={queryClient}>
+              <KibanaContextProvider
+                services={{
+                  ...core,
+                  ...plugins,
+                  storage,
+                  data: startPlugins.data,
+                  inspector: startPlugins.inspector,
+                  triggersActionsUi: startPlugins.triggersActionsUi,
+                  observability: startPlugins.observability,
+                  observabilityShared: startPlugins.observabilityShared,
+                  exploratoryView: startPlugins.exploratoryView,
+                  cases: startPlugins.cases,
+                  spaces: startPlugins.spaces,
+                  fleet: startPlugins.fleet,
+                }}
+              >
+                <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
+                  <ObservabilityAIAssistantProvider
+                    value={startPlugins.observabilityAIAssistant.service}
+                  >
+                    <Router history={appMountParameters.history}>
+                      <EuiThemeProvider darkMode={darkMode}>
+                        <SyntheticsRefreshContextProvider>
+                          <SyntheticsSettingsContextProvider {...props}>
+                            <SyntheticsThemeContextProvider darkMode={darkMode}>
+                              <SyntheticsStartupPluginsContextProvider {...startPlugins}>
+                                <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
+                                  <RedirectAppLinks
+                                    coreStart={{
+                                      application: core.application,
+                                    }}
+                                  >
+                                    <InspectorContextProvider>
+                                      <PageRouter />
+                                      <ActionMenu appMountParameters={appMountParameters} />
+                                      <TestNowModeFlyoutContainer />
+                                    </InspectorContextProvider>
+                                  </RedirectAppLinks>
+                                </div>
+                              </SyntheticsStartupPluginsContextProvider>
+                            </SyntheticsThemeContextProvider>
+                          </SyntheticsSettingsContextProvider>
+                        </SyntheticsRefreshContextProvider>
+                      </EuiThemeProvider>
+                    </Router>
+                  </ObservabilityAIAssistantProvider>
+                </SyntheticsDataViewContextProvider>
+              </KibanaContextProvider>
+            </QueryClientProvider>
           </ReduxProvider>
         </KibanaThemeProvider>
       </i18nCore.Context>

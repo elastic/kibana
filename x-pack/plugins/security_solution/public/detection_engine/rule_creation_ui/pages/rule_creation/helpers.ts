@@ -7,7 +7,7 @@
 
 /* eslint-disable complexity */
 
-import { has, isEmpty } from 'lodash/fp';
+import { has, isEmpty, get } from 'lodash/fp';
 import type { Unit } from '@kbn/datemath';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
@@ -46,8 +46,8 @@ import {
   GroupByOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { stepActionsDefaultValue } from '../../../../detections/components/rules/step_rule_actions';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
   const timeObj: { unit: Unit; value: number } = {
@@ -151,6 +151,20 @@ type NewTermsRuleFields<T> = Omit<
   | 'threatMapping'
   | 'eqlOptions'
 >;
+type EsqlRuleFields<T> = Omit<
+  T,
+  | 'anomalyThreshold'
+  | 'machineLearningJobId'
+  | 'threshold'
+  | 'threatIndex'
+  | 'threatQueryBar'
+  | 'threatMapping'
+  | 'eqlOptions'
+  | 'index'
+  | 'newTermsFields'
+  | 'historyWindowSize'
+  | 'dataViewId'
+>;
 
 const isMlFields = <T>(
   fields:
@@ -160,6 +174,7 @@ const isMlFields = <T>(
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
 ): fields is MlRuleFields<T> => has('anomalyThreshold', fields);
 
 const isThresholdFields = <T>(
@@ -170,6 +185,7 @@ const isThresholdFields = <T>(
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
 ): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
 const isThreatMatchFields = <T>(
@@ -180,6 +196,7 @@ const isThreatMatchFields = <T>(
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
 ): fields is ThreatMatchRuleFields<T> => has('threatIndex', fields);
 
 const isNewTermsFields = <T>(
@@ -190,6 +207,7 @@ const isNewTermsFields = <T>(
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
 ): fields is NewTermsRuleFields<T> => has('newTermsFields', fields);
 
 const isEqlFields = <T>(
@@ -200,7 +218,19 @@ const isEqlFields = <T>(
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
 ): fields is EqlQueryRuleFields<T> => has('eqlOptions', fields);
+
+const isEsqlFields = <T>(
+  fields:
+    | QueryRuleFields<T>
+    | EqlQueryRuleFields<T>
+    | MlRuleFields<T>
+    | ThresholdRuleFields<T>
+    | ThreatMatchRuleFields<T>
+    | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
+): fields is EsqlRuleFields<T> => get('queryBar.query.language', fields) === 'esql';
 
 export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   fields: T,
@@ -211,6 +241,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   | MlRuleFields<T>
   | ThresholdRuleFields<T>
   | ThreatMatchRuleFields<T>
+  | EsqlRuleFields<T>
   | NewTermsRuleFields<T> => {
   switch (type) {
     case 'machine_learning':
@@ -279,6 +310,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         ...eqlRuleFields
       } = fields;
       return eqlRuleFields;
+
     case 'new_terms':
       const {
         anomalyThreshold: ___a,
@@ -291,6 +323,23 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         ...newTermsRuleFields
       } = fields;
       return newTermsRuleFields;
+
+    case 'esql':
+      const {
+        anomalyThreshold: _esql_a,
+        machineLearningJobId: _esql_m,
+        threshold: _esql_t,
+        threatIndex: _esql_removedThreatIndex,
+        threatQueryBar: _esql_removedThreatQueryBar,
+        threatMapping: _esql_removedThreatMapping,
+        newTermsFields: _esql_removedNewTermsFields,
+        historyWindowSize: _esql_removedHistoryWindowSize,
+        eqlOptions: _esql__eqlOptions,
+        index: _esql_index,
+        dataViewId: _esql_dataViewId,
+        ...esqlRuleFields
+      } = fields;
+      return esqlRuleFields;
   }
   assertUnreachable(type);
 };
@@ -385,6 +434,9 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
                   ]
                 : [],
           },
+          ...(ruleFields.enableThresholdSuppression && {
+            alert_suppression: { duration: ruleFields.groupByDuration },
+          }),
         }),
       }
     : isThreatMatchFields(ruleFields)
@@ -420,6 +472,11 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         new_terms_fields: ruleFields.newTermsFields,
         history_window_start: `now-${ruleFields.historyWindowSize}`,
       }
+    : isEsqlFields(ruleFields) && !('index' in ruleFields)
+    ? {
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+      }
     : {
         ...(ruleFields.groupByFields.length > 0
           ? {
@@ -451,10 +508,11 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
             saved_id: ruleFields.queryBar.saved_id,
           }),
       };
+
   return {
     ...baseFields,
     ...typeFields,
-    data_view_id: ruleFields.dataViewId,
+    ...('dataViewId' in ruleFields ? { data_view_id: ruleFields.dataViewId } : {}),
   };
 };
 
@@ -485,6 +543,7 @@ export const formatAboutStepData = (
   const {
     author,
     falsePositives,
+    investigationFields,
     references,
     riskScore,
     severity,
@@ -501,6 +560,7 @@ export const formatAboutStepData = (
 
   const detectionExceptionLists =
     exceptionsList != null ? exceptionsList.filter((list) => list.type !== 'endpoint') : [];
+  const isinvestigationFieldsEmpty = investigationFields.every((item) => isEmpty(item.trim()));
 
   const resp = {
     author: author.filter((item) => !isEmpty(item)),
@@ -524,6 +584,9 @@ export const formatAboutStepData = (
       : {}),
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
+    investigation_fields: isinvestigationFieldsEmpty
+      ? undefined
+      : { field_names: investigationFields },
     risk_score: riskScore.value,
     risk_score_mapping: riskScore.isMappingChecked
       ? riskScore.mapping.filter((m) => m.field != null && m.field !== '')
@@ -550,7 +613,7 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
   const { actions = [], responseActions, enabled, kibanaSiemAppUrl } = actionsStepData;
 
   return {
-    actions: actions.map(transformAlertToRuleAction),
+    actions: actions.map((action) => transformAlertToRuleAction(action)),
     response_actions: responseActions?.map(transformAlertToRuleResponseAction),
     enabled,
     meta: {

@@ -1,17 +1,33 @@
 {
   "indices.put_alias": {
     "url_params": {
-      "timeout": "",
-      "master_timeout": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "PUT",
       "POST"
     ],
     "patterns": [
-      "{indices}/_alias/{name}",
-      "{indices}/_aliases/{name}"
+      "{index}/_alias/{name}",
+      "{index}/_aliases/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

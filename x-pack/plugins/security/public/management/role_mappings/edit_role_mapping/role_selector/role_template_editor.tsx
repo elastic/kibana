@@ -21,13 +21,13 @@ import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { RoleTemplate } from '../../../../../common/model';
+import { RoleTemplateTypeSelect } from './role_template_type_select';
+import type { RoleTemplate } from '../../../../../common';
 import {
   isInlineRoleTemplate,
   isInvalidRoleTemplate,
   isStoredRoleTemplate,
 } from '../services/role_template_type';
-import { RoleTemplateTypeSelect } from './role_template_type_select';
 
 interface Props {
   roleTemplate: RoleTemplate;

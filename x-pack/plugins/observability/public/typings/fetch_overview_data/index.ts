@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import type { ObservabilityApp } from '../../../typings/common';
-import type { UXMetrics } from '../../pages/overview/components/sections/ux/core_web_vitals/core_vitals';
 import { ApmIndicesConfig } from '../../../common/typings';
 
 export interface Stat {
@@ -64,6 +64,10 @@ export interface InfraMetricsHasDataResponse {
 export interface InfraLogsHasDataResponse {
   hasData: boolean;
   indices: string;
+}
+
+interface UniversalProfilingHasDataResponse {
+  hasData: boolean;
 }
 
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
@@ -150,12 +154,15 @@ export interface UxFetchDataResponse extends FetchDataResponse {
   coreWebVitals: UXMetrics;
 }
 
+export type UniversalProfilingDataResponse = FetchDataResponse;
+
 export interface ObservabilityFetchDataResponse {
   apm: ApmFetchDataResponse;
   infra_metrics: MetricsFetchDataResponse;
   infra_logs: LogsFetchDataResponse;
   uptime: UptimeFetchDataResponse;
   ux: UxFetchDataResponse;
+  universal_profiling: UniversalProfilingDataResponse;
 }
 
 export interface ObservabilityHasDataResponse {
@@ -164,4 +171,5 @@ export interface ObservabilityHasDataResponse {
   infra_logs: InfraLogsHasDataResponse;
   uptime: SyntheticsHasDataResponse;
   ux: UXHasDataResponse;
+  universal_profiling: UniversalProfilingHasDataResponse;
 }

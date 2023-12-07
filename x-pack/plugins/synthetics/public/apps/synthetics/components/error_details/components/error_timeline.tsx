@@ -9,11 +9,8 @@ import { EuiSkeletonText } from '@elastic/eui';
 import moment from 'moment';
 import { Ping } from '../../../../../../common/runtime_types';
 import { MonitorFailedTests } from '../../monitor_details/monitor_errors/failed_tests';
-import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 
 export const ErrorTimeline = ({ lastTestRun }: { lastTestRun?: Ping }) => {
-  const location = useSelectedLocation();
-
   if (!lastTestRun) {
     return <EuiSkeletonText lines={3} />;
   }
@@ -25,7 +22,6 @@ export const ErrorTimeline = ({ lastTestRun }: { lastTestRun?: Ping }) => {
 
   return (
     <MonitorFailedTests
-      location={location}
       time={{
         from: moment(startedAt)
           .subtract(diff / 2, 'minutes')

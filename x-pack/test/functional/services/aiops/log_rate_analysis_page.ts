@@ -7,7 +7,11 @@
 
 import expect from '@kbn/expect';
 
+import type { LogRateAnalysisType } from '@kbn/aiops-utils';
+
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
+import type { LogRateAnalysisDataGenerator } from './log_rate_analysis_data_generator';
 
 export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrProviderContext) {
   const browser = getService('browser');
@@ -239,15 +243,37 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       });
     },
 
-    async assertAnalysisComplete() {
+    async assertAnalysisComplete(
+      analysisType: LogRateAnalysisType,
+      dataGenerator: LogRateAnalysisDataGenerator
+    ) {
+      const dataGeneratorParts = dataGenerator.split('_');
+      const zeroDocsFallback = dataGeneratorParts.includes('zerodocsfallback');
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.existOrFail('aiopsAnalysisComplete');
         const currentProgressTitle = await testSubjects.getVisibleText('aiopsAnalysisComplete');
         expect(currentProgressTitle).to.be('Analysis complete');
+
+        await testSubjects.existOrFail('aiopsAnalysisTypeCalloutTitle');
+        const currentAnalysisTypeCalloutTitle = await testSubjects.getVisibleText(
+          'aiopsAnalysisTypeCalloutTitle'
+        );
+
+        if (zeroDocsFallback && analysisType === 'spike') {
+          expect(currentAnalysisTypeCalloutTitle).to.be(
+            'Analysis type: Top items for deviation time range'
+          );
+        } else if (zeroDocsFallback && analysisType === 'dip') {
+          expect(currentAnalysisTypeCalloutTitle).to.be(
+            'Analysis type: Top items for baseline time range'
+          );
+        } else {
+          expect(currentAnalysisTypeCalloutTitle).to.be(`Analysis type: Log rate ${analysisType}`);
+        }
       });
     },
 
-    async navigateToIndexPatternSelection() {
+    async navigateToDataViewSelection() {
       await testSubjects.click('mlMainTab logRateAnalysis');
       await testSubjects.existOrFail('mlPageSourceSelection');
     },

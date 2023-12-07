@@ -7,8 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { Position, Fit } from '@elastic/charts';
 
 import { AggGroupNames } from '@kbn/data-plugin/public';

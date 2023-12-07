@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_BULK_UPDATE,
@@ -32,6 +33,10 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleRuleWithoutRuleId,
   getSimpleRuleOutputWithoutRuleId,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+  createRuleThroughAlertingEndpoint,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
+  getRuleSOById,
 } from '../../utils';
 import { removeUUIDFromActions } from '../../utils/remove_uuid_from_actions';
 import {
@@ -59,6 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { header } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([updatedRule])
           .expect(200);
 
@@ -88,6 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([updatedRule])
           .expect(200);
 
@@ -105,6 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send(getSimpleRuleUpdate('rule-2'))
           .expect(200);
 
@@ -118,6 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([updatedRule1, updatedRule2])
           .expect(200);
 
@@ -182,6 +191,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body }: { body: RuleResponse[] } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([updatedRule1, updatedRule2])
           .expect(200);
 
@@ -249,6 +259,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body }: { body: RuleResponse[] } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([updatedRule1, updatedRule2])
           .expect(200);
 
@@ -274,6 +285,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([updatedRule1])
           .expect(200);
 
@@ -302,6 +314,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([updatedRule1, updatedRule2])
           .expect(200);
 
@@ -331,6 +344,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([updatedRule1])
           .expect(200);
 
@@ -352,6 +366,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([updatedRule1])
           .expect(200);
 
@@ -375,6 +390,7 @@ export default ({ getService }: FtrProviderContext) => {
         await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([ruleUpdate])
           .expect(200);
 
@@ -385,6 +401,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([ruleUpdate2])
           .expect(200);
 
@@ -404,6 +421,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([ruleUpdate])
           .expect(200);
 
@@ -426,6 +444,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([ruleUpdate])
           .expect(200);
 
@@ -452,6 +471,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([ruleUpdate, ruleUpdate2])
           .expect(200);
 
@@ -489,6 +509,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([rule1, rule2])
           .expect(200);
 
@@ -529,6 +550,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([
             {
               ...rule1,
@@ -568,6 +590,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([
             {
               ...rule1,
@@ -629,6 +652,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([ruleToUpdate])
           .expect(200);
 
@@ -781,6 +805,125 @@ export default ({ getService }: FtrProviderContext) => {
 
             expect(updatedRule).to.eql(expectedRule);
           });
+        });
+      });
+    });
+
+    describe('legacy investigation fields', () => {
+      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
+      let ruleWithLegacyInvestigationFieldEmptyArray: Rule<BaseRuleParams>;
+      let ruleWithInvestigationFields: RuleResponse;
+
+      beforeEach(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+        await createSignalsIndex(supertest, log);
+        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFields()
+        );
+        ruleWithLegacyInvestigationFieldEmptyArray = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+        );
+        ruleWithInvestigationFields = await createRule(supertest, log, {
+          ...getSimpleRule('rule-with-investigation-field'),
+          name: 'Test investigation fields object',
+          investigation_fields: { field_names: ['host.name'] },
+        });
+      });
+
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
+      });
+
+      it('errors if trying to update investigation fields using legacy format', async () => {
+        // update rule
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([
+            {
+              ...getSimpleRule(),
+              name: 'New name',
+              rule_id: ruleWithLegacyInvestigationField.params.ruleId,
+              investigation_fields: ['client.foo'],
+            },
+          ])
+          .expect(400);
+
+        expect(body.message).to.eql(
+          '[request body]: 0.investigation_fields: Expected object, received array'
+        );
+      });
+
+      it('updates a rule with legacy investigation fields and transforms field in response', async () => {
+        // update rule
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([
+            {
+              ...getSimpleRule(),
+              name: 'New name - used to have legacy investigation fields',
+              rule_id: ruleWithLegacyInvestigationField.params.ruleId,
+            },
+            {
+              ...getSimpleRule(),
+              name: 'New name - used to have legacy investigation fields, empty array',
+              rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId,
+              investigation_fields: {
+                field_names: ['foo'],
+              },
+            },
+            {
+              ...getSimpleRule(),
+              name: 'New name - never had legacy investigation fields',
+              rule_id: 'rule-with-investigation-field',
+              investigation_fields: {
+                field_names: ['bar'],
+              },
+            },
+          ])
+          .expect(200);
+
+        expect(body[0].investigation_fields).to.eql(undefined);
+        expect(body[0].name).to.eql('New name - used to have legacy investigation fields');
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, ruleWithLegacyInvestigationField.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql(undefined);
+
+        expect(body[1].investigation_fields).to.eql({
+          field_names: ['foo'],
+        });
+        expect(body[1].name).to.eql(
+          'New name - used to have legacy investigation fields, empty array'
+        );
+        const {
+          hits: {
+            hits: [{ _source: ruleSO2 }],
+          },
+        } = await getRuleSOById(es, ruleWithLegacyInvestigationFieldEmptyArray.id);
+        expect(ruleSO2?.alert?.params?.investigationFields).to.eql({
+          field_names: ['foo'],
+        });
+
+        expect(body[2].investigation_fields).to.eql({
+          field_names: ['bar'],
+        });
+        expect(body[2].name).to.eql('New name - never had legacy investigation fields');
+        const {
+          hits: {
+            hits: [{ _source: ruleSO3 }],
+          },
+        } = await getRuleSOById(es, ruleWithInvestigationFields.id);
+        expect(ruleSO3?.alert?.params?.investigationFields).to.eql({
+          field_names: ['bar'],
         });
       });
     });

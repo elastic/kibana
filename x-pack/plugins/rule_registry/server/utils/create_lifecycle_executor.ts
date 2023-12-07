@@ -17,6 +17,7 @@ import {
   AlertInstanceState,
   RuleTypeParams,
   RuleTypeState,
+  isValidAlertIndexName,
 } from '@kbn/alerting-plugin/server';
 import { isFlapping } from '@kbn/alerting-plugin/server/lib';
 import { wrappedStateRt, WrappedLifecycleRuleState } from '@kbn/alerting-state-types';
@@ -216,10 +217,14 @@ export const createLifecycleExecutor =
       `[Rule Registry] Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStates.length} previous)`
     );
 
-    const trackedAlertsDataMap: Record<
-      string,
-      { indexName: string; fields: Partial<ParsedTechnicalFields & ParsedExperimentalFields> }
-    > = {};
+    interface TrackedAlertData {
+      indexName: string;
+      fields: Partial<ParsedTechnicalFields & ParsedExperimentalFields>;
+      seqNo: number | undefined;
+      primaryTerm: number | undefined;
+    }
+
+    const trackedAlertsDataMap: Record<string, TrackedAlertData> = {};
 
     if (trackedAlertStates.length) {
       const result = await fetchExistingAlerts(
@@ -230,90 +235,115 @@ export const createLifecycleExecutor =
       result.forEach((hit) => {
         const alertInstanceId = hit._source ? hit._source[ALERT_INSTANCE_ID] : void 0;
         if (alertInstanceId && hit._source) {
-          trackedAlertsDataMap[alertInstanceId] = {
-            indexName: hit._index,
-            fields: hit._source,
-          };
+          const alertLabel = `${rule.ruleTypeId}:${rule.id} ${alertInstanceId}`;
+          if (hit._seq_no == null) {
+            logger.error(`missing _seq_no on alert instance ${alertLabel}`);
+          } else if (hit._primary_term == null) {
+            logger.error(`missing _primary_term on alert instance ${alertLabel}`);
+          } else {
+            trackedAlertsDataMap[alertInstanceId] = {
+              indexName: hit._index,
+              fields: hit._source,
+              seqNo: hit._seq_no,
+              primaryTerm: hit._primary_term,
+            };
+          }
         }
       });
     }
 
     const makeEventsDataMapFor = (alertIds: string[]) =>
-      alertIds.map((alertId) => {
-        const alertData = trackedAlertsDataMap[alertId];
-        const currentAlertData = currentAlerts[alertId];
-        const trackedAlert = state.trackedAlerts[alertId];
+      alertIds
+        .filter((alertId) => {
+          const alertData = trackedAlertsDataMap[alertId];
+          const alertIndex = alertData?.indexName;
+          if (!alertIndex) {
+            return true;
+          } else if (!isValidAlertIndexName(alertIndex)) {
+            logger.warn(
+              `Could not update alert ${alertId} in ${alertIndex}. Partial and restored alert indices are not supported.`
+            );
+            return false;
+          }
+          return true;
+        })
+        .map((alertId) => {
+          const alertData = trackedAlertsDataMap[alertId];
+          const currentAlertData = currentAlerts[alertId];
+          const trackedAlert = state.trackedAlerts[alertId];
 
-        if (!alertData) {
-          logger.debug(`[Rule Registry] Could not find alert data for ${alertId}`);
-        }
+          if (!alertData) {
+            logger.debug(`[Rule Registry] Could not find alert data for ${alertId}`);
+          }
 
-        const isNew = !trackedAlert;
-        const isRecovered = !currentAlertData;
-        const isActive = !isRecovered;
+          const isNew = !trackedAlert;
+          const isRecovered = !currentAlertData;
+          const isActive = !isRecovered;
 
-        const flappingHistory = getUpdatedFlappingHistory<State>(
-          flappingSettings,
-          alertId,
-          state,
-          isNew,
-          isRecovered,
-          isActive,
-          trackedAlertRecoveredIds
-        );
+          const flappingHistory = getUpdatedFlappingHistory<State>(
+            flappingSettings,
+            alertId,
+            state,
+            isNew,
+            isRecovered,
+            isActive,
+            trackedAlertRecoveredIds
+          );
 
-        const { alertUuid, started, flapping, pendingRecoveredCount } = !isNew
-          ? state.trackedAlerts[alertId]
-          : {
-              alertUuid: lifecycleAlertServices.getAlertUuid(alertId),
-              started: commonRuleFields[TIMESTAMP],
-              flapping: state.trackedAlertsRecovered[alertId]
-                ? state.trackedAlertsRecovered[alertId].flapping
-                : false,
-              pendingRecoveredCount: 0,
-            };
+          const { alertUuid, started, flapping, pendingRecoveredCount } = !isNew
+            ? state.trackedAlerts[alertId]
+            : {
+                alertUuid: lifecycleAlertServices.getAlertUuid(alertId),
+                started: commonRuleFields[TIMESTAMP],
+                flapping: state.trackedAlertsRecovered[alertId]
+                  ? state.trackedAlertsRecovered[alertId].flapping
+                  : false,
+                pendingRecoveredCount: 0,
+              };
 
-        const event: ParsedTechnicalFields & ParsedExperimentalFields = {
-          ...alertData?.fields,
-          ...commonRuleFields,
-          ...currentAlertData,
-          [ALERT_DURATION]: (options.startedAt.getTime() - new Date(started).getTime()) * 1000,
-          [ALERT_TIME_RANGE]: isRecovered
-            ? {
-                gte: started,
-                lte: commonRuleFields[TIMESTAMP],
-              }
-            : { gte: started },
-          [ALERT_INSTANCE_ID]: alertId,
-          [ALERT_START]: started,
-          [ALERT_UUID]: alertUuid,
-          [ALERT_STATUS]: isRecovered ? ALERT_STATUS_RECOVERED : ALERT_STATUS_ACTIVE,
-          [ALERT_WORKFLOW_STATUS]: alertData?.fields[ALERT_WORKFLOW_STATUS] ?? 'open',
-          [EVENT_KIND]: 'signal',
-          [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
-          [TAGS]: Array.from(
-            new Set([
-              ...(currentAlertData?.tags ?? []),
-              ...(alertData?.fields[TAGS] ?? []),
-              ...(options.rule.tags ?? []),
-            ])
-          ),
-          [VERSION]: ruleDataClient.kibanaVersion,
-          [ALERT_FLAPPING]: flapping,
-          ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
-          ...(isNew && maintenanceWindowIds?.length
-            ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
-            : {}),
-        };
+          const event: ParsedTechnicalFields & ParsedExperimentalFields = {
+            ...alertData?.fields,
+            ...commonRuleFields,
+            ...currentAlertData,
+            [ALERT_DURATION]: (options.startedAt.getTime() - new Date(started).getTime()) * 1000,
+            [ALERT_TIME_RANGE]: isRecovered
+              ? {
+                  gte: started,
+                  lte: commonRuleFields[TIMESTAMP],
+                }
+              : { gte: started },
+            [ALERT_INSTANCE_ID]: alertId,
+            [ALERT_START]: started,
+            [ALERT_UUID]: alertUuid,
+            [ALERT_STATUS]: isRecovered ? ALERT_STATUS_RECOVERED : ALERT_STATUS_ACTIVE,
+            [ALERT_WORKFLOW_STATUS]: alertData?.fields[ALERT_WORKFLOW_STATUS] ?? 'open',
+            [EVENT_KIND]: 'signal',
+            [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
+            [TAGS]: Array.from(
+              new Set([
+                ...(currentAlertData?.tags ?? []),
+                ...(alertData?.fields[TAGS] ?? []),
+                ...(options.rule.tags ?? []),
+              ])
+            ),
+            [VERSION]: ruleDataClient.kibanaVersion,
+            [ALERT_FLAPPING]: flapping,
+            ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
+            ...(isNew && maintenanceWindowIds?.length
+              ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
+              : {}),
+          };
 
-        return {
-          indexName: alertData?.indexName,
-          event,
-          flappingHistory,
-          flapping,
-          pendingRecoveredCount,
-        };
-      });
+          return {
+            indexName: alertData?.indexName,
+            seqNo: alertData?.seqNo,
+            primaryTerm: alertData?.primaryTerm,
+            event,
+            flappingHistory,
+            flapping,
+            pendingRecoveredCount,
+          };
+        });
 
     const trackedEventsToIndex = makeEventsDataMapFor(trackedAlertIds);
     const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
@@ -335,13 +365,25 @@ export const createLifecycleExecutor =
       logger.debug(`[Rule Registry] Preparing to index ${allEventsToIndex.length} alerts.`);
 
       await ruleDataClientWriter.bulk({
-        body: allEventsToIndex.flatMap(({ event, indexName }) => [
+        body: allEventsToIndex.flatMap(({ event, indexName, seqNo, primaryTerm }) => [
           indexName
-            ? { index: { _id: event[ALERT_UUID]!, _index: indexName, require_alias: false } }
-            : { index: { _id: event[ALERT_UUID]! } },
+            ? {
+                index: {
+                  _id: event[ALERT_UUID]!,
+                  _index: indexName,
+                  if_seq_no: seqNo,
+                  if_primary_term: primaryTerm,
+                  require_alias: false,
+                },
+              }
+            : {
+                create: {
+                  _id: event[ALERT_UUID]!,
+                },
+              },
           event,
         ]),
-        refresh: 'wait_for',
+        refresh: true,
       });
     } else {
       logger.debug(

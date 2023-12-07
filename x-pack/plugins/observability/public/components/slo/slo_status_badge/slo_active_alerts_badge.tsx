@@ -10,16 +10,16 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-import { paths } from '../../../routes/paths';
+import { paths } from '../../../../common/locators/paths';
 import { useKibana } from '../../../utils/kibana_react';
-import { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 
 export interface Props {
-  activeAlerts?: ActiveAlerts;
+  viewMode?: 'compact' | 'default';
+  activeAlerts?: number;
   slo: SLOWithSummaryResponse;
 }
 
-export function SloActiveAlertsBadge({ slo, activeAlerts }: Props) {
+export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -27,10 +27,13 @@ export function SloActiveAlertsBadge({ slo, activeAlerts }: Props) {
 
   const handleActiveAlertsClick = () => {
     if (activeAlerts) {
+      const kuery = encodeURIComponent(
+        `'slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}"'`
+      );
       navigateToUrl(
-        `${basePath.prepend(paths.observability.alerts)}?_a=(kuery:'slo.id:"${
-          slo.id
-        }"',rangeFrom:now-15m,rangeTo:now,status:active)`
+        `${basePath.prepend(
+          paths.observability.alerts
+        )}?_a=(kuery:${kuery},rangeFrom:now-15m,rangeTo:now,status:active)`
       );
     }
   };
@@ -51,10 +54,12 @@ export function SloActiveAlertsBadge({ slo, activeAlerts }: Props) {
         )}
         data-test-subj="o11ySloActiveAlertsBadge"
       >
-        {i18n.translate('xpack.observability.slo.slo.activeAlertsBadge.label', {
-          defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
-          values: { count: activeAlerts.count },
-        })}
+        {viewMode !== 'default'
+          ? activeAlerts
+          : i18n.translate('xpack.observability.slo.slo.activeAlertsBadge.label', {
+              defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
+              values: { count: activeAlerts },
+            })}
       </EuiBadge>
     </EuiFlexItem>
   );

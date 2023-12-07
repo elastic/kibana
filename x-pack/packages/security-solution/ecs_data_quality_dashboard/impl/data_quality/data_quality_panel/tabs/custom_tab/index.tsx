@@ -24,6 +24,7 @@ import { getAllCustomMarkdownComments, showCustomCallout } from './helpers';
 import * as i18n from '../../index_properties/translations';
 import { COPIED_RESULTS_TOAST_TITLE } from '../../../translations';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
+import { useDataQualityContext } from '../../data_quality_context';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -48,6 +49,7 @@ const CustomTabComponent: React.FC<Props> = ({
   patternDocsCount,
   sizeInBytes,
 }) => {
+  const { isILMAvailable } = useDataQualityContext();
   const markdownComments: string[] = useMemo(
     () =>
       getAllCustomMarkdownComments({
@@ -56,6 +58,7 @@ const CustomTabComponent: React.FC<Props> = ({
         formatNumber,
         ilmPhase,
         indexName,
+        isILMAvailable,
         partitionedFieldMetadata,
         patternDocsCount,
         sizeInBytes,
@@ -66,6 +69,7 @@ const CustomTabComponent: React.FC<Props> = ({
       formatNumber,
       ilmPhase,
       indexName,
+      isILMAvailable,
       partitionedFieldMetadata,
       patternDocsCount,
       sizeInBytes,

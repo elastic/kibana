@@ -5,38 +5,78 @@
  * 2.0.
  */
 
+import { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useState } from 'react';
 
-import { HttpSetup } from '@kbn/core-http-browser';
+import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
-import { fetchConnectorExecuteAction } from '../api';
+import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
 
 interface SendMessagesProps {
+  allow?: string[];
+  allowReplacement?: string[];
+  apiConfig: Conversation['apiConfig'];
   http: HttpSetup;
   messages: Message[];
-  apiConfig: Conversation['apiConfig'];
+  onNewReplacements: (newReplacements: Record<string, string>) => void;
+  replacements?: Record<string, string>;
 }
 
 interface UseSendMessages {
   isLoading: boolean;
-  sendMessages: ({ apiConfig, http, messages }: SendMessagesProps) => Promise<string>;
+  sendMessages: ({
+    apiConfig,
+    http,
+    messages,
+  }: SendMessagesProps) => Promise<FetchConnectorExecuteResponse>;
 }
 
 export const useSendMessages = (): UseSendMessages => {
+  const {
+    alertsIndexPattern,
+    assistantStreamingEnabled,
+    defaultAllow,
+    defaultAllowReplacement,
+    ragOnAlerts,
+    knowledgeBase,
+  } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
 
-  const sendMessages = useCallback(async ({ apiConfig, http, messages }: SendMessagesProps) => {
-    setIsLoading(true);
-    try {
-      return await fetchConnectorExecuteAction({
-        http,
-        messages,
-        apiConfig,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const sendMessages = useCallback(
+    async ({ apiConfig, http, messages, onNewReplacements, replacements }: SendMessagesProps) => {
+      setIsLoading(true);
+
+      try {
+        return await fetchConnectorExecuteAction({
+          alerts: knowledgeBase.alerts, // settings toggle
+          alertsIndexPattern,
+          allow: defaultAllow,
+          allowReplacement: defaultAllowReplacement,
+          apiConfig,
+          assistantLangChain: knowledgeBase.assistantLangChain,
+          assistantStreamingEnabled,
+          http,
+          ragOnAlerts, // feature flag
+          replacements,
+          messages,
+          size: knowledgeBase.latestAlerts,
+          onNewReplacements,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [
+      alertsIndexPattern,
+      assistantStreamingEnabled,
+      defaultAllow,
+      defaultAllowReplacement,
+      knowledgeBase.alerts,
+      knowledgeBase.assistantLangChain,
+      knowledgeBase.latestAlerts,
+      ragOnAlerts,
+    ]
+  );
 
   return { isLoading, sendMessages };
 };

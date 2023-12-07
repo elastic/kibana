@@ -2026,6 +2026,9 @@ export const mockTimelineModel: TimelineModel = {
   templateTimelineId: null,
   templateTimelineVersion: null,
   version: '1',
+  savedSearchId: null,
+  savedSearch: null,
+  isDataProviderVisible: false,
 };
 
 export const mockDataTableModel: DataTableModel = {
@@ -2205,6 +2208,10 @@ export const defaultTimelineProps: CreateTimelineProps = {
     templateTimelineVersion: null,
     templateTimelineId: null,
     version: null,
+    savedSearchId: null,
+    isDiscoverSavedSearchLoaded: false,
+    savedSearch: null,
+    isDataProviderVisible: false,
   },
   to: '2018-11-05T19:03:25.937Z',
   notes: null,

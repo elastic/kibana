@@ -93,6 +93,12 @@ export const epmRouteService = {
   getBulkAssetsPath: () => {
     return EPM_API_ROUTES.BULK_ASSETS_PATTERN;
   },
+  getInputsTemplatesPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INPUTS_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
+  },
 };
 
 export const packagePolicyRouteService = {
@@ -242,6 +248,8 @@ export const outputRoutesService = {
     OUTPUT_API_ROUTES.DELETE_PATTERN.replace('{outputId}', outputId),
   getCreatePath: () => OUTPUT_API_ROUTES.CREATE_PATTERN,
   getCreateLogstashApiKeyPath: () => OUTPUT_API_ROUTES.LOGSTASH_API_KEY_PATTERN,
+  getOutputHealthPath: (outputId: string) =>
+    OUTPUT_API_ROUTES.GET_OUTPUT_HEALTH_PATTERN.replace('{outputId}', outputId),
 };
 
 export const fleetProxiesRoutesService = {

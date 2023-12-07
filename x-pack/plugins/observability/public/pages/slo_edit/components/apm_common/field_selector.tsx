@@ -7,6 +7,7 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import React, { ReactNode, useState } from 'react';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
@@ -55,7 +56,7 @@ export function FieldSelector({
     allowAllOption
       ? [
           {
-            value: '*',
+            value: ALL_VALUE,
             label: i18n.translate('xpack.observability.slo.sloEdit.fieldSelector.all', {
               defaultMessage: 'All',
             }),
@@ -63,6 +64,8 @@ export function FieldSelector({
         ]
       : []
   ).concat(createOptions(suggestions));
+
+  const isDisabled = name !== 'indicator.params.service' && !serviceName;
 
   return (
     <EuiFlexItem>
@@ -82,7 +85,7 @@ export function FieldSelector({
           defaultValue=""
           name={name}
           control={control}
-          rules={{ required: true }}
+          rules={{ required: !isDisabled }}
           render={({ field, fieldState }) => (
             <EuiComboBox
               {...field}
@@ -90,7 +93,7 @@ export function FieldSelector({
               async
               data-test-subj={dataTestSubj}
               isClearable
-              isDisabled={name !== 'indicator.params.service' && !serviceName}
+              isDisabled={isDisabled}
               isInvalid={fieldState.invalid}
               isLoading={isLoading}
               onChange={(selected: EuiComboBoxOptionOption[]) => {

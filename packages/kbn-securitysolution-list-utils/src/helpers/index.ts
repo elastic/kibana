@@ -19,7 +19,6 @@ import {
   NamespaceType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
-  OsTypeArray,
   createExceptionListItemSchema,
   entriesList,
   entriesNested,
@@ -49,6 +48,8 @@ import {
   isNotOneOfOperator,
   isInListOperator,
   isNotInListOperator,
+  matchesOperator,
+  doesNotMatchOperator,
 } from '../autocomplete_operators';
 
 import {
@@ -302,18 +303,13 @@ export const getUpdatedEntriesOnDelete = (
  */
 export const getFilteredIndexPatterns = (
   patterns: DataViewBase,
-  item: FormattedBuilderEntry,
-  type: ExceptionListType,
-  preFilter?: (i: DataViewBase, t: ExceptionListType, o?: OsTypeArray) => DataViewBase,
-  osTypes?: OsTypeArray
+  item: FormattedBuilderEntry
 ): DataViewBase => {
-  const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;
-
   if (item.nested === 'child' && item.parent != null) {
     // when user has selected a nested entry, only fields with the common parent are shown
     return {
-      ...indexPatterns,
-      fields: indexPatterns.fields
+      ...patterns,
+      fields: patterns.fields
         .filter((indexField) => {
           const subTypeNested = getDataViewFieldSubtypeNested(indexField);
           const fieldHasCommonParentPath =
@@ -330,15 +326,15 @@ export const getFilteredIndexPatterns = (
     };
   } else if (item.nested === 'parent' && item.field != null) {
     // when user has selected a nested entry, right above it we show the common parent
-    return { ...indexPatterns, fields: [item.field] };
+    return { ...patterns, fields: [item.field] };
   } else if (item.nested === 'parent' && item.field == null) {
     // when user selects to add a nested entry, only nested fields are shown as options
     return {
-      ...indexPatterns,
-      fields: indexPatterns.fields.filter((field) => isDataViewFieldSubtypeNested(field)),
+      ...patterns,
+      fields: patterns.fields.filter((field) => isDataViewFieldSubtypeNested(field)),
     };
   } else {
-    return indexPatterns;
+    return patterns;
   }
 };
 
@@ -702,8 +698,14 @@ export const getOperatorOptions = (
 ): OperatorOption[] => {
   if (item.nested === 'parent' || item.field == null) {
     return [isOperator];
-  } else if ((item.nested != null && listType === 'endpoint') || listType === 'endpoint') {
-    return isBoolean ? [isOperator] : [isOperator, isOneOfOperator];
+  } else if (listType === 'endpoint') {
+    if (isBoolean) {
+      return [isOperator];
+    } else {
+      return fieldSupportsMatches(item.field)
+        ? [isOperator, isOneOfOperator, matchesOperator, doesNotMatchOperator]
+        : [isOperator, isOneOfOperator];
+    }
   } else if (item.nested != null && listType === 'detection') {
     return isBoolean ? [isOperator, existsOperator] : [isOperator, isOneOfOperator, existsOperator];
   } else if (isBoolean) {

@@ -11,6 +11,7 @@ import type { CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { maybeAddCloudLinks } from './maybe_add_cloud_links';
 
 interface CloudLinksDepsSetup {
@@ -21,6 +22,7 @@ interface CloudLinksDepsSetup {
 interface CloudLinksDepsStart {
   cloud?: CloudStart;
   security?: SecurityPluginStart;
+  share: SharePluginStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
 }
 
@@ -29,7 +31,7 @@ export class CloudLinksPlugin
 {
   public setup() {}
 
-  public start(core: CoreStart, { cloud, security, guidedOnboarding }: CloudLinksDepsStart) {
+  public start(core: CoreStart, { cloud, security, guidedOnboarding, share }: CloudLinksDepsStart) {
     if (cloud?.isCloudEnabled && !core.http.anonymousPaths.isAnonymous(window.location.pathname)) {
       if (guidedOnboarding?.guidedOnboardingApi?.isEnabled) {
         core.chrome.registerGlobalHelpExtensionMenuLink({
@@ -42,13 +44,13 @@ export class CloudLinksPlugin
           priority: 1000, // We want this link to be at the very top.
         });
       }
+
       if (security) {
         maybeAddCloudLinks({
+          core,
           security,
-          chrome: core.chrome,
           cloud,
-          docLinks: core.docLinks,
-          uiSettingsClient: core.uiSettings,
+          share,
         });
       }
     }

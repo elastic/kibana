@@ -43,7 +43,7 @@ run(
     }
 
     for (const Linter of [Eslint, Stylelint]) {
-      const filesToLint = Linter.pickFilesToLint(log, files);
+      const filesToLint = await Linter.pickFilesToLint(log, files);
       if (filesToLint.length > 0) {
         try {
           await Linter.lintFiles(log, filesToLint, {

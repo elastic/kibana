@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import { useFormContext } from 'react-hook-form';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
@@ -28,10 +27,14 @@ import {
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
-import { DataStream, SyntheticsMonitor } from '../../../../../../common/runtime_types';
+import { MonitorTypeEnum, MonitorFields } from '../../../../../../common/runtime_types';
 import { inspectMonitorAPI, MonitorInspectResponse } from '../../../state/monitor_management/api';
 
-export const MonitorInspectWrapper = () => {
+interface InspectorProps {
+  isValid: boolean;
+  monitorFields: MonitorFields;
+}
+export const MonitorInspectWrapper = (props: InspectorProps) => {
   const {
     services: { uiSettings },
   } = useKibana<ClientPluginsStart>();
@@ -40,10 +43,10 @@ export const MonitorInspectWrapper = () => {
 
   const isInspectorEnabled = uiSettings?.get<boolean>(enableInspectEsQueries);
 
-  return isDev || isInspectorEnabled ? <MonitorInspect /> : null;
+  return isDev || isInspectorEnabled ? <MonitorInspect {...props} /> : null;
 };
 
-const MonitorInspect = () => {
+const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
   const { isDev } = useSyntheticsSettingsContext();
 
   const [hideParams, setHideParams] = useState(() => !isDev);
@@ -60,13 +63,11 @@ const MonitorInspect = () => {
     setIsFlyoutVisible(() => !isFlyoutVisible);
   };
 
-  const { getValues, formState } = useFormContext();
-
   const { data, loading, error } = useFetcher(() => {
     if (isInspecting) {
       return inspectMonitorAPI({
         hideParams,
-        monitor: getValues() as SyntheticsMonitor,
+        monitor: monitorFields,
       });
     }
   }, [isInspecting, hideParams]);
@@ -121,9 +122,9 @@ const MonitorInspect = () => {
   }
   return (
     <>
-      <EuiToolTip content={formState.isValid ? FORMATTED_CONFIG_DESCRIPTION : VALID_CONFIG_LABEL}>
+      <EuiToolTip content={isValid ? FORMATTED_CONFIG_DESCRIPTION : VALID_CONFIG_LABEL}>
         <EuiButton
-          disabled={!formState.isValid}
+          disabled={!isValid}
           data-test-subj="syntheticsMonitorInspectShowFlyoutExampleButton"
           onClick={onButtonClick}
           iconType="inspect"
@@ -158,7 +159,7 @@ const formatContent = (result: MonitorInspectResponse) => {
 
   const currentInput = result.privateConfig?.inputs.find((input) => input.enabled);
   const compiledConfig = currentInput?.streams.find((stream) =>
-    Object.values(DataStream).includes(stream.data_stream.dataset as DataStream)
+    Object.values(MonitorTypeEnum).includes(stream.data_stream.dataset as MonitorTypeEnum)
   )?.compiled_stream;
 
   return JSON.stringify(

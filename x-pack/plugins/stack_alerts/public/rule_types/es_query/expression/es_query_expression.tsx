@@ -114,10 +114,10 @@ export const EsQueryExpression: React.FC<
     setCombinedFields(sortBy(currentEsFields.concat(runtimeFields), 'name'));
   };
 
-  const getRuntimeFields = () => {
+  const getRuntimeFields = (xjson: string) => {
     let runtimeMappings;
     try {
-      runtimeMappings = get(JSON.parse(xJson), 'runtime_mappings');
+      runtimeMappings = get(JSON.parse(xjson), 'runtime_mappings');
     } catch (e) {
       // ignore error
     }
@@ -197,7 +197,7 @@ export const EsQueryExpression: React.FC<
         <h5>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectIndexPrompt"
-            defaultMessage="Select an index and time field"
+            defaultMessage="Select indices"
           />
         </h5>
       </EuiTitle>
@@ -270,7 +270,7 @@ export const EsQueryExpression: React.FC<
           onChange={(xjson: string) => {
             setXJson(xjson);
             setParam('esQuery', convertToJson(xjson));
-            getRuntimeFields();
+            getRuntimeFields(xjson);
           }}
           options={{
             ariaLabel: i18n.translate('xpack.stackAlerts.esQuery.ui.queryEditor', {
@@ -351,6 +351,7 @@ export const EsQueryExpression: React.FC<
           (exclude) => setParam('excludeHitsFromPreviousRun', exclude),
           [setParam]
         )}
+        canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
       />
 
       <EuiSpacer />

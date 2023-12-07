@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import type { GetAgentPolicyRequestParamsSchema } from '../../../common/api';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getInternalSavedObjectsClient } from '../utils';
+import { getAgentPolicyRequestParamsSchema } from '../../../common/api';
 
 export const getAgentPolicyRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -24,9 +26,10 @@ export const getAgentPolicyRoute = (router: IRouter, osqueryContext: OsqueryAppC
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            params: schema.object({
-              id: schema.string(),
-            }),
+            params: buildRouteValidation<
+              typeof getAgentPolicyRequestParamsSchema,
+              GetAgentPolicyRequestParamsSchema
+            >(getAgentPolicyRequestParamsSchema),
           },
         },
       },

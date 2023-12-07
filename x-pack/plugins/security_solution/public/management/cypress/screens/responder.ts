@@ -6,6 +6,7 @@
  */
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
+import type { ConsoleResponseActionCommands } from '../../../../common/endpoint/service/response_actions/constants';
 import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '../../../../common/test';
 
 const TEST_SUBJ = Object.freeze({
@@ -13,7 +14,23 @@ const TEST_SUBJ = Object.freeze({
   actionLogFlyout: 'responderActionLogFlyout',
 });
 
-const ensureOnResponder = (): Cypress.Chainable<JQuery<HTMLDivElement>> => {
+export const getConsoleHelpPanelResponseActionTestSubj = (): Record<
+  ConsoleResponseActionCommands,
+  string
+> => {
+  return {
+    isolate: 'endpointResponseActionsConsole-commandList-Responseactions-isolate',
+    release: 'endpointResponseActionsConsole-commandList-Responseactions-release',
+    processes: 'endpointResponseActionsConsole-commandList-Responseactions-processes',
+    'kill-process': 'endpointResponseActionsConsole-commandList-Responseactions-kill-process',
+    'suspend-process': 'endpointResponseActionsConsole-commandList-Responseactions-suspend-process',
+    'get-file': 'endpointResponseActionsConsole-commandList-Responseactions-get-file',
+    execute: 'endpointResponseActionsConsole-commandList-Responseactions-execute',
+    upload: 'endpointResponseActionsConsole-commandList-Responseactions-upload',
+  };
+};
+
+export const ensureOnResponder = (): Cypress.Chainable<JQuery<HTMLDivElement>> => {
   return cy.getByTestSubj<HTMLDivElement>(TEST_SUBJ.responderPage).should('exist');
 };
 
@@ -25,10 +42,8 @@ export const closeResponder = (): void => {
 
 export const openResponderActionLogFlyout = (): void => {
   ensureOnResponder();
-  cy.getByTestSubj('responderShowActionLogButton')
-    .click()
-    .getByTestSubj(TEST_SUBJ.actionLogFlyout)
-    .should('exist');
+  cy.getByTestSubj('responderShowActionLogButton').click();
+  cy.getByTestSubj(TEST_SUBJ.actionLogFlyout).should('exist');
 };
 
 export const closeResponderActionLogFlyout = (): void => {
@@ -60,4 +75,9 @@ export const setResponderActionLogDateRange = (
   openResponderActionLogDatePickerQuickMenu();
   cy.getByTestSubj(DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP[range]).click();
   cy.getByTestSubj('superDatePickerQuickMenu').should('not.exist');
+};
+
+export const openConsoleHelpPanel = (): Cypress.Chainable => {
+  ensureOnResponder();
+  return cy.getByTestSubj('endpointResponseActionsConsole-header-helpButton').click();
 };

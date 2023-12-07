@@ -7,6 +7,7 @@
 
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { ExpandedDetailTimeline, SessionViewConfig } from '../../../../common/types';
 import type {
   EqlOptionsSelected,
@@ -133,6 +134,14 @@ export interface TimelineModel {
   isSelectAllChecked: boolean;
   isLoading: boolean;
   selectAll: boolean;
+  /* discover saved search Id */
+  savedSearchId: string | null;
+  /* local saved search object, it's not sent to the server */
+  savedSearch: SavedSearch | null;
+  isDiscoverSavedSearchLoaded?: boolean;
+  isDataProviderVisible: boolean;
+  /** used to mark the timeline as unsaved in the UI */
+  changed?: boolean;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -186,12 +195,18 @@ export type SubsetTimelineModel = Readonly<
     | 'status'
     | 'filters'
     | 'filterManager'
+    | 'savedSearchId'
+    | 'savedSearch'
+    | 'isDiscoverSavedSearchLoaded'
+    | 'isDataProviderVisible'
+    | 'changed'
   >
 >;
 
 export interface TimelineUrl {
   activeTab?: TimelineTabs;
-  id: string;
+  id?: string;
   isOpen: boolean;
   graphEventId?: string;
+  savedSearchId?: string;
 }

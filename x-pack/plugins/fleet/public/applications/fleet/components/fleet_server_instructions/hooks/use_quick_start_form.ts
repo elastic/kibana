@@ -15,8 +15,9 @@ import type { NewAgentPolicy } from '../../../types';
 
 import type { FleetServerHost } from '../../../types';
 
+import { useServiceToken } from '../../../hooks/use_service_token';
+
 import { useSelectFleetServerPolicy } from './use_select_fleet_server_policy';
-import { useServiceToken } from './use_service_token';
 import { useFleetServerHost } from './use_fleet_server_host';
 
 const QUICK_START_FLEET_SERVER_POLICY_FIELDS: NewAgentPolicy = {

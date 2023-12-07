@@ -6,8 +6,7 @@
  */
 
 import React, { FC, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
+
 import {
   useEuiBackgroundColor,
   EuiInMemoryTable,
@@ -19,25 +18,38 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
-import { useDiscoverLinks, createFilter, QueryMode, QUERY_MODE } from '../use_discover_links';
-import { MiniHistogram } from '../../mini_histogram';
+import { useTableState } from '@kbn/ml-in-memory-table';
+
+import moment from 'moment';
+import type { CategorizationAdditionalFilter } from '../../../../common/api/log_categorization/create_category_request';
+import {
+  type QueryMode,
+  QUERY_MODE,
+} from '../../../../common/api/log_categorization/get_category_query';
+import type { Category } from '../../../../common/api/log_categorization/types';
+
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
-import type { AiOpsFullIndexBasedAppState } from '../../../application/utils/url_state';
-import type { EventRate, Category, SparkLinesPerCategory } from '../use_categorize_request';
-import { useTableState } from './use_table_state';
+import type { LogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
+
+import { MiniHistogram } from '../../mini_histogram';
+
+import { useDiscoverLinks, createFilter } from '../use_discover_links';
+import type { EventRate } from '../use_categorize_request';
+
 import { getLabels } from './labels';
 import { TableHeader } from './table_header';
 
 interface Props {
   categories: Category[];
-  sparkLines: SparkLinesPerCategory;
   eventRate: EventRate;
   dataViewId: string;
   selectedField: DataViewField | string | undefined;
   timefilter: TimefilterContract;
-  aiopsListState: AiOpsFullIndexBasedAppState;
+  aiopsListState: LogCategorizationAppState;
   pinnedCategory: Category | null;
   setPinnedCategory: (category: Category | null) => void;
   selectedCategory: Category | null;
@@ -45,11 +57,12 @@ interface Props {
   onAddFilter?: (values: Filter, alias?: string) => void;
   onClose?: () => void;
   enableRowActions?: boolean;
+  additionalFilter?: CategorizationAdditionalFilter;
+  navigateToDiscover?: boolean;
 }
 
 export const CategoryTable: FC<Props> = ({
   categories,
-  sparkLines,
   eventRate,
   dataViewId,
   selectedField,
@@ -62,6 +75,8 @@ export const CategoryTable: FC<Props> = ({
   onAddFilter,
   onClose = () => {},
   enableRowActions = true,
+  additionalFilter,
+  navigateToDiscover = true,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
@@ -69,16 +84,21 @@ export const CategoryTable: FC<Props> = ({
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const { onTableChange, pagination, sorting } = useTableState<Category>(categories ?? [], 'key');
 
-  const labels = useMemo(
-    () => getLabels(onAddFilter !== undefined && onClose !== undefined),
-    [onAddFilter, onClose]
-  );
+  const labels = useMemo(() => {
+    const isFlyout = onAddFilter !== undefined && onClose !== undefined;
+    return getLabels(isFlyout && navigateToDiscover === false);
+  }, [navigateToDiscover, onAddFilter, onClose]);
+
+  const showSparkline = useMemo(() => {
+    return categories.some((category) => category.sparkline !== undefined);
+  }, [categories]);
 
   const openInDiscover = (mode: QueryMode, category?: Category) => {
     if (
       onAddFilter !== undefined &&
       selectedField !== undefined &&
-      typeof selectedField !== 'string'
+      typeof selectedField !== 'string' &&
+      navigateToDiscover === false
     ) {
       onAddFilter(
         createFilter('', selectedField.name, selectedCategories, mode, category),
@@ -88,7 +108,14 @@ export const CategoryTable: FC<Props> = ({
       return;
     }
 
-    const timefilterActiveBounds = timefilter.getActiveBounds();
+    const timefilterActiveBounds =
+      additionalFilter !== undefined
+        ? {
+            min: moment(additionalFilter.from),
+            max: moment(additionalFilter.to),
+          }
+        : timefilter.getActiveBounds();
+
     if (timefilterActiveBounds === undefined || selectedField === undefined) {
       return;
     }
@@ -100,7 +127,8 @@ export const CategoryTable: FC<Props> = ({
       aiopsListState,
       timefilterActiveBounds,
       mode,
-      category
+      category,
+      additionalFilter?.field
     );
   };
 
@@ -112,34 +140,6 @@ export const CategoryTable: FC<Props> = ({
       }),
       sortable: true,
       width: '80px',
-    },
-    {
-      field: 'count',
-      name: i18n.translate('xpack.aiops.logCategorization.column.logRate', {
-        defaultMessage: 'Log rate',
-      }),
-      sortable: false,
-      width: '100px',
-      render: (_, { key }) => {
-        const sparkLine = sparkLines[key];
-        if (sparkLine === undefined) {
-          return null;
-        }
-        const histogram = eventRate.map((e) => ({
-          doc_count_overall: e.docCount,
-          doc_count_significant_term: sparkLine[e.key],
-          key: e.key,
-          key_as_string: `${e.key}`,
-        }));
-
-        return (
-          <MiniHistogram
-            chartData={histogram}
-            isLoading={categories === null && histogram === undefined}
-            label={''}
-          />
-        );
-      },
     },
     {
       field: 'examples',
@@ -185,6 +185,42 @@ export const CategoryTable: FC<Props> = ({
       ],
     },
   ] as Array<EuiBasicTableColumn<Category>>;
+
+  if (showSparkline === true) {
+    columns.splice(1, 0, {
+      field: 'sparkline',
+      name: i18n.translate('xpack.aiops.logCategorization.column.logRate', {
+        defaultMessage: 'Log rate',
+      }),
+      sortable: false,
+      width: '100px',
+      render: (sparkline: Category['sparkline']) => {
+        if (sparkline === undefined) {
+          return null;
+        }
+        const histogram = eventRate.map(({ key: catKey, docCount }) => {
+          const term = sparkline[catKey] ?? 0;
+          const newTerm = term > docCount ? docCount : term;
+          const adjustedDocCount = docCount - newTerm;
+
+          return {
+            doc_count_overall: adjustedDocCount,
+            doc_count_significant_item: newTerm,
+            key: catKey,
+            key_as_string: `${catKey}`,
+          };
+        });
+
+        return (
+          <MiniHistogram
+            chartData={histogram}
+            isLoading={categories === null && histogram === undefined}
+            label={''}
+          />
+        );
+      },
+    });
+  }
 
   const selectionValue: EuiTableSelectionType<Category> | undefined = {
     selectable: () => true,

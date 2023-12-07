@@ -8,10 +8,3 @@
 export { UserProfile } from './user_profile';
 
 export type { UserProfileProps, UserProfileFormValues } from './user_profile';
-export type {
-  UserProfileGetCurrentParams,
-  UserProfileBulkGetParams,
-  UserProfileSuggestParams,
-} from './user_profile_api_client';
-
-export type { UpdateUserProfileHook } from './use_update_user_profile';

@@ -15,47 +15,33 @@ import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { SloTimeWindowBadge } from './slo_time_window_badge';
 import { SloRulesBadge } from './slo_rules_badge';
-import type { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
 import type { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+import { SloGroupByBadge } from '../../../../components/slo/slo_status_badge/slo_group_by_badge';
+export type ViewMode = 'default' | 'compact';
 
-export interface Props {
-  activeAlerts?: ActiveAlerts;
+export interface SloBadgesProps {
+  activeAlerts?: number;
   isLoading: boolean;
   rules: Array<Rule<SloRule>> | undefined;
   slo: SLOWithSummaryResponse;
   onClickRuleBadge: () => void;
 }
 
-export function SloBadges({ activeAlerts, isLoading, rules, slo, onClickRuleBadge }: Props) {
+export function SloBadges({
+  activeAlerts,
+  isLoading,
+  rules,
+  slo,
+  onClickRuleBadge,
+}: SloBadgesProps) {
   return (
-    <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
+    <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center" wrap>
       {isLoading ? (
-        <>
-          <EuiSkeletonRectangle
-            isLoading
-            contentAriaLabel="Loading"
-            width="54.16px"
-            height="20px"
-            borderRadius="s"
-          />
-          <EuiSkeletonRectangle
-            isLoading
-            contentAriaLabel="Loading"
-            width="54.16px"
-            height="20px"
-            borderRadius="s"
-          />
-          <EuiSkeletonRectangle
-            isLoading
-            contentAriaLabel="Loading"
-            width="54.16px"
-            height="20px"
-            borderRadius="s"
-          />
-        </>
+        <LoadingBadges />
       ) : (
         <>
           <SloStatusBadge slo={slo} />
+          <SloGroupByBadge slo={slo} />
           <SloIndicatorTypeBadge slo={slo} />
           <SloTimeWindowBadge slo={slo} />
           <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} />
@@ -63,5 +49,33 @@ export function SloBadges({ activeAlerts, isLoading, rules, slo, onClickRuleBadg
         </>
       )}
     </EuiFlexGroup>
+  );
+}
+
+export function LoadingBadges() {
+  return (
+    <>
+      <EuiSkeletonRectangle
+        isLoading
+        contentAriaLabel="Loading"
+        width="54.16px"
+        height="20px"
+        borderRadius="s"
+      />
+      <EuiSkeletonRectangle
+        isLoading
+        contentAriaLabel="Loading"
+        width="54.16px"
+        height="20px"
+        borderRadius="s"
+      />
+      <EuiSkeletonRectangle
+        isLoading
+        contentAriaLabel="Loading"
+        width="54.16px"
+        height="20px"
+        borderRadius="s"
+      />
+    </>
   );
 }

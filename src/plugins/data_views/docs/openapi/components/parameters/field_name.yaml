@@ -1,0 +1,7 @@
+in: path
+name: fieldName
+description: The name of the runtime field.
+required: true
+schema:
+  type: string
+  example: hour_of_day

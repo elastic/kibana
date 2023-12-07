@@ -11,5 +11,5 @@ import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_contex
 export function useTraceExplorerEnabledSetting() {
   const { core } = useApmPluginContext();
 
-  return core.uiSettings.get<boolean>(apmTraceExplorerTab, false);
+  return core.uiSettings.get<boolean>(apmTraceExplorerTab, true);
 }

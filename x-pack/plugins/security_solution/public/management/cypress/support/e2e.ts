@@ -23,11 +23,14 @@
 // ***********************************************************
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
+import 'cypress-data-session';
+// @ts-ignore
+import registerCypressGrep from '@cypress/grep';
 
-// force ESM in this module
-export {};
+import { login, ROLE } from '../tasks/login';
+import { loadPage } from '../tasks/common';
 
-import 'cypress-react-selector';
+registerCypressGrep();
 
 Cypress.Commands.addQuery<'getByTestSubj'>(
   'getByTestSubj',
@@ -36,7 +39,16 @@ Cypress.Commands.addQuery<'getByTestSubj'>(
       subject: Cypress.Chainable<JQuery<HTMLElement>>
     ) => Cypress.Chainable<JQuery<HTMLElement>>;
 
-    return (subject) => getFn(subject);
+    return (subject) => {
+      if (subject) {
+        const errMessage =
+          '`cy.getByTestSubj()` is a parent query and can not be chained off a existing subject. Did you mean to use `.findByTestSubj()`?';
+        cy.now('log', errMessage, [selector, subject]);
+        throw new TypeError(errMessage);
+      }
+
+      return getFn(subject);
+    };
   }
 );
 
@@ -45,7 +57,7 @@ Cypress.Commands.addQuery<'findByTestSubj'>(
   function findByTestSubj(selector, options) {
     return (subject) => {
       Cypress.ensure.isElement(subject, this.get('name'), cy);
-      return subject.find(testSubjSelector(selector), {});
+      return subject.find(testSubjSelector(selector), options);
     };
   }
 );
@@ -53,7 +65,7 @@ Cypress.Commands.addQuery<'findByTestSubj'>(
 Cypress.Commands.add(
   'waitUntil',
   { prevSubject: 'optional' },
-  (subject, fn, { interval = 500, timeout = 30000 } = {}) => {
+  (subject, fn, { interval = 500, timeout = 30000 } = {}, msg = 'waitUntil()') => {
     let attempts = Math.floor(timeout / interval);
 
     const completeOrRetry = (result: boolean) => {
@@ -61,7 +73,7 @@ Cypress.Commands.add(
         return result;
       }
       if (attempts < 1) {
-        throw new Error(`Timed out while retrying, last result was: {${result}}`);
+        throw new Error(`${msg}: Timed out while retrying - last result was: [${result}]`);
       }
       cy.wait(interval, { log: false }).then(() => {
         attempts--;
@@ -79,7 +91,7 @@ Cypress.Commands.add(
         return result.then(completeOrRetry);
       } else {
         throw new Error(
-          `Unknown return type from callback: ${Object.prototype.toString.call(result)}`
+          `${msg}: Unknown return type from callback: ${Object.prototype.toString.call(result)}`
         );
       }
     };
@@ -89,3 +101,10 @@ Cypress.Commands.add(
 );
 
 Cypress.on('uncaught:exception', () => false);
+
+// Login as a SOC_MANAGER to properly initialize Security Solution App
+before(() => {
+  login(ROLE.soc_manager);
+  loadPage('/app/security/alerts');
+  cy.getByTestSubj('manage-alert-detection-rules').should('exist');
+});

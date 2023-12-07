@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
 import type { IBasePath, IRouter, Logger } from '@kbn/core/server';
+import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
 import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
 
-import type { ConfigType } from '../config';
-import type { ElasticsearchServiceSetup } from '../elasticsearch_service';
-import type { KibanaConfigWriter } from '../kibana_config_writer';
-import type { VerificationCode } from '../verification_code';
 import { defineConfigureRoute } from './configure';
 import { defineEnrollRoutes } from './enroll';
 import { definePingRoute } from './ping';
 import { defineStatusRoute } from './status';
 import { defineVerifyRoute } from './verify';
+import type { ConfigType } from '../config';
+import type { ElasticsearchServiceSetup } from '../elasticsearch_service';
+import type { KibanaConfigWriter } from '../kibana_config_writer';
+import type { VerificationCode } from '../verification_code';
 
 /**
  * Describes parameters used to define HTTP routes.

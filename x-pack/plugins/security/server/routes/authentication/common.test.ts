@@ -11,7 +11,8 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
-import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
+import { defineCommonRoutes } from './common';
+import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import {
@@ -24,7 +25,6 @@ import { authenticationServiceMock } from '../../authentication/authentication_s
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
-import { defineCommonRoutes } from './common';
 
 describe('Common authentication routes', () => {
   let router: jest.Mocked<SecurityRouter>;
@@ -66,6 +66,7 @@ describe('Common authentication routes', () => {
 
     it('correctly defines route.', async () => {
       expect(routeConfig.options).toEqual({
+        access: 'public',
         authRequired: false,
         tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
       });

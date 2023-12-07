@@ -27,7 +27,7 @@ import { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
 import { FormBasedPrivateState, FormBasedLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
-import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
+import type { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
@@ -47,11 +47,21 @@ declare global {
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
+// Need a more complex logic for decimals percentiles
+function getAggIdPostFixForPercentile(percentile: string, decimals?: string) {
+  if (!percentile && !decimals) {
+    return '';
+  }
+  if (!decimals) {
+    return `.${percentile}`;
+  }
+  return `['${percentile}.${decimals}']`;
+}
 const updatePositionIndex = (currentId: string, newIndex: number) => {
-  const [fullId, percentile] = currentId.split('.');
+  const [fullId, percentile, percentileDecimals] = currentId.split('.');
   const idParts = fullId.split('-');
   idParts[1] = String(newIndex);
-  return idParts.join('-') + (percentile ? `.${percentile}` : '');
+  return idParts.join('-') + getAggIdPostFixForPercentile(percentile, percentileDecimals);
 };
 
 function getExpressionForLayer(
@@ -232,8 +242,8 @@ function getExpressionForLayer(
               ? col.label
               : operationDefinitionMap[col.operationType].getDefaultLabel(
                   col,
-                  indexPattern,
-                  layer.columns
+                  layer.columns,
+                  indexPattern
                 ),
           },
         ];
@@ -352,6 +362,14 @@ function getExpressionForLayer(
             format?.params && 'pattern' in format.params && format.params.pattern
               ? [format.params.pattern]
               : [],
+          fromUnit:
+            format?.params && 'fromUnit' in format.params && format.params.fromUnit
+              ? [format.params.fromUnit]
+              : [],
+          toUnit:
+            format?.params && 'toUnit' in format.params && format.params.toUnit
+              ? [format.params.toUnit]
+              : [],
           parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
         },
       };
@@ -380,8 +398,8 @@ function getExpressionForLayer(
                 ? col.label
                 : operationDefinitionMap[col.operationType].getDefaultLabel(
                     col,
-                    indexPattern,
-                    layer.columns
+                    layer.columns,
+                    indexPattern
                   ),
             ],
             targetUnit: [col.timeScale!],

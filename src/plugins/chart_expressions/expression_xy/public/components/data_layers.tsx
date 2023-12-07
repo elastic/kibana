@@ -8,6 +8,7 @@
 import {
   AreaSeries,
   BarSeries,
+  BarSeriesProps,
   CurveType,
   LabelOverflowConstraint,
   LineSeries,
@@ -51,12 +52,14 @@ interface Props {
   timeZone?: string;
   emphasizeFitting?: boolean;
   fillOpacity?: number;
+  minBarHeight: number;
   shouldShowValueLabels?: boolean;
   valueLabels: ValueLabelMode;
   defaultXScaleType: XScaleType;
   fieldFormats: LayersFieldFormats;
   uiState?: PersistedState;
   singleTable?: boolean;
+  isDarkMode: boolean;
 }
 
 export const DataLayers: FC<Props> = ({
@@ -67,6 +70,7 @@ export const DataLayers: FC<Props> = ({
   syncColors,
   valueLabels,
   fillOpacity,
+  minBarHeight,
   formatFactory,
   paletteService,
   fittingFunction,
@@ -80,6 +84,7 @@ export const DataLayers: FC<Props> = ({
   fieldFormats,
   uiState,
   singleTable,
+  isDarkMode,
 }) => {
   // for singleTable mode we should use y accessors from all layers for creating correct series name and getting color
   const allYAccessors = layers.flatMap((layer) => layer.accessors);
@@ -169,6 +174,7 @@ export const DataLayers: FC<Props> = ({
             allYAccessors,
             singleTable,
             multipleLayersWithSplits,
+            isDarkMode,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;
@@ -186,14 +192,13 @@ export const DataLayers: FC<Props> = ({
                 />
               );
             case SeriesTypes.BAR:
-              const valueLabelsSettings = {
+              const valueLabelsSettings: Pick<BarSeriesProps, 'displayValueSettings'> = {
                 displayValueSettings: {
                   // This format double fixes two issues in elastic-chart
                   // * when rotating the chart, the formatter is not correctly picked
                   // * in some scenarios value labels are not strings, and this breaks the elastic-chart lib
                   valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
                   showValueLabel: shouldShowValueLabels && valueLabels !== ValueLabelModes.HIDE,
-                  isValueContainedInElement: false,
                   isAlternatingValueLabel: false,
                   overflowConstraints: [
                     LabelOverflowConstraint.ChartEdges,
@@ -201,7 +206,14 @@ export const DataLayers: FC<Props> = ({
                   ],
                 },
               };
-              return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
+              return (
+                <BarSeries
+                  key={index}
+                  {...seriesProps}
+                  {...valueLabelsSettings}
+                  minBarHeight={minBarHeight}
+                />
+              );
             case SeriesTypes.AREA:
               return (
                 <AreaSeries

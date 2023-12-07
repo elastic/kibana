@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { merge } from 'lodash';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   PROCESSOR_EVENT,
   METRICSET_NAME,
@@ -15,7 +16,6 @@ import {
   TRANSACTION_DURATION_SUMMARY,
   INDEX,
 } from '../../../../common/es_fields/apm';
-import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { getTypedSearch, TypedSearch } from '../create_typed_es_client';
 import { getApmIndexPatterns } from './get_indices';
 
@@ -36,7 +36,7 @@ export async function getApmEvents({
   kuery,
 }: {
   esClient: ElasticsearchClient;
-  apmIndices: ApmIndicesConfig;
+  apmIndices: APMIndices;
   start: number;
   end: number;
   kuery?: string;

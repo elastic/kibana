@@ -13,16 +13,11 @@ import { isEqual } from 'lodash';
 import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  toMountPoint,
-  wrapWithTheme,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
-import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import {
   Provider as UrlStateContextProvider,
@@ -268,9 +263,15 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
   );
 };
 
-export const IndexDataVisualizer: FC<{
+interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
-}> = ({ getAdditionalLinks }) => {
+  showFrozenDataTierChoice?: boolean;
+}
+
+export const IndexDataVisualizer: FC<Props> = ({
+  getAdditionalLinks,
+  showFrozenDataTierChoice = true,
+}) => {
   const coreStart = getCoreStart();
   const {
     data,
@@ -301,11 +302,10 @@ export const IndexDataVisualizer: FC<{
     unifiedSearch,
     ...coreStart,
   };
-  const datePickerDeps = {
-    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-    toMountPoint,
-    wrapWithTheme,
+  const datePickerDeps: DatePickerDependencies = {
+    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
+    showFrozenDataTierChoice,
   };
 
   return (

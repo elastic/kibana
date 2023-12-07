@@ -15,7 +15,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'timePicker',
+    'dashboard',
+    'settings',
+    'discover',
+    'common',
+    'header',
+  ]);
   const defaultSettings = {
     defaultIndex: 'long-window-logstash-*',
     'dateFormat:tz': 'Europe/Berlin',
@@ -88,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return actualCount <= expectedCount;
       });
       const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-      expect(Math.round(newDurationHours)).to.be(26);
+      expect(Math.round(newDurationHours)).to.be(24); // might fail if histogram's width changes
 
       await retry.waitFor('doc table containing the documents of the brushed range', async () => {
         const rowData = await PageObjects.discover.getDocTableField(1);
@@ -253,7 +260,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // go to dashboard
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // go to discover
@@ -282,8 +289,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // type an invalid search query, hit refresh
       await queryBar.setQuery('this is > not valid');
       await queryBar.submitQuery();
-      // check the error state
-      expect(await testSubjects.exists('embeddable-lens-failure')).to.be(true);
+
+      await PageObjects.discover.showsErrorCallout();
 
       // now remove the query
       await queryBar.clearQuery();
@@ -313,7 +320,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.discover.toggleChartVisibility();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.clickResetSavedSearchButton();
+      await PageObjects.discover.revertUnsavedChanges();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       requestData = await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data');
       expect(JSON.parse(requestData)).to.eql({

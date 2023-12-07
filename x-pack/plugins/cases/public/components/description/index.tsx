@@ -113,7 +113,7 @@ export const Description = ({
 
   const handleOnSave = useCallback(
     (content: string) => {
-      onUpdateField({ key: DESCRIPTION_ID, value: content });
+      onUpdateField({ key: DESCRIPTION_ID, value: content.trim() });
       setIsEditable(false);
     },
     [onUpdateField, setIsEditable]

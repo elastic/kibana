@@ -8,17 +8,25 @@
 import {
   getCardTimeInMinutes,
   getCardStepsLeft,
-  isCardActive,
-  setupCards,
-  updateCard,
+  setupActiveSections,
+  updateActiveSections,
+  isStepActive,
 } from './helpers';
-import type { ActiveCards, Card, CardId, Section, StepId } from './types';
+import type { ActiveSections, Card, CardId, Section, Step, StepId } from './types';
+
 import {
-  GetMoreFromElasticSecurityCardId,
-  GetSetUpCardId,
-  IntroductionSteps,
+  AddAndValidateYourDataCardsId,
+  AddIntegrationsSteps,
+  CreateProjectSteps,
+  EnablePrebuiltRulesSteps,
+  OverviewSteps,
+  QuickStartSectionCardsId,
   SectionId,
+  GetStartedWithAlertsCardsId,
+  ViewAlertsSteps,
+  ViewDashboardSteps,
 } from './types';
+
 import * as sectionsConfigs from './sections';
 import { ProductLine } from '../../common/product';
 const mockSections = jest.spyOn(sectionsConfigs, 'getSections');
@@ -31,18 +39,23 @@ describe('getCardTimeInMinutes', () => {
         { id: 'step3', timeInMinutes: 15 },
       ],
     } as unknown as Card;
+    const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
+    const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
     const stepsDone = new Set(['step1', 'step3']) as unknown as Set<StepId>;
 
-    const timeInMinutes = getCardTimeInMinutes(card, stepsDone);
+    const timeInMinutes = getCardTimeInMinutes(activeSteps, stepsDone);
 
     expect(timeInMinutes).toEqual(45);
   });
 
   it('should return 0 if the card is null or has no steps', () => {
     const card = {} as Card;
+
+    const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
+    const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
     const stepsDone = new Set(['step1']) as unknown as Set<StepId>;
 
-    const timeInMinutes = getCardTimeInMinutes(card, stepsDone);
+    const timeInMinutes = getCardTimeInMinutes(activeSteps, stepsDone);
 
     expect(timeInMinutes).toEqual(0);
   });
@@ -51,249 +64,273 @@ describe('getCardTimeInMinutes', () => {
 describe('getCardStepsLeft', () => {
   it('should calculate the number of steps left for a card correctly', () => {
     const card = { steps: ['step1', 'step2', 'step3'] } as unknown as Card;
+    const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
+    const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
     const stepsDone = new Set(['step1', 'step3']) as unknown as Set<StepId>;
 
-    const stepsLeft = getCardStepsLeft(card, stepsDone);
+    const stepsLeft = getCardStepsLeft(activeSteps, stepsDone);
 
     expect(stepsLeft).toEqual(1);
   });
 
   it('should return the total number of steps if the card is null or has no steps', () => {
     const card = {} as Card;
+    const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
+    const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
     const stepsDone = new Set() as unknown as Set<StepId>;
 
-    const stepsLeft = getCardStepsLeft(card, stepsDone);
+    const stepsLeft = getCardStepsLeft(activeSteps, stepsDone);
 
     expect(stepsLeft).toEqual(0);
   });
 });
 
-describe('isCardActive', () => {
-  it('should return true if the card is active based on the active products', () => {
-    const card = { productLineRequired: [ProductLine.security, ProductLine.cloud] } as Card;
-    const activeProducts = new Set([ProductLine.security]);
+describe('isStepActive', () => {
+  it('should return true if the step is active based on the active products', () => {
+    const step = {
+      productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
+      id: OverviewSteps.getToKnowElasticSecurity,
+    } as Step;
+    const activeProducts = new Set([ProductLine.cloud]);
 
-    const isActive = isCardActive(card, activeProducts);
+    const isActive = isStepActive(step, activeProducts);
 
     expect(isActive).toBe(true);
   });
 
   it('should return true if the card has no product type requirement', () => {
-    const card = {} as Card;
+    const step = {
+      id: EnablePrebuiltRulesSteps.enablePrebuiltRules,
+    } as Step;
     const activeProducts = new Set([ProductLine.security]);
 
-    const isActive = isCardActive(card, activeProducts);
+    const isActive = isStepActive(step, activeProducts);
 
     expect(isActive).toBe(true);
   });
 
   it('should return false if the card is not active based on the active products', () => {
-    const card = { productLineRequired: [ProductLine.security, ProductLine.cloud] } as Card;
-    const activeProducts = new Set([ProductLine.endpoint]);
+    const step = {
+      productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
+      id: OverviewSteps.getToKnowElasticSecurity,
+    } as Step;
+    const activeProducts = new Set([ProductLine.security]);
 
-    const isActive = isCardActive(card, activeProducts);
+    const isActive = isStepActive(step, activeProducts);
 
     expect(isActive).toBe(false);
   });
 });
 
-describe('setupCards', () => {
-  const analyticProductActiveCards = {
-    [SectionId.getSetUp]: {
-      [GetSetUpCardId.introduction]: {
-        id: GetSetUpCardId.introduction,
-        timeInMins: 3,
-        stepsLeft: 1,
-      },
-      [GetSetUpCardId.bringInYourData]: {
-        id: GetSetUpCardId.bringInYourData,
-        timeInMins: 0,
-        stepsLeft: 0,
-      },
-      [GetSetUpCardId.activateAndCreateRules]: {
-        id: GetSetUpCardId.activateAndCreateRules,
-        timeInMins: 0,
-        stepsLeft: 0,
-      },
-    },
-    [SectionId.getMoreFromElasticSecurity]: {
-      [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
-        id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-        stepsLeft: 0,
-        timeInMins: 0,
-      },
-      [GetMoreFromElasticSecurityCardId.respondToThreats]: {
-        id: GetMoreFromElasticSecurityCardId.respondToThreats,
-        stepsLeft: 0,
-        timeInMins: 0,
-      },
-      [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
-        id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
-        stepsLeft: 0,
-        timeInMins: 0,
-      },
-    },
+describe('setupActiveSections', () => {
+  const getCard = (cardId: CardId, sectionId: SectionId, activeSections: ActiveSections | null) => {
+    const section = activeSections ? activeSections[sectionId] : {};
+    return section ? section[cardId] ?? { activeStepIds: null } : {};
   };
-  it('should set up active cards based on active products', () => {
+
+  it('should set up active steps based on active products', () => {
     const finishedSteps = {} as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.cloud]);
+    const { activeSections } = setupActiveSections(finishedSteps, activeProducts);
 
-    const activeCards = setupCards(finishedSteps, activeProducts);
+    expect(
+      getCard(QuickStartSectionCardsId.createFirstProject, SectionId.quickStart, activeSections)
+        .activeStepIds
+    ).toEqual([CreateProjectSteps.createFirstProject]);
 
-    expect(activeCards).toEqual({
-      ...analyticProductActiveCards,
-      [SectionId.getSetUp]: {
-        ...analyticProductActiveCards[SectionId.getSetUp],
-        [GetSetUpCardId.protectYourEnvironmentInRealtime]: {
-          id: GetSetUpCardId.protectYourEnvironmentInRealtime,
-          timeInMins: 0,
-          stepsLeft: 0,
-        },
-      },
+    expect(
+      getCard(QuickStartSectionCardsId.watchTheOverviewVideo, SectionId.quickStart, activeSections)
+        .activeStepIds
+    ).toEqual([OverviewSteps.getToKnowElasticSecurity]);
+
+    expect(
+      getCard(
+        AddAndValidateYourDataCardsId.addIntegrations,
+        SectionId.addAndValidateYourData,
+        activeSections
+      ).activeStepIds
+    ).toEqual([AddIntegrationsSteps.connectToDataSources]);
+
+    expect(
+      getCard(
+        AddAndValidateYourDataCardsId.viewDashboards,
+        SectionId.addAndValidateYourData,
+        activeSections
+      ).activeStepIds
+    ).toEqual([ViewDashboardSteps.analyzeData]);
+
+    expect(
+      getCard(
+        GetStartedWithAlertsCardsId.enablePrebuiltRules,
+        SectionId.getStartedWithAlerts,
+        activeSections
+      ).activeStepIds
+    ).toEqual([EnablePrebuiltRulesSteps.enablePrebuiltRules]);
+
+    expect(
+      getCard(
+        GetStartedWithAlertsCardsId.viewAlerts,
+        SectionId.getStartedWithAlerts,
+        activeSections
+      ).activeStepIds
+    ).toEqual([ViewAlertsSteps.viewAlerts]);
+  });
+
+  it('should set up active cards based on finished steps', () => {
+    const finishedSteps = {
+      [QuickStartSectionCardsId.createFirstProject]: new Set([
+        CreateProjectSteps.createFirstProject,
+      ]),
+    } as unknown as Record<CardId, Set<StepId>>;
+    const activeProducts = new Set([ProductLine.security]);
+
+    const { activeSections } = setupActiveSections(finishedSteps, activeProducts);
+
+    expect(
+      getCard(QuickStartSectionCardsId.createFirstProject, SectionId.quickStart, activeSections)
+    ).toEqual({
+      activeStepIds: [CreateProjectSteps.createFirstProject],
+      id: QuickStartSectionCardsId.createFirstProject,
+      stepsLeft: 0,
+      timeInMins: 0,
     });
   });
 
-  it('should skip inactive cards based on finished steps and active products', () => {
-    const finishedSteps = {} as Record<CardId, Set<StepId>>;
-    const activeProducts = new Set([ProductLine.security]);
-
-    const activeCards = setupCards(finishedSteps, activeProducts);
-
-    expect(activeCards).toEqual(analyticProductActiveCards);
-  });
-
   it('should return null if there are no active products', () => {
-    const finishedSteps = {
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
-    } as unknown as Record<CardId, Set<StepId>>;
+    const finishedSteps = {} as unknown as Record<CardId, Set<StepId>>;
 
     const activeProducts: Set<ProductLine> = new Set();
 
-    const activeCards = setupCards(finishedSteps, activeProducts);
+    const activeSections = setupActiveSections(finishedSteps, activeProducts);
 
-    expect(activeCards).toBeNull();
+    expect(activeSections).toEqual({
+      activeSections: null,
+      totalActiveSteps: null,
+      totalStepsLeft: null,
+    });
   });
 
   it('should handle null or empty cards in sections', () => {
     mockSections.mockImplementation(() => [
       {
-        id: SectionId.getSetUp,
+        id: SectionId.quickStart,
       } as unknown as Section,
     ]);
 
     const finishedSteps = {
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
+      [QuickStartSectionCardsId.createFirstProject]: new Set([
+        CreateProjectSteps.createFirstProject,
+      ]),
     } as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.security]);
 
-    const activeCards = setupCards(finishedSteps, activeProducts);
+    const activeSections = setupActiveSections(finishedSteps, activeProducts);
 
-    expect(activeCards).toEqual({});
+    expect(activeSections).toEqual({
+      activeSections: {},
+      totalActiveSteps: 0,
+      totalStepsLeft: 0,
+    });
 
     mockSections.mockRestore();
   });
 });
 
-describe('updateCard', () => {
+describe('updateActiveSections', () => {
   const finishedSteps = {
-    [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
+    [QuickStartSectionCardsId.createFirstProject]: new Set([CreateProjectSteps.createFirstProject]),
   } as unknown as Record<CardId, Set<StepId>>;
-  const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
 
-  const activeCards = {
-    [SectionId.getSetUp]: {
-      [GetSetUpCardId.introduction]: {
-        id: GetSetUpCardId.introduction,
-        timeInMins: 3,
+  const activeSections = {
+    [SectionId.quickStart]: {
+      [QuickStartSectionCardsId.createFirstProject]: {
+        id: QuickStartSectionCardsId.createFirstProject,
+        stepsLeft: 0,
+      },
+      [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+        id: QuickStartSectionCardsId.watchTheOverviewVideo,
         stepsLeft: 1,
       },
-      [GetSetUpCardId.bringInYourData]: {
-        id: GetSetUpCardId.bringInYourData,
-        timeInMins: 0,
-        stepsLeft: 0,
-      },
-      [GetSetUpCardId.activateAndCreateRules]: {
-        id: GetSetUpCardId.activateAndCreateRules,
-        timeInMins: 0,
-        stepsLeft: 0,
-      },
-      [GetSetUpCardId.protectYourEnvironmentInRealtime]: {
-        id: GetSetUpCardId.protectYourEnvironmentInRealtime,
-        timeInMins: 0,
-        stepsLeft: 0,
-      },
     },
-    [SectionId.getMoreFromElasticSecurity]: {
-      [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
-        id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-        stepsLeft: 0,
-        timeInMins: 0,
-      },
-      [GetMoreFromElasticSecurityCardId.respondToThreats]: {
-        id: GetMoreFromElasticSecurityCardId.respondToThreats,
-        stepsLeft: 0,
-        timeInMins: 0,
-      },
-      [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
-        id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
-        stepsLeft: 0,
-        timeInMins: 0,
-      },
-    },
-  } as ActiveCards;
+  } as ActiveSections;
 
   it('should update the active card based on finished steps and active products', () => {
-    const sectionId = SectionId.getSetUp;
-    const cardId = GetSetUpCardId.introduction;
-
-    const updatedCards = updateCard({
-      finishedSteps,
-      activeProducts,
-      activeCards,
-      sectionId,
-      cardId,
-    });
-
-    expect(updatedCards).toEqual({
-      ...activeCards,
-      [SectionId.getSetUp]: {
-        ...activeCards[SectionId.getSetUp],
-        [GetSetUpCardId.introduction]: {
-          id: GetSetUpCardId.introduction,
-          timeInMins: 0,
+    const activeProducts = new Set([ProductLine.cloud]);
+    const sectionId = SectionId.quickStart;
+    const cardId = QuickStartSectionCardsId.createFirstProject;
+    const testActiveSections = {
+      [SectionId.quickStart]: {
+        [QuickStartSectionCardsId.createFirstProject]: {
+          id: QuickStartSectionCardsId.createFirstProject,
           stepsLeft: 0,
+          timeInMins: 0,
+          activeStepIds: [CreateProjectSteps.createFirstProject],
         },
       },
+    };
+    const updatedSections = updateActiveSections({
+      activeProducts,
+      activeSections: testActiveSections,
+      cardId,
+      finishedSteps,
+      sectionId,
+    });
+
+    expect(updatedSections).toEqual({
+      activeSections: {
+        ...testActiveSections,
+        [SectionId.quickStart]: {
+          ...testActiveSections[SectionId.quickStart],
+          [QuickStartSectionCardsId.createFirstProject]: {
+            id: QuickStartSectionCardsId.createFirstProject,
+            timeInMins: 0,
+            stepsLeft: 0,
+            activeStepIds: [CreateProjectSteps.createFirstProject],
+          },
+        },
+      },
+      totalActiveSteps: 1,
+      totalStepsLeft: 0,
     });
   });
 
   it('should return null if the card is inactive based on active products', () => {
-    const sectionId = SectionId.getSetUp;
-    const cardId = GetSetUpCardId.protectYourEnvironmentInRealtime;
+    const activeProducts = new Set([ProductLine.cloud]);
+    const sectionId = SectionId.quickStart;
+    const cardId = QuickStartSectionCardsId.createFirstProject;
 
-    const updatedCards = updateCard({
-      finishedSteps,
+    const updatedSections = updateActiveSections({
       activeProducts,
-      activeCards: null,
+      finishedSteps,
+      activeSections: null,
       sectionId,
       cardId,
     });
 
-    expect(updatedCards).toBeNull();
+    expect(updatedSections).toEqual({
+      activeSections: null,
+      totalStepsLeft: null,
+      totalActiveSteps: null,
+    });
   });
 
-  it('should return null if the card or activeCards is not found', () => {
-    const sectionId = SectionId.getSetUp;
+  it('should return null if the card or activeSections is not found', () => {
+    const activeProducts = new Set([ProductLine.cloud]);
+    const sectionId = SectionId.quickStart;
     const cardId = 'test' as CardId;
 
-    const updatedCards = updateCard({
-      finishedSteps,
+    const updatedSections = updateActiveSections({
       activeProducts,
-      activeCards,
+      finishedSteps,
+      activeSections,
       sectionId,
       cardId,
     });
 
-    expect(updatedCards).toEqual(activeCards);
+    expect(updatedSections).toEqual({
+      activeSections,
+      totalStepsLeft: null,
+      totalActiveSteps: null,
+    });
   });
 });

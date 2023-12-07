@@ -11,13 +11,15 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { useMemo } from 'react';
 import { useUrlState } from '../../../../utils/use_url_state';
 
 const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
 
-const availableControlsPanels = {
+export const availableControlsPanels = {
   HOST_OS_NAME: 'host.os.name',
   CLOUD_PROVIDER: 'cloud.provider',
+  SERVICE_NAME: 'service.name',
 };
 
 const controlPanelConfigs: ControlPanels = {
@@ -43,6 +45,17 @@ const controlPanelConfigs: ControlPanels = {
       title: 'Cloud Provider',
     },
   },
+  [availableControlsPanels.SERVICE_NAME]: {
+    order: 2,
+    width: 'medium',
+    grow: false,
+    type: 'optionsListControl',
+    explicitInput: {
+      id: availableControlsPanels.SERVICE_NAME,
+      fieldName: availableControlsPanels.SERVICE_NAME,
+      title: 'Service Name',
+    },
+  },
 };
 
 const availableControlPanelFields = Object.values(availableControlsPanels);
@@ -50,7 +63,7 @@ const availableControlPanelFields = Object.values(availableControlsPanels);
 export const useControlPanels = (
   dataView: DataView | undefined
 ): [ControlPanels, (state: ControlPanels) => void] => {
-  const defaultState = getVisibleControlPanelsConfig(dataView);
+  const defaultState = useMemo(() => getVisibleControlPanelsConfig(dataView), [dataView]);
 
   const [controlPanels, setControlPanels] = useUrlState<ControlPanels>({
     defaultState,

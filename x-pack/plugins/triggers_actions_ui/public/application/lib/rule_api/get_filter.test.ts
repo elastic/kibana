@@ -34,4 +34,10 @@ describe('getFilter', () => {
   test('should not return filter if outcome filter is invalid', () => {
     expect(getFilter({ outcomeFilter: ['doesntexist'] })).toEqual([]);
   });
+
+  test('should return ruleTypeId filter', () => {
+    expect(getFilter({ ruleTypeIds: ['test-1', 'test-2'] })).toEqual([
+      'kibana.alert.rule.rule_type_id:(test-1 or test-2)',
+    ]);
+  });
 });

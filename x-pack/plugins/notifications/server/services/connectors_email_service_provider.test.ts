@@ -235,7 +235,8 @@ describe('ConnectorsEmailServiceProvider', () => {
           expect(connectorsEmailServiceMock).toHaveBeenCalledWith(
             PLUGIN_ID,
             validConnectorConfig.connectors.default.email,
-            actionsStart.getUnsecuredActionsClient()
+            actionsStart.getUnsecuredActionsClient(),
+            logger
           );
         });
       });

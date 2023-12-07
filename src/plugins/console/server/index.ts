@@ -8,10 +8,12 @@
 
 import { PluginInitializerContext } from '@kbn/core/server';
 
-import { ConsoleServerPlugin } from './plugin';
-
 export type { ConsoleSetup, ConsoleStart } from './types';
 
 export { config } from './config';
 
-export const plugin = (ctx: PluginInitializerContext) => new ConsoleServerPlugin(ctx);
+export const plugin = async (ctx: PluginInitializerContext) => {
+  const { ConsoleServerPlugin } = await import('./plugin');
+
+  return new ConsoleServerPlugin(ctx);
+};

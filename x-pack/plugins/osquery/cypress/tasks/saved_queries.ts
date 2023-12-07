@@ -11,7 +11,6 @@ import {
   checkResults,
   BIG_QUERY,
   deleteAndConfirm,
-  findFormFieldByRowsLabelAndType,
   inputQuery,
   selectAllAgents,
   submitQuery,
@@ -47,65 +46,61 @@ export const getSavedQueriesComplexTest = () =>
 
         // hidden columns
         cy.contains('columns hidden').should('not.exist');
-        cy.react('EuiDataGridHeaderCellWrapper', { props: { id: 'osquery.cmdline' } }).click();
+        cy.getBySel('dataGridHeaderCell-osquery.cmdline').click();
         cy.contains(/Hide column$/).click();
-        cy.react('EuiDataGridHeaderCellWrapper', {
-          props: { id: 'osquery.cwd' },
-        }).click();
+        cy.getBySel('dataGridHeaderCell-osquery.cwd').click();
+
         cy.contains(/Hide column$/).click();
-        cy.react('EuiDataGridHeaderCellWrapper', {
-          props: { id: 'osquery.disk_bytes_written.number' },
-        }).click();
+        cy.getBySel('dataGridHeaderCell-osquery.disk_bytes_written.number').click();
+
         cy.contains(/Hide column$/).click();
         cy.contains('columns hidden').should('exist');
         // change pagination
         cy.getBySel('pagination-button-next').click().wait(500).click();
         cy.contains('columns hidden').should('exist');
 
+        // enter fullscreen
         cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
         cy.contains(/Enter fullscreen$/).should('not.exist');
         cy.contains('Exit fullscreen').should('exist');
         cy.getBySel(RESULTS_TABLE_BUTTON).click();
 
         // sorting
-        cy.react('EuiDataGridHeaderCellWrapper', {
-          props: { id: 'osquery.egid' },
-        }).click();
+        cy.getBySel('dataGridHeaderCell-osquery.egid').click();
+
         cy.contains(/Sort A-Z$/).click();
         cy.contains('columns hidden').should('exist');
         cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
         cy.contains(/Enter fullscreen$/).should('exist');
 
         // visit Status results
-        cy.react('EuiTab', { props: { id: 'status' } }).click();
-        cy.react('EuiTableRow').should('have.lengthOf', 2);
+        cy.getBySel('osquery-status-tab').click();
+        cy.get('tbody > tr.euiTableRow').should('have.lengthOf', 2);
 
         // save new query
         cy.contains('Exit full screen').should('not.exist');
         cy.contains('Save for later').click();
         cy.contains('Save query');
-        findFormFieldByRowsLabelAndType('ID', savedQueryId);
-        findFormFieldByRowsLabelAndType('Description (optional)', savedQueryDescription);
-        cy.react('EuiButtonDisplay').contains('Save').click();
+        cy.get('input[name="id"]').type(`${savedQueryId}{downArrow}{enter}`);
+        cy.get('input[name="description"]').type(`${savedQueryDescription}{downArrow}{enter}`);
+        cy.getBySel('savedQueryFlyoutSaveButton').click();
         cy.contains('Successfully saved');
         closeToastIfVisible();
 
         // play saved query
         navigateTo('/app/osquery/saved_queries');
         cy.contains(savedQueryId);
-        cy.react('PlayButtonComponent', {
-          props: { savedQuery: { id: savedQueryId } },
-        }).click();
+        cy.get(`[aria-label="Run ${savedQueryId}"]`).click();
         selectAllAgents();
         submitQuery();
 
         // edit saved query
         cy.contains('Saved queries').click();
         cy.contains(savedQueryId);
-        cy.react('CustomItemAction', {
-          props: { index: 1, item: { id: savedQueryId } },
-        }).click();
-        findFormFieldByRowsLabelAndType('Description (optional)', ' Edited');
+
+        cy.get(`[aria-label="Edit ${savedQueryId}"]`).click();
+        cy.get('input[name="description"]').type(` Edited{downArrow}{enter}`);
+
         // Run in test configuration
         cy.contains('Test configuration').click();
         selectAllAgents();
@@ -120,17 +115,18 @@ export const getSavedQueriesComplexTest = () =>
           inputQuery('{selectall}{backspace}{selectall}{backspace}');
           cy.contains('Query is a required field');
           inputQuery(BIG_QUERY);
+          cy.contains('Query is a required field').should('not.exist');
         });
 
         // Save edited
-        cy.react('EuiButton').contains('Update query').click();
+        cy.getBySel('euiFlyoutCloseButton').click();
+        cy.getBySel('update-query-button').click();
         cy.contains(`${savedQueryDescription} Edited`);
 
         // delete saved query
         cy.contains(savedQueryId);
-        cy.react('CustomItemAction', {
-          props: { index: 1, item: { id: savedQueryId } },
-        }).click();
+        cy.get(`[aria-label="Edit ${savedQueryId}"]`).click();
+
         deleteAndConfirm('query');
         cy.contains(savedQueryId).should('exist');
         cy.contains(savedQueryId).should('not.exist');

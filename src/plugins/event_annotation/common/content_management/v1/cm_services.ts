@@ -33,7 +33,7 @@ const eventAnnotationGroupAttributesSchema = schema.object(
     description: schema.maybe(schema.string()),
     ignoreGlobalFilters: schema.boolean(),
     annotations: schema.arrayOf(schema.any()),
-    dataViewSpec: schema.maybe(schema.any()),
+    dataViewSpec: schema.oneOf([schema.literal(null), schema.object({}, { unknowns: 'allow' })]),
   },
   { unknowns: 'forbid' }
 );
@@ -79,7 +79,6 @@ const getResultSchema = schema.object(
 );
 
 const createOptionsSchema = schema.object({
-  overwrite: schema.maybe(schema.boolean()),
   references: schema.maybe(referencesSchema),
 });
 

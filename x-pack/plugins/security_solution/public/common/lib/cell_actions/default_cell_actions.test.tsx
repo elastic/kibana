@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn, EuiDataGridColumnCellAction } from '@elastic/eui';
 import type { ColumnHeaderType, DataTableCellAction } from '../../../../common/types';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type {
@@ -43,7 +43,7 @@ describe('default cell actions', () => {
           header: columnHeaders.find((h) => h.id === header.id),
           pageSize,
           scopeId: tableId,
-        });
+        }) as EuiDataGridColumnCellAction;
 
       return {
         ...header,
@@ -76,7 +76,7 @@ describe('default cell actions', () => {
             header: [columnHeaders].find((h) => h.id === header.id),
             pageSize,
             scopeId: tableId,
-          });
+          }) as EuiDataGridColumnCellAction;
 
         return {
           ...header,

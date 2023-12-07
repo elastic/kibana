@@ -10,19 +10,24 @@ import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
+import { getDefaultPresetForEsOutput } from '../../../../../../../common/services/output_helpers';
+
 import type {
   KafkaOutput,
   NewElasticsearchOutput,
   NewLogstashOutput,
   NewOutput,
+  NewRemoteElasticsearchOutput,
 } from '../../../../../../../common/types/models';
 
 import {
   kafkaAcknowledgeReliabilityLevel,
   kafkaAuthType,
   kafkaCompressionType,
+  kafkaConnectionType,
   kafkaPartitionType,
   kafkaSaslMechanism,
+  kafkaVerificationModes,
   outputType,
 } from '../../../../../../../common/constants';
 
@@ -30,6 +35,7 @@ import {
   sendPostOutput,
   useComboInput,
   useInput,
+  useSecretInput,
   useNumberInput,
   useSelectInput,
   useSwitchInput,
@@ -50,13 +56,20 @@ import {
   validateLogstashHosts,
   validateYamlConfig,
   validateCATrustedFingerPrint,
+  validateServiceToken,
+  validateServiceTokenSecret,
   validateSSLCertificate,
   validateSSLKey,
+  validateSSLKeySecret,
   validateKafkaUsername,
   validateKafkaPassword,
+  validateKafkaPasswordSecret,
   validateKafkaHeaders,
   validateKafkaDefaultTopic,
   validateKafkaTopics,
+  validateKafkaClientId,
+  validateKafkaHosts,
+  validateKafkaPartitioningGroupEvents,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
@@ -73,12 +86,16 @@ export interface OutputFormInputsType {
   diskQueueCompressionEnabled: ReturnType<typeof useSwitchInput>;
   compressionLevelInput: ReturnType<typeof useSelectInput>;
   logstashHostsInput: ReturnType<typeof useComboInput>;
+  presetInput: ReturnType<typeof useInput>;
   additionalYamlConfigInput: ReturnType<typeof useInput>;
   defaultOutputInput: ReturnType<typeof useSwitchInput>;
   defaultMonitoringOutputInput: ReturnType<typeof useSwitchInput>;
   caTrustedFingerprintInput: ReturnType<typeof useInput>;
+  serviceTokenInput: ReturnType<typeof useInput>;
+  serviceTokenSecretInput: ReturnType<typeof useSecretInput>;
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
+  sslKeySecretInput: ReturnType<typeof useSecretInput>;
   sslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
   proxyIdInput: ReturnType<typeof useInput>;
   loadBalanceEnabledInput: ReturnType<typeof useSwitchInput>;
@@ -87,10 +104,13 @@ export interface OutputFormInputsType {
   maxBatchBytes: ReturnType<typeof useNumberInput>;
   kafkaHostsInput: ReturnType<typeof useComboInput>;
   kafkaVersionInput: ReturnType<typeof useInput>;
+  kafkaVerificationModeInput: ReturnType<typeof useInput>;
   kafkaAuthMethodInput: ReturnType<typeof useRadioInput>;
+  kafkaConnectionTypeInput: ReturnType<typeof useRadioInput>;
   kafkaSaslMechanismInput: ReturnType<typeof useRadioInput>;
   kafkaAuthUsernameInput: ReturnType<typeof useInput>;
   kafkaAuthPasswordInput: ReturnType<typeof useInput>;
+  kafkaAuthPasswordSecretInput: ReturnType<typeof useSecretInput>;
   kafkaPartitionTypeInput: ReturnType<typeof useRadioInput>;
   kafkaPartitionTypeRandomInput: ReturnType<typeof useInput>;
   kafkaPartitionTypeHashInput: ReturnType<typeof useInput>;
@@ -104,12 +124,36 @@ export interface OutputFormInputsType {
   kafkaCompressionCodecInput: ReturnType<typeof useInput>;
   kafkaBrokerTimeoutInput: ReturnType<typeof useInput>;
   kafkaBrokerReachabilityTimeoutInput: ReturnType<typeof useInput>;
-  kafkaBrokerChannelBufferSizeInput: ReturnType<typeof useInput>;
   kafkaBrokerAckReliabilityInput: ReturnType<typeof useInput>;
   kafkaKeyInput: ReturnType<typeof useInput>;
   kafkaSslCertificateInput: ReturnType<typeof useInput>;
   kafkaSslKeyInput: ReturnType<typeof useInput>;
+  kafkaSslKeySecretInput: ReturnType<typeof useSecretInput>;
   kafkaSslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
+}
+
+function extractKafkaOutputSecrets(
+  inputs: Pick<
+    OutputFormInputsType,
+    | 'kafkaSslKeyInput'
+    | 'kafkaSslKeySecretInput'
+    | 'kafkaAuthPasswordInput'
+    | 'kafkaAuthPasswordSecretInput'
+  >
+): KafkaOutput['secrets'] | null {
+  const secrets: KafkaOutput['secrets'] = {};
+
+  if (!inputs.kafkaSslKeyInput.value && inputs.kafkaSslKeySecretInput.value) {
+    secrets.ssl = {
+      key: inputs.kafkaSslKeySecretInput.value,
+    };
+  }
+
+  if (!inputs.kafkaAuthPasswordInput.value && inputs.kafkaAuthPasswordSecretInput.value) {
+    secrets.password = inputs.kafkaAuthPasswordSecretInput.value;
+  }
+
+  return Object.keys(secrets).length ? secrets : null;
 }
 
 export function useOutputForm(onSucess: () => void, output?: Output) {
@@ -129,10 +173,13 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const isPreconfigured = output?.is_preconfigured ?? false;
   const allowEdit = output?.allow_edit ?? [];
 
-  function isDisabled(field: keyof Output | keyof KafkaOutput) {
+  function isDisabled(
+    field: keyof Output | keyof KafkaOutput | keyof NewRemoteElasticsearchOutput
+  ) {
     if (!isPreconfigured) {
       return false;
     }
+
     return !allowEdit.includes(field);
   }
 
@@ -166,6 +213,25 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     output?.hosts ?? [],
     validateESHosts,
     isDisabled('hosts')
+  );
+
+  const presetInput = useInput(
+    output?.preset ?? getDefaultPresetForEsOutput(output?.config_yaml ?? '', safeLoad),
+    () => undefined,
+    isDisabled('preset')
+  );
+
+  // Remtote ES inputs
+  const serviceTokenInput = useInput(
+    (output as NewRemoteElasticsearchOutput)?.service_token ?? '',
+    validateServiceToken,
+    isDisabled('service_token')
+  );
+
+  const serviceTokenSecretInput = useSecretInput(
+    (output as NewRemoteElasticsearchOutput)?.secrets?.service_token ?? '',
+    validateServiceTokenSecret,
+    isDisabled('service_token')
   );
   /*
   Shipper feature flag - currently depends on the content of the yaml
@@ -244,6 +310,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
   const sslKeyInput = useInput(output?.ssl?.key ?? '', validateSSLKey, isSSLEditable);
 
+  const sslKeySecretInput = useSecretInput(
+    (output as NewLogstashOutput)?.secrets?.ssl?.key,
+    validateSSLKeySecret,
+    isSSLEditable
+  );
+
   const proxyIdInput = useInput(output?.proxy_id ?? '', () => undefined, isDisabled('proxy_id'));
 
   /**
@@ -278,13 +350,18 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const kafkaHostsInput = useComboInput(
     'kafkaHostsComboBox',
     output?.hosts ?? [],
-    validateESHosts,
+    validateKafkaHosts,
     isDisabled('hosts')
   );
 
   const kafkaAuthMethodInput = useRadioInput(
-    kafkaOutput?.auth_type ?? kafkaAuthType.Userpass,
+    kafkaOutput?.auth_type ?? kafkaAuthType.None,
     isDisabled('auth_type')
+  );
+
+  const kafkaConnectionTypeInput = useRadioInput(
+    kafkaOutput?.connection_type ?? kafkaConnectionType.Plaintext,
+    isDisabled('connection_type')
   );
 
   const kafkaAuthUsernameInput = useInput(
@@ -295,6 +372,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const kafkaAuthPasswordInput = useInput(
     kafkaOutput?.password,
     kafkaAuthMethodInput.value === kafkaAuthType.Userpass ? validateKafkaPassword : undefined,
+    isDisabled('password')
+  );
+
+  const kafkaAuthPasswordSecretInput = useSecretInput(
+    kafkaOutput?.secrets?.password,
+    kafkaAuthMethodInput.value === kafkaAuthType.Userpass ? validateKafkaPasswordSecret : undefined,
     isDisabled('password')
   );
 
@@ -315,6 +398,18 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isSSLEditable
   );
 
+  const kafkaSslKeySecretInput = useSecretInput(
+    kafkaOutput?.ssl?.certificate,
+    kafkaAuthMethodInput.value === kafkaAuthType.Ssl ? validateSSLKeySecret : undefined,
+    isSSLEditable
+  );
+
+  const kafkaVerificationModeInput = useInput(
+    kafkaOutput?.ssl?.verification_mode ?? kafkaVerificationModes.Full,
+    undefined,
+    isSSLEditable
+  );
+
   const kafkaSaslMechanismInput = useRadioInput(
     kafkaOutput?.sasl?.mechanism ?? kafkaSaslMechanism.Plain,
     isDisabled('sasl')
@@ -326,8 +421,10 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const kafkaPartitionTypeRandomInput = useInput(
-    kafkaOutput?.random?.group_events ? `${kafkaOutput.random.group_events}` : undefined,
-    undefined,
+    kafkaOutput?.random?.group_events ? `${kafkaOutput.random.group_events}` : '1',
+    kafkaPartitionTypeInput.value === kafkaPartitionType.Random
+      ? validateKafkaPartitioningGroupEvents
+      : undefined,
     isDisabled('partition')
   );
   const kafkaPartitionTypeHashInput = useInput(
@@ -336,8 +433,10 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isDisabled('partition')
   );
   const kafkaPartitionTypeRoundRobinInput = useInput(
-    kafkaOutput?.round_robin?.group_events ? `${kafkaOutput.round_robin.group_events}` : undefined,
-    undefined,
+    kafkaOutput?.round_robin?.group_events ? `${kafkaOutput.round_robin.group_events}` : '1',
+    kafkaPartitionTypeInput.value === kafkaPartitionType.RoundRobin
+      ? validateKafkaPartitioningGroupEvents
+      : undefined,
     isDisabled('partition')
   );
 
@@ -360,8 +459,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const kafkaClientIdInput = useInput(
-    kafkaOutput?.client_id ?? 'Elastic agent',
-    undefined,
+    kafkaOutput?.client_id ?? 'Elastic',
+    validateKafkaClientId,
     isDisabled('client_id')
   );
 
@@ -375,7 +474,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isDisabled('compression_level')
   );
   const kafkaCompressionCodecInput = useInput(
-    kafkaOutput?.compression ?? kafkaCompressionType.None,
+    kafkaOutput?.compression && kafkaOutput.compression !== kafkaCompressionType.None
+      ? kafkaOutput.compression
+      : kafkaCompressionType.Gzip,
     undefined,
     isDisabled('compression')
   );
@@ -392,22 +493,17 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isDisabled('timeout')
   );
 
-  const kafkaBrokerChannelBufferSizeInput = useInput(
-    `${kafkaOutput?.broker_buffer_size ?? 256}`,
-    undefined,
-    isDisabled('broker_buffer_size')
-  );
-
   const kafkaBrokerAckReliabilityInput = useInput(
-    kafkaOutput?.broker_ack_reliability ?? kafkaAcknowledgeReliabilityLevel.Commit,
+    `${kafkaOutput?.required_acks ?? kafkaAcknowledgeReliabilityLevel.Commit}`,
     undefined,
-    isDisabled('broker_ack_reliability')
+    isDisabled('required_acks')
   );
 
   const kafkaKeyInput = useInput(kafkaOutput?.key, undefined, isDisabled('key'));
 
   const isLogstash = typeInput.value === outputType.Logstash;
   const isKafka = typeInput.value === outputType.Kafka;
+  const isRemoteElasticsearch = typeInput.value === outputType.RemoteElasticsearch;
 
   const inputs: OutputFormInputsType = {
     nameInput,
@@ -420,12 +516,16 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     diskQueueCompressionEnabled,
     compressionLevelInput,
     logstashHostsInput,
+    presetInput,
     additionalYamlConfigInput,
     defaultOutputInput,
     defaultMonitoringOutputInput,
     caTrustedFingerprintInput,
+    serviceTokenInput,
+    serviceTokenSecretInput,
     sslCertificateInput,
     sslKeyInput,
+    sslKeySecretInput,
     sslCertificateAuthoritiesInput,
     proxyIdInput,
     loadBalanceEnabledInput,
@@ -434,9 +534,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     maxBatchBytes,
     kafkaVersionInput,
     kafkaHostsInput,
+    kafkaVerificationModeInput,
     kafkaAuthMethodInput,
+    kafkaConnectionTypeInput,
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
+    kafkaAuthPasswordSecretInput,
     kafkaSaslMechanismInput,
     kafkaPartitionTypeInput,
     kafkaPartitionTypeRandomInput,
@@ -449,12 +552,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaCompressionCodecInput,
     kafkaBrokerTimeoutInput,
     kafkaBrokerReachabilityTimeoutInput,
-    kafkaBrokerChannelBufferSizeInput,
     kafkaBrokerAckReliabilityInput,
     kafkaKeyInput,
     kafkaSslCertificateAuthoritiesInput,
     kafkaSslCertificateInput,
     kafkaSslKeyInput,
+    kafkaSslKeySecretInput,
     kafkaDefaultTopicInput,
     kafkaTopicsInput,
   };
@@ -466,18 +569,34 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     const elasticsearchUrlsValid = elasticsearchUrlInput.validate();
     const kafkaHostsValid = kafkaHostsInput.validate();
     const kafkaUsernameValid = kafkaAuthUsernameInput.validate();
-    const kafkaPasswordValid = kafkaAuthPasswordInput.validate();
+    const kafkaPasswordPlainValid = kafkaAuthPasswordInput.validate();
+    const kafkaPasswordSecretValid = kafkaAuthPasswordSecretInput.validate();
+    const kafkaClientIDValid = kafkaClientIdInput.validate();
     const kafkaSslCertificateValid = kafkaSslCertificateInput.validate();
-    const kafkaSslKeyValid = kafkaSslKeyInput.validate();
+    const kafkaSslKeyPlainValid = kafkaSslKeyInput.validate();
+    const kafkaSslKeySecretValid = kafkaSslKeySecretInput.validate();
     const kafkaDefaultTopicValid = kafkaDefaultTopicInput.validate();
     const kafkaTopicsValid = kafkaTopicsInput.validate();
     const kafkaHeadersValid = kafkaHeadersInput.validate();
     const logstashHostsValid = logstashHostsInput.validate();
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
     const caTrustedFingerprintValid = caTrustedFingerprintInput.validate();
+    const serviceTokenValid = serviceTokenInput.validate();
+    const serviceTokenSecretValid = serviceTokenSecretInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
+    const sslKeySecretValid = sslKeySecretInput.validate();
     const diskQueuePathValid = diskQueuePathInput.validate();
+    const partitioningRandomGroupEventsValid = kafkaPartitionTypeRandomInput.validate();
+    const partitioningRoundRobinGroupEventsValid = kafkaPartitionTypeRoundRobinInput.validate();
+
+    const kafkaSslKeyValid = kafkaSslKeyInput.value
+      ? kafkaSslKeyPlainValid
+      : kafkaSslKeySecretValid;
+
+    const kafkaPasswordValid = kafkaAuthPasswordInput.value
+      ? kafkaPasswordPlainValid
+      : kafkaPasswordSecretValid;
 
     if (isLogstash) {
       // validate logstash
@@ -486,7 +605,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         additionalYamlConfigValid &&
         nameInputValid &&
         sslCertificateValid &&
-        sslKeyValid
+        ((sslKeyInput.value && sslKeyValid) || (sslKeySecretInput.value && sslKeySecretValid))
       );
     }
     if (isKafka) {
@@ -501,7 +620,19 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         kafkaHeadersValid &&
         kafkaDefaultTopicValid &&
         kafkaTopicsValid &&
-        additionalYamlConfigValid
+        additionalYamlConfigValid &&
+        kafkaClientIDValid &&
+        partitioningRandomGroupEventsValid &&
+        partitioningRoundRobinGroupEventsValid
+      );
+    }
+    if (isRemoteElasticsearch) {
+      return (
+        elasticsearchUrlsValid &&
+        additionalYamlConfigValid &&
+        nameInputValid &&
+        ((serviceTokenInput.value && serviceTokenValid) ||
+          (serviceTokenSecretInput.value && serviceTokenSecretValid))
       );
     } else {
       // validate ES
@@ -519,19 +650,28 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaHostsInput,
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
+    kafkaAuthPasswordSecretInput,
+    kafkaClientIdInput,
     kafkaSslCertificateInput,
     kafkaSslKeyInput,
+    kafkaSslKeySecretInput,
     kafkaDefaultTopicInput,
     kafkaTopicsInput,
     kafkaHeadersInput,
     logstashHostsInput,
     additionalYamlConfigInput,
     caTrustedFingerprintInput,
+    serviceTokenInput,
+    serviceTokenSecretInput,
     sslCertificateInput,
     sslKeyInput,
+    sslKeySecretInput,
     diskQueuePathInput,
+    kafkaPartitionTypeRandomInput,
+    kafkaPartitionTypeRoundRobinInput,
     isLogstash,
     isKafka,
+    isRemoteElasticsearch,
   ]);
 
   const submit = useCallback(async () => {
@@ -582,7 +722,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
       const payload: NewOutput = (() => {
         const parseIntegerIfStringDefined = (value: string | undefined): number | undefined => {
           if (value !== undefined) {
-            const parsedInt = parseInt(value, 10); // Specify the base as 10 for decimal numbers
+            const parsedInt = parseInt(value, 10);
             if (!isNaN(parsedInt)) {
               return parsedInt;
             }
@@ -592,6 +732,17 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
 
         switch (typeInput.value) {
           case outputType.Kafka:
+            const definedCA = kafkaSslCertificateAuthoritiesInput.value.filter(
+              (val) => val !== ''
+            ).length;
+
+            const maybeSecrets = extractKafkaOutputSecrets({
+              kafkaSslKeyInput,
+              kafkaSslKeySecretInput,
+              kafkaAuthPasswordInput,
+              kafkaAuthPasswordSecretInput,
+            });
+
             return {
               name: nameInput.value,
               type: outputType.Kafka,
@@ -599,25 +750,36 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               is_default: defaultOutputInput.value,
               is_default_monitoring: defaultMonitoringOutputInput.value,
               config_yaml: additionalYamlConfigInput.value,
-              ...(kafkaAuthMethodInput.value === kafkaAuthType.Ssl
+              ...(kafkaConnectionTypeInput.value !== kafkaConnectionType.Plaintext ||
+              kafkaAuthMethodInput.value !== kafkaAuthType.None
                 ? {
                     ssl: {
-                      certificate: kafkaSslCertificateInput.value,
-                      key: kafkaSslKeyInput.value,
-                      certificate_authorities: kafkaSslCertificateAuthoritiesInput.value.filter(
-                        (val) => val !== ''
-                      ),
+                      ...(definedCA
+                        ? {
+                            certificate_authorities:
+                              kafkaSslCertificateAuthoritiesInput.value.filter((val) => val !== ''),
+                          }
+                        : {}),
+                      ...(kafkaAuthMethodInput.value === kafkaAuthType.Ssl
+                        ? {
+                            certificate: kafkaSslCertificateInput.value,
+                            key: kafkaSslKeyInput.value,
+                          }
+                        : {}),
+                      verification_mode: kafkaVerificationModeInput.value,
                     },
                   }
                 : {}),
-
               proxy_id: proxyIdValue,
 
               client_id: kafkaClientIdInput.value || undefined,
               version: kafkaVersionInput.value,
               ...(kafkaKeyInput.value ? { key: kafkaKeyInput.value } : {}),
-              compression: kafkaCompressionCodecInput.value,
-              ...(kafkaCompressionCodecInput.value === kafkaCompressionType.Gzip
+              compression: kafkaCompressionInput.value
+                ? kafkaCompressionCodecInput.value
+                : kafkaCompressionType.None,
+              ...(kafkaCompressionInput.value &&
+              kafkaCompressionCodecInput.value === kafkaCompressionType.Gzip
                 ? {
                     compression_level: parseIntegerIfStringDefined(
                       kafkaCompressionLevelInput.value
@@ -626,15 +788,25 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                 : {}),
 
               auth_type: kafkaAuthMethodInput.value,
-              ...(kafkaAuthUsernameInput.value ? { username: kafkaAuthUsernameInput.value } : {}),
-              ...(kafkaAuthPasswordInput.value ? { password: kafkaAuthPasswordInput.value } : {}),
+              ...(kafkaAuthMethodInput.value === kafkaAuthType.None
+                ? { connection_type: kafkaConnectionTypeInput.value }
+                : {}),
+              ...(kafkaAuthMethodInput.value === kafkaAuthType.Userpass &&
+              kafkaAuthUsernameInput.value
+                ? { username: kafkaAuthUsernameInput.value }
+                : {}),
+              ...(kafkaAuthMethodInput.value === kafkaAuthType.Userpass &&
+              kafkaAuthPasswordInput.value
+                ? { password: kafkaAuthPasswordInput.value }
+                : {}),
               ...(kafkaAuthMethodInput.value === kafkaAuthType.Userpass &&
               kafkaSaslMechanismInput.value
                 ? { sasl: { mechanism: kafkaSaslMechanismInput.value } }
                 : {}),
 
               partition: kafkaPartitionTypeInput.value,
-              ...(kafkaPartitionTypeRandomInput.value
+              ...(kafkaPartitionTypeInput.value === kafkaPartitionType.Random &&
+              kafkaPartitionTypeRandomInput.value
                 ? {
                     random: {
                       group_events: parseIntegerIfStringDefined(
@@ -643,7 +815,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                     },
                   }
                 : {}),
-              ...(kafkaPartitionTypeRoundRobinInput.value
+              ...(kafkaPartitionTypeInput.value === kafkaPartitionType.RoundRobin &&
+              kafkaPartitionTypeRoundRobinInput.value
                 ? {
                     round_robin: {
                       group_events: parseIntegerIfStringDefined(
@@ -652,7 +825,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                     },
                   }
                 : {}),
-              ...(kafkaPartitionTypeHashInput.value
+              ...(kafkaPartitionTypeInput.value === kafkaPartitionType.Hash &&
+              kafkaPartitionTypeHashInput.value
                 ? {
                     hash: {
                       hash: kafkaPartitionTypeHashInput.value,
@@ -665,11 +839,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               broker_timeout: parseIntegerIfStringDefined(
                 kafkaBrokerReachabilityTimeoutInput.value
               ),
-              broker_ack_reliability: kafkaBrokerAckReliabilityInput.value,
-              broker_buffer_size: parseIntegerIfStringDefined(
-                kafkaBrokerChannelBufferSizeInput.value
-              ),
+              required_acks: parseIntegerIfStringDefined(kafkaBrokerAckReliabilityInput.value),
               ...shipperParams,
+              ...(maybeSecrets ? { secrets: maybeSecrets } : {}),
             } as KafkaOutput;
           case outputType.Logstash:
             return {
@@ -681,14 +853,41 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               config_yaml: additionalYamlConfigInput.value,
               ssl: {
                 certificate: sslCertificateInput.value,
-                key: sslKeyInput.value,
+                key: sslKeyInput.value || undefined,
                 certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
                   (val) => val !== ''
                 ),
               },
+              ...(!sslKeyInput.value &&
+                sslKeySecretInput.value && {
+                  secrets: {
+                    ssl: {
+                      key: sslKeySecretInput.value,
+                    },
+                  },
+                }),
               proxy_id: proxyIdValue,
               ...shipperParams,
             } as NewLogstashOutput;
+          case outputType.RemoteElasticsearch:
+            return {
+              name: nameInput.value,
+              type: outputType.RemoteElasticsearch,
+              hosts: elasticsearchUrlInput.value,
+              is_default: false,
+              is_default_monitoring: defaultMonitoringOutputInput.value,
+              preset: presetInput.value,
+              config_yaml: additionalYamlConfigInput.value,
+              service_token: serviceTokenInput.value || undefined,
+              ...(!serviceTokenInput.value &&
+                serviceTokenSecretInput.value && {
+                  secrets: {
+                    service_token: serviceTokenSecretInput.value,
+                  },
+                }),
+              proxy_id: proxyIdValue,
+              ...shipperParams,
+            } as NewRemoteElasticsearchOutput;
           case outputType.Elasticsearch:
           default:
             return {
@@ -697,6 +896,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               hosts: elasticsearchUrlInput.value,
               is_default: defaultOutputInput.value,
               is_default_monitoring: defaultMonitoringOutputInput.value,
+              preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
@@ -752,22 +952,27 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     compressionLevelInput.value,
     loadBalanceEnabledInput.value,
     typeInput.value,
+    kafkaSslCertificateAuthoritiesInput.value,
+    kafkaSslKeyInput,
+    kafkaSslKeySecretInput,
+    kafkaAuthPasswordInput,
+    kafkaAuthPasswordSecretInput,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,
     defaultMonitoringOutputInput.value,
     additionalYamlConfigInput.value,
+    kafkaConnectionTypeInput.value,
     kafkaAuthMethodInput.value,
     kafkaSslCertificateInput.value,
-    kafkaSslKeyInput.value,
-    kafkaSslCertificateAuthoritiesInput.value,
+    kafkaVerificationModeInput.value,
     kafkaClientIdInput.value,
     kafkaVersionInput.value,
     kafkaKeyInput.value,
+    kafkaCompressionInput.value,
     kafkaCompressionCodecInput.value,
     kafkaCompressionLevelInput.value,
     kafkaAuthUsernameInput.value,
-    kafkaAuthPasswordInput.value,
     kafkaSaslMechanismInput.value,
     kafkaPartitionTypeInput.value,
     kafkaPartitionTypeRandomInput.value,
@@ -779,12 +984,15 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaBrokerTimeoutInput.value,
     kafkaBrokerReachabilityTimeoutInput.value,
     kafkaBrokerAckReliabilityInput.value,
-    kafkaBrokerChannelBufferSizeInput.value,
     logstashHostsInput.value,
     sslCertificateInput.value,
     sslKeyInput.value,
     sslCertificateAuthoritiesInput.value,
+    sslKeySecretInput.value,
     elasticsearchUrlInput.value,
+    serviceTokenInput.value,
+    serviceTokenSecretInput.value,
+    presetInput.value,
     caTrustedFingerprintInput.value,
     confirm,
     notifications.toasts,

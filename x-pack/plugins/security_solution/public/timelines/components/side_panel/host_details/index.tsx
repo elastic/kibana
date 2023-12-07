@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import {
   EuiFlexGroup,
   EuiFlyoutHeader,
@@ -65,6 +63,7 @@ interface HostDetailsProps {
   isDraggable?: boolean;
 }
 
+// eslint-disable-next-line react/display-name
 export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
   ({ contextID, scopeId, expandedHost, handleOnHostClosed, isDraggable, isFlyoutView }) => {
     const { hostName } = expandedHost;

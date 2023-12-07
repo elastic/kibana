@@ -12,6 +12,9 @@ export {
   asPercent,
   getDurationFormatter,
   asDuration,
+  asDynamicBytes,
+  asAbsoluteDateTime,
+  asInteger,
 } from './utils/formatters';
 export { getInspectResponse } from './utils/get_inspect_response';
 export { getAlertDetailsUrl, getAlertUrl } from './utils/alerting/alert_url';
@@ -37,6 +40,14 @@ export {
   apmEnableContinuousRollups,
   enableCriticalPath,
   syntheticsThrottlingEnabled,
+  apmEnableProfilingIntegration,
+  profilingCo2PerKWH,
+  profilingDatacenterPUE,
+  profilingPervCPUWattX86,
+  profilingUseLegacyCo2Calculation,
+  profilingPervCPUWattArm64,
+  profilingAWSCostDiscountRate,
+  profilingCostPervCPUPerHour,
 } from './ui_settings_keys';
 
 export {
@@ -66,7 +77,8 @@ export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
 export const rulesLocatorID = 'RULES_LOCATOR';
 export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
 export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
+export const sloListLocatorID = 'SLO_LIST_LOCATOR';
 
+import { paths } from './locators/paths';
+export const observabilityPaths = paths.observability;
 export type { AlertsLocatorParams } from './locators/alerts';
-
-export { CoPilotPromptId, loadCoPilotPrompts } from './co_pilot';

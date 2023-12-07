@@ -37,16 +37,8 @@ export const SUBMIT_MESSAGE = i18n.translate('xpack.elasticAssistant.assistant.s
 });
 
 export const API_ERROR = i18n.translate('xpack.elasticAssistant.assistant.apiErrorTitle', {
-  defaultMessage:
-    'An error occurred sending your message. If the problem persists, please test the connector configuration.',
+  defaultMessage: 'An error occurred sending your message.',
 });
-
-export const TOOLTIP_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.technicalPreview.tooltipTitle',
-  {
-    defaultMessage: 'Beta',
-  }
-);
 
 export const TOOLTIP_ARIA_LABEL = i18n.translate(
   'xpack.elasticAssistant.documentationLinks.ariaLabel',

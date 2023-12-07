@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { FactoryQueryTypes, RiskScoreEntity, RiskSeverity } from '../..';
-import type { ESQuery } from '../../../../typed_json';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { RiskSeverity } from '../..';
 
 import type { Inspect, Maybe } from '../../../common';
-
-export interface KpiRiskScoreRequestOptions extends IEsSearchRequest {
-  defaultIndex: string[];
-  factoryQueryType?: FactoryQueryTypes;
-  filterQuery?: ESQuery | string | undefined;
-  entity: RiskScoreEntity;
-}
 
 export interface KpiRiskScoreStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;

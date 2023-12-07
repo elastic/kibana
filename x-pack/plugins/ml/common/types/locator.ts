@@ -8,10 +8,10 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
-import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { JobId } from './anomaly_detection_jobs/job';
-import type { SearchQueryLanguage } from '../constants/search';
 import type { ListingPageUrlState } from './common';
 import { ML_PAGES } from '../constants/locator';
 
@@ -49,6 +49,7 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_LENS
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_MAP
+  | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_PATTERN_ANALYSIS
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
   | typeof ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB
@@ -58,6 +59,9 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.FILTER_LISTS_MANAGE
   | typeof ML_PAGES.FILTER_LISTS_NEW
   | typeof ML_PAGES.SETTINGS
+  | typeof ML_PAGES.DATA_DRIFT_CUSTOM
+  | typeof ML_PAGES.DATA_DRIFT_INDEX_SELECT
+  | typeof ML_PAGES.DATA_DRIFT
   | typeof ML_PAGES.DATA_VISUALIZER
   | typeof ML_PAGES.DATA_VISUALIZER_FILE
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_SELECT
@@ -70,7 +74,6 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
   MlGenericUrlPageState | undefined
 >;
-
 export interface AnomalyDetectionQueryState {
   jobId?: JobId | string[];
   groupIds?: string[];

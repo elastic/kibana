@@ -19,6 +19,7 @@ import { NoMatches } from '../user_profiles/no_matches';
 import { bringCurrentUserToFrontAndSort, orderAssigneesIncludingNone } from '../user_profiles/sort';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
 import * as i18n from './translations';
+import { MAX_ASSIGNEES_FILTER_LENGTH } from '../../../common/constants';
 
 export const NO_ASSIGNEES_VALUE = null;
 
@@ -72,6 +73,11 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
     onDebounce,
   });
 
+  const limitReachedMessage = useCallback(
+    (limit: number) => i18n.MAX_SELECTED_FILTER(limit, 'assignees'),
+    []
+  );
+
   const searchResultProfiles = useMemo(() => {
     const sortedUsers = bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles) ?? [];
 
@@ -117,6 +123,8 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
         clearButtonLabel: i18n.CLEAR_FILTERS,
         emptyMessage: <EmptyMessage />,
         noMatchesMessage: !isUserTyping && !isLoadingData ? <NoMatches /> : <EmptyMessage />,
+        limit: MAX_ASSIGNEES_FILTER_LENGTH,
+        limitReachedMessage,
         singleSelection: false,
         nullOptionLabel: i18n.NO_ASSIGNEES,
       }}

@@ -42,6 +42,7 @@ const patternRollups: Record<string, PatternRollup> = {
 
 const flattenedBuckets = getFlattenedBuckets({
   ilmPhases,
+  isILMAvailable: true,
   patternRollups,
 });
 

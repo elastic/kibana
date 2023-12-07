@@ -37,6 +37,12 @@ export { getHighlightRequest, geoUtils } from './utils';
 
 export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
 export { FORMATS_UI_SETTINGS } from './constants/ui_settings';
+export {
+  DEFAULT_DURATION_INPUT_FORMAT,
+  DEFAULT_DURATION_OUTPUT_FORMAT,
+  DURATION_INPUT_FORMATS,
+  DURATION_OUTPUT_FORMATS,
+} from './constants/duration_formats';
 export { FIELD_FORMAT_IDS } from './types';
 export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
 

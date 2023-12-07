@@ -7,17 +7,23 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { CloudLinkId } from '@kbn/core-chrome-browser';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
+
+export interface CloudLink {
+  title: string;
+  href: string;
+}
 
 export type CloudLinks = {
-  [id in CloudLinkId]?: {
-    title: string;
-    href: string;
-  };
+  [id in CloudLinkId]?: CloudLink;
 };
 
-export const getCloudLinks = (cloud: CloudStart): CloudLinks => {
-  const { billingUrl, performanceUrl, usersAndRolesUrl } = cloud;
+export const getCloudLinks = (cloud: {
+  billingUrl?: string;
+  deploymentUrl?: string;
+  performanceUrl?: string;
+  usersAndRolesUrl?: string;
+}): CloudLinks => {
+  const { billingUrl, deploymentUrl, performanceUrl, usersAndRolesUrl } = cloud;
 
   const links: CloudLinks = {};
 
@@ -51,6 +57,18 @@ export const getCloudLinks = (cloud: CloudStart): CloudLinks => {
         defaultMessage: 'Billing and subscription',
       }),
       href: billingUrl,
+    };
+  }
+
+  if (deploymentUrl) {
+    links.deployment = {
+      title: i18n.translate(
+        'sharedUXPackages.chrome.sideNavigation.cloudLinks.deploymentLinkText',
+        {
+          defaultMessage: 'Project',
+        }
+      ),
+      href: deploymentUrl,
     };
   }
 

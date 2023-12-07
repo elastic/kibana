@@ -92,7 +92,7 @@ interface BaseDataTableProps {
   rowRenderers: DeprecatedRowRenderer[];
   hasCrudPermissions?: boolean;
   unitCountText: string;
-  pagination: EuiDataGridPaginationProps;
+  pagination: EuiDataGridPaginationProps & { pageSize: number };
   totalItems: number;
   rowHeightsOptions?: EuiDataGridRowHeightsOptions;
   isEventRenderedView?: boolean;
@@ -118,11 +118,11 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
       ${({ hideLastPage }) => `${hideLastPage ? 'display:none' : ''}`};
     }
   }
-  div .euiDataGridRowCell__contentByHeight {
-    height: auto;
-    align-self: center;
+  div .euiDataGridRowCell__contentWrapper {
+    display: flex;
+    align-items: center;
   }
-  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__contentByHeight {
+  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__content {
     flex-grow: 0;
     width: 100%;
   }
@@ -137,6 +137,7 @@ const memoizedGetColumnHeaders: (
   isEventRenderedView: boolean
 ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
+// eslint-disable-next-line react/display-name
 export const DataTableComponent = React.memo<DataTableProps>(
   ({
     additionalControls,

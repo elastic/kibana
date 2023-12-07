@@ -1,8 +1,77 @@
 {
   "fleet.search": {
     "url_params": {
-      "wait_for_checkpoints": [],
-      "wait_for_checkpoints_timeout": "",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_indices": "__flag__",
+      "analyzer": "",
+      "analyze_wildcard": "__flag__",
+      "batched_reduce_size": "",
+      "ccs_minimize_roundtrips": "__flag__",
+      "default_operator": [
+        "and",
+        "or"
+      ],
+      "df": "",
+      "docvalue_fields": [],
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
+      "explain": "__flag__",
+      "ignore_throttled": "__flag__",
+      "ignore_unavailable": "__flag__",
+      "lenient": "__flag__",
+      "max_concurrent_shard_requests": "",
+      "min_compatible_shard_node": "",
+      "preference": "",
+      "pre_filter_shard_size": "",
+      "request_cache": "__flag__",
+      "routing": "",
+      "scroll": [
+        "-1",
+        "0"
+      ],
+      "search_type": [
+        "query_then_fetch",
+        "dfs_query_then_fetch"
+      ],
+      "stats": "",
+      "stored_fields": [],
+      "suggest_field": "",
+      "suggest_mode": [
+        "missing",
+        "popular",
+        "always"
+      ],
+      "suggest_size": "",
+      "suggest_text": "",
+      "terminate_after": "",
+      "timeout": [
+        "-1",
+        "0"
+      ],
+      "track_total_hits": "__flag__",
+      "track_scores": "__flag__",
+      "typed_keys": "__flag__",
+      "rest_total_hits_as_int": "__flag__",
+      "version": "__flag__",
+      "_source": "__flag__",
+      "_source_excludes": [],
+      "_source_includes": [],
+      "seq_no_primary_term": "__flag__",
+      "q": "",
+      "size": "",
+      "from": "",
+      "sort": [],
+      "wait_for_checkpoints": [
+        ""
+      ],
       "allow_partial_search_results": "__flag__"
     },
     "methods": [
@@ -10,7 +79,12 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_fleet/_fleet_search"
-    ]
+      "{index}/_fleet/_fleet_search"
+    ],
+    "documentation": null,
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

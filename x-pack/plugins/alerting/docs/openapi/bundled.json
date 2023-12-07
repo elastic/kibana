@@ -1,9 +1,9 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.1.0",
   "info": {
     "title": "Alerting",
     "description": "OpenAPI schema for alerting endpoints",
-    "version": "0.1",
+    "version": "0.2",
     "contact": {
       "name": "Alerting Team"
     },
@@ -12,16 +12,23 @@
       "url": "https://www.elastic.co/licensing/elastic-license"
     }
   },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "security": [
+    {
+      "basicAuth": []
+    },
+    {
+      "apiKeyAuth": []
+    }
+  ],
   "tags": [
     {
       "name": "alerting",
       "description": "Alerting APIs enable you to create and manage rules and alerts."
-    }
-  ],
-  "servers": [
-    {
-      "url": "http://localhost:5601",
-      "description": "local"
     }
   ],
   "paths": {
@@ -49,8 +56,14 @@
                 "$ref": "#/components/schemas/create_rule_request"
               },
               "examples": {
+                "createEsQueryEsqlRuleRequest": {
+                  "$ref": "#/components/examples/create_es_query_esql_rule_request"
+                },
                 "createEsQueryRuleRequest": {
                   "$ref": "#/components/examples/create_es_query_rule_request"
+                },
+                "createEsQueryKqlRuleRequest": {
+                  "$ref": "#/components/examples/create_es_query_kql_rule_request"
                 },
                 "createIndexThresholdRuleRequest": {
                   "$ref": "#/components/examples/create_index_threshold_rule_request"
@@ -68,8 +81,14 @@
                   "$ref": "#/components/schemas/rule_response_properties"
                 },
                 "examples": {
+                  "createEsQueryEsqlRuleResponse": {
+                    "$ref": "#/components/examples/create_es_query_esql_rule_response"
+                  },
                   "createEsQueryRuleResponse": {
                     "$ref": "#/components/examples/create_es_query_rule_response"
+                  },
+                  "createEsQueryKqlRuleResponse": {
+                    "$ref": "#/components/examples/create_es_query_kql_rule_response"
                   },
                   "createIndexThresholdRuleResponse": {
                     "$ref": "#/components/examples/create_index_threshold_rule_response"
@@ -98,18 +117,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}": {
       "get": {
@@ -163,12 +172,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "delete": {
         "summary": "Deletes a rule.",
@@ -212,12 +216,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Creates a rule with a specific rule identifier.",
@@ -240,7 +239,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+              "examples": [
+                "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+              ]
             }
           }
         ],
@@ -252,8 +253,14 @@
                 "$ref": "#/components/schemas/create_rule_request"
               },
               "examples": {
+                "createEsQueryEsqlRuleIdRequest": {
+                  "$ref": "#/components/examples/create_es_query_esql_rule_request"
+                },
                 "createEsQueryRuleIdRequest": {
                   "$ref": "#/components/examples/create_es_query_rule_request"
+                },
+                "createEsQueryKqlRuleIdRequest": {
+                  "$ref": "#/components/examples/create_es_query_kql_rule_request"
                 },
                 "createIndexThreholdRuleIdRequest": {
                   "$ref": "#/components/examples/create_index_threshold_rule_request"
@@ -271,8 +278,14 @@
                   "$ref": "#/components/schemas/rule_response_properties"
                 },
                 "examples": {
+                  "createEsQueryEsqlRuleIdResponse": {
+                    "$ref": "#/components/examples/create_es_query_esql_rule_response"
+                  },
                   "createEsQueryRuleIdResponse": {
                     "$ref": "#/components/examples/create_es_query_rule_response"
+                  },
+                  "createEsQueryKqlRuleIdResponse": {
+                    "$ref": "#/components/examples/create_es_query_kql_rule_response"
                   },
                   "createIndexThresholdRuleIdResponse": {
                     "$ref": "#/components/examples/create_index_threshold_rule_response"
@@ -301,12 +314,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "put": {
         "summary": "Updates the attributes for a rule.",
@@ -377,18 +385,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/_disable": {
       "post": {
@@ -433,18 +431,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/_enable": {
       "post": {
@@ -489,18 +477,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rules/_find": {
       "get": {
@@ -520,9 +498,11 @@
             "description": "The default operator to use for the simple_query_string.",
             "schema": {
               "type": "string",
-              "default": "OR"
-            },
-            "example": "OR"
+              "default": "OR",
+              "examples": [
+                "AND"
+              ]
+            }
           },
           {
             "name": "fields",
@@ -565,9 +545,11 @@
             "description": "The page number to return.",
             "schema": {
               "type": "integer",
-              "default": 1
-            },
-            "example": 1
+              "default": 1,
+              "examples": [
+                1
+              ]
+            }
           },
           {
             "name": "per_page",
@@ -575,16 +557,21 @@
             "description": "The number of rules to return per page.",
             "schema": {
               "type": "integer",
-              "default": 20
-            },
-            "example": 20
+              "default": 20,
+              "examples": [
+                20
+              ]
+            }
           },
           {
             "name": "search",
             "in": "query",
             "description": "An Elasticsearch simple_query_string query that filters the objects in the response.",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "examples": [
+                "threshold +-test*"
+              ]
             }
           },
           {
@@ -594,7 +581,10 @@
             "schema": {
               "oneOf": [
                 {
-                  "type": "string"
+                  "type": "string",
+                  "examples": [
+                    "name"
+                  ]
                 },
                 {
                   "type": "array",
@@ -623,9 +613,11 @@
                 "asc",
                 "desc"
               ],
-              "default": "desc"
-            },
-            "example": "asc"
+              "default": "desc",
+              "examples": [
+                "asc"
+              ]
+            }
           }
         ],
         "responses": {
@@ -674,18 +666,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/_health": {
       "get": {
@@ -718,7 +700,9 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "example": "ok",
+                              "examples": [
+                                "ok"
+                              ],
                               "enum": [
                                 "error",
                                 "ok",
@@ -728,7 +712,9 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "example": "2023-01-13T01:28:00.280Z"
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         },
@@ -738,7 +724,9 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "example": "ok",
+                              "examples": [
+                                "ok"
+                              ],
                               "enum": [
                                 "error",
                                 "ok",
@@ -748,7 +736,9 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "example": "2023-01-13T01:28:00.280Z"
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         },
@@ -758,7 +748,9 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "example": "ok",
+                              "examples": [
+                                "ok"
+                              ],
                               "enum": [
                                 "error",
                                 "ok",
@@ -768,7 +760,9 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "example": "2023-01-13T01:28:00.280Z"
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         }
@@ -777,12 +771,16 @@
                     "has_permanent_encryption_key": {
                       "type": "boolean",
                       "description": "If `false`, the encrypted saved object plugin does not have a permanent encryption key.",
-                      "example": true
+                      "examples": [
+                        true
+                      ]
                     },
                     "is_sufficiently_secure": {
                       "type": "boolean",
                       "description": "If `false`, security is enabled but TLS is not.",
-                      "example": true
+                      "examples": [
+                        true
+                      ]
                     }
                   }
                 },
@@ -805,12 +803,7 @@
             }
           }
         }
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
-        }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule_types": {
       "get": {
@@ -900,6 +893,9 @@
                             }
                           }
                         }
+                      },
+                      "alerts": {
+                        "type": "object"
                       },
                       "authorized_consumers": {
                         "description": "The list of the plugins IDs that have access to the rule type.",
@@ -993,6 +989,17 @@
                               }
                             }
                           },
+                          "slo": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
                           "stackAlerts": {
                             "type": "object",
                             "properties": {
@@ -1017,6 +1024,15 @@
                           }
                         }
                       },
+                      "category": {
+                        "type": "string",
+                        "description": "The rule category, which is used by features such as category-specific maintenance windows.",
+                        "enum": [
+                          "management",
+                          "observability",
+                          "securitySolution"
+                        ]
+                      },
                       "default_action_group_id": {
                         "description": "The default identifier for the rule type group.",
                         "type": "string"
@@ -1027,6 +1043,12 @@
                       },
                       "enabled_in_license": {
                         "description": "Indicates whether the rule type is enabled or disabled based on the subscription.",
+                        "type": "boolean"
+                      },
+                      "has_alerts_mappings": {
+                        "type": "boolean"
+                      },
+                      "has_fields_for_a_a_d": {
                         "type": "boolean"
                       },
                       "id": {
@@ -1040,7 +1062,9 @@
                       "minimum_license_required": {
                         "description": "The subscriptions required to use the rule type.",
                         "type": "string",
-                        "example": "basic"
+                        "examples": [
+                          "basic"
+                        ]
                       },
                       "name": {
                         "description": "The descriptive name of the rule type.",
@@ -1049,7 +1073,9 @@
                       "producer": {
                         "description": "An identifier for the application that produces this rule type.",
                         "type": "string",
-                        "example": "stackAlerts"
+                        "examples": [
+                          "stackAlerts"
+                        ]
                       },
                       "recovery_action_group": {
                         "description": "An action group to use when an alert goes from an active state to an inactive one.",
@@ -1065,7 +1091,9 @@
                       },
                       "rule_task_timeout": {
                         "type": "string",
-                        "example": "5m"
+                        "examples": [
+                          "5m"
+                        ]
                       }
                     }
                   }
@@ -1089,12 +1117,7 @@
             }
           }
         }
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
-        }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all": {
       "post": {
@@ -1129,18 +1152,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all": {
       "post": {
@@ -1175,18 +1188,44 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
+    },
+    "/s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key": {
+      "post": {
+        "summary": "Updates the API key for a rule.",
+        "operationId": "updateRuleAPIKey",
+        "description": "The new API key has the credentials of the user that submits the request.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/rule_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute": {
       "post": {
@@ -1224,18 +1263,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute": {
       "post": {
@@ -1273,18 +1302,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}": {
       "delete": {
@@ -1309,7 +1328,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1327,12 +1348,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "get": {
         "summary": "Retrieves an alert by its identifier.",
@@ -1353,7 +1369,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1378,12 +1396,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Create an alert.",
@@ -1404,7 +1417,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           },
           {
@@ -1493,7 +1508,9 @@
                       "interval": {
                         "type": "string",
                         "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.",
-                        "example": "10s"
+                        "examples": [
+                          "10s"
+                        ]
                       }
                     }
                   },
@@ -1534,12 +1551,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "put": {
         "summary": "Updates the attributes for an alert.",
@@ -1563,7 +1575,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1635,7 +1649,9 @@
                       "interval": {
                         "type": "string",
                         "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.",
-                        "example": "1d"
+                        "examples": [
+                          "1d"
+                        ]
                       }
                     }
                   },
@@ -1676,18 +1692,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/_disable": {
       "post": {
@@ -1712,7 +1718,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1730,18 +1738,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/_enable": {
       "post": {
@@ -1766,7 +1764,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1784,18 +1784,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/_mute_all": {
       "post": {
@@ -1820,7 +1810,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1838,18 +1830,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/_unmute_all": {
       "post": {
@@ -1874,7 +1856,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1892,18 +1876,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alerts/_find": {
       "get": {
@@ -1924,9 +1898,11 @@
             "description": "The default operator to use for the `simple_query_string`.",
             "schema": {
               "type": "string",
-              "default": "OR"
-            },
-            "example": "OR"
+              "default": "OR",
+              "examples": [
+                "OR"
+              ]
+            }
           },
           {
             "name": "fields",
@@ -1969,9 +1945,11 @@
             "description": "The page number to return.",
             "schema": {
               "type": "integer",
-              "default": 1
-            },
-            "example": 1
+              "default": 1,
+              "examples": [
+                1
+              ]
+            }
           },
           {
             "name": "per_page",
@@ -1979,9 +1957,11 @@
             "description": "The number of alerts to return per page.",
             "schema": {
               "type": "integer",
-              "default": 20
-            },
-            "example": 20
+              "default": 20,
+              "examples": [
+                20
+              ]
+            }
           },
           {
             "name": "search",
@@ -2027,9 +2007,11 @@
                 "asc",
                 "desc"
               ],
-              "default": "desc"
-            },
-            "example": "asc"
+              "default": "desc",
+              "examples": [
+                "asc"
+              ]
+            }
           }
         ],
         "responses": {
@@ -2070,18 +2052,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alerts/_health": {
       "get": {
@@ -2115,7 +2087,9 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "example": "ok",
+                              "examples": [
+                                "ok"
+                              ],
                               "enum": [
                                 "error",
                                 "ok",
@@ -2125,7 +2099,9 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "example": "2023-01-13T01:28:00.280Z"
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         },
@@ -2135,7 +2111,9 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "example": "ok",
+                              "examples": [
+                                "ok"
+                              ],
                               "enum": [
                                 "error",
                                 "ok",
@@ -2145,7 +2123,9 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "example": "2023-01-13T01:28:00.280Z"
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         },
@@ -2155,7 +2135,9 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "example": "ok",
+                              "examples": [
+                                "ok"
+                              ],
                               "enum": [
                                 "error",
                                 "ok",
@@ -2165,7 +2147,9 @@
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "example": "2023-01-13T01:28:00.280Z"
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         }
@@ -2174,12 +2158,16 @@
                     "hasPermanentEncryptionKey": {
                       "type": "boolean",
                       "description": "If `false`, the encrypted saved object plugin does not have a permanent encryption key.",
-                      "example": true
+                      "examples": [
+                        true
+                      ]
                     },
                     "isSufficientlySecure": {
                       "type": "boolean",
                       "description": "If `false`, security is enabled but TLS is not.",
-                      "example": true
+                      "examples": [
+                        true
+                      ]
                     }
                   }
                 }
@@ -2197,12 +2185,7 @@
             }
           }
         }
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
-        }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alerts/list_alert_types": {
       "get": {
@@ -2352,12 +2335,7 @@
             }
           }
         }
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
-        }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute": {
       "post": {
@@ -2382,7 +2360,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           },
           {
@@ -2392,7 +2372,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+              "examples": [
+                "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+              ]
             }
           }
         ],
@@ -2410,18 +2392,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute": {
       "post": {
@@ -2446,7 +2418,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           },
           {
@@ -2456,7 +2430,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+              "examples": [
+                "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+              ]
             }
           }
         ],
@@ -2474,18 +2450,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     }
   },
   "components": {
@@ -2497,7 +2463,8 @@
       "apiKeyAuth": {
         "type": "apiKey",
         "in": "header",
-        "name": "ApiKey"
+        "name": "Authorization",
+        "description": "e.g. Authorization: ApiKey base64AccessApiKey"
       }
     },
     "parameters": {
@@ -2517,7 +2484,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "example": "default"
+          "examples": [
+            "default"
+          ]
         }
       },
       "rule_id": {
@@ -2527,7 +2496,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+          "examples": [
+            "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+          ]
         }
       },
       "alert_id": {
@@ -2537,7 +2508,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+          "examples": [
+            "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+          ]
         }
       }
     },
@@ -2550,8 +2523,10 @@
             "type": "object",
             "properties": {
               "alias": {
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "controlledBy": {
                 "type": "string"
@@ -2604,26 +2579,35 @@
           "onActiveAlert",
           "onThrottleInterval"
         ],
-        "example": "onActiveAlert"
+        "examples": [
+          "onActiveAlert"
+        ]
       },
       "throttle": {
-        "type": "string",
+        "type": [
+          "string",
+          "null"
+        ],
         "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
-        "nullable": true,
         "default": null,
-        "example": "10m"
+        "examples": [
+          "10m"
+        ]
       },
       "actions": {
-        "type": "array",
-        "default": [],
-        "required": [
-          "group",
-          "id",
-          "params"
+        "type": [
+          "array",
+          "null"
         ],
-        "nullable": true,
+        "default": [],
         "items": {
           "type": "object",
+          "required": [
+            "group",
+            "id",
+            "params"
+          ],
+          "description": "An action that runs under defined conditions.\n",
           "properties": {
             "alerts_filter": {
               "type": "object",
@@ -2655,12 +2639,14 @@
                       "items": {
                         "type": "integer"
                       },
-                      "example": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5
+                      "examples": [
+                        [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5
+                        ]
                       ]
                     },
                     "hours": {
@@ -2670,19 +2656,25 @@
                         "end": {
                           "type": "string",
                           "description": "The end of the time frame in 24-hour notation (`hh:mm`).",
-                          "example": "17:00"
+                          "examples": [
+                            "17:00"
+                          ]
                         },
                         "start": {
                           "type": "string",
                           "description": "The start of the time frame in 24-hour notation (`hh:mm`).",
-                          "example": "08:00"
+                          "examples": [
+                            "08:00"
+                          ]
                         }
                       }
                     },
                     "timezone": {
                       "type": "string",
                       "description": "The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.\n",
-                      "example": "Europe/Madrid"
+                      "examples": [
+                        "Europe/Madrid"
+                      ]
                     }
                   }
                 }
@@ -2691,12 +2683,14 @@
             "connector_type_id": {
               "type": "string",
               "description": "The type of connector. This property appears in responses but cannot be set in requests.",
-              "example": ".server-log",
+              "examples": [
+                ".server-log"
+              ],
               "readOnly": true
             },
             "frequency": {
               "type": "object",
-              "description": "The parameters that affect how often actions are generated. NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.\n",
+              "description": "The properties that affect how often actions are generated. If the rule type supports setting `summary` to `true`, the action can be a summary of alerts at the specified notification interval. Otherwise, an action runs for each alert at the specified notification interval. NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.\n",
               "required": [
                 "notify_when",
                 "summary"
@@ -2716,13 +2710,17 @@
             },
             "group": {
               "type": "string",
-              "description": "The group name for the actions. If you don't need to group actions, set to `default`.",
-              "example": "default"
+              "description": "The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.\n",
+              "examples": [
+                "default"
+              ]
             },
             "id": {
               "type": "string",
               "description": "The identifier for the connector saved object.",
-              "example": "9dca3e00-74f5-11ed-9801-35303b735aef"
+              "examples": [
+                "9dca3e00-74f5-11ed-9801-35303b735aef"
+              ]
             },
             "params": {
               "type": "object",
@@ -2732,7 +2730,9 @@
             "uuid": {
               "type": "string",
               "description": "A universally unique identifier (UUID) for the action.",
-              "example": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61"
+              "examples": [
+                "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61"
+              ]
             }
           }
         }
@@ -2755,7 +2755,9 @@
         "properties": {
           "interval": {
             "type": "string",
-            "example": "1m"
+            "examples": [
+              "1m"
+            ]
           }
         }
       },
@@ -3322,20 +3324,61 @@
         ],
         "default": "all"
       },
-      "termfield": {
-        "description": "This property is required when `groupBy` is `top`. The name of the field that is used for grouping the aggregation.\n",
-        "type": "string"
-      },
       "termsize": {
         "description": "This property is required when `groupBy` is `top`. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.\n",
         "type": "integer"
+      },
+      "timefield": {
+        "description": "The field that is used to calculate the time window.",
+        "type": "string"
+      },
+      "timewindowsize": {
+        "description": "The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.\n",
+        "type": "integer",
+        "examples": [
+          5
+        ]
+      },
+      "timewindowunit": {
+        "description": "The type of units for the time window: seconds, minutes, hours, or days.\n",
+        "type": "string",
+        "enum": [
+          "s",
+          "m",
+          "h",
+          "d"
+        ],
+        "examples": [
+          "m"
+        ]
+      },
+      "size": {
+        "description": "The number of documents to pass to the configured actions when the threshold condition is met.\n",
+        "type": "integer"
+      },
+      "termfield": {
+        "description": "The names of up to four fields that are used for grouping the aggregation. This property is required when `groupBy` is `top`.\n",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 4
+          }
+        ]
       },
       "threshold": {
         "description": "The threshold value that is used with the `thresholdComparator`. If the `thresholdComparator` is `between` or `notBetween`, you must specify the boundary values.\n",
         "type": "array",
         "items": {
           "type": "integer",
-          "example": 4000
+          "examples": [
+            4000
+          ]
         }
       },
       "thresholdcomparator": {
@@ -3349,30 +3392,100 @@
           "between",
           "notBetween"
         ],
-        "example": ">"
-      },
-      "timefield": {
-        "description": "The field that is used to calculate the time window.",
-        "type": "string"
-      },
-      "timewindowsize": {
-        "description": "The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.\n",
-        "type": "integer",
-        "example": 5
-      },
-      "timewindowunit": {
-        "description": "The type of units for the time window: seconds, minutes, hours, or days.\n",
-        "type": "string",
-        "enum": [
-          "s",
-          "m",
-          "h",
-          "d"
-        ],
-        "example": "m"
+        "examples": [
+          ">"
+        ]
       },
       "params_es_query_rule": {
         "oneOf": [
+          {
+            "type": "object",
+            "x-technical-preview": true,
+            "description": "The parameters for an Elasticsearch query rule that uses ES|QL to define the query. This functionality is in technical pre view and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+            "required": [
+              "esqlQuery",
+              "searchType",
+              "size",
+              "threshold",
+              "thresholdComparator",
+              "timeWindowSize",
+              "timeWindowUnit"
+            ],
+            "properties": {
+              "aggField": {
+                "$ref": "#/components/schemas/aggfield"
+              },
+              "aggType": {
+                "$ref": "#/components/schemas/aggtype"
+              },
+              "esqlQuery": {
+                "type": "object",
+                "required": [
+                  "esql"
+                ],
+                "properties": {
+                  "esql": {
+                    "description": "The query definition, which uses Elasticsearch Query Language.",
+                    "type": "string"
+                  }
+                }
+              },
+              "excludeHitsFromPreviousRun": {
+                "$ref": "#/components/schemas/excludehitsfrompreviousrun"
+              },
+              "groupBy": {
+                "$ref": "#/components/schemas/groupby"
+              },
+              "searchType": {
+                "description": "The type of query, in this case a query that uses Elasticsearch Query Language (ES|QL).",
+                "type": "string",
+                "enum": [
+                  "esqlQuery"
+                ],
+                "examples": [
+                  "esqlQuery"
+                ]
+              },
+              "size": {
+                "type": "integer",
+                "description": "When `searchType` is `esqlQuery`, this property is required but it does not affect the rule behavior.\n",
+                "examples": [
+                  0
+                ]
+              },
+              "termSize": {
+                "$ref": "#/components/schemas/termsize"
+              },
+              "threshold": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 0
+                },
+                "description": "The threshold value that is used with the `thresholdComparator`. When `searchType` is `esqlQuery`, this property is required and must be set to zero.\n"
+              },
+              "thresholdComparator": {
+                "type": "string",
+                "description": "The comparison function for the threshold. When `searchType` is `esqlQuery`, this property is required and must be set to \">\". Since the `threshold` value must be `0`, the result is that an alert occurs whenever the query returns results.\n",
+                "enum": [
+                  ">"
+                ],
+                "examples": [
+                  ">"
+                ]
+              },
+              "timeField": {
+                "$ref": "#/components/schemas/timefield"
+              },
+              "timeWindowSize": {
+                "$ref": "#/components/schemas/timewindowsize"
+              },
+              "timeWindowUnit": {
+                "$ref": "#/components/schemas/timewindowunit"
+              }
+            }
+          },
           {
             "type": "object",
             "description": "The parameters for an Elasticsearch query rule that uses KQL or Lucene to define the query.",
@@ -3426,7 +3539,9 @@
                     "properties": {
                       "language": {
                         "type": "string",
-                        "example": "kuery"
+                        "examples": [
+                          "kuery"
+                        ]
                       },
                       "query": {
                         "type": "string"
@@ -3441,11 +3556,12 @@
                 "enum": [
                   "searchSource"
                 ],
-                "example": "searchSource"
+                "examples": [
+                  "searchSource"
+                ]
               },
               "size": {
-                "description": "The number of documents to pass to the configured actions when the threshold condition is met.\n",
-                "type": "integer"
+                "$ref": "#/components/schemas/size"
               },
               "termField": {
                 "$ref": "#/components/schemas/termfield"
@@ -3520,11 +3636,12 @@
                   "esQuery"
                 ],
                 "default": "esQuery",
-                "example": "esQuery"
+                "examples": [
+                  "esQuery"
+                ]
               },
               "size": {
-                "description": "The number of documents to pass to the configured actions when the threshold condition is met.\n",
-                "type": "integer"
+                "$ref": "#/components/schemas/size"
               },
               "termField": {
                 "$ref": "#/components/schemas/termfield"
@@ -6346,58 +6463,82 @@
           "api_key_created_by_user": {
             "type": "boolean",
             "description": "Indicates whether the API key that is associated with the rule was created by the user.",
-            "example": false
+            "examples": [
+              false
+            ]
           },
           "api_key_owner": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The owner of the API key that is associated with the rule and used to run background tasks.\n",
-            "nullable": true,
-            "example": "elastic"
+            "examples": [
+              "elastic"
+            ]
           },
           "consumer": {
             "type": "string",
             "description": "The application or feature that owns the rule. For example, `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
-            "example": "alerts"
+            "examples": [
+              "alerts"
+            ]
           },
           "created_at": {
             "type": "string",
             "description": "The date and time that the rule was created.",
             "format": "date-time",
-            "example": "2022-12-05T23:36:58.284Z"
+            "examples": [
+              "2022-12-05T23:36:58.284Z"
+            ]
           },
           "created_by": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The identifier for the user that created the rule.",
-            "nullable": true,
-            "example": "elastic"
+            "examples": [
+              "elastic"
+            ]
           },
           "enabled": {
             "type": "boolean",
             "description": "Indicates whether the rule is currently enabled.",
-            "example": true
+            "examples": [
+              true
+            ]
           },
           "execution_status": {
             "type": "object",
             "properties": {
               "last_duration": {
                 "type": "integer",
-                "example": 55
+                "examples": [
+                  55
+                ]
               },
               "last_execution_date": {
                 "type": "string",
                 "format": "date-time",
-                "example": "2022-12-06T00:13:43.890Z"
+                "examples": [
+                  "2022-12-06T00:13:43.890Z"
+                ]
               },
               "status": {
                 "type": "string",
-                "example": "ok"
+                "examples": [
+                  "ok"
+                ]
               }
             }
           },
           "id": {
             "type": "string",
             "description": "The identifier for the rule.",
-            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
+            "examples": [
+              "b530fed0-74f5-11ed-9801-35303b735aef"
+            ]
           },
           "last_run": {
             "type": "object",
@@ -6421,51 +6562,71 @@
               },
               "outcome": {
                 "type": "string",
-                "example": "succeeded"
+                "examples": [
+                  "succeeded"
+                ]
               },
               "outcome_msg": {
-                "type": "array",
+                "type": [
+                  "array",
+                  "null"
+                ],
                 "items": {
                   "type": "string"
-                },
-                "nullable": true
+                }
               },
               "outcome_order": {
                 "type": "integer"
               },
               "warning": {
-                "type": "string",
-                "nullable": true,
-                "example": null
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  null
+                ]
               }
             }
           },
           "muted_alert_ids": {
-            "type": "array",
-            "nullable": true,
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
           },
           "mute_all": {
             "type": "boolean",
-            "example": false
+            "examples": [
+              false
+            ]
           },
           "name": {
             "type": "string",
             "description": "The name of the rule.",
-            "example": "cluster_health_rule"
+            "examples": [
+              "cluster_health_rule"
+            ]
           },
           "next_run": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time",
-            "nullable": true,
-            "example": "2022-12-06T00:14:43.818Z"
+            "examples": [
+              "2022-12-06T00:14:43.818Z"
+            ]
           },
           "notify_when": {
-            "type": "string",
-            "description": "Indicates how often alerts generate actions.",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Indicates how often alerts generate actions."
           },
           "params": {
             "type": "object",
@@ -6479,7 +6640,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The identifier for the type of rule. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.\n",
-            "example": "monitoring_alert_cluster_health"
+            "examples": [
+              "monitoring_alert_cluster_health"
+            ]
           },
           "running": {
             "type": "boolean",
@@ -6490,7 +6653,9 @@
           },
           "scheduled_task_id": {
             "type": "string",
-            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
+            "examples": [
+              "b530fed0-74f5-11ed-9801-35303b735aef"
+            ]
           },
           "tags": {
             "$ref": "#/components/schemas/tags"
@@ -6501,13 +6666,19 @@
           "updated_at": {
             "type": "string",
             "description": "The date and time that the rule was updated most recently.",
-            "example": "2022-12-05T23:36:58.284Z"
+            "examples": [
+              "2022-12-05T23:36:58.284Z"
+            ]
           },
           "updated_by": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The identifier for the user that updated this rule most recently.",
-            "nullable": true,
-            "example": "elastic"
+            "examples": [
+              "elastic"
+            ]
           }
         }
       },
@@ -6517,7 +6688,9 @@
         "properties": {
           "error": {
             "type": "string",
-            "example": "Unauthorized",
+            "examples": [
+              "Unauthorized"
+            ],
             "enum": [
               "Unauthorized"
             ]
@@ -6527,7 +6700,9 @@
           },
           "statusCode": {
             "type": "integer",
-            "example": 401,
+            "examples": [
+              401
+            ],
             "enum": [
               401
             ]
@@ -6539,18 +6714,24 @@
         "properties": {
           "error": {
             "type": "string",
-            "example": "Not Found",
+            "examples": [
+              "Not Found"
+            ],
             "enum": [
               "Not Found"
             ]
           },
           "message": {
             "type": "string",
-            "example": "Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found"
+            "examples": [
+              "Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found"
+            ]
           },
           "statusCode": {
             "type": "integer",
-            "example": 404,
+            "examples": [
+              404
+            ],
             "enum": [
               404
             ]
@@ -6573,7 +6754,9 @@
           "name": {
             "type": "string",
             "description": "The name of the rule.",
-            "example": "cluster_health_rule"
+            "examples": [
+              "cluster_health_rule"
+            ]
           },
           "notify_when": {
             "$ref": "#/components/schemas/notify_when"
@@ -6594,6 +6777,32 @@
           }
         }
       },
+      "400_response": {
+        "title": "Bad request",
+        "type": "object",
+        "required": [
+          "error",
+          "message",
+          "statusCode"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": [
+              "Bad Request"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "statusCode": {
+            "type": "integer",
+            "enum": [
+              400
+            ]
+          }
+        }
+      },
       "alert_response_properties": {
         "title": "Legacy alert response properties",
         "type": "object",
@@ -6606,28 +6815,40 @@
           },
           "alertTypeId": {
             "type": "string",
-            "example": ".index-threshold"
+            "examples": [
+              ".index-threshold"
+            ]
           },
           "apiKeyOwner": {
-            "type": "string",
-            "nullable": true,
-            "example": "elastic"
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              "elastic"
+            ]
           },
           "createdAt": {
             "type": "string",
             "description": "The date and time that the alert was created.",
             "format": "date-time",
-            "example": "2022-12-05T23:36:58.284Z"
+            "examples": [
+              "2022-12-05T23:36:58.284Z"
+            ]
           },
           "createdBy": {
             "type": "string",
             "description": "The identifier for the user that created the alert.",
-            "example": "elastic"
+            "examples": [
+              "elastic"
+            ]
           },
           "enabled": {
             "type": "boolean",
             "description": "Indicates whether the alert is currently enabled.",
-            "example": true
+            "examples": [
+              true
+            ]
           },
           "executionStatus": {
             "type": "object",
@@ -6635,26 +6856,36 @@
               "lastExecutionDate": {
                 "type": "string",
                 "format": "date-time",
-                "example": "2022-12-06T00:13:43.890Z"
+                "examples": [
+                  "2022-12-06T00:13:43.890Z"
+                ]
               },
               "status": {
                 "type": "string",
-                "example": "ok"
+                "examples": [
+                  "ok"
+                ]
               }
             }
           },
           "id": {
             "type": "string",
             "description": "The identifier for the alert.",
-            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
+            "examples": [
+              "b530fed0-74f5-11ed-9801-35303b735aef"
+            ]
           },
           "muteAll": {
             "type": "boolean",
-            "example": false
+            "examples": [
+              false
+            ]
           },
           "mutedInstanceIds": {
-            "type": "array",
-            "nullable": true,
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
@@ -6662,11 +6893,15 @@
           "name": {
             "type": "string",
             "description": "The name of the alert.",
-            "example": "my alert"
+            "examples": [
+              "my alert"
+            ]
           },
           "notifyWhen": {
             "type": "string",
-            "example": "onActionGroupChange"
+            "examples": [
+              "onActionGroupChange"
+            ]
           },
           "params": {
             "type": "object",
@@ -6682,7 +6917,9 @@
           },
           "scheduledTaskId": {
             "type": "string",
-            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
+            "examples": [
+              "b530fed0-74f5-11ed-9801-35303b735aef"
+            ]
           },
           "tags": {
             "type": "array",
@@ -6691,28 +6928,127 @@
             }
           },
           "throttle": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "updatedAt": {
             "type": "string",
-            "example": "2022-12-05T23:36:58.284Z"
+            "examples": [
+              "2022-12-05T23:36:58.284Z"
+            ]
           },
           "updatedBy": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The identifier for the user that updated this alert most recently.",
-            "nullable": true,
-            "example": "elastic"
+            "examples": [
+              "elastic"
+            ]
           }
         }
       }
     },
     "examples": {
-      "create_es_query_rule_request": {
-        "summary": "Create an Elasticsearch query rule.",
+      "create_es_query_esql_rule_request": {
+        "summary": "Create an Elasticsearch query rule that uses Elasticsearch Query Language (ES|QL).",
         "value": {
+          "name": "my Elasticsearch query ESQL rule",
+          "params": {
+            "searchType": "esqlQuery",
+            "esqlQuery": {
+              "esql": "FROM kibana_sample_data_logs | KEEP bytes, clientip, host, geo.dest | where geo.dest != \"GB\" | STATS sumbytes = sum(bytes) by clientip, host | WHERE sumbytes > 5000 | SORT sumbytes desc | LIMIT 10"
+            },
+            "timeField": "@timestamp",
+            "timeWindowSize": 1,
+            "timeWindowUnit": "d",
+            "size": 0,
+            "thresholdComparator": ">",
+            "threshold": [
+              0
+            ]
+          },
+          "consumer": "stackAlerts",
+          "rule_type_id": ".es-query",
+          "schedule": {
+            "interval": "1d"
+          },
+          "actions": [
+            {
+              "group": "query matched",
+              "id": "d0db1fe0-78d6-11ee-9177-f7d404c8c945",
+              "params": {
+                "level": "info",
+                "message": "Elasticsearch query rule '{{rule.name}}' is active:\n- Value: {{context.value}} - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}} - Timestamp: {{context.date}} - Link: {{context.link}}"
+              },
+              "frequency": {
+                "summary": false,
+                "notify_when": "onActiveAlert"
+              }
+            }
+          ]
+        }
+      },
+      "create_es_query_rule_request": {
+        "summary": "Create an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL) to define its query and a server log connector to send notifications.",
+        "value": {
+          "actions": [
+            {
+              "group": "query matched",
+              "params": {
+                "level": "info",
+                "message": "The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts."
+              },
+              "id": "fdbece50-406c-11ee-850e-c71febc4ca7f",
+              "frequency": {
+                "throttle": "1d",
+                "summary": true,
+                "notify_when": "onThrottleInterval"
+              }
+            },
+            {
+              "group": "recovered",
+              "params": {
+                "level": "info",
+                "message": "Recovered"
+              },
+              "id": "fdbece50-406c-11ee-850e-c71febc4ca7f",
+              "frequency": {
+                "summary": false,
+                "notify_when": "onActionGroupChange"
+              }
+            }
+          ],
           "consumer": "alerts",
           "name": "my Elasticsearch query rule",
+          "params": {
+            "esQuery": "\"\"\"{\"query\":{\"match_all\" : {}}}\"\"\"",
+            "index": [
+              "kibana_sample_data_logs"
+            ],
+            "size": 100,
+            "threshold": [
+              100
+            ],
+            "thresholdComparator": ">",
+            "timeField": "@timestamp",
+            "timeWindowSize": 1,
+            "timeWindowUnit": "d"
+          },
+          "rule_type_id": ".es-query",
+          "schedule": {
+            "interval": "1d"
+          }
+        }
+      },
+      "create_es_query_kql_rule_request": {
+        "summary": "Create an Elasticsearch query rule that uses Kibana query language (KQL).",
+        "value": {
+          "consumer": "alerts",
+          "name": "my Elasticsearch query KQL rule",
           "params": {
             "aggType": "count",
             "excludeHitsFromPreviousRun": true,
@@ -6784,12 +7120,158 @@
           ]
         }
       },
+      "create_es_query_esql_rule_response": {
+        "summary": "The create rule API returns a JSON object that contains details about the rule.",
+        "value": {
+          "id": "e0d62360-78e8-11ee-9177-f7d404c8c945",
+          "enabled": true,
+          "name": "my Elasticsearch query ESQL rule",
+          "tags": [],
+          "rule_type_id": ".es-query",
+          "consumer": "stackAlerts",
+          "schedule": {
+            "interval": "1d"
+          },
+          "actions": [
+            {
+              "group": "query matched",
+              "id": "d0db1fe0-78d6-11ee-9177-f7d404c8c945",
+              "params": {
+                "level": "info",
+                "message": "Elasticsearch query rule '{{rule.name}}' is active:\n- Value: {{context.value}} - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}} - Timestamp: {{context.date}} - Link: {{context.link}}"
+              },
+              "connector_type_id": ".server-log",
+              "frequency": {
+                "summary": false,
+                "notify_when": "onActiveAlert",
+                "throttle": null
+              },
+              "uuid": "bfe370a3-531b-4855-bbe6-ad739f578844"
+            }
+          ],
+          "params": {
+            "searchType": "esqlQuery",
+            "esqlQuery": {
+              "esql": "FROM kibana_sample_data_logs | keep bytes, clientip, host, geo.dest | WHERE geo.dest != \"GB\" | stats sumbytes = sum(bytes) by clientip, host | WHERE sumbytes > 5000 | sort sumbytes desc | limit 10"
+            },
+            "timeField": "@timestamp",
+            "timeWindowSize": 1,
+            "timeWindowUnit": "d",
+            "size": 0,
+            "thresholdComparator": ">",
+            "threshold": [
+              0
+            ],
+            "excludeHitsFromPreviousRun\"": "true,",
+            "aggType": "count",
+            "groupBy": "all"
+          },
+          "scheduled_task_id": "e0d62360-78e8-11ee-9177-f7d404c8c945",
+          "created_by": "elastic",
+          "updated_by": "elastic\",",
+          "created_at": "2023-11-01T19:00:10.453Z",
+          "updated_at": "2023-11-01T19:00:10.453Z",
+          "api_key_owner": "elastic",
+          "api_key_created_by_user": false,
+          "throttle": null,
+          "mute_all": false,
+          "notify_when": null,
+          "muted_alert_ids": [],
+          "execution_status": {
+            "status": "pending",
+            "last_execution_date": "2023-11-01T19:00:10.453Z"
+          },
+          "revision": 0,
+          "running": false
+        }
+      },
       "create_es_query_rule_response": {
+        "summary": "The create rule API returns a JSON object that contains details about the rule.",
+        "value": {
+          "id": "58148c70-407f-11ee-850e-c71febc4ca7f",
+          "enabled": true,
+          "name": "my Elasticsearch query rule",
+          "tags": [],
+          "rule_type_id": ".es-query",
+          "consumer": "alerts",
+          "schedule": {
+            "interval": "1d"
+          },
+          "actions": [
+            {
+              "group": "query matched",
+              "id": "fdbece50-406c-11ee-850e-c71febc4ca7f",
+              "params": {
+                "level": "info",
+                "message": "The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts."
+              },
+              "connector_type_id": ".server-log",
+              "frequency": {
+                "summary": true,
+                "notify_when": "onThrottleInterval",
+                "throttle": "1d"
+              },
+              "uuid": "53f3c2a3-e5d0-4cfa-af3b-6f0881385e78"
+            },
+            {
+              "group": "recovered",
+              "id": "fdbece50-406c-11ee-850e-c71febc4ca7f",
+              "params": {
+                "level": "info",
+                "message": "Recovered"
+              },
+              "connector_type_id": ".server-log",
+              "frequency": {
+                "summary": false,
+                "notify_when": "onActionGroupChange",
+                "throttle": null
+              },
+              "uuid": "2324e45b-c0df-45c7-9d70-4993e30be758"
+            }
+          ],
+          "params": {
+            "thresholdComparator": ">",
+            "timeWindowSize": 1,
+            "timeWindowUnit": "d",
+            "threshold": [
+              100
+            ],
+            "size": 100,
+            "timeField": "@timestamp",
+            "index": [
+              "kibana_sample_data_logs"
+            ],
+            "esQuery": "\"\"\"{\"query\":{\"match_all\" : {}}}\"\"\"",
+            "excludeHitsFromPreviousRun": true,
+            "aggType": "count",
+            "groupBy": "all",
+            "searchType": "esQuery"
+          },
+          "scheduled_task_id": "58148c70-407f-11ee-850e-c71febc4ca7f",
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "created_at": "2023-08-22T00:03:38.263Z",
+          "updated_at": "2023-08-22T00:03:38.263Z",
+          "api_key_owner": "elastic",
+          "api_key_created_by_user": false,
+          "throttle": null,
+          "mute_all": false,
+          "notify_when": null,
+          "muted_alert_ids": [],
+          "execution_status": {
+            "status": "pending",
+            "last_execution_date": "2023-08-22T00:03:38.263Z"
+          },
+          "revision": 0,
+          "running": false
+        }
+      },
+      "create_es_query_kql_rule_response": {
         "summary": "The create rule API returns a JSON object that contains details about the rule.",
         "value": {
           "id": "7bd506d0-2284-11ee-8fad-6101956ced88",
           "enabled": true,
-          "name": "my Elasticsearch query rule\"",
+          "name": "my Elasticsearch query KQL rule\"",
           "tags": [],
           "rule_type_id": ".es-query",
           "consumer": "alerts",
@@ -7375,6 +7857,127 @@
         "value": [
           {
             "id": "xpack.ml.anomaly_detection_alert",
+            "name": "Anomaly detection alert",
+            "category": "management",
+            "producer": "ml",
+            "alerts": {
+              "context": "ml.anomaly-detection",
+              "mappings": {
+                "fieldMap": {
+                  "kibana.alert.job_id": {
+                    "type": "keyword",
+                    "array": false,
+                    "required": true
+                  },
+                  "kibana.alert.anomaly_score": {
+                    "type": "double",
+                    "array": false,
+                    "required": false
+                  },
+                  "kibana.alert.is_interim": {
+                    "type": "boolean",
+                    "array": false,
+                    "required": false
+                  },
+                  "kibana.alert.anomaly_timestamp": {
+                    "type": "date",
+                    "array": false,
+                    "required": false
+                  },
+                  "kibana.alert.top_records": {
+                    "type": "object",
+                    "array": true,
+                    "required": false,
+                    "dynamic": false,
+                    "properties": {
+                      "job_id": {
+                        "type": "keyword"
+                      },
+                      "record_score": {
+                        "type": "double"
+                      },
+                      "initial_record_score": {
+                        "type": "double"
+                      },
+                      "detector_index": {
+                        "type": "integer"
+                      },
+                      "is_interim": {
+                        "type": "boolean"
+                      },
+                      "timestamp": {
+                        "type": "date"
+                      },
+                      "partition_field_name": {
+                        "type": "keyword"
+                      },
+                      "partition_field_value": {
+                        "type": "keyword"
+                      },
+                      "over_field_name": {
+                        "type": "keyword"
+                      },
+                      "over_field_value": {
+                        "type": "keyword"
+                      },
+                      "by_field_name": {
+                        "type": "keyword"
+                      },
+                      "by_field_value": {
+                        "type": "keyword"
+                      },
+                      "function": {
+                        "type": "keyword"
+                      },
+                      "typical": {
+                        "type": "double"
+                      },
+                      "actual": {
+                        "type": "double"
+                      },
+                      "field_name": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "kibana.alert.top_influencers": {
+                    "type": "object",
+                    "array": true,
+                    "required": false,
+                    "dynamic": false,
+                    "properties": {
+                      "job_id": {
+                        "type": "keyword"
+                      },
+                      "influencer_field_name": {
+                        "type": "keyword"
+                      },
+                      "influencer_field_value": {
+                        "type": "keyword"
+                      },
+                      "influencer_score": {
+                        "type": "double"
+                      },
+                      "initial_influencer_score": {
+                        "type": "double"
+                      },
+                      "is_interim": {
+                        "type": "boolean"
+                      },
+                      "timestamp": {
+                        "type": "date"
+                      }
+                    }
+                  }
+                }
+              },
+              "shouldWrite": true
+            },
+            "enabled_in_license": true,
+            "recovery_action_group": {
+              "id": "recovered",
+              "name": "Recovered"
+            },
             "action_groups": [
               {
                 "id": "anomaly_score_match",
@@ -7385,6 +7988,10 @@
                 "name": "Recovered"
               }
             ],
+            "default_action_group_id": "anomaly_score_match",
+            "minimum_license_required": "platinum",
+            "is_exportable": true,
+            "rule_task_timeout": "5m",
             "action_variables": {
               "context": [
                 {
@@ -7425,34 +8032,69 @@
                   "useWithTripleBracesInTemplates": true
                 }
               ],
-              "params": [],
-              "state": []
+              "state": [],
+              "params": []
             },
             "authorized_consumers": {
               "alerts": {
-                "all": true,
-                "read": true
+                "read": true,
+                "all": true
+              },
+              "stackAlerts": {
+                "read": true,
+                "all": true
+              },
+              "slo": {
+                "read": true,
+                "all": true
               },
               "ml": {
-                "all": true,
-                "read": true
+                "read": true,
+                "all": true
+              },
+              "uptime": {
+                "read": true,
+                "all": true
+              },
+              "infrastructure": {
+                "read": true,
+                "all": true
+              },
+              "logs": {
+                "read": true,
+                "all": true
+              },
+              "monitoring": {
+                "read": true,
+                "all": true
+              },
+              "siem": {
+                "read": true,
+                "all": true
+              },
+              "apm": {
+                "read": true,
+                "all": true
+              },
+              "discover": {
+                "read": true,
+                "all": true
               }
             },
-            "default_action_group_id": "anomaly_score_match",
             "does_set_recovery_context": true,
-            "enabled_in_license": true,
-            "is_exportable": true,
-            "minimum_license_required": "platinum",
-            "name": "Anomaly detection alert",
+            "has_alerts_mappings": true,
+            "has_fields_for_a_a_d": false
+          },
+          {
+            "id": "xpack.ml.anomaly_detection_jobs_health",
+            "name": "Anomaly detection jobs health",
+            "category": "management",
             "producer": "ml",
+            "enabled_in_license": true,
             "recovery_action_group": {
               "id": "recovered",
               "name": "Recovered"
             },
-            "rule_task_timeout": "5m"
-          },
-          {
-            "id": "xpack.ml.anomaly_detection_jobs_health",
             "action_groups": [
               {
                 "id": "anomaly_detection_realtime_issue",
@@ -7463,6 +8105,10 @@
                 "name": "Recovered"
               }
             ],
+            "default_action_group_id": "anomaly_detection_realtime_issue",
+            "minimum_license_required": "platinum",
+            "is_exportable": true,
+            "rule_task_timeout": "5m",
             "action_variables": {
               "context": [
                 {
@@ -7474,42 +8120,61 @@
                   "description": "Alert info message"
                 }
               ],
-              "params": [],
-              "state": []
+              "state": [],
+              "params": []
             },
             "authorized_consumers": {
               "alerts": {
-                "all": true,
-                "read": true
+                "read": true,
+                "all": true
+              },
+              "stackAlerts": {
+                "read": true,
+                "all": true
+              },
+              "slo": {
+                "read": true,
+                "all": true
               },
               "ml": {
-                "all": true,
-                "read": true
+                "read": true,
+                "all": true
+              },
+              "uptime": {
+                "read": true,
+                "all": true
+              },
+              "infrastructure": {
+                "read": true,
+                "all": true
+              },
+              "logs": {
+                "read": true,
+                "all": true
+              },
+              "monitoring": {
+                "read": true,
+                "all": true
+              },
+              "siem": {
+                "read": true,
+                "all": true
+              },
+              "apm": {
+                "read": true,
+                "all": true
+              },
+              "discover": {
+                "read": true,
+                "all": true
               }
             },
-            "default_action_group_id": "anomaly_detection_realtime_issue",
             "does_set_recovery_context": true,
-            "enabled_in_license": true,
-            "is_exportable": true,
-            "minimum_license_required": "platinum",
-            "name": "Anomaly detection jobs health",
-            "producer": "ml",
-            "recovery_action_group": {
-              "id": "recovered",
-              "name": "Recovered"
-            },
-            "rule_task_timeout": "5m"
+            "has_alerts_mappings": false,
+            "has_fields_for_a_a_d": false
           }
         ]
       }
     }
-  },
-  "security": [
-    {
-      "basicAuth": []
-    },
-    {
-      "apiKeyAuth": []
-    }
-  ]
+  }
 }

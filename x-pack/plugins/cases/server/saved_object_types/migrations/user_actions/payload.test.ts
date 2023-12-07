@@ -9,7 +9,7 @@
 
 import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
-import { CommentType } from '../../../../common/api';
+import { AttachmentType } from '../../../../common/types/domain';
 import {
   CASE_USER_ACTION_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
@@ -141,7 +141,7 @@ describe('user action migrations', () => {
         const userAction = create_7_14_0_userAction({
           action: 'create',
           action_field: ['comment'],
-          new_value: { comment: 'A comment', type: CommentType.user },
+          new_value: { comment: 'A comment', type: AttachmentType.user },
           old_value: null,
         });
 

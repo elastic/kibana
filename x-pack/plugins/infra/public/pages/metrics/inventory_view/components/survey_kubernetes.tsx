@@ -5,85 +5,75 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiGlobalToastList } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiGlobalToastList } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
+import { FeatureFeedbackButton } from '../../../../components/feature_feedback_button';
 
 const KUBERNETES_TOAST_STORAGE_KEY = 'kubernetesToastKey';
 const KUBERNETES_FEEDBACK_LINK = 'https://ela.st/k8s-feedback';
 
 export const SurveyKubernetes = () => {
-  const { nodeType } = useWaffleOptionsContext();
-  const podNodeType: typeof nodeType = 'pod';
-
   const [isToastSeen, setIsToastSeen] = useLocalStorage(KUBERNETES_TOAST_STORAGE_KEY, false);
   const markToastAsSeen = () => setIsToastSeen(true);
 
   return (
     <>
-      {nodeType === podNodeType && (
-        <>
-          <EuiButton
-            href={KUBERNETES_FEEDBACK_LINK}
-            target="_blank"
-            color="warning"
-            iconType="editorComment"
-            data-test-subj="infra-kubernetes-feedback-link"
-          >
-            <FormattedMessage
-              id="xpack.infra.homePage.tellUsWhatYouThinkK8sLink"
-              defaultMessage="Tell us what you think! (K8s)"
-            />
-          </EuiButton>
-          {!isToastSeen && (
-            <EuiGlobalToastList
-              toastLifeTimeMs={Infinity}
-              dismissToast={markToastAsSeen}
-              toasts={[
-                {
-                  id: 'k8s-toast',
-                  title: (
+      <FeatureFeedbackButton
+        formUrl={KUBERNETES_FEEDBACK_LINK}
+        data-test-subj="infra-kubernetes-feedback-link"
+        surveyButtonText={
+          <FormattedMessage
+            id="xpack.infra.homePage.tellUsWhatYouThinkK8sLink"
+            defaultMessage="Tell us what you think! (K8s)"
+          />
+        }
+      />
+      {!isToastSeen && (
+        <EuiGlobalToastList
+          toastLifeTimeMs={Infinity}
+          dismissToast={markToastAsSeen}
+          toasts={[
+            {
+              id: 'k8s-toast',
+              title: (
+                <FormattedMessage
+                  id="xpack.infra.homePage.kubernetesToastTitle"
+                  defaultMessage="We need your help!"
+                />
+              ),
+              color: 'primary',
+              iconType: 'help',
+              text: (
+                <>
+                  <p>
                     <FormattedMessage
-                      id="xpack.infra.homePage.kubernetesToastTitle"
-                      defaultMessage="We need your help!"
+                      id="xpack.infra.homePage.kubernetesToastText"
+                      defaultMessage="Help us design your Kubernetes experience by completing a feedback survey."
                     />
-                  ),
-                  color: 'primary',
-                  iconType: 'help',
-                  toastLifeTimeMs: 0x7fffffff, // Biggest possible lifetime because we control when it should be visible using isToastSeen
-                  text: (
-                    <>
-                      <p>
-                        <FormattedMessage
-                          id="xpack.infra.homePage.kubernetesToastText"
-                          defaultMessage="Help us design your Kubernetes experience by completing a feedback survey."
-                        />
-                      </p>
-                      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                        <EuiFlexItem grow={false}>
-                          <EuiButton
-                            data-test-subj="infra-toast-kubernetes-survey-start"
-                            href={KUBERNETES_FEEDBACK_LINK}
-                            target="_blank"
-                            onClickCapture={markToastAsSeen}
-                            size="s"
-                          >
-                            <FormattedMessage
-                              id="xpack.infra.homePage.kubernetesToastButton"
-                              defaultMessage="Start survey"
-                            />
-                          </EuiButton>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </>
-                  ),
-                },
-              ]}
-            />
-          )}
-        </>
+                  </p>
+                  <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <FeatureFeedbackButton
+                        formUrl={KUBERNETES_FEEDBACK_LINK}
+                        data-test-subj="infra-toast-kubernetes-survey-start"
+                        onClickCapture={markToastAsSeen}
+                        defaultButton={true}
+                        surveyButtonText={
+                          <FormattedMessage
+                            id="xpack.infra.homePage.kubernetesToastButton"
+                            defaultMessage="Start survey"
+                          />
+                        }
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>
+              ),
+            },
+          ]}
+        />
       )}
     </>
   );

@@ -7,13 +7,16 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX } from '../..';
-import { ConnectorDocument } from '../../../common/types/connectors';
+import {
+  ConnectorDocument,
+  CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX,
+  CONNECTORS_INDEX,
+} from '@kbn/search-connectors';
+
 import { toAlphanumeric } from '../../../common/utils/to_alphanumeric';
 
 export const generateApiKey = async (client: IScopedClusterClient, indexName: string) => {
-  // removes the "search-" prefix if present, and applies the new prefix
-  const aclIndexName = indexName.replace(/^(?:search-)?(.*)$/, '.search-acl-filter-$1');
+  const aclIndexName = `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}${indexName}`;
 
   const apiKeyResult = await client.asCurrentUser.security.createApiKey({
     name: `${indexName}-connector`,

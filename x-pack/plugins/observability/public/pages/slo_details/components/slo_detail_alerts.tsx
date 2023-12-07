@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../utils/kibana_react';
 
 const ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
@@ -31,11 +31,16 @@ export function SloDetailsAlerts({ slo }: Props) {
             alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
             configurationId={AlertConsumers.OBSERVABILITY}
             id={ALERTS_TABLE_ID}
-            flyoutSize="s"
             data-test-subj="alertTable"
-            featureIds={[AlertConsumers.SLO]}
-            query={{ bool: { filter: { term: { 'slo.id': slo.id } } } }}
-            showExpandToDetails={false}
+            featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
+            query={{
+              bool: {
+                filter: [
+                  { term: { 'slo.id': slo.id } },
+                  { term: { 'slo.instanceId': slo.instanceId ?? ALL_VALUE } },
+                ],
+              },
+            }}
             showAlertStatusWithFlapping
             pageSize={100}
           />

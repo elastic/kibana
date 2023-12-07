@@ -30,6 +30,7 @@ import {
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
+  selectVisualizationState,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
 import { LensInspector } from '../../../lens_inspector_service';
@@ -52,13 +53,11 @@ export interface WorkspacePanelWrapperProps {
 export function VisualizationToolbar(props: {
   activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
-  onUpdateStateCb?: (datasourceState: unknown, visualizationState: unknown) => void;
+  isFixedPosition?: boolean;
 }) {
   const dispatchLens = useLensDispatch();
-  const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
-    (state) => state.lens
-  );
-  const { activeVisualization, onUpdateStateCb } = props;
+  const visualization = useLensSelector(selectVisualizationState);
+  const { activeVisualization, isFixedPosition } = props;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
@@ -70,12 +69,8 @@ export function VisualizationToolbar(props: {
           newState,
         })
       );
-      if (activeDatasourceId && onUpdateStateCb) {
-        const dsState = datasourceStates[activeDatasourceId].state;
-        onUpdateStateCb?.(dsState, newState);
-      }
     },
-    [activeDatasourceId, datasourceStates, dispatchLens, activeVisualization, onUpdateStateCb]
+    [dispatchLens, activeVisualization]
   );
 
   const ToolbarComponent = props.activeVisualization?.ToolbarComponent;
@@ -83,7 +78,12 @@ export function VisualizationToolbar(props: {
   return (
     <>
       {ToolbarComponent && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          className={classNames({
+            'lnsVisualizationToolbar--fixed': isFixedPosition,
+          })}
+        >
           {ToolbarComponent({
             frame: props.framePublicAPI,
             state: visualization.state,

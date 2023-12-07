@@ -15,10 +15,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { TopNFunctionSortField } from '../../../common/functions';
+import { TopNFunctionSortField } from '@kbn/profiling-utils';
+import React, { useEffect } from 'react';
+import { profilingUseLegacyCo2Calculation } from '@kbn/observability-plugin/common';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
+import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { StackFrameSummary } from '../stack_frame_summary';
 import { CPUStat } from './cpu_stat';
 import { SampleStat } from './sample_stat';
@@ -39,38 +41,16 @@ export function FunctionRow({
   onFrameClick,
   setCellProps,
 }: Props) {
-  const theme = useEuiTheme();
-  const successColor = useEuiBackgroundColor('success');
-  const dangerColor = useEuiBackgroundColor('danger');
+  const {
+    start: { core },
+  } = useProfilingDependencies();
+
+  const shouldUseLegacyCo2Calculation = core.uiSettings.get<boolean>(
+    profilingUseLegacyCo2Calculation
+  );
 
   if (columnId === TopNFunctionSortField.Diff) {
-    if (!functionRow.diff) {
-      return (
-        <EuiText size="xs" color={theme.euiTheme.colors.primaryText}>
-          {i18n.translate('xpack.profiling.functionsView.newLabel', {
-            defaultMessage: 'New',
-          })}
-        </EuiText>
-      );
-    }
-
-    if (functionRow.diff.rank === 0) {
-      return null;
-    }
-
-    const color = functionRow.diff.rank > 0 ? 'success' : 'danger';
-    setCellProps({ style: { backgroundColor: color === 'success' ? successColor : dangerColor } });
-
-    return (
-      <EuiFlexGroup direction="row" gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{functionRow.diff.rank}</EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={functionRow.diff.rank > 0 ? 'sortDown' : 'sortUp'} color={color} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return <DiffColumn diff={functionRow.diff} setCellProps={setCellProps} />;
   }
 
   if (columnId === TopNFunctionSortField.Rank) {
@@ -82,12 +62,12 @@ export function FunctionRow({
   }
 
   if (columnId === TopNFunctionSortField.Samples) {
-    setCellProps({ css: { textAlign: 'right' } });
     return (
-      <SampleStat
+      <SamplesColumn
         samples={functionRow.samples}
         diffSamples={functionRow.diff?.samples}
         totalSamples={totalCount}
+        setCellProps={setCellProps}
       />
     );
   }
@@ -102,17 +82,96 @@ export function FunctionRow({
 
   if (
     columnId === TopNFunctionSortField.AnnualizedCo2 &&
-    functionRow.impactEstimates?.annualizedCo2
+    functionRow.impactEstimates?.totalCPU?.annualizedCo2
   ) {
-    return <div>{asWeight(functionRow.impactEstimates.annualizedCo2)}</div>;
+    return (
+      <div>
+        {asWeight(
+          shouldUseLegacyCo2Calculation
+            ? functionRow.impactEstimates.totalCPU.annualizedCo2
+            : functionRow.totalAnnualCO2kgs,
+          'kgs'
+        )}
+      </div>
+    );
   }
 
   if (
     columnId === TopNFunctionSortField.AnnualizedDollarCost &&
-    functionRow.impactEstimates?.annualizedDollarCost
+    functionRow.impactEstimates?.totalCPU?.annualizedDollarCost
   ) {
-    return <div>{asCost(functionRow.impactEstimates.annualizedDollarCost)}</div>;
+    return (
+      <div>
+        {asCost(
+          shouldUseLegacyCo2Calculation
+            ? functionRow.impactEstimates.totalCPU.annualizedDollarCost
+            : functionRow.totalAnnualCostUSD
+        )}
+      </div>
+    );
   }
 
   return null;
+}
+
+interface SamplesColumnProps {
+  samples: number;
+  diffSamples?: number;
+  totalSamples: number;
+  setCellProps: EuiDataGridCellValueElementProps['setCellProps'];
+}
+
+function SamplesColumn({ samples, totalSamples, diffSamples, setCellProps }: SamplesColumnProps) {
+  useEffect(() => {
+    setCellProps({ css: { textAlign: 'right' } });
+  }, [setCellProps]);
+  return <SampleStat samples={samples} diffSamples={diffSamples} totalSamples={totalSamples} />;
+}
+
+interface DiffColumnProps {
+  diff: IFunctionRow['diff'];
+  setCellProps: EuiDataGridCellValueElementProps['setCellProps'];
+}
+
+function DiffColumn({ diff, setCellProps }: DiffColumnProps) {
+  const theme = useEuiTheme();
+  const successColor = useEuiBackgroundColor('success');
+  const dangerColor = useEuiBackgroundColor('danger');
+
+  useEffect(() => {
+    if (diff && diff.rank !== 0) {
+      const color = diff.rank > 0 ? 'success' : 'danger';
+      setCellProps({
+        style: { backgroundColor: color === 'success' ? successColor : dangerColor },
+      });
+    }
+  }, [dangerColor, diff, setCellProps, successColor]);
+
+  if (!diff) {
+    return (
+      <EuiText size="xs" color={theme.euiTheme.colors.primaryText}>
+        {i18n.translate('xpack.profiling.functionsView.newLabel', {
+          defaultMessage: 'New',
+        })}
+      </EuiText>
+    );
+  }
+
+  if (diff.rank === 0) {
+    return null;
+  }
+
+  return (
+    <EuiFlexGroup direction="row" gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <EuiIcon
+          type={diff.rank > 0 ? 'sortUp' : 'sortDown'}
+          color={diff.rank > 0 ? 'success' : 'danger'}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">{Math.abs(diff.rank)}</EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 }

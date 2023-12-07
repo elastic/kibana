@@ -23,7 +23,6 @@ import {
   controlGroupSelector,
   useControlGroupContainer,
 } from '../embeddable/control_group_container';
-import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 import { ControlError } from './control_error_component';
 
@@ -135,11 +134,7 @@ export const ControlFrame = ({
       <EuiFormRow
         data-test-subj="control-frame-title"
         fullWidth
-        label={
-          usingTwoLineLayout
-            ? title || ControlGroupStrings.emptyState.getTwoLineLoadingTitle()
-            : undefined
-        }
+        label={usingTwoLineLayout ? title || '...' : undefined}
       >
         {form}
       </EuiFormRow>

@@ -275,9 +275,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             );
           }
 
-          return (
-            <DistinctValues cardinality={item?.stats?.cardinality} showIcon={dimensions.showIcon} />
-          );
+          return <DistinctValues config={item} showIcon={dimensions.showIcon} />;
         },
         sortable: (item: DataVisualizerTableItem) => item?.stats?.cardinality,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
@@ -485,7 +483,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             itemIdToExpandedRowMap={itemIdToExpandedRowMap}
             isSelectable={false}
             onTableChange={onTableChange}
-            data-test-subj={'dataVisualizerTable'}
+            data-test-subj={`dataVisualizerTable-${loading ? 'loading' : 'loaded'}`}
             rowProps={(item) => ({
               'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
             })}

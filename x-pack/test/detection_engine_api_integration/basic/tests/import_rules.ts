@@ -41,6 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
           .expect('Content-Type', 'application/json; charset=utf-8')
           .expect(200);
@@ -50,6 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.txt')
           .expect(400);
 
@@ -63,6 +65,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
           .expect(200);
 
@@ -85,11 +88,13 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
           .expect(200);
 
         const { body } = await supertest
           .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200);
 
@@ -110,10 +115,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', fileNdJson, 'rules.ndjson')
           .expect(200);
 
-        expect(body.errors[0].error.message).to.eql('Failed to parse "from" on rule param');
+        expect(body.errors[0].error.message).to.eql('from: Failed to parse date-math expression');
       });
 
       it('should fail validation when importing two rules and one has a malformed "from" params', async () => {
@@ -129,18 +135,20 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', fileNdJson, 'rules.ndjson')
           .expect(200);
 
         // should result in one success and a failure message
         expect(body.success_count).to.eql(1);
-        expect(body.errors[0].error.message).to.eql('Failed to parse "from" on rule param');
+        expect(body.errors[0].error.message).to.eql('from: Failed to parse date-math expression');
       });
 
       it('should be able to import two rules', async () => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2']), 'rules.ndjson')
           .expect(200);
 
@@ -168,6 +176,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(ruleIds, false), 'rules.ndjson')
           .expect(200);
 
@@ -208,6 +217,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(ruleIds, false), 'rules.ndjson')
           .expect(500);
 
@@ -221,6 +231,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-1']), 'rules.ndjson')
           .expect(200);
 
@@ -251,6 +262,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-1']), 'rules.ndjson')
           .expect(200);
 
@@ -273,12 +285,14 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
           .expect(200);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
           .expect(200);
 
@@ -309,12 +323,14 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
           .expect(200);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
           .expect(200);
 
@@ -337,6 +353,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
           .expect(200);
 
@@ -347,11 +364,13 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', ndjson, 'rules.ndjson')
           .expect(200);
 
         const { body } = await supertest
           .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200);
 
@@ -369,12 +388,14 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
           .expect(200);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2', 'rule-3']), 'rules.ndjson')
           .expect(200);
 
@@ -405,12 +426,14 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2']), 'rules.ndjson')
           .expect(200);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2', 'rule-3']), 'rules.ndjson')
           .expect(200);
 
@@ -452,27 +475,32 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2']), 'rules.ndjson')
           .expect(200);
 
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2', 'rule-3']), 'rules.ndjson')
           .expect(200);
 
         const { body: bodyOfRule1 } = await supertest
           .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200);
 
         const { body: bodyOfRule2 } = await supertest
           .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-2`)
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200);
 
         const { body: bodyOfRule3 } = await supertest
           .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-3`)
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200);
 

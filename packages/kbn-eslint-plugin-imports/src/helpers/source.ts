@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Rule } from 'eslint';
+import type { Rule } from 'eslint';
 
 /**
  * Get the path of the sourcefile being linted

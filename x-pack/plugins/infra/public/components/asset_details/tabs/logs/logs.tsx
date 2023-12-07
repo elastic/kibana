@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -13,43 +13,42 @@ import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elas
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InfraLoadingPanel } from '../../../loading';
-
-export interface LogsProps {
-  currentTimestamp: number;
-  logViewReference?: LogViewReference | null;
-  logViewLoading?: boolean;
-  nodeName: string;
-  nodeType: InventoryItemType;
-  search?: string;
-  onSearchChange?: (query: string) => void;
-}
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import { useDataViewsProviderContext } from '../../hooks/use_data_views';
+import { useDatePickerContext } from '../../hooks/use_date_picker';
+import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
+import { useIntersectingState } from '../../hooks/use_intersecting_state';
 
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
-export const Logs = ({
-  nodeName,
-  currentTimestamp,
-  nodeType,
-  logViewReference,
-  search,
-  logViewLoading = false,
-  onSearchChange,
-}: LogsProps) => {
+export const Logs = () => {
+  const ref = useRef<HTMLDivElement>(null);
+  const { getDateRangeInTimestamp, dateRange, autoRefresh } = useDatePickerContext();
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const { asset } = useAssetDetailsRenderPropsContext();
+  const { logs } = useDataViewsProviderContext();
+
+  const { loading: logViewLoading, reference: logViewReference } = logs ?? {};
+
   const { services } = useKibanaContextForPlugin();
   const { locators } = services;
-  const [textQuery, setTextQuery] = useState(search ?? '');
-  const [textQueryDebounced, setTextQueryDebounced] = useState(search ?? '');
-  const startTimestamp = currentTimestamp - 60 * 60 * 1000; // 60 minutes
+  const [textQuery, setTextQuery] = useState(urlState?.logsSearch ?? '');
+  const [textQueryDebounced, setTextQueryDebounced] = useState(urlState?.logsSearch ?? '');
+
+  const currentTimestamp = getDateRangeInTimestamp().to;
+  const state = useIntersectingState(ref, {
+    currentTimestamp,
+    startTimestamp: currentTimestamp - 60 * 60 * 1000,
+    dateRange,
+    autoRefresh,
+  });
 
   useDebounce(
     () => {
-      if (onSearchChange) {
-        onSearchChange(textQuery);
-      }
+      setUrlState({ logsSearch: textQuery });
       setTextQueryDebounced(textQuery);
     },
     TEXT_QUERY_THROTTLE_INTERVAL_MS,
@@ -58,7 +57,7 @@ export const Logs = ({
 
   const filter = useMemo(() => {
     const query = [
-      `${findInventoryFields(nodeType).id}: "${nodeName}"`,
+      `${findInventoryFields(asset.type).id}: "${asset.name}"`,
       ...(textQueryDebounced !== '' ? [textQueryDebounced] : []),
     ].join(' and ');
 
@@ -66,7 +65,7 @@ export const Logs = ({
       language: 'kuery',
       query,
     };
-  }, [nodeType, nodeName, textQueryDebounced]);
+  }, [asset.type, asset.name, textQueryDebounced]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);
@@ -79,16 +78,23 @@ export const Logs = ({
 
   const logsUrl = useMemo(() => {
     return locators.nodeLogsLocator.getRedirectUrl({
-      nodeType,
-      nodeId: nodeName,
-      time: startTimestamp,
+      nodeType: asset.type,
+      nodeId: asset.name,
+      time: state.startTimestamp,
       filter: textQueryDebounced,
       logView,
     });
-  }, [locators.nodeLogsLocator, nodeName, nodeType, startTimestamp, textQueryDebounced, logView]);
+  }, [
+    locators.nodeLogsLocator,
+    asset.name,
+    asset.type,
+    state.startTimestamp,
+    textQueryDebounced,
+    logView,
+  ]);
 
   return (
-    <EuiFlexGroup direction="column" data-test-subj="infraAssetDetailsLogsTabContent">
+    <EuiFlexGroup direction="column" data-test-subj="infraAssetDetailsLogsTabContent" ref={ref}>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
           <EuiFlexItem>
@@ -136,11 +142,18 @@ export const Logs = ({
         ) : (
           <LogStream
             logView={logView}
-            startTimestamp={startTimestamp}
-            endTimestamp={currentTimestamp}
+            startTimestamp={state.startTimestamp}
+            endTimestamp={state.currentTimestamp}
+            startDateExpression={
+              state.autoRefresh && !state.autoRefresh.isPaused ? state.dateRange.from : undefined
+            }
+            endDateExpression={
+              state.autoRefresh && !state.autoRefresh.isPaused ? state.dateRange.to : undefined
+            }
             query={filter}
             height="60vh"
             showFlyoutAction
+            isStreaming={state.autoRefresh && !state.autoRefresh.isPaused}
           />
         )}
       </EuiFlexItem>

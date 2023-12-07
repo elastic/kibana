@@ -27,7 +27,7 @@ Available attributes:
 
 ### Load all generated buckets generated via previous command
 
-> `node mappings_loader.js --mappings-dir='test_unmapped' --es-url=http://username:password@localhost:9200 --kibana-url=http://username:password@localhost:5601/app`
+> `node mappings_loader.js --mappings-dir='test_unmapped' --es-url=http://elastic:changeme@localhost:9200 --kibana-url=http://elastic:changeme@localhost:5601/kbn/app`
 
 
 This script will go through each folder in the provided root folder (via `--mappings-dir`) and load each folder with mappings inside using `es_archiver` tool.

@@ -8,48 +8,52 @@
 
 import '../_dashboard_container.scss';
 
-import React, {
-  useRef,
-  useMemo,
-  useState,
-  useEffect,
-  forwardRef,
-  useImperativeHandle,
-} from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
+import { v4 as uuidv4 } from 'uuid';
 
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 
-import {
-  DashboardAPI,
-  AwaitingDashboardAPI,
-  buildApiFromDashboardContainer,
-} from './dashboard_api';
-import {
-  DashboardCreationOptions,
-  DashboardContainerFactory,
-  DashboardContainerFactoryDefinition,
-} from '../embeddable/dashboard_container_factory';
-import { DashboardRedirect } from '../types';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardContainerInput } from '../../../common';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
+import {
+  DashboardContainerFactory,
+  DashboardContainerFactoryDefinition,
+  DashboardCreationOptions,
+} from '../embeddable/dashboard_container_factory';
+import { DashboardLocatorParams, DashboardRedirect } from '../types';
 import { Dashboard404Page } from './dashboard_404';
+import {
+  AwaitingDashboardAPI,
+  buildApiFromDashboardContainer,
+  DashboardAPI,
+} from './dashboard_api';
 
 export interface DashboardRendererProps {
   savedObjectId?: string;
   showPlainSpinner?: boolean;
   dashboardRedirect?: DashboardRedirect;
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
+  locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 }
 
 export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRendererProps>(
-  ({ savedObjectId, getCreationOptions, dashboardRedirect, showPlainSpinner }, ref) => {
+  ({ savedObjectId, getCreationOptions, dashboardRedirect, showPlainSpinner, locator }, ref) => {
     const dashboardRoot = useRef(null);
+    const dashboardViewport = useRef(null);
     const [loading, setLoading] = useState(true);
     const [screenshotMode, setScreenshotMode] = useState(false);
     const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
@@ -74,6 +78,11 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     }, []);
 
     const id = useMemo(() => uuidv4(), []);
+
+    useEffect(() => {
+      /* In case the locator prop changes, we need to reassign the value in the container */
+      if (dashboardContainer) dashboardContainer.locator = locator;
+    }, [dashboardContainer, locator]);
 
     useEffect(() => {
       /**
@@ -108,7 +117,9 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
 
         const dashboardFactory = embeddable.getEmbeddableFactory(
           DASHBOARD_CONTAINER_TYPE
-        ) as DashboardContainerFactory & { create: DashboardContainerFactoryDefinition['create'] };
+        ) as DashboardContainerFactory & {
+          create: DashboardContainerFactoryDefinition['create'];
+        };
         const container = await dashboardFactory?.create(
           { id } as unknown as DashboardContainerInput, // Input from creationOptions is used instead.
           undefined,
@@ -168,6 +179,45 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
       return <div ref={dashboardRoot} />;
     };
 
-    return <div className={viewportClasses}>{renderDashboardContents()}</div>;
+    return (
+      <div ref={dashboardViewport} className={viewportClasses}>
+        {dashboardViewport?.current &&
+          dashboardContainer &&
+          !isErrorEmbeddable(dashboardContainer) && (
+            <ParentClassController
+              viewportRef={dashboardViewport.current}
+              dashboard={dashboardContainer}
+            />
+          )}
+        {renderDashboardContents()}
+      </div>
+    );
   }
 );
+
+/**
+ * Maximizing a panel in Dashboard only works if the parent div has a certain class. This
+ * small component listens to the Dashboard's expandedPanelId state and adds and removes
+ * the class to whichever element renders the Dashboard.
+ */
+const ParentClassController = ({
+  dashboard,
+  viewportRef,
+}: {
+  dashboard: DashboardContainer;
+  viewportRef: HTMLDivElement;
+}) => {
+  const maximizedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
+
+  useLayoutEffect(() => {
+    const parentDiv = viewportRef.parentElement;
+    if (!parentDiv) return;
+
+    if (maximizedPanelId) {
+      parentDiv.classList.add('dshDashboardViewportWrapper');
+    } else {
+      parentDiv.classList.remove('dshDashboardViewportWrapper');
+    }
+  }, [maximizedPanelId, viewportRef.parentElement]);
+  return null;
+};

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
+  EuiFieldPassword,
   EuiFieldText,
   EuiFormRow,
   EuiPanel,
   EuiRadioGroup,
+  EuiSelect,
   EuiSpacer,
   EuiTextArea,
   EuiTitle,
@@ -20,9 +22,16 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { MultiRowInput } from '../multi_row_input';
-import { kafkaAuthType, kafkaSaslMechanism } from '../../../../../../../common/constants';
+
+import {
+  kafkaAuthType,
+  kafkaConnectionType,
+  kafkaSaslMechanism,
+  kafkaVerificationModes,
+} from '../../../../../../../common/constants';
 
 import type { OutputFormInputsType } from './use_output_form';
+import { SecretFormRow } from './output_form_secret_form_row';
 
 const kafkaSaslOptions = [
   {
@@ -44,6 +53,11 @@ const kafkaSaslOptions = [
 
 const kafkaAuthenticationsOptions = [
   {
+    id: kafkaAuthType.None,
+    label: 'None',
+    'data-test-subj': 'kafkaAuthenticationNoneRadioButton',
+  },
+  {
     id: kafkaAuthType.Userpass,
     label: 'Username / Password',
     'data-test-subj': 'kafkaAuthenticationUsernamePasswordRadioButton',
@@ -53,40 +67,65 @@ const kafkaAuthenticationsOptions = [
     label: 'SSL',
     'data-test-subj': 'kafkaAuthenticationSSLRadioButton',
   },
-  {
-    id: kafkaAuthType.Kerberos,
-    label: 'Kerberos',
-    'data-test-subj': 'kafkaAuthenticationKerberosRadioButton',
-  },
 ];
 
 export const OutputFormKafkaAuthentication: React.FunctionComponent<{
   inputs: OutputFormInputsType;
+  useSecretsStorage: boolean;
+  onUsePlainText: () => void;
 }> = (props) => {
-  const { inputs } = props;
+  const { inputs, useSecretsStorage, onUsePlainText } = props;
+
+  const kafkaVerificationModeOptions = useMemo(
+    () =>
+      (Object.keys(kafkaVerificationModes) as Array<keyof typeof kafkaVerificationModes>).map(
+        (key) => {
+          return {
+            text: kafkaVerificationModes[key],
+            label: key,
+          };
+        }
+      ),
+    []
+  );
+
+  const kafkaConnectionTypeOptions = useMemo(
+    () =>
+      (Object.keys(kafkaConnectionType) as Array<keyof typeof kafkaConnectionType>).map((key) => {
+        return {
+          id: kafkaConnectionType[key],
+          label: key,
+          'data-test-subj': `kafkaConnectionType${key}RadioButton`,
+        };
+      }),
+    []
+  );
 
   const renderAuthentication = () => {
     switch (inputs.kafkaAuthMethodInput.value) {
+      case kafkaAuthType.None:
+        return (
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.kafkaConnectionTypeLabel"
+                defaultMessage="Connection"
+              />
+            }
+          >
+            <EuiRadioGroup
+              style={{ display: 'flex', gap: 30 }}
+              data-test-subj={'settingsOutputsFlyout.kafkaConnectionTypeRadioInput'}
+              options={kafkaConnectionTypeOptions}
+              compressed
+              {...inputs.kafkaConnectionTypeInput.props}
+            />
+          </EuiFormRow>
+        );
       case kafkaAuthType.Ssl:
         return (
           <>
-            <MultiRowInput
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
-                {
-                  defaultMessage: 'Specify certificate authority',
-                }
-              )}
-              label={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
-                {
-                  defaultMessage: 'Server SSL certificate authorities (optional)',
-                }
-              )}
-              multiline={true}
-              sortable={false}
-              {...inputs.kafkaSslCertificateAuthoritiesInput.props}
-            />
             <EuiFormRow
               fullWidth
               label={
@@ -109,32 +148,56 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                 )}
               />
             </EuiFormRow>
-            <EuiFormRow
-              fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
-                  defaultMessage="Client SSL certificate key"
-                />
-              }
-              {...inputs.kafkaSslKeyInput.formRowProps}
-            >
-              <EuiTextArea
+            {inputs.kafkaSslKeyInput.value || !useSecretsStorage ? (
+              <EuiFormRow
                 fullWidth
-                rows={5}
-                {...inputs.sslKeyInput.props}
-                placeholder={i18n.translate(
-                  'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
+                    defaultMessage="Client SSL certificate key"
+                  />
+                }
+                {...inputs.kafkaSslKeyInput.formRowProps}
+              >
+                <EuiTextArea
+                  fullWidth
+                  rows={5}
+                  {...inputs.kafkaSslKeyInput.props}
+                  placeholder={i18n.translate(
+                    'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
+                    {
+                      defaultMessage: 'Specify certificate key',
+                    }
+                  )}
+                />
+              </EuiFormRow>
+            ) : (
+              <SecretFormRow
+                fullWidth
+                title={i18n.translate(
+                  'xpack.fleet.settings.editOutputFlyout.kafkaPasswordSecretInputTitle',
                   {
-                    defaultMessage: 'Specify certificate key',
+                    defaultMessage: 'Client SSL certificate key',
                   }
                 )}
-              />
-            </EuiFormRow>
+                {...inputs.kafkaSslKeySecretInput.formRowProps}
+                onUsePlainText={onUsePlainText}
+              >
+                <EuiTextArea
+                  fullWidth
+                  rows={5}
+                  {...inputs.kafkaSslKeySecretInput.props}
+                  placeholder={i18n.translate(
+                    'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
+                    {
+                      defaultMessage: 'Specify certificate key',
+                    }
+                  )}
+                />
+              </SecretFormRow>
+            )}
           </>
         );
-      case kafkaAuthType.Kerberos:
-        return null;
       default:
       case kafkaAuthType.Userpass:
         return (
@@ -155,22 +218,44 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                 {...inputs.kafkaAuthUsernameInput.props}
               />
             </EuiFormRow>
-            <EuiFormRow
-              fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.kafkaPasswordInputLabel"
-                  defaultMessage="Password"
-                />
-              }
-              {...inputs.kafkaAuthPasswordInput.formRowProps}
-            >
-              <EuiFieldText
-                data-test-subj="settingsOutputsFlyout.kafkaPasswordInput"
+            {inputs.kafkaAuthPasswordInput.value || !useSecretsStorage ? (
+              <EuiFormRow
                 fullWidth
-                {...inputs.kafkaAuthPasswordInput.props}
-              />
-            </EuiFormRow>
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.kafkaPasswordInputLabel"
+                    defaultMessage="Password"
+                  />
+                }
+                {...inputs.kafkaAuthPasswordInput.formRowProps}
+              >
+                <EuiFieldPassword
+                  type={'dual'}
+                  data-test-subj="settingsOutputsFlyout.kafkaPasswordInput"
+                  fullWidth
+                  {...inputs.kafkaAuthPasswordInput.props}
+                />
+              </EuiFormRow>
+            ) : (
+              <SecretFormRow
+                fullWidth
+                title={i18n.translate(
+                  'xpack.fleet.settings.editOutputFlyout.kafkaPasswordInputtitle',
+                  {
+                    defaultMessage: 'Password',
+                  }
+                )}
+                {...inputs.kafkaAuthPasswordSecretInput.formRowProps}
+                onUsePlainText={onUsePlainText}
+              >
+                <EuiFieldPassword
+                  type={'dual'}
+                  data-test-subj="settingsOutputsFlyout.kafkaPasswordSecretInput"
+                  fullWidth
+                  {...inputs.kafkaAuthPasswordSecretInput.props}
+                />
+              </SecretFormRow>
+            )}
             <EuiFormRow
               fullWidth
               label={
@@ -193,33 +278,93 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
     }
   };
 
-  return (
-    <EuiPanel
-      borderRadius="m"
-      hasShadow={false}
-      paddingSize={'m'}
-      color={'subdued'}
-      data-test-subj="settingsOutputsFlyout.kafkaAuthenticationPanel"
-    >
-      <EuiTitle size="s">
-        <h3 id="FleetEditOutputFlyoutKafkaAuthenticationTitle">
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.kafkaAuthenticationTitle"
-            defaultMessage="Authentication"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiFormRow fullWidth>
-        <EuiRadioGroup
-          style={{ display: 'flex', gap: 30 }}
-          data-test-subj={'settingsOutputsFlyout.kafkaAuthenticationRadioInput'}
-          options={kafkaAuthenticationsOptions}
-          compressed
-          {...inputs.kafkaAuthMethodInput.props}
+  const renderEncryptionSection = () => {
+    const displayEncryptionSection =
+      inputs.kafkaConnectionTypeInput.value !== kafkaConnectionType.Plaintext ||
+      inputs.kafkaAuthMethodInput.value !== kafkaAuthType.None;
+
+    if (!displayEncryptionSection) {
+      return null;
+    }
+
+    return (
+      <>
+        <EuiSpacer size="m" />
+
+        <MultiRowInput
+          placeholder={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
+            {
+              defaultMessage: 'Specify certificate authority',
+            }
+          )}
+          label={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
+            {
+              defaultMessage: 'Server SSL certificate authorities (optional)',
+            }
+          )}
+          multiline={true}
+          sortable={false}
+          {...inputs.kafkaSslCertificateAuthoritiesInput.props}
         />
-      </EuiFormRow>
-      {renderAuthentication()}
-    </EuiPanel>
+
+        <EuiFormRow
+          fullWidth
+          label={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.kafkaVerificationModeInputLabel"
+              defaultMessage="Verification mode"
+            />
+          }
+        >
+          <EuiSelect
+            fullWidth
+            data-test-subj="settingsOutputsFlyout.kafkaVerificationModeInput"
+            {...inputs.kafkaVerificationModeInput.props}
+            options={kafkaVerificationModeOptions}
+            placeholder={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.kafkaVerificationModeInputPlaceholder',
+              {
+                defaultMessage: 'Specify verification mode',
+              }
+            )}
+          />
+        </EuiFormRow>
+      </>
+    );
+  };
+
+  return (
+    <>
+      <EuiPanel
+        borderRadius="m"
+        hasShadow={false}
+        paddingSize={'m'}
+        color={'subdued'}
+        data-test-subj="settingsOutputsFlyout.kafkaAuthenticationPanel"
+      >
+        <EuiTitle size="s">
+          <h3 id="FleetEditOutputFlyoutKafkaAuthenticationTitle">
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.kafkaAuthenticationTitle"
+              defaultMessage="Authentication"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiFormRow fullWidth>
+          <EuiRadioGroup
+            style={{ display: 'flex', gap: 30 }}
+            data-test-subj={'settingsOutputsFlyout.kafkaAuthenticationRadioInput'}
+            options={kafkaAuthenticationsOptions}
+            compressed
+            {...inputs.kafkaAuthMethodInput.props}
+          />
+        </EuiFormRow>
+        {renderAuthentication()}
+      </EuiPanel>
+      {renderEncryptionSection()}
+    </>
   );
 };

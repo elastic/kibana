@@ -1,5 +1,11 @@
 {
   "security.has_privileges": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "GET",
       "POST"
@@ -8,6 +14,10 @@
       "_security/user/_has_privileges",
       "_security/user/{user}/_has_privileges"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-has-privileges.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-has-privileges.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

@@ -54,6 +54,17 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./connectors'));
-    loadTestFile(require.resolve('./connector_types'));
+    loadTestFile(require.resolve('./bedrock_connector'));
+    loadTestFile(require.resolve('./email_connector'));
+    loadTestFile(require.resolve('./generative_ai_connector'));
+    loadTestFile(require.resolve('./index_connector'));
+    loadTestFile(require.resolve('./jira_connector'));
+    loadTestFile(require.resolve('./opsgenie_connector'));
+    loadTestFile(require.resolve('./pagerduty_connector'));
+    loadTestFile(require.resolve('./server_log_connector'));
+    loadTestFile(require.resolve('./servicenow_itom_connector'));
+    loadTestFile(require.resolve('./slack_connector'));
+    loadTestFile(require.resolve('./webhook_connector'));
+    loadTestFile(require.resolve('./xmatters_connector'));
   });
 }

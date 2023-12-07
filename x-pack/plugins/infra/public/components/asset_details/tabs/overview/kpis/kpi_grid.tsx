@@ -4,26 +4,52 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Tile, type TileProps } from './tile';
-import { KPI_CHARTS } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 
-export const KPIGrid = React.memo(({ nodeName, dataView, timeRange: dateRange }: TileProps) => {
-  return (
-    <>
-      <EuiFlexGroup
-        direction="row"
-        gutterSize="s"
-        style={{ flexGrow: 0 }}
-        data-test-subj="assetDetailsKPIGrid"
-      >
-        {KPI_CHARTS.map((chartProp, index) => (
-          <EuiFlexItem key={index}>
-            <Tile {...chartProp} nodeName={nodeName} dataView={dataView} timeRange={dateRange} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    </>
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import useAsync from 'react-use/lib/useAsync';
+import { KPI_CHART_HEIGHT } from '../../../../../common/visualizations';
+import { Kpi } from './kpi';
+
+interface Props {
+  dataView?: DataView;
+  assetName: string;
+  dateRange: TimeRange;
+}
+
+export const KPIGrid = ({ assetName, dataView, dateRange }: Props) => {
+  const model = findInventoryModel('host');
+  const { euiTheme } = useEuiTheme();
+
+  const { value: dashboards } = useAsync(() => {
+    return model.metrics.getDashboards();
+  });
+
+  const charts = useMemo(
+    () =>
+      dashboards?.kpi.get({
+        metricsDataView: dataView,
+        options: {
+          backgroundColor: euiTheme.colors.lightestShade,
+        },
+      }).charts ?? [],
+    [dataView, euiTheme.colors.lightestShade, dashboards?.kpi]
   );
-});
+  return (
+    <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">
+      {charts.map((chartProps, index) => (
+        <EuiFlexItem key={index}>
+          <Kpi
+            {...chartProps}
+            dateRange={dateRange}
+            assetName={assetName}
+            height={KPI_CHART_HEIGHT}
+          />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};

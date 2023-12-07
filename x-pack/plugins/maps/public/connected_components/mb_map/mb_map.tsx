@@ -52,6 +52,7 @@ import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../classes/styles/vec
 import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
 import { KeydownScrollZoom } from './keydown_scroll_zoom/keydown_scroll_zoom';
 import { transformRequest } from './transform_request';
+import { boundsToExtent } from '../../classes/util/maplibre_utils';
 
 export interface Props {
   isMapReady: boolean;
@@ -141,12 +142,7 @@ export class MbMap extends Component<Props, State> {
         lon: _.round(mbCenter.lng, DECIMAL_DEGREES_PRECISION),
         lat: _.round(mbCenter.lat, DECIMAL_DEGREES_PRECISION),
       },
-      extent: {
-        minLon: _.round(mbBounds.getWest(), DECIMAL_DEGREES_PRECISION),
-        minLat: _.round(mbBounds.getSouth(), DECIMAL_DEGREES_PRECISION),
-        maxLon: _.round(mbBounds.getEast(), DECIMAL_DEGREES_PRECISION),
-        maxLat: _.round(mbBounds.getNorth(), DECIMAL_DEGREES_PRECISION),
-      },
+      extent: boundsToExtent(mbBounds),
     };
   }
 
@@ -191,8 +187,13 @@ export class MbMap extends Component<Props, State> {
         }
       });
       mbMap.on('load', () => {
-        emptyImage = new Image();
+        // Map instance automatically resizes when container size changes.
+        // However, issues may arise if container resizes before map finishes loading.
+        // This is occuring when by-value maps are used in dashboard.
+        // To prevent issues, resize container after load
+        mbMap.resize();
 
+        emptyImage = new Image();
         emptyImage.src =
           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
         emptyImage.crossOrigin = 'anonymous';

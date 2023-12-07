@@ -7,10 +7,10 @@
 
 import React, { Fragment, useMemo } from 'react';
 import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
-import type { RulePreviewLogs } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 
-interface PreviewLogsComponentProps {
+interface PreviewLogsProps {
   logs: RulePreviewLogs[];
   hasNoiseWarning: boolean;
   isAborted: boolean;
@@ -42,11 +42,7 @@ const addLogs = (
   allLogs: SortedLogs[]
 ) => (logs.length ? [{ startedAt, logs, duration }, ...allLogs] : allLogs);
 
-export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
-  logs,
-  hasNoiseWarning,
-  isAborted,
-}) => {
+const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({ logs, hasNoiseWarning, isAborted }) => {
   const sortedLogs = useMemo(
     () =>
       logs.reduce<{
@@ -72,6 +68,9 @@ export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
     </>
   );
 };
+
+export const PreviewLogs = React.memo(PreviewLogsComponent);
+PreviewLogs.displayName = 'PreviewLogs';
 
 const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError, children }) => {
   const firstLog = logs[0];

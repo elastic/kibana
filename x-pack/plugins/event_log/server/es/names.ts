@@ -10,23 +10,16 @@ const EVENT_LOG_NAME_SUFFIX = `-event-log`;
 export interface EsNames {
   base: string;
   dataStream: string;
-  ilmPolicy: string;
   indexPattern: string;
   indexTemplate: string;
 }
 
-export function getEsNames(baseName: string, kibanaVersion: string): EsNames {
-  const EVENT_LOG_VERSION_SUFFIX = `-${kibanaVersion.toLocaleLowerCase()}`;
+export function getEsNames(baseName: string): EsNames {
   const eventLogName = `${baseName}${EVENT_LOG_NAME_SUFFIX}`;
-  const eventLogNameWithVersion = `${eventLogName}${EVENT_LOG_VERSION_SUFFIX}`;
-  const eventLogPolicyName = `${
-    baseName.startsWith('.') ? baseName.substring(1) : baseName
-  }${EVENT_LOG_NAME_SUFFIX}-policy`;
   return {
     base: baseName,
-    dataStream: eventLogNameWithVersion,
-    ilmPolicy: `${eventLogPolicyName}`,
+    dataStream: `${eventLogName}-ds`,
     indexPattern: `${eventLogName}-*`,
-    indexTemplate: `${eventLogNameWithVersion}-template`,
+    indexTemplate: `${eventLogName}-template`,
   };
 }

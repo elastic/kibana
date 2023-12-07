@@ -6,14 +6,13 @@
  */
 
 import { EuiCommentList } from '@elastic/eui';
-import { CaseSeverity } from '../../../common/api';
+import { CaseSeverity, UserActionActions } from '../../../common/types/domain';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { getUserAction } from '../../containers/mock';
 import { getMockBuilderArgs } from './mock';
 import { createSeverityUserActionBuilder } from './severity';
-import { UserActionActions } from '../../../common/types/domain';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');

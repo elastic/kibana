@@ -16,10 +16,7 @@ import {
   SecurityPageName,
   SHOW_RELATED_INTEGRATIONS_SETTING,
 } from '../../../../../common/constants';
-import type {
-  DurationMetric,
-  RuleExecutionSummary,
-} from '../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionSummary } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
@@ -37,7 +34,7 @@ import { RuleStatusBadge } from '../../../../detections/components/rules/rule_ex
 import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
-import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import type { Rule } from '../../../rule_management/logic';
 import { PopoverTooltip } from './popover_tooltip';
 import { useRulesTableContext } from './rules_table/rules_table_context';
@@ -46,6 +43,7 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
 import { MlRuleWarningPopover } from '../ml_rule_warning_popover/ml_rule_warning_popover';
+import { getMachineLearningJobId } from '../../../../detections/pages/detection_engine/rules/helpers';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -58,6 +56,7 @@ interface ColumnsProps {
 
 interface ActionColumnsProps {
   showExceptionsDuplicateConfirmation: () => Promise<string | null>;
+  confirmDeletion: () => Promise<boolean>;
 }
 
 const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): TableColumn => {
@@ -90,7 +89,7 @@ const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): Ta
           <RuleSwitch
             id={rule.id}
             enabled={rule.enabled}
-            startMlJobsIfNeeded={() => startMlJobs(rule.machine_learning_job_id)}
+            startMlJobsIfNeeded={() => startMlJobs(getMachineLearningJobId(rule))}
             isDisabled={
               !canEditRuleWithActions(rule, hasActionsPrivileges) ||
               !hasCRUDPermissions ||
@@ -232,8 +231,12 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 
 const useActionsColumn = ({
   showExceptionsDuplicateConfirmation,
+  confirmDeletion,
 }: ActionColumnsProps): EuiTableActionsColumnType<Rule> => {
-  const actions = useRulesTableActions({ showExceptionsDuplicateConfirmation });
+  const actions = useRulesTableActions({
+    showExceptionsDuplicateConfirmation,
+    confirmDeletion,
+  });
 
   return useMemo(() => ({ actions, width: '40px' }), [actions]);
 };
@@ -246,8 +249,12 @@ export const useRulesColumns = ({
   mlJobs,
   startMlJobs,
   showExceptionsDuplicateConfirmation,
+  confirmDeletion,
 }: UseColumnsProps): TableColumn[] => {
-  const actionsColumn = useActionsColumn({ showExceptionsDuplicateConfirmation });
+  const actionsColumn = useActionsColumn({
+    showExceptionsDuplicateConfirmation,
+    confirmDeletion,
+  });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const enabledColumn = useEnabledColumn({
@@ -354,9 +361,13 @@ export const useMonitoringColumns = ({
   mlJobs,
   startMlJobs,
   showExceptionsDuplicateConfirmation,
+  confirmDeletion,
 }: UseColumnsProps): TableColumn[] => {
   const docLinks = useKibana().services.docLinks;
-  const actionsColumn = useActionsColumn({ showExceptionsDuplicateConfirmation });
+  const actionsColumn = useActionsColumn({
+    showExceptionsDuplicateConfirmation,
+    confirmDeletion,
+  });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const enabledColumn = useEnabledColumn({
@@ -388,7 +399,7 @@ export const useMonitoringColumns = ({
             tooltipContent={i18n.COLUMN_INDEXING_TIMES_TOOLTIP}
           />
         ),
-        render: (value: DurationMetric | undefined) => (
+        render: (value: number | undefined) => (
           <EuiText data-test-subj="total_indexing_duration_ms" size="s">
             {value != null ? value.toFixed() : getEmptyTagValue()}
           </EuiText>
@@ -405,7 +416,7 @@ export const useMonitoringColumns = ({
             tooltipContent={i18n.COLUMN_QUERY_TIMES_TOOLTIP}
           />
         ),
-        render: (value: DurationMetric | undefined) => (
+        render: (value: number | undefined) => (
           <EuiText data-test-subj="total_search_duration_ms" size="s">
             {value != null ? value.toFixed() : getEmptyTagValue()}
           </EuiText>
@@ -445,7 +456,7 @@ export const useMonitoringColumns = ({
             }
           />
         ),
-        render: (value: DurationMetric | undefined) => (
+        render: (value: number | undefined) => (
           <EuiText data-test-subj="gap" size="s">
             {value != null ? moment.duration(value, 'seconds').humanize() : getEmptyTagValue()}
           </EuiText>

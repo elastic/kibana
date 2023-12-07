@@ -9,25 +9,18 @@
 
 import { get } from 'lodash';
 
+import { setupStackServicesUsingCypressConfig } from './common';
 import {
   getLatestActionDoc,
   updateActionDoc,
   waitForNewActionDoc,
 } from '../../../../scripts/endpoint/common/response_actions';
-import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
 
 export const responseActionTasks = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): void => {
-  const stackServicesPromise = createRuntimeServices({
-    kibanaUrl: config.env.KIBANA_URL,
-    elasticsearchUrl: config.env.ELASTICSEARCH_URL,
-    fleetServerUrl: config.env.FLEET_SERVER_URL,
-    username: config.env.ELASTICSEARCH_USERNAME,
-    password: config.env.ELASTICSEARCH_PASSWORD,
-    asSuperuser: true,
-  });
+  const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
 
   on('task', {
     getLatestActionDoc: async () => {
@@ -48,10 +41,9 @@ export const responseActionTasks = (
       const signed = get(newActionDoc, '_source.signed');
       const signedDataBuffer = Buffer.from(signed.data, 'base64');
       const signedDataJson = JSON.parse(signedDataBuffer.toString());
-      const tamperedAgentsList = [...signedDataJson.agents, 'anotheragent'];
       const tamperedData = {
         ...signedDataJson,
-        agents: tamperedAgentsList,
+        comment: 'tampered data',
       };
       const tamperedDataString = Buffer.from(JSON.stringify(tamperedData), 'utf8').toString(
         'base64'

@@ -54,6 +54,10 @@
     "@kbn/core-ui-settings-common",
     "@kbn/dashboard-plugin",
     "@kbn/licensing-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/serverless",
+    "@kbn/triggers-actions-ui-types"
   ],
   "exclude": ["target/**/*"]
 }

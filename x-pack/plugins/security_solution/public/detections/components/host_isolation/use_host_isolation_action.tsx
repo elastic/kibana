@@ -5,6 +5,12 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import {
+  getSentinelOneAgentId,
+  isAlertFromSentinelOneEvent,
+} from '../../../common/utils/sentinelone_alert_check';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
 import { HostStatus } from '../../../../common/endpoint/types';
@@ -14,6 +20,7 @@ import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import { getFieldValue } from './helpers';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { AlertTableContextMenuItem } from '../alerts_table/types';
+import { useSentinelOneAgentData } from './use_sentinelone_host_isolation';
 
 interface UseHostIsolationActionProps {
   closePopover: () => void;
@@ -27,15 +34,30 @@ export const useHostIsolationAction = ({
   detailsData,
   isHostIsolationPanelOpen,
   onAddIsolationStatusClick,
-}: UseHostIsolationActionProps) => {
-  const isEndpointAlert = useMemo(() => {
-    return isAlertFromEndpointEvent({ data: detailsData || [] });
-  }, [detailsData]);
+}: UseHostIsolationActionProps): AlertTableContextMenuItem[] => {
+  const hasActionsAllPrivileges = useKibana().services.application?.capabilities?.actions?.save;
+
+  const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+    'sentinelOneManualHostActionsEnabled'
+  );
+  const { canIsolateHost, canUnIsolateHost } = useUserPrivileges().endpointPrivileges;
+
+  const isEndpointAlert = useMemo(
+    () => isAlertFromEndpointEvent({ data: detailsData || [] }),
+    [detailsData]
+  );
+
+  const isSentinelOneAlert = useMemo(
+    () => isAlertFromSentinelOneEvent({ data: detailsData || [] }),
+    [detailsData]
+  );
 
   const agentId = useMemo(
     () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
     [detailsData]
   );
+
+  const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(detailsData), [detailsData]);
 
   const hostOsFamily = useMemo(
     () => getFieldValue({ category: 'host', field: 'host.os.name' }, detailsData),
@@ -49,63 +71,128 @@ export const useHostIsolationAction = ({
 
   const {
     loading: loadingHostIsolationStatus,
-    isIsolated: isolationStatus,
+    isIsolated,
     agentStatus,
     capabilities,
   } = useHostIsolationStatus({
     agentId,
   });
 
-  const isolationSupported = useMemo(() => {
-    return isEndpointAlert
-      ? isIsolationSupported({
-          osName: hostOsFamily,
-          version: agentVersion,
-          capabilities,
-        })
-      : false;
-  }, [agentVersion, capabilities, hostOsFamily, isEndpointAlert]);
+  const { data: sentinelOneResponse } = useSentinelOneAgentData({ agentId: sentinelOneAgentId });
 
-  const isIsolationAllowed = useUserPrivileges().endpointPrivileges.canIsolateHost;
+  const sentinelOneAgentData = useMemo(
+    () => sentinelOneResponse?.data?.data?.[0],
+    [sentinelOneResponse]
+  );
+
+  const isHostIsolated = useMemo(() => {
+    if (sentinelOneManualHostActionsEnabled && isSentinelOneAlert) {
+      return sentinelOneAgentData?.networkStatus === 'disconnected';
+    }
+
+    return isIsolated;
+  }, [
+    isIsolated,
+    isSentinelOneAlert,
+    sentinelOneAgentData?.networkStatus,
+    sentinelOneManualHostActionsEnabled,
+  ]);
+
+  const doesHostSupportIsolation = useMemo(() => {
+    if (isEndpointAlert) {
+      return isIsolationSupported({
+        osName: hostOsFamily,
+        version: agentVersion,
+        capabilities,
+      });
+    }
+
+    if (sentinelOneManualHostActionsEnabled && isSentinelOneAlert && sentinelOneAgentData) {
+      return sentinelOneAgentData.isActive;
+    }
+    return false;
+  }, [
+    agentVersion,
+    capabilities,
+    hostOsFamily,
+    isEndpointAlert,
+    isSentinelOneAlert,
+    sentinelOneAgentData,
+    sentinelOneManualHostActionsEnabled,
+  ]);
 
   const isolateHostHandler = useCallback(() => {
     closePopover();
-    if (isolationStatus === false) {
+    if (!isHostIsolated) {
       onAddIsolationStatusClick('isolateHost');
     } else {
       onAddIsolationStatusClick('unisolateHost');
     }
-  }, [closePopover, isolationStatus, onAddIsolationStatusClick]);
+  }, [closePopover, isHostIsolated, onAddIsolationStatusClick]);
 
-  const isolateHostTitle = isolationStatus === false ? ISOLATE_HOST : UNISOLATE_HOST;
+  const menuItemDisabled = useMemo(() => {
+    if (sentinelOneManualHostActionsEnabled && isSentinelOneAlert) {
+      return (
+        !sentinelOneAgentData ||
+        sentinelOneAgentData?.isUninstalled ||
+        sentinelOneAgentData?.isPendingUninstall
+      );
+    }
 
-  const hostIsolationAction: AlertTableContextMenuItem[] = useMemo(
-    () =>
-      isIsolationAllowed &&
-      isEndpointAlert &&
-      isolationSupported &&
-      isHostIsolationPanelOpen === false &&
-      loadingHostIsolationStatus === false
-        ? [
-            {
-              key: 'isolate-host-action-item',
-              'data-test-subj': 'isolate-host-action-item',
-              disabled: agentStatus === HostStatus.UNENROLLED,
-              onClick: isolateHostHandler,
-              name: isolateHostTitle,
-            },
-          ]
-        : [],
-    [
-      agentStatus,
-      isEndpointAlert,
-      isHostIsolationPanelOpen,
-      isIsolationAllowed,
-      isolateHostHandler,
-      isolateHostTitle,
-      isolationSupported,
-      loadingHostIsolationStatus,
-    ]
+    return agentStatus === HostStatus.UNENROLLED;
+  }, [agentStatus, isSentinelOneAlert, sentinelOneAgentData, sentinelOneManualHostActionsEnabled]);
+
+  const menuItems = useMemo(
+    () => [
+      {
+        key: 'isolate-host-action-item',
+        'data-test-subj': 'isolate-host-action-item',
+        disabled: menuItemDisabled,
+        onClick: isolateHostHandler,
+        name: isHostIsolated ? UNISOLATE_HOST : ISOLATE_HOST,
+      },
+    ],
+    [isHostIsolated, isolateHostHandler, menuItemDisabled]
   );
-  return hostIsolationAction;
+
+  return useMemo(() => {
+    if (isHostIsolationPanelOpen) {
+      return [];
+    }
+
+    if (
+      isSentinelOneAlert &&
+      sentinelOneManualHostActionsEnabled &&
+      sentinelOneAgentId &&
+      sentinelOneAgentData &&
+      hasActionsAllPrivileges
+    ) {
+      return menuItems;
+    }
+
+    if (
+      isEndpointAlert &&
+      doesHostSupportIsolation &&
+      !loadingHostIsolationStatus &&
+      (canIsolateHost || (isHostIsolated && !canUnIsolateHost))
+    ) {
+      return menuItems;
+    }
+
+    return [];
+  }, [
+    canIsolateHost,
+    canUnIsolateHost,
+    doesHostSupportIsolation,
+    hasActionsAllPrivileges,
+    isEndpointAlert,
+    isHostIsolated,
+    isHostIsolationPanelOpen,
+    isSentinelOneAlert,
+    loadingHostIsolationStatus,
+    menuItems,
+    sentinelOneAgentData,
+    sentinelOneAgentId,
+    sentinelOneManualHostActionsEnabled,
+  ]);
 };

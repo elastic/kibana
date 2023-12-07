@@ -15,8 +15,7 @@ import {
   EuiImage,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
@@ -60,77 +59,75 @@ export function App() {
             </EuiTitle>
           </EuiPageHeaderSection>
         </EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody>
-            <EuiText>
-              <p>This example captures a screenshot of an expression provided below.</p>
-            </EuiText>
-            <EuiSpacer size={'m'} />
-            <EuiTextArea
-              placeholder="Expression to render"
-              fullWidth
-              onChange={handleChange}
-              data-test-subj="expression"
-            />
-            <EuiSpacer size={'m'} />
-            <EuiButton
-              iconType="play"
-              onClick={handleClick}
-              isDisabled={!expression}
-              isLoading={loading}
-              data-test-subj="run"
-            >
-              Run
-            </EuiButton>
-            {!!response && <EuiHorizontalRule />}
-            {response?.errors && (
-              <>
-                <EuiCallOut
-                  title="Sorry, there was an error"
-                  color="danger"
-                  iconType="warning"
-                  data-test-subj="error"
-                >
-                  <p>{response.errors.join('\n')}</p>
-                </EuiCallOut>
-                <EuiSpacer size={'m'} />
-              </>
-            )}
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                {response?.image && (
-                  <EuiImage
-                    src={`data:image/png;base64,${response.image}`}
-                    alt="Screenshot"
-                    size="xl"
-                    allowFullScreen
-                    hasShadow
-                    data-test-subj="image"
+        <EuiPageSection>
+          <EuiText>
+            <p>This example captures a screenshot of an expression provided below.</p>
+          </EuiText>
+          <EuiSpacer size={'m'} />
+          <EuiTextArea
+            placeholder="Expression to render"
+            fullWidth
+            onChange={handleChange}
+            data-test-subj="expression"
+          />
+          <EuiSpacer size={'m'} />
+          <EuiButton
+            iconType="play"
+            onClick={handleClick}
+            isDisabled={!expression}
+            isLoading={loading}
+            data-test-subj="run"
+          >
+            Run
+          </EuiButton>
+          {!!response && <EuiHorizontalRule />}
+          {response?.errors && (
+            <>
+              <EuiCallOut
+                title="Sorry, there was an error"
+                color="danger"
+                iconType="warning"
+                data-test-subj="error"
+              >
+                <p>{response.errors.join('\n')}</p>
+              </EuiCallOut>
+              <EuiSpacer size={'m'} />
+            </>
+          )}
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              {response?.image && (
+                <EuiImage
+                  src={`data:image/png;base64,${response.image}`}
+                  alt="Screenshot"
+                  size="xl"
+                  allowFullScreen
+                  hasShadow
+                  data-test-subj="image"
+                />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {response?.metrics && (
+                <>
+                  <EuiStat
+                    title={`${response.metrics.cpuInPercentage ?? 'N/A'}%`}
+                    description="CPU"
+                    titleColor="primary"
+                    data-test-subj="cpu"
                   />
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem>
-                {response?.metrics && (
-                  <>
-                    <EuiStat
-                      title={`${response.metrics.cpuInPercentage ?? 'N/A'}%`}
-                      description="CPU"
-                      titleColor="primary"
-                      data-test-subj="cpu"
-                    />
-                    <EuiSpacer size={'m'} />
-                    <EuiStat
-                      title={`${response.metrics.memoryInMegabytes ?? 'N/A'} MB`}
-                      description="Memory"
-                      titleColor="primary"
-                      data-test-subj="memory"
-                    />
-                  </>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContentBody>
-        </EuiPageContent>
+                  <EuiSpacer size={'m'} />
+                  <EuiStat
+                    title={`${response.metrics.memoryInMegabytes ?? 'N/A'} MB`}
+                    description="Memory"
+                    titleColor="primary"
+                    data-test-subj="memory"
+                  />
+                </>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageSection>
       </EuiPageBody>
     </EuiPage>
   );

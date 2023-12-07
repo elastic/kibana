@@ -26,10 +26,8 @@ import type { FormHook } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { RuleActionsField } from '../rule_actions_field';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  useFetchConnectors,
-  useFetchConnectorTypes,
-} from '../../../../detection_engine/rule_management/api/hooks/use_fetch_connectors';
+import { useFetchConnectorsQuery } from '../../../../detection_engine/rule_management/api/hooks/use_fetch_connectors_query';
+import { useFetchConnectorTypesQuery } from '../../../../detection_engine/rule_management/api/hooks/use_fetch_connector_types_query';
 import * as i18n from './translations';
 import { RuleSnoozeSection } from './rule_snooze_section';
 import { NotificationAction } from './notification_action';
@@ -159,8 +157,8 @@ const StepRuleActionsReadOnlyComponent: FC<StepRuleActionsReadOnlyProps> = ({
 
   const actionTypeRegistry = triggersActionsUi.actionTypeRegistry as ActionTypeRegistryContract;
 
-  const { data: connectors } = useFetchConnectors();
-  const { data: connectorTypes } = useFetchConnectorTypes();
+  const { data: connectors } = useFetchConnectorsQuery();
+  const { data: connectorTypes } = useFetchConnectorTypesQuery();
 
   const notificationActions = ruleActionsData.actions;
   const responseActions = ruleActionsData.responseActions || [];

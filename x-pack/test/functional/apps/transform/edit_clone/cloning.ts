@@ -189,6 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
+  // Failing: See https://github.com/elastic/kibana/issues/165883
   describe('cloning', function () {
     const transformConfigWithPivot = getTransformConfig();
     const transformConfigWithRuntimeMapping = getTransformConfigWithRuntimeMappings();
@@ -198,7 +199,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await transform.api.createAndRunTransform(
         transformConfigWithPivot.id,
         transformConfigWithPivot
@@ -222,17 +223,17 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithPivot.dest.index);
-      await transform.testResources.deleteIndexPatternByTitle(
+      await transform.testResources.deleteDataViewByTitle(transformConfigWithPivot.dest.index);
+      await transform.testResources.deleteDataViewByTitle(
         transformConfigWithRuntimeMapping.dest.index
       );
 
-      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
+      await transform.testResources.deleteDataViewByTitle(transformConfigWithLatest.dest.index);
       await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
       await transform.api.deleteIndices(transformConfigWithRuntimeMapping.dest.index);
       await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
-      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await transform.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
     const testDataList: TestData[] = [
@@ -396,7 +397,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
-          await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
+          await transform.testResources.deleteDataViewByTitle(testData.destinationIndex);
         });
 
         it('opens the existing transform in the wizard', async () => {
@@ -516,9 +517,16 @@ export default function ({ getService }: FtrProviderContext) {
           );
           await transform.wizard.setTransformDescription(testData.transformDescription);
 
+          await transform.testExecution.logTestStep(
+            'should default the set destination index to job id switch to true'
+          );
+          await transform.wizard.assertDestIndexSameAsIdSwitchExists();
+          await transform.wizard.assertDestIndexSameAsIdCheckState(true);
+
           await transform.testExecution.logTestStep('should input the destination index');
+          await transform.wizard.setDestIndexSameAsIdCheckState(false);
           await transform.wizard.assertDestinationIndexInputExists();
-          await transform.wizard.assertDestinationIndexValue('');
+          await transform.wizard.assertDestinationIndexValue(testData.transformId);
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
           await transform.testExecution.logTestStep('should display the create data view switch');

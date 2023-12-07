@@ -1,5 +1,16 @@
-title: Connector request properties for a xMatters connector
+title: Connector request properties for an xMatters connector
 description: Defines properties for connectors when type is `.xmatters`.
 type: object
-additionalProperties: true
-# TO-DO: Add the properties for this connector.
+properties:
+  configUrl:
+    description: >
+      The request URL for the Elastic Alerts trigger in xMatters.
+      It is applicable only when `usesBasic` is `true`.
+    type:
+      - "string"
+      - "null"
+  usesBasic:
+    description: Specifies whether the connector uses HTTP basic authentication (`true`) or URL authentication (`false`).
+    type: boolean
+    default: true
+    

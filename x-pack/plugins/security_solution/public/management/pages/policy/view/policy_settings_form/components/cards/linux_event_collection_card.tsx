@@ -98,7 +98,6 @@ const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingS
     isDisabled: (config: UIPolicyConfig) => {
       return !config.linux.events.session_data;
     },
-    beta: true,
   },
 ];
 

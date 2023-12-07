@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/infra-plugin",
-  "owner": "@elastic/infra-monitoring-ui",
+  "owner": ["@elastic/infra-monitoring-ui", "@elastic/obs-ux-logs-team", "@elastic/obs-ux-infra_services-team"],
   "description": "This plugin visualizes data from Filebeat and Metricbeat, and integrates with other Observability solutions",
   "plugin": {
     "id": "infra",
@@ -15,13 +15,16 @@
       "charts",
       "data",
       "dataViews",
+      "dataViewEditor",
       "discover",
       "embeddable",
       "features",
       "fieldFormats",
       "lens",
       "logsShared",
+      "metricsDataAccess",
       "observability",
+      "observabilityAIAssistant",
       "observabilityShared",
       "ruleRegistry",
       "security",
@@ -32,16 +35,18 @@
       "usageCollection",
       "visTypeTimeseries"
     ],
-    "optionalPlugins": ["spaces", "ml", "home", "embeddable", "osquery"],
+    "optionalPlugins": ["spaces", "ml", "home", "embeddable", "osquery", "cloud", "profilingDataAccess"],
     "requiredBundles": [
       "unifiedSearch",
       "observability",
+      "observabilityAIAssistant",
       "licenseManagement",
       "kibanaUtils",
       "kibanaReact",
       "ml",
       "embeddable",
-      "controls"
+      "controls",
+      "advancedSettings"
     ]
   }
 }

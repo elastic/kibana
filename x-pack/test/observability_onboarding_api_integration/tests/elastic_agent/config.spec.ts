@@ -31,25 +31,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     const logFilepath = '/my-logs.log';
     const serviceName = 'my-service';
 
-    before(async () => {
-      const req = await observabilityOnboardingApiClient.logMonitoringUser({
-        endpoint: 'POST /internal/observability_onboarding/custom_logs/save',
-        params: {
-          body: {
-            name: 'name',
-            state: {
-              datasetName,
-              namespace,
-              logFilePaths: [logFilepath],
-              serviceName,
-            },
-          },
-        },
-      });
-
-      onboardingId = req.body.onboardingId;
-    });
-
     describe("when onboardingId doesn't exists", () => {
       it('should return input properties empty', async () => {
         const req = await callApi({
@@ -66,17 +47,72 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('when onboardingId exists', () => {
-      it('should return input properties configured', async () => {
-        const req = await callApi({
-          onboardingId,
+      describe('and onboarding type is logFiles', () => {
+        before(async () => {
+          const req = await observabilityOnboardingApiClient.logMonitoringUser({
+            endpoint: 'POST /internal/observability_onboarding/logs/flow',
+            params: {
+              body: {
+                type: 'logFiles',
+                name: 'name',
+                state: {
+                  datasetName,
+                  namespace,
+                  logFilePaths: [logFilepath],
+                  serviceName,
+                },
+              },
+            },
+          });
+
+          onboardingId = req.body.onboardingId;
         });
 
-        expect(req.status).to.be(200);
+        it('should return input properties configured', async () => {
+          const req = await callApi({
+            onboardingId,
+          });
 
-        const ymlConfig = load(req.text);
-        expect(ymlConfig.inputs[0].data_stream.namespace).to.be(namespace);
-        expect(ymlConfig.inputs[0].streams[0].data_stream.dataset).to.be(datasetName);
-        expect(ymlConfig.inputs[0].streams[0].paths).to.be.eql([logFilepath]);
+          expect(req.status).to.be(200);
+
+          const ymlConfig = load(req.text);
+          expect(ymlConfig.inputs[0].data_stream.namespace).to.be(namespace);
+          expect(ymlConfig.inputs[0].streams[0].data_stream.dataset).to.be(datasetName);
+          expect(ymlConfig.inputs[0].streams[0].paths).to.be.eql([logFilepath]);
+          expect(ymlConfig.inputs[0].streams[0].processors[0].add_fields.fields.name).to.be.eql(
+            serviceName
+          );
+        });
+      });
+
+      describe('and onboarding type is systemLogs', () => {
+        before(async () => {
+          const req = await observabilityOnboardingApiClient.logMonitoringUser({
+            endpoint: 'POST /internal/observability_onboarding/logs/flow',
+            params: {
+              body: {
+                type: 'systemLogs',
+                name: 'name',
+              },
+            },
+          });
+
+          onboardingId = req.body.onboardingId;
+        });
+
+        it('should return input properties configured', async () => {
+          const req = await callApi({
+            onboardingId,
+          });
+
+          expect(req.status).to.be(200);
+
+          const ymlConfig = load(req.text);
+          expect(ymlConfig.inputs[0].data_stream.namespace).to.be('default');
+          expect(ymlConfig.inputs[0].streams.length).to.be(2);
+          expect(ymlConfig.inputs[0].streams[0].data_stream.dataset).to.be('system.auth');
+          expect(ymlConfig.inputs[0].streams[1].data_stream.dataset).to.be('system.syslog');
+        });
       });
     });
   });

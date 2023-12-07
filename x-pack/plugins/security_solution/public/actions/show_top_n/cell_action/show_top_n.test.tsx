@@ -6,36 +6,24 @@
  */
 
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-} from '../../../common/mock';
-import { mockHistory } from '../../../common/mock/router';
-import { createStore } from '../../../common/store';
+
 import { createShowTopNCellActionFactory } from './show_top_n';
-import React from 'react';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { StartServices } from '../../../types';
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../show_top_n_component', () => ({
-  TopNAction: () => <span>{'TEST COMPONENT'}</span>,
-}));
-
-const mockServices = createStartServicesMock();
-const { storage } = createSecuritySolutionStorageMock();
-const mockStore = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const mockServices = {
+  ...createStartServicesMock(),
+  topValuesPopover: { showPopover: jest.fn() },
+} as unknown as StartServices;
 
 const element = document.createElement('div');
 document.body.appendChild(element);
 
 describe('createShowTopNCellActionFactory', () => {
   const showTopNActionFactory = createShowTopNCellActionFactory({
-    store: mockStore,
-    history: mockHistory,
     services: mockServices,
   });
   const showTopNAction = showTopNActionFactory({ id: 'testAction' });
@@ -125,7 +113,8 @@ describe('createShowTopNCellActionFactory', () => {
   describe('execute', () => {
     it('should execute normally', async () => {
       await showTopNAction.execute(context);
-      expect(document.body.textContent).toContain('TEST COMPONENT');
+
+      expect(mockServices.topValuesPopover.showPopover).toHaveBeenCalled();
     });
   });
 });

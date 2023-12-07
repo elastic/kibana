@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
-import { UpsellingService } from '../../lib/upsellings';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { updateAppLinks } from '../../links';
 import { links } from '../../links/app_links';
 import { useShowTimeline } from './use_show_timeline';
@@ -83,7 +83,7 @@ describe('use show timeline', () => {
   });
 
   it('hides timeline for blacklist routes', async () => {
-    mockUseLocation.mockReturnValueOnce({ pathname: '/rules/create' });
+    mockUseLocation.mockReturnValueOnce({ pathname: '/rules/add_rules' });
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
       await waitForNextUpdate();

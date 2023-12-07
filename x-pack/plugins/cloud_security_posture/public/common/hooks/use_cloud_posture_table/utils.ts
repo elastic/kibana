@@ -6,17 +6,26 @@
  */
 
 import { useEffect, useCallback, useMemo } from 'react';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import type { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type Query } from '@kbn/es-query';
 import { useKibana } from '../use_kibana';
-import type { FindingsBaseProps, FindingsBaseURLQuery } from '../../types';
+import type {
+  FindingsBaseESQueryConfig,
+  FindingsBaseProps,
+  FindingsBaseURLQuery,
+} from '../../types';
 
-const getBaseQuery = ({ dataView, query, filters }: FindingsBaseURLQuery & FindingsBaseProps) => {
+const getBaseQuery = ({
+  dataView,
+  query,
+  filters,
+  config,
+}: FindingsBaseURLQuery & FindingsBaseProps & FindingsBaseESQueryConfig) => {
   try {
     return {
-      query: buildEsQuery(dataView, query, filters), // will throw for malformed query
+      query: buildEsQuery(dataView, query, filters, config), // will throw for malformed query
     };
   } catch (error) {
     return {
@@ -41,7 +50,7 @@ export const getPaginationTableParams = (
 export const getPaginationQuery = ({
   pageIndex,
   pageSize,
-}: Pick<Pagination, 'pageIndex' | 'pageSize'>) => ({
+}: Required<Pick<Pagination, 'pageIndex' | 'pageSize'>>) => ({
   from: pageIndex * pageSize,
   size: pageSize,
 });
@@ -56,11 +65,13 @@ export const useBaseEsQuery = ({
     data: {
       query: { filterManager, queryString },
     },
+    uiSettings,
   } = useKibana().services;
-
+  const allowLeadingWildcards = uiSettings.get('query:allowLeadingWildcards');
+  const config: EsQueryConfig = useMemo(() => ({ allowLeadingWildcards }), [allowLeadingWildcards]);
   const baseEsQuery = useMemo(
-    () => getBaseQuery({ dataView, filters, query }),
-    [dataView, filters, query]
+    () => getBaseQuery({ dataView, filters, query, config }),
+    [dataView, filters, query, config]
   );
 
   /**

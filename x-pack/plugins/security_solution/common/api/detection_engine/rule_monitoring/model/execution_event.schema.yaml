@@ -1,0 +1,49 @@
+openapi: '3.0.0'
+info:
+  title: Execution Event Schema
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    LogLevel:
+      type: string
+      enum: ['trace', 'debug', 'info', 'warn', 'error']
+
+    RuleExecutionEventType:
+      type: string
+      enum: ['message', 'status-change', 'execution-metrics']
+      description: |-
+        Type of a plain rule execution event:
+        - message: Simple log message of some log level, such as debug, info or error.
+        - status-change: We log an event of this type each time a rule changes its status during an execution.
+        - execution-metrics: We log an event of this type at the end of a rule execution. It contains various execution metrics such as search and indexing durations.
+
+    RuleExecutionEvent:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        sequence:
+          type: integer
+        level:
+          $ref: '#/components/schemas/LogLevel'
+        type:
+          $ref: '#/components/schemas/RuleExecutionEventType'
+        execution_id:
+          type: string
+          minLength: 1
+        message:
+          type: string
+      required:
+        - timestamp
+        - sequence
+        - level
+        - type
+        - execution_id
+        - message
+      description: |-
+        Plain rule execution event. A rule can write many of them during each execution. Events can be of different types and log levels.
+
+        NOTE: This is a read model of rule execution events and it is pretty generic. It contains only a subset of their fields: only those fields that are common to all types of execution events.

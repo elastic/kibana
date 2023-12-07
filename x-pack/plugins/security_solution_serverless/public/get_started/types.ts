@@ -7,17 +7,13 @@
 
 import type { EuiIconProps } from '@elastic/eui';
 import type React from 'react';
+import type { MutableRefObject } from 'react';
+import type { HttpSetup } from '@kbn/core/public';
+
 import type { ProductLine } from '../../common/product';
 
-export interface HeaderSection {
-  description?: string;
-  icon: EuiIconProps;
-  id: string;
-  title: string;
-}
 export interface Section {
-  cards?: Card[];
-  description?: string;
+  cards: Card[];
   icon?: EuiIconProps;
   id: SectionId;
   title: string;
@@ -28,63 +24,130 @@ export interface Badge {
   id: string;
 }
 
-export type StepId = IntroductionSteps;
+export type StepId =
+  | CreateProjectSteps
+  | OverviewSteps
+  | AddIntegrationsSteps
+  | ViewDashboardSteps
+  | EnablePrebuiltRulesSteps
+  | ViewAlertsSteps;
 
-export interface Step {
-  badges: Badge[];
-  description?: string[];
+type AutoCheckAddIntegrationsSteps = ({
+  indicesExist,
+}: {
+  indicesExist: boolean;
+}) => Promise<boolean>;
+type AutoCheckEnablePrebuiltRulesSteps = ({
+  abortSignal,
+  kibanaServicesHttp,
+  onError,
+}: {
+  abortSignal: MutableRefObject<AbortController>;
+  kibanaServicesHttp: HttpSetup;
+  onError?: (error: Error) => void;
+}) => Promise<boolean>;
+
+export type CheckIfStepCompleted<T = StepId> =
+  T extends EnablePrebuiltRulesSteps.enablePrebuiltRules
+    ? AutoCheckEnablePrebuiltRulesSteps
+    : T extends AddIntegrationsSteps.connectToDataSources
+    ? AutoCheckAddIntegrationsSteps
+    : undefined;
+
+export interface Step<T = StepId> {
+  autoCheckIfStepCompleted?: CheckIfStepCompleted<T>;
+  description?: Array<React.ReactNode | string>;
   id: StepId;
+  productLineRequired?: ProductLine[];
   splitPanel?: React.ReactNode;
-  title: string;
+  title?: string;
+  icon?: EuiIconProps;
   timeInMinutes?: number;
 }
 
-export type CardId = GetSetUpCardId | GetMoreFromElasticSecurityCardId;
+export type CardId =
+  | QuickStartSectionCardsId
+  | AddAndValidateYourDataCardsId
+  | GetStartedWithAlertsCardsId;
 
 export interface Card {
-  productLineRequired?: ProductLine[];
-  description?: string | React.ReactNode;
-  icon?: EuiIconProps;
   id: CardId;
   steps?: Step[];
-  title: string;
-  timeInMins?: number;
-  stepsLeft?: number;
+  hideSteps?: boolean;
 }
 
-export type ActiveCards = Record<SectionId, Record<CardId, ActiveCard>>;
+export type ActiveSections = Partial<Record<SectionId, Partial<Record<CardId, ActiveCard>>>>;
 
 export enum SectionId {
-  getSetUp = 'getSetUp',
-  getMoreFromElasticSecurity = 'getMoreFromElasticSecurity',
+  quickStart = 'quick_start',
+  addAndValidateYourData = 'add_and_validate_your_data',
+  getStartedWithAlerts = 'get_started_with_alerts',
 }
 
-export enum GetSetUpCardId {
-  activateAndCreateRules = 'activateAndCreateRules',
-  bringInYourData = 'bringInYourData',
-  introduction = 'introduction',
-  protectYourEnvironmentInRealtime = 'protectYourEnvironmentInRealtime',
+export enum QuickStartSectionCardsId {
+  createFirstProject = 'create_first_project',
+  watchTheOverviewVideo = 'watch_the_overview_video',
 }
 
-export enum IntroductionSteps {
-  watchOverviewVideo = 'watchOverviewVideo',
+export enum AddAndValidateYourDataCardsId {
+  addIntegrations = 'add_integrations',
+  viewDashboards = 'view_dashboards',
 }
 
-export enum GetMoreFromElasticSecurityCardId {
-  masterTheInvestigationsWorkflow = 'masterTheInvestigationsWorkflow',
-  optimizeYourWorkSpace = 'optimizeYourWorkSpace',
-  respondToThreats = 'respondToThreats',
+export enum GetStartedWithAlertsCardsId {
+  enablePrebuiltRules = 'enable_prebuilt_rules',
+  viewAlerts = 'view_alerts',
+}
+
+export enum BadgeId {
+  analytics = 'analytics',
+  cloud = 'cloud',
+  edr = 'edr',
+}
+
+export enum CreateProjectSteps {
+  createFirstProject = 'create_your_first_project',
+}
+
+export enum OverviewSteps {
+  getToKnowElasticSecurity = 'watch_the_overview_video',
+}
+
+export enum AddIntegrationsSteps {
+  connectToDataSources = 'add_integrations',
+}
+
+export enum ViewDashboardSteps {
+  analyzeData = 'view_and_analyze_your_data',
+}
+
+export enum EnablePrebuiltRulesSteps {
+  enablePrebuiltRules = 'enable_prebuilt_rules',
+}
+
+export enum ViewAlertsSteps {
+  viewAlerts = 'view_alerts',
 }
 
 export interface ActiveCard {
   id: CardId;
   timeInMins: number;
   stepsLeft: number;
+  activeStepIds: StepId[] | undefined;
 }
+
+export interface ExpandedCardStep {
+  isExpanded: boolean;
+  expandedSteps: StepId[];
+}
+export type ExpandedCardSteps = Record<CardId, ExpandedCardStep>;
 export interface TogglePanelReducer {
   activeProducts: Set<ProductLine>;
+  activeSections: ActiveSections | null;
+  expandedCardSteps: ExpandedCardSteps;
   finishedSteps: Record<CardId, Set<StepId>>;
-  activeCards: Record<SectionId, Record<CardId, ActiveCard>> | null;
+  totalActiveSteps: number | null;
+  totalStepsLeft: number | null;
 }
 
 export interface ToggleProductAction {
@@ -97,6 +160,22 @@ export interface AddFinishedStepAction {
   payload: { stepId: StepId; cardId: CardId; sectionId: SectionId };
 }
 
+export interface RemoveFinishedStepAction {
+  type: GetStartedPageActions.RemoveFinishedStep;
+  payload: { stepId: StepId; cardId: CardId; sectionId: SectionId };
+}
+
+export interface ToggleStepAction {
+  type: GetStartedPageActions.ToggleExpandedStep;
+  payload: { stepId: StepId; cardId: CardId; isStepExpanded?: boolean };
+}
+
+export type ReducerActions =
+  | ToggleProductAction
+  | AddFinishedStepAction
+  | RemoveFinishedStepAction
+  | ToggleStepAction;
+
 export interface Switch {
   id: ProductLine;
   label: string;
@@ -104,5 +183,39 @@ export interface Switch {
 
 export enum GetStartedPageActions {
   AddFinishedStep = 'addFinishedStep',
+  RemoveFinishedStep = 'removeFinishedStep',
   ToggleProduct = 'toggleProduct',
+  ToggleExpandedStep = 'toggleExpandedStep',
 }
+
+export type OnStepClicked = ({
+  stepId,
+  cardId,
+  sectionId,
+  isExpanded,
+}: {
+  stepId: StepId;
+  cardId: CardId;
+  sectionId: SectionId;
+  isExpanded: boolean;
+}) => void;
+
+export type HandleStepClicked = ({
+  stepId,
+  isExpandedStep,
+}: {
+  stepId: StepId;
+  isExpandedStep: boolean;
+}) => void;
+
+export type ToggleTaskCompleteStatus = ({
+  stepId,
+  cardId,
+  sectionId,
+  undo,
+}: {
+  stepId: StepId;
+  cardId: CardId;
+  sectionId: SectionId;
+  undo?: boolean;
+}) => void;

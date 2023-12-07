@@ -86,7 +86,6 @@ const getCommonProps = () => {
     inspectorAdapters: { requests: new RequestAdapter() },
     onChangeDataView: action('change the data view'),
     onUpdateQuery: action('update the query'),
-    resetSavedSearch: action('reset the saved search the query'),
     savedSearch: savedSearchMock,
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
@@ -159,7 +158,7 @@ export const getPlainRecordLayoutProps = (dataView: DataView) => {
     columns: ['name', 'message', 'bytes'],
     sort: [['date', 'desc']],
     query: {
-      sql: 'SELECT * FROM "kibana_sample_data_ecommerce"',
+      esql: 'FROM "kibana_sample_data_ecommerce"',
     },
     filters: [],
   });

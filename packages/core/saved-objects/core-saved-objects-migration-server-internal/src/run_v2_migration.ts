@@ -8,7 +8,10 @@
 
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
@@ -56,6 +59,8 @@ export interface RunV2MigrationOpts {
   mappingProperties: SavedObjectsTypeMappingDefinitions;
   /** Tells whether this instance should actively participate in the migration or not */
   waitForMigrationCompletion: boolean;
+  /** Capabilities of the ES cluster we're using */
+  esCapabilities: ElasticsearchCapabilities;
 }
 
 export const runV2Migration = async (options: RunV2MigrationOpts): Promise<MigrationResult[]> => {
@@ -147,6 +152,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
           migrationsConfig: options.migrationConfig,
           typeRegistry: options.typeRegistry,
           docLinks: options.docLinks,
+          esCapabilities: options.esCapabilities,
         });
       },
     };

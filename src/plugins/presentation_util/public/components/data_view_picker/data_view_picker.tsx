@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
+import { EuiSelectable, EuiInputPopover, EuiSelectableProps } from '@elastic/eui';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 
-import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 
-import './data_view_picker.scss';
-
-export type DataViewTriggerProps = ToolbarButtonProps & {
+export type DataViewTriggerProps = Omit<ToolbarButtonProps<'standard'>, 'label'> & {
   label: string;
   title?: string;
 };
@@ -26,6 +24,7 @@ export function DataViewPicker({
   onChangeDataViewId,
   trigger,
   selectableProps,
+  ...other
 }: {
   dataViews: DataViewListItem[];
   selectedDataViewId?: string;
@@ -48,33 +47,32 @@ export function DataViewPicker({
     const { label, title, ...rest } = trigger;
     return (
       <ToolbarButton
-        title={title}
+        aria-label={title}
         data-test-subj="open-data-view-picker"
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
+        label={label}
         fullWidth
         {...colorProp}
         {...rest}
-      >
-        {label}
-      </ToolbarButton>
+      />
     );
   };
 
   return (
-    <EuiPopover
-      button={createTrigger()}
-      isOpen={isPopoverOpen}
-      closePopover={() => setPopoverIsOpen(false)}
+    <EuiInputPopover
+      {...other}
+      ownFocus
+      fullWidth
       display="block"
       panelPaddingSize="s"
-      ownFocus
-      panelClassName="presDataViewPicker__panel"
+      isOpen={isPopoverOpen}
+      input={createTrigger()}
+      closePopover={() => setPopoverIsOpen(false)}
+      panelMinWidth={calculateWidthFromEntries(dataViews, ['name', 'id'])}
+      panelProps={{
+        'data-test-subj': 'data-view-picker-popover',
+      }}
     >
-      <EuiPopoverTitle data-test-subj="data-view-picker-title">
-        {i18n.translate('presentationUtil.dataViewPicker.changeDataViewTitle', {
-          defaultMessage: 'Data view',
-        })}
-      </EuiPopoverTitle>
       <EuiSelectable<{
         key?: string;
         label: string;
@@ -102,6 +100,9 @@ export function DataViewPicker({
           compressed: true,
           ...(selectableProps ? selectableProps.searchProps : undefined),
         }}
+        listProps={{
+          truncationProps: { truncation: 'middle' },
+        }}
       >
         {(list, search) => (
           <>
@@ -110,7 +111,7 @@ export function DataViewPicker({
           </>
         )}
       </EuiSelectable>
-    </EuiPopover>
+    </EuiInputPopover>
   );
 }
 

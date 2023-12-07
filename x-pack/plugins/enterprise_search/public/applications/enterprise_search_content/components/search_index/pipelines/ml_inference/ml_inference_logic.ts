@@ -15,6 +15,7 @@ import {
   generateMlInferencePipelineBody,
   getMlInferencePrefixedFieldName,
   getMlModelTypesForModelConfig,
+  ML_INFERENCE_PREFIX,
   parseMlInferenceParametersFromPipeline,
 } from '../../../../../../../common/ml_inference_pipeline';
 import { Status } from '../../../../../../../common/types/api';
@@ -89,14 +90,24 @@ import {
 } from './utils';
 
 export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
-  destinationField: '',
   modelID: '',
   pipelineName: '',
-  sourceField: '',
+  targetField: '',
 };
 
 const API_REQUEST_COMPLETE_STATUSES = [Status.SUCCESS, Status.ERROR];
 const DEFAULT_CONNECTOR_FIELDS = ['body', 'title', 'id', 'type', 'url'];
+
+const getFullTargetFieldName = (
+  sourceField: string,
+  targetField: string | undefined,
+  isTextExpansionModelSelected: boolean
+) => {
+  const suffixedTargetField = `${targetField || sourceField}${
+    isTextExpansionModelSelected ? '_expanded' : ''
+  }`;
+  return getMlInferencePrefixedFieldName(suffixedTargetField);
+};
 
 export interface MLInferencePipelineOption {
   disabled: boolean;
@@ -109,7 +120,9 @@ export interface MLInferencePipelineOption {
 }
 
 interface MLInferenceProcessorsActions {
-  addSelectedFieldsToMapping: () => void;
+  addSelectedFieldsToMapping: (isTextExpansionModelSelected: boolean) => {
+    isTextExpansionModelSelected: boolean;
+  };
   attachApiError: Actions<
     AttachMlInferencePipelineApiLogicArgs,
     AttachMlInferencePipelineResponse
@@ -166,6 +179,7 @@ interface MLInferenceProcessorsActions {
   setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => {
     configuration: InferencePipelineConfiguration;
   };
+  setTargetField: (targetFieldName: string) => { targetFieldName: string };
   startTextExpansionModelSuccess: StartTextExpansionModelApiLogicActions['apiSuccess'];
 }
 
@@ -203,7 +217,9 @@ export const MLInferenceLogic = kea<
   MakeLogicType<MLInferenceProcessorsValues, MLInferenceProcessorsActions>
 >({
   actions: {
-    addSelectedFieldsToMapping: true,
+    addSelectedFieldsToMapping: (isTextExpansionModelSelected: string) => ({
+      isTextExpansionModelSelected,
+    }),
     attachPipeline: true,
     clearFormErrors: true,
     createPipeline: true,
@@ -217,6 +233,7 @@ export const MLInferenceLogic = kea<
     setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => ({
       configuration,
     }),
+    setTargetField: (targetFieldName: string) => ({ targetFieldName }),
   },
   connect: {
     actions: [
@@ -290,14 +307,8 @@ export const MLInferenceLogic = kea<
 
       actions.makeCreatePipelineRequest({
         indexName,
-        inferenceConfig: configuration.inferenceConfig,
-        fieldMappings: configuration.fieldMappings || [
-          // Temporary while we're using single fields for non-ELSER pipelines
-          {
-            sourceField: configuration.sourceField,
-            targetField: getMlInferencePrefixedFieldName(configuration.destinationField),
-          },
-        ],
+        fieldMappings: configuration.fieldMappings ?? [],
+        modelId: configuration.modelID,
         pipelineDefinition: mlInferencePipeline!,
         pipelineName: configuration.pipelineName,
       });
@@ -308,12 +319,11 @@ export const MLInferenceLogic = kea<
       const params = parseMlInferenceParametersFromPipeline(pipelineName, pipeline);
       if (params === null) return;
       actions.setInferencePipelineConfiguration({
-        destinationField: params.destination_field ?? '',
         existingPipeline: true,
         modelID: params.model_id,
         pipelineName,
-        sourceField: params.source_field,
         fieldMappings: params.field_mappings,
+        targetField: '',
       });
     },
     setIndexName: ({ indexName }) => {
@@ -370,17 +380,21 @@ export const MLInferenceLogic = kea<
         step: AddInferencePipelineSteps.Configuration,
       },
       {
-        addSelectedFieldsToMapping: (modal) => {
+        addSelectedFieldsToMapping: (modal, { isTextExpansionModelSelected }) => {
           const {
-            configuration: { fieldMappings },
+            configuration: { fieldMappings, targetField },
             selectedSourceFields,
           } = modal;
 
           const mergedFieldMappings: FieldMapping[] = [
             ...(fieldMappings || []),
-            ...(selectedSourceFields || []).map((fieldName) => ({
+            ...(selectedSourceFields || []).map((fieldName: string) => ({
               sourceField: fieldName,
-              targetField: getMlInferencePrefixedFieldName(`${fieldName}_expanded`),
+              targetField: getFullTargetFieldName(
+                fieldName,
+                targetField,
+                isTextExpansionModelSelected
+              ),
             })),
           ];
 
@@ -389,6 +403,7 @@ export const MLInferenceLogic = kea<
             configuration: {
               ...modal.configuration,
               fieldMappings: mergedFieldMappings,
+              targetField: '',
             },
             selectedSourceFields: [],
           };
@@ -436,6 +451,13 @@ export const MLInferenceLogic = kea<
         setInferencePipelineConfiguration: (modal, { configuration }) => ({
           ...modal,
           configuration,
+        }),
+        setTargetField: (modal, { targetFieldName }) => ({
+          ...modal,
+          configuration: {
+            ...modal.configuration,
+            targetField: targetFieldName,
+          },
         }),
       },
     ],
@@ -512,14 +534,8 @@ export const MLInferenceLogic = kea<
 
         return generateMlInferencePipelineBody({
           model,
-          pipelineName: configuration.pipelineName,
-          fieldMappings: configuration.fieldMappings || [
-            {
-              sourceField: configuration.sourceField,
-              targetField:
-                configuration.destinationField || formatPipelineName(configuration.pipelineName),
-            },
-          ],
+          pipelineName: `${ML_INFERENCE_PREFIX}${configuration.pipelineName}`,
+          fieldMappings: configuration.fieldMappings ?? [],
           inferenceConfig: configuration.inferenceConfig,
         });
       },

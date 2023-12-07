@@ -12,15 +12,15 @@ export const PrivateLocationAttributesCodec = t.intersection([
     label: t.string,
     id: t.string,
     agentPolicyId: t.string,
-    concurrentMonitors: t.number,
     isServiceManaged: t.boolean,
   }),
   t.partial({
     tags: t.array(t.string),
     geo: t.interface({
-      lat: t.union([t.null, t.number, t.string]),
-      lon: t.union([t.null, t.number, t.string]),
+      lat: t.number,
+      lon: t.number,
     }),
+    namespace: t.string,
   }),
 ]);
 

@@ -32,6 +32,7 @@
     "@kbn/i18n-react",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
+    "@kbn/data-views-plugin",
 
   ],
   "exclude": [

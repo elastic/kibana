@@ -21,6 +21,7 @@ import {
 import { EuiPanel } from '@elastic/eui';
 import { keyBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { TopNSample, TopNSubchart } from '../../../common/topn';
 import { useKibanaTimeZoneSetting } from '../../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../../hooks/use_profiling_charts_theme';
@@ -83,7 +84,6 @@ export function StackedBarChart({
             height={128}
             width={MAX_TOOLTIP_WIDTH}
             showAxes={false}
-            onShowMoreClick={null}
             padTitle={false}
           />
         </EuiPanel>
@@ -120,6 +120,7 @@ export function StackedBarChart({
         onElementOut={() => {
           setHighlightedSample(undefined);
         }}
+        locale={i18n.getLocale()}
       />
       <Tooltip customTooltip={CustomTooltipWithSubChart} />
       {charts.map((chart) => (
