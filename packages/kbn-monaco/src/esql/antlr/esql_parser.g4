@@ -20,7 +20,8 @@ query
     ;
 
 sourceCommand
-    : fromCommand
+    : explainCommand
+    | fromCommand
     | rowCommand
     | showCommand
     ;
