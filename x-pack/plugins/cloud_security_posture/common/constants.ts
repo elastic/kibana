@@ -78,6 +78,8 @@ export const RULE_FAILED = `failed`;
 
 export const POSTURE_TYPE_ALL = 'all';
 
+export const CSPM_FINDINGS_STATS_INTERVAL = 5;
+
 // A mapping of in-development features to their status. These features should be hidden from users but can be easily
 // activated via a simple code change in a single location.
 export const INTERNAL_FEATURE_FLAGS = {

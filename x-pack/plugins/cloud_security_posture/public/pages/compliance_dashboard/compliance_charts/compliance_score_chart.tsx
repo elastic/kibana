@@ -132,7 +132,7 @@ const CompactPercentageLabels = ({
   </>
 );
 
-const NonCompactPercentageLabels = ({
+const PercentageLabels = ({
   onEvalCounterClick,
   stats,
 }: {
@@ -301,7 +301,7 @@ export const ComplianceScoreChart = ({
                   onEvalCounterClick={onEvalCounterClick}
                 />
               ) : (
-                <NonCompactPercentageLabels
+                <PercentageLabels
                   stats={{ totalPassed: data.totalPassed, totalFailed: data.totalFailed }}
                   onEvalCounterClick={onEvalCounterClick}
                 />

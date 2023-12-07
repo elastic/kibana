@@ -19,6 +19,7 @@ import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_i
 import { FindingsStatsTaskResult, ScoreByPolicyTemplateBucket, VulnSeverityAggs } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  CSPM_FINDINGS_STATS_INTERVAL,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULNERABILITIES_SEVERITY,
@@ -36,7 +37,6 @@ import { toBenchmarkMappingFieldKey } from '../lib/mapping_field_util';
 
 const CSPM_FINDINGS_STATS_TASK_ID = 'cloud_security_posture-findings_stats';
 const CSPM_FINDINGS_STATS_TASK_TYPE = 'cloud_security_posture-stats_task';
-export const CSPM_FINDINGS_STATS_INTERVAL = 5;
 
 export async function scheduleFindingsStatsTask(
   taskManager: TaskManagerStartContract,
