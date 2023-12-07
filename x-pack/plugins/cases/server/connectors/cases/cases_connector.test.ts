@@ -148,6 +148,8 @@ describe('CasesConnector', () => {
               id: groupedAlertsWithOracleKey[2].oracleKey,
               grouping: groupedAlertsWithOracleKey[2].grouping,
               version: 'so-version-2',
+              createdAt: '2023-11-13T10:23:42.769Z',
+              updatedAt: '2023-11-13T10:23:42.769Z',
             },
           ]),
           bulkUpdateRecord: mockBulkUpdateRecord.mockResolvedValue([]),
@@ -304,6 +306,8 @@ describe('CasesConnector', () => {
               id: groupedAlertsWithOracleKey[2].oracleKey,
               grouping: groupedAlertsWithOracleKey[2].grouping,
               version: 'so-version-2',
+              createdAt: '2023-11-13T10:23:42.769Z',
+              updatedAt: '2023-11-13T10:23:42.769Z',
             },
             // Returning errors to verify that the code does not return them
             {
@@ -382,10 +386,22 @@ describe('CasesConnector', () => {
           expect(mockGetCaseId).toBeCalledTimes(3);
 
           /**
+           * Oracle record index: 0
+           * Should update the counter
+           */
+          expect(mockGetCaseId).nthCalledWith(1, {
+            counter: 2,
+            grouping: { 'dest.ip': '0.0.0.1', 'host.name': 'A' },
+            owner: 'cases',
+            ruleId: 'rule-test-id',
+            spaceId: 'default',
+          });
+
+          /**
            * Oracle record index: 1
            * Should not update the counter
            */
-          expect(mockGetCaseId).nthCalledWith(1, {
+          expect(mockGetCaseId).nthCalledWith(2, {
             counter: 1,
             grouping: { 'dest.ip': '0.0.0.1', 'host.name': 'B' },
             owner: 'cases',
@@ -397,21 +413,9 @@ describe('CasesConnector', () => {
            * Oracle record index: 3
            * Not found. Created.
            */
-          expect(mockGetCaseId).nthCalledWith(2, {
+          expect(mockGetCaseId).nthCalledWith(3, {
             counter: 1,
             grouping: { 'dest.ip': '0.0.0.3', 'host.name': 'B' },
-            owner: 'cases',
-            ruleId: 'rule-test-id',
-            spaceId: 'default',
-          });
-
-          /**
-           * Oracle record index: 0
-           * Should update the counter
-           */
-          expect(mockGetCaseId).nthCalledWith(3, {
-            counter: 2,
-            grouping: { 'dest.ip': '0.0.0.1', 'host.name': 'A' },
             owner: 'cases',
             ruleId: 'rule-test-id',
             spaceId: 'default',

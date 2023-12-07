@@ -9,7 +9,7 @@ import stringify from 'json-stable-stringify';
 import pMap from 'p-map';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
-import { partition, pick } from 'lodash';
+import { pick } from 'lodash';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from '@kbn/core/server';
 import dateMath from '@kbn/datemath';
@@ -109,9 +109,16 @@ export class CasesConnector extends SubActionConnector<
     /**
      * Add circuit breakers to the number of oracles they can be created or retrieved
      */
-    const oracleRecordsMap = await this.upsertOracleRecords(params, groupedAlertsWithOracleKey);
+    const oracleRecordsMap = await this.upsertOracleRecords(groupedAlertsWithOracleKey);
+    const oracleRecordMapWithTimeWindowHandled = await this.handleTimeWindow(
+      params,
+      oracleRecordsMap
+    );
 
-    const groupedAlertsWithCaseId = this.generateCaseIds(params, oracleRecordsMap);
+    const groupedAlertsWithCaseId = this.generateCaseIds(
+      params,
+      oracleRecordMapWithTimeWindowHandled
+    );
 
     const groupedAlertsWithCases = await this.upsertCases(
       params,
@@ -185,10 +192,8 @@ export class CasesConnector extends SubActionConnector<
   }
 
   private async upsertOracleRecords(
-    params: CasesConnectorRunParams,
     groupedAlertsWithOracleKey: Map<string, GroupedAlertsWithOracleKey>
   ): Promise<Map<string, GroupedAlertsWithOracleRecords>> {
-    const { timeWindow } = params;
     const bulkCreateReq: BulkCreateOracleRecordRequest = [];
     const oracleRecordMap = new Map<string, GroupedAlertsWithOracleRecords>();
 
@@ -206,14 +211,9 @@ export class CasesConnector extends SubActionConnector<
     const bulkGetRes = await this.casesOracleService.bulkGetRecords(ids);
     const [bulkGetValidRecords, bulkGetRecordsErrors] = partitionRecordsByError(bulkGetRes);
 
-    const [recordsToIncreaseCounter, recordsWithoutIncreasedCounter] = partition(
-      bulkGetValidRecords,
-      (req) => this.isTimeWindowPassed(timeWindow, req.updatedAt ?? req.createdAt)
-    );
+    addRecordToMap(bulkGetValidRecords);
 
-    addRecordToMap(recordsWithoutIncreasedCounter);
-
-    if (bulkGetRecordsErrors.length === 0 && recordsToIncreaseCounter.length === 0) {
+    if (bulkGetRecordsErrors.length === 0) {
       return oracleRecordMap;
     }
 
@@ -234,16 +234,40 @@ export class CasesConnector extends SubActionConnector<
     }
 
     const bulkCreateRes = await this.casesOracleService.bulkCreateRecord(bulkCreateReq);
-    const bulkUpdateValidRecords = await this.increaseOracleRecordCounter(recordsToIncreaseCounter);
 
     /**
      * TODO: Throw/Retry on errors
      */
     const [bulkCreateValidRecords, _bulkCreateErrors] = partitionRecordsByError(bulkCreateRes);
 
-    addRecordToMap([...bulkCreateValidRecords, ...bulkUpdateValidRecords]);
+    addRecordToMap(bulkCreateValidRecords);
 
     return oracleRecordMap;
+  }
+
+  private async handleTimeWindow(
+    params: CasesConnectorRunParams,
+    oracleRecordMap: Map<string, GroupedAlertsWithOracleRecords>
+  ) {
+    const { timeWindow } = params;
+    const oracleRecordMapWithIncreasedCounters = new Map(oracleRecordMap);
+
+    const recordsToIncreaseCounter = Array.from(oracleRecordMap.values())
+      .filter(({ oracleRecord }) =>
+        this.isTimeWindowPassed(timeWindow, oracleRecord.updatedAt ?? oracleRecord.createdAt)
+      )
+      .map(({ oracleRecord }) => oracleRecord);
+
+    const bulkUpdateValidRecords = await this.increaseOracleRecordCounter(recordsToIncreaseCounter);
+
+    for (const res of bulkUpdateValidRecords) {
+      if (oracleRecordMap.has(res.id)) {
+        const data = oracleRecordMap.get(res.id) as GroupedAlertsWithOracleRecords;
+        oracleRecordMapWithIncreasedCounters.set(res.id, { ...data, oracleRecord: res });
+      }
+    }
+
+    return oracleRecordMapWithIncreasedCounters;
   }
 
   private async increaseOracleRecordCounter(
