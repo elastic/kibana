@@ -121,6 +121,30 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).toThrow();
     });
 
+    it('throws if there is a non valid letter at the end', () => {
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: '10d#' }))
+      ).toThrow();
+    });
+
+    it('throws if there is a valid letter at the end', () => {
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: '10dd' }))
+      ).toThrow();
+    });
+
+    it('throws if there is a digit at the end', () => {
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: '10d2' }))
+      ).toThrow();
+    });
+
+    it('throws if there are two valid formats in sequence', () => {
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: '1d2d' }))
+      ).toThrow();
+    });
+
     it('accepts double digit numbers', () => {
       expect(() =>
         CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: '10d' }))
