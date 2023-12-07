@@ -7,7 +7,6 @@
 
 import { useEffect, useMemo } from 'react';
 import { useInstalledIntegrations } from '../../../../../detections/components/rules/related_integrations/use_installed_integrations';
-import { ManagedUserDatasetKey } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import { UsersQueries } from '../../../../../../common/search_strategy';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
@@ -37,10 +36,7 @@ export const useManagedUser = (userName: string, observedUser: ObserverUser) => 
   } = useSearchStrategy<UsersQueries.managedDetails>({
     factoryQueryType: UsersQueries.managedDetails,
     initialResult: {
-      users: {
-        [ManagedUserDatasetKey.ENTRA]: undefined,
-        [ManagedUserDatasetKey.OKTA]: undefined,
-      },
+      users: {},
     },
     errorMessage: i18n.FAIL_MANAGED_USER,
   });
