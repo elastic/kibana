@@ -26,6 +26,8 @@ import {
   logicalCSS,
   keys,
   EuiToolTip,
+  EuiText,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
@@ -363,6 +365,22 @@ export function SavedQueryManagementList({
                 <EuiPanel color="transparent" paddingSize="s" css={{ paddingBottom: 0 }}>
                   {search}
                 </EuiPanel>
+                <EuiPanel color="transparent" paddingSize="s">
+                  <EuiText size="xs" color="subdued">
+                    {i18n.translate('unifiedSearch.search.searchBar.savedQueryTotalQueryCount', {
+                      defaultMessage: '{totalQueryCount, plural, one {# query} other {# queries}}',
+                      values: { totalQueryCount },
+                    })}
+                    {Boolean(selectedSavedQuery) &&
+                      ` | ${i18n.translate(
+                        'unifiedSearch.search.searchBar.savedQuerySelectedQueryCount',
+                        {
+                          defaultMessage: '1 selected',
+                        }
+                      )}`}
+                  </EuiText>
+                </EuiPanel>
+                <EuiHorizontalRule margin="none" />
                 {list}
               </>
             )}
@@ -395,25 +413,29 @@ export function SavedQueryManagementList({
         >
           {Boolean(showSaveQuery) && (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                display="base"
-                size="s"
-                iconType="trash"
-                color="danger"
-                disabled={!selectedSavedQuery}
-                title={i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
+              <EuiToolTip
+                position="top"
+                content={i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
                   defaultMessage: 'Delete query',
                 })}
-                aria-label={i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
-                  defaultMessage: 'Delete query',
-                })}
-                data-test-subj="delete-saved-query-button"
-                onClick={() => {
-                  if (selectedSavedQuery) {
-                    handleDelete(selectedSavedQuery);
-                  }
-                }}
-              />
+              >
+                <EuiButtonIcon
+                  display="base"
+                  size="s"
+                  iconType="trash"
+                  color="danger"
+                  disabled={!selectedSavedQuery}
+                  aria-label={i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
+                    defaultMessage: 'Delete query',
+                  })}
+                  data-test-subj="delete-saved-query-button"
+                  onClick={() => {
+                    if (selectedSavedQuery) {
+                      handleDelete(selectedSavedQuery);
+                    }
+                  }}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
