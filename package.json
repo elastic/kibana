@@ -92,7 +92,8 @@
     "**/remark-parse/trim": "1.0.1",
     "**/typescript": "4.7.4",
     "**/underscore": "^1.13.1",
-    "globby/fast-glob": "^3.2.11"
+    "globby/fast-glob": "^3.2.11",
+    "wrap-ansi": "7.0.0"
   },
   "dependencies": {
     "@babel/runtime": "^7.21.0",
@@ -321,7 +322,7 @@
     "prop-types": "^15.7.2",
     "proxy-from-env": "1.0.0",
     "puid": "1.0.7",
-    "puppeteer": "21.3.6",
+    "puppeteer": "21.5.2",
     "query-string": "^6.13.2",
     "random-word-slugs": "^0.0.5",
     "raw-loader": "^3.1.0",
