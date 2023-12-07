@@ -228,7 +228,7 @@ export const waitForHostToEnroll = async (
       await esClient?.search({
         index: [
           '.fleet-agents',
-          '.metrics-endpoint.metadata_current_default',
+          'metrics-endpoint.metadata_current_default',
           '.metrics-endpoint.metadata_united_default',
         ],
       }),
