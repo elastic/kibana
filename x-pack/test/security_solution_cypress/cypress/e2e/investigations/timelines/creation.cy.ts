@@ -48,20 +48,15 @@ import { createTimeline } from '../../../tasks/timelines';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../urls/navigation';
 
-// Failing: See https://github.com/elastic/kibana/issues/172304
-describe.skip('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
+describe('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     deleteTimelines();
     login();
     createTimelineTemplate(getTimeline());
   });
 
-  beforeEach(() => {
-    login();
-    visit(TIMELINE_TEMPLATES_URL);
-  });
-
   it('Should have the same query and open the timeline modal', () => {
+    visit(TIMELINE_TEMPLATES_URL);
     selectCustomTemplates();
     expandEventAction();
     clickingOnCreateTimelineFormTemplateBtn();
@@ -151,16 +146,16 @@ describe('Timelines', (): void => {
     }
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172031
-  describe.skip('shows the different timeline states', () => {
+  describe('shows the different timeline states', () => {
     before(() => {
       login();
-      visitWithTimeRange(OVERVIEW_URL);
-      openTimelineUsingToggle();
-      createNewTimeline();
+      deleteTimelines();
+      visitWithTimeRange(TIMELINES_URL);
     });
 
     it('should show the correct timeline status', { tags: ['@ess', '@serverless'] }, () => {
+      createTimeline();
+
       // Unsaved
       cy.get(TIMELINE_PANEL).should('be.visible');
       cy.get(TIMELINE_STATUS).should('be.visible');
@@ -186,8 +181,8 @@ describe('Timelines', (): void => {
 
   describe('saves timeline as new', () => {
     before(() => {
-      deleteTimelines();
       login();
+      deleteTimelines();
       visitWithTimeRange(TIMELINES_URL);
     });
 
