@@ -1,0 +1,459 @@
+{
+  "id": "@kbn/elastic-assistant-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.getAnonymizedValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getAnonymizedValue",
+        "description": [],
+        "signature": [
+          "({ currentReplacements, rawValue, }: { currentReplacements: Record<string, string> | undefined; rawValue: string; }) => string"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/get_anonymized_value/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.getAnonymizedValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  currentReplacements,\n  rawValue,\n}",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/get_anonymized_value/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.getAnonymizedValue.$1.currentReplacements",
+                "type": "Object",
+                "tags": [],
+                "label": "currentReplacements",
+                "description": [],
+                "signature": [
+                  "Record<string, string> | undefined"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/get_anonymized_value/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.getAnonymizedValue.$1.rawValue",
+                "type": "string",
+                "tags": [],
+                "label": "rawValue",
+                "description": [],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/get_anonymized_value/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.getIsDataAnonymizable",
+        "type": "Function",
+        "tags": [],
+        "label": "getIsDataAnonymizable",
+        "description": [],
+        "signature": [
+          "(rawData: string | Record<string, string[]>) => boolean"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.getIsDataAnonymizable.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rawData",
+            "description": [],
+            "signature": [
+              "string | Record<string, string[]>"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.isAllowed",
+        "type": "Function",
+        "tags": [],
+        "label": "isAllowed",
+        "description": [],
+        "signature": [
+          "({ allowSet, field }: { allowSet: Set<string>; field: string; }) => boolean"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.isAllowed.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ allowSet, field }",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.isAllowed.$1.allowSet",
+                "type": "Object",
+                "tags": [],
+                "label": "allowSet",
+                "description": [],
+                "signature": [
+                  "Set<string>"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.isAllowed.$1.field",
+                "type": "string",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.isAnonymized",
+        "type": "Function",
+        "tags": [],
+        "label": "isAnonymized",
+        "description": [],
+        "signature": [
+          "({ allowReplacementSet, field, }: { allowReplacementSet: Set<string>; field: string; }) => boolean"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.isAnonymized.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  allowReplacementSet,\n  field,\n}",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.isAnonymized.$1.allowReplacementSet",
+                "type": "Object",
+                "tags": [],
+                "label": "allowReplacementSet",
+                "description": [],
+                "signature": [
+                  "Set<string>"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.isAnonymized.$1.field",
+                "type": "string",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.isDenied",
+        "type": "Function",
+        "tags": [],
+        "label": "isDenied",
+        "description": [],
+        "signature": [
+          "({ allowSet, field }: { allowSet: Set<string>; field: string; }) => boolean"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.isDenied.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ allowSet, field }",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.isDenied.$1.allowSet",
+                "type": "Object",
+                "tags": [],
+                "label": "allowSet",
+                "description": [],
+                "signature": [
+                  "Set<string>"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.isDenied.$1.field",
+                "type": "string",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.transformRawData",
+        "type": "Function",
+        "tags": [],
+        "label": "transformRawData",
+        "description": [],
+        "signature": [
+          "({ allow, allowReplacement, currentReplacements, getAnonymizedValue, onNewReplacements, rawData, }: { allow: string[]; allowReplacement: string[]; currentReplacements: Record<string, string> | undefined; getAnonymizedValue: ({ currentReplacements, rawValue, }: { currentReplacements: Record<string, string> | undefined; rawValue: string; }) => string; onNewReplacements?: ((replacements: Record<string, string>) => void) | undefined; rawData: string | Record<string, unknown[]>; }) => string"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/transform_raw_data/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.transformRawData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  allow,\n  allowReplacement,\n  currentReplacements,\n  getAnonymizedValue,\n  onNewReplacements,\n  rawData,\n}",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/transform_raw_data/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.transformRawData.$1.allow",
+                "type": "Array",
+                "tags": [],
+                "label": "allow",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/transform_raw_data/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.transformRawData.$1.allowReplacement",
+                "type": "Array",
+                "tags": [],
+                "label": "allowReplacement",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/transform_raw_data/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.transformRawData.$1.currentReplacements",
+                "type": "Object",
+                "tags": [],
+                "label": "currentReplacements",
+                "description": [],
+                "signature": [
+                  "Record<string, string> | undefined"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/transform_raw_data/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.transformRawData.$1.getAnonymizedValue",
+                "type": "Function",
+                "tags": [],
+                "label": "getAnonymizedValue",
+                "description": [],
+                "signature": [
+                  "({ currentReplacements, rawValue, }: { currentReplacements: Record<string, string> | undefined; rawValue: string; }) => string"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/transform_raw_data/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/elastic-assistant-common",
+                    "id": "def-common.transformRawData.$1.getAnonymizedValue.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "{\n    currentReplacements,\n    rawValue,\n  }",
+                    "description": [],
+                    "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/transform_raw_data/index.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/elastic-assistant-common",
+                        "id": "def-common.transformRawData.$1.getAnonymizedValue.$1.currentReplacements",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "currentReplacements",
+                        "description": [],
+                        "signature": [
+                          "Record<string, string> | undefined"
+                        ],
+                        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/transform_raw_data/index.tsx",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/elastic-assistant-common",
+                        "id": "def-common.transformRawData.$1.getAnonymizedValue.$1.rawValue",
+                        "type": "string",
+                        "tags": [],
+                        "label": "rawValue",
+                        "description": [],
+                        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/transform_raw_data/index.tsx",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.transformRawData.$1.onNewReplacements",
+                "type": "Function",
+                "tags": [],
+                "label": "onNewReplacements",
+                "description": [],
+                "signature": [
+                  "((replacements: Record<string, string>) => void) | undefined"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/transform_raw_data/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/elastic-assistant-common",
+                    "id": "def-common.transformRawData.$1.onNewReplacements.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "replacements",
+                    "description": [],
+                    "signature": [
+                      "Record<string, string>"
+                    ],
+                    "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/transform_raw_data/index.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.transformRawData.$1.rawData",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "rawData",
+                "description": [],
+                "signature": [
+                  "string | Record<string, unknown[]>"
+                ],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/transform_raw_data/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
