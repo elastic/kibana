@@ -25,14 +25,9 @@
   flex: 0 0 auto;
   height: $lnsSuggestionHeight;
   margin-right: $euiSizeS;
-<<<<<<< HEAD
   margin-left: calc($euiSizeXS / 2);
   margin-bottom: calc($euiSizeXS / 2);
-=======
-  margin-left: $euiSizeXS / 2;
-  margin-bottom: $euiSizeXS / 2;
   padding: 0 $euiSizeS;
->>>>>>> 6628232433c0144f7564b22d8e6d2941425431ae
   box-shadow: none !important; // sass-lint:disable-line no-important
 
   &:focus {
