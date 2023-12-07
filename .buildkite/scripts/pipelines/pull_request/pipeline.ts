@@ -9,8 +9,7 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
-// import { areChangesSkippable, doAnyChangesMatch } from '#pipeline-utils';
-import { doAnyChangesMatch } from '#pipeline-utils';
+import { areChangesSkippable, doAnyChangesMatch } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 
@@ -40,17 +39,17 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
 (async () => {
   try {
-    // const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
+    const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
-    // if (skippable) {
-    // console.log('All changes in PR are skippable. Skipping CI.');
+    if (skippable) {
+      console.log('All changes in PR are skippable. Skipping CI.');
 
-    // Since we skip everything, including post-build, we need to at least make sure the commit status gets set
-    execSync('BUILD_SUCCESSFUL=true .buildkite/scripts/lifecycle/commit_status_complete.sh', {
-      stdio: 'inherit',
-    });
-    process.exit(0);
-    // }
+      // Since we skip everything, including post-build, we need to at least make sure the commit status gets set
+      execSync('BUILD_SUCCESSFUL=true .buildkite/scripts/lifecycle/commit_status_complete.sh', {
+        stdio: 'inherit',
+      });
+      process.exit(0);
+    }
 
     const pipeline = [];
 
