@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import * as fs from 'fs';
-import { resolve } from 'path';
 import { User } from './session_manager';
 
 export const getProjectType = (serverArgs: string[]) => {
@@ -19,18 +17,13 @@ export const getProjectType = (serverArgs: string[]) => {
   return svlArg[0].split('=')[1];
 };
 
-/**
- * Loads cloud users from '.ftr/role_users.json'
- * QAF prepares the file for CI pipelines, make sure to add it manually for local run
- */
-export const readCloudUsersFromFile = (): Array<[string, User]> => {
-  const cloudRoleUsersFilePath = resolve(REPO_ROOT, '.ftr', 'role_users.json');
-  if (!fs.existsSync(cloudRoleUsersFilePath)) {
-    throw new Error(`Please define user roles with email/password in ${cloudRoleUsersFilePath}`);
+export const readCloudUsersFromFile = (filePath: string): Array<[string, User]> => {
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Please define user roles with email/password in ${filePath}`);
   }
-  const data = fs.readFileSync(cloudRoleUsersFilePath, 'utf8');
+  const data = fs.readFileSync(filePath, 'utf8');
   if (data.length === 0) {
-    throw new Error(`'${cloudRoleUsersFilePath}' is empty: no roles are defined`);
+    throw new Error(`'${filePath}' is empty: no roles are defined`);
   }
 
   return Object.entries(JSON.parse(data)) as Array<[string, User]>;

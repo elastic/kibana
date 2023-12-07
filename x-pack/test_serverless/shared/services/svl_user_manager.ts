@@ -5,15 +5,26 @@
  * 2.0.
  */
 
-import { SAMLSessionManager } from '@kbn/test';
+import { SamlSessionManager } from '@kbn/test';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
   const isCloud = !!process.env.TEST_CLOUD;
+
   // Sharing the instance within FTR config run means cookies are persistent for each role between tests.
-  const sessionManager = new SAMLSessionManager(config, log, isCloud);
+  const sessionManager = new SamlSessionManager({
+    hostOptions: {
+      protocol: config.get('servers.kibana.protocol'),
+      hostname: config.get('servers.kibana.hostname'),
+      port: isCloud ? undefined : config.get('servers.kibana.port'),
+      username: config.get('servers.kibana.username'),
+      password: config.get('servers.kibana.password'),
+    },
+    log,
+    isCloud
+  });
 
   return sessionManager;
 }

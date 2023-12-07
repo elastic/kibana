@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
+import { resolve } from 'path';
 import Url from 'url';
-import type { Config } from '../functional_test_runner';
 import { KbnClient } from '../kbn_client';
-import { getProjectType, readCloudUsersFromFile } from './helper';
+import { readCloudUsersFromFile } from './helper';
 import { createCloudSAMLSession, createLocalSAMLSession, Session } from './saml_auth';
 
 export interface User {
@@ -20,54 +21,59 @@ export interface User {
 
 export type Role = string;
 
-export class SAMLSessionManager {
-  private readonly config: Config;
-  private readonly log: ToolingLog;
-  private readonly sessionCache;
+export interface HostOptions {
+  protocol: 'http' | 'https';
+  hostname: string;
+  port?: number;
+  username: string;
+  password: string;
+}
+
+export interface SamlSessionManagerOptions {
+  hostOptions: HostOptions;
+  isCloud: boolean;
+  log: ToolingLog;
+}
+
+/**
+ * Manages cookies assosiated with user roles
+ */
+export class SamlSessionManager {
   private readonly isCloud: boolean;
   private readonly kbnHost: string;
   private readonly kbnClient: KbnClient;
-  private readonly roleToUserMap: Map<string, User>;
-  private readonly svlProjectType: string;
-  constructor(config: Config, log: ToolingLog, isCloud: boolean) {
-    this.config = config;
-    this.log = log;
-    this.sessionCache = new Map<Role, Session>();
-    this.isCloud = isCloud;
-    this.roleToUserMap = new Map<string, User>();
+  private readonly log: ToolingLog;
+  private readonly roleToUserMap: Map<Role, User>;
+  private readonly sessionCache: Map<Role, Session>;
+  private readonly userRoleFilePath = resolve(REPO_ROOT, '.ftr', 'role_users.json');
 
-    const hostOptions = {
-      protocol: this.config.get('servers.kibana.protocol'),
-      hostname: this.config.get('servers.kibana.hostname'),
-      port: isCloud ? undefined : this.config.get('servers.kibana.port'),
-    };
-    this.kbnHost = Url.format(hostOptions);
+  constructor(options: SamlSessionManagerOptions) {
+    this.isCloud = options.isCloud;
+    this.log = options.log;
+    const hostOptionsWithoutAuth = {
+      protocol: options.hostOptions.protocol,
+      hostname: options.hostOptions.hostname,
+      port: options.hostOptions.port,
+    }
+    this.kbnHost = Url.format(hostOptionsWithoutAuth);
     this.kbnClient = new KbnClient({
-      log: this.log,
-      url: Url.format({
-        ...hostOptions,
-        auth: `${this.config.get('servers.kibana.username')}:${this.config.get(
-          'servers.kibana.password'
-        )}`,
-      }),
-    });
-    this.svlProjectType = getProjectType(this.config.get('kbnTestServer.serverArgs'));
+       log: this.log,
+       url: Url.format({
+         ...hostOptionsWithoutAuth,
+         auth: `${options.hostOptions.username}:${options.hostOptions.password}`,
+       }),
+      });
+    this.sessionCache = new Map<Role, Session>();
+    this.roleToUserMap = new Map<Role, User>();
   }
 
-  // we should split packages/kbn-es/src/serverless_resources/roles.yml into 3 different files
-
-  // getLocalUsers = () => {
-  //   const rolesDefinitionFilePath = resolve(
-  //     REPO_ROOT,
-  //     'packages/kbn-es/src/serverless_resources/roles.yml'
-  //   );
-  //   const roles: string[] = Object.keys(loadYaml(fs.readFileSync(rolesDefinitionFilePath, 'utf8')));
-  // };
-
+  /**
+   * Loads cloud users from '.ftr/role_users.json'
+   * QAF prepares the file for CI pipelines, make sure to add it manually for local run
+   */
   private getCloudUsers = () => {
-    // Loading cloud users on the first call
     if (this.roleToUserMap.size === 0) {
-      const data = readCloudUsersFromFile();
+      const data = readCloudUsersFromFile(this.userRoleFilePath);
       for (const [roleName, user] of data) {
         this.roleToUserMap.set(roleName, user);
       }
@@ -80,7 +86,7 @@ export class SAMLSessionManager {
     if (this.getCloudUsers().has(role)) {
       return this.getCloudUsers().get(role)!;
     } else {
-      throw new Error(`User with '${role}' role is not defined for ${this.svlProjectType} project`);
+      throw new Error(`User with '${role}' role is not defined`);
     }
   };
 
@@ -92,7 +98,7 @@ export class SAMLSessionManager {
     let session: Session;
 
     if (this.isCloud) {
-      this.log.debug(`new SAML authentication with '${role}' role`);
+      this.log.debug(`new cloud SAML authentication with '${role}' role`);
       const kbnVersion = await this.kbnClient.version.get();
       const { email, password } = this.getCloudUserByRole(role);
       session = await createCloudSAMLSession({
