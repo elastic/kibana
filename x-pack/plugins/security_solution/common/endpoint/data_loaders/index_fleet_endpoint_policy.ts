@@ -60,7 +60,6 @@ export const indexFleetEndpointPolicy = usageTracker.track(
       description: `Policy created with endpoint data generator (${policyName})`,
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
-      is_managed: false,
     };
 
     let agentPolicy: AxiosResponse<CreateAgentPolicyResponse>;
