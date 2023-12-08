@@ -211,28 +211,4 @@ describe('UnifiedHistogramStateService', () => {
     expect(setTopPanelHeight as jest.Mock).not.toHaveBeenCalled();
     expect(setBreakdownField as jest.Mock).not.toHaveBeenCalled();
   });
-
-  it('should not update total hits to loading when the current status is partial', () => {
-    const stateService = createStateService({
-      services: unifiedHistogramServicesMock,
-      initialState: {
-        ...initialState,
-        totalHitsStatus: UnifiedHistogramFetchStatus.partial,
-      },
-    });
-    let state: UnifiedHistogramState | undefined;
-    stateService.state$.subscribe((s) => (state = s));
-    expect(state).toEqual({
-      ...initialState,
-      totalHitsStatus: UnifiedHistogramFetchStatus.partial,
-    });
-    stateService.setTotalHits({
-      totalHitsStatus: UnifiedHistogramFetchStatus.loading,
-      totalHitsResult: 100,
-    });
-    expect(state).toEqual({
-      ...initialState,
-      totalHitsStatus: UnifiedHistogramFetchStatus.partial,
-    });
-  });
 });

@@ -224,8 +224,9 @@ export function Chart({
   const a11yCommonProps = {
     id: 'unifiedHistogramCollapsablePanel',
     'aria-label': i18n.translate('unifiedHistogram.collapsablePanelAriaLabel', {
-      defaultMessage: 'Histogram chart',
+      defaultMessage: 'Chart',
     }),
+    'aria-role': 'region',
   };
 
   if (Boolean(renderCustomChartToggleActions) && !chartVisible) {
