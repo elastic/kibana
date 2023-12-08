@@ -116,6 +116,7 @@ export const getAwsCredentialsFormAgentlessOptions = (): AwsCredentialsTypeOptio
     ({ value }) => value === 'direct_access_keys' || value === 'temporary_keys'
   );
 
+export const DEFAULT_AWS_CREDENTIALS_TYPE = 'cloud_formation';
 export const DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE = 'assume_role';
 export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = 'direct_access_keys';
 

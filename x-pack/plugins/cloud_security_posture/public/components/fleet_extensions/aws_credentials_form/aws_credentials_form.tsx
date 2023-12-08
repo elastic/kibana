@@ -16,23 +16,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   AwsCredentialsTypeOptions,
-  DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
-  DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
   getAwsCredentialsFormManualOptions,
 } from './get_aws_credentials_form_options';
 import { RadioGroup } from '../csp_boxed_radio_group';
-import {
-  getCspmCloudFormationDefaultValue,
-  getPosturePolicy,
-  NewPackagePolicyPostureInput,
-} from '../utils';
+import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { SetupFormat, useAwsCredentialsForm } from './hooks';
 import { AWS_ORGANIZATION_ACCOUNT } from '../policy_template_form';
 import { AwsCredentialsType } from '../../../../common/types';
@@ -73,22 +66,6 @@ const getSetupFormatOptions = (): Array<{ id: SetupFormat; label: string }> => [
     }),
   },
 ];
-
-export const getDefaultAwsVarsGroup = (
-  packageInfo: PackageInfo,
-  setupTechnology?: SetupTechnology
-): AwsCredentialsType => {
-  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
-    return DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
-  }
-
-  const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
-  if (hasCloudFormationTemplate) {
-    return 'cloud_formation';
-  }
-
-  return DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
-};
 
 export interface AwsFormProps {
   newPolicy: NewPackagePolicy;

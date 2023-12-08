@@ -19,22 +19,29 @@ import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import {
   CLOUDBEAT_AWS,
-  CLOUDBEAT_EKS,
-  CLOUDBEAT_VANILLA,
-  CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
+  CLOUDBEAT_EKS,
+  CLOUDBEAT_GCP,
+  CLOUDBEAT_VANILLA,
   CLOUDBEAT_VULN_MGMT_AWS,
-  SUPPORTED_POLICY_TEMPLATES,
-  SUPPORTED_CLOUDBEAT_INPUTS,
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
+  SUPPORTED_CLOUDBEAT_INPUTS,
+  SUPPORTED_POLICY_TEMPLATES,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import { getDefaultAwsVarsGroup } from './aws_credentials_form/aws_credentials_form';
-import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
+import {
+  AwsCredentialsType,
+  CloudSecurityPolicyTemplate,
+  PostureInput,
+} from '../../../common/types';
 import { cloudPostureIntegrations } from '../../common/constants';
 import { DEFAULT_EKS_VARS_GROUP } from './eks_credentials_form';
-import { AwsCredentialsType } from '../../../common/types';
+import {
+  DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
+  DEFAULT_AWS_CREDENTIALS_TYPE,
+  DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
+} from './aws_credentials_form/get_aws_credentials_form_options';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
@@ -205,6 +212,21 @@ export const getArmTemplateUrlFromCspmPackage = (packageInfo: PackageInfo): stri
   return armTemplateUrl;
 };
 
+export const getDefaultAwsCredentialsType = (
+  packageInfo: PackageInfo,
+  setupTechnology?: SetupTechnology
+): AwsCredentialsType => {
+  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
+    return DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
+  }
+
+  const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
+  if (hasCloudFormationTemplate) {
+    return DEFAULT_AWS_CREDENTIALS_TYPE;
+  }
+
+  return DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
+};
 /**
  * Input vars that are hidden from the user
  */
@@ -217,7 +239,7 @@ export const getPostureInputHiddenVars = (
     case 'cloudbeat/cis_aws':
       return {
         'aws.credentials.type': {
-          value: getDefaultAwsVarsGroup(packageInfo, setupTechnology),
+          value: getDefaultAwsCredentialsType(packageInfo, setupTechnology),
           type: 'text',
         },
       };
