@@ -68,3 +68,15 @@ export const bayesianUpdate = ({
   const newProbability = priorProbability * modifier;
   return (max * newProbability) / (1 + newProbability);
 };
+
+/**
+ * Normalizes a number to the range [0, 100]
+ *
+ * @param number - The number to be normalized
+ * @param min - The minimum possible value of the number
+ * @param max - The maximum possible value of the number
+ *
+ * @returns The updated score with modifiers applied
+ */
+export const normalize = ({ number, min, max }: { number: number; min: number; max: number }) =>
+  (number - min) / (max - min);
