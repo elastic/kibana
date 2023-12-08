@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 import { CANCEL_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
-import { HttpLogic } from '../../../../shared/http';
+import { KibanaLogic } from '../../../../shared/kibana';
 import { ML_MANAGE_TRAINED_MODELS_PATH } from '../../../routes';
 import { getMLType, getModelDisplayTitle } from '../../shared/ml_inference/utils';
 import { IndexNameLogic } from '../index_name_logic';
@@ -38,7 +38,7 @@ import { MLModelTypeBadge } from './ml_model_type_badge';
 import { PipelinesLogic } from './pipelines_logic';
 
 export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline) => {
-  const { http } = useValues(HttpLogic);
+  const { navigateToUrl } = useValues(KibanaLogic);
   const { indexName } = useValues(IndexNameLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
 
@@ -85,7 +85,11 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
                   flush="both"
                   iconType="wrench"
                   color="text"
-                  href={http.basePath.prepend(ML_MANAGE_TRAINED_MODELS_PATH)}
+                  onClick={() => {
+                    navigateToUrl(ML_MANAGE_TRAINED_MODELS_PATH, {
+                      shouldNotCreateHref: true,
+                    });
+                  }}
                 >
                   {i18n.translate(
                     'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDeployed.fixLink',
@@ -105,9 +109,12 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
                 flush="both"
                 iconType="eye"
                 color="text"
-                href={http.basePath.prepend(
-                  `/app/management/ingest/ingest_pipelines/?pipeline=${pipelineName}`
-                )}
+                onClick={() => {
+                  navigateToUrl(
+                    `/app/management/ingest/ingest_pipelines/?pipeline=${pipelineName}`,
+                    { shouldNotCreateHref: true }
+                  );
+                }}
               >
                 {i18n.translate('xpack.enterpriseSearch.inferencePipelineCard.action.view', {
                   defaultMessage: 'View in Stack Management',
