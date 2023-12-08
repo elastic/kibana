@@ -7,7 +7,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
+  preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-rtl-eui'],
+  roots: ['<rootDir>/packages/kbn-test-jest-helpers2'],
 };

@@ -1288,6 +1288,7 @@
     "@kbn/telemetry-tools": "link:packages/kbn-telemetry-tools",
     "@kbn/test": "link:packages/kbn-test",
     "@kbn/test-jest-helpers": "link:packages/kbn-test-jest-helpers",
+    "@kbn/test-jest-helpers2": "link:packages/kbn-test-jest-helpers2",
     "@kbn/test-subj-selector": "link:packages/kbn-test-subj-selector",
     "@kbn/tooling-log": "link:packages/kbn-tooling-log",
     "@kbn/ts-projects": "link:packages/kbn-ts-projects",

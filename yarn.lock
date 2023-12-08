@@ -6055,6 +6055,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-jest-helpers2@link:packages/kbn-test-jest-helpers2":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-jest-helpers@link:packages/kbn-test-jest-helpers":
   version "0.0.0"
   uid ""

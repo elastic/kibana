@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/test-jest-helpers2",
+  "devOnly": true,
+  "owner": ["@elastic/kibana-visualizations"],
+}
