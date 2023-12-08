@@ -187,7 +187,7 @@ export const OptionsListEditorOptions = ({
         </EuiFormRow>
       ) : (
         allowExpensiveQueries &&
-        compatibleSearchTechniques.length > 0 && (
+        compatibleSearchTechniques.length > 1 && (
           <EuiFormRow
             label={OptionsListStrings.editor.getSearchOptionsTitle()}
             data-test-subj="optionsListControl__searchOptionsRadioGroup"
