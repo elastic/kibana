@@ -104,11 +104,9 @@ export function MobileServiceOverview() {
       start={start}
       end={end}
     >
+      <EuiHorizontalRule />
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>
-            <EuiHorizontalRule />
-          </EuiFlexItem>
           <EuiFlexItem>
             <MobileStats
               start={start}
