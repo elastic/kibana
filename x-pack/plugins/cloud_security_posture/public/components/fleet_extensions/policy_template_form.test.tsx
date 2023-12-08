@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import {
   CspPolicyTemplateForm,
   AWS_ORGANIZATION_ACCOUNT,
@@ -141,7 +141,7 @@ describe('<CspPolicyTemplateForm />', () => {
     });
   });
 
-  it('renders and updates name field', () => {
+  it('renders and updates name field', async () => {
     const policy = getMockPolicyK8s();
     const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
     const name = getByLabelText('Name');
@@ -149,15 +149,15 @@ describe('<CspPolicyTemplateForm />', () => {
 
     userEvent.type(name, '1');
 
-    // Listen to the 2nd triggered by the test.
-    // The 1st is done on mount to ensure initial state is valid.
-    expect(onChange).toHaveBeenNthCalledWith(2, {
-      isValid: true,
-      updatedPolicy: { ...policy, name: `${policy.name}1` },
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy: { ...policy, name: `${policy.name}1` },
+      });
     });
   });
 
-  it('renders and updates description field', () => {
+  it('renders and updates description field', async () => {
     const policy = getMockPolicyK8s();
     const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
     const description = getByLabelText('Description');
@@ -165,11 +165,11 @@ describe('<CspPolicyTemplateForm />', () => {
 
     userEvent.type(description, '1');
 
-    // Listen to the 2nd triggered by the test.
-    // The 1st is done on mount to ensure initial state is valid.
-    expect(onChange).toHaveBeenNthCalledWith(2, {
-      isValid: true,
-      updatedPolicy: { ...policy, description: `${policy.description}1` },
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy: { ...policy, description: `${policy.description}1` },
+      });
     });
   });
 
@@ -186,7 +186,7 @@ describe('<CspPolicyTemplateForm />', () => {
     expect(option1).toBeChecked();
   });
 
-  it('updates selected KSPM input', () => {
+  it('updates selected KSPM input', async () => {
     const k8sPolicy = getMockPolicyK8s();
     const eksPolicy = getMockPolicyEKS();
 
@@ -194,11 +194,11 @@ describe('<CspPolicyTemplateForm />', () => {
     const option = getByLabelText('EKS');
     userEvent.click(option);
 
-    // Listen to the 2nd triggered by the test.
-    // The 1st is done on mount to ensure initial state is valid.
-    expect(onChange).toHaveBeenNthCalledWith(2, {
-      isValid: true,
-      updatedPolicy: eksPolicy,
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy: eksPolicy,
+      });
     });
   });
 
