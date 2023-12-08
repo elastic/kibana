@@ -40,7 +40,6 @@ import * as descriptionStepI18n from '../../../../detections/components/rules/de
 import { RelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
 import { AlertSuppressionTechnicalPreviewBadge } from '../../../../detections/components/rules/description_step/alert_suppression_technical_preview_badge';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
-import { useLicense } from '../../../../common/hooks/use_license';
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
 import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
 import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
@@ -53,7 +52,7 @@ import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { TechnicalPreviewBadge } from '../../../../detections/components/rules/technical_preview_badge';
 import { BadgeList } from './badge_list';
-import { DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
+import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
@@ -357,9 +356,7 @@ interface AlertSuppressionTitleProps {
 }
 
 const AlertSuppressionTitle = ({ title }: AlertSuppressionTitleProps) => {
-  const license = useLicense();
-
-  return <AlertSuppressionTechnicalPreviewBadge label={title} license={license} />;
+  return <AlertSuppressionTechnicalPreviewBadge label={title} />;
 };
 
 interface SuppressAlertsByFieldProps {
@@ -727,6 +724,7 @@ const prepareDefinitionSectionListItems = (
 export interface RuleDefinitionSectionProps
   extends React.ComponentProps<typeof EuiDescriptionList> {
   rule: Partial<RuleResponse>;
+  columnWidths?: EuiDescriptionListProps['columnWidths'];
   isInteractive?: boolean;
   dataTestSubj?: string;
 }
@@ -734,6 +732,7 @@ export interface RuleDefinitionSectionProps
 export const RuleDefinitionSection = ({
   rule,
   isInteractive = false,
+  columnWidths = DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
   dataTestSubj,
   ...descriptionListProps
 }: RuleDefinitionSectionProps) => {
@@ -759,7 +758,7 @@ export const RuleDefinitionSection = ({
         type={descriptionListProps.type ?? 'column'}
         rowGutterSize={descriptionListProps.rowGutterSize ?? 'm'}
         listItems={definitionSectionListItems}
-        columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
+        columnWidths={columnWidths}
         data-test-subj="listItemColumnStepRuleDescription"
         {...descriptionListProps}
       />
