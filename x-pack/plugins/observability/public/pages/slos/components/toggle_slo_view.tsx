@@ -6,22 +6,15 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonGroup,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiPopoverTitle,
-} from '@elastic/eui';
-import { CardsPerRow } from './card_view/cards_per_row';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { SLOViewSettings } from './slo_view_settings';
 
 export type SLOViewType = 'cardView' | 'listView';
 
 interface Props {
-  setCardsPerRow: (gridSize?: string) => void;
+  toggleCompactView: () => void;
+  isCompact: boolean;
   setSLOView: (view: SLOViewType) => void;
   sloView: SLOViewType;
 }
@@ -40,7 +33,7 @@ const toggleButtonsIcons = [
   },
 ];
 
-export function ToggleSLOView({ sloView, setSLOView, setCardsPerRow }: Props) {
+export function ToggleSLOView({ sloView, setSLOView, toggleCompactView, isCompact = true }: Props) {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
@@ -54,44 +47,9 @@ export function ToggleSLOView({ sloView, setSLOView, setCardsPerRow }: Props) {
           isIconOnly
         />
       </EuiFlexItem>
-      {sloView === 'cardView' && (
-        <EuiFlexItem grow={false}>
-          <ViewSettings setCardsPerRow={setCardsPerRow} />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <SLOViewSettings toggleCompactView={toggleCompactView} isCompact={isCompact} />
+      </EuiFlexItem>
     </EuiFlexGroup>
-  );
-}
-
-function ViewSettings({ setCardsPerRow }: { setCardsPerRow: (cardsPerRow?: string) => void }) {
-  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
-
-  return (
-    <EuiPopover
-      button={
-        <EuiButtonIcon
-          data-test-subj="o11yToggleSLOViewButton"
-          iconType={'gear'}
-          aria-label={i18n.translate(
-            'xpack.observability.toggleSLOView.euiButtonIcon.settingsLabel',
-            { defaultMessage: 'Settings' }
-          )}
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-        />
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      anchorPosition="downCenter"
-    >
-      <EuiPopoverTitle>
-        <FormattedMessage
-          id="xpack.observability.viewSettings.viewSettingsPopoverTitleLabel"
-          defaultMessage="View settings"
-        />
-      </EuiPopoverTitle>
-      <div style={{ width: '300px' }}>
-        <CardsPerRow setCardsPerRow={setCardsPerRow} />
-      </div>
-    </EuiPopover>
   );
 }

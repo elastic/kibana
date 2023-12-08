@@ -205,6 +205,7 @@ export const LOCAL_STORAGE_KEYS = {
   casesQueryParams: 'cases.list.queryParams',
   casesFilterOptions: 'cases.list.filterOptions',
   casesTableColumns: 'cases.list.tableColumns',
+  casesTableFiltersConfig: 'cases.list.tableFiltersConfig',
 };
 
 /**

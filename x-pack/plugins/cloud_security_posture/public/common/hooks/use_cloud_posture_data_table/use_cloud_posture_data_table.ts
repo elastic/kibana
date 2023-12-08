@@ -11,9 +11,11 @@ import { CriteriaWithPagination } from '@elastic/eui';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import { useUrlQuery } from '../use_url_query';
 import { usePageSize } from '../use_page_size';
-import { getDefaultQuery, useBaseEsQuery, usePersistedQuery } from './utils';
+import { getDefaultQuery } from './utils';
 import { LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY } from '../../constants';
 import { FindingsBaseURLQuery } from '../../types';
+import { useBaseEsQuery } from './use_base_es_query';
+import { usePersistedQuery } from './use_persisted_query';
 
 type URLQuery = FindingsBaseURLQuery & Record<string, any>;
 
@@ -140,7 +142,16 @@ export const useCloudPostureDataTable = ({
     setUrlQuery,
     sort: urlQuery.sort,
     filters: urlQuery.filters,
-    query: baseEsQuery.query,
+    query: baseEsQuery.query
+      ? baseEsQuery.query
+      : {
+          bool: {
+            must: [],
+            filter: [],
+            should: [],
+            must_not: [],
+          },
+        },
     queryError,
     pageIndex: urlQuery.pageIndex,
     urlQuery,
