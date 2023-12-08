@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header', 'svlCommonPage']);
   const log = getService('log');
-  const security = getService('security');
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
@@ -20,8 +19,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const POLICY_NAME = `policy-${Math.random()}`;
 
   describe('Create enrich policy', function () {
-    // TimeoutError:  Waiting for element to be located By(css selector, [data-test-subj="enrichPoliciesEmptyPromptCreateButton"])
-    this.tags(['failsOnMKI']);
     before(async () => {
       log.debug('Creating test index');
       try {
@@ -47,7 +44,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       log.debug('Navigating to the enrich policies tab');
       await pageObjects.svlCommonPage.login();
-      await security.testUser.setRoles(['index_management_user']);
       await pageObjects.common.navigateToApp('indexManagement');
 
       // Navigate to the enrich policies tab
