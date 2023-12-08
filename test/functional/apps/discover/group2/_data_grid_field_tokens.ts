@@ -131,7 +131,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await findFirstColumnTokens()).to.eql(['Number', 'String', 'String']);
 
-      expect((await findFirstDocViewerTokens()).slice(0, 5)).to.eql([
+      const docViewerTokens = await findFirstDocViewerTokens();
+      expect(docViewerTokens?.slice(0, 5)).to.eql([
         'String',
         'String',
         'Date',
