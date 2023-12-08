@@ -17,19 +17,16 @@ const testQuery = {
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['svlCommonPage', 'common', 'searchProfiler']);
   const retry = getService('retry');
-  const security = getService('security');
   const es = getService('es');
 
   describe('Search Profiler Editor', () => {
     before(async () => {
-      await security.testUser.setRoles(['global_devtools_read']);
       await PageObjects.svlCommonPage.login();
       await PageObjects.common.navigateToApp('searchProfiler');
       expect(await PageObjects.searchProfiler.editorExists()).to.be(true);
     });
 
     after(async () => {
-      await security.testUser.restoreDefaults();
       await PageObjects.svlCommonPage.forceLogout();
     });
 
