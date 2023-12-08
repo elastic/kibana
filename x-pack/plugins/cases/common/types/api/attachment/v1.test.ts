@@ -125,7 +125,7 @@ describe('Attachments', () => {
         it('is successful when a comment string of empty characters', () => {
           expect(
             PathReporter.report(AttachmentRequestRt.decode({ ...request, comment: '   ' }))
-          ).not.toContain('The comment figeld cannot be an empty string.');
+          ).not.toContain('The comment field cannot be an empty string.');
         });
       });
     });
