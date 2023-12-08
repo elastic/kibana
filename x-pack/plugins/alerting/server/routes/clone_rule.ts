@@ -8,18 +8,14 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import {
-  verifyAccessAndContext,
-  handleDisabledApiKeysError,
-  rewriteRuleLastRun,
-  rewriteActionsRes,
-} from './lib';
+import { verifyAccessAndContext, handleDisabledApiKeysError, rewriteRuleLastRun } from './lib';
 import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
   PartialRule,
 } from '../types';
+import { transformRuleActions } from './rule/transforms';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -70,7 +66,7 @@ const rewriteBodyRes = ({
     : {}),
   ...(actions
     ? {
-        actions: rewriteActionsRes(actions),
+        actions: transformRuleActions(actions),
       }
     : {}),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),

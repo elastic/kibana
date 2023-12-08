@@ -7,13 +7,12 @@
 import { TypeOf } from '@kbn/config-schema/src/types/object_type';
 import { omit } from 'lodash';
 import { NormalizedAlertAction } from '../../rules_client';
-import { IsSystemAction, RuleAction } from '../../types';
 import { actionsSchema } from './actions_schema';
-import { RuleActionTypes, RuleDefaultAction } from '../../../common';
+import { RuleActionTypes } from '../../../common';
 
 export const rewriteActionsReq = (
   actions: TypeOf<typeof actionsSchema>,
-  isSystemAction: IsSystemAction
+  isSystemAction: (connectorId: string) => boolean
 ): NormalizedAlertAction[] => {
   if (!actions) return [];
 
@@ -55,40 +54,4 @@ export const rewriteActionsReq = (
       };
     }
   );
-};
-
-export const rewriteActionsRes = (actions?: RuleAction[]) => {
-  const rewriteFrequency = ({
-    notifyWhen,
-    ...rest
-  }: NonNullable<RuleDefaultAction['frequency']>) => ({
-    ...rest,
-    notify_when: notifyWhen,
-  });
-  if (!actions) return [];
-  return actions.map(({ actionTypeId, useAlertDataForTemplate, ...action }) => {
-    if (action.type === RuleActionTypes.SYSTEM) {
-      return {
-        ...action,
-        connector_type_id: actionTypeId,
-        ...(typeof useAlertDataForTemplate !== 'undefined'
-          ? { use_alert_data_for_template: useAlertDataForTemplate }
-          : {}),
-      };
-    }
-    const { frequency, alertsFilter } = action as RuleDefaultAction;
-    return {
-      ...action,
-      connector_type_id: actionTypeId,
-      ...(typeof useAlertDataForTemplate !== 'undefined'
-        ? { use_alert_data_for_template: useAlertDataForTemplate }
-        : {}),
-      ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
-      ...(alertsFilter
-        ? {
-            alerts_filter: alertsFilter,
-          }
-        : {}),
-    };
-  });
 };
