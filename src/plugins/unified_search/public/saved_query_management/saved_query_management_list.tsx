@@ -172,7 +172,6 @@ export function SavedQueryManagementList({
   const [isInitializing, setIsInitializing] = useState(true);
   const currentPageFetchId = useRef(0);
   const selectableRef = useRef<EuiSelectable | null>(null);
-  const latestLoadedQuery = useLatest(loadedSavedQuery);
   const [selectedSavedQuery, setSelectedSavedQuery] = useState(loadedSavedQuery);
   const [toBeDeletedSavedQuery, setToBeDeletedSavedQuery] = useState<SavedQuery | null>(null);
   const [showDeletionConfirmationModal, setShowDeletionConfirmationModal] = useState(false);
@@ -190,48 +189,47 @@ export function SavedQueryManagementList({
     }, SAVED_QUERY_SEARCH_DEBOUNCE);
   }, []);
 
-  useEffect(() => {
-    const fetchPage = async () => {
-      const fetchIdValue = ++currentPageFetchId.current;
+  const fetchPage = useLatest(async () => {
+    const fetchIdValue = ++currentPageFetchId.current;
 
-      try {
-        const trimmedSearchTerm = searchTerm.trim();
-        const { total, queries } = await savedQueryService.findSavedQueries(
-          trimmedSearchTerm ? `${trimmedSearchTerm}*` : undefined,
-          SAVED_QUERY_PAGE_SIZE,
-          currentPageNumber + 1
-        );
+    try {
+      const trimmedSearchTerm = searchTerm.trim();
+      const { total, queries } = await savedQueryService.findSavedQueries(
+        trimmedSearchTerm ? `${trimmedSearchTerm}*` : undefined,
+        SAVED_QUERY_PAGE_SIZE,
+        currentPageNumber + 1
+      );
 
-        if (fetchIdValue !== currentPageFetchId.current) {
-          return;
-        }
-
-        let filteredQueries = queries;
-        const loadedQuery = latestLoadedQuery.current;
-
-        if (loadedQuery && !trimmedSearchTerm && currentPageNumber === 0) {
-          filteredQueries = [
-            loadedQuery,
-            ...queries.filter((savedQuery) => savedQuery.id !== loadedQuery?.id),
-          ];
-        }
-
-        if (!filteredQueries.some((savedQuery) => savedQuery.id === selectedSavedQuery?.id)) {
-          setSelectedSavedQuery(undefined);
-        }
-
-        setTotalQueryCount(total);
-        setCurrentPageQueries(filteredQueries);
-        selectableRef.current?.scrollToItem(0);
-      } finally {
-        if (fetchIdValue === currentPageFetchId.current) {
-          setIsInitializing(false);
-        }
+      if (fetchIdValue !== currentPageFetchId.current) {
+        return;
       }
-    };
 
-    fetchPage();
-  }, [currentPageNumber, latestLoadedQuery, savedQueryService, searchTerm, selectedSavedQuery?.id]);
+      let filteredQueries = queries;
+
+      if (loadedSavedQuery && !trimmedSearchTerm && currentPageNumber === 0) {
+        filteredQueries = [
+          loadedSavedQuery,
+          ...queries.filter((savedQuery) => savedQuery.id !== loadedSavedQuery.id),
+        ];
+      }
+
+      if (!filteredQueries.some((savedQuery) => savedQuery.id === selectedSavedQuery?.id)) {
+        setSelectedSavedQuery(undefined);
+      }
+
+      setTotalQueryCount(total);
+      setCurrentPageQueries(filteredQueries);
+      selectableRef.current?.scrollToItem(0);
+    } finally {
+      if (fetchIdValue === currentPageFetchId.current) {
+        setIsInitializing(false);
+      }
+    }
+  });
+
+  useEffect(() => {
+    fetchPage.current();
+  }, [currentPageNumber, fetchPage, searchTerm]);
 
   const handleLoad = useCallback(() => {
     if (selectedSavedQuery) {
@@ -252,6 +250,7 @@ export function SavedQueryManagementList({
   const onDelete = useCallback(
     (savedQueryToDelete: string) => {
       const onDeleteSavedQuery = async (savedQueryId: string) => {
+        setTotalQueryCount((currentTotalQueryCount) => currentTotalQueryCount - 1);
         setCurrentPageQueries(
           currentPageQueries.filter((currentSavedQuery) => currentSavedQuery.id !== savedQueryId)
         );
