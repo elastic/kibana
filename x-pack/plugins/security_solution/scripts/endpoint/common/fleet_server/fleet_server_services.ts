@@ -49,8 +49,8 @@ import {
   retryOnError,
 } from '../../../../common/endpoint/data_loaders/utils';
 import { isServerlessKibanaFlavor } from '../stack_services';
-import type { FormattedAxiosError } from '../format_axios_error';
-import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
+import type { FormattedAxiosError } from '../../../../common/endpoint/format_axios_error';
+import { catchAxiosErrorFormatAndThrow } from '../../../../common/endpoint/format_axios_error';
 import {
   ensureFleetSetup,
   fetchFleetOutputs,
