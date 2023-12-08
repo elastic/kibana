@@ -16,7 +16,7 @@ import {
 } from '../../../../../common/slo/constants';
 import { getGroupBy } from './common';
 
-export function generateTransformForTimeslicesAndCalendarAligned(
+export function generateSummaryTransformForTimeslicesAndCalendarAligned(
   slo: SLO
 ): TransformPutTransformRequest {
   const isWeeklyAligned = slo.timeWindow.duration.unit === DurationUnit.Week;

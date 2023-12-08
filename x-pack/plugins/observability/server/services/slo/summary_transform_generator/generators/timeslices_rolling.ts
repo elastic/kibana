@@ -16,7 +16,9 @@ import {
 } from '../../../../../common/slo/constants';
 import { getGroupBy } from './common';
 
-export function generateTransformForTimeslicesAndRolling(slo: SLO): TransformPutTransformRequest {
+export function generateSummaryTransformForTimeslicesAndRolling(
+  slo: SLO
+): TransformPutTransformRequest {
   return {
     transform_id: getSLOSummaryTransformId(slo.id, slo.revision),
     dest: {

@@ -7,9 +7,9 @@
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { SLO } from '../../../domain/models';
-import { generateTransformForOccurrences } from './generators/occurrences';
-import { generateTransformForTimeslicesAndRolling } from './generators/timeslices_rolling';
-import { generateTransformForTimeslicesAndCalendarAligned } from './generators/timeslices_calendar_aligned';
+import { generateSummaryTransformForOccurrences } from './generators/occurrences';
+import { generateSummaryTransformForTimeslicesAndRolling } from './generators/timeslices_rolling';
+import { generateSummaryTransformForTimeslicesAndCalendarAligned } from './generators/timeslices_calendar_aligned';
 
 export interface SummaryTransformGenerator {
   generate(slo: SLO): TransformPutTransformRequest;
@@ -18,11 +18,11 @@ export interface SummaryTransformGenerator {
 export class DefaultSummaryTransformGenerator implements SummaryTransformGenerator {
   public generate(slo: SLO): TransformPutTransformRequest {
     if (slo.budgetingMethod === 'occurrences') {
-      return generateTransformForOccurrences(slo);
+      return generateSummaryTransformForOccurrences(slo);
     } else if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'rolling') {
-      return generateTransformForTimeslicesAndRolling(slo);
+      return generateSummaryTransformForTimeslicesAndRolling(slo);
     } else if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'calendarAligned') {
-      return generateTransformForTimeslicesAndCalendarAligned(slo);
+      return generateSummaryTransformForTimeslicesAndCalendarAligned(slo);
     }
 
     throw new Error('Not supported SLO');
