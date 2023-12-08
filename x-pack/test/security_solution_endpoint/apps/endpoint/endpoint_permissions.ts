@@ -35,15 +35,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     // Run the same set of tests against all of the Security Solution roles
+    // ESS roles only as the test is targeting ESS
     const ROLES: SecurityRoleName[] = [
-      't1_analyst',
-      't2_analyst',
-      'rule_author',
-      'soc_manager',
-      'detections_admin',
-      'platform_engineer',
+      'reader',
       'hunter',
       'hunter_no_actions',
+      'no_risk_engine_privileges',
     ];
 
     for (const role of ROLES) {
