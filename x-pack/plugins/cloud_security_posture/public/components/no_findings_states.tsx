@@ -30,7 +30,7 @@ import {
 } from './test_subjects';
 import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import type { IndexDetails, PostureTypes } from '../../common/types';
+import type { IndexDetails, PostureTypes } from '../../common/types_old';
 import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';

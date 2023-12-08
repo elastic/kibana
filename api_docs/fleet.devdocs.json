@@ -2371,6 +2371,18 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.SetupTechnology",
+        "type": "Enum",
+        "tags": [],
+        "label": "SetupTechnology",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/models/setup_technology.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
