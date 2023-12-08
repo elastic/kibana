@@ -9,7 +9,6 @@
 
 import React, { ReactNode } from 'react';
 import { renderSearchError } from '@kbn/search-errors';
-import { getApplication } from '../../kibana_services';
 import type { DataRequestDescriptor, DataRequestMeta } from '../../../common/descriptor_types';
 
 export class DataRequest {
@@ -60,10 +59,7 @@ export class DataRequest {
       return null;
     }
 
-    const searchErrorDisplay = renderSearchError({
-      error: this._descriptor.error,
-      application: getApplication(),
-    });
+    const searchErrorDisplay = renderSearchError(this._descriptor.error);
 
     const body = searchErrorDisplay?.body ? (
       searchErrorDisplay.body

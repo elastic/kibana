@@ -15,7 +15,6 @@ import type { MaybePromise } from '@kbn/utility-types';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { renderSearchError } from '@kbn/search-errors';
 import { ErrorLike } from '@kbn/expressions-plugin/common';
-import { core } from '../kibana_services';
 
 import { EditPanelAction } from './panel_actions';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../lib/embeddables';
@@ -53,10 +52,7 @@ export function EmbeddablePanelError({
     [label, title]
   );
 
-  const searchErrorDisplay = renderSearchError({
-    error,
-    application: core.application,
-  });
+  const searchErrorDisplay = renderSearchError(error);
 
   const actions = searchErrorDisplay?.actions ?? [];
   if (isEditable) {

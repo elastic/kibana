@@ -12,7 +12,7 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { IEsSearchRequest } from '../../../common/search';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
-import { PainlessError, EsError, type IEsError } from '@kbn/search-errors';
+import { EsError, type IEsError } from '@kbn/search-errors';
 import { ISessionService, SearchSessionState } from '..';
 import { bfetchPluginMock } from '@kbn/bfetch-plugin/public/mocks';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
@@ -157,9 +157,9 @@ describe('SearchInterceptor', () => {
       expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();
     });
 
-    test('Renders a PainlessError', async () => {
+    test('Renders a EsError', async () => {
       searchInterceptor.showError(
-        new PainlessError(
+        new EsError(
           {
             statusCode: 400,
             message: 'search_phase_execution_exception',
@@ -167,6 +167,7 @@ describe('SearchInterceptor', () => {
               error: searchPhaseException.error,
             },
           },
+          'search_phase_execution_exception',
           () => {}
         )
       );
@@ -1465,22 +1466,6 @@ describe('SearchInterceptor', () => {
           ).rejects.toThrow(SearchTimeoutError);
           expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
         });
-      });
-
-      test('Should throw Painless error on server error with OSS format', async () => {
-        const mockResponse: IEsError = {
-          statusCode: 400,
-          message: 'search_phase_execution_exception',
-          attributes: {
-            error: searchPhaseException.error,
-          },
-        };
-        fetchMock.mockRejectedValueOnce(mockResponse);
-        const mockRequest: IEsSearchRequest = {
-          params: {},
-        };
-        const response = searchInterceptor.search(mockRequest);
-        await expect(response.toPromise()).rejects.toThrow(PainlessError);
       });
 
       test('Should throw ES error on ES server error', async () => {
