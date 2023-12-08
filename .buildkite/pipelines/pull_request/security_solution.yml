@@ -36,7 +36,7 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_burn.sh
-    label: 'Security Solution Cypress tests, burning changed specs'
+    label: '[Soft fail] Security Solution Cypress tests, burning changed specs'
     agents:
       queue: n2-4-spot
     depends_on: build

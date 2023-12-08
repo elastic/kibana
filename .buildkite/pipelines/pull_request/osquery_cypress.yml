@@ -14,7 +14,7 @@ steps:
       - "target/kibana-osquery/**/*"
 
   - command: .buildkite/scripts/steps/functional/osquery_cypress_burn.sh
-    label: 'Osquery Cypress Tests, burning changed specs'
+    label: '[Soft fail] Osquery Cypress Tests, burning changed specs'
     agents:
       queue: n2-4-spot
     depends_on: build

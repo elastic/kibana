@@ -12,7 +12,7 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_burn.sh
-    label: 'Defend Workflows Cypress Tests, burning changed specs'
+    label: '[Soft fail] Defend Workflows Cypress Tests, burning changed specs'
     agents:
       queue: n2-4-virt
     depends_on: build
