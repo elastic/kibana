@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY } from './common';
-export * as urlSchemaV1 from './url_schema_v1';
+export const OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY = 'pageState';

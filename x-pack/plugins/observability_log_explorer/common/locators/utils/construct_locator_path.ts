@@ -16,11 +16,8 @@ import {
   availableControlsPanels,
   DatasetSelectionPlain,
 } from '@kbn/log-explorer-plugin/common';
-import {
-  OBSERVABILITY_LOG_EXPLORER_APP_ID,
-  OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY,
-} from '../../constants';
-import { urlSchemaV1 } from '../../url_schema';
+import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY, urlSchemaV1 } from '../../url_schema';
 import { deepCompactObject } from '../../utils/deep_compact_object';
 
 type ControlsPageState = NonNullable<urlSchemaV1.UrlSchema['controls']>;
