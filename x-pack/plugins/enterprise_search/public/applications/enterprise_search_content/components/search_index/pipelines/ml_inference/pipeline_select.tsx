@@ -54,19 +54,10 @@ export const PipelineSelect: React.FC = () => {
     }
   };
 
-  const getActiveOptionIndex = (): number | undefined => {
-    const index = existingInferencePipelines.findIndex(
-      (pipelineOption) => pipelineOption.pipelineName === pipelineName
-    );
-
-    return index >= 0 ? index : undefined;
-  };
-
   return (
     <EuiSelectable
       options={getPipelineOptions(existingInferencePipelines)}
       listProps={{
-        activeOptionIndex: getActiveOptionIndex(),
         bordered: true,
         showIcons: true,
         onFocusBadge: false,

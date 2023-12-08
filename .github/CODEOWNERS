@@ -56,6 +56,7 @@ packages/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
 x-pack/plugins/banners @elastic/appex-sharedux
 packages/kbn-bazel-runner @elastic/kibana-operations
+packages/kbn-bfetch-error @elastic/appex-sharedux
 examples/bfetch_explorer @elastic/appex-sharedux
 src/plugins/bfetch @elastic/appex-sharedux
 packages/kbn-calculate-auto @elastic/obs-ux-management-team
@@ -378,6 +379,7 @@ packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-i18n @elastic/obs-knowledge-team @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
+examples/eso_model_version_example @elastic/kibana-security
 x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 packages/kbn-event-annotation-common @elastic/kibana-visualizations
 packages/kbn-event-annotation-components @elastic/kibana-visualizations
@@ -650,6 +652,7 @@ x-pack/examples/screenshotting_example @elastic/appex-sharedux
 x-pack/plugins/screenshotting @elastic/kibana-reporting-services
 packages/kbn-search-api-panels @elastic/enterprise-search-frontend
 packages/kbn-search-connectors @elastic/enterprise-search-frontend
+packages/kbn-search-errors @elastic/kibana-data-discovery
 examples/search_examples @elastic/kibana-data-discovery
 packages/kbn-search-index-documents @elastic/enterprise-search-frontend
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
@@ -1396,7 +1399,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detection-engine
 /x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-detection-engine
 
-/x-pack/test/security_solution_cypress/cypress/e2e/detection_engine @elastic/security-detection-engine
+/x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions  @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions @elastic/security-detection-engine

@@ -9,19 +9,17 @@ import React from 'react';
 import { defaultExpandedCards } from '../../storage';
 import { CreateProjectSteps, QuickStartSectionCardsId } from '../../types';
 
+export const mockOnStepClicked = jest.fn();
+export const mockToggleTaskCompleteStatus = jest.fn();
 export const StepContextProvider = ({ children }: { children: React.ReactElement }) => (
   <>{children}</>
 );
 
-export const useStepContext = () => {
-  return {
-    expandedCardSteps: defaultExpandedCards,
-    finishedSteps: {
-      [QuickStartSectionCardsId.createFirstProject]: new Set([
-        CreateProjectSteps.createFirstProject,
-      ]),
-    },
-    onStepClicked: jest.fn(),
-    toggleTaskCompleteStatus: jest.fn(),
-  };
-};
+export const useStepContext = jest.fn(() => ({
+  expandedCardSteps: defaultExpandedCards,
+  finishedSteps: {
+    [QuickStartSectionCardsId.createFirstProject]: new Set([CreateProjectSteps.createFirstProject]),
+  },
+  onStepClicked: mockOnStepClicked,
+  toggleTaskCompleteStatus: mockToggleTaskCompleteStatus,
+}));
