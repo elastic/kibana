@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         basemaps: {},
         joins: { term: { min: 1, max: 1, total: 4, avg: 0.14814814814814814 } },
         layerTypes: {
-          es_docs: { min: 1, max: 2, total: 19, avg: 0.7037037037037037 },
+          es_docs: { min: 1, max: 3, total: 20, avg: 0.7407407407407407 },
           es_agg_grids: { min: 1, max: 1, total: 6, avg: 0.2222222222222222 },
           es_point_to_point: { min: 1, max: 1, total: 1, avg: 0.037037037037037035 },
           es_top_hits: { min: 1, max: 1, total: 2, avg: 0.07407407407407407 },
@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
           super_fine: { min: 1, max: 1, total: 3, avg: 0.1111111111111111 },
         },
         scalingOptions: {
-          limit: { min: 1, max: 2, total: 14, avg: 0.5185185185185185 },
+          limit: { min: 1, max: 3, total: 15, avg: 0.5555555555555556 },
           clusters: { min: 1, max: 1, total: 1, avg: 0.037037037037037035 },
           mvt: { min: 1, max: 1, total: 4, avg: 0.14814814814814814 },
         },
@@ -80,8 +80,8 @@ export default function ({ getService }: FtrProviderContext) {
             min: 0,
           },
           dataSourcesCount: {
-            avg: 1.1481481481481481,
-            max: 5,
+            avg: 1.1851851851851851,
+            max: 6,
             min: 1,
           },
           emsVectorLayersCount: {
@@ -103,8 +103,8 @@ export default function ({ getService }: FtrProviderContext) {
               min: 1,
             },
             GEOJSON_VECTOR: {
-              avg: 0.7777777777777778,
-              max: 4,
+              avg: 0.8148148148148148,
+              max: 5,
               min: 1,
             },
             HEATMAP: {
@@ -124,8 +124,8 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           layersCount: {
-            avg: 1.1851851851851851,
-            max: 6,
+            avg: 1.2222222222222223,
+            max: 7,
             min: 1,
           },
         },
