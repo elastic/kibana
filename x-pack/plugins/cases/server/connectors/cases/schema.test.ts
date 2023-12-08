@@ -121,6 +121,12 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).toThrow();
     });
 
+    it('should fail for valid date math but not valid time window', () => {
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: '10d+3d' }))
+      ).toThrow();
+    });
+
     it('throws if there is a non valid letter at the end', () => {
       expect(() =>
         CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: '10d#' }))
