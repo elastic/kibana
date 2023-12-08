@@ -67,6 +67,13 @@ describe('InferencePipelineCard', () => {
     const badge = wrapper.find(MLModelTypeBadge).render();
     expect(badge.text()).toBe('ner');
   });
+});
+
+describe('TrainedModelHealthPopover', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setMockValues(mockValues);
+  });
   it('popover renders fix button when model not deployed', () => {
     const values = {
       ...DEFAULT_VALUES,
