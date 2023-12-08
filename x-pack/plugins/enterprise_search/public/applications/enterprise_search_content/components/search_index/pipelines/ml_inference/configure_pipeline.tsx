@@ -29,6 +29,7 @@ import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_l
 import { ModelSelect } from './model_select';
 import { ModelSelectLogic } from './model_select_logic';
 import { PipelineSelect } from './pipeline_select';
+import { ModelList } from './model_list';
 
 const CREATE_NEW_TAB_NAME = i18n.translate(
   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.tabs.createNew.name',
@@ -130,15 +131,28 @@ export const ConfigurePipeline: React.FC = () => {
                 <EuiSpacer />
               </>
             )}
-            <EuiFormRow
-              fullWidth
-              label={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.titleSelectTrainedModel',
-                { defaultMessage: 'Select a trained ML Model' }
-              )}
-            >
-              <ModelSelect />
-            </EuiFormRow>
+            <EuiSpacer size="s" />
+            <EuiTitle size="xxxs">
+              <h5>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.titleSelectTrainedModel',
+                  { defaultMessage: 'Select a trained ML Model' }
+                )}
+              </h5>
+            </EuiTitle>
+            {formErrors.modelStatus !== undefined && (
+              <>
+                <EuiSpacer size="xs" />
+                <EuiText size="xs">
+                  <p>
+                    <EuiTextColor color="danger">{formErrors.modelStatus}</EuiTextColor>
+                  </p>
+                </EuiText>
+              </>
+            )}
+            <EuiSpacer size="xs" />
+            {/* <ModelSelect /> */}
+            <ModelList />
           </EuiForm>
         </>
       ),
