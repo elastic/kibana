@@ -240,7 +240,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         savedSearch: 'esql test',
         query1: 'from logstash-* | where bytes > 1000 | stats countB = count(bytes) ',
         query2: 'from logstash-* | where bytes < 2000 | stats countB = count(bytes) ',
-        savedSearchesRequests: 4,
+        savedSearchesRequests: 3,
         setQuery: (query) => monacoEditor.setCodeEditorValue(query),
       });
     });

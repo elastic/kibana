@@ -421,14 +421,14 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
-      expect(api.refetch).not.toHaveBeenCalled();
+      expect(api.refetch).toHaveBeenCalled();
       act(() => {
         savedSearchFetch$.next({
           options: { reset: false, fetchMore: false },
           searchSessionId: '1234',
         });
       });
-      expect(api.refetch).toHaveBeenCalled();
+      expect(api.refetch).toHaveBeenCalledTimes(2);
     });
 
     it('should skip the next refetch when hideChart changes from true to false', async () => {
@@ -446,6 +446,7 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
+      expect(api.refetch).toHaveBeenCalled();
       act(() => {
         hook.rerender({ ...initialProps, hideChart: true });
       });
@@ -458,7 +459,7 @@ describe('useDiscoverHistogram', () => {
           searchSessionId: '1234',
         });
       });
-      expect(api.refetch).not.toHaveBeenCalled();
+      expect(api.refetch).toHaveBeenCalledTimes(1);
     });
 
     it('should skip the next refetch when fetching more', async () => {
@@ -476,13 +477,14 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
+      expect(api.refetch).toHaveBeenCalledTimes(1);
       act(() => {
         savedSearchFetch$.next({
           options: { reset: false, fetchMore: true },
           searchSessionId: '1234',
         });
       });
-      expect(api.refetch).not.toHaveBeenCalled();
+      expect(api.refetch).toHaveBeenCalledTimes(1);
 
       act(() => {
         savedSearchFetch$.next({
@@ -490,7 +492,7 @@ describe('useDiscoverHistogram', () => {
           searchSessionId: '1234',
         });
       });
-      expect(api.refetch).toHaveBeenCalled();
+      expect(api.refetch).toHaveBeenCalledTimes(2);
     });
   });
 
