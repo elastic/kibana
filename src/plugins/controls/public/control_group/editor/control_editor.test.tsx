@@ -178,15 +178,13 @@ describe('Data control editor', () => {
         expect(customSettings.exists()).toBe(true);
       });
 
-      test('when creating options list, has custom search options', async () => {
+      test('when creating options list, does not have custom search options', async () => {
         findTestSubject(controlEditor, 'create__optionsListControl').simulate('click');
         const searchOptions = findTestSubject(
           controlEditor,
           'optionsListControl__searchOptionsRadioGroup'
         );
-        expect(searchOptions.exists()).toBe(true);
-        const options = searchOptions.find('div.euiRadioGroup__item');
-        expect(options.length).toBe(1);
+        expect(searchOptions.exists()).toBe(false);
       });
 
       test('when creating range slider, does not have custom settings', async () => {
