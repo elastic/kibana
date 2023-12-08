@@ -129,19 +129,5 @@ describe('migration v2', () => {
     );
 
     expect(logRecordWithPit).toBeTruthy();
-    /* TEMPORARILY DISABLE
-    const pitId = logRecordWithPit.right.pitId;
-    expect(pitId).toBeTruthy();
-
-    const client = esServer.es.getClient();
-    await expect(
-      client.search({
-        body: {
-          pit: { id: pitId },
-        },
-      })
-      // throws an exception that cannot search with closed PIT
-    ).rejects.toThrow(/search_phase_execution_exception/);
-    */
   });
 });
