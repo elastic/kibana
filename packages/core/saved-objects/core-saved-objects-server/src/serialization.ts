@@ -99,7 +99,7 @@ export interface SavedObjectsRawDocSource {
  *
  * @public
  */
-interface SavedObjectDoc<T = unknown> {
+export interface SavedObjectDoc<T = unknown> {
   attributes: T;
   id: string;
   type: string;

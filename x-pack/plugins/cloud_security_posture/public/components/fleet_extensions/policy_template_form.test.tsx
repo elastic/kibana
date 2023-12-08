@@ -1330,6 +1330,7 @@ describe('<CspPolicyTemplateForm />', () => {
       ).toBeInTheDocument();
     });
 
+    // TODO: remove for stack version 8.13
     it(`doesnt render ${CLOUDBEAT_AZURE} Manual fields when version is not at least version 1.7.0`, () => {
       let policy = getMockPolicyAzure();
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {

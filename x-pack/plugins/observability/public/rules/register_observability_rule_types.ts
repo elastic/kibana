@@ -115,52 +115,49 @@ export const registerObservabilityRuleTypes = async (
     priority: 100,
   });
 
-  if (config.unsafe.thresholdRule.enabled) {
-    observabilityRuleTypeRegistry.register({
-      id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-      description: i18n.translate(
-        'xpack.observability.customThreshold.rule.alertFlyout.alertDescription',
-        {
-          defaultMessage:
-            'Alert when any Observability data type reaches or exceeds a given value.',
-        }
-      ),
-      iconClass: 'bell',
-      documentationUrl(docLinks) {
-        return `${docLinks.links.observability.customThreshold}`;
-      },
-      ruleParamsExpression: lazy(
-        () => import('../components/custom_threshold/custom_threshold_rule_expression')
-      ),
-      validate: validateCustomThreshold,
-      defaultActionMessage: thresholdDefaultActionMessage,
-      defaultRecoveryMessage: thresholdDefaultRecoveryMessage,
-      requiresAppContext: false,
-      format: ({ fields }) => {
-        const searchConfiguration = fields[ALERT_RULE_PARAMETERS]?.searchConfiguration as
-          | SerializedSearchSourceFields
-          | undefined;
-        const criteria = fields[ALERT_RULE_PARAMETERS]?.criteria as MetricExpression[];
-        const metrics: CustomThresholdExpressionMetric[] =
-          criteria.length === 1 ? criteria[0].metrics : [];
+  observabilityRuleTypeRegistry.register({
+    id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+    description: i18n.translate(
+      'xpack.observability.customThreshold.rule.alertFlyout.alertDescription',
+      {
+        defaultMessage: 'Alert when any Observability data type reaches or exceeds a given value.',
+      }
+    ),
+    iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.links.observability.customThreshold}`;
+    },
+    ruleParamsExpression: lazy(
+      () => import('../components/custom_threshold/custom_threshold_rule_expression')
+    ),
+    validate: validateCustomThreshold,
+    defaultActionMessage: thresholdDefaultActionMessage,
+    defaultRecoveryMessage: thresholdDefaultRecoveryMessage,
+    requiresAppContext: false,
+    format: ({ fields }) => {
+      const searchConfiguration = fields[ALERT_RULE_PARAMETERS]?.searchConfiguration as
+        | SerializedSearchSourceFields
+        | undefined;
+      const criteria = fields[ALERT_RULE_PARAMETERS]?.criteria as MetricExpression[];
+      const metrics: CustomThresholdExpressionMetric[] =
+        criteria.length === 1 ? criteria[0].metrics : [];
 
-        const dataViewId = getDataViewId(searchConfiguration);
-        return {
-          reason: fields[ALERT_REASON] ?? '-',
-          link: getViewInAppUrl(
-            metrics,
-            fields[ALERT_START],
-            logExplorerLocator,
-            (searchConfiguration?.query as { query: string }).query,
-            dataViewId
-          ),
-          hasBasePath: true,
-        };
-      },
-      alertDetailsAppSection: lazy(
-        () => import('../components/custom_threshold/components/alert_details_app_section')
-      ),
-      priority: 5,
-    });
-  }
+      const dataViewId = getDataViewId(searchConfiguration);
+      return {
+        reason: fields[ALERT_REASON] ?? '-',
+        link: getViewInAppUrl(
+          metrics,
+          fields[ALERT_START],
+          logExplorerLocator,
+          (searchConfiguration?.query as { query: string }).query,
+          dataViewId
+        ),
+        hasBasePath: true,
+      };
+    },
+    alertDetailsAppSection: lazy(
+      () => import('../components/custom_threshold/components/alert_details_app_section')
+    ),
+    priority: 5,
+  });
 };
