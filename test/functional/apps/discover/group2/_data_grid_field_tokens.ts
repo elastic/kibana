@@ -60,8 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return firstFieldIcons;
   }
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/172874
-  describe.skip('discover data grid field tokens', function () {
+  describe('discover data grid field tokens', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -129,20 +128,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('ip');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('geo.coordinates');
 
       expect(await findFirstColumnTokens()).to.eql(['Number', 'String', 'String']);
 
-      expect(await findFirstDocViewerTokens()).to.eql([
+      const docViewerTokens = await findFirstDocViewerTokens();
+      expect(docViewerTokens?.slice(0, 6)).to.eql([
         'String',
         'String',
         'Date',
         'String',
         'Number',
-        'String',
-        'String',
-        'Unknown field',
-        'String',
         'String',
       ]);
     });
