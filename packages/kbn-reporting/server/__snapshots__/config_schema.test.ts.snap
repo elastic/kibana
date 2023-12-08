@@ -9,6 +9,7 @@ Object {
     "checkForFormulas": true,
     "enablePanelActionDownload": true,
     "escapeFormulaValues": false,
+    "maxConcurrentShardRequests": 5,
     "maxSizeBytes": ByteSizeValue {
       "valueInBytes": 262144000,
     },
@@ -70,6 +71,7 @@ Object {
     "checkForFormulas": true,
     "enablePanelActionDownload": true,
     "escapeFormulaValues": false,
+    "maxConcurrentShardRequests": 5,
     "maxSizeBytes": ByteSizeValue {
       "valueInBytes": 262144000,
     },

@@ -1234,6 +1234,136 @@ describe('TaskManagerRunner', () => {
       expect(instance.enabled).not.toBeDefined();
     });
 
+    test('throws error when the task has invalid state', async () => {
+      const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+        schedule: { interval: '10m' },
+        status: TaskStatus.Idle,
+        startedAt: new Date(),
+        enabled: true,
+        runAt: new Date(),
+        params: { foo: true },
+        state: { foo: true, bar: 'test', baz: 'test' },
+        stateVersion: 4,
+      };
+
+      const { runner, logger } = await readyToRunStageSetup({
+        instance: mockTaskInstance,
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: { foo: 'bar' } };
+              },
+            }),
+            stateSchemaByVersion: {
+              1: {
+                up: (state: Record<string, unknown>) => ({ foo: state.foo || '' }),
+                schema: schema.object({
+                  foo: schema.string(),
+                }),
+              },
+              2: {
+                up: (state: Record<string, unknown>) => ({ ...state, bar: state.bar || '' }),
+                schema: schema.object({
+                  foo: schema.string(),
+                  bar: schema.string(),
+                }),
+              },
+              3: {
+                up: (state: Record<string, unknown>) => ({ ...state, baz: state.baz || '' }),
+                schema: schema.object({
+                  foo: schema.string(),
+                  bar: schema.string(),
+                  baz: schema.string(),
+                }),
+              },
+            },
+          },
+        },
+        requeueInvalidTasksConfig: {
+          enabled: true,
+          delay: 3000,
+          max_attempts: 20,
+        },
+      });
+
+      expect(() => runner.run()).rejects.toMatchInlineSnapshot(
+        `[Error: [foo]: expected value of type [string] but got [boolean]]`
+      );
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Task (bar/foo) has a validation error: [foo]: expected value of type [string] but got [boolean]'
+      );
+    });
+
+    test('does not throw error and runs when the task has invalid state and allowReadingInvalidState = true', async () => {
+      const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+        schedule: { interval: '10m' },
+        status: TaskStatus.Idle,
+        startedAt: new Date(),
+        enabled: true,
+        runAt: new Date(),
+        params: { foo: true },
+        state: { foo: true, bar: 'test', baz: 'test' },
+        stateVersion: 4,
+      };
+
+      const { runner, store, logger } = await readyToRunStageSetup({
+        instance: mockTaskInstance,
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: { foo: 'bar' } };
+              },
+            }),
+            stateSchemaByVersion: {
+              1: {
+                up: (state: Record<string, unknown>) => ({ foo: state.foo || '' }),
+                schema: schema.object({
+                  foo: schema.string(),
+                }),
+              },
+              2: {
+                up: (state: Record<string, unknown>) => ({ ...state, bar: state.bar || '' }),
+                schema: schema.object({
+                  foo: schema.string(),
+                  bar: schema.string(),
+                }),
+              },
+              3: {
+                up: (state: Record<string, unknown>) => ({ ...state, baz: state.baz || '' }),
+                schema: schema.object({
+                  foo: schema.string(),
+                  bar: schema.string(),
+                  baz: schema.string(),
+                }),
+              },
+            },
+          },
+        },
+        requeueInvalidTasksConfig: {
+          enabled: true,
+          delay: 3000,
+          max_attempts: 20,
+        },
+        allowReadingInvalidState: true,
+      });
+
+      const result = await runner.run();
+
+      expect(store.update).toHaveBeenCalledTimes(1);
+      const instance = store.update.mock.calls[0][0];
+      expect(instance.state).toEqual({
+        foo: 'bar',
+      });
+      expect(instance.attempts).toBe(0);
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(result).toEqual(asOk({ state: { foo: 'bar' } }));
+    });
+
     describe('TaskEvents', () => {
       test('emits TaskEvent when a task is run successfully', async () => {
         const id = _.random(1, 20).toString();
@@ -2418,6 +2548,7 @@ describe('TaskManagerRunner', () => {
     definitions?: TaskDefinitionRegistry;
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
     requeueInvalidTasksConfig?: RequeueInvalidTasksConfig;
+    allowReadingInvalidState?: boolean;
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -2494,6 +2625,7 @@ describe('TaskManagerRunner', () => {
         warn_threshold: 5000,
       },
       requeueInvalidTasksConfig: opts.requeueInvalidTasksConfig || mockRequeueInvalidTasksConfig,
+      allowReadingInvalidState: opts.allowReadingInvalidState || false,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

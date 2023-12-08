@@ -17,7 +17,7 @@ import type {
   ComplianceDashboardDataV2,
   Evaluation,
   PosturePolicyTemplate,
-} from '../../../../common/types';
+} from '../../../../common/types_old';
 import { RisksTable } from '../compliance_charts/risks_table';
 import { RULE_FAILED } from '../../../../common/constants';
 import { LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY } from '../../../common/constants';

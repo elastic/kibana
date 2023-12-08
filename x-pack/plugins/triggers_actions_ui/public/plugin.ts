@@ -28,6 +28,9 @@ import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
+import type { AlertActionsProps } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import { TypeRegistry } from './application/type_registry';
 
@@ -118,6 +121,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
+  getAlertsTableDefaultAlertActions: <P extends AlertActionsProps>(
+    props: P
+  ) => ReactElement<AlertActionsProps>;
   getAlertsStateTable: (
     props: AlertsTableStateProps & LazyLoadProps
   ) => ReactElement<AlertsTableStateProps>;
@@ -167,6 +173,7 @@ interface PluginsStart {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   licensing: LicensingPluginStart;
   serverless?: ServerlessPluginStart;
+  fieldFormats: FieldFormatsRegistry;
 }
 
 export class Plugin
@@ -293,6 +300,7 @@ export class Plugin
           licensing: pluginsStart.licensing,
           expressions: pluginsStart.expressions,
           isServerless: !!pluginsStart.serverless,
+          fieldFormats: pluginsStart.fieldFormats,
         });
       },
     });
@@ -358,7 +366,15 @@ export class Plugin
     };
   }
 
-  public start(): TriggersAndActionsUIPublicPluginStart {
+  public start(_: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
+    import('./application/sections/alerts_table/configuration').then(
+      ({ getAlertsTableConfiguration }) => {
+        this.alertsTableConfigurationRegistry.register(
+          getAlertsTableConfiguration(plugins.fieldFormats)
+        );
+      }
+    );
+
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
@@ -410,6 +426,9 @@ export class Plugin
       },
       getAlertsTable: (props: AlertsTableProps) => {
         return getAlertsTableLazy(props);
+      },
+      getAlertsTableDefaultAlertActions: (props: AlertActionsProps) => {
+        return getAlertsTableDefaultAlertActionsLazy(props);
       },
       getFieldBrowser: (props: FieldBrowserProps) => {
         return getFieldBrowserLazy(props);

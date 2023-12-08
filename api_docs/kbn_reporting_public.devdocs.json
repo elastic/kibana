@@ -17,6 +17,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ClientConfigType.csv",
+            "type": "Object",
+            "tags": [],
+            "label": "csv",
+            "description": [],
+            "signature": [
+              "{ scroll: { duration: string; size: number; }; }"
+            ],
+            "path": "packages/kbn-reporting/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
             "id": "def-public.ClientConfigType.poll",
             "type": "Object",
             "tags": [],
