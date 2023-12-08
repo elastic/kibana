@@ -58,7 +58,7 @@ export const CasesConnectorRunParamsSchema = schema.object({
        *
        * Example: 20d, 2w, 1M, etc
        */
-      const timeWindowRegex = new RegExp(/[1-9][0-9]*[d,w,M,y]/, 'g');
+      const timeWindowRegex = new RegExp(/^[1-9][0-9]*[d,w,M,y]$/, 'g');
 
       if (!timeWindowRegex.test(value)) {
         return 'Not a valid time window';
