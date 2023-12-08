@@ -1013,8 +1013,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('Tabs', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
+      it('renders tabs correctly', async () => {
+        await testSubjects.existOrFail('case-view-tab-title-activity');
+        await testSubjects.existOrFail('case-view-tab-title-files');
+        // there are no alerts in stack management yet
+      });
+
       it('shows the "activity" tab by default', async () => {
         await testSubjects.existOrFail('case-view-tab-title-activity');
+        await testSubjects.existOrFail('case-view-tab-content-activity');
+      });
+
+      it("shows the 'activity' tab when clicked", async () => {
+        await testSubjects.click('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-content-activity');
       });
 
@@ -1027,6 +1038,37 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it("shows the 'files' tab when clicked", async () => {
         await testSubjects.click('case-view-tab-title-files');
         await testSubjects.existOrFail('case-view-tab-content-files');
+      });
+
+      describe('Query params', () => {
+        it('renders the activity tab when the query parameter tabId=activity', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'activity');
+          await testSubjects.existOrFail('case-view-tab-title-activity');
+        });
+
+        // there are no alerts in stack management yet
+        it.skip('renders the activity tab when the query parameter tabId=alerts', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'alerts');
+          await testSubjects.existOrFail('case-view-tab-title-activity');
+        });
+
+        it('renders the activity tab when the query parameter tabId=files', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'files');
+          await testSubjects.existOrFail('case-view-tab-content-files');
+        });
+
+        it('renders the activity tab when the query parameter tabId has an unknown value', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'fake');
+          await testSubjects.existOrFail('case-view-tab-title-activity');
+        });
       });
     });
 

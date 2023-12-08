@@ -42,6 +42,8 @@ import { useGetCaseUserActionsStats } from '../../containers/use_get_case_user_a
 import { createQueryWithMarkup } from '../../common/test_utils';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { CaseMetricsFeature } from '../../../common/types/api';
+import { useGetCategories } from '../../containers/use_get_categories';
+import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -56,6 +58,7 @@ jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_case_connectors');
 jest.mock('../../containers/use_get_case_users');
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
+jest.mock('../../containers/user_profiles/use_suggest_user_profiles');
 jest.mock('../../common/use_cases_features');
 jest.mock('../user_actions/timestamp', () => ({
   UserActionTimestamp: () => <></>,
@@ -64,6 +67,7 @@ jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/hooks');
 jest.mock('../connectors/resilient/api');
 jest.mock('../../common/lib/kibana');
+jest.mock('../../containers/use_get_categories');
 
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useUrlParamsMock = useUrlParams as jest.Mock;
@@ -79,6 +83,8 @@ const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
+const useGetCategoriesMock = useGetCategories as jest.Mock;
+const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
 
 const mockGetCase = (props: Partial<UseGetCase> = {}) => {
   const data = {
@@ -183,6 +189,9 @@ describe('CaseViewPage', () => {
       isAlertsEnabled: true,
       isSyncAlertsEnabled: true,
     });
+    useGetCategoriesMock.mockReturnValue({ data: [], isLoading: false });
+    useSuggestUserProfilesMock.mockReturnValue({ data: [], isLoading: false });
+    useUrlParamsMock.mockReturnValue({});
 
     appMockRenderer = createAppMockRenderer({ license: platinumLicense });
   });
@@ -337,27 +346,7 @@ describe('CaseViewPage', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/149777
-  describe.skip('Tabs', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('renders tabs correctly', async () => {
-      appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-      expect(await screen.findByRole('tablist')).toBeInTheDocument();
-
-      expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
-      expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
-      expect(await screen.findByTestId('case-view-tab-title-files')).toBeInTheDocument();
-    });
-
-    it('renders the activity tab by default', async () => {
-      appMockRenderer.render(<CaseViewPage {...caseProps} />);
-      expect(await screen.findByTestId('case-view-tab-content-activity')).toBeInTheDocument();
-    });
-
+  describe('Tabs', () => {
     it('renders the alerts tab when the query parameter tabId has alerts', async () => {
       useUrlParamsMock.mockReturnValue({
         urlParams: {
@@ -369,45 +358,6 @@ describe('CaseViewPage', () => {
 
       expect(await screen.findByTestId('case-view-tab-content-alerts')).toBeInTheDocument();
       expect(await screen.findByTestId('alerts-table')).toBeInTheDocument();
-    });
-
-    it('renders the activity tab when the query parameter tabId has activity', async () => {
-      useUrlParamsMock.mockReturnValue({
-        urlParams: {
-          tabId: CASE_VIEW_PAGE_TABS.ACTIVITY,
-        },
-      });
-
-      appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-      expect(await screen.findByTestId('case-view-tab-content-activity')).toBeInTheDocument();
-    });
-
-    it('renders the activity tab when the query parameter tabId has an unknown value', async () => {
-      useUrlParamsMock.mockReturnValue({
-        urlParams: {
-          tabId: 'what-is-love',
-        },
-      });
-
-      appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-      expect(await screen.findByTestId('case-view-tab-content-activity')).toBeInTheDocument();
-      expect(screen.queryByTestId('case-view-tab-content-alerts')).not.toBeInTheDocument();
-    });
-
-    it('navigates to the activity tab when the activity tab is clicked', async () => {
-      const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-      appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-      userEvent.click(await screen.findByTestId('case-view-tab-title-activity'));
-
-      await waitFor(() => {
-        expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-          detailName: caseData.id,
-          tabId: CASE_VIEW_PAGE_TABS.ACTIVITY,
-        });
-      });
     });
 
     it('navigates to the alerts tab when the alerts tab is clicked', async () => {
@@ -459,27 +409,27 @@ describe('CaseViewPage', () => {
         await screen.findByTestId('case-view-alerts-table-experimental-badge')
       ).toBeInTheDocument();
     });
+  });
 
-    describe('description', () => {
-      it('renders the description correctly', async () => {
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
+  describe('description', () => {
+    it('renders the description correctly', async () => {
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-        const description = within(await screen.findByTestId('description'));
+      const description = within(await screen.findByTestId('description'));
 
-        expect(await description.findByText(caseData.description)).toBeInTheDocument();
-      });
+      expect(await description.findByText(caseData.description)).toBeInTheDocument();
+    });
 
-      it('should display description when case is loading', async () => {
-        useUpdateCaseMock.mockImplementation(() => ({
-          ...defaultUpdateCaseState,
-          isLoading: true,
-          updateKey: 'description',
-        }));
+    it('should display description when case is loading', async () => {
+      useUpdateCaseMock.mockImplementation(() => ({
+        ...defaultUpdateCaseState,
+        isLoading: true,
+        updateKey: 'description',
+      }));
 
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-        expect(await screen.findByTestId('description')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('description')).toBeInTheDocument();
     });
   });
 });
