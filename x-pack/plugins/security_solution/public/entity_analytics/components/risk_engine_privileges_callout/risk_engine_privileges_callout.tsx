@@ -11,13 +11,12 @@ import { CallOutSwitcher } from '../../../common/components/callouts';
 import { MissingPrivilegesCallOutBody, MISSING_PRIVILEGES_CALLOUT_TITLE } from './translations';
 import type { MissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
 
-export const RiskEnginePrivilegesCallOut = () => {
-  const privileges = useMissingPrivileges();
-
+export const RiskEnginePrivilegesCallOut: React.FC<{
+  privileges: MissingPrivilegesResponse;
+}> = ({ privileges }) => {
   if (privileges.isLoading || privileges.hasAllRequiredPrivileges) {
     return null;
   }
-
   const message: CallOutMessage = {
     type: 'primary',
     id: `missing-risk-engine-privileges`,

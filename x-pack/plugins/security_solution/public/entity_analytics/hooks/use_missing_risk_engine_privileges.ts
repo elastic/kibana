@@ -17,7 +17,7 @@ export type MissingPrivilegesResponse =
       hasAllRequiredPrivileges: false;
     };
 
-export const useMissingPrivileges = (): MissingPrivilegesResponse => {
+export const useMissingRiskEnginePrivileges = (): MissingPrivilegesResponse => {
   const { data: privilegesResponse, isLoading } = useRiskEnginePrivileges();
 
   return useMemo<MissingPrivilegesResponse>(() => {
