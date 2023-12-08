@@ -1146,6 +1146,8 @@ export class Embeddable
     });
 
     if (errors.length && this.domNode) {
+      this.updateOutput({ loading: false });
+
       render(
         <>
           <KibanaThemeProvider theme$={this.deps.theme.theme$}>
