@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/rtl-eui",
+  "owner": "@elastic/kibana-visualizations"
+}
