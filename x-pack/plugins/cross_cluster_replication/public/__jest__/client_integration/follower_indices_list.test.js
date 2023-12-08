@@ -309,7 +309,7 @@ describe('<FollowerIndicesList />', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/100951
+    // FLAKY: https://github.com/elastic/kibana/issues/142774
     describe.skip('detail panel', () => {
       test('should open a detail panel when clicking on a follower index', async () => {
         expect(exists('followerIndexDetail')).toBe(false);
@@ -372,7 +372,8 @@ describe('<FollowerIndicesList />', () => {
         );
       });
 
-      test('should have a section to render the follower index shards stats', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/100951
+      test.skip('should have a section to render the follower index shards stats', async () => {
         await actions.clickFollowerIndexAt(0);
         expect(exists('followerIndexDetail.shardsStatsSection')).toBe(true);
 

@@ -21,6 +21,7 @@
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/actions-plugin",
     "@kbn/elastic-assistant",
+    "@kbn/elastic-assistant-common",
     "@kbn/logging-mocks",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-logging-server-mocks",
@@ -29,9 +30,9 @@
     "@kbn/tooling-log",
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
-    "@kbn/std",
     "@kbn/stack-connectors-plugin",
     "@kbn/ml-plugin",
+    "@kbn/apm-utils",
   ],
   "exclude": [
     "target/**/*",

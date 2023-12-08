@@ -76,6 +76,49 @@ export const fleetAgentsSchema: RootSchema<any> = {
           description: 'Output type used by agent',
         },
       },
+      presets_counts: {
+        _meta: {
+          description: 'Count of agents per preset',
+        },
+        properties: {
+          balanced: {
+            type: 'long',
+            _meta: {
+              description: 'Number of agents enrolled whose output uses the balanced preset',
+            },
+          },
+          custom: {
+            type: 'long',
+            _meta: {
+              description: 'Number of agents enrolled whose outputs uses the custom preset',
+            },
+          },
+          throughput: {
+            type: 'long',
+            _meta: {
+              description: 'Number of agents enrolled whose output uses the throughput preset',
+            },
+          },
+          scale: {
+            type: 'long',
+            _meta: {
+              description: 'Number of agents enrolled whose output uses the scale preset',
+            },
+          },
+          latency: {
+            type: 'long',
+            _meta: {
+              description: 'Number of agents enrolled whose output uses the latency preset',
+            },
+          },
+        },
+      },
+      output_preset: {
+        type: 'keyword',
+        _meta: {
+          description: 'Output preset used by agent, if applicable',
+        },
+      },
       count_as_data: {
         type: 'long',
         _meta: {

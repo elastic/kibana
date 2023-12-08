@@ -3,8 +3,11 @@
 exports[`error distribution queries fetches an error distribution 1`] = `
 Object {
   "apm": Object {
-    "events": Array [
-      "error",
+    "sources": Array [
+      Object {
+        "documentType": "error",
+        "rollupInterval": "none",
+      },
     ],
   },
   "body": Object {
@@ -39,6 +42,11 @@ Object {
             },
           },
         ],
+        "must_not": Object {
+          "term": Object {
+            "error.type": "crash",
+          },
+        },
       },
     },
     "size": 0,
@@ -50,8 +58,11 @@ Object {
 exports[`error distribution queries fetches an error distribution with a group id 1`] = `
 Object {
   "apm": Object {
-    "events": Array [
-      "error",
+    "sources": Array [
+      Object {
+        "documentType": "error",
+        "rollupInterval": "none",
+      },
     ],
   },
   "body": Object {
@@ -91,6 +102,11 @@ Object {
             },
           },
         ],
+        "must_not": Object {
+          "term": Object {
+            "error.type": "crash",
+          },
+        },
       },
     },
     "size": 0,

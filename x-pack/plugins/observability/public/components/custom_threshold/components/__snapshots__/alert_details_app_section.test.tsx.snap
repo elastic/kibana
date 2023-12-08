@@ -22,7 +22,6 @@ Array [
       "title": "unknown-index",
     },
     "expression": Object {
-      "aggType": "custom",
       "comparator": ">",
       "metrics": Array [
         Object {

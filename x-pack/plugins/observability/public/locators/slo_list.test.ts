@@ -13,8 +13,8 @@ describe('SloListLocator', () => {
   it("returns the correct url with the default search state when no 'kqlQuery' provided", async () => {
     const location = await locator.getLocation({});
     expect(location.app).toEqual('observability');
-    expect(location.path).toEqual(
-      "/slos?search=(kqlQuery:'',page:0,sort:(by:status,direction:desc))"
+    expect(location.path).toMatchInlineSnapshot(
+      `"/slos?search=(compact:!t,kqlQuery:'',page:0,sort:(by:status,direction:desc),view:cardView)"`
     );
   });
 
@@ -23,8 +23,8 @@ describe('SloListLocator', () => {
       kqlQuery: 'slo.name: "Service Availability" and slo.indicator.type : "sli.kql.custom"',
     });
     expect(location.app).toEqual('observability');
-    expect(location.path).toEqual(
-      "/slos?search=(kqlQuery:'slo.name:%20%22Service%20Availability%22%20and%20slo.indicator.type%20:%20%22sli.kql.custom%22',page:0,sort:(by:status,direction:desc))"
+    expect(location.path).toMatchInlineSnapshot(
+      `"/slos?search=(compact:!t,kqlQuery:'slo.name:%20%22Service%20Availability%22%20and%20slo.indicator.type%20:%20%22sli.kql.custom%22',page:0,sort:(by:status,direction:desc),view:cardView)"`
     );
   });
 });

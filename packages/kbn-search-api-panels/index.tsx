@@ -54,18 +54,18 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
           </EuiFlexItem>
           {Boolean(user) && (
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
+              <EuiText>
                 <h4>
                   {user
                     ? i18n.translate('searchApiPanels.welcomeBanner.header.greeting.customTitle', {
-                        defaultMessage: 'Hi {name}!',
+                        defaultMessage: '👋 Hi {name}!',
                         values: { name: user.full_name || user.username },
                       })
                     : i18n.translate('searchApiPanels.welcomeBanner.header.greeting.defaultTitle', {
-                        defaultMessage: 'Hi!',
+                        defaultMessage: '👋 Hi',
                       })}
                 </h4>
-              </EuiTitle>
+              </EuiText>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

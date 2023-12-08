@@ -25,12 +25,12 @@ describe('KeyUXMetrics', () => {
         loading={false}
         data={{
           cls: 0.01,
-          fid: 6,
+          inp: 6,
           lcp: 1701.1142857142856,
           tbt: 270.915,
           fcp: 1273.6285714285714,
           lcpRanks: [69, 17, 14],
-          fidRanks: [83, 6, 11],
+          inpRanks: [83, 6, 11],
           clsRanks: [90, 7, 3],
           coreVitalPages: 1000,
         }}
