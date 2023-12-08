@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiFlexGroupProps,
   EuiFlexGroup,
-  EuiHorizontalRule,
   EuiFlexItem,
   EuiLink,
   EuiPanel,
@@ -104,7 +103,6 @@ export function MobileServiceOverview() {
       start={start}
       end={end}
     >
-      <EuiHorizontalRule />
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>

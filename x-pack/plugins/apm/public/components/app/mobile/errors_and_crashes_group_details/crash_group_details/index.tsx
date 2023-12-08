@@ -219,14 +219,11 @@ export function CrashGroupDetails() {
 
   return (
     <>
-      <EuiSpacer size={'s'} />
-
       <CrashGroupHeader
         groupId={groupId}
         occurrencesCount={errorSamplesData?.occurrencesCount}
       />
 
-      <EuiSpacer size={'m'} />
       <EuiFlexGroup>
         <ChartPointerEventContextProvider>
           <EuiFlexItem grow={3}>
