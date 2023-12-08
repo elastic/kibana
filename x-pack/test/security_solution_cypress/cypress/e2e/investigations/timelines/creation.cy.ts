@@ -21,6 +21,7 @@ import {
   SAVE_TIMELINE_ACTION_BTN,
   SAVE_TIMELINE_TOOLTIP,
 } from '../../../screens/timeline';
+import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { ROWS } from '../../../screens/timelines';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 
@@ -168,6 +169,11 @@ describe('Timelines', (): void => {
       cy.get(TIMELINE_STATUS)
         .invoke('text')
         .should('match', /^Saved/);
+
+      // Offsetting the extra save that is happening in the background
+      // for the saved search object.
+      cy.get(LOADING_INDICATOR).should('be.visible');
+      cy.get(LOADING_INDICATOR).should('not.exist');
 
       executeTimelineKQL('agent.name : *');
 
