@@ -325,7 +325,7 @@ export const GettingStarted: React.FC<GettingStartedProps> = ({
           leftPanelContent={<GettingStartedPipelinePanel />}
           links={[]}
           overviewPanelProps={{ color: 'plain', hasShadow: false }}
-          title={i18n.translate('xpack.serverlessSearch.pipeline.title', {
+          title={i18n.translate('xpack.enterpriseSearch.pipeline.title', {
             defaultMessage: 'Transform and enrich your data',
           })}
         />

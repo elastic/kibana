@@ -55,7 +55,7 @@ export const APIGettingStarted = () => {
       )}
       <EuiTitle size="l">
         <h2>
-          {i18n.translate('xpack.enterpriseSearch.content.overview.gettingStarted.pageTitle', {
+          {i18n.translate('xpack.enterpriseSearch.gettingStarted.pageTitle', {
             defaultMessage: 'Getting started with Elastic API',
           })}
         </h2>
