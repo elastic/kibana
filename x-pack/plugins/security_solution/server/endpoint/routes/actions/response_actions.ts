@@ -7,10 +7,9 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import { EndpointError } from '../../../../common/endpoint/errors';
+import { getResponseActionsClient } from '../../services';
 import type { ResponseActionsClient } from '../../lib/response_actions/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { EndpointActionsClient, SentinelOneActionsClient } from '../../services/actions/clients';
 import type {
   NoParametersRequestSchema,
   ResponseActionsRequestBody,
@@ -310,35 +309,16 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
     const connectorActions = (await context.actions).getActionsClient();
-    const agentType = req.body.agent_type ?? 'endpoint';
-    let responseActionsClient: ResponseActionsClient;
-
-    switch (agentType) {
-      case 'endpoint':
-        responseActionsClient = new EndpointActionsClient({
-          esClient,
-          casesClient,
-          endpointService: endpointContext.service,
-          username: user?.username ?? 'unknown',
-        });
-        break;
-      case 'sentinel_one':
-        responseActionsClient = new SentinelOneActionsClient({
-          esClient,
-          casesClient,
-          endpointService: endpointContext.service,
-          username: user?.username ?? 'unknown',
-          connectorActions,
-        });
-        break;
-
-      default:
-        return errorHandler(
-          logger,
-          res,
-          new EndpointError(`No client defined for agent_type: ${agentType}`)
-        );
-    }
+    const responseActionsClient: ResponseActionsClient = getResponseActionsClient(
+      req.body.agent_type ?? 'endpoint',
+      {
+        esClient,
+        casesClient,
+        endpointService: endpointContext.service,
+        username: user?.username ?? 'unknown',
+        connectorActions,
+      }
+    );
 
     try {
       let action: ActionDetails;

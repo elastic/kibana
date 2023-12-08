@@ -38,3 +38,9 @@ export class ResponseActionsNotSupportedError extends ResponseActionsClientError
     super(`Action ${responseAction ? `[${responseAction}] ` : ''}not supported`, statusCode, meta);
   }
 }
+
+export class UnsupportedResponseActionsAgentTypeError extends ResponseActionsClientError {
+  constructor(message: string, statusCode = 501, meta?: unknown) {
+    super(message, statusCode, meta);
+  }
+}

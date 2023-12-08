@@ -7,3 +7,4 @@
 
 export * from './endpoint_actions_client';
 export * from './sentinelone/sentinel_one_actions_client';
+export * from './get_response_actions_client';
