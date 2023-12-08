@@ -225,5 +225,11 @@ export default ({ getService }: FtrProviderContext) => {
       expect(result.count).to.eql(1);
       expect(result.categories[0]).to.eql(expectedCategory3);
     });
+
+    it('should not find a category', async () => {
+      const result = await runGetCategoryRequest(catJobId, '9999');
+      expect(result.count).to.eql(0);
+      expect(result.categories.length).to.eql(0);
+    });
   });
 };
