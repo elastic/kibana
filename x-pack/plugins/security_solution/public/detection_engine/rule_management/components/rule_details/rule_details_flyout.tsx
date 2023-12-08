@@ -21,11 +21,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import type { EuiTabbedContentTab, EuiTabbedContentProps } from '@elastic/eui';
+import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleOverviewTab, useOverviewTabSections } from './rule_overview_tab';
 import { RuleInvestigationGuideTab } from './rule_investigation_guide_tab';
+import {
+  DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
+  LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS,
+} from './constants';
 
 import * as i18n from './translations';
 
@@ -95,13 +99,15 @@ const tabPaddingClassName = css`
   padding: 0 ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeXL} ${euiThemeVars.euiSizeM};
 `;
 
-const TabContentPadding: React.FC = ({ children }) => (
+export const TabContentPadding: React.FC = ({ children }) => (
   <div className={tabPaddingClassName}>{children}</div>
 );
 
 interface RuleDetailsFlyoutProps {
   rule: RuleResponse;
   ruleActions?: React.ReactNode;
+  size?: EuiFlyoutProps['size'];
+  extraTabs?: EuiTabbedContentTab[];
   dataTestSubj?: string;
   closeFlyout: () => void;
 }
@@ -109,6 +115,8 @@ interface RuleDetailsFlyoutProps {
 export const RuleDetailsFlyout = ({
   rule,
   ruleActions,
+  size = 'm',
+  extraTabs = [],
   dataTestSubj,
   closeFlyout,
 }: RuleDetailsFlyoutProps) => {
@@ -122,13 +130,18 @@ export const RuleDetailsFlyout = ({
         <TabContentPadding>
           <RuleOverviewTab
             rule={rule}
+            columnWidths={
+              size === 'l'
+                ? LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS
+                : DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS
+            }
             expandedOverviewSections={expandedOverviewSections}
             toggleOverviewSection={toggleOverviewSection}
           />
         </TabContentPadding>
       ),
     }),
-    [rule, expandedOverviewSections, toggleOverviewSection]
+    [rule, size, expandedOverviewSections, toggleOverviewSection]
   );
 
   const investigationGuideTab: EuiTabbedContentTab = useMemo(
@@ -146,11 +159,11 @@ export const RuleDetailsFlyout = ({
 
   const tabs = useMemo(() => {
     if (rule.note) {
-      return [overviewTab, investigationGuideTab];
+      return [...extraTabs, overviewTab, investigationGuideTab];
     } else {
-      return [overviewTab];
+      return [...extraTabs, overviewTab];
     }
-  }, [overviewTab, investigationGuideTab, rule.note]);
+  }, [overviewTab, investigationGuideTab, rule.note, extraTabs]);
 
   const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
   const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
@@ -168,7 +181,7 @@ export const RuleDetailsFlyout = ({
 
   return (
     <EuiFlyout
-      size="m"
+      size={size}
       onClose={closeFlyout}
       ownFocus={false}
       key="prebuilt-rules-flyout"
