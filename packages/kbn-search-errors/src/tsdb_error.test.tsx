@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { ReactElement } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { createEsError } from './create_es_error';
+import { renderSearchError } from './render_search_error';
 import { shallow } from 'enzyme';
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -72,12 +74,15 @@ describe('Tsdb error', () => {
   });
 
   test('should render error message', () => {
-    const wrapper = shallow(tsdbError.getErrorMessage());
+    const searchErrorDisplay = renderSearchError(tsdbError);
+    expect(searchErrorDisplay).not.toBeUndefined();
+    const wrapper = shallow(searchErrorDisplay?.body as ReactElement);
     expect(wrapper).toMatchSnapshot();
   });
 
   test('should return 1 actions', () => {
-    const actions = tsdbError.getActions();
-    expect(actions.length).toBe(1);
+    const searchErrorDisplay = renderSearchError(tsdbError);
+    expect(searchErrorDisplay).not.toBeUndefined();
+    expect(searchErrorDisplay?.actions?.length).toBe(1);
   });
 });

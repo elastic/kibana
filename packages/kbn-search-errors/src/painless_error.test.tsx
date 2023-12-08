@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { ReactElement } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createEsError } from './create_es_error';
+import { renderSearchError } from './render_search_error';
 import { shallow } from 'enzyme';
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -75,12 +77,15 @@ describe('Painless error', () => {
   });
 
   test('should render error message', () => {
-    const wrapper = shallow(painlessError.getErrorMessage());
+    const searchErrorDisplay = renderSearchError(painlessError);
+    expect(searchErrorDisplay).not.toBeUndefined();
+    const wrapper = shallow(searchErrorDisplay?.body as ReactElement);
     expect(wrapper).toMatchSnapshot();
   });
 
   test('should return 2 actions', () => {
-    const actions = painlessError.getActions();
-    expect(actions.length).toBe(2);
+    const searchErrorDisplay = renderSearchError(painlessError);
+    expect(searchErrorDisplay).not.toBeUndefined();
+    expect(searchErrorDisplay?.actions?.length).toBe(2);
   });
 });
