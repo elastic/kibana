@@ -25,6 +25,10 @@ function getStateContainer({ dataView }: { dataView?: DataView } = {}) {
   const stateContainer = getDiscoverStateContainer({
     services: discoverServiceMock,
     history,
+    customizationContext: {
+      displayMode: 'standalone',
+      showLogExplorerTabs: false,
+    },
   });
   stateContainer.savedSearchState.set(savedSearch);
   stateContainer.appState.getState = jest.fn(() => ({
