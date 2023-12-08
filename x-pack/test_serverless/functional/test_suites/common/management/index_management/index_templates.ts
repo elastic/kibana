@@ -13,18 +13,14 @@ import type { WebElementWrapper } from '../../../../../../../test/functional/ser
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
   const browser = getService('browser');
-  const security = getService('security');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
+  const retry = getService('retry');
 
   const TEST_TEMPLATE = 'a_test_template';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172703
-  // FLAKY: https://github.com/elastic/kibana/issues/172704
-  describe.skip('Index Templates', function () {
+  describe('Index Templates', function () {
     before(async () => {
-      await security.testUser.setRoles(['index_management_user']);
-      // Navigate to the index management page
       await pageObjects.svlCommonPage.login();
     });
 
@@ -55,7 +51,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE });
+        await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE }, { ignore: [404] });
       });
 
       it('Displays the test template in the list of templates', async () => {
@@ -80,7 +76,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Create index template', () => {
       after(async () => {
-        await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE });
+        await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE }, { ignore: [404] });
       });
 
       it('Creates index template', async () => {
@@ -97,7 +93,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('nextButton');
         await testSubjects.click('nextButton');
 
-        expect(await testSubjects.getVisibleText('title')).to.contain(TEST_TEMPLATE);
+        await retry.try(async () => {
+          expect(await testSubjects.getVisibleText('title')).to.contain(TEST_TEMPLATE);
+        });
       });
     });
   });
