@@ -24,13 +24,11 @@ const PIPELINE_CSV = {
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'ingestPipelines']);
   const es = getService('es');
-  const security = getService('security');
   const log = getService('log');
 
   describe('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
-      await security.testUser.setRoles(['ingest_pipelines_user']);
       await pageObjects.svlCommonPage.login();
     });
     beforeEach(async () => {
