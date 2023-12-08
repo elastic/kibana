@@ -104,7 +104,7 @@ export const registerIndicesRoutes = ({ router, security }: RouteDependencies) =
       const from = page * size;
 
       const searchResults = await fetchSearchResults(client, indexName, searchQuery, from, size);
-      // console.log('searchResults', from, size);
+
       return response.ok({
         body: {
           results: searchResults,
