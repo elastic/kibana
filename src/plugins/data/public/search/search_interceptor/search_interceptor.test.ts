@@ -12,7 +12,7 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { IEsSearchRequest } from '../../../common/search';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
-import { SearchTimeoutError, PainlessError, TimeoutErrorMode, EsError } from '../errors';
+import { PainlessError, EsError, type IEsError } from '@kbn/search-errors';
 import { ISessionService, SearchSessionState } from '..';
 import { bfetchPluginMock } from '@kbn/bfetch-plugin/public/mocks';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
@@ -22,12 +22,12 @@ import * as resourceNotFoundException from '../../../common/search/test_data/res
 import { BehaviorSubject } from 'rxjs';
 import { dataPluginMock } from '../../mocks';
 import { UI_SETTINGS } from '../../../common';
-import type { IEsError } from '../errors';
 import type { SearchServiceStartDependencies } from '../search_service';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 
-jest.mock('./utils', () => {
-  const originalModule = jest.requireActual('./utils');
+jest.mock('./create_request_hash', () => {
+  const originalModule = jest.requireActual('./create_request_hash');
   return {
     ...originalModule,
     createRequestHash: jest.fn().mockImplementation((input) => {
@@ -36,11 +36,11 @@ jest.mock('./utils', () => {
   };
 });
 
-jest.mock('../errors/search_session_incomplete_warning', () => ({
+jest.mock('./search_session_incomplete_warning', () => ({
   SearchSessionIncompleteWarning: jest.fn(),
 }));
 
-import { SearchSessionIncompleteWarning } from '../errors/search_session_incomplete_warning';
+import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { getMockSearchConfig } from '../../../config.mock';
 
 let searchInterceptor: SearchInterceptor;
