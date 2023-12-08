@@ -30,11 +30,11 @@ import {
   SUPPORTED_POLICY_TEMPLATES,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import {
+import type {
   AwsCredentialsType,
-  CloudSecurityPolicyTemplate,
   PostureInput,
-} from '../../../common/types';
+  CloudSecurityPolicyTemplate,
+} from '../../../common/types_old';
 import { cloudPostureIntegrations } from '../../common/constants';
 import { DEFAULT_EKS_VARS_GROUP } from './eks_credentials_form';
 import {

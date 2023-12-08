@@ -33,7 +33,7 @@ import { i18n } from '@kbn/i18n';
 import { AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
 import { assert } from '../../../common/utils/helpers';
-import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../common/types';
+import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../common/types_old';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VANILLA,

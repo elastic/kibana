@@ -6,10 +6,10 @@
  */
 
 import React, { useState } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { TreemapSelect, TreemapTypes } from './treemap_select';
 import { TreemapChart } from '../../../../shared/charts/treemap_chart';
-import { useFetcher } from '../../../../../hooks/use_fetcher';
+import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
 import {
   DEVICE_MODEL_IDENTIFIER,
   SERVICE_VERSION,
@@ -62,7 +62,10 @@ export function MobileErrorsAndCrashesTreemap({
     [environment, kuery, serviceName, start, end, selectedTreemap]
   );
   return (
-    <>
+    <EuiPanel hasBorder={true} style={{ position: 'relative' }}>
+      {isPending(status) && (
+        <EuiProgress size="xs" color="accent" position="absolute" />
+      )}
       <TreemapSelect
         selectedTreemap={selectedTreemap}
         onChange={selectTreemap}
@@ -74,6 +77,6 @@ export function MobileErrorsAndCrashesTreemap({
         id="device-treemap"
         height={320}
       />
-    </>
+    </EuiPanel>
   );
 }
