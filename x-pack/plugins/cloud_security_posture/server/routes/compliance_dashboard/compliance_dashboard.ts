@@ -15,7 +15,7 @@ import type {
   ComplianceDashboardData,
   GetComplianceDashboardRequest,
   ComplianceDashboardDataV2,
-} from '../../../common/types';
+} from '../../../common/types_old';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
 import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
 import { ClusterWithoutTrend, getClusters } from './get_clusters';

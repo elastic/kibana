@@ -28,7 +28,6 @@ import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
-import { useInspector } from '../../hooks/use_inspector';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -65,8 +64,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     filterManager,
     history,
     spaces,
-    inspector,
     docLinks,
+    serverless,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
@@ -108,11 +107,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false),
     [dataState.fetchStatus, dataState.foundDocuments]
   );
-
-  const onOpenInspector = useInspector({
-    inspector,
-    stateContainer,
-  });
 
   const {
     columns: currentColumns,
@@ -248,7 +242,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   return (
     <EuiPage
-      className="dscPage"
+      className={classNames('dscPage', { 'dscPage--serverless': serverless })}
       data-fetch-counter={fetchCounter.current}
       css={css`
         background-color: ${pageBackgroundColor};
@@ -271,12 +265,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             })}
       </h1>
       <TopNavMemoized
-        onOpenInspector={onOpenInspector}
-        query={query}
         savedQuery={savedQuery}
         stateContainer={stateContainer}
         updateQuery={stateContainer.actions.onUpdateQuery}
-        isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         textBasedLanguageModeWarning={textBasedLanguageModeWarning}
         onFieldEdited={onFieldEdited}
