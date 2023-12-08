@@ -133,12 +133,12 @@ export const ConfigurePipeline: React.FC = () => {
             )}
             <EuiSpacer size="s" />
             <EuiTitle size="xxxs">
-              <h5>
+              <h6>
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.titleSelectTrainedModel',
                   { defaultMessage: 'Select a trained ML Model' }
                 )}
-              </h5>
+              </h6>
             </EuiTitle>
             {formErrors.modelStatus !== undefined && (
               <>
