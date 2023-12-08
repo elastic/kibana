@@ -54,7 +54,7 @@ export const ElasticsearchGuide = () => {
           username={user?.full_name || user?.username || ''}
         />
       )}
-      <EuiTitle size="l">
+      <EuiTitle size="l" data-test-subj="elasticsearchGuide">
         <h1>
           {i18n.translate('xpack.enterpriseSearch.content.overview.gettingStarted.pageTitle', {
             defaultMessage: 'Elasticsearch language clients',

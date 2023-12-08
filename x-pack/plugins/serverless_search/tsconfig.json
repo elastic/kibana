@@ -10,7 +10,6 @@
     "public/**/*.tsx",
     "server/**/*.ts",
     "../../../typings/**/*",
-    "../../../packages/kbn-search-api-panels/components/cloud_details.tsx"
   ],
   "exclude": [
     "target/**/*"
