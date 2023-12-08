@@ -27,7 +27,7 @@ export interface LogAIAssistantProps {
 }
 
 export interface LogAIAssistantDeps extends LogAIAssistantProps {
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart['service'];
 }
 
 export const LogAIAssistant = withProviders(({ doc }: LogAIAssistantProps) => {
@@ -77,12 +77,20 @@ export const LogAIAssistant = withProviders(({ doc }: LogAIAssistantProps) => {
     <EuiFlexGroup direction="column" gutterSize="m">
       {aiAssistant.isEnabled() && explainLogMessageMessages ? (
         <EuiFlexItem grow={false}>
-          <ContextualInsight title={explainLogMessageTitle} messages={explainLogMessageMessages} />
+          <ContextualInsight
+            title={explainLogMessageTitle}
+            messages={explainLogMessageMessages}
+            dataTestSubj="obsAiAssistantInsightButtonExplainLogMessage"
+          />
         </EuiFlexItem>
       ) : null}
       {aiAssistant.isEnabled() && similarLogMessageMessages ? (
         <EuiFlexItem grow={false}>
-          <ContextualInsight title={similarLogMessagesTitle} messages={similarLogMessageMessages} />
+          <ContextualInsight
+            title={similarLogMessagesTitle}
+            messages={similarLogMessageMessages}
+            dataTestSubj="obsAiAssistantInsightButtonSimilarLogMessage"
+          />
         </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>
@@ -94,11 +102,11 @@ export default LogAIAssistant;
 
 function withProviders(Component: React.FunctionComponent<LogAIAssistantProps>) {
   return function ComponentWithProviders({
-    observabilityAIAssistant,
+    observabilityAIAssistant: observabilityAIAssistantService,
     ...props
   }: LogAIAssistantDeps) {
     return (
-      <ObservabilityAIAssistantProvider value={observabilityAIAssistant}>
+      <ObservabilityAIAssistantProvider value={observabilityAIAssistantService}>
         <Component {...props} />
       </ObservabilityAIAssistantProvider>
     );

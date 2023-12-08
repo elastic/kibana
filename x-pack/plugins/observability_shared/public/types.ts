@@ -17,15 +17,16 @@ export interface ApmIndicesConfig {
 }
 
 export interface UXMetrics {
-  cls: number | null;
-  fid?: number | null;
+  cls?: number | null;
   lcp?: number | null;
-  tbt: number;
+  tbt?: number;
   fcp?: number | null;
-  coreVitalPages: number;
-  lcpRanks: number[];
-  fidRanks: number[];
-  clsRanks: number[];
+  coreVitalPages?: number;
+  lcpRanks?: number[];
+  clsRanks?: number[];
+  inp?: number | null;
+  hasINP?: boolean;
+  inpRanks?: number[];
 }
 
 export interface HeaderMenuPortalProps {

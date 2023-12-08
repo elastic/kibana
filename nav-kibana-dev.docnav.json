@@ -200,6 +200,9 @@
           "id": "ktServerlessReleaseOverview"
         },
         {
+          "id": "ktServerlessEmergencyReleases"
+        },
+        {
           "id": "ktCustomServerlessImage"
         }
       ]
@@ -424,6 +427,9 @@
         },
         {
           "id": "kibNewsfeedPluginApi"
+        },
+        {
+          "id": "kibNotificationsPluginApi"
         },
         {
           "id": "kibObservabilityPluginApi"

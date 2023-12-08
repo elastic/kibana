@@ -11,7 +11,6 @@
  * 2.0.
  */
 
-import { CUSTOM_AGGREGATOR } from '@kbn/observability-plugin/common/custom_threshold_rule/constants';
 import moment from 'moment';
 import { cleanup, generate } from '@kbn/infra-forge';
 import {
@@ -97,7 +96,6 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                aggType: CUSTOM_AGGREGATOR,
                 comparator: Comparator.GT,
                 threshold: [0.9],
                 timeSize: 1,
@@ -165,7 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (Technical Preview)'
+          'Custom threshold (Beta)'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -195,7 +193,6 @@ export default function ({ getService }: FtrProviderContext) {
           .eql({
             criteria: [
               {
-                aggType: CUSTOM_AGGREGATOR,
                 comparator: Comparator.GT,
                 threshold: [0.9],
                 timeSize: 1,

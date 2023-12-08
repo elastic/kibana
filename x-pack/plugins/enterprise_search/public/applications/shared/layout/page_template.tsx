@@ -5,22 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import classNames from 'classnames';
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 
+import { Status } from '../../../../common/types/api';
+
+import { CreateApiKeyAPILogic } from '../../enterprise_search_overview/api/create_elasticsearch_api_key_logic';
+import { CreateApiKeyFlyout } from '../api_key/create_api_key_flyout';
 import { FlashMessages } from '../flash_messages';
 import { HttpLogic } from '../http';
+import { KibanaLogic } from '../kibana';
 import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../loading';
 
 import './page_template.scss';
+import { EndpointsHeaderAction } from './endpoints_header_action';
 
 /*
  * EnterpriseSearchPageTemplateWrapper is a light wrapper for KibanaPageTemplate (which
@@ -43,6 +51,7 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
   pageViewTelemetry?: string;
   setPageChrome?: React.ReactNode;
   solutionNavIcon?: string;
+  useEndpointHeaderActions?: boolean;
 };
 
 export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({
@@ -56,13 +65,29 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
   setPageChrome,
   solutionNav,
   solutionNavIcon,
+  useEndpointHeaderActions = true,
   ...pageTemplateProps
 }) => {
   const { readOnlyMode } = useValues(HttpLogic);
+  const { cloud, renderHeaderActions, user } = useValues(KibanaLogic);
+  const { makeRequest: saveApiKey } = useActions(CreateApiKeyAPILogic);
+  const { data: apiKey, error, status } = useValues(CreateApiKeyAPILogic);
+
   const hasCustomEmptyState = !!emptyState;
   const showCustomEmptyState = hasCustomEmptyState && isEmptyState;
 
   const navIcon = solutionNavIcon ?? 'logoEnterpriseSearch';
+
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const HeaderAction: React.FC<{}> = () => (
+    <I18nProvider>
+      <EndpointsHeaderAction isFlyoutOpen={isFlyoutOpen} setIsFlyoutOpen={setIsFlyoutOpen} />
+    </I18nProvider>
+  );
+
+  if (cloud && useEndpointHeaderActions) {
+    renderHeaderActions(HeaderAction);
+  }
   return (
     <KibanaPageTemplate
       restrictWidth={false}
@@ -78,6 +103,16 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
       isEmptyState={isEmptyState && !isLoading}
       solutionNav={solutionNav && solutionNav.items ? { icon: navIcon, ...solutionNav } : undefined}
     >
+      {isFlyoutOpen && (
+        <CreateApiKeyFlyout
+          createdApiKey={apiKey}
+          error={error?.body?.message}
+          isLoading={status === Status.LOADING}
+          onClose={() => setIsFlyoutOpen(false)}
+          setApiKey={saveApiKey}
+          username={user?.full_name || user?.username || ''}
+        />
+      )}
       {setPageChrome}
       {readOnlyMode && (
         <>

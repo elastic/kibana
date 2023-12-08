@@ -5,29 +5,24 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../../../objects/rule';
+import { visit } from '../../../../tasks/navigation';
 import { ALERTS_COUNT, SELECTED_ALERTS } from '../../../../screens/alerts';
-
+import { ruleDetailsUrl } from '../../../../urls/rule_details';
 import {
-  selectNumberOfAlerts,
-  waitForAlerts,
-  markAcknowledgedFirstAlert,
-  markAlertsAcknowledged,
-  goToAcknowledgedAlertsOnRuleDetailsPage,
-  closeFirstAlert,
   closeAlerts,
-  openAlerts,
-  openFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
+  markAcknowledgedFirstAlert,
+  markAlertsAcknowledged,
+  openAlerts,
+  openFirstAlert,
+  selectNumberOfAlerts,
+  waitForAlerts,
 } from '../../../../tasks/alerts';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { deleteAlertsAndRules } from '../../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
-
-import { ruleDetailsUrl } from '../../../../urls/rule_details';
+import { getNewRule } from '../../../../objects/rule';
 
 describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
@@ -231,3 +226,6 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 });
+function goToAcknowledgedAlertsOnRuleDetailsPage() {
+  throw new Error('Function not implemented.');
+}

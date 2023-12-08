@@ -54,24 +54,55 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           description: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
           hidden: true,
-          name: '.elser_model_1',
+          model_id: '.elser_model_1',
           version: 1,
+          modelName: 'elser',
+          type: ['elastic', 'pytorch', 'text_expansion'],
         },
         {
           config: { input: { field_names: ['text_field'] } },
           default: true,
           description: 'Elastic Learned Sparse EncodeR v2',
-          name: '.elser_model_2',
+          model_id: '.elser_model_2',
           version: 2,
+          modelName: 'elser',
+          type: ['elastic', 'pytorch', 'text_expansion'],
         },
         {
           arch: 'amd64',
           config: { input: { field_names: ['text_field'] } },
           description: 'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64',
-          name: '.elser_model_2_linux-x86_64',
+          model_id: '.elser_model_2_linux-x86_64',
           os: 'Linux',
           recommended: true,
           version: 2,
+          modelName: 'elser',
+          type: ['elastic', 'pytorch', 'text_expansion'],
+        },
+        {
+          config: { input: { field_names: ['text_field'] } },
+          description: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
+          model_id: '.multilingual-e5-small',
+          default: true,
+          version: 1,
+          modelName: 'e5',
+          license: 'MIT',
+          licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small',
+          type: ['pytorch', 'text_embedding'],
+        },
+        {
+          arch: 'amd64',
+          config: { input: { field_names: ['text_field'] } },
+          description:
+            'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
+          model_id: '.multilingual-e5-small_linux-x86_64',
+          os: 'Linux',
+          recommended: true,
+          version: 1,
+          modelName: 'e5',
+          license: 'MIT',
+          licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small_linux-x86_64',
+          type: ['pytorch', 'text_embedding'],
         },
       ]);
     });
@@ -105,23 +136,53 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           description: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
           hidden: true,
-          name: '.elser_model_1',
+          model_id: '.elser_model_1',
           version: 1,
+          modelName: 'elser',
+          type: ['elastic', 'pytorch', 'text_expansion'],
         },
         {
           config: { input: { field_names: ['text_field'] } },
           recommended: true,
           description: 'Elastic Learned Sparse EncodeR v2',
-          name: '.elser_model_2',
+          model_id: '.elser_model_2',
           version: 2,
+          modelName: 'elser',
+          type: ['elastic', 'pytorch', 'text_expansion'],
         },
         {
           arch: 'amd64',
           config: { input: { field_names: ['text_field'] } },
           description: 'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64',
-          name: '.elser_model_2_linux-x86_64',
+          model_id: '.elser_model_2_linux-x86_64',
           os: 'Linux',
           version: 2,
+          modelName: 'elser',
+          type: ['elastic', 'pytorch', 'text_expansion'],
+        },
+        {
+          config: { input: { field_names: ['text_field'] } },
+          description: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
+          model_id: '.multilingual-e5-small',
+          recommended: true,
+          version: 1,
+          modelName: 'e5',
+          type: ['pytorch', 'text_embedding'],
+          license: 'MIT',
+          licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small',
+        },
+        {
+          arch: 'amd64',
+          config: { input: { field_names: ['text_field'] } },
+          description:
+            'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
+          model_id: '.multilingual-e5-small_linux-x86_64',
+          os: 'Linux',
+          version: 1,
+          modelName: 'e5',
+          type: ['pytorch', 'text_embedding'],
+          license: 'MIT',
+          licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small_linux-x86_64',
         },
       ]);
     });
@@ -130,7 +191,7 @@ describe('modelsProvider', () => {
   describe('getELSER', () => {
     test('provides a recommended definition by default', async () => {
       const result = await modelService.getELSER();
-      expect(result.name).toEqual('.elser_model_2_linux-x86_64');
+      expect(result.model_id).toEqual('.elser_model_2_linux-x86_64');
     });
 
     test('provides a default version if there is no recommended', async () => {
@@ -156,17 +217,50 @@ describe('modelsProvider', () => {
       });
 
       const result = await modelService.getELSER();
-      expect(result.name).toEqual('.elser_model_2');
+      expect(result.model_id).toEqual('.elser_model_2');
     });
 
     test('provides the requested version', async () => {
       const result = await modelService.getELSER({ version: 1 });
-      expect(result.name).toEqual('.elser_model_1');
+      expect(result.model_id).toEqual('.elser_model_1');
     });
 
     test('provides the requested version of a recommended architecture', async () => {
       const result = await modelService.getELSER({ version: 2 });
-      expect(result.name).toEqual('.elser_model_2_linux-x86_64');
+      expect(result.model_id).toEqual('.elser_model_2_linux-x86_64');
+    });
+  });
+
+  describe('getCuratedModelConfig', () => {
+    test('provides a recommended definition by default', async () => {
+      const result = await modelService.getCuratedModelConfig('e5');
+      expect(result.model_id).toEqual('.multilingual-e5-small_linux-x86_64');
+    });
+
+    test('provides a default version if there is no recommended', async () => {
+      mockCloud.cloudId = undefined;
+      (mockClient.asInternalUser.transport.request as jest.Mock).mockResolvedValueOnce({
+        _nodes: {
+          total: 1,
+          successful: 1,
+          failed: 0,
+        },
+        cluster_name: 'default',
+        nodes: {
+          yYmqBqjpQG2rXsmMSPb9pQ: {
+            name: 'node-0',
+            roles: ['ml'],
+            attributes: {},
+            os: {
+              name: 'Mac OS X',
+              arch: 'aarch64',
+            },
+          },
+        },
+      });
+
+      const result = await modelService.getCuratedModelConfig('e5');
+      expect(result.model_id).toEqual('.multilingual-e5-small');
     });
   });
 });

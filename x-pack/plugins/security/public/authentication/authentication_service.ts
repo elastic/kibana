@@ -11,6 +11,7 @@ import type {
   HttpSetup,
   StartServicesAccessor,
 } from '@kbn/core/public';
+import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 
 import { accessAgreementApp } from './access_agreement';
 import { captureURLApp } from './capture_url';
@@ -18,7 +19,7 @@ import { loggedOutApp } from './logged_out';
 import { loginApp } from './login';
 import { logoutApp } from './logout';
 import { overwrittenSessionApp } from './overwritten_session';
-import type { AuthenticatedUser } from '../../common/model';
+import type { AuthenticatedUser } from '../../common';
 import type { ConfigType } from '../config';
 import type { PluginStartDependencies } from '../plugin';
 
@@ -29,24 +30,6 @@ interface SetupParams {
   http: HttpSetup;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
-
-export interface AuthenticationServiceSetup {
-  /**
-   * Returns currently authenticated user and throws if current user isn't authenticated.
-   */
-  getCurrentUser: () => Promise<AuthenticatedUser>;
-
-  /**
-   * Determines if API Keys are currently enabled.
-   */
-  areAPIKeysEnabled: () => Promise<boolean>;
-}
-
-/**
- * Start has the same contract as Setup for now.
- */
-export type AuthenticationServiceStart = AuthenticationServiceSetup;
-
 export class AuthenticationService {
   public setup({
     application,
