@@ -55,7 +55,10 @@ describe('agent configuration queries', () => {
     it('fetches configurations', async () => {
       mock = await inspectSearchParams(
         ({ mockInternalESClient, mockIndices }) =>
-          listConfigurations(mockInternalESClient, mockIndices)
+          listConfigurations({
+            internalESClient: mockInternalESClient,
+            apmIndices: mockIndices,
+          })
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -94,11 +97,11 @@ describe('agent configuration queries', () => {
   describe('findExactConfiguration', () => {
     it('find configuration by service.name', async () => {
       mock = await inspectSearchParams(
-        ({ mockInternalESClient, mockIndices }) =>
+        ({ mockInternalESClient, mockApmEventClient }) =>
           findExactConfiguration({
             service: { name: 'foo' },
             internalESClient: mockInternalESClient,
-            apmIndices: mockIndices,
+            apmEventClient: mockApmEventClient,
           })
       );
 
@@ -107,11 +110,11 @@ describe('agent configuration queries', () => {
 
     it('find configuration by service.environment', async () => {
       mock = await inspectSearchParams(
-        ({ mockInternalESClient, mockIndices }) =>
+        ({ mockInternalESClient, mockApmEventClient }) =>
           findExactConfiguration({
             service: { environment: 'bar' },
             internalESClient: mockInternalESClient,
-            apmIndices: mockIndices,
+            apmEventClient: mockApmEventClient,
           })
       );
 
@@ -120,11 +123,11 @@ describe('agent configuration queries', () => {
 
     it('find configuration by service.name and service.environment', async () => {
       mock = await inspectSearchParams(
-        ({ mockInternalESClient, mockIndices }) =>
+        ({ mockInternalESClient, mockApmEventClient }) =>
           findExactConfiguration({
             service: { name: 'foo', environment: 'bar' },
             internalESClient: mockInternalESClient,
-            apmIndices: mockIndices,
+            apmEventClient: mockApmEventClient,
           })
       );
 

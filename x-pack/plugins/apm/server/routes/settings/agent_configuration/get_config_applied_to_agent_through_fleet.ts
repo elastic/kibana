@@ -7,23 +7,26 @@
 
 import { termQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import datemath from '@kbn/datemath';
-import { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { METRICSET_NAME } from '../../../../common/es_fields/apm';
-import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 
-export async function getConfigsAppliedToAgentsThroughFleet(
-  internalESClient: APMInternalESClient,
-  apmIndices: APMIndices
+export async function getEtagsAppliedThroughFleet(
+  apmEventClient: APMEventClient,
+  etag?: string
 ) {
   const params = {
-    index: apmIndices.metric,
-    track_total_hits: 0,
-    size: 0,
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
     body: {
+      track_total_hits: 0,
+      size: 0,
       query: {
         bool: {
           filter: [
             ...termQuery(METRICSET_NAME, 'agent_config'),
+            ...termQuery('labels.etag', etag),
             ...rangeQuery(
               datemath.parse('now-15m')!.valueOf(),
               datemath.parse('now')!.valueOf()
@@ -42,18 +45,14 @@ export async function getConfigsAppliedToAgentsThroughFleet(
     },
   };
 
-  const response = await internalESClient.search(
+  const response = await apmEventClient.search(
     'get_config_applied_to_agent_through_fleet',
     params
   );
 
   return (
-    response.aggregations?.config_by_etag.buckets.reduce(
-      (configsAppliedToAgentsThroughFleet, bucket) => {
-        configsAppliedToAgentsThroughFleet[bucket.key as string] = true;
-        return configsAppliedToAgentsThroughFleet;
-      },
-      {} as Record<string, true>
-    ) ?? {}
+    response.aggregations?.config_by_etag.buckets.map(
+      ({ key }) => key as string
+    ) ?? []
   );
 }
