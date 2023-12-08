@@ -269,13 +269,13 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         kqlQuery = record.influencers
           .filter((influencer) => isDefined(influencer))
           .map((influencer) => {
-            const fieldName = escapeQuotes(influencer.influencer_field_name);
             const values = influencer.influencer_field_values;
 
             if (values.length > 0) {
+              const fieldName = escapeQuotes(influencer.influencer_field_name);
               const escapedVals = values
                 .filter((value) => isDefined(value))
-                .map((value) => `"${fieldName}":"${escapeQuotes(value) ?? ''}"`);
+                .map((value) => `"${fieldName}":"${escapeQuotes(value)}"`);
               // Ensure there's enclosing () if there are multiple field values,
               return escapedVals.length > 1 ? `(${escapedVals.join(' OR ')})` : escapedVals[0];
             }
