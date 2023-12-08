@@ -18,14 +18,18 @@ import {
   EuiThemeProvider,
   EuiTitle,
   EuiBadge,
+  EuiPanelProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OverviewPanel } from '..';
+import { ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
 
 export interface CloudDetailsPanelProps {
   cloudId?: string;
   elasticsearchUrl?: string;
+  isPanelLeft?: boolean;
+  overviewPanelProps?: Partial<EuiPanelProps>;
 }
 
 enum CloudDetail {
@@ -33,29 +37,37 @@ enum CloudDetail {
   CloudId = 'cloud_id',
 }
 
-export const CloudDetailsPanel = ({ cloudId, elasticsearchUrl }: CloudDetailsPanelProps) => {
+export const CloudDetailsPanel = ({
+  cloudId,
+  elasticsearchUrl = ELASTICSEARCH_URL_PLACEHOLDER,
+  isPanelLeft = true,
+  overviewPanelProps,
+}: CloudDetailsPanelProps) => {
   const [selectedDetail, setSelectedCloudDetail] = useState<CloudDetail>(
     CloudDetail.ElasticsearchEndpoint
+  );
+  const panelContent = (
+    <EuiThemeProvider colorMode="dark">
+      <EuiPanel paddingSize="xs">
+        <EuiCodeBlock isCopyable fontSize="m" className="serverlessSearchCloudDetailsCopyPanel">
+          {selectedDetail === CloudDetail.CloudId && cloudId}
+          {selectedDetail === CloudDetail.ElasticsearchEndpoint && elasticsearchUrl}
+        </EuiCodeBlock>
+      </EuiPanel>
+    </EuiThemeProvider>
   );
   return (
     <OverviewPanel
       description={i18n.translate('xpack.serverlessSearch.cloudIdDetails.description', {
         defaultMessage: 'Get ready to ingest and query your data by choosing a connection option:',
       })}
-      leftPanelContent={
-        <EuiThemeProvider colorMode="dark">
-          <EuiPanel paddingSize="xs">
-            <EuiCodeBlock isCopyable fontSize="m" className="serverlessSearchCloudDetailsCopyPanel">
-              {selectedDetail === CloudDetail.CloudId && cloudId}
-              {selectedDetail === CloudDetail.ElasticsearchEndpoint && elasticsearchUrl}
-            </EuiCodeBlock>
-          </EuiPanel>
-        </EuiThemeProvider>
-      }
+      leftPanelContent={isPanelLeft ? panelContent : undefined}
+      rightPanelContent={isPanelLeft ? undefined : panelContent}
       links={[]}
       title={i18n.translate('xpack.serverlessSearch.cloudIdDetails.title', {
         defaultMessage: 'Copy your connection details',
       })}
+      overviewPanelProps={overviewPanelProps}
     >
       <EuiSpacer size="l" />
       <EuiCheckableCard
@@ -98,31 +110,33 @@ export const CloudDetailsPanel = ({ cloudId, elasticsearchUrl }: CloudDetailsPan
         </EuiText>
       </EuiCheckableCard>
       <EuiSpacer />
-      <EuiCheckableCard
-        id={CloudDetail.CloudId}
-        name={CloudDetail.CloudId}
-        label={
-          <EuiTitle size="xxs">
-            <h5>
+      {Boolean(cloudId) && (
+        <EuiCheckableCard
+          id={CloudDetail.CloudId}
+          name={CloudDetail.CloudId}
+          label={
+            <EuiTitle size="xxs">
+              <h5>
+                <FormattedMessage
+                  id="xpack.serverlessSearch.cloudIdDetails.cloudId.title"
+                  defaultMessage="Cloud ID"
+                />
+              </h5>
+            </EuiTitle>
+          }
+          checked={selectedDetail === CloudDetail.CloudId}
+          onChange={() => setSelectedCloudDetail(CloudDetail.CloudId)}
+        >
+          <EuiText size="s">
+            <p>
               <FormattedMessage
-                id="xpack.serverlessSearch.cloudIdDetails.cloudId.title"
-                defaultMessage="Cloud ID"
+                id="xpack.serverlessSearch.cloudIdDetails.cloudId.description"
+                defaultMessage="Specific client libraries and connectors can use this unique identifier specific to Elastic Cloud."
               />
-            </h5>
-          </EuiTitle>
-        }
-        checked={selectedDetail === CloudDetail.CloudId}
-        onChange={() => setSelectedCloudDetail(CloudDetail.CloudId)}
-      >
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.serverlessSearch.cloudIdDetails.cloudId.description"
-              defaultMessage="Specific client libraries and connectors can use this unique identifier specific to Elastic Cloud."
-            />
-          </p>
-        </EuiText>
-      </EuiCheckableCard>
+            </p>
+          </EuiText>
+        </EuiCheckableCard>
+      )}
     </OverviewPanel>
   );
 };

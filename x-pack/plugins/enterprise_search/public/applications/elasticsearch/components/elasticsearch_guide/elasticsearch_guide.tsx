@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiTitle } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { LanguageDefinitionSnippetArguments } from '@kbn/search-api-panels';
@@ -55,12 +55,26 @@ export const ElasticsearchGuide = () => {
         />
       )}
       <EuiTitle size="l">
-        <h2>
+        <h1>
           {i18n.translate('xpack.enterpriseSearch.content.overview.gettingStarted.pageTitle', {
-            defaultMessage: 'Getting Started with Elastic API',
+            defaultMessage: 'Elasticsearch language clients',
           })}
-        </h2>
+        </h1>
       </EuiTitle>
+      <EuiSpacer size="xl" />
+      <EuiText>
+        <p>
+          {i18n.translate(
+            'xpack.enterpriseSearch.content.overview.gettingStarted.pageDescription',
+            {
+              defaultMessage:
+                "Set up your programming language client, ingest some data, and you'll be ready to start searching within minutes.",
+            }
+          )}
+        </p>
+      </EuiText>
+      <EuiHorizontalRule />
+      <EuiSpacer />
       <GettingStarted
         apiKeys={apiKeys}
         openApiKeyModal={() => setIsFlyoutOpen(true)}

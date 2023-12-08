@@ -130,7 +130,12 @@ export const GettingStarted: React.FC<GettingStartedProps> = ({
         overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
 
-      <CloudDetailsPanel cloudId={codeArgs.cloudId} elasticsearchUrl={codeArgs.url} />
+      <CloudDetailsPanel
+        cloudId={codeArgs.cloudId}
+        elasticsearchUrl={codeArgs.url}
+        isPanelLeft={isPanelLeft}
+        overviewPanelProps={{ color: 'plain', hasShadow: false }}
+      />
 
       <OverviewPanel
         description={i18n.translate(
@@ -303,6 +308,7 @@ export const GettingStarted: React.FC<GettingStartedProps> = ({
                 iconType="plusInCircle"
                 size="s"
                 href={http.basePath.prepend('/app/management/ingest/ingest_pipelines/create')}
+                data-telemetry-id="entSearch-gettingStarted-createPipeline"
                 data-test-subj="create-a-pipeline-button"
               >
                 <EuiText size="s">
