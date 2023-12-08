@@ -303,7 +303,7 @@ export function LensEditConfigurationFlyout({
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
         attributesChanged={attributesChanged}
-        language={getLanguageDisplayName(textBasedMode)}
+        language={textBasedMode ? getLanguageDisplayName(textBasedMode) : ''}
         isScrollable={false}
       >
         <EuiFlexGroup
