@@ -1024,7 +1024,6 @@ export class Embeddable
 
     this.renderComplete.dispatchComplete();
     this.updateOutput({
-      ...this.getOutput(),
       rendered: true,
     });
   };
@@ -1120,7 +1119,7 @@ export class Embeddable
               executionContext={this.getExecutionContext()}
               addUserMessages={(messages) => this.addUserMessages(messages)}
               onRuntimeError={(message) => {
-                this.updateOutput({ error: new Error(message) });
+                this.updateOutput({ error: new Error(message), loading: false });
                 this.logError('runtime');
               }}
               noPadding={this.visDisplayOptions.noPadding}
