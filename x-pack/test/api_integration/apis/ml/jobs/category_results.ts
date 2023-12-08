@@ -187,12 +187,16 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  async function runGetCategoryRequest(jobId: string, categoryId: string) {
+  async function runGetCategoryRequest(
+    jobId: string,
+    categoryId: string,
+    expectedStatusCode = 200
+  ) {
     const { body, status } = await supertest
       .get(`/internal/ml/anomaly_detectors/${jobId}/results/categories/${categoryId}`)
       .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
       .set(getCommonRequestHeader('1'));
-    ml.api.assertResponseStatusCode(200, status, body);
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }
@@ -224,6 +228,10 @@ export default ({ getService }: FtrProviderContext) => {
       const result = await runGetCategoryRequest(catJobId, '3');
       expect(result.count).to.eql(1);
       expect(result.categories[0]).to.eql(expectedCategory3);
+    });
+
+    it('should not find the category ID', async () => {
+      await runGetCategoryRequest('no-job', '3', 404);
     });
 
     it('should not find a category', async () => {
