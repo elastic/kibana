@@ -435,7 +435,8 @@ export function TransformTableProvider({ getPageObject, getService }: FtrProvide
       );
       expect(isEnabled).to.eql(
         expectedValue,
-        `Expected transform row actions button to be '${expectedValue ? 'enabled' : 'disabled'
+        `Expected transform row actions button to be '${
+          expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
     }
@@ -531,7 +532,8 @@ export function TransformTableProvider({ getPageObject, getService }: FtrProvide
         const isEnabled = await testSubjects.isEnabled(selector);
         expect(isEnabled).to.eql(
           expectedValue,
-          `Expected '${action}' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${isEnabled ? 'enabled' : 'disabled'
+          `Expected '${action}' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+            isEnabled ? 'enabled' : 'disabled'
           }')`
         );
 

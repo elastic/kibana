@@ -49,7 +49,8 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
         const isEnabled = await testSubjects.isEnabled(`transformEditRetentionPolicySwitch`);
         expect(isEnabled).to.eql(
           expectedValue,
-          `Expected 'transformEditRetentionPolicySwitch' input to be '${expectedValue ? 'enabled' : 'disabled'
+          `Expected 'transformEditRetentionPolicySwitch' input to be '${
+            expectedValue ? 'enabled' : 'disabled'
           }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
         );
       });
@@ -65,7 +66,8 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
         );
         expect(isEnabled).to.eql(
           expectedValue,
-          `Expected 'transformEditFlyoutRetentionPolicyFieldSelect' input to be '${expectedValue ? 'enabled' : 'disabled'
+          `Expected 'transformEditFlyoutRetentionPolicyFieldSelect' input to be '${
+            expectedValue ? 'enabled' : 'disabled'
           }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
         );
       });
@@ -98,7 +100,8 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       const isEnabled = await testSubjects.isEnabled(`transformEditFlyout${input}Input`);
       expect(isEnabled).to.eql(
         expectedValue,
-        `Expected '${input}' input to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${isEnabled ? 'enabled' : 'disabled'
+        `Expected '${input}' input to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          isEnabled ? 'enabled' : 'disabled'
         }')`
       );
     },
@@ -138,7 +141,8 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       const isEnabled = await testSubjects.isEnabled('transformEditFlyoutUpdateButton');
       expect(isEnabled).to.eql(
         expectedValue,
-        `Expected "Update" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${isEnabled ? 'enabled' : 'disabled'
+        `Expected "Update" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          isEnabled ? 'enabled' : 'disabled'
         }')`
       );
     },
