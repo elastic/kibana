@@ -124,6 +124,7 @@ export const assetCriticalityRouteHelpersFactoryNoAuth = (
       .send()
       .expect(200),
 });
+
 /**
  * Function to read asset criticality records from ES. By default, it reads from the asset criticality index in the default space, but this can be overridden with the
  * `index` parameter.
@@ -171,4 +172,3 @@ export const waitForAssetCriticalityToBePresent = async ({
     log
   );
 };
-
