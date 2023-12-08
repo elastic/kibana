@@ -10,6 +10,7 @@ import { TimeRange, Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
 
 export interface PublishesLocalUnifiedSearch {
+  isCompatibleWithLocalUnifiedSearch?: () => boolean;
   localTimeRange: PublishingSubject<TimeRange | undefined>;
   getFallbackTimeRange?: () => TimeRange | undefined;
   localFilters: PublishingSubject<Filter[] | undefined>;

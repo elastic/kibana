@@ -124,17 +124,15 @@ export const PresentationPanelInternal = <
         </EuiFlexGroup>
       )}
       {!initialLoadComplete && <PanelLoader />}
-      {!blockingError && (
-        <div className="embPanel__content">
-          <Component
-            {...(componentProps as React.ComponentProps<typeof Component>)}
-            {...contentAttrs}
-            ref={(newApi) => {
-              if (newApi && !api) setApi(newApi);
-            }}
-          />
-        </div>
-      )}
+      <div className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}>
+        <Component
+          {...(componentProps as React.ComponentProps<typeof Component>)}
+          {...contentAttrs}
+          ref={(newApi) => {
+            if (newApi && !api) setApi(newApi);
+          }}
+        />
+      </div>
     </EuiPanel>
   );
 };

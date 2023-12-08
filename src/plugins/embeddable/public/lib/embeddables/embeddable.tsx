@@ -138,6 +138,7 @@ export abstract class Embeddable<
       setPanelDescription: this.setPanelDescription,
       getFallbackTimeRange: this.getFallbackTimeRange,
       canUnlinkFromLibrary: this.canUnlinkFromLibrary,
+      isCompatibleWithLocalUnifiedSearch: this.isCompatibleWithLocalUnifiedSearch,
     } = api);
   }
 
@@ -169,6 +170,7 @@ export abstract class Embeddable<
   public setPanelDescription: LegacyEmbeddableAPI['setPanelDescription'];
   public canUnlinkFromLibrary: LegacyEmbeddableAPI['canUnlinkFromLibrary'];
   public getFallbackTimeRange: LegacyEmbeddableAPI['getFallbackTimeRange'];
+  public isCompatibleWithLocalUnifiedSearch: LegacyEmbeddableAPI['isCompatibleWithLocalUnifiedSearch'];
 
   public getEditHref(): string | undefined {
     return this.getOutput().editUrl ?? undefined;

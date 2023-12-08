@@ -23,7 +23,10 @@ export type FilterableEmbeddableInput = EmbeddableInput & {
 
 export type EmbeddableHasTimeRange = Pick<
   PublishesWritableLocalUnifiedSearch,
-  'localTimeRange' | 'setLocalTimeRange' | 'getFallbackTimeRange'
+  | 'localTimeRange'
+  | 'setLocalTimeRange'
+  | 'getFallbackTimeRange'
+  | 'isCompatibleWithLocalUnifiedSearch'
 >;
 
 /**

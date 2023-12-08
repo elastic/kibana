@@ -61,7 +61,11 @@ export class CustomizePanelAction implements Action<EmbeddableApiContext> {
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) return false;
     // It should be possible to customize just the time range in View mode
-    return embeddable.viewMode.value === 'edit' || apiPublishesLocalUnifiedSearch(embeddable);
+    return (
+      embeddable.viewMode.value === 'edit' ||
+      (apiPublishesLocalUnifiedSearch(embeddable) &&
+        (embeddable.isCompatibleWithLocalUnifiedSearch?.() ?? true))
+    );
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {

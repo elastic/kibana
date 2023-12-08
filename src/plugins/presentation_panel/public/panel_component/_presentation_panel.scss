@@ -28,6 +28,10 @@
     }
   }
 
+  .embPanel__content--hidden {
+    display: none;
+  }
+
   // SASSTODO: this MIGHT be fixing IE
   .embPanel__content--fullWidth {
     width: 100%;

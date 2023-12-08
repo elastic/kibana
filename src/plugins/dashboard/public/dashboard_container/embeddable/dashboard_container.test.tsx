@@ -116,10 +116,11 @@ test('DashboardContainer.replacePanel', (done) => {
   );
 
   // replace the panel now
-  container.replacePanel(container.getInput().panels[ID].explicitInput.id, {
-    panelType: EMPTY_EMBEDDABLE,
-    initialState: { id: ID },
-  });
+  container.replaceEmbeddable(
+    container.getInput().panels[ID].explicitInput.id,
+    { id: ID },
+    EMPTY_EMBEDDABLE
+  );
 });
 
 test('Container view mode change propagates to existing children', async () => {

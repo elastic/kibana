@@ -32,6 +32,13 @@ export type CommonLegacyInput = EmbeddableInput & { timeRange: TimeRange };
 export type CommonLegacyOutput = EmbeddableOutput & { indexPatterns: DataView[] };
 export type CommonLegacyEmbeddable = IEmbeddable<CommonLegacyInput, CommonLegacyOutput>;
 
+type VisualizeEmbeddable = IEmbeddable<{ id: string }, EmbeddableOutput & { visTypeName: string }>;
+function isVisualizeEmbeddable(
+  embeddable: IEmbeddable | VisualizeEmbeddable
+): embeddable is VisualizeEmbeddable {
+  return embeddable.type === 'visualization';
+}
+
 export const legacyEmbeddableToApi = (
   embeddable: CommonLegacyEmbeddable
 ): { api: Omit<LegacyEmbeddableAPI, 'type' | 'getInspectorAdapters'>; destroyAPI: () => void } => {
@@ -100,6 +107,20 @@ export const legacyEmbeddableToApi = (
     (embeddable.parent?.getInput() as unknown as CommonLegacyInput)?.timeRange;
 
   const dataViews = outputKeyToSubject<DataView[]>('indexPatterns');
+  const isCompatibleWithLocalUnifiedSearch = () => {
+    const isInputControl =
+      isVisualizeEmbeddable(embeddable) &&
+      (embeddable as unknown as VisualizeEmbeddable).getOutput().visTypeName ===
+        'input_control_vis';
+
+    const isMarkdown =
+      isVisualizeEmbeddable(embeddable) &&
+      (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'markdown';
+
+    const isImage = embeddable.type === 'image';
+    const isNavigation = embeddable.type === 'navigation';
+    return !isInputControl && !isMarkdown && !isImage && !isNavigation;
+  };
 
   /**
    * Forward Link & Unlink actions for reference or value embeddables.
@@ -119,6 +140,7 @@ export const legacyEmbeddableToApi = (
       localTimeRange,
       setLocalTimeRange,
       getFallbackTimeRange,
+      isCompatibleWithLocalUnifiedSearch,
 
       dataViews,
       disabledActionIds,
