@@ -177,6 +177,53 @@ const RiskScoreUpdateModal = ({
   );
 };
 
+const RiskEngineHealth: React.FC<{ currentRiskEngineStatus?: RiskEngineStatus | null }> = ({
+  currentRiskEngineStatus,
+}) => {
+  if (!currentRiskEngineStatus) {
+    return <EuiHealth color="subdued">{'-'}</EuiHealth>;
+  }
+  if (currentRiskEngineStatus === RiskEngineStatus.ENABLED) {
+    return <EuiHealth color="success">{i18n.RISK_SCORE_MODULE_STATUS_ON}</EuiHealth>;
+  }
+  return <EuiHealth color="subdued">{i18n.RISK_SCORE_MODULE_STATUS_OFF}</EuiHealth>;
+};
+
+const RiskEngineStatusRow: React.FC<{
+  currentRiskEngineStatus?: RiskEngineStatus | null;
+  onSwitchClick: () => void;
+  isLoading: boolean;
+}> = ({ currentRiskEngineStatus, onSwitchClick, isLoading }) => {
+  const btnIsDisabled = !currentRiskEngineStatus || isLoading;
+
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems={'center'}>
+      {isLoading && (
+        <EuiFlexItem>
+          <EuiLoadingSpinner data-test-subj="risk-score-status-loading" size="m" />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem
+        css={{ minWidth: MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING }}
+        data-test-subj="risk-score-status"
+      >
+        <RiskEngineHealth currentRiskEngineStatus={currentRiskEngineStatus} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiSwitch
+          label={''}
+          data-test-subj="risk-score-switch"
+          checked={currentRiskEngineStatus === RiskEngineStatus.ENABLED}
+          onChange={onSwitchClick}
+          compressed
+          disabled={btnIsDisabled}
+          aria-describedby={'switchRiskModule'}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 export const RiskScoreEnableSection = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
@@ -203,10 +250,9 @@ export const RiskScoreEnableSection = () => {
     isStatusLoading;
 
   const isUpdateAvailable = riskEngineStatus?.isUpdateAvailable;
-  const btnIsDisabled = !currentRiskEngineStatus || isLoading;
 
   const onSwitchClick = () => {
-    if (btnIsDisabled) {
+    if (!currentRiskEngineStatus || isLoading) {
       return;
     }
 
@@ -295,34 +341,11 @@ export const RiskScoreEnableSection = () => {
                 </EuiFlexGroup>
               )}
               {!isUpdateAvailable && (
-                <EuiFlexGroup gutterSize="s" alignItems={'center'}>
-                  <EuiFlexItem>
-                    {isLoading && (
-                      <EuiLoadingSpinner data-test-subj="risk-score-status-loading" size="m" />
-                    )}
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    css={{ minWidth: MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING }}
-                    data-test-subj="risk-score-status"
-                  >
-                    {currentRiskEngineStatus === RiskEngineStatus.ENABLED ? (
-                      <EuiHealth color="success">{i18n.RISK_SCORE_MODULE_STATUS_ON}</EuiHealth>
-                    ) : (
-                      <EuiHealth color="subdued">{i18n.RISK_SCORE_MODULE_STATUS_OFF}</EuiHealth>
-                    )}
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiSwitch
-                      label={''}
-                      data-test-subj="risk-score-switch"
-                      checked={currentRiskEngineStatus === RiskEngineStatus.ENABLED}
-                      onChange={onSwitchClick}
-                      compressed
-                      disabled={btnIsDisabled}
-                      aria-describedby={'switchRiskModule'}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <RiskEngineStatusRow
+                  currentRiskEngineStatus={currentRiskEngineStatus}
+                  onSwitchClick={onSwitchClick}
+                  isLoading={isLoading}
+                />
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
