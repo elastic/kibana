@@ -18,7 +18,7 @@ import {
   formulaIntervalFn,
   formulaNowFn,
   formulaTimeRangeFn,
-} from './datasources/form_based/operations/definitions/formula/context_variables';
+} from '../common/expressions/formula_context/context_fns';
 
 type TimeScaleArguments = Parameters<typeof getTimeScale>;
 

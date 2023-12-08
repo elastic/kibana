@@ -6,21 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import {
-  calcAutoIntervalNear,
-  ExecutionContextSearch,
-  getAbsoluteTimeRange,
-  UI_SETTINGS,
-} from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { partition } from 'lodash';
 import {
   buildExpressionFunction,
   buildExpression,
   ExpressionFunctionDefinitions,
-  ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
-import type { TimeRange } from '@kbn/es-query';
+import {
+  ExpressionFunctionFormulaInterval,
+  ExpressionFunctionFormulaNow,
+  ExpressionFunctionFormulaTimeRange,
+} from '../../../../../../common/expressions/formula_context/context_fns';
 import type {
   DateHistogramIndexPatternColumn,
   FormBasedLayer,
@@ -70,36 +67,6 @@ export interface TimeRangeIndexPatternColumn extends ReferenceBasedIndexPatternC
   operationType: 'time_range';
 }
 
-const timeRangeHelp = i18n.translate('xpack.lens.formula.timeRange.help', {
-  defaultMessage: 'The specified time range, in milliseconds (ms).',
-});
-
-export type ExpressionFunctionFormulaTimeRange = ExpressionFunctionDefinition<
-  'formula_time_range',
-  undefined,
-  object,
-  number
->;
-
-const getTimeRangeAsNumber = (timeRange: TimeRange | undefined, now: number | undefined) => {
-  if (!timeRange) return 0;
-  const absoluteTimeRange = getAbsoluteTimeRange(timeRange, now ? { forceNow: new Date(now) } : {});
-  return timeRange ? moment(absoluteTimeRange.to).diff(moment(absoluteTimeRange.from)) : 0;
-};
-
-export const formulaTimeRangeFn: ExpressionFunctionFormulaTimeRange = {
-  name: 'formula_time_range',
-
-  help: timeRangeHelp,
-
-  args: {},
-
-  fn(_input, _args, { getSearchContext }) {
-    const { timeRange, now } = getSearchContext() as ExecutionContextSearch;
-    return getTimeRangeAsNumber(timeRange, now);
-  },
-};
-
 function getTimeRangeErrorMessages(
   _layer: FormBasedLayer,
   _columnId: string,
@@ -127,34 +94,13 @@ function getTimeRangeErrorMessages(
 export const timeRangeOperation = createContextValueBasedOperation<TimeRangeIndexPatternColumn>({
   type: 'time_range',
   label: 'Time range',
-  description: timeRangeHelp,
+  description: i18n.translate('xpack.lens.formula.timeRange.help', {
+    defaultMessage: 'The specified time range, in milliseconds (ms).',
+  }),
   getExpressionFunction: (_context: ContextValues) =>
     buildExpressionFunction<ExpressionFunctionFormulaTimeRange>('formula_time_range', {}),
   getErrorMessage: getTimeRangeErrorMessages,
 });
-
-const nowHelp = i18n.translate('xpack.lens.formula.now.help', {
-  defaultMessage: 'The current now moment used in Kibana expressed in milliseconds (ms).',
-});
-
-export type ExpressionFunctionFormulaNow = ExpressionFunctionDefinition<
-  'formula_now',
-  undefined,
-  object,
-  number
->;
-
-export const formulaNowFn: ExpressionFunctionFormulaNow = {
-  name: 'formula_now',
-
-  help: nowHelp,
-
-  args: {},
-
-  fn(_input, _args, { getSearchContext }) {
-    return (getSearchContext() as ExecutionContextSearch).now ?? Date.now();
-  },
-};
 
 export interface NowIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'now';
@@ -167,46 +113,13 @@ function getNowErrorMessage() {
 export const nowOperation = createContextValueBasedOperation<NowIndexPatternColumn>({
   type: 'now',
   label: 'Current now',
-  description: nowHelp,
+  description: i18n.translate('xpack.lens.formula.now.help', {
+    defaultMessage: 'The current now moment used in Kibana expressed in milliseconds (ms).',
+  }),
   getExpressionFunction: (_context: ContextValues) =>
     buildExpressionFunction<ExpressionFunctionFormulaNow>('formula_now', {}),
   getErrorMessage: getNowErrorMessage,
 });
-
-const intervalHelp = i18n.translate('xpack.lens.formula.interval.help', {
-  defaultMessage: 'The specified minimum interval for the date histogram, in milliseconds (ms).',
-});
-
-export type ExpressionFunctionFormulaInterval = ExpressionFunctionDefinition<
-  'formula_interval',
-  undefined,
-  {
-    targetBars?: number;
-  },
-  number
->;
-
-export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
-  name: 'formula_interval',
-
-  help: intervalHelp,
-
-  args: {
-    targetBars: {
-      types: ['number'],
-      help: i18n.translate('xpack.lens.formula.interval.targetBars.help', {
-        defaultMessage: 'The target number of bars for the date histogram.',
-      }),
-    },
-  },
-
-  fn(_input, args, { getSearchContext }) {
-    const { timeRange, now } = getSearchContext() as ExecutionContextSearch;
-    return timeRange && args.targetBars
-      ? calcAutoIntervalNear(args.targetBars, getTimeRangeAsNumber(timeRange, now)).asMilliseconds()
-      : 0;
-  },
-};
 
 export interface IntervalIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'interval';
@@ -255,7 +168,9 @@ function getIntervalErrorMessages(
 export const intervalOperation = createContextValueBasedOperation<IntervalIndexPatternColumn>({
   type: 'interval',
   label: 'Date histogram interval',
-  description: intervalHelp,
+  description: i18n.translate('xpack.lens.formula.interval.help', {
+    defaultMessage: 'The specified minimum interval for the date histogram, in milliseconds (ms).',
+  }),
   getExpressionFunction: ({ targetBars }: ContextValues) =>
     buildExpressionFunction<ExpressionFunctionFormulaInterval>('formula_interval', {
       targetBars,
