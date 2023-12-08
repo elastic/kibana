@@ -45,6 +45,13 @@ export const assistantMessageSentEvent: TelemetryEvent = {
         optional: false,
       },
     },
+    assistantLangChain: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is knowledge base enabled',
+        optional: false,
+      },
+    },
   },
 };
 
@@ -60,6 +67,19 @@ export const assistantQuickPrompt: TelemetryEvent = {
     },
     promptTitle: {
       type: 'keyword',
+      _meta: {
+        description: 'Title of the quick prompt',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const assistantKnowledgeBaseToggledEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.AssistantKnowledgeBaseToggled,
+  schema: {
+    didEnable: {
+      type: 'boolean',
       _meta: {
         description: 'Title of the quick prompt',
         optional: false,

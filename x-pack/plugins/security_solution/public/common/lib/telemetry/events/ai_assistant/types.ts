@@ -16,6 +16,7 @@ export interface ReportAssistantInvokedParams {
 export interface ReportAssistantMessageSentParams {
   conversationId: string;
   role: string;
+  assistantLangChain: boolean;
 }
 
 export interface ReportAssistantQuickPromptParams {
@@ -23,15 +24,24 @@ export interface ReportAssistantQuickPromptParams {
   promptTitle: string;
 }
 
+export interface ReportAssistantKnowledgeBaseToggledParams {
+  didEnable: boolean;
+}
+
 export type ReportAssistantTelemetryEventParams =
   | ReportAssistantInvokedParams
   | ReportAssistantMessageSentParams
+  | ReportAssistantKnowledgeBaseToggledParams
   | ReportAssistantQuickPromptParams;
 
 export type AssistantTelemetryEvent =
   | {
       eventType: TelemetryEventTypes.AssistantInvoked;
       schema: RootSchema<ReportAssistantInvokedParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.AssistantKnowledgeBaseToggled;
+      schema: RootSchema<ReportAssistantKnowledgeBaseToggledParams>;
     }
   | {
       eventType: TelemetryEventTypes.AssistantMessageSent;

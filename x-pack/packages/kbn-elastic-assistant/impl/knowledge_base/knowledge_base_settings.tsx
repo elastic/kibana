@@ -47,7 +47,7 @@ interface Props {
  */
 export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
   ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }) => {
-    const { http, ragOnAlerts } = useAssistantContext();
+    const { assistantTelemetry, http, ragOnAlerts } = useAssistantContext();
     const {
       data: kbStatus,
       isLoading,
@@ -79,6 +79,9 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     // setting that is saved to localstorage
     const onEnableAssistantLangChainChange = useCallback(
       (event: EuiSwitchEvent) => {
+        assistantTelemetry?.reportAssistantKnowledgeBaseToggled({
+          didEnable: event.target.checked,
+        });
         setUpdatedKnowledgeBaseSettings({
           ...knowledgeBase,
           assistantLangChain: event.target.checked,
