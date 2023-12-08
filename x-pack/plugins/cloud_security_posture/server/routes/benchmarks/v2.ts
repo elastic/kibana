@@ -28,8 +28,7 @@ import {
   getAgentStatusesByAgentPolicies,
 } from '../../lib/fleet_util';
 import { getBenchmarksDataV1 } from './v1';
-import { BenchmarkVersion2 } from '../../../common/types_old';
-import { CspBenchmarkRule } from '../../../common/types/latest';
+import { CspBenchmarkRule, Benchmark } from '../../../common/types/latest';
 import { getClusters } from '../compliance_dashboard/get_clusters';
 import { getStats } from '../compliance_dashboard/get_stats';
 import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
@@ -38,7 +37,7 @@ export const getBenchmarksDataV2 = async (
   soClient: SavedObjectsClientContract,
   esClient: any,
   logger: Logger
-): Promise<BenchmarkVersion2[]> => {
+): Promise<Benchmark[]> => {
   // Returns a list of benchmark based on their Version and Benchmark ID
 
   const benchmarksResponse = await soClient.find<CspBenchmarkRule>({

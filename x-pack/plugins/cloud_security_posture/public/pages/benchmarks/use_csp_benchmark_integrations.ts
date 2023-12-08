@@ -21,9 +21,6 @@ export interface UseCspBenchmarkIntegrationsProps {
   sortOrder: BenchmarksQueryParams['sort_order'];
 }
 
-// export interface BenchmarkDetails extends ListResult<BenchmarkVersion2> {
-//   items_policies_information: Benchmark[];
-// }
 export const useCspBenchmarkIntegrations = ({
   name,
   perPage,

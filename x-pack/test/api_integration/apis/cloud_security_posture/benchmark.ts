@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type { GetBenchmarkResponse } from '@kbn/cloud-security-posture-plugin/common/types_old';
+import type { GetBenchmarkResponse } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createPackagePolicy } from './helper';

@@ -21,7 +21,7 @@ import {
   getAgentStatusesByAgentPolicies,
 } from '../../lib/fleet_util';
 import { getRulesCountForPolicy } from './utilities';
-import { Benchmark } from '../../../common/types_old';
+import { Benchmark } from '../../../common/types/benchmarks/v1';
 
 export const getBenchmarksDataV1 = (
   soClient: SavedObjectsClientContract,
