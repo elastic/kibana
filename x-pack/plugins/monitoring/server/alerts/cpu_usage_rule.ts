@@ -100,7 +100,12 @@ export class CpuUsageRule extends BaseRule {
     stat: AlertCpuUsageNodeStats,
     threshold: number
   ): { shouldFire: boolean; severity: AlertSeverity } {
-    if (stat.limitsChanged || stat.unexpectedLimits || stat.cpuUsage === undefined) {
+    if (
+      stat.missingLimits ||
+      stat.limitsChanged ||
+      stat.unexpectedLimits ||
+      stat.cpuUsage === undefined
+    ) {
       let severity = AlertSeverity.Warning;
       if (stat.cpuUsage && stat.cpuUsage > threshold) {
         severity = AlertSeverity.Danger;
@@ -143,6 +148,19 @@ export class CpuUsageRule extends BaseRule {
         timestamp: alertState.ui.triggeredMS,
       } as AlertMessageTimeToken,
     ];
+
+    if (stat.missingLimits) {
+      return {
+        text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.missingLimits', {
+          defaultMessage: `Kibana is configured for containerized workloads but node #start_link{nodeName}#end_link does not have resource limits configured. Fallback metric reports usage of {cpuUsage}%. Last checked at #absolute`,
+          values: {
+            nodeName: stat.nodeName,
+            cpuUsage: numeral(stat.cpuUsage).format(ROUNDED_FLOAT),
+          },
+        }),
+        tokens,
+      };
+    }
 
     if (stat.unexpectedLimits) {
       return {
@@ -255,7 +273,12 @@ export class CpuUsageRule extends BaseRule {
   private getMessage(state: AlertCpuUsageState, clusterName: string, action: string) {
     const stat = state.meta as AlertCpuUsageNodeStats;
 
-    if (stat.limitsChanged || stat.unexpectedLimits || stat.cpuUsage === undefined) {
+    if (
+      stat.missingLimits ||
+      stat.limitsChanged ||
+      stat.unexpectedLimits ||
+      stat.cpuUsage === undefined
+    ) {
       return i18n.translate('xpack.monitoring.alerts.cpuUsage.firing.internalMessageForFailure', {
         defaultMessage: `CPU usage alert for node {nodeName} in cluster {clusterName} faced issues while evaluating the usage. {action}`,
         values: {
