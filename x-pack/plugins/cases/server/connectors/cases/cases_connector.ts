@@ -14,6 +14,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from '@kbn/core/server';
 import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
+import { MAX_ALERTS_PER_CASE } from '../../../common/constants';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
@@ -574,18 +575,26 @@ export class CasesConnector extends SubActionConnector<
   ): Promise<void> {
     const { rule } = params;
 
-    const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = Array.from(
-      groupedAlertsWithCases.values()
-    ).map(({ theCase, alerts }) => ({
-      caseId: theCase.id,
-      attachments: alerts.map((alert) => ({
-        type: AttachmentType.alert,
-        alertId: alert._id,
-        index: alert._index,
-        rule: { id: rule.id, name: rule.name },
-        owner: theCase.owner,
-      })),
-    }));
+    /**
+     * TODO: Log that we could not attach the alerts to the cases
+     * that have reached out the limit
+     */
+    const casesUnderAlertLimit = Array.from(groupedAlertsWithCases.values()).filter(
+      ({ theCase, alerts }) => theCase.totalAlerts + alerts.length <= MAX_ALERTS_PER_CASE
+    );
+
+    const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
+      ({ theCase, alerts }) => ({
+        caseId: theCase.id,
+        attachments: alerts.map((alert) => ({
+          type: AttachmentType.alert,
+          alertId: alert._id,
+          index: alert._index,
+          rule: { id: rule.id, name: rule.name },
+          owner: theCase.owner,
+        })),
+      })
+    );
 
     await pMap(
       bulkCreateAlertsRequest,

@@ -12,7 +12,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { CasesConnector } from './cases_connector';
 import { CASES_CONNECTOR_ID } from './constants';
-import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_ORACLE_SAVED_OBJECT, MAX_ALERTS_PER_CASE } from '../../../common/constants';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
 import { createCasesClientMock } from '../../client/mocks';
@@ -641,7 +641,7 @@ describe('CasesConnector', () => {
           });
         });
 
-        it('attaches alerts to reopen cases', async () => {
+        it('attaches alerts to reopened cases', async () => {
           casesClientMock.cases.bulkGet.mockResolvedValue({
             cases: [{ ...cases[0], status: CaseStatuses.closed }],
             errors: [],
@@ -734,6 +734,70 @@ describe('CasesConnector', () => {
               },
             ],
           });
+        });
+
+        it('does not attach alerts to cases that have surpass the limit', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [{ ...cases[0], totalAlerts: MAX_ALERTS_PER_CASE }],
+            errors: [],
+          });
+
+          await connector.run({
+            alerts,
+            groupingBy,
+            owner,
+            rule,
+            timeWindow,
+            reopenClosedCases,
+          });
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(0);
+        });
+
+        it('does not attach alerts to cases when attaching the new alerts will surpass the limit', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [
+              {
+                ...cases[0],
+                totalAlerts: MAX_ALERTS_PER_CASE - groupedAlertsWithOracleKey[0].alerts.length + 1,
+              },
+            ],
+            errors: [],
+          });
+
+          await connector.run({
+            alerts,
+            groupingBy,
+            owner,
+            rule,
+            timeWindow,
+            reopenClosedCases,
+          });
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(0);
+        });
+
+        it('attach alerts to cases when attaching the new alerts will be equal to the limit', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [
+              {
+                ...cases[0],
+                totalAlerts: MAX_ALERTS_PER_CASE - groupedAlertsWithOracleKey[0].alerts.length,
+              },
+            ],
+            errors: [],
+          });
+
+          await connector.run({
+            alerts,
+            groupingBy,
+            owner,
+            rule,
+            timeWindow,
+            reopenClosedCases,
+          });
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
         });
       });
     });
