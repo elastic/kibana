@@ -22,11 +22,12 @@ import {
   API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
 import { memoize } from 'lodash';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { usageTracker } from './usage_tracker';
 import { getEndpointPackageInfo } from '../utils/package';
 import type { PolicyData } from '../types';
 import { policyFactory as policyConfigFactory } from '../models/policy_config';
-import { wrapErrorAndRejectPromise } from './utils';
+import { RETRYABLE_TRANSIENT_ERRORS, retryOnError, wrapErrorAndRejectPromise } from './utils';
 
 export interface IndexedFleetEndpointPolicyResponse {
   integrationPolicies: PolicyData[];
@@ -43,7 +44,8 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     kbnClient: KbnClient,
     policyName: string,
     endpointPackageVersion?: string,
-    agentPolicyName?: string
+    agentPolicyName?: string,
+    log?: ToolingLog
   ): Promise<IndexedFleetEndpointPolicyResponse> => {
     const response: IndexedFleetEndpointPolicyResponse = {
       integrationPolicies: [],
@@ -106,18 +108,47 @@ export const indexFleetEndpointPolicy = usageTracker.track(
         version: packageVersion,
       },
     };
-    const packagePolicy = (await kbnClient
-      .request({
-        path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
-        method: 'POST',
-        body: newPackagePolicyData,
-        headers: {
-          'elastic-api-version': API_VERSIONS.public.v1,
-        },
-      })
-      .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreatePackagePolicyResponse>;
 
-    response.integrationPolicies.push(packagePolicy.data.item as PolicyData);
+    const fetchPackagePolicy = async (): Promise<CreatePackagePolicyResponse> =>
+      kbnClient
+        .request<CreatePackagePolicyResponse>({
+          path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
+          method: 'POST',
+          body: newPackagePolicyData,
+          headers: {
+            'elastic-api-version': API_VERSIONS.public.v1,
+          },
+        })
+        .catch(wrapErrorAndRejectPromise)
+        .then((res) => res.data);
+
+    const started = new Date();
+    const hasTimedOut = (): boolean => {
+      const elapsedTime = Date.now() - started.getTime();
+      return elapsedTime > 60 * 1000;
+    };
+
+    let packagePolicy: CreatePackagePolicyResponse | undefined;
+    log?.info(`Creating package policy for ${policyName}`);
+    while (!packagePolicy && !hasTimedOut()) {
+      packagePolicy = await retryOnError(
+        async () => fetchPackagePolicy(),
+        RETRYABLE_TRANSIENT_ERRORS,
+        log
+      );
+
+      if (!packagePolicy) {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+    }
+
+    if (!packagePolicy) {
+      throw new Error(`Create package policy failed`);
+    }
+
+    log?.info(`Created package policy for ${policyName}`);
+
+    response.integrationPolicies.push(packagePolicy.item as PolicyData);
 
     return response;
   }
