@@ -199,7 +199,6 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
   const modelTitle = getModelDisplayTitle(modelType);
   const isSmallScreen = useIsWithinMaxBreakpoint('s');
 
-  // TODO: Handle redacted model ID
   return (
     <EuiPanel color="subdued">
       <EuiFlexGroup alignItems="center" gutterSize={isSmallScreen ? 'xs' : undefined}>
