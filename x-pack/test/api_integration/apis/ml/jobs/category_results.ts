@@ -158,8 +158,25 @@ export default ({ getService }: FtrProviderContext) => {
       },
     ],
   };
+  const expectedCategory3 = {
+    job_id: 'test_top_cat',
+    category_id: 3,
+    terms:
+      'failed to execute bulk item index index testing-twitter-pycon-realtime doc source n/a actual length max length',
+    regex:
+      '.*?failed.+?to.+?execute.+?bulk.+?item.+?index.+?index.+?testing-twitter-pycon-realtime.+?doc.+?source.+?n/a.+?actual.+?length.+?max.+?length.*',
+    max_matching_length: 1101,
+    examples: [
+      '[0] failed to execute bulk item (index) index {[testing-twitter-pycon-realtime][_doc][1115075670953136128], source[n/a, actual length: [4.9kb], max length: 2kb]}\njava.lang.IllegalArgumentException: Limit of total fields [1000] in index [testing-twitter-pycon-realtime] has been exceeded\n\tat org.elasticsearch.index.mapper.MapperService.checkTotalFieldsLimit(MapperService.java:602) ~[elasticsearch-7.0.0-SNAPSHOT.jar:7.0.0-SNAPSHOT]\n\tat org.elasticsearch.index.mapper.MapperService.internalMerge(MapperService.java:506) ~[elasticsearch-7.0.0-SNAPSHOT.jar:7.0.0-SNAPSHOT]\n\tat org.elasticsearch.index.mapper.MapperService.internalMerge(MapperService.java:398) ~[elasticsearch-7.0.0-SNAPSHOT.jar:7.0.0-SNAPSHOT]\n\tat org.elasticsearch.index.mapper.MapperService.merge(MapperService.java:331) ~[elasticsearch-7.0.0-SNAPSHOT.jar:7.0.0-SNAPSHOT]\n\tat org.elasticsearch.cluster.metadata.MetaDataMappingService$PutMappingExecutor.applyRequest(MetaDataMappingService.java:315) ~[elasticsearch-7.0.0-SNAPSHOT....',
+    ],
+    grok_pattern:
+      '.*?%{NUMBER:field}.+?failed.+?to.+?execute.+?bulk.+?item.+?index.+?index.+?testing-twitter-pycon-realtime.+?doc.+?%{NUMBER:field2}.+?source.+?n/a.+?actual.+?length.+?max.+?length.+?%{NUMBER:field3}.*',
+    num_matches: 1,
+    result_type: 'category_definition',
+    mlcategory: '3',
+  };
 
-  async function runRequest(jobId: string, count = 5) {
+  async function runTopCategoriesRequest(jobId: string, count = 5) {
     const { body, status } = await supertest
       .post(`/internal/ml/jobs/top_categories`)
       .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
@@ -170,7 +187,17 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('Categorization job top categories', function () {
+  async function runGetCategoryRequest(jobId: string, categoryId: string) {
+    const { body, status } = await supertest
+      .get(`/internal/ml/anomaly_detectors/${jobId}/results/categories/${categoryId}`)
+      .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+      .set(getCommonRequestHeader('1'));
+    ml.api.assertResponseStatusCode(200, status, body);
+
+    return body;
+  }
+
+  describe('Categorization job results', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization_small');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -189,8 +216,14 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should have the correct top categories', async () => {
-      const result = await runRequest(catJobId);
+      const result = await runTopCategoriesRequest(catJobId);
       expect(result).to.eql(expectedTopCategories);
+    });
+
+    it('should get the correct category', async () => {
+      const result = await runGetCategoryRequest(catJobId, '3');
+      expect(result.count).to.eql(1);
+      expect(result.categories[0]).to.eql(expectedCategory3);
     });
   });
 };
