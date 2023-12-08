@@ -44,12 +44,9 @@ The default values are:
 | Metrics           | `metrics-apm*`
 |====
 
-NOTE: The default index settings also query the `apm-*` data view.
-This data view matches APM data shipped in earlier versions of APM (prior to v8.0).
+NOTE: The default index settings also matches `apm-*`. This is to include APM data shipped in earlier versions of APM (prior to v8.0 where data streams was introduced).
 
-Instead of querying the default APM data views, we can create filtered aliases for the APM app to query.
-A filtered alias is a secondary name for a group of data streams that has a user-defined
-filter to limit the documents that the alias can access.
+If the default settings are not specific enough we can create filtered aliases for the APM app to query. A filtered alias is a secondary name for a group of data streams that has a user-defined filter to limit the documents that the alias can access.
 
 To separate `staging` and `production` APM data, we'd need to create six filtered aliases--three
 aliases for each service environment:
@@ -57,14 +54,14 @@ aliases for each service environment:
 [options="header"]
 |====
 | Index setting    | `production` env         | `staging` env
-| Error            | `production-logs-apm`    | `staging-logs-apm`
-| Span/Transaction | `production-traces-apm`  | `staging-traces-apm`
-| Metrics          | `production-metrics-apm` | `staging-metrics-apm`
+| Error            | `logs-apm-production`    | `logs-apm-staging`
+| Span/Transaction | `traces-apm-production`  | `traces-apm-staging`
+| Metrics          | `metrics-apm-production` | `metrics-apm-staging`
 |====
 
-The `production-<event>-apm` aliases will contain a filter that only provides access to documents
+The `<event>-apm-production` aliases will contain a filter that only matches documents
 where the `service.environment` is `production`.
-Similarly, the `staging-<event>-apm` aliases will contain a filter that only provides access to documents
+Similarly, the `staging-<event>-apm` aliases will contain a filter that only matches documents
 where the `service.environment` is `staging`.
 
 To create these six filtered aliases, use the {es} {ref}/indices-aliases.html[Aliases API].
@@ -81,7 +78,7 @@ POST /_aliases?pretty
     {
       "add": {
         "index": "traces-apm*", <1>
-        "alias": "production-traces-apm", <2>
+        "alias": "traces-apm-production", <2>
         "filter": {
           "term": {
             "service.environment": {
@@ -95,7 +92,7 @@ POST /_aliases?pretty
 }
 ----
 <1> This example matches the APM traces data stream
-<2> The alias must not match the default APM index (`traces-apm*,apm-*`)
+<2> The alias must be a subset of `traces-apm*`
 <3> Only match documents where `service.environment: production`
 ====
 
