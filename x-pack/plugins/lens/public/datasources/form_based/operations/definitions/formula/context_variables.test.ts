@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { ExecutionContextSearch } from '@kbn/data-plugin/public';
-import type { ExecutionContext } from '@kbn/expressions-plugin/common';
-import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { FormBasedLayer } from '../../../../..';
 import { createMockedIndexPattern } from '../../../mocks';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
@@ -16,9 +13,6 @@ import {
   nowOperation,
   intervalOperation,
   timeRangeOperation,
-  formulaIntervalFn,
-  formulaTimeRangeFn,
-  formulaNowFn,
 } from './context_variables';
 
 function createLayer<T extends ConstantsIndexPatternColumn>(
@@ -116,47 +110,6 @@ describe('context variables', () => {
         ).toBeUndefined();
       });
     });
-    describe('expression function', () => {
-      it('should return 0 if no time range available', () => {
-        // (not sure if this case is actually possible)
-        const result = formulaIntervalFn.fn(undefined, { targetBars: 100 }, {
-          getSearchContext: () => ({
-            /* no time range */
-          }),
-        } as ExecutionContext<Adapters, ExecutionContextSearch>);
-        expect(result).toEqual(0);
-      });
-
-      it('should return 0 if no targetBars is passed', () => {
-        const result = formulaIntervalFn.fn(
-          undefined,
-          {
-            /* no targetBars */
-          },
-          {
-            getSearchContext: () => ({
-              timeRange: {
-                from: 'now-15m',
-                to: 'now',
-              },
-            }),
-          } as ExecutionContext<Adapters, ExecutionContextSearch>
-        );
-        expect(result).toEqual(0);
-      });
-
-      it('should return a valid value > 0 if both timeRange and targetBars is passed', () => {
-        const result = formulaIntervalFn.fn(undefined, { targetBars: 100 }, {
-          getSearchContext: () => ({
-            timeRange: {
-              from: 'now-15m',
-              to: 'now',
-            },
-          }),
-        } as ExecutionContext<Adapters, ExecutionContextSearch>);
-        expect(result).toEqual(10000);
-      });
-    });
   });
   describe('time_range', () => {
     describe('getErrorMessages', () => {
@@ -188,32 +141,6 @@ describe('context variables', () => {
         ).toEqual(expect.arrayContaining(['The current time range interval is not available']));
       });
     });
-
-    describe('expression function', () => {
-      it('should return 0 if no time range is available', () => {
-        // (not sure if this case is actually possible)
-        const result = formulaTimeRangeFn.fn(undefined, {}, {
-          getSearchContext: () => ({
-            /* no time range */
-          }),
-        } as ExecutionContext<Adapters, ExecutionContextSearch>);
-        expect(result).toEqual(0);
-      });
-
-      it('should return a valid value > 0 if time range is available', () => {
-        const result = formulaTimeRangeFn.fn(undefined, {}, {
-          getSearchContext: () => ({
-            timeRange: {
-              from: 'now-15m',
-              to: 'now',
-            },
-            now: 1000000, // important to provide this to make the result consistent
-          }),
-        } as ExecutionContext<Adapters, ExecutionContextSearch>);
-
-        expect(result).toBe(900000);
-      });
-    });
   });
   describe('now', () => {
     describe('getErrorMessages', () => {
@@ -221,19 +148,6 @@ describe('context variables', () => {
         expect(
           nowOperation.getErrorMessage!(createLayer('now'), 'col1', createMockedIndexPattern())
         ).toBeUndefined();
-      });
-    });
-
-    describe('expression function', () => {
-      it('should return the now value when passed', () => {
-        const now = 123456789;
-        expect(
-          formulaNowFn.fn(undefined, {}, {
-            getSearchContext: () => ({
-              now,
-            }),
-          } as ExecutionContext<Adapters, ExecutionContextSearch>)
-        ).toEqual(now);
       });
     });
   });
