@@ -12,7 +12,7 @@ import { omit } from 'lodash';
 import { isQuery, SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/filters/persistable_state';
 
-interface InternalSavedQueryAttributes extends SavedQueryAttributes {
+export interface InternalSavedQueryAttributes extends SavedQueryAttributes {
   titleKeyword: string;
 }
 

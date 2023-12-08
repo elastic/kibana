@@ -10,7 +10,10 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { FilterStateStore, Query } from '@kbn/es-query';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 import type { SavedObject, SavedQueryAttributes } from '../../common';
-import { registerSavedQueryRouteHandlerContext } from './route_handler_context';
+import {
+  InternalSavedQueryAttributes,
+  registerSavedQueryRouteHandlerContext,
+} from './route_handler_context';
 import { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 
 const mockContext = {
@@ -30,6 +33,10 @@ const savedQueryAttributes: SavedQueryAttributes = {
     query: 'response:200',
   },
   filters: [],
+};
+const internalSavedQueryAttributes: InternalSavedQueryAttributes = {
+  ...savedQueryAttributes,
+  titleKeyword: 'foo',
 };
 const savedQueryAttributesBar: SavedQueryAttributes = {
   title: 'bar',
@@ -90,19 +97,23 @@ describe('saved query route handler context', () => {
 
   describe('create', function () {
     it('should create a saved object for the given attributes', async () => {
-      const mockResponse: SavedObject<SavedQueryAttributes> = {
+      const mockResponse: SavedObject<InternalSavedQueryAttributes> = {
         id: 'foo',
         type: 'query',
-        attributes: savedQueryAttributes,
+        attributes: internalSavedQueryAttributes,
         references: [],
       };
       mockSavedObjectsClient.create.mockResolvedValue(mockResponse);
 
       const response = await context.create(savedQueryAttributes);
 
-      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith('query', savedQueryAttributes, {
-        references: [],
-      });
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        'query',
+        internalSavedQueryAttributes,
+        {
+          references: [],
+        }
+      );
       expect(response).toEqual({
         id: 'foo',
         attributes: savedQueryAttributes,
@@ -117,10 +128,13 @@ describe('saved query route handler context', () => {
           query: { match_all: {} },
         },
       };
-      const mockResponse: SavedObject<SavedQueryAttributes> = {
+      const mockResponse: SavedObject<InternalSavedQueryAttributes> = {
         id: 'foo',
         type: 'query',
-        attributes: savedQueryAttributesWithQueryObject,
+        attributes: {
+          ...savedQueryAttributesWithQueryObject,
+          titleKeyword: 'foo',
+        },
         references: [],
       };
       mockSavedObjectsClient.create.mockResolvedValue(mockResponse);
@@ -136,10 +150,13 @@ describe('saved query route handler context', () => {
         filters: savedQueryAttributesWithFilters.filters,
         timefilter: savedQueryAttributesWithFilters.timefilter,
       };
-      const mockResponse: SavedObject<SavedQueryAttributes> = {
+      const mockResponse: SavedObject<InternalSavedQueryAttributes> = {
         id: 'foo',
         type: 'query',
-        attributes: serializedSavedQueryAttributesWithFilters,
+        attributes: {
+          ...serializedSavedQueryAttributesWithFilters,
+          titleKeyword: 'foo',
+        },
         references: [],
       };
       mockSavedObjectsClient.create.mockResolvedValue(mockResponse);
@@ -176,10 +193,10 @@ describe('saved query route handler context', () => {
 
   describe('update', function () {
     it('should update a saved object for the given attributes', async () => {
-      const mockResponse: SavedObject<SavedQueryAttributes> = {
+      const mockResponse: SavedObject<InternalSavedQueryAttributes> = {
         id: 'foo',
         type: 'query',
-        attributes: savedQueryAttributes,
+        attributes: internalSavedQueryAttributes,
         references: [],
       };
       mockSavedObjectsClient.update.mockResolvedValue(mockResponse);
@@ -189,7 +206,7 @@ describe('saved query route handler context', () => {
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
         'query',
         'foo',
-        savedQueryAttributes,
+        internalSavedQueryAttributes,
         {
           references: [],
         }
@@ -361,6 +378,8 @@ describe('saved query route handler context', () => {
         page: 1,
         perPage: 2,
         search: '',
+        sortField: 'titleKeyword',
+        sortOrder: 'asc',
         type: 'query',
       });
       expect(response.savedQueries).toEqual(
