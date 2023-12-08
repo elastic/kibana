@@ -268,7 +268,10 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   ]);
 
   const extraTabs = useMemo<EuiTabbedContentTab[]>(() => {
-    const activeRule = previewedRule && filteredRules.find(({ id }) => id === previewedRule.id);
+    const activeRule =
+      isJsonPrebuiltRulesDiffingEnabled &&
+      previewedRule &&
+      filteredRules.find(({ id }) => id === previewedRule.id);
 
     if (!activeRule) {
       return [];
@@ -285,7 +288,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         ),
       },
     ];
-  }, [previewedRule, filteredRules]);
+  }, [previewedRule, filteredRules, isJsonPrebuiltRulesDiffingEnabled]);
 
   return (
     <UpgradePrebuiltRulesTableContext.Provider value={providerValue}>

@@ -104,6 +104,7 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
       created_at: installedCurrentVersion.created_at,
       created_by: installedCurrentVersion.created_by,
       updated_at: new Date().toISOString(),
+      updated_by: installedCurrentVersion.updated_by,
     };
 
     return {
