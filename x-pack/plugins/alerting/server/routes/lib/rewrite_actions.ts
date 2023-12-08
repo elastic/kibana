@@ -9,10 +9,11 @@ import { omit } from 'lodash';
 import { NormalizedAlertAction } from '../../rules_client';
 import { RuleAction } from '../../types';
 import { actionsSchema } from './actions_schema';
-import { RuleActionTypes } from '../../../common';
+import { RuleActionTypes, RuleDefaultAction } from '../../../common';
 
 export const rewriteActionsReq = (
-  actions?: TypeOf<typeof actionsSchema>
+  actions: TypeOf<typeof actionsSchema>,
+  isSystemAction: (connectorId: string) => boolean
 ): NormalizedAlertAction[] => {
   if (!actions) return [];
 
@@ -23,67 +24,63 @@ export const rewriteActionsReq = (
       use_alert_data_for_template: useAlertDataForTemplate,
       ...action
     }) => {
+      if (isSystemAction(action.id)) {
+        return {
+          id: action.id,
+          params: action.params,
+          ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
+          ...(action.uuid ? { uuid: action.uuid } : {}),
+          type: RuleActionTypes.SYSTEM,
+        };
+      }
+
       return {
-        ...action,
+        group: action.group ?? 'default',
+        id: action.id,
+        params: action.params,
+        ...(action.uuid ? { uuid: action.uuid } : {}),
         ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
         ...(frequency
           ? {
               frequency: {
                 ...omit(frequency, 'notify_when'),
+                summary: frequency.summary,
+                throttle: frequency.throttle,
                 notifyWhen: frequency.notify_when,
               },
             }
           : {}),
         ...(alertsFilter ? { alertsFilter } : {}),
+        type: RuleActionTypes.DEFAULT,
       };
     }
   );
 };
 
-export const rewriteActionsReqWithSystemActions = (
-  actions: TypeOf<typeof actionsSchema>,
+export const rewriteActionsRes = (
+  actions: RuleAction[] | undefined,
   isSystemAction: (connectorId: string) => boolean
-): NormalizedAlertAction[] => {
-  if (!actions) return [];
-
-  return actions.map(({ frequency, alerts_filter: alertsFilter, ...action }) => {
-    if (isSystemAction(action.id)) {
-      return {
-        id: action.id,
-        params: action.params,
-        ...(action.uuid ? { uuid: action.uuid } : {}),
-        type: RuleActionTypes.SYSTEM,
-      };
-    }
-
-    return {
-      group: action.group ?? 'default',
-      id: action.id,
-      params: action.params,
-      ...(action.uuid ? { uuid: action.uuid } : {}),
-      ...(frequency
-        ? {
-            frequency: {
-              summary: frequency.summary,
-              throttle: frequency.throttle,
-              notifyWhen: frequency.notify_when,
-            },
-          }
-        : {}),
-      ...(alertsFilter ? { alertsFilter } : {}),
-      type: RuleActionTypes.DEFAULT,
-    };
-  });
-};
-
-export const rewriteActionsRes = (actions?: RuleAction[]) => {
-  const rewriteFrequency = ({ notifyWhen, ...rest }: NonNullable<RuleAction['frequency']>) => ({
+) => {
+  const rewriteFrequency = ({
+    notifyWhen,
+    ...rest
+  }: NonNullable<RuleDefaultAction['frequency']>) => ({
     ...rest,
     notify_when: notifyWhen,
   });
   if (!actions) return [];
-  return actions.map(
-    ({ actionTypeId, frequency, alertsFilter, useAlertDataForTemplate, ...action }) => ({
+  return actions.map(({ actionTypeId, useAlertDataForTemplate, ...action }) => {
+    if (isSystemAction(action.id)) {
+      return {
+        ...action,
+        connector_type_id: actionTypeId,
+        ...(typeof useAlertDataForTemplate !== 'undefined'
+          ? { use_alert_data_for_template: useAlertDataForTemplate }
+          : {}),
+      };
+    }
+    const { frequency, alertsFilter } = action as RuleDefaultAction;
+    return {
       ...action,
       connector_type_id: actionTypeId,
       ...(typeof useAlertDataForTemplate !== 'undefined'
@@ -95,6 +92,6 @@ export const rewriteActionsRes = (actions?: RuleAction[]) => {
             alerts_filter: alertsFilter,
           }
         : {}),
-    })
-  );
+    };
+  });
 };

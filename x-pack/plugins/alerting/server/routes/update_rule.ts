@@ -16,7 +16,7 @@ import {
   handleDisabledApiKeysError,
   actionsSchema,
   rewriteRuleLastRun,
-  rewriteActionsReqWithSystemActions,
+  rewriteActionsReq,
 } from './lib';
 import {
   RuleTypeParams,
@@ -70,7 +70,7 @@ const rewriteBodyReq = (
     data: {
       ...rest,
       notifyWhen,
-      actions: rewriteActionsReqWithSystemActions(actions, isSystemAction),
+      actions: rewriteActionsReq(actions, isSystemAction),
     },
   };
 };
@@ -146,15 +146,13 @@ export const updateRuleRoute = (
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
-          const actionsClient = (await context.actions).getActionsClient();
+          const { isSystemAction } = (await context.actions).getActionsClient();
 
           const { id } = req.params;
           const rule = req.body;
           try {
             const alertRes = await rulesClient.update(
-              rewriteBodyReq({ id, data: rule }, (connectorId: string) =>
-                actionsClient.isSystemAction(connectorId)
-              )
+              rewriteBodyReq({ id, data: rule }, isSystemAction)
             );
             return res.ok({
               body: rewriteBodyRes(alertRes),

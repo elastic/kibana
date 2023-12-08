@@ -94,11 +94,12 @@ export const cloneRuleRoute = (
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
+          const { isSystemAction } = (await context.actions).getActionsClient();
           const { id, newId } = req.params;
           try {
             const cloneRule = await rulesClient.clone(id, { newId });
             return res.ok({
-              body: rewriteBodyRes(cloneRule),
+              body: rewriteBodyRes(cloneRule, isSystemAction),
             });
           } catch (e) {
             if (e instanceof RuleTypeDisabledError) {
