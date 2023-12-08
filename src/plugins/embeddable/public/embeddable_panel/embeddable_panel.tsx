@@ -129,8 +129,9 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
    * Select state from the embeddable
    */
   const loading = useSelectFromEmbeddableOutput('loading', embeddable);
+  const rendered = useSelectFromEmbeddableOutput('rendered', embeddable);
 
-  if (loading === false && !initialLoadComplete) {
+  if ((loading === false || rendered === true || outputError) && !initialLoadComplete) {
     setInitialLoadComplete(true);
   }
 
