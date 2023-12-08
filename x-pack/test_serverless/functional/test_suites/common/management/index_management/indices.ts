@@ -11,17 +11,19 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
   const browser = getService('browser');
-  const security = getService('security');
 
   describe('Indices', function () {
     before(async () => {
-      await security.testUser.setRoles(['index_management_user']);
       // Navigate to the index management page
       await pageObjects.svlCommonPage.login();
       await pageObjects.common.navigateToApp('indexManagement');
       // Navigate to the indices tab
       await pageObjects.indexManagement.changeTabs('indicesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
+    });
+
+    after(async () => {
+      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('renders the indices tab', async () => {

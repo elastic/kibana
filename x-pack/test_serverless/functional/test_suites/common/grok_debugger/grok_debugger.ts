@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['svlCommonPage', 'common', 'grokDebugger']);
   const browser = getService('browser');
-  const security = getService('security');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -21,7 +20,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Increase window height to ensure "Simulate" button is shown above the
       // fold. Otherwise it can't be clicked by the browser driver.
       await browser.setWindowSize(1600, 1000);
-      await security.testUser.setRoles(['global_devtools_read', 'ingest_pipelines_user']);
       await PageObjects.svlCommonPage.login();
       await PageObjects.common.navigateToApp('dev_tools', { hash: '/grokdebugger' });
       await retry.waitFor('Grok Debugger Header to be visible', async () => {
@@ -31,7 +29,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after(async () => {
       await PageObjects.svlCommonPage.forceLogout();
-      await security.testUser.restoreDefaults();
     });
 
     it('Loads the app', async () => {

@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header', 'svlCommonPage']);
   const log = getService('log');
-  const security = getService('security');
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
@@ -47,7 +46,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       log.debug('Navigating to the enrich policies tab');
       await pageObjects.svlCommonPage.login();
-      await security.testUser.setRoles(['index_management_user']);
       await pageObjects.common.navigateToApp('indexManagement');
 
       // Navigate to the enrich policies tab
@@ -68,6 +66,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       } finally {
         await pageObjects.svlCommonPage.forceLogout();
       }
+
+      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('shows create enrich policies page and docs link', async () => {

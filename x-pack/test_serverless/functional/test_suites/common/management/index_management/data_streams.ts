@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
   const browser = getService('browser');
-  const security = getService('security');
   const log = getService('log');
   const es = getService('es');
   const testSubjects = getService('testSubjects');
@@ -55,7 +54,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         throw e;
       }
 
-      await security.testUser.setRoles(['index_management_user']);
       // Navigate to the index management page
       await pageObjects.svlCommonPage.login();
       await pageObjects.common.navigateToApp('indexManagement');
@@ -79,6 +77,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         log.debug('[Teardown error] Error deleting test data stream');
         throw e;
       }
+
+      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('renders the data streams tab', async () => {

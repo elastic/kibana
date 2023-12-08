@@ -11,6 +11,7 @@ export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Serverless Common UI - Management', function () {
     loadTestFile(require.resolve('./index_management/index_templates'));
     loadTestFile(require.resolve('./index_management/indices'));
+    loadTestFile(require.resolve('./index_management/data_streams'));
     loadTestFile(require.resolve('./index_management/create_enrich_policy'));
     loadTestFile(require.resolve('./index_management/enrich_policies'));
     loadTestFile(require.resolve('./index_management/component_templates'));

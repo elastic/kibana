@@ -13,7 +13,6 @@ import type { WebElementWrapper } from '../../../../../../../test/functional/ser
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
   const browser = getService('browser');
-  const security = getService('security');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
@@ -21,7 +20,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Index component templates', function () {
     before(async () => {
-      await security.testUser.setRoles(['index_management_user']);
       // Navigate to the index management page
       await pageObjects.svlCommonPage.login();
     });
