@@ -95,7 +95,11 @@ export function ExpressionWrapper({
           renderError={(errorMessage, error) => {
             const messages = getOriginalRequestErrorMessages(error || null);
             addUserMessages(messages);
-            onRuntimeError(error.original ? error.original : error);
+            if (error?.original) {
+              onRuntimeError(error.original);
+            } else {
+              onRuntimeError(new Error(errorMessage ? errorMessage : ''));
+            }
 
             return <></>; // the embeddable will take care of displaying the messages
           }}

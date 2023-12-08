@@ -13,14 +13,10 @@ import { toExpression } from '@kbn/interpreter';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiText,
   EuiButtonEmpty,
   EuiLink,
   EuiTextColor,
-  EuiSpacer,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart, ExecutionContextSearch } from '@kbn/data-plugin/public';
@@ -83,6 +79,7 @@ import {
 import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField, DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
+import { PaginatedErrors } from './paginated_errors';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -98,7 +95,6 @@ export interface WorkspacePanelProps {
 }
 
 interface WorkspaceState {
-  expandError: boolean;
   expressionToRender: string | null | undefined;
   errors: UserMessage[];
 }
@@ -166,7 +162,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
-    expandError: false,
     expressionToRender: undefined,
     errors: [],
   });
@@ -736,28 +731,8 @@ export const VisualizationWrapper = ({
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
   if (errors.length) {
-    const showExtraErrorsAction =
-      !localState.expandError && errors.length > 1 ? (
-        <EuiButtonEmpty
-          onClick={() => {
-            setLocalState((prevState: WorkspaceState) => ({
-              ...prevState,
-              expandError: !prevState.expandError,
-            }));
-          }}
-          data-test-subj="workspace-more-errors-button"
-        >
-          {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
-            defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
-            values: { errors: errors.length - 1 },
-          })}
-        </EuiButtonEmpty>
-      ) : null;
-
-    const [firstMessage, ...rest] = errors;
-
     return (
-      <EuiFlexGroup
+      <div
         data-shared-items-container
         data-render-complete={true}
         data-shared-item=""
@@ -765,30 +740,13 @@ export const VisualizationWrapper = ({
           defaultMessage: `A configuration error occurred`,
         })}
       >
-        <EuiFlexItem>
-          <EuiEmptyPrompt
-            actions={showExtraErrorsAction}
-            body={
-              <>
-                <div data-test-subj="workspace-error-message">{firstMessage.longMessage}</div>
-                {localState.expandError && (
-                  <>
-                    <EuiSpacer />
-                    {rest.map((message) => (
-                      <div data-test-subj="workspace-error-message">
-                        {message.longMessage}
-                        <EuiSpacer />
-                      </div>
-                    ))}
-                  </>
-                )}
-              </>
-            }
-            iconColor="danger"
-            iconType="warning"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <PaginatedErrors
+          errors={errors}
+          title={i18n.translate('xpack.lens.editorFrame.configurationFailureErrors', {
+            defaultMessage: `A configuration error occurred`,
+          })}
+        />
+      </div>
     );
   }
 
@@ -821,64 +779,24 @@ export const VisualizationWrapper = ({
         executionContext={executionContext}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
-          const errorsFromRequest = getOriginalRequestErrorMessages(error || null, core.docLinks);
+          const errorsFromRequest = getOriginalRequestErrorMessages(error || null);
           const visibleErrorMessages = errorsFromRequest.length
-            ? errorsFromRequest.map((e) => e.longMessage || e.shortMessage)
+            ? errorsFromRequest
             : errorMessage
             ? [errorMessage]
-            : [];
+            : [''];
 
           if (!hasDynamicError) {
             setDynamicError(true);
           }
 
           return (
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiEmptyPrompt
-                  actions={
-                    visibleErrorMessages.length && !localState.expandError ? (
-                      <EuiButtonEmpty
-                        onClick={() => {
-                          setLocalState((prevState: WorkspaceState) => ({
-                            ...prevState,
-                            expandError: !prevState.expandError,
-                          }));
-                        }}
-                      >
-                        {i18n.translate('xpack.lens.editorFrame.expandRenderingErrorButton', {
-                          defaultMessage: 'Show details of error',
-                        })}
-                      </EuiButtonEmpty>
-                    ) : null
-                  }
-                  body={
-                    <>
-                      <p data-test-subj="expression-failure">
-                        <FormattedMessage
-                          id="xpack.lens.editorFrame.dataFailure"
-                          defaultMessage="An error occurred when loading data."
-                        />
-                      </p>
-
-                      {localState.expandError
-                        ? visibleErrorMessages.map((visibleErrorMessage) =>
-                            typeof visibleErrorMessage === 'string' ? (
-                              <p className="eui-textBreakWord" key={visibleErrorMessage}>
-                                {visibleErrorMessage}
-                              </p>
-                            ) : (
-                              visibleErrorMessage
-                            )
-                          )
-                        : null}
-                    </>
-                  }
-                  iconColor="danger"
-                  iconType="warning"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <PaginatedErrors
+              errors={visibleErrorMessages}
+              title={i18n.translate('xpack.lens.editorFrame.dataFailure', {
+                defaultMessage: 'An error occurred when loading data',
+              })}
+            />
           );
         }}
       />
