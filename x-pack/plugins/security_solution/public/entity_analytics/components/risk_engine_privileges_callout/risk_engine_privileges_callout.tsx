@@ -9,7 +9,7 @@ import React from 'react';
 import type { CallOutMessage } from '../../../common/components/callouts';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import { MissingPrivilegesCallOutBody, MISSING_PRIVILEGES_CALLOUT_TITLE } from './translations';
-import { useMissingPrivileges } from './use_missing_risk_engine_privileges';
+import type { MissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
 
 export const RiskEnginePrivilegesCallOut = () => {
   const privileges = useMissingPrivileges();
