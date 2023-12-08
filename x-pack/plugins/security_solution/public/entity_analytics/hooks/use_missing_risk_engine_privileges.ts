@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { useRiskEnginePrivileges } from '../api/hooks/use_risk_engine_privileges';
 import { getMissingRiskEnginePrivileges } from '../../../common/entity_analytics/risk_engine';
-export type MissingPrivilegesResponse =
+export type RiskEngineMissingPrivilegesResponse =
   | { isLoading: true }
   | { isLoading: false; hasAllRequiredPrivileges: true }
   | {
@@ -17,10 +17,10 @@ export type MissingPrivilegesResponse =
       hasAllRequiredPrivileges: false;
     };
 
-export const useMissingRiskEnginePrivileges = (): MissingPrivilegesResponse => {
+export const useMissingRiskEnginePrivileges = (): RiskEngineMissingPrivilegesResponse => {
   const { data: privilegesResponse, isLoading } = useRiskEnginePrivileges();
 
-  return useMemo<MissingPrivilegesResponse>(() => {
+  return useMemo<RiskEngineMissingPrivilegesResponse>(() => {
     if (isLoading || !privilegesResponse) {
       return {
         isLoading: true,

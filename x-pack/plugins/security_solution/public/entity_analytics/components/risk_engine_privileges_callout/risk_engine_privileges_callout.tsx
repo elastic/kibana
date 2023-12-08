@@ -9,10 +9,10 @@ import React from 'react';
 import type { CallOutMessage } from '../../../common/components/callouts';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import { MissingPrivilegesCallOutBody, MISSING_PRIVILEGES_CALLOUT_TITLE } from './translations';
-import type { MissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
+import type { RiskEngineMissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
 
 export const RiskEnginePrivilegesCallOut: React.FC<{
-  privileges: MissingPrivilegesResponse;
+  privileges: RiskEngineMissingPrivilegesResponse;
 }> = ({ privileges }) => {
   if (privileges.isLoading || privileges.hasAllRequiredPrivileges) {
     return null;
