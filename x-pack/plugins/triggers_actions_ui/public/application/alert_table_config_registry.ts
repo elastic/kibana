@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
+import { ALERT_TABLE_GENERIC_CONFIG_ID } from '../../common/alert_config';
 import {
   AlertsTableConfigurationRegistry,
   AlertsTableConfigurationRegistryWithActions,
@@ -93,18 +94,16 @@ export class AlertTableConfigRegistry {
   }
 
   public getAlertConfigIdPerRuleTypes(ruleTypeIds: string[]): string {
-    const alertConfigs = Array.from(this.objectTypes).reduce<string[]>((acc, [id, objectType]) => {
+    const alertConfigs: string[] = [];
+    Array.from(this.objectTypes).forEach(([id, objectType]) => {
       if (ruleTypeIds.every((ruleTypeId) => objectType.ruleTypeIds?.includes(ruleTypeId))) {
-        acc.push(id);
+        alertConfigs.push(id);
       }
-      return acc;
-    }, []);
+    });
     if (alertConfigs.length === 1) {
       return alertConfigs[0];
     }
     // If there is more than one, we will return the generic alert configuration id
-    // Umbo is creating one, so we should have it soon
-    // We will wait on https://github.com/elastic/kibana/pull/172302
-    return 'stackAlerts-generic-alert-table';
+    return ALERT_TABLE_GENERIC_CONFIG_ID;
   }
 }
