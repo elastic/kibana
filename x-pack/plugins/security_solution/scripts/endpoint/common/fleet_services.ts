@@ -251,7 +251,6 @@ export const waitForHostToEnroll = async (
     metadataFound = await retryOnError(
       async () =>
         fetchEndpointMetadataList(kbnClient).then((response) => {
-          log.info(JSON.stringify(response, null, 2));
           return response.data.filter(
             (record) =>
               record.metadata.host.hostname === hostname && record.host_status === 'healthy'
