@@ -538,7 +538,7 @@ export const ModelsList: FC<Props> = ({
             content={
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
-                defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
+                defaultMessage="Recommended model version for your cluster's hardware configuration"
               />
             }
           >
