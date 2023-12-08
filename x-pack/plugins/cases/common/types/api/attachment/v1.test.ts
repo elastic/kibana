@@ -116,13 +116,13 @@ describe('Attachments', () => {
           ).toContain('The length of the comment is too long. The maximum length is 30000.');
         });
 
-        it('is successful when a comment with empty string', () => {
+        it('is successful when a comment is an empty string', () => {
           expect(
             PathReporter.report(AttachmentRequestRt.decode({ ...request, comment: '' }))
           ).toEqual(['No errors!']);
         });
 
-        it('is successful when a comment string of empty characters', () => {
+        it('is successful when a comment is a string of empty characters', () => {
           expect(
             PathReporter.report(AttachmentRequestRt.decode({ ...request, comment: '   ' }))
           ).toEqual(['No errors!']);
