@@ -39,6 +39,7 @@ import { RiskEngineStatus, MAX_SPACES_COUNT } from '../../../common/entity_analy
 
 import { RiskInformationFlyout } from '../../explore/components/risk_score/risk_information';
 import { useOnOpenCloseHandler } from '../../helper_hooks';
+import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 
 const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
 
@@ -151,8 +152,11 @@ const RiskEngineStatusRow: React.FC<{
   currentRiskEngineStatus?: RiskEngineStatus | null;
   onSwitchClick: () => void;
   isLoading: boolean;
-}> = ({ currentRiskEngineStatus, onSwitchClick, isLoading }) => {
-  const btnIsDisabled = !currentRiskEngineStatus || isLoading;
+  privileges: RiskEngineMissingPrivilegesResponse;
+}> = ({ currentRiskEngineStatus, onSwitchClick, isLoading, privileges }) => {
+  const userHasRequiredPrivileges =
+    'hasAllRequiredPrivileges' in privileges && privileges.hasAllRequiredPrivileges;
+  const btnIsDisabled = !currentRiskEngineStatus || isLoading || !userHasRequiredPrivileges;
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems={'center'}>
@@ -182,7 +186,9 @@ const RiskEngineStatusRow: React.FC<{
   );
 };
 
-export const RiskScoreEnableSection = () => {
+export const RiskScoreEnableSection: React.FC<{
+  privileges: RiskEngineMissingPrivilegesResponse;
+}> = ({ privileges }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
   const initRiskEngineMutation = useInitRiskEngineMutation({
@@ -205,6 +211,7 @@ export const RiskScoreEnableSection = () => {
     initRiskEngineMutation.isLoading ||
     enableRiskEngineMutation.isLoading ||
     disableRiskEngineMutation.isLoading ||
+    privileges.isLoading ||
     isStatusLoading;
 
   const isUpdateAvailable = riskEngineStatus?.isUpdateAvailable;
@@ -303,6 +310,7 @@ export const RiskScoreEnableSection = () => {
                   currentRiskEngineStatus={currentRiskEngineStatus}
                   onSwitchClick={onSwitchClick}
                   isLoading={isLoading}
+                  privileges={privileges}
                 />
               )}
             </EuiFlexItem>

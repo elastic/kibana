@@ -33,7 +33,7 @@ export const EntityAnalyticsManagementPage = () => {
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={2}>
-          <RiskScoreEnableSection />
+          <RiskScoreEnableSection privileges={privileges} />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <RiskScorePreviewSection />
