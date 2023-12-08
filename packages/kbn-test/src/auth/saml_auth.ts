@@ -1,40 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosResponse } from 'axios';
 import * as cheerio from 'cheerio';
-import { parse as parseCookie } from 'tough-cookie';
+import { Cookie, parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
-import { Session } from './svl_user_manager';
+import { CloudSamlSessionParams, CreateSamlSessionParams, LocalSamlSessionParams } from './types';
 
-export interface CloudSamlSessionParams {
-  email: string;
-  password: string;
-  kbnHost: string;
-  kbnVersion: string;
-  log: ToolingLog;
-}
+export class Session {
+  readonly cookie;
+  readonly email;
+  readonly fullname;
+  constructor(cookie: Cookie, email: string, fullname: string) {
+    this.cookie = cookie;
+    this.email = email;
+    this.fullname = fullname;
+  }
 
-export interface LocalSamlSessionParams {
-  username: string;
-  email: string;
-  fullname: string;
-  role: string;
-  kbnHost: string;
-  log: ToolingLog;
-}
-
-export interface CreateSamlSessionParams {
-  hostname: string;
-  email: string;
-  password: string;
-  log: ToolingLog;
+  getCookieValue() {
+    return this.cookie.value;
+  }
 }
 
 const cleanException = (url: string, ex: any) => {
