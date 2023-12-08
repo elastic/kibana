@@ -26,7 +26,7 @@ export const Curation: React.FC = () => {
   }, [curationId]);
 
   if (dataLoading) {
-    return <EnterpriseSearchPageTemplateWrapper isLoading />;
+    return <EnterpriseSearchPageTemplateWrapper isLoading useEndpointHeaderActions={false} />;
   }
   return isAutomated ? <AutomatedCuration /> : <ManualCuration />;
 };

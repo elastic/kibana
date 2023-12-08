@@ -11,6 +11,10 @@ import type { ObservabilityAIAssistantConfig } from './config';
 export type { ObservabilityAIAssistantServerRouteRepository } from './routes/get_global_observability_ai_assistant_route_repository';
 
 import { config as configSchema } from './config';
+export type {
+  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantPluginSetup,
+} from './types';
 
 export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
   deprecations: ({ unusedFromRoot }) => [

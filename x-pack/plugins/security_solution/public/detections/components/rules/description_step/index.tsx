@@ -205,7 +205,7 @@ export const getDescriptionItem = (
     return [];
   } else if (field === 'groupByFields') {
     const values: string[] = get(field, data);
-    return buildAlertSuppressionDescription(label, values, license);
+    return buildAlertSuppressionDescription(label, values);
   } else if (field === 'groupByRadioSelection') {
     return [];
   } else if (field === 'groupByDuration') {
@@ -214,7 +214,6 @@ export const getDescriptionItem = (
       return buildAlertSuppressionWindowDescription(
         label,
         value,
-        license,
         get('groupByRadioSelection', data)
       );
     } else {
@@ -223,7 +222,7 @@ export const getDescriptionItem = (
   } else if (field === 'suppressionMissingFields') {
     if (get('groupByFields', data).length > 0) {
       const value = get(field, data);
-      return buildAlertSuppressionMissingFieldsDescription(label, value, license);
+      return buildAlertSuppressionMissingFieldsDescription(label, value);
     } else {
       return [];
     }

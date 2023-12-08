@@ -35,7 +35,7 @@ import {
 } from '../utils';
 import { SetupFormat, useAwsCredentialsForm } from './hooks';
 import { AWS_ORGANIZATION_ACCOUNT } from '../policy_template_form';
-import { AwsCredentialsType } from '../../../../common/types';
+import { AwsCredentialsType } from '../../../../common/types_old';
 
 interface AWSSetupInfoContentProps {
   integrationLink: string;
