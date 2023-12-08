@@ -10,7 +10,6 @@ import { CspFinding } from './schemas/csp_finding';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
 import { getComplianceDashboardSchema } from './schemas/stats';
-import type { CspBenchmarkRuleMetadata } from './types/latest';
 
 export type AwsCredentialsType =
   | 'assume_role'
