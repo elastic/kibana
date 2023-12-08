@@ -64,7 +64,7 @@ describe('EditConnectorFlyout', () => {
     appMockRenderer = createAppMockRenderer();
     appMockRenderer.coreStart.application.capabilities = {
       ...appMockRenderer.coreStart.application.capabilities,
-      actions: { save: true, show: true },
+      actions: { save: true, show: true, execute: true },
     };
     appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);

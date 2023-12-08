@@ -1,26 +1,10 @@
 {
   "id": "@kbn/shared-ux-page-kibana-template-mocks",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-        "id": "def-common.StorybookMock",
+        "id": "def-public.StorybookMock",
         "type": "Class",
         "tags": [],
         "label": "StorybookMock",
@@ -28,9 +12,9 @@
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-            "section": "def-common.StorybookMock",
+            "section": "def-public.StorybookMock",
             "text": "StorybookMock"
           },
           " extends ",
@@ -53,7 +37,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.propArguments",
+            "id": "def-public.StorybookMock.propArguments",
             "type": "Object",
             "tags": [],
             "label": "propArguments",
@@ -64,7 +48,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "id": "def-common.StorybookMock.propArguments.Unnamed",
+                "id": "def-public.StorybookMock.propArguments.Unnamed",
                 "type": "Any",
                 "tags": [],
                 "label": "Unnamed",
@@ -78,7 +62,7 @@
               },
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "id": "def-common.StorybookMock.propArguments.Unnamed",
+                "id": "def-public.StorybookMock.propArguments.Unnamed",
                 "type": "Any",
                 "tags": [],
                 "label": "Unnamed",
@@ -94,7 +78,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.serviceArguments",
+            "id": "def-public.StorybookMock.serviceArguments",
             "type": "Object",
             "tags": [],
             "label": "serviceArguments",
@@ -106,7 +90,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.dependencies",
+            "id": "def-public.StorybookMock.dependencies",
             "type": "Array",
             "tags": [],
             "label": "dependencies",
@@ -127,7 +111,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.getProps",
+            "id": "def-public.StorybookMock.getProps",
             "type": "Function",
             "tags": [],
             "label": "getProps",
@@ -136,9 +120,9 @@
               "(params?: ",
               {
                 "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                "section": "def-common.Params",
+                "section": "def-public.Params",
                 "text": "Params"
               },
               " | undefined) => ",
@@ -150,7 +134,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "id": "def-common.StorybookMock.getProps.$1",
+                "id": "def-public.StorybookMock.getProps.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "params",
@@ -158,9 +142,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                    "section": "def-common.Params",
+                    "section": "def-public.Params",
                     "text": "Params"
                   },
                   " | undefined"
@@ -175,7 +159,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.getServices",
+            "id": "def-public.StorybookMock.getServices",
             "type": "Function",
             "tags": [],
             "label": "getServices",
@@ -184,9 +168,9 @@
               "(params: ",
               {
                 "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                "section": "def-common.Params",
+                "section": "def-public.Params",
                 "text": "Params"
               },
               ") => ",
@@ -198,7 +182,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "id": "def-common.StorybookMock.getServices.$1",
+                "id": "def-public.StorybookMock.getServices.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "params",
@@ -206,9 +190,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                    "section": "def-common.Params",
+                    "section": "def-public.Params",
                     "text": "Params"
                   }
                 ],
@@ -225,7 +209,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-        "id": "def-common.StorybookMock",
+        "id": "def-public.StorybookMock",
         "type": "Class",
         "tags": [],
         "label": "StorybookMock",
@@ -233,9 +217,9 @@
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-            "section": "def-common.StorybookMock",
+            "section": "def-public.StorybookMock",
             "text": "StorybookMock"
           },
           " extends ",
@@ -260,7 +244,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.propArguments",
+            "id": "def-public.StorybookMock.propArguments",
             "type": "Object",
             "tags": [],
             "label": "propArguments",
@@ -271,7 +255,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "id": "def-common.StorybookMock.propArguments.Unnamed",
+                "id": "def-public.StorybookMock.propArguments.Unnamed",
                 "type": "Any",
                 "tags": [],
                 "label": "Unnamed",
@@ -287,7 +271,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.serviceArguments",
+            "id": "def-public.StorybookMock.serviceArguments",
             "type": "Object",
             "tags": [],
             "label": "serviceArguments",
@@ -299,7 +283,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.dependencies",
+            "id": "def-public.StorybookMock.dependencies",
             "type": "Array",
             "tags": [],
             "label": "dependencies",
@@ -320,7 +304,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.getProps",
+            "id": "def-public.StorybookMock.getProps",
             "type": "Function",
             "tags": [],
             "label": "getProps",
@@ -329,9 +313,9 @@
               "(params?: ",
               {
                 "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                "section": "def-common.Params",
+                "section": "def-public.Params",
                 "text": "Params"
               },
               " | undefined) => ",
@@ -343,7 +327,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "id": "def-common.StorybookMock.getProps.$1",
+                "id": "def-public.StorybookMock.getProps.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "params",
@@ -351,9 +335,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                    "section": "def-common.Params",
+                    "section": "def-public.Params",
                     "text": "Params"
                   },
                   " | undefined"
@@ -368,7 +352,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.getServices",
+            "id": "def-public.StorybookMock.getServices",
             "type": "Function",
             "tags": [],
             "label": "getServices",
@@ -377,9 +361,9 @@
               "(params: ",
               {
                 "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                "section": "def-common.Params",
+                "section": "def-public.Params",
                 "text": "Params"
               },
               ") => ",
@@ -391,7 +375,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "id": "def-common.StorybookMock.getServices.$1",
+                "id": "def-public.StorybookMock.getServices.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "params",
@@ -399,9 +383,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                    "section": "def-common.Params",
+                    "section": "def-public.Params",
                     "text": "Params"
                   }
                 ],
@@ -418,7 +402,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-        "id": "def-common.StorybookMock",
+        "id": "def-public.StorybookMock",
         "type": "Class",
         "tags": [],
         "label": "StorybookMock",
@@ -426,9 +410,9 @@
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-            "section": "def-common.StorybookMock",
+            "section": "def-public.StorybookMock",
             "text": "StorybookMock"
           },
           " extends ",
@@ -453,7 +437,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.propArguments",
+            "id": "def-public.StorybookMock.propArguments",
             "type": "Object",
             "tags": [],
             "label": "propArguments",
@@ -464,7 +448,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "id": "def-common.StorybookMock.propArguments.Unnamed",
+                "id": "def-public.StorybookMock.propArguments.Unnamed",
                 "type": "Any",
                 "tags": [],
                 "label": "Unnamed",
@@ -480,7 +464,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.serviceArguments",
+            "id": "def-public.StorybookMock.serviceArguments",
             "type": "Object",
             "tags": [],
             "label": "serviceArguments",
@@ -492,7 +476,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.dependencies",
+            "id": "def-public.StorybookMock.dependencies",
             "type": "Array",
             "tags": [],
             "label": "dependencies",
@@ -513,7 +497,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.getProps",
+            "id": "def-public.StorybookMock.getProps",
             "type": "Function",
             "tags": [],
             "label": "getProps",
@@ -522,9 +506,9 @@
               "(params?: ",
               {
                 "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                "section": "def-common.Params",
+                "section": "def-public.Params",
                 "text": "Params"
               },
               " | undefined) => ",
@@ -536,7 +520,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "id": "def-common.StorybookMock.getProps.$1",
+                "id": "def-public.StorybookMock.getProps.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "params",
@@ -544,9 +528,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                    "section": "def-common.Params",
+                    "section": "def-public.Params",
                     "text": "Params"
                   },
                   " | undefined"
@@ -561,7 +545,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.getServices",
+            "id": "def-public.StorybookMock.getServices",
             "type": "Function",
             "tags": [],
             "label": "getServices",
@@ -570,9 +554,9 @@
               "(params: ",
               {
                 "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                "section": "def-common.Params",
+                "section": "def-public.Params",
                 "text": "Params"
               },
               ") => ",
@@ -584,7 +568,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "id": "def-common.StorybookMock.getServices.$1",
+                "id": "def-public.StorybookMock.getServices.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "params",
@@ -592,9 +576,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                    "section": "def-common.Params",
+                    "section": "def-public.Params",
                     "text": "Params"
                   }
                 ],
@@ -611,7 +595,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-        "id": "def-common.StorybookMock",
+        "id": "def-public.StorybookMock",
         "type": "Class",
         "tags": [],
         "label": "StorybookMock",
@@ -619,9 +603,9 @@
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-            "section": "def-common.StorybookMock",
+            "section": "def-public.StorybookMock",
             "text": "StorybookMock"
           },
           " extends ",
@@ -644,7 +628,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.propArguments",
+            "id": "def-public.StorybookMock.propArguments",
             "type": "Object",
             "tags": [],
             "label": "propArguments",
@@ -655,7 +639,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "id": "def-common.StorybookMock.propArguments.Unnamed",
+                "id": "def-public.StorybookMock.propArguments.Unnamed",
                 "type": "Any",
                 "tags": [],
                 "label": "Unnamed",
@@ -671,7 +655,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.serviceArguments",
+            "id": "def-public.StorybookMock.serviceArguments",
             "type": "Object",
             "tags": [],
             "label": "serviceArguments",
@@ -683,7 +667,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.dependencies",
+            "id": "def-public.StorybookMock.dependencies",
             "type": "Array",
             "tags": [],
             "label": "dependencies",
@@ -697,7 +681,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.getProps",
+            "id": "def-public.StorybookMock.getProps",
             "type": "Function",
             "tags": [],
             "label": "getProps",
@@ -706,9 +690,9 @@
               "(params?: ",
               {
                 "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                "section": "def-common.Params",
+                "section": "def-public.Params",
                 "text": "Params"
               },
               " | undefined) => ",
@@ -720,7 +704,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "id": "def-common.StorybookMock.getProps.$1",
+                "id": "def-public.StorybookMock.getProps.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "params",
@@ -728,9 +712,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                    "section": "def-common.Params",
+                    "section": "def-public.Params",
                     "text": "Params"
                   },
                   " | undefined"
@@ -745,7 +729,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-            "id": "def-common.StorybookMock.getServices",
+            "id": "def-public.StorybookMock.getServices",
             "type": "Function",
             "tags": [],
             "label": "getServices",
@@ -754,9 +738,9 @@
               "(params: ",
               {
                 "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                "section": "def-common.Params",
+                "section": "def-public.Params",
                 "text": "Params"
               },
               ") => ",
@@ -768,7 +752,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                "id": "def-common.StorybookMock.getServices.$1",
+                "id": "def-public.StorybookMock.getServices.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "params",
@@ -776,9 +760,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnSharedUxPageKibanaTemplateMocksPluginApi",
-                    "section": "def-common.Params",
+                    "section": "def-public.Params",
                     "text": "Params"
                   }
                 ],
@@ -797,7 +781,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-        "id": "def-common.getKibanaDependenciesMock",
+        "id": "def-public.getKibanaDependenciesMock",
         "type": "Function",
         "tags": [],
         "label": "getKibanaDependenciesMock",
@@ -815,7 +799,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-        "id": "def-common.getServicesMock",
+        "id": "def-public.getServicesMock",
         "type": "Function",
         "tags": [],
         "label": "getServicesMock",
@@ -837,7 +821,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-        "id": "def-common.Params",
+        "id": "def-public.Params",
         "type": "Type",
         "tags": [],
         "label": "Params",
@@ -869,9 +853,9 @@
           "<PropArguments, {}> & ",
           {
             "pluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
-            "section": "def-common.Params",
+            "section": "def-public.Params",
             "text": "Params"
           }
         ],
@@ -882,7 +866,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-        "id": "def-common.Params",
+        "id": "def-public.Params",
         "type": "Type",
         "tags": [],
         "label": "Params",
@@ -916,9 +900,9 @@
           "<PropArguments, {}> & ",
           {
             "pluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
-            "section": "def-common.Params",
+            "section": "def-public.Params",
             "text": "Params"
           }
         ],
@@ -929,7 +913,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-        "id": "def-common.Params",
+        "id": "def-public.Params",
         "type": "Type",
         "tags": [],
         "label": "Params",
@@ -963,9 +947,9 @@
           "<PropArguments, {}> & ",
           {
             "pluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
-            "section": "def-common.Params",
+            "section": "def-public.Params",
             "text": "Params"
           }
         ],
@@ -976,7 +960,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
-        "id": "def-common.Params",
+        "id": "def-public.Params",
         "type": "Type",
         "tags": [],
         "label": "Params",
@@ -1008,9 +992,9 @@
           "<PropArguments, {}> & ",
           {
             "pluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
-            "section": "def-common.Params",
+            "section": "def-public.Params",
             "text": "Params"
           }
         ],
@@ -1020,6 +1004,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }
