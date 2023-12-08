@@ -59,7 +59,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     await testSubjects.missingOrFail('deleteIdsConfirmation');
   };
 
-  describe('Rule details', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/172916
+  describe.skip('Rule details', () => {
     let ruleIdList: string[];
     let connectorIdList: string[];
 
