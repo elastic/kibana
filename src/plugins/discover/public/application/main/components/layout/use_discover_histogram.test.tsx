@@ -261,20 +261,14 @@ describe('useDiscoverHistogram', () => {
         hook.result.current.ref(api);
       });
       stateContainer.appState.update({ hideChart: true, interval: '1m', breakdownField: 'test' });
-      expect(api.setTotalHits).toHaveBeenCalled();
+      expect(api.setTotalHits).not.toHaveBeenCalled();
       expect(api.setChartHidden).toHaveBeenCalled();
       expect(api.setTimeInterval).toHaveBeenCalled();
       expect(api.setBreakdownField).toHaveBeenCalled();
-      expect(Object.keys(params ?? {})).toEqual([
-        'totalHitsStatus',
-        'totalHitsResult',
-        'breakdownField',
-        'timeInterval',
-        'chartHidden',
-      ]);
+      expect(Object.keys(params ?? {})).toEqual(['breakdownField', 'timeInterval', 'chartHidden']);
     });
 
-    it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates after the first load', async () => {
+    it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates', async () => {
       const stateContainer = getStateContainer();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const containerState = stateContainer.appState.getState();
@@ -290,20 +284,13 @@ describe('useDiscoverHistogram', () => {
       api.setChartHidden = jest.fn((chartHidden) => {
         params = { ...params, chartHidden };
       });
-      api.setTotalHits = jest.fn((p) => {
-        params = { ...params, ...p };
-      });
       const subject$ = new BehaviorSubject(state);
       api.state$ = subject$;
       act(() => {
         hook.result.current.ref(api);
       });
       stateContainer.appState.update({ hideChart: true });
-      expect(Object.keys(params ?? {})).toEqual([
-        'totalHitsStatus',
-        'totalHitsResult',
-        'chartHidden',
-      ]);
+      expect(Object.keys(params ?? {})).toEqual(['chartHidden']);
       params = {};
       stateContainer.appState.update({ hideChart: false });
       act(() => {

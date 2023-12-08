@@ -314,7 +314,7 @@ export const useDiscoverHistogram = ({
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const timeRangeMemoized = useMemo(() => timeRange, [timeRange.from, timeRange.to]);
+  const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
 
   return {
     ref,
