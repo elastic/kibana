@@ -42,7 +42,29 @@ export const applyCriticalityToScore = ({
     return score;
   }
 
-  const priorProbability = score / (100 - score);
+  return bayesianUpdate({ max: 100, modifiers: [modifier], score });
+};
+
+/**
+ * Updates a score with the given modifiers using bayesian inference.
+ * @param modifiers - The modifiers to be applied to the score.
+ * @param score - The score to modifiers are applied
+ * @param max - The maximum value of the score.
+ *
+ * @returns The updated score with modifiers applied
+ */
+export const bayesianUpdate = ({
+  max,
+  modifiers,
+  score,
+}: {
+  max: number;
+  modifiers: number[];
+  score: number;
+}) => {
+  const modifier = modifiers.reduce((acc, curr) => acc * curr, 1);
+
+  const priorProbability = score / (max - score);
   const newProbability = priorProbability * modifier;
-  return (100 * newProbability) / (1 + newProbability);
+  return (max * newProbability) / (1 + newProbability);
 };
