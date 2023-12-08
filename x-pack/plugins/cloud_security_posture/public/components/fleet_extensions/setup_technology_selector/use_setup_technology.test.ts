@@ -30,7 +30,9 @@ describe('useSetupTechnology', () => {
     it('sets to AGENTLESS when agentless is available', () => {
       const agentlessPolicy = { id: 'agentlessPolicyId' } as AgentPolicy;
       const input = { type: CLOUDBEAT_AWS } as NewPackagePolicyInput;
-      const { result } = renderHook(() => useSetupTechnology({ input, agentlessPolicy, isEditPage }));
+      const { result } = renderHook(() =>
+        useSetupTechnology({ input, agentlessPolicy, isEditPage })
+      );
       expect(result.current.isAgentlessAvailable).toBeTruthy();
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENTLESS);
     });
