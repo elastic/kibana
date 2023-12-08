@@ -13,15 +13,11 @@ import { RiskScoreEnableSection } from '../components/risk_score_enable_section'
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
 import { BETA } from '../../common/translations';
 import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export const EntityAnalyticsManagementPage = () => {
-  const privilegesCalloutEnabled = useIsExperimentalFeatureEnabled(
-    'riskEnginePrivilegesRouteEnabled'
-  );
   return (
     <>
-      {privilegesCalloutEnabled && <RiskEnginePrivilegesCallOut />}
+      <RiskEnginePrivilegesCallOut />
       <EuiFlexGroup gutterSize="s" alignItems="baseline">
         <EuiFlexItem grow={false}>
           <EuiPageHeader
