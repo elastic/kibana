@@ -61,6 +61,7 @@ export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
   AlertConsumers.LOGS,
   AlertConsumers.INFRASTRUCTURE,
   'stackAlerts',
+  'alerts',
 ];
 
 export interface RuleFormConsumerSelectionProps {

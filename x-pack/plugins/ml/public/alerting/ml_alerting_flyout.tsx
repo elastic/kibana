@@ -9,7 +9,6 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { JobId } from '../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../application/contexts/kibana';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
@@ -78,7 +77,6 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
           },
         },
       },
-      initialSelectedConsumer: AlertConsumers.STACK_ALERTS,
     });
     // deps on id to avoid re-rendering on auto-refresh
     // eslint-disable-next-line react-hooks/exhaustive-deps
