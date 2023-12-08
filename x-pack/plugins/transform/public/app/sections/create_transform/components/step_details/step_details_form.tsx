@@ -109,8 +109,6 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [destIndexAvailableTimeFields, setDestIndexAvailableTimeFields] = useState<string[]>([]);
     const [dataViewTimeField, setDataViewTimeField] = useState<string | undefined>();
 
-    // @TODO: remove
-    console.log(`--@@destIndexAvailableTimeFields`, destIndexAvailableTimeFields);
     const onTimeFieldChanged = React.useCallback(
       (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
@@ -164,8 +162,6 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     useEffect(() => {
       if (transformPreview) {
         const properties = transformPreview.generated_dest_index.mappings.properties;
-        // @TODO: remove
-        console.log(`--@@properties`, properties);
         const timeFields: string[] = Object.keys(properties).filter(
           (col) => properties[col].type === 'date'
         );
