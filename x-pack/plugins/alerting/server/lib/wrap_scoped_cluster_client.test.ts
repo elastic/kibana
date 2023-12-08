@@ -36,180 +36,182 @@ describe('wrapScopedClusterClient', () => {
     jest.resetAllMocks();
   });
 
-  test('searches with asInternalUser when specified', async () => {
-    const abortController = new AbortController();
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const childClient = elasticsearchServiceMock.createElasticsearchClient();
+  describe('search', () => {
+    test('uses asInternalUser when specified', async () => {
+      const abortController = new AbortController();
+      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
-    scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
-    const asInternalUserWrappedSearchFn = childClient.search;
+      scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
+      const asInternalUserWrappedSearchFn = childClient.search;
 
-    const wrappedSearchClient = createWrappedScopedClusterClientFactory({
-      scopedClusterClient,
-      rule,
-      logger,
-      abortController,
-    }).client();
-    await wrappedSearchClient.asInternalUser.search(esQuery);
+      const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+        scopedClusterClient,
+        rule,
+        logger,
+        abortController,
+      }).client();
+      await wrappedSearchClient.asInternalUser.search(esQuery);
 
-    expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {
-      signal: abortController.signal,
-    });
-    expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
-    expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
-  });
-
-  test('searches with asCurrentUser when specified', async () => {
-    const abortController = new AbortController();
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const childClient = elasticsearchServiceMock.createElasticsearchClient();
-
-    scopedClusterClient.asCurrentUser.child.mockReturnValue(childClient as unknown as Client);
-    const asCurrentUserWrappedSearchFn = childClient.search;
-
-    const wrappedSearchClient = createWrappedScopedClusterClientFactory({
-      scopedClusterClient,
-      rule,
-      logger,
-      abortController,
-    }).client();
-    await wrappedSearchClient.asCurrentUser.search(esQuery);
-
-    expect(asCurrentUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {
-      signal: abortController.signal,
-    });
-    expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
-    expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
-  });
-
-  test('uses search options when specified', async () => {
-    const abortController = new AbortController();
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const childClient = elasticsearchServiceMock.createElasticsearchClient();
-
-    scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
-    const asInternalUserWrappedSearchFn = childClient.search;
-
-    const wrappedSearchClient = createWrappedScopedClusterClientFactory({
-      scopedClusterClient,
-      rule,
-      logger,
-      abortController,
-    }).client();
-    await wrappedSearchClient.asInternalUser.search(esQuery, { ignore: [404] });
-
-    expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {
-      ignore: [404],
-      signal: abortController.signal,
-    });
-    expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
-    expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
-  });
-
-  test('re-throws error when search throws error', async () => {
-    const abortController = new AbortController();
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const childClient = elasticsearchServiceMock.createElasticsearchClient();
-
-    scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
-    const asInternalUserWrappedSearchFn = childClient.search;
-
-    asInternalUserWrappedSearchFn.mockRejectedValueOnce(new Error('something went wrong!'));
-    const wrappedSearchClient = createWrappedScopedClusterClientFactory({
-      scopedClusterClient,
-      rule,
-      logger,
-      abortController,
-    }).client();
-
-    await expect(
-      wrappedSearchClient.asInternalUser.search
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
-  });
-
-  test('handles empty search result object', async () => {
-    const abortController = new AbortController();
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const childClient = elasticsearchServiceMock.createElasticsearchClient();
-
-    scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
-    const asInternalUserWrappedSearchFn = childClient.search;
-    // @ts-ignore incomplete return type
-    asInternalUserWrappedSearchFn.mockResolvedValue({});
-
-    const wrappedSearchClientFactory = createWrappedScopedClusterClientFactory({
-      scopedClusterClient,
-      rule,
-      logger,
-      abortController,
+      expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {
+        signal: abortController.signal,
+      });
+      expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+      expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
     });
 
-    const wrappedSearchClient = wrappedSearchClientFactory.client();
-    await wrappedSearchClient.asInternalUser.search(esQuery);
+    test('uses asCurrentUser when specified', async () => {
+      const abortController = new AbortController();
+      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
-    expect(asInternalUserWrappedSearchFn).toHaveBeenCalledTimes(1);
-    expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
-    expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+      scopedClusterClient.asCurrentUser.child.mockReturnValue(childClient as unknown as Client);
+      const asCurrentUserWrappedSearchFn = childClient.search;
 
-    const stats = wrappedSearchClientFactory.getMetrics();
-    expect(stats.numSearches).toEqual(1);
-    expect(stats.esSearchDurationMs).toEqual(0);
-  });
+      const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+        scopedClusterClient,
+        rule,
+        logger,
+        abortController,
+      }).client();
+      await wrappedSearchClient.asCurrentUser.search(esQuery);
 
-  test('keeps track of number of queries', async () => {
-    const abortController = new AbortController();
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const childClient = elasticsearchServiceMock.createElasticsearchClient();
-
-    scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
-    const asInternalUserWrappedSearchFn = childClient.search;
-    // @ts-ignore incomplete return type
-    asInternalUserWrappedSearchFn.mockResolvedValue({ took: 333 });
-
-    const wrappedSearchClientFactory = createWrappedScopedClusterClientFactory({
-      scopedClusterClient,
-      rule,
-      logger,
-      abortController,
+      expect(asCurrentUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {
+        signal: abortController.signal,
+      });
+      expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+      expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
     });
-    const wrappedSearchClient = wrappedSearchClientFactory.client();
-    await wrappedSearchClient.asInternalUser.search(esQuery);
-    await wrappedSearchClient.asInternalUser.search(esQuery);
-    await wrappedSearchClient.asInternalUser.search(esQuery);
 
-    expect(asInternalUserWrappedSearchFn).toHaveBeenCalledTimes(3);
-    expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
-    expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+    test('uses search options when specified', async () => {
+      const abortController = new AbortController();
+      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
-    const stats = wrappedSearchClientFactory.getMetrics();
-    expect(stats.numSearches).toEqual(3);
-    expect(stats.esSearchDurationMs).toEqual(999);
+      scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
+      const asInternalUserWrappedSearchFn = childClient.search;
 
-    expect(logger.debug).toHaveBeenCalledWith(
-      `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
-    );
-  });
+      const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+        scopedClusterClient,
+        rule,
+        logger,
+        abortController,
+      }).client();
+      await wrappedSearchClient.asInternalUser.search(esQuery, { ignore: [404] });
 
-  test('throws error when search throws abort error', async () => {
-    const abortController = new AbortController();
-    abortController.abort();
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const childClient = elasticsearchServiceMock.createElasticsearchClient();
+      expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {
+        ignore: [404],
+        signal: abortController.signal,
+      });
+      expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+      expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+    });
 
-    scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
-    childClient.search.mockRejectedValueOnce(new Error('Request has been aborted by the user'));
+    test('re-throws error when an error is thrown', async () => {
+      const abortController = new AbortController();
+      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
-    const abortableSearchClient = createWrappedScopedClusterClientFactory({
-      scopedClusterClient,
-      rule,
-      logger,
-      abortController,
-    }).client();
+      scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
+      const asInternalUserWrappedSearchFn = childClient.search;
 
-    await expect(
-      abortableSearchClient.asInternalUser.search
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Search has been aborted due to cancelled execution"`
-    );
+      asInternalUserWrappedSearchFn.mockRejectedValueOnce(new Error('something went wrong!'));
+      const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+        scopedClusterClient,
+        rule,
+        logger,
+        abortController,
+      }).client();
+
+      await expect(
+        wrappedSearchClient.asInternalUser.search
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
+    });
+
+    test('handles empty search result object', async () => {
+      const abortController = new AbortController();
+      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const childClient = elasticsearchServiceMock.createElasticsearchClient();
+
+      scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
+      const asInternalUserWrappedSearchFn = childClient.search;
+      // @ts-ignore incomplete return type
+      asInternalUserWrappedSearchFn.mockResolvedValue({});
+
+      const wrappedSearchClientFactory = createWrappedScopedClusterClientFactory({
+        scopedClusterClient,
+        rule,
+        logger,
+        abortController,
+      });
+
+      const wrappedSearchClient = wrappedSearchClientFactory.client();
+      await wrappedSearchClient.asInternalUser.search(esQuery);
+
+      expect(asInternalUserWrappedSearchFn).toHaveBeenCalledTimes(1);
+      expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+      expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+
+      const stats = wrappedSearchClientFactory.getMetrics();
+      expect(stats.numSearches).toEqual(1);
+      expect(stats.esSearchDurationMs).toEqual(0);
+    });
+
+    test('keeps track of number of queries', async () => {
+      const abortController = new AbortController();
+      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const childClient = elasticsearchServiceMock.createElasticsearchClient();
+
+      scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
+      const asInternalUserWrappedSearchFn = childClient.search;
+      // @ts-ignore incomplete return type
+      asInternalUserWrappedSearchFn.mockResolvedValue({ took: 333 });
+
+      const wrappedSearchClientFactory = createWrappedScopedClusterClientFactory({
+        scopedClusterClient,
+        rule,
+        logger,
+        abortController,
+      });
+      const wrappedSearchClient = wrappedSearchClientFactory.client();
+      await wrappedSearchClient.asInternalUser.search(esQuery);
+      await wrappedSearchClient.asInternalUser.search(esQuery);
+      await wrappedSearchClient.asInternalUser.search(esQuery);
+
+      expect(asInternalUserWrappedSearchFn).toHaveBeenCalledTimes(3);
+      expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+      expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+
+      const stats = wrappedSearchClientFactory.getMetrics();
+      expect(stats.numSearches).toEqual(3);
+      expect(stats.esSearchDurationMs).toEqual(999);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
+      );
+    });
+
+    test('throws error when search throws abort error', async () => {
+      const abortController = new AbortController();
+      abortController.abort();
+      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const childClient = elasticsearchServiceMock.createElasticsearchClient();
+
+      scopedClusterClient.asInternalUser.child.mockReturnValue(childClient as unknown as Client);
+      childClient.search.mockRejectedValueOnce(new Error('Request has been aborted by the user'));
+
+      const abortableSearchClient = createWrappedScopedClusterClientFactory({
+        scopedClusterClient,
+        rule,
+        logger,
+        abortController,
+      }).client();
+
+      await expect(
+        abortableSearchClient.asInternalUser.search
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Search has been aborted due to cancelled execution"`
+      );
+    });
   });
 });
