@@ -59,6 +59,9 @@ const formatForResponse = ({
     score: bucket.risk_details.value.normalized_score,
     modifier: criticalityModifier,
   });
+  const categoryFiveScore =
+    bucket.risk_details.value.normalized_score - normalizedScoreWithCriticality;
+  const categoryFiveCount = criticalityModifier ? 1 : 0;
 
   return {
     '@timestamp': now,
@@ -71,6 +74,8 @@ const formatForResponse = ({
     calculated_score_norm: normalizedScoreWithCriticality,
     category_1_score: bucket.risk_details.value.category_1_score,
     category_1_count: bucket.risk_details.value.category_1_count,
+    category_5_score: categoryFiveScore,
+    category_5_count: categoryFiveCount,
     notes: bucket.risk_details.value.notes,
     inputs: bucket.inputs.hits.hits.map((riskInput) => ({
       id: riskInput._id,
