@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
@@ -32,14 +32,23 @@ export const AwsCredentialsFormAgentless = ({ input, newPolicy, updatePolicy }: 
   const fields = getInputVarsFields(input, group.fields);
   const integrationLink = cspIntegrationDocsNavigation.cspm.getStartedPath;
 
-  // TODO: get text
   return (
     <>
       <AWSSetupInfoContent
         info={
           <FormattedMessage
             id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentAgentless"
-            defaultMessage="TBD Agentless guide"
+            defaultMessage="Utilize AWS Access Keys to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+            values={{
+              gettingStartedLink: (
+                <EuiLink href={integrationLink} target="_blank">
+                  <FormattedMessage
+                    id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
+                    defaultMessage="Getting Started"
+                  />
+                </EuiLink>
+              ),
+            }}
           />
         }
       />
