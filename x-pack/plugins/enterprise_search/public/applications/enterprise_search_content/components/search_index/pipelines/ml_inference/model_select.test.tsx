@@ -98,6 +98,23 @@ describe('ModelSelect', () => {
       })
     );
   });
+  it('sets placeholder flag on selecting a placeholder item', () => {
+    setMockValues(DEFAULT_VALUES);
+
+    const wrapper = shallow(<ModelSelect />);
+    expect(wrapper.find(EuiSelectable)).toHaveLength(1);
+    const selectable = wrapper.find(EuiSelectable);
+    selectable.simulate('change', [
+      { modelId: 'model_1' },
+      { modelId: 'model_2', isPlaceholder: true, checked: 'on' },
+    ]);
+    expect(MOCK_ACTIONS.setInferencePipelineConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        modelID: 'model_2',
+        isModelPlaceholderSelected: true,
+      })
+    );
+  });
   it('generates pipeline name on selecting an item', () => {
     setMockValues(DEFAULT_VALUES);
 
