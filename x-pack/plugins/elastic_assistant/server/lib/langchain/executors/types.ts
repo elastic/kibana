@@ -11,8 +11,8 @@ import { BaseMessage } from 'langchain/schema';
 import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { LangChainTracer } from 'langchain/callbacks';
-import type { Tool } from 'langchain/tools';
 import { RequestBody, ResponseBody } from '../types';
+import type { GetApplicableTools } from '../../../types';
 
 export interface AgentExecutorParams {
   alertsIndexPattern?: string;
@@ -22,12 +22,12 @@ export interface AgentExecutorParams {
   assistantLangChain: boolean;
   connectorId: string;
   esClient: ElasticsearchClient;
+  getApplicableTools?: GetApplicableTools;
   kbResource: string | undefined;
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
   onNewReplacements?: (newReplacements: Record<string, string>) => void;
-  registeredTools?: Tool[];
   replacements?: Record<string, string>;
   request: KibanaRequest<unknown, unknown, RequestBody>;
   size?: number;

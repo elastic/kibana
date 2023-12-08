@@ -58,11 +58,10 @@ export const postActionsConnectorExecuteRoute = (
         // TODO: Add `traceId` to actions request when calling via langchain
         logger.debug('Executing via langchain, assistantLangChain: true');
 
-        // Fetch any tools registered by the request's originating plugin
-        const registeredTools = (await context.elasticAssistant).getRegisteredTools(
+        // Fetch the function for fetching any tools registered by the request's originating plugin
+        const getApplicableTools = (await context.elasticAssistant).getRegisteredTools(
           'securitySolution'
         );
-        logger.debug(`Registered tools: ${registeredTools.map((tool) => tool.name).join(', ')}`);
 
         // get a scoped esClient for assistant memory
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -88,11 +87,11 @@ export const postActionsConnectorExecuteRoute = (
           connectorId,
           elserId,
           esClient,
+          getApplicableTools,
           kbResource: ESQL_RESOURCE,
           langChainMessages,
           logger,
           onNewReplacements,
-          registeredTools,
           request,
           replacements: request.body.replacements,
           size: request.body.size,

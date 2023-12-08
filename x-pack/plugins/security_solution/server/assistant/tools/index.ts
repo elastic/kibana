@@ -5,31 +5,17 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { KibanaRequest } from '@kbn/core-http-server';
-import { RetrievalQAChain } from 'langchain/chains';
-import { Tool } from 'langchain/tools';
+import type { Tool } from 'langchain/tools';
 
+import type {
+  GetApplicableTools,
+  GetApplicableToolsParams,
+} from '@kbn/elastic-assistant-plugin/server';
 import { getAlertCountsTool } from './alert_counts/get_alert_counts_tool';
 import { getEsqlLanguageKnowledgeBaseTool } from './esql_language_knowledge_base/get_esql_language_knowledge_base_tool';
 import { getOpenAlertsTool } from './open_alerts/get_open_alerts_tool';
-import type { RequestBody } from '../types';
 
-export interface GetApplicableTools {
-  alertsIndexPattern?: string;
-  allow?: string[];
-  allowReplacement?: string[];
-  assistantLangChain: boolean;
-  chain: RetrievalQAChain;
-  esClient: ElasticsearchClient;
-  modelExists: boolean;
-  onNewReplacements?: (newReplacements: Record<string, string>) => void;
-  replacements?: Record<string, string>;
-  request: KibanaRequest<unknown, unknown, RequestBody>;
-  size?: number;
-}
-
-export const getApplicableTools = ({
+export const getApplicableTools: GetApplicableTools = ({
   alertsIndexPattern,
   allow,
   allowReplacement,
@@ -41,7 +27,7 @@ export const getApplicableTools = ({
   replacements,
   request,
   size,
-}: GetApplicableTools): Tool[] =>
+}: GetApplicableToolsParams): Tool[] =>
   [
     getEsqlLanguageKnowledgeBaseTool({ assistantLangChain, chain, modelExists }) ?? [],
     getAlertCountsTool({

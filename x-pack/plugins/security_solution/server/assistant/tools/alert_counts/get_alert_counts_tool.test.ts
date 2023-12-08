@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { DynamicTool } from 'langchain/tools';
+import type { DynamicTool } from 'langchain/tools';
 import { omit } from 'lodash/fp';
 
 import { getAlertCountsTool } from './get_alert_counts_tool';
-import type { RequestBody } from '../../types';
+import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
 
 describe('getAlertCountsTool', () => {
   const alertsIndexPattern = 'alerts-index';

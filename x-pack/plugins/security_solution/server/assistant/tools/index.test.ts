@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { KibanaRequest } from '@kbn/core-http-server';
-import { RetrievalQAChain } from 'langchain/chains';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { RetrievalQAChain } from 'langchain/chains';
 
-import { RequestBody } from '../types';
+import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
 import { getApplicableTools } from '.';
 
 describe('getApplicableTools', () => {

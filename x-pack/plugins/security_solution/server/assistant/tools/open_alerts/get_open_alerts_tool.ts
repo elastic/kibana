@@ -6,12 +6,13 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { getAnonymizedValue, transformRawData } from '@kbn/elastic-assistant-common';
-import { DynamicTool, Tool } from 'langchain/tools';
-import { requestHasRequiredAnonymizationParams } from '../../helpers';
-import { RequestBody } from '../../types';
+import type { Tool } from 'langchain/tools';
+import { DynamicTool } from 'langchain/tools';
+import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
+import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
 
 import { getOpenAlertsQuery } from './get_open_alerts_query';
 import { getRawDataOrDefault, sizeIsOutOfRange } from './helpers';

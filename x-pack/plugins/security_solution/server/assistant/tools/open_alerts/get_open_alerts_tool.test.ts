@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { DynamicTool } from 'langchain/tools';
+import type { DynamicTool } from 'langchain/tools';
 import { omit } from 'lodash/fp';
 
 import { getOpenAlertsTool } from './get_open_alerts_tool';
-import { mockAlertsFieldsApi } from '../../../../__mocks__/alerts';
-import type { RequestBody } from '../../types';
+import { mockAlertsFieldsApi } from '@kbn/elastic-assistant-plugin/server/__mocks__/alerts';
+import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
 import { MAX_SIZE } from './helpers';
 
 describe('getOpenAlertsTool', () => {

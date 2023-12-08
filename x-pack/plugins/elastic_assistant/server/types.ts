@@ -17,8 +17,27 @@ import type {
 } from '@kbn/core/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { Tool } from 'langchain/dist/tools/base';
+import { RetrievalQAChain } from 'langchain/chains';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { RequestBody } from './lib/langchain/types';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
+
+export interface GetApplicableToolsParams {
+  alertsIndexPattern?: string;
+  allow?: string[];
+  allowReplacement?: string[];
+  assistantLangChain: boolean;
+  chain: RetrievalQAChain;
+  esClient: ElasticsearchClient;
+  modelExists: boolean;
+  onNewReplacements?: (newReplacements: Record<string, string>) => void;
+  replacements?: Record<string, string>;
+  request: KibanaRequest<unknown, unknown, RequestBody>;
+  size?: number;
+}
+
+export type GetApplicableTools = (params: GetApplicableToolsParams) => Tool[];
 
 /** The plugin setup interface */
 export interface ElasticAssistantPluginSetup {
@@ -31,9 +50,9 @@ export interface ElasticAssistantPluginStart {
   /**
    * Register tools to be used by the elastic assistant
    * @param pluginName Name of the plugin the tool should be registered to
-   * @param tool The tool to register
+   * @param getApplicableTools Function that returns the tools for the specified plugin
    */
-  registerTool: (pluginName: string, tool: Tool) => void;
+  registerTools: (pluginName: string, getApplicableTools: GetApplicableTools) => void;
   /**
    * Get the registered tools
    * @param pluginName Name of the plugin to get the tools for
@@ -51,7 +70,10 @@ export interface ElasticAssistantPluginStartDependencies {
 
 export interface ElasticAssistantApiRequestHandlerContext {
   actions: ActionsPluginStart;
-  getRegisteredTools: (pluginName: string) => Tool[];
+  getRegisteredTools: (
+    pluginName: string,
+    getApplicableToolsParams: GetApplicableToolsParams
+  ) => Tool[];
   logger: Logger;
 }
 

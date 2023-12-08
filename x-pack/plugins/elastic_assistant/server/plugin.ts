@@ -17,13 +17,13 @@ import {
 } from '@kbn/core/server';
 import { once } from 'lodash';
 
-import type { Tool } from 'langchain/tools';
 import {
   ElasticAssistantPluginSetup,
   ElasticAssistantPluginSetupDependencies,
   ElasticAssistantPluginStart,
   ElasticAssistantPluginStartDependencies,
   ElasticAssistantRequestHandlerContext,
+  GetApplicableTools,
   GetElser,
   PLUGIN_ID,
 } from './types';
@@ -122,8 +122,8 @@ export class ElasticAssistantPlugin
       getRegisteredTools: (pluginName: string) => {
         return appContextService.getRegisteredTools(pluginName);
       },
-      registerTool: (pluginName: string, tool: Tool) => {
-        return appContextService.registerTools(pluginName, tool);
+      registerTools: (pluginName: string, getApplicableTools: GetApplicableTools) => {
+        return appContextService.registerTools(pluginName, getApplicableTools);
       },
     };
   }

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { RetrievalQAChain } from 'langchain/chains';
-import { ChainTool, Tool } from 'langchain/tools';
+import type { RetrievalQAChain } from 'langchain/chains';
+import type { Tool } from 'langchain/tools';
+import { ChainTool } from 'langchain/tools';
 
 export const getEsqlLanguageKnowledgeBaseTool = ({
   assistantLangChain,

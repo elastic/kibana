@@ -7,10 +7,11 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { Tool } from 'langchain/tools';
+import type { GetApplicableTools, GetApplicableToolsParams } from '../types';
 
 export type PluginName = string;
-export type RegisteredToolsStorage = Map<PluginName, Set<Tool>>;
-export type RegisterTools = (pluginName: string, tool: Tool) => void;
+export type RegisteredToolsStorage = Map<PluginName, GetApplicableTools>;
+export type RegisterTools = (pluginName: string, getApplicableTools: GetApplicableTools) => void;
 export type GetRegisteredTools = (pluginName: string) => Tool[];
 
 export interface ElasticAssistantAppContext {
@@ -35,35 +36,35 @@ class AppContextService {
   }
 
   /**
-   * Register a tool to be used by the Elastic Assistant
+   * Register tools to be used by the Elastic Assistant
    *
    * @param pluginName
-   * @param tool
+   * @param getApplicableTools
    */
-  public registerTools(pluginName: string, tool: Tool) {
+  public registerTools(pluginName: string, getApplicableTools: GetApplicableTools) {
     this.logger?.debug('AppContextService:registerTools');
     this.logger?.debug(`pluginName: ${pluginName}`);
-    this.logger?.debug(`tool: ${tool.name}`);
 
     if (!this.registeredTools.has(pluginName)) {
-      this.logger?.debug('plugin has no tools, making new set');
-      this.registeredTools.set(pluginName, new Set());
+      this.logger?.debug('plugin has no tools, setting "getApplicableTools"');
+    } else {
+      this.logger?.debug('plugin already has tools, overriding "getApplicableTools"');
     }
-    this.registeredTools.get(pluginName)?.add(tool);
+    this.registeredTools.set(pluginName, getApplicableTools);
   }
 
   /**
    * Get the registered tools
    * @param pluginName
    */
-  public getRegisteredTools(pluginName: string): Tool[] {
-    const tools = Array.from(this.registeredTools?.get(pluginName) ?? new Set<Tool>());
+  public getRegisteredTools(pluginName: string): GetApplicableTools {
+    const getApplicableTools =
+      this.registeredTools?.get(pluginName) ?? ((params: GetApplicableToolsParams) => []);
 
     this.logger?.debug('AppContextService:getRegisteredTools');
     this.logger?.debug(`pluginName: ${pluginName}`);
-    this.logger?.debug(`tools: ${tools.map((tool) => tool.name).join(', ')}`);
 
-    return tools;
+    return getApplicableTools;
   }
 }
 

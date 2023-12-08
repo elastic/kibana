@@ -6,13 +6,14 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { KibanaRequest } from '@kbn/core-http-server';
-import { DynamicTool, Tool } from 'langchain/tools';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Tool } from 'langchain/tools';
+import { DynamicTool } from 'langchain/tools';
 
+import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
+import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
 import { getAlertsCountQuery } from './get_alert_counts_query';
-import { requestHasRequiredAnonymizationParams } from '../../helpers';
-import type { RequestBody } from '../../types';
 
 export const ALERT_COUNTS_TOOL_DESCRIPTION =
   'Call this for the counts of last 24 hours of open alerts in the environment, grouped by their severity';

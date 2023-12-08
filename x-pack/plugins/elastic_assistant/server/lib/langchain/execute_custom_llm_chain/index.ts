@@ -16,7 +16,6 @@ import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/con
 import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { APMTracer } from '../tracers/apm_tracer';
-import { getApplicableTools } from '../tools';
 
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
@@ -39,7 +38,7 @@ export const callAgentExecutor = async ({
   llmType,
   logger,
   onNewReplacements,
-  registeredTools = [],
+  getApplicableTools = (params: GetRegisteredToolParams) => [],
   replacements,
   request,
   size,
@@ -72,22 +71,20 @@ export const callAgentExecutor = async ({
   // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
   const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
 
-  const tools: Tool[] = [
-    ...getApplicableTools({
-      allow,
-      allowReplacement,
-      alertsIndexPattern,
-      assistantLangChain,
-      chain,
-      esClient,
-      modelExists,
-      onNewReplacements,
-      replacements,
-      request,
-      size,
-    }),
-    ...registeredTools,
-  ];
+  // Fetch any applicable tools that the source plugin may have registered
+  const tools: Tool[] = getApplicableTools({
+    allow,
+    allowReplacement,
+    alertsIndexPattern,
+    assistantLangChain,
+    chain,
+    esClient,
+    modelExists,
+    onNewReplacements,
+    replacements,
+    request,
+    size,
+  });
 
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
