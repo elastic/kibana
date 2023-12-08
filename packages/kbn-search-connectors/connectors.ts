@@ -25,7 +25,7 @@ export interface ConnectorServerSideDefinition {
 export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'azure_blob_storage.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['cloud', 'azure', 'blob', 's3', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.azureBlob.name', {
@@ -76,8 +76,8 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'google_cloud_storage.svg',
-    isBeta: true,
-    isNative: false,
+    isBeta: false,
+    isNative: true,
     keywords: ['google', 'cloud', 'blob', 's3', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.googleCloud.name', {
       defaultMessage: 'Google Cloud Storage',
@@ -116,7 +116,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'mssql.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['mssql', 'microsoft', 'sql', 'database', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.microsoftSQL.name', {
@@ -136,7 +136,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'postgresql.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['postgresql', 'sql', 'database', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.postgresql.name', {
@@ -147,7 +147,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'salesforce.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     isTechPreview: false,
     keywords: ['salesforce', 'cloud', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.salesforce.name', {
@@ -191,7 +191,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'oracle.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     keywords: ['oracle', 'sql', 'database', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.oracle.name', {
       defaultMessage: 'Oracle',
@@ -210,8 +210,8 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 's3.svg',
-    isBeta: true,
-    isNative: false,
+    isBeta: false,
+    isNative: true,
     keywords: ['s3', 'cloud', 'amazon', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.s3.name', {
       defaultMessage: 'S3',
