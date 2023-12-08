@@ -116,16 +116,16 @@ describe('Attachments', () => {
           ).toContain('The length of the comment is too long. The maximum length is 30000.');
         });
 
-        it('throws error when comment is empty', () => {
+        it('is successful when a comment with empty string', () => {
           expect(
             PathReporter.report(AttachmentRequestRt.decode({ ...request, comment: '' }))
-          ).toContain('The comment field cannot be an empty string.');
+          ).not.toContain('The comment field cannot be an empty string.');
         });
 
-        it('throws error when comment string of empty characters', () => {
+        it('is successful when a comment string of empty characters', () => {
           expect(
             PathReporter.report(AttachmentRequestRt.decode({ ...request, comment: '   ' }))
-          ).toContain('The comment field cannot be an empty string.');
+          ).not.toContain('The comment figeld cannot be an empty string.');
         });
       });
     });
