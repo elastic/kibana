@@ -60,6 +60,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/172916
+  // Failing: See https://github.com/elastic/kibana/issues/172918
   describe.skip('Rule details', () => {
     let ruleIdList: string[];
     let connectorIdList: string[];
