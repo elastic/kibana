@@ -44,7 +44,13 @@ function findFile(paths: string[]) {
 }
 
 export const buildDataPaths = (): string[] => {
-  const configDataPath = getConfigFromFiles([getConfigPath()]).path?.data;
+  let configDataPath: string | undefined;
+  try {
+    configDataPath = getConfigFromFiles([getConfigPath()])?.path?.data;
+  } catch (e) {
+    // Config not available, skip
+  }
+
   const argv = process.argv.slice(2);
   const options = getopts(argv, {
     string: ['pathData'],
