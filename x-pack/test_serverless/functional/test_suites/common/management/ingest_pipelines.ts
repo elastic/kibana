@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const TEST_PIPELINE_NAME = 'test_pipeline';
 
@@ -22,21 +22,20 @@ const PIPELINE_CSV = {
 };
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'ingestPipelines', 'savedObjects']);
-  const log = getService('log');
+  const pageObjects = getPageObjects(['svlCommonPage', 'common', 'ingestPipelines']);
   const es = getService('es');
-  const security = getService('security');
+  const log = getService('log');
 
   describe('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
-      await security.testUser.setRoles(['ingest_pipelines_user']);
+      await pageObjects.svlCommonPage.login();
     });
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('ingestPipelines');
     });
     after(async () => {
-      await security.testUser.restoreDefaults();
+      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('Loads the app', async () => {
