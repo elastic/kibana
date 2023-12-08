@@ -60,7 +60,8 @@ export const FlyoutWrapper = ({
                       language
                         ? i18n.translate('xpack.lens.config.experimentalLabel', {
                             defaultMessage:
-                              'Technical preview, ES|QL currently offers limited configuration options',
+                              'Technical preview, {lang} currently offers limited configuration options',
+                            values: { lang: language },
                           })
                         : i18n.translate('xpack.lens.config.experimentalLabelDataview', {
                             defaultMessage:
