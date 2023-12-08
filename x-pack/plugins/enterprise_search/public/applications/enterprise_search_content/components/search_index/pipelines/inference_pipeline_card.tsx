@@ -11,7 +11,6 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +18,6 @@ import {
   EuiPopover,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
@@ -77,32 +75,28 @@ const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline) => {
         isOpen={isPopOverOpen}
         closePopover={() => setIsPopOverOpen(false)}
       >
-        {pipeline.modelState === TrainedModelState.NotDeployed && (
-          <EuiFlexItem grow={false} style={{ paddingRight: '1rem' }}>
-            <EuiToolTip
-              position="top"
-              content={i18n.translate(
-                'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDeployed.fixLink',
-                { defaultMessage: 'Fix issue in Trained Models' }
-              )}
-            >
-              <EuiButtonIcon
-                aria-label={i18n.translate(
-                  'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDeployed.fixLink',
-                  {
-                    defaultMessage: 'Fix issue in Trained Models',
-                  }
-                )}
-                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-fixIssueInTrainedModels`}
-                href={http.basePath.prepend(ML_MANAGE_TRAINED_MODELS_PATH)}
-                display="base"
-                size="xs"
-                iconType="wrench"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
         <EuiFlexGroup direction="column" gutterSize="none">
+          {pipeline.modelState === TrainedModelState.NotDeployed && (
+            <EuiFlexItem>
+              <div>
+                <EuiButtonEmpty
+                  data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-fixIssueInTrainedModels`}
+                  size="s"
+                  flush="both"
+                  iconType="wrench"
+                  color="text"
+                  href={http.basePath.prepend(ML_MANAGE_TRAINED_MODELS_PATH)}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDeployed.fixLink',
+                    {
+                      defaultMessage: 'Fix issue in Trained Models',
+                    }
+                  )}
+                </EuiButtonEmpty>
+              </div>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <div>
               <EuiButtonEmpty
