@@ -641,8 +641,11 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async saveCurrentSavedQuery() {
-    await this.testSubjects.click('savedQueryFormSaveButton');
+    await this.testSubjects.existOrFail('savedQueryFormSaveButton');
     await this.retry.try(async () => {
+      if (await this.testSubjects.exists('savedQueryFormSaveButton')) {
+        await this.testSubjects.click('savedQueryFormSaveButton');
+      }
       await this.testSubjects.missingOrFail('queryBarMenuPanel');
     });
   }
