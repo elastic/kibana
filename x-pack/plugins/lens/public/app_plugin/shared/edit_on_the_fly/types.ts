@@ -75,6 +75,8 @@ export interface EditConfigPanelProps {
   displayFlyoutHeader?: boolean;
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
   canEditTextBasedQuery?: boolean;
+  /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
+  hidesSuggestions?: boolean;
 }
 
 export interface LayerConfigurationProps {
