@@ -88,24 +88,35 @@ export const EditTransformRetentionPolicy: FC = () => {
 
   return (
     <>
-      <EuiSwitch
-        name="transformEditRetentionPolicySwitch"
-        label={i18n.translate(
-          'xpack.transform.transformList.editFlyoutFormRetentionPolicySwitchLabel',
-          {
-            defaultMessage: 'Retention policy',
-          }
-        )}
-        checked={formSections.retentionPolicy.enabled}
-        onChange={(e) =>
-          formSection({
-            section: 'retentionPolicy',
-            enabled: e.target.checked,
-          })
+      <EuiFormRow
+        helpText={
+          isRetentionPolicyAvailable === false
+            ? i18n.translate('xpack.transform.transformList.editFlyoutFormEetentionPolicyError', {
+                defaultMessage:
+                  'Retention policy settings are not available for indices without date fields.',
+              })
+            : ''
         }
-        disabled={!isRetentionPolicyAvailable}
-        data-test-subj="transformEditRetentionPolicySwitch"
-      />
+      >
+        <EuiSwitch
+          name="transformEditRetentionPolicySwitch"
+          label={i18n.translate(
+            'xpack.transform.transformList.editFlyoutFormRetentionPolicySwitchLabel',
+            {
+              defaultMessage: 'Retention policy',
+            }
+          )}
+          checked={formSections.retentionPolicy.enabled}
+          onChange={(e) =>
+            formSection({
+              section: 'retentionPolicy',
+              enabled: e.target.checked,
+            })
+          }
+          disabled={!isRetentionPolicyAvailable}
+          data-test-subj="transformEditRetentionPolicySwitch"
+        />
+      </EuiFormRow>
       {formSections.retentionPolicy.enabled && (
         <div data-test-subj="transformEditRetentionPolicyContent">
           <EuiSpacer size="m" />

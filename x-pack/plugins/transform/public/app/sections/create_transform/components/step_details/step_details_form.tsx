@@ -273,6 +273,9 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const isRetentionPolicyMaxAgeValid = retentionPolicyMaxAgeValidator(retentionPolicyMaxAge);
 
     useEffect(() => {
+      if (!isRetentionPolicyAvailable) {
+        setRetentionPolicyEnabled(false);
+      }
       // Reset retention policy settings when the user disables the whole option
       if (!isRetentionPolicyEnabled) {
         setRetentionPolicyDateField(
