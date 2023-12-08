@@ -7,13 +7,13 @@
 import { TypeOf } from '@kbn/config-schema/src/types/object_type';
 import { omit } from 'lodash';
 import { NormalizedAlertAction } from '../../rules_client';
-import { RuleAction } from '../../types';
+import { IsSystemAction, RuleAction } from '../../types';
 import { actionsSchema } from './actions_schema';
 import { RuleActionTypes, RuleDefaultAction } from '../../../common';
 
 export const rewriteActionsReq = (
   actions: TypeOf<typeof actionsSchema>,
-  isSystemAction: (connectorId: string) => boolean
+  isSystemAction: IsSystemAction
 ): NormalizedAlertAction[] => {
   if (!actions) return [];
 
@@ -59,7 +59,7 @@ export const rewriteActionsReq = (
 
 export const rewriteActionsRes = (
   actions: RuleAction[] | undefined,
-  isSystemAction: (connectorId: string) => boolean
+  isSystemAction: IsSystemAction
 ) => {
   const rewriteFrequency = ({
     notifyWhen,

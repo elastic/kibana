@@ -10,7 +10,6 @@ import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError } from '../lib';
 import {
   verifyAccessAndContext,
-  RewriteResponseCase,
   handleDisabledApiKeysError,
   rewriteRuleLastRun,
   rewriteActionsRes,
@@ -20,6 +19,7 @@ import {
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
   PartialRule,
+  IsSystemAction,
 } from '../types';
 
 const paramSchema = schema.object({
@@ -27,26 +27,29 @@ const paramSchema = schema.object({
   newId: schema.maybe(schema.string()),
 });
 
-const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
-  actions,
-  alertTypeId,
-  scheduledTaskId,
-  createdBy,
-  updatedBy,
-  createdAt,
-  updatedAt,
-  apiKeyOwner,
-  apiKeyCreatedByUser,
-  notifyWhen,
-  muteAll,
-  mutedInstanceIds,
-  executionStatus,
-  snoozeSchedule,
-  isSnoozedUntil,
-  lastRun,
-  nextRun,
-  ...rest
-}) => ({
+const rewriteBodyRes = (
+  {
+    actions,
+    alertTypeId,
+    scheduledTaskId,
+    createdBy,
+    updatedBy,
+    createdAt,
+    updatedAt,
+    apiKeyOwner,
+    apiKeyCreatedByUser,
+    notifyWhen,
+    muteAll,
+    mutedInstanceIds,
+    executionStatus,
+    snoozeSchedule,
+    isSnoozedUntil,
+    lastRun,
+    nextRun,
+    ...rest
+  }: PartialRule<RuleTypeParams>,
+  isSystemAction: IsSystemAction
+) => ({
   ...rest,
   api_key_owner: apiKeyOwner,
   created_by: createdBy,
@@ -71,7 +74,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
     : {}),
   ...(actions
     ? {
-        actions: rewriteActionsRes(actions),
+        actions: rewriteActionsRes(actions, isSystemAction),
       }
     : {}),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),

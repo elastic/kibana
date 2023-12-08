@@ -484,3 +484,5 @@ export interface RawRule {
 }
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
+
+export type IsSystemAction = (connectorId: string) => boolean;
