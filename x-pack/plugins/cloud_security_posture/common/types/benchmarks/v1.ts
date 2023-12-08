@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export * from './rules/v3';
-export * from './benchmarks_score/v1';
-export * from './benchmarks/v2';
-export * from './get_benchmark_response/v2';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { AgentPolicyStatus } from '../../types_old';
+
+export interface Benchmark {
+  package_policy: PackagePolicy;
+  agent_policy: AgentPolicyStatus;
+  rules_count: number;
+}

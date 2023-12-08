@@ -159,16 +159,16 @@ export interface BenchmarkScore {
 }
 
 export interface BenchmarkVersion2 {
-  id: string;
+  id: BenchmarksCisId;
   name: string;
   version: string;
   score: BenchmarkScore;
   evaluation: number;
 }
 
-export type BenchmarkId = CspRuleTemplateMetadata['benchmark']['id'];
-export type BenchmarkName = CspRuleTemplateMetadata['benchmark']['name'];
-export type RuleSection = CspRuleTemplateMetadata['section'];
+export type BenchmarkId = CspBenchmarkRuleMetadata['benchmark']['id'];
+export type BenchmarkName = CspBenchmarkRuleMetadata['benchmark']['name'];
+export type RuleSection = CspBenchmarkRuleMetadata['section'];
 
 // Fleet Integration types
 export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
@@ -267,3 +267,5 @@ export interface AggFieldBucket {
     doc_count?: string;
   }>;
 }
+
+export type BenchmarksCisId = 'cis_k8s' | 'cis_azure' | 'cis_aws' | 'cis_eks' | 'cis_gcp';

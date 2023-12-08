@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Benchmark } from '../benchmarks/v1';
 
-export * from './rules/v3';
-export * from './benchmarks_score/v1';
-export * from './benchmarks/v2';
-export * from './get_benchmark_response/v2';
+export interface GetBenchmarkResponse {
+  items: Benchmark[];
+  total: number;
+  page: number;
+  perPage: number;
+}

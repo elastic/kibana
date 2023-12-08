@@ -30,6 +30,7 @@ import type {
   GcpCredentialsType,
   AzureCredentialsType,
   RuleSection,
+  BenchmarksCisId,
 } from '../types_old';
 
 /**
@@ -173,7 +174,7 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
   return packagePolicy;
 };
 
-export const getBenchmarkCisName = (benchmarkId: string) => {
+export const getBenchmarkCisName = (benchmarkId: BenchmarksCisId) => {
   switch (benchmarkId) {
     case 'cis_k8s':
       return 'CIS Kubernetes';
@@ -186,10 +187,10 @@ export const getBenchmarkCisName = (benchmarkId: string) => {
     case 'cis_gcp':
       return 'CIS GCP';
   }
-  return 'undefined';
+  return null;
 };
 
-export const getBenchmarkApplicableTo = (benchmarkId: string) => {
+export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
   switch (benchmarkId) {
     case 'cis_k8s':
       return 'Kubernetes';
@@ -202,5 +203,5 @@ export const getBenchmarkApplicableTo = (benchmarkId: string) => {
     case 'cis_gcp':
       return 'Google Cloud Provider';
   }
-  return 'undefined';
+  return null;
 };

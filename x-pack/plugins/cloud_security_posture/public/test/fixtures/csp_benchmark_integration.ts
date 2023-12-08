@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
-import Chance from 'chance';
-import type { BenchmarkVersion2 } from '../../../common/types_old';
+import type { Benchmark } from '../../../common/types/latest';
 
 type CreateCspBenchmarkIntegrationFixtureInput = {
   chance?: Chance.Chance;
-} & Partial<BenchmarkVersion2>;
+} & Partial<Benchmark>;
 
 export const createCspBenchmarkIntegrationFixture =
-  ({}: CreateCspBenchmarkIntegrationFixtureInput = {}): BenchmarkVersion2 => ({
+  ({}: CreateCspBenchmarkIntegrationFixtureInput = {}): Benchmark => ({
     id: 'cis_aws',
     version: '1.0.1',
     evaluation: 2,

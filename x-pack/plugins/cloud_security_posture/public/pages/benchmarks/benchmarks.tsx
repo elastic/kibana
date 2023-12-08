@@ -177,7 +177,7 @@ export const Benchmarks = () => {
       />
       <EuiSpacer size="s" />
       <BenchmarksTable
-        benchmarks={benchmarkResult || []}
+        benchmarks={benchmarkResult}
         data-test-subj={TEST_SUBJ.BENCHMARKS_TABLE_DATA_TEST_SUBJ}
         error={queryResult.error ? extractErrorMessage(queryResult.error) : undefined}
         loading={queryResult.isFetching}

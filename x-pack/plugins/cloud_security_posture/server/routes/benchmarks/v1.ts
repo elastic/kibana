@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { ListResult, PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
 import type { Logger } from '@kbn/core/server';
 import {
   PackagePolicyClient,
@@ -13,12 +13,54 @@ import {
 } from '@kbn/fleet-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME, POSTURE_TYPE_ALL } from '../../../common/constants';
+import { isNonNullable, getBenchmarkFromPackagePolicy } from '../../../common/utils/helpers';
+import { AgentStatusByAgentPolicyMap } from '../../lib/fleet_util';
 import {
   getCspPackagePolicies,
   getCspAgentPolicies,
   getAgentStatusesByAgentPolicies,
 } from '../../lib/fleet_util';
-import { createBenchmarks } from './utilities';
+import { getRulesCountForPolicy } from './utilities';
+import { Benchmark } from '../../../common/types_old';
+
+export const getBenchmarksDataV1 = (
+  soClient: SavedObjectsClientContract,
+  agentPolicies: AgentPolicy[],
+  agentStatusByAgentPolicyId: AgentStatusByAgentPolicyMap,
+  cspPackagePolicies: PackagePolicy[]
+): Promise<Benchmark[]> => {
+  const cspPackagePoliciesMap = new Map(
+    cspPackagePolicies.map((packagePolicy) => [packagePolicy.id, packagePolicy])
+  );
+
+  return Promise.all(
+    agentPolicies.flatMap((agentPolicy) => {
+      const cspPackagesOnAgent =
+        agentPolicy.package_policies
+          ?.map(({ id: pckPolicyId }) => {
+            return cspPackagePoliciesMap.get(pckPolicyId);
+          })
+          .filter(isNonNullable) ?? [];
+
+      const benchmarks = cspPackagesOnAgent.map(async (cspPackage) => {
+        const benchmarkId = getBenchmarkFromPackagePolicy(cspPackage.inputs);
+        const rulesCount = await getRulesCountForPolicy(soClient, benchmarkId);
+        const agentPolicyStatus = {
+          id: agentPolicy.id,
+          name: agentPolicy.name,
+          agents: agentStatusByAgentPolicyId[agentPolicy.id]?.total,
+        };
+        return {
+          package_policy: cspPackage,
+          agent_policy: agentPolicyStatus,
+          rules_count: rulesCount,
+        };
+      });
+
+      return benchmarks;
+    })
+  );
+};
 
 export const getBenchmarks = async (
   soClient: SavedObjectsClientContract,
@@ -51,7 +93,7 @@ export const getBenchmarks = async (
     logger
   );
 
-  const benchmarks = await createBenchmarks(
+  const benchmarks = await getBenchmarksDataV1(
     soClient,
     agentPolicies,
     agentStatusesByAgentPolicyId,

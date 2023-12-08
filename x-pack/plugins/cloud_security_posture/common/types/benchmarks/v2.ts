@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export * from './rules/v3';
-export * from './benchmarks_score/v1';
-export * from './benchmarks/v2';
-export * from './get_benchmark_response/v2';
+import { BenchmarksCisId } from '../../types_old';
+import { BenchmarkScore } from '../latest';
+
+export interface Benchmark {
+  id: BenchmarksCisId;
+  name: string;
+  version: string;
+  score: BenchmarkScore;
+  evaluation: number;
+}
