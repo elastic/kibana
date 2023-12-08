@@ -22,9 +22,9 @@ import {
 } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { DiscoverAppStateContainer } from './discover_app_state_container';
+import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import { waitFor } from '@testing-library/react';
-import { FetchStatus } from '../../types';
+import { DiscoverCustomizationContext, FetchStatus } from '../../types';
 import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 import { copySavedSearch } from './discover_saved_search_container';
 
@@ -32,6 +32,11 @@ const startSync = (appState: DiscoverAppStateContainer) => {
   const { start, stop } = appState.syncState();
   start();
   return stop;
+};
+
+const customizationContext: DiscoverCustomizationContext = {
+  displayMode: 'standalone',
+  showLogExplorerTabs: false,
 };
 
 async function getState(
@@ -51,6 +56,7 @@ async function getState(
   const nextState = getDiscoverStateContainer({
     services: discoverServiceMock,
     history: nextHistory,
+    customizationContext,
   });
   nextState.appState.isEmptyURL = jest.fn(() => isEmptyUrl ?? true);
   jest.spyOn(nextState.dataState, 'fetch');
@@ -87,9 +93,10 @@ describe('Test discover state', () => {
     state = getDiscoverStateContainer({
       services: discoverServiceMock,
       history,
+      customizationContext,
     });
     state.savedSearchState.set(savedSearchMock);
-    await state.appState.update({}, true);
+    state.appState.update({}, true);
     stopSync = startSync(state.appState);
   });
   afterEach(() => {
@@ -137,7 +144,10 @@ describe('Test discover state', () => {
   test('pauseAutoRefreshInterval sets refreshInterval.pause to true', async () => {
     history.push('/#?_g=(refreshInterval:(pause:!f,value:5000))');
     expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!f,value:5000))');
-    await state.actions.setDataView(dataViewMock);
+    // TODO: state.actions.setDataView should be async because it calls pauseAutoRefreshInterval which is async.
+    // I found this bug while removing unnecessary awaits, but it will need to be fixed in a follow up PR.
+    state.actions.setDataView(dataViewMock);
+    await new Promise(process.nextTick);
     expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!t,value:5000))');
   });
 });
@@ -190,6 +200,7 @@ describe('Test createSearchSessionRestorationDataProvider', () => {
   const discoverStateContainer = getDiscoverStateContainer({
     services: discoverServiceMock,
     history,
+    customizationContext,
   });
   discoverStateContainer.appState.update({
     index: savedSearchMock.searchSource.getField('index')!.id,
@@ -661,9 +672,9 @@ describe('Test discover state actions', () => {
     const { state } = await getState('/', { savedSearch: savedSearchMock });
     const unsubscribe = state.actions.initializeAndSync();
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
-    await state.savedSearchState.update({ nextState: { hideChart: true } });
+    state.savedSearchState.update({ nextState: { hideChart: true } });
     expect(state.savedSearchState.getState().hideChart).toBe(true);
-    await state.actions.onOpenSavedSearch(savedSearchMock.id!);
+    state.actions.onOpenSavedSearch(savedSearchMock.id!);
     expect(state.savedSearchState.getState().hideChart).toBe(undefined);
     unsubscribe();
   });
@@ -756,16 +767,21 @@ describe('Test discover state with embedded mode', () => {
     state = getDiscoverStateContainer({
       services: discoverServiceMock,
       history,
-      mode: 'embedded',
+      customizationContext: {
+        ...customizationContext,
+        displayMode: 'embedded',
+      },
     });
     state.savedSearchState.set(savedSearchMock);
-    await state.appState.update({}, true);
+    state.appState.update({}, true);
     stopSync = startSync(state.appState);
   });
+
   afterEach(() => {
     stopSync();
     stopSync = () => {};
   });
+
   test('setting app state and syncing to URL', async () => {
     state.appState.update({ index: 'modified' });
     await new Promise(process.nextTick);

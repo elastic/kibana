@@ -16,6 +16,7 @@ import type { DiscoverServices } from '../../build_services';
 import type { CustomizationCallback } from '../../customizations';
 import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_services';
 import { LoadingIndicator } from '../common/loading_indicator';
+import type { DiscoverCustomizationContext } from '../../application/types';
 
 export interface DiscoverContainerInternalProps {
   /*
@@ -42,6 +43,11 @@ const discoverContainerWrapperCss = css`
     height: 100%;
   }
 `;
+
+const customizationContext: DiscoverCustomizationContext = {
+  displayMode: 'embedded',
+  showLogExplorerTabs: false,
+};
 
 export const DiscoverContainerInternal = ({
   overrideServices,
@@ -90,7 +96,7 @@ export const DiscoverContainerInternal = ({
         <KibanaContextProvider services={services}>
           <DiscoverMainRoute
             customizationCallbacks={customizationCallbacks}
-            mode="embedded"
+            customizationContext={customizationContext}
             isDev={isDev}
           />
         </KibanaContextProvider>
