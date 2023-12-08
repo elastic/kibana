@@ -33,7 +33,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common']);
   const browser = getService('browser');
   const retry = getService('retry');
-  const security = getService('security');
   const kibanaServer = getService('kibanaServer');
   let INITIAL_CSV_QUOTE_VALUES_SETTING_VALUE: any;
 
@@ -41,8 +40,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     // the suite is flaky on MKI
     this.tags(['failsOnMKI']);
     before(async () => {
-      // We need kibana_admin role in order to update settings
-      await security.testUser.setRoles(['kibana_admin']);
       INITIAL_CSV_QUOTE_VALUES_SETTING_VALUE = await kibanaServer.uiSettings.get('csv:quoteValues');
       // Setting the `csv:quoteValues` setting to its default value
       await kibanaServer.uiSettings.update({
