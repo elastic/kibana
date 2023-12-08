@@ -58,13 +58,13 @@ export const CloudDetailsPanel = ({
   );
   return (
     <OverviewPanel
-      description={i18n.translate('xpack.serverlessSearch.cloudIdDetails.description', {
+      description={i18n.translate('searchApiPanels.cloudIdDetails.description', {
         defaultMessage: 'Get ready to ingest and query your data by choosing a connection option:',
       })}
       leftPanelContent={isPanelLeft ? panelContent : undefined}
       rightPanelContent={isPanelLeft ? undefined : panelContent}
       links={[]}
-      title={i18n.translate('xpack.serverlessSearch.cloudIdDetails.title', {
+      title={i18n.translate('searchApiPanels.cloudIdDetails.title', {
         defaultMessage: 'Copy your connection details',
       })}
       overviewPanelProps={overviewPanelProps}
@@ -79,7 +79,7 @@ export const CloudDetailsPanel = ({
               <EuiTitle size="xxs">
                 <h5>
                   <FormattedMessage
-                    id="xpack.serverlessSearch.cloudIdDetails.elasticsearchEndpoint.title"
+                    id="searchApiPanels.cloudIdDetails.elasticsearchEndpoint.title"
                     defaultMessage="Elasticsearch endpoint"
                   />
                 </h5>
@@ -89,7 +89,7 @@ export const CloudDetailsPanel = ({
               <span>
                 <EuiBadge color="success">
                   <FormattedMessage
-                    id="xpack.serverlessSearch.cloudIdDetails.elasticsearchEndpoint.recommendedBadge"
+                    id="searchApiPanels.cloudIdDetails.elasticsearchEndpoint.recommendedBadge"
                     defaultMessage="Recommended"
                   />
                 </EuiBadge>
@@ -103,7 +103,7 @@ export const CloudDetailsPanel = ({
         <EuiText size="s">
           <p>
             <FormattedMessage
-              id="xpack.serverlessSearch.cloudIdDetails.elasticsearchEndpoint.description"
+              id="searchApiPanels.cloudIdDetails.elasticsearchEndpoint.description"
               defaultMessage="The most common method for establishing an Elasticsearch connection."
             />
           </p>
@@ -118,7 +118,7 @@ export const CloudDetailsPanel = ({
             <EuiTitle size="xxs">
               <h5>
                 <FormattedMessage
-                  id="xpack.serverlessSearch.cloudIdDetails.cloudId.title"
+                  id="searchApiPanels.cloudIdDetails.cloudId.title"
                   defaultMessage="Cloud ID"
                 />
               </h5>
@@ -130,7 +130,7 @@ export const CloudDetailsPanel = ({
           <EuiText size="s">
             <p>
               <FormattedMessage
-                id="xpack.serverlessSearch.cloudIdDetails.cloudId.description"
+                id="searchApiPanels.cloudIdDetails.cloudId.description"
                 defaultMessage="Specific client libraries and connectors can use this unique identifier specific to Elastic Cloud."
               />
             </p>
