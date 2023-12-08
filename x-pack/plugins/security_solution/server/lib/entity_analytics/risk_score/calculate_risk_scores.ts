@@ -27,7 +27,11 @@ import { RiskCategories } from '../../../../common/entity_analytics/risk_engine'
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
-import { applyCriticalityToScore, getCriticalityModifier } from '../asset_criticality/helpers';
+import {
+  applyCriticalityToScore,
+  getCriticalityModifier,
+  normalize,
+} from '../asset_criticality/helpers';
 import { getAfterKeyForIdentifierType, getFieldForIdentifierAgg } from './helpers';
 import {
   buildCategoryCountDeclarations,
@@ -66,7 +70,7 @@ const formatForResponse = ({
 }): RiskScore => {
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
   const normalizedScoreWithCriticality = applyCriticalityToScore({
-    score: bucket.risk_details.value.normalized_score,
+    score: bucket.risk_details.value.normalized_score, // TODO investigate whether normalization can be done in memory with negligible overhead
     modifier: criticalityModifier,
   });
   const categoryFiveScore =
@@ -82,7 +86,10 @@ const formatForResponse = ({
     calculated_level: bucket.risk_details.value.level, // TODO calculate new level based on post-criticality score
     calculated_score: bucket.risk_details.value.score,
     calculated_score_norm: normalizedScoreWithCriticality,
-    category_1_score: bucket.risk_details.value.category_1_score,
+    category_1_score: normalize({
+      number: bucket.risk_details.value.category_1_score,
+      max: RISK_SCORING_SUM_MAX,
+    }),
     category_1_count: bucket.risk_details.value.category_1_count,
     category_5_score: categoryFiveScore,
     category_5_count: categoryFiveCount,
