@@ -296,6 +296,9 @@
                 "$ref": "#/components/schemas/run_connector_request"
               },
               "examples": {
+                "runCasesWebhookConnectorRequest": {
+                  "$ref": "#/components/examples/run_cases_webhook_connector_request"
+                },
                 "runEmailConnectorRequest": {
                   "$ref": "#/components/examples/run_email_connector_request"
                 },
@@ -364,6 +367,9 @@
                   }
                 },
                 "examples": {
+                  "runCasesWebhookConnectorResponse": {
+                    "$ref": "#/components/examples/run_cases_webhook_connector_response"
+                  },
                   "runEmailConnectorResponse": {
                     "$ref": "#/components/examples/run_email_connector_response"
                   },
@@ -5619,7 +5625,7 @@
           "subAction",
           "subActionParams"
         ],
-        "description": "The `pushToService` subaction for Jira, ServiceNow ITSM, ServiceNow SecOps, and Swimlane connectors.",
+        "description": "The `pushToService` subaction for Jira, ServiceNow ITSM, ServiceNow SecOps, Swimlane, and Webhook - Case Management connectors.",
         "properties": {
           "subAction": {
             "type": "string",
@@ -5679,7 +5685,7 @@
                   },
                   "description": {
                     "type": "string",
-                    "description": "The description of the incident for Jira, ServiceNow ITSM, ServiceNow SecOps, and Swimlane connectors."
+                    "description": "The description of the incident for Jira, ServiceNow ITSM, ServiceNow SecOps, Swimlane, and Webhook - Case Management connectors."
                   },
                   "dest_ip": {
                     "description": "A list of destination IP addresses related to the security incident for ServiceNow SecOps connectors. The IPs are added as observables to the security incident.\n",
@@ -5698,6 +5704,10 @@
                   "externalId": {
                     "type": "string",
                     "description": "The Jira, ServiceNow ITSM, or ServiceNow SecOps issue identifier. If present, the incident is updated. Otherwise, a new incident is created.\n"
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "The external case identifier for Webhook - Case Management connectors."
                   },
                   "impact": {
                     "type": "string",
@@ -5777,6 +5787,10 @@
                       }
                     ]
                   },
+                  "status": {
+                    "type": "string",
+                    "description": "The status of the incident for Webhook - Case Management connectors."
+                  },
                   "subcategory": {
                     "type": "string",
                     "description": "The subcategory of the incident for ServiceNow ITSM and ServiceNow SecOps connectors."
@@ -5785,9 +5799,16 @@
                     "type": "string",
                     "description": "A summary of the incident for Jira connectors."
                   },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "A list of tags for Webhook - Case Management connectors."
+                  },
                   "title": {
                     "type": "string",
-                    "description": "A title for the incident for Jira connectors. It is used for searching the contents of the knowledge base.\n"
+                    "description": "A title for the incident for Jira and Webhook - Case Management connectors. It is used for searching the contents of the knowledge base.\n"
                   },
                   "urgency": {
                     "type": "string",
@@ -6105,6 +6126,33 @@
           }
         }
       },
+      "run_cases_webhook_connector_request": {
+        "summary": "Run a Webhook - Case Management connector to create a case.",
+        "value": {
+          "params": {
+            "subAction": "pushToService",
+            "subActionParams": {
+              "comments": [
+                {
+                  "commentId": 1,
+                  "comment": "A comment about the incident."
+                }
+              ],
+              "incident": {
+                "title": "Case title",
+                "description": "Description of the incident.",
+                "tags": [
+                  "tag1",
+                  "tag2"
+                ],
+                "severity": "low",
+                "status": "open",
+                "id": "caseID"
+              }
+            }
+          }
+        }
+      },
       "run_email_connector_request": {
         "summary": "Send an email message from an email connector.",
         "value": {
@@ -6206,6 +6254,25 @@
               }
             }
           }
+        }
+      },
+      "run_cases_webhook_connector_response": {
+        "summary": "Response from a pushToService action for a Webhook - Case Management connector.",
+        "value": {
+          "connector_id": "1824b5b8-c005-4dcc-adac-57f92db46459",
+          "data": {
+            "id": 100665,
+            "title": "TEST-29034",
+            "url": "https://example.com/browse/TEST-29034",
+            "pushedDate": "2023-12-05T19:43:36.360Z",
+            "comments": [
+              {
+                "commentId": 1,
+                "pushedDate": "2023-12-05T19:43:36.360Z"
+              }
+            ]
+          },
+          "status": "ok"
         }
       },
       "run_email_connector_response": {
