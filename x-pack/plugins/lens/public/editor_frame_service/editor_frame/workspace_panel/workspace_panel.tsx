@@ -12,12 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiText,
-  EuiButtonEmpty,
-  EuiLink,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiText, EuiButtonEmpty, EuiLink, EuiTextColor } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart, ExecutionContextSearch } from '@kbn/data-plugin/public';
 import type {
@@ -731,9 +726,12 @@ export const VisualizationWrapper = ({
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
   if (errors.length) {
-    const configurationErrorTitle = i18n.translate('xpack.lens.editorFrame.configurationFailureErrors', {
-      defaultMessage: `A configuration error occurred`,
-    });
+    const configurationErrorTitle = i18n.translate(
+      'xpack.lens.editorFrame.configurationFailureErrors',
+      {
+        defaultMessage: `A configuration error occurred`,
+      }
+    );
     return (
       <div
         data-shared-items-container
@@ -741,10 +739,7 @@ export const VisualizationWrapper = ({
         data-shared-item=""
         data-render-error={configurationErrorTitle}
       >
-        <PaginatedErrors
-          errors={errors}
-          title={configurationErrorTitle}
-        />
+        <PaginatedErrors errors={errors} title={configurationErrorTitle} />
       </div>
     );
   }
@@ -759,11 +754,7 @@ export const VisualizationWrapper = ({
       data-shared-items-container
       data-render-complete={isRenderComplete}
       data-shared-item=""
-      data-render-error={
-        hasDynamicError
-          ? dataLoadingErrorTitle
-          : undefined
-      }
+      data-render-error={hasDynamicError ? dataLoadingErrorTitle : undefined}
       ref={nodeRef}
     >
       <ExpressionRendererComponent
@@ -791,12 +782,7 @@ export const VisualizationWrapper = ({
             setDynamicError(true);
           }
 
-          return (
-            <PaginatedErrors
-              errors={visibleErrorMessages}
-              title={dataLoadingErrorTitle}
-            />
-          );
+          return <PaginatedErrors errors={visibleErrorMessages} title={dataLoadingErrorTitle} />;
         }}
       />
     </div>

@@ -6,12 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPagination,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import type { UserMessage } from '../../../types';
 
 interface Props {
@@ -22,34 +17,27 @@ interface Props {
 export function PaginatedErrors(props: Props) {
   const [activePage, setActivePage] = useState(0);
 
-  const activeError = props.errors.length ? props.errors[activePage] : ''
+  const activeError = props.errors.length ? props.errors[activePage] : '';
 
   return (
     <EuiEmptyPrompt
-      actions={props.errors.length > 1 
-        ? <EuiFlexGroup justifyContent="spaceAround">
+      actions={
+        props.errors.length > 1 ? (
+          <EuiFlexGroup justifyContent="spaceAround">
             <EuiFlexItem grow={false}>
               <EuiPagination
-                pageCount={props.errors.length }
+                pageCount={props.errors.length}
                 activePage={activePage}
                 onPageClick={setActivePage}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        : []
+        ) : (
+          []
+        )
       }
-      body={
-        <div>
-          {typeof activeError === 'string' 
-            ? activeError 
-            : activeError.longMessage}
-        </div>
-      }
-      title={
-        <h2>
-          {props.title}
-        </h2>
-      }
+      body={<div>{typeof activeError === 'string' ? activeError : activeError.longMessage}</div>}
+      title={<h2>{props.title}</h2>}
       iconColor="danger"
       iconType="warning"
     />
