@@ -197,6 +197,12 @@ describe('Timelines', (): void => {
 
       createTimeline();
       addNameToTimelineAndSave('First');
+
+      // Offsetting the extra save that is happening in the background
+      // for the saved search object.
+      cy.get(LOADING_INDICATOR).should('be.visible');
+      cy.get(LOADING_INDICATOR).should('not.exist');
+
       addNameToTimelineAndSaveAsNew('Second');
       closeTimeline();
 
