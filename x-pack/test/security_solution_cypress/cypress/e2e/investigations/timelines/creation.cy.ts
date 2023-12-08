@@ -150,6 +150,9 @@ describe('Timelines', (): void => {
   describe('shows the different timeline states', { tags: ['@ess', '@serverless'] }, () => {
     before(() => {
       login();
+    });
+
+    beforeEach(() => {
       deleteTimelines();
       visitWithTimeRange(TIMELINES_URL);
     });
@@ -188,6 +191,9 @@ describe('Timelines', (): void => {
   describe('saves timeline as new', { tags: ['@ess', '@serverless'] }, () => {
     before(() => {
       login();
+    });
+
+    beforeEach(() => {
       deleteTimelines();
       visitWithTimeRange(TIMELINES_URL);
     });
