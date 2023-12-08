@@ -48,7 +48,7 @@ export const buildDataPaths = (): string[] => {
   try {
     configDataPath = getConfigFromFiles([getConfigPath()])?.path?.data;
   } catch (e) {
-    // Config not available, skip
+    // Config not available, skip - undefined will allow for fall-through to defaults
   }
 
   const argv = process.argv.slice(2);
