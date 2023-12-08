@@ -11,7 +11,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
-import { getSearchErrorOverrideDisplay } from '@kbn/data-plugin/public';
+import { renderSearchError } from '@kbn/search-errors';
 
 import { usePanelTitle } from '@kbn/presentation-publishing';
 import { Subscription } from 'rxjs';
@@ -63,12 +63,12 @@ export const PresentationPanelError = ({ api, error }: EmbeddablePanelErrorProps
     };
   }, [api]);
 
-  const overrideDisplay = getSearchErrorOverrideDisplay({
+  const searchErrorDisplay = renderSearchError({
     error,
     application: core.application,
   });
 
-  const actions = overrideDisplay?.actions ?? [];
+  const actions = searchErrorDisplay?.actions ?? [];
   if (isEditable) {
     actions.push(
       <EuiButtonEmpty aria-label={ariaLabel} onClick={handleErrorClick} size="s">
@@ -80,7 +80,7 @@ export const PresentationPanelError = ({ api, error }: EmbeddablePanelErrorProps
   return (
     <EuiEmptyPrompt
       body={
-        overrideDisplay?.body ?? (
+        searchErrorDisplay?.body ?? (
           <EuiText size="s">
             <Markdown
               markdown={error.message}

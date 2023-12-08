@@ -21,7 +21,7 @@ export async function getLatestApmPackage({
     APM_PACKAGE_NAME
   );
   const packageInfo =
-    'buffer' in latestPackage
+    'getBuffer' in latestPackage
       ? (await packageClient.readBundledPackage(latestPackage)).packageInfo
       : latestPackage;
   const {

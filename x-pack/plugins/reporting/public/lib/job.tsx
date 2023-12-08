@@ -32,6 +32,8 @@ type ReportPayload = ReportSource['payload'];
  * It can be instantiated with ReportApiJSON: the response data format for the report job APIs
  */
 export class Job {
+  public readonly payload: Omit<ReportPayload, 'headers'>;
+
   public readonly id: JobId;
   public readonly index: string;
 
@@ -73,6 +75,8 @@ export class Job {
     this.id = report.id;
     this.index = report.index;
 
+    this.payload = report.payload;
+
     this.jobtype = report.jobtype;
     this.objectType = report.payload.objectType;
     this.title = report.payload.title;
@@ -103,6 +107,10 @@ export class Job {
     this.metrics = report.metrics;
     this.queue_time_ms = report.queue_time_ms;
     this.execution_time_ms = report.execution_time_ms;
+  }
+
+  public isSearch() {
+    return this.objectType === 'search';
   }
 
   getStatusMessage() {

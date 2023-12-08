@@ -27,15 +27,15 @@ export const getTopNavLinks = ({
   services,
   state,
   onOpenInspector,
-  isPlainRecord,
+  isTextBased,
   adHocDataViews,
   topNavCustomization,
 }: {
-  dataView: DataView;
+  dataView: DataView | undefined;
   services: DiscoverServices;
   state: DiscoverStateContainer;
   onOpenInspector: () => void;
-  isPlainRecord: boolean;
+  isTextBased: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
 }): TopNavMenuData[] => {
@@ -53,7 +53,7 @@ export const getTopNavLinks = ({
         services,
         stateContainer: state,
         adHocDataViews,
-        isPlainRecord,
+        isPlainRecord: isTextBased,
       });
     },
     testId: 'discoverAlertsButton',
@@ -126,7 +126,7 @@ export const getTopNavLinks = ({
         savedSearch.searchSource,
         state.appState.getState(),
         services,
-        isPlainRecord
+        isTextBased
       );
 
       const { locator } = services;

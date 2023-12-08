@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { safeLoad } from 'js-yaml';
 
 import {
   EuiFlyout,
@@ -31,14 +32,23 @@ import {
   EuiBetaBadge,
   useEuiTheme,
   EuiText,
+  EuiAccordion,
+  EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
 
+import type { OutputType, ValueOf } from '../../../../../../../common/types';
+
+import {
+  outputTypeSupportPresets,
+  outputYmlIncludesReservedPerformanceKey,
+} from '../../../../../../../common/services/output_helpers';
+
 import { ExperimentalFeaturesService } from '../../../../../../services';
 
-import { outputType } from '../../../../../../../common/constants';
+import { outputType, RESERVED_CONFIG_YML_KEYS } from '../../../../../../../common/constants';
 
 import { MultiRowInput } from '../multi_row_input';
 import type { Output, FleetProxy } from '../../../../types';
@@ -87,7 +97,13 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const { kafkaOutput: isKafkaOutputEnabled, remoteESOutput: isRemoteESOutputEnabled } =
     ExperimentalFeaturesService.get();
+
   const isRemoteESOutput = inputs.typeInput.value === outputType.RemoteElasticsearch;
+  const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
+  const supportsPresets = inputs.typeInput.value
+    ? outputTypeSupportPresets(inputs.typeInput.value as ValueOf<OutputType>)
+    : false;
+
   // Remote ES output not yet supported in serverless
   const isStateful = !cloud?.isServerlessEnabled;
 
@@ -211,6 +227,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             })}
             {...inputs.sslKeySecretInput.formRowProps}
             onUsePlainText={onUsePlainText}
+            cancelEdit={inputs.sslKeySecretInput.cancelEdit}
           >
             <EuiTextArea
               fullWidth
@@ -312,7 +329,6 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   };
 
   const renderTypeSpecificWarning = () => {
-    const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
     const isKafkaOutput = inputs.typeInput.value === outputType.Kafka;
     if (!isKafkaOutput && !isESOutput && !isRemoteESOutput) {
       return null;
@@ -507,30 +523,6 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               />
             </EuiFormRow>
           )}
-          <EuiFormRow
-            label={
-              <EuiLink href={docLinks.links.fleet.esSettings} external target="_blank">
-                {i18n.translate('xpack.fleet.settings.editOutputFlyout.yamlConfigInputLabel', {
-                  defaultMessage: 'Advanced YAML configuration',
-                })}
-              </EuiLink>
-            }
-            {...inputs.additionalYamlConfigInput.formRowProps}
-            fullWidth
-          >
-            <YamlCodeEditorWithPlaceholder
-              value={inputs.additionalYamlConfigInput.value}
-              onChange={inputs.additionalYamlConfigInput.setValue}
-              disabled={inputs.additionalYamlConfigInput.props.disabled}
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.yamlConfigInputPlaceholder',
-                {
-                  defaultMessage:
-                    '# YAML settings here will be added to the output section of each agent policy.',
-                }
-              )}
-            />
-          </EuiFormRow>
           <EuiFormRow fullWidth {...inputs.defaultOutputInput.formRowProps}>
             <EuiSwitch
               {...inputs.defaultOutputInput.props}
@@ -574,7 +566,112 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               }
             />
           </EuiFormRow>
+          {supportsPresets && (
+            <>
+              <EuiSpacer size="l" />
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.performanceTuningLabel"
+                    defaultMessage="Performance tuning"
+                  />
+                }
+              >
+                <>
+                  <EuiSelect
+                    data-test-subj="settingsOutputsFlyout.presetInput"
+                    {...inputs.presetInput.props}
+                    onChange={(e) => inputs.presetInput.setValue(e.target.value)}
+                    disabled={
+                      inputs.presetInput.props.disabled ||
+                      outputYmlIncludesReservedPerformanceKey(
+                        inputs.additionalYamlConfigInput.value,
+                        safeLoad
+                      )
+                    }
+                    options={[
+                      { value: 'balanced', text: 'Balanced' },
+                      { value: 'custom', text: 'Custom' },
+                      { value: 'throughput', text: 'Throughput' },
+                      { value: 'scale', text: 'Scale' },
+                      { value: 'latency', text: 'Latency' },
+                    ]}
+                  />
+                </>
+              </EuiFormRow>
+            </>
+          )}
+
+          {supportsPresets &&
+            outputYmlIncludesReservedPerformanceKey(
+              inputs.additionalYamlConfigInput.value,
+              safeLoad
+            ) && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut
+                  color="warning"
+                  iconType="alert"
+                  size="s"
+                  title={
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.performanceTuningMustBeCustomWarning"
+                      defaultMessage='Performance tuning preset must be "Custom" due to presence of reserved key in advanced YAML configuration'
+                    />
+                  }
+                >
+                  <EuiAccordion
+                    id="performanceTuningMustBeCustomWarningDetails"
+                    buttonContent={
+                      <FormattedMessage
+                        id="xpack.fleet.settings.editOutputFlyout.performanceTuningMustBeCustomWarningDetails"
+                        defaultMessage="Show reserved keys"
+                      />
+                    }
+                  >
+                    <ul>
+                      {RESERVED_CONFIG_YML_KEYS.map((key) => (
+                        <li key={key}>
+                          <EuiCode>{key}</EuiCode>
+                        </li>
+                      ))}
+                    </ul>
+                  </EuiAccordion>
+                </EuiCallOut>
+              </>
+            )}
+
           <EuiSpacer size="l" />
+          <EuiFormRow
+            label={
+              <EuiLink href={docLinks.links.fleet.esSettings} external target="_blank">
+                {i18n.translate('xpack.fleet.settings.editOutputFlyout.yamlConfigInputLabel', {
+                  defaultMessage: 'Advanced YAML configuration',
+                })}
+              </EuiLink>
+            }
+            {...inputs.additionalYamlConfigInput.formRowProps}
+            fullWidth
+          >
+            <YamlCodeEditorWithPlaceholder
+              value={inputs.additionalYamlConfigInput.value}
+              onChange={(value) => {
+                if (outputYmlIncludesReservedPerformanceKey(value, safeLoad)) {
+                  inputs.presetInput.setValue('custom');
+                }
+
+                inputs.additionalYamlConfigInput.setValue(value);
+              }}
+              disabled={inputs.additionalYamlConfigInput.props.disabled}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.yamlConfigInputPlaceholder',
+                {
+                  defaultMessage:
+                    '# YAML settings here will be added to the output section of each agent policy.',
+                }
+              )}
+            />
+          </EuiFormRow>
           <AdvancedOptionsSection enabled={form.isShipperEnabled} inputs={inputs} />
         </EuiForm>
         {output?.id && output.type === 'remote_elasticsearch' ? (

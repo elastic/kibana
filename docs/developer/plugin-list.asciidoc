@@ -28,6 +28,14 @@ allowing users to configure their advanced settings, also known
 as uiSettings within the code.
 
 
+|{kib-repo}blob/{branch}/src/plugins/ai_assistant_management/observability/README.md[aiAssistantManagementObservability]
+|The aiAssistantManagementObservability plugin manages the Ai Assistant for Observability management section.
+
+
+|{kib-repo}blob/{branch}/src/plugins/ai_assistant_management/selection/README.md[aiAssistantManagementSelection]
+|The aiAssistantManagementSelection plugin manages the Ai Assistant management section.
+
+
 |{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
 |bfetch allows to batch HTTP requests and streams responses back.
 
