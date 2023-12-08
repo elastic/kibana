@@ -66,7 +66,7 @@ export const AttachmentRequestRt = rt.union([
   AlertAttachmentPayloadRt,
   rt.strict({
     type: rt.literal(AttachmentType.actions),
-    comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
+    comment: limitedStringSchema({ fieldName: 'comment', max: MAX_COMMENT_LENGTH }),
     actions: rt.strict({
       targets: rt.array(
         rt.strict({
