@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import dateMath from '@kbn/datemath';
 
 const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
   validate: (value) => {
@@ -26,7 +27,10 @@ const RuleSchema = schema.object({
   /**
    * TODO: Verify limits
    */
-  tags: schema.arrayOf(schema.string({ minLength: 1, maxLength: 50 }), { minSize: 0, maxSize: 10 }),
+  tags: schema.arrayOf(schema.string({ minLength: 1, maxLength: 50 }), {
+    minSize: 0,
+    maxSize: 10,
+  }),
   ruleUrl: schema.nullable(schema.string()),
 });
 
@@ -42,4 +46,29 @@ export const CasesConnectorRunParamsSchema = schema.object({
   groupingBy: GroupingSchema,
   owner: schema.string(),
   rule: RuleSchema,
+  timeWindow: schema.string({
+    defaultValue: '7d',
+    validate: (value) => {
+      /**
+       * Validates the time window.
+       * Acceptable format:
+       * - First character should be a digit from 1 to 9
+       * - All next characters should be a digit from 0 to 9
+       * - The last character should be d (day) or w (week) or M (month) or Y (year)
+       *
+       * Example: 20d, 2w, 1M, etc
+       */
+      const timeWindowRegex = new RegExp(/^[1-9][0-9]*[d,w,M,y]$/, 'g');
+
+      if (!timeWindowRegex.test(value)) {
+        return 'Not a valid time window';
+      }
+
+      const date = dateMath.parse(`now-${value}`);
+
+      if (!date || !date.isValid()) {
+        return 'Not a valid time window';
+      }
+    },
+  }),
 });

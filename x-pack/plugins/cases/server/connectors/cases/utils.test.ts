@@ -6,7 +6,7 @@
  */
 
 import { oracleRecordError, oracleRecord } from './index.mock';
-import { isRecordError, partitionRecords } from './utils';
+import { isRecordError, partitionRecordsByError } from './utils';
 
 describe('utils', () => {
   describe('isRecordError', () => {
@@ -24,10 +24,10 @@ describe('utils', () => {
     });
   });
 
-  describe('partitionRecords', () => {
+  describe('partitionRecordsByError', () => {
     it('partition records correctly', () => {
       expect(
-        partitionRecords([oracleRecordError, oracleRecord, oracleRecordError, oracleRecord])
+        partitionRecordsByError([oracleRecordError, oracleRecord, oracleRecordError, oracleRecord])
       ).toEqual([
         [oracleRecord, oracleRecord],
         [oracleRecordError, oracleRecordError],
