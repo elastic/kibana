@@ -6,47 +6,27 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { Disclaimer } from './disclaimer';
+import { WelcomeMessage } from './welcome_message';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 
 const incorrectLicenseContainer = css`
-  height: 100%;
-  padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingMedium};
+  min-height: 100%;
 `;
 
 export function ChatWelcomePanel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   return (
-    <EuiPanel hasBorder={false} hasShadow={false}>
-      <EuiFlexGroup
-        direction="column"
-        alignItems="center"
-        justifyContent="center"
-        className={incorrectLicenseContainer}
-      >
-        <Disclaimer />
-
-        {!knowledgeBase.status.value?.ready ? (
-          <EuiButton
-            data-test-subj="observabilityAiAssistantChatWelcomePanelSetUpKnowledgeBaseButton"
-            color="primary"
-            fill
-            iconType={knowledgeBase.status.value?.ready ? 'checkInCircleFilled' : 'dotInCircle'}
-            isLoading={knowledgeBase.isInstalling || knowledgeBase.status.loading}
-            onClick={knowledgeBase.install}
-          >
-            {i18n.translate(
-              'xpack.observabilityAiAssistant.chatWelcomePanel.knowledgeBase.buttonLabel.notInstalledYet',
-              {
-                defaultMessage: 'Set up knowledge base',
-              }
-            )}
-          </EuiButton>
-        ) : null}
-      </EuiFlexGroup>
-    </EuiPanel>
+    <EuiFlexGroup
+      alignItems="center"
+      className={incorrectLicenseContainer}
+      direction="column"
+      gutterSize="none"
+      justifyContent="center"
+    >
+      <EuiFlexItem>
+        <WelcomeMessage setup knowledgeBase={knowledgeBase} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

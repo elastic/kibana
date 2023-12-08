@@ -105,46 +105,44 @@ export function ChatTimeline({
     return consolidatedChatItems;
   }, [chatService, hasConnector, messages, currentUser, startedFrom, chatState]);
 
-  return (
+  return items.length <= 1 ? (
+    <ChatWelcomePanel knowledgeBase={knowledgeBase} />
+  ) : (
     <EuiCommentList
       css={css`
         padding-bottom: 32px;
       `}
     >
-      {items.length <= 1 ? (
-        <ChatWelcomePanel knowledgeBase={knowledgeBase} />
-      ) : (
-        items.map((item, index) => {
-          return Array.isArray(item) ? (
-            <ChatConsolidatedItems
-              key={index}
-              consolidatedItem={item}
-              onFeedback={onFeedback}
-              onRegenerate={onRegenerate}
-              onEditSubmit={onEdit}
-              onStopGenerating={onStopGenerating}
-              onActionClick={onActionClick}
-            />
-          ) : (
-            <ChatItem
-              // use index, not id to prevent unmounting of component when message is persisted
-              key={index}
-              {...item}
-              onFeedbackClick={(feedback) => {
-                onFeedback(item.message, feedback);
-              }}
-              onRegenerateClick={() => {
-                onRegenerate(item.message);
-              }}
-              onEditSubmit={(message) => {
-                onEdit(item.message, message);
-              }}
-              onStopGeneratingClick={onStopGenerating}
-              onActionClick={onActionClick}
-            />
-          );
-        })
-      )}
+      {items.map((item, index) => {
+        return Array.isArray(item) ? (
+          <ChatConsolidatedItems
+            key={index}
+            consolidatedItem={item}
+            onFeedback={onFeedback}
+            onRegenerate={onRegenerate}
+            onEditSubmit={onEdit}
+            onStopGenerating={onStopGenerating}
+            onActionClick={onActionClick}
+          />
+        ) : (
+          <ChatItem
+            // use index, not id to prevent unmounting of component when message is persisted
+            key={index}
+            {...item}
+            onFeedbackClick={(feedback) => {
+              onFeedback(item.message, feedback);
+            }}
+            onRegenerateClick={() => {
+              onRegenerate(item.message);
+            }}
+            onEditSubmit={(message) => {
+              onEdit(item.message, message);
+            }}
+            onStopGeneratingClick={onStopGenerating}
+            onActionClick={onActionClick}
+          />
+        );
+      })}
     </EuiCommentList>
   );
 }

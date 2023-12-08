@@ -275,6 +275,7 @@ export class KnowledgeBaseService {
       const elserModelStats = modelStats.trained_model_stats[0];
       const deploymentState = elserModelStats.deployment_stats?.state;
       const allocationState = elserModelStats.deployment_stats?.allocation_status.state;
+
       return {
         ready: deploymentState === 'started' && allocationState === 'fully_allocated',
         deployment_state: deploymentState,

@@ -75,8 +75,6 @@ export function ChatBody({
   startedFrom?: StartedFrom;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
 }) {
-  const { analytics } = useKibana().services;
-
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
 
@@ -193,15 +191,20 @@ export function ChatBody({
         connectors={connectors}
         connectorsManagementHref={connectorsManagementHref}
         knowledgeBase={knowledgeBase}
-        startedFrom={startedFrom}
       />
     );
   } else {
     footer = (
       <>
         <EuiFlexItem grow className={timelineClassName}>
-          <div ref={timelineContainerRef}>
-            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+          <div ref={timelineContainerRef} style={{ height: '100%' }}>
+            <EuiPanel
+              grow
+              hasBorder={false}
+              hasShadow={false}
+              paddingSize="m"
+              style={{ height: '100%' }}
+            >
               <ChatTimeline
                 startedFrom={startedFrom}
                 messages={messages}

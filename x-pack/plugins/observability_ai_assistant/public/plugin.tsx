@@ -73,8 +73,6 @@ export class ObservabilityAIAssistantPlugin
           coreSetup.getStartServices(),
         ]);
 
-        coreSetup.analytics.registerEventType<MessageFeedback>(MESSAGE_FEEDBACK_SCHEMA);
-
         ReactDOM.render(
           <Application
             {...appMountParameters}
