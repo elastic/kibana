@@ -1119,12 +1119,11 @@ export class Embeddable
               style={input.style}
               executionContext={this.getExecutionContext()}
               addUserMessages={(messages) => this.addUserMessages(messages)}
-              onRuntimeError={(message) => {
-                this.updateOutput({ error: new Error(message) });
+              onRuntimeError={(error) => {
+                this.updateOutput({ error });
                 this.logError('runtime');
               }}
               noPadding={this.visDisplayOptions.noPadding}
-              docLinks={this.deps.coreStart.docLinks}
             />
           </KibanaThemeProvider>
           <MessagesBadge

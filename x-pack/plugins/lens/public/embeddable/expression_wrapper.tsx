@@ -42,11 +42,10 @@ export interface ExpressionWrapperProps {
   style?: React.CSSProperties;
   className?: string;
   addUserMessages: AddUserMessages;
-  onRuntimeError: (message?: string) => void;
+  onRuntimeError: (error: Error) => void;
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
-  docLinks: CoreStart['docLinks'];
 }
 
 export function ExpressionWrapper({
@@ -72,7 +71,6 @@ export function ExpressionWrapper({
   executionContext,
   lensInspector,
   noPadding,
-  docLinks,
 }: ExpressionWrapperProps) {
   if (!expression) return null;
   return (
@@ -95,9 +93,9 @@ export function ExpressionWrapper({
           syncCursor={syncCursor}
           executionContext={executionContext}
           renderError={(errorMessage, error) => {
-            const messages = getOriginalRequestErrorMessages(error || null, docLinks);
+            const messages = getOriginalRequestErrorMessages(error || null);
             addUserMessages(messages);
-            onRuntimeError(messages[0].shortMessage ?? (errorMessage || ''));
+            onRuntimeError(error.original ? error.original : error);
 
             return <></>; // the embeddable will take care of displaying the messages
           }}
