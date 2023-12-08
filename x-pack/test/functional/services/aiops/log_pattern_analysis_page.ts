@@ -237,8 +237,6 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
 
     async setRandomSamplingOption(option: RandomSamplerOption) {
       await retry.tryForTime(20000, async () => {
-        // escape popover
-        await browser.pressKeys(browser.keys.ESCAPE);
         await testSubjects.existOrFail('aiopsLogPatternAnalysisShowSamplingOptionsButton');
         await testSubjects.clickWhenNotDisabled('aiopsLogPatternAnalysisShowSamplingOptionsButton');
 
