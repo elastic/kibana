@@ -173,7 +173,10 @@ export const ControlEditor = ({
   const CompatibleControlTypesComponent = useMemo(() => {
     const allDataControlTypes = getControlTypes().filter((type) => type !== TIME_SLIDER_CONTROL);
     return (
-      <EuiKeyPadMenu data-test-subj={`controlTypeMenu`}>
+      <EuiKeyPadMenu
+        data-test-subj={`controlTypeMenu`}
+        aria-label={ControlGroupStrings.manageControl.dataSource.getControlTypeTitle()}
+      >
         {allDataControlTypes.map((controlType) => {
           const factory = getControlFactory(controlType);
 
@@ -184,6 +187,7 @@ export const ControlEditor = ({
           const keyPadMenuItem = (
             <EuiKeyPadMenuItem
               key={controlType}
+              aria-label={factory.getDisplayName()}
               data-test-subj={`create__${controlType}`}
               isSelected={controlType === selectedControlType}
               disabled={disabled}

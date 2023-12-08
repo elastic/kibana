@@ -36,6 +36,7 @@ export const OptionsListPopoverEmptyMessage = ({
 
   return (
     <EuiSelectableMessage
+      tabIndex={0}
       data-test-subj={`optionsList-control-${
         showOnlySelected ? 'selectionsEmptyMessage' : 'noSelectionsMessage'
       }`}
