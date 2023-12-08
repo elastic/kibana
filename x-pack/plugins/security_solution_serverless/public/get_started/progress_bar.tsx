@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { css } from '@emotion/react';
 import type { ProductTier } from '../../common/product';
 
 import { PROGRESS_TRACKER_LABEL } from './translations';
+import { useProgressBarStyles } from './styles/progress_bar.style';
 
 const ProgressComponent: React.FC<{
   productTier: ProductTier | undefined;
@@ -19,7 +19,7 @@ const ProgressComponent: React.FC<{
 }> = ({ productTier, totalActiveSteps, totalStepsLeft }) => {
   const stepsDone =
     totalActiveSteps != null && totalStepsLeft != null ? totalActiveSteps - totalStepsLeft : null;
-  const { euiTheme } = useEuiTheme();
+  const { textStyle } = useProgressBarStyles();
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -31,19 +31,11 @@ const ProgressComponent: React.FC<{
             size="m"
             label={
               <span>
-                <span
-                  css={css`
-                    font-size: 10.5px;
-                    font-weight: ${euiTheme.font.weight.bold}}};
-                    text-transform: uppercase;
-                  `}
-                >
-                  {PROGRESS_TRACKER_LABEL}
-                </span>
+                <span css={textStyle}>{PROGRESS_TRACKER_LABEL}</span>
                 <EuiSpacer size="s" />
               </span>
             }
-            valueText={<>{`${stepsDone}/${totalActiveSteps}`}</>}
+            valueText={<span css={textStyle}>{`${stepsDone}/${totalActiveSteps}`}</span>}
           />
         </EuiFlexItem>
       )}
