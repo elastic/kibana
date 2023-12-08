@@ -117,7 +117,7 @@ const userActionsStats = {
   totalOtherActions: 11,
 };
 
-describe.only('CaseViewPage', () => {
+describe('CaseViewPage', () => {
   const updateCaseProperty = defaultUpdateCaseState.mutate;
   const pushCaseToExternalService = jest.fn();
   const caseConnectors = getCaseConnectorsMockResponse();
