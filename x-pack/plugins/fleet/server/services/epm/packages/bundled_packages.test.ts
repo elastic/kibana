@@ -7,6 +7,8 @@
 
 import fs from 'fs/promises';
 
+import { omit } from 'lodash';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { appContextService } from '../../app_context';
@@ -16,7 +18,6 @@ import {
   getBundledPackages,
   _purgeBundledPackagesCache,
 } from './bundled_packages';
-import { omit } from 'lodash';
 
 jest.mock('fs/promises');
 jest.mock('../../app_context');
