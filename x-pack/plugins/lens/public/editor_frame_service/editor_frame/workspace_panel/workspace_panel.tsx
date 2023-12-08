@@ -74,7 +74,7 @@ import {
 import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField, DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
-import { PaginatedErrors } from './paginated_errors';
+import { WorkspaceErrors } from './workspace_errors';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -739,7 +739,7 @@ export const VisualizationWrapper = ({
         data-shared-item=""
         data-render-error={configurationErrorTitle}
       >
-        <PaginatedErrors errors={errors} title={configurationErrorTitle} />
+        <WorkspaceErrors errors={errors} title={configurationErrorTitle} />
       </div>
     );
   }
@@ -782,7 +782,7 @@ export const VisualizationWrapper = ({
             setDynamicError(true);
           }
 
-          return <PaginatedErrors errors={visibleErrorMessages} title={dataLoadingErrorTitle} />;
+          return <WorkspaceErrors errors={visibleErrorMessages} title={dataLoadingErrorTitle} />;
         }}
       />
     </div>

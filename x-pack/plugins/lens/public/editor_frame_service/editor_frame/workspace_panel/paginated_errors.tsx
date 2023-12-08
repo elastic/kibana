@@ -14,7 +14,7 @@ interface Props {
   title: string;
 }
 
-export function PaginatedErrors(props: Props) {
+export function WorkspaceErrors(props: Props) {
   const [activePage, setActivePage] = useState(0);
 
   const activeError = props.errors.length ? props.errors[activePage] : '';
