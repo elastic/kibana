@@ -25,11 +25,7 @@ export class EsError extends Error {
   public readonly attributes: IEsError['attributes'];
   private readonly openInInspector: () => void;
 
-  constructor(
-    err: IEsError,
-    message: string,
-    openInInspector: () => void,
-  ) {
+  constructor(err: IEsError, message: string, openInInspector: () => void) {
     super(message);
     this.attributes = err.attributes;
     this.openInInspector = openInInspector;

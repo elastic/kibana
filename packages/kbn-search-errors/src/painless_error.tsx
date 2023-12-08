@@ -25,10 +25,10 @@ export class PainlessError extends EsError {
     openInInspector: () => void,
     painlessCause: estypes.ErrorCause,
     applicationStart: ApplicationStart,
-    dataView?: DataView,
+    dataView?: DataView
   ) {
     super(
-      err, 
+      err,
       i18n.translate('searchErrors.painlessError.painlessScriptedFieldErrorMessage', {
         defaultMessage:
           'Error executing runtime field or scripted field on data view {indexPatternName}',
@@ -51,7 +51,9 @@ export class PainlessError extends EsError {
     const hasScript = this.painlessCause?.script_stack?.slice(-1)[0]?.indexOf('HERE') || -1 >= 0;
     const humanReadableError = this.painlessCause?.caused_by?.reason;
     // fallback, show ES stacktrace
-    const painlessStack = this.painlessCause?.script_stack ? this.painlessCause?.script_stack.join('\n') : undefined;
+    const painlessStack = this.painlessCause?.script_stack
+      ? this.painlessCause?.script_stack.join('\n')
+      : undefined;
 
     return (
       <div>

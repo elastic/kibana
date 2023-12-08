@@ -21,22 +21,19 @@ export class TsdbError extends EsError {
     err: IEsError,
     openInInspector: () => void,
     tsdbCause: estypes.ErrorCause,
-    docLinks: CoreStart['docLinks'],
+    docLinks: CoreStart['docLinks']
   ) {
     const [fieldName, _type, _isCounter, opUsed] = tsdbCause.reason!.match(/\[(\w)*\]/g)!;
     super(
-      err, 
-      i18n.translate(
-        'searchErrors.tsdbError.message',
-        {
-          defaultMessage:
-            'The field {field} of Time series type [counter] has been used with the unsupported operation {op}.',
-          values: {
-            field: fieldName,
-            op: opUsed,
-          },
-        }
-      ),
+      err,
+      i18n.translate('searchErrors.tsdbError.message', {
+        defaultMessage:
+          'The field {field} of Time series type [counter] has been used with the unsupported operation {op}.',
+        values: {
+          field: fieldName,
+          op: opUsed,
+        },
+      }),
       openInInspector
     );
     this.docLinks = docLinks;
@@ -45,9 +42,7 @@ export class TsdbError extends EsError {
   public getErrorMessage() {
     return (
       <div>
-        <p className="eui-textBreakWord">
-          {this.message}
-        </p>
+        <p className="eui-textBreakWord">{this.message}</p>
         <EuiLink href={this.docLinks.links.fleet.datastreamsTSDSMetrics} external target="_blank">
           {i18n.translate('searchErrors.tsdbError.tsdbCounterDocsLabel', {
             defaultMessage:

@@ -16,9 +16,9 @@ const servicesMock = {
   docLinks: {
     links: {
       fleet: {
-        datastreamsTSDSMetrics: ''
-      }
-    }
+        datastreamsTSDSMetrics: '',
+      },
+    },
   } as CoreStart['docLinks'],
 };
 
@@ -62,7 +62,7 @@ describe('Tsdb error', () => {
       },
     },
     () => {},
-    servicesMock,
+    servicesMock
   );
 
   test('should set error.message to tsdb reason', () => {

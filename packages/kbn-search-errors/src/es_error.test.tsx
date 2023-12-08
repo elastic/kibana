@@ -16,9 +16,9 @@ const services = {
   docLinks: {
     links: {
       fleet: {
-        datastreamsTSDSMetrics: ''
-      }
-    }
+        datastreamsTSDSMetrics: '',
+      },
+    },
   } as CoreStart['docLinks'],
 };
 
@@ -39,7 +39,7 @@ describe('EsError', () => {
       },
     },
     () => {},
-    services,
+    services
   );
 
   test('should set error.message to root "error cause" reason', () => {

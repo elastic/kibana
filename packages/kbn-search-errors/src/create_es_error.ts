@@ -23,9 +23,9 @@ export interface Services {
 function getNestedCauses(errorCause: estypes.ErrorCause): estypes.ErrorCause[] {
   // Give shard failures priority, then try to get the error navigating nested objects
   if (errorCause.failed_shards) {
-    return (errorCause.failed_shards as estypes.ShardFailure[]).map((shardFailure) =>
-      shardFailure.reason
-    )
+    return (errorCause.failed_shards as estypes.ShardFailure[]).map(
+      (shardFailure) => shardFailure.reason
+    );
   }
   return errorCause.caused_by ? getNestedCauses(errorCause.caused_by) : [errorCause];
 }
@@ -36,18 +36,16 @@ export function createEsError(
   services: Services,
   dataView?: DataView
 ) {
-  const rootCauses = err.attributes?.error
-    ? getNestedCauses(err.attributes?.error)
-    : [];
+  const rootCauses = err.attributes?.error ? getNestedCauses(err.attributes?.error) : [];
 
-  const painlessCause = rootCauses.find(errorCause => {
+  const painlessCause = rootCauses.find((errorCause) => {
     return errorCause.lang && errorCause.lang === 'painless';
   });
   if (painlessCause) {
     return new PainlessError(err, openInInspector, painlessCause, services.application, dataView);
   }
 
-  const tsdbCause = rootCauses.find(errorCause => {
+  const tsdbCause = rootCauses.find((errorCause) => {
     return (
       errorCause.type === 'illegal_argument_exception' &&
       errorCause.reason &&

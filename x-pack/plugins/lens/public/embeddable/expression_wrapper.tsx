@@ -12,7 +12,7 @@ import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
-import type { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ExecutionContextSearch } from '@kbn/data-plugin/public';
 import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import classNames from 'classnames';

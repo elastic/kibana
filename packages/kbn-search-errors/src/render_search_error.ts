@@ -11,7 +11,9 @@ import { ReactNode } from 'react';
 import { BfetchRequestError } from '@kbn/bfetch-error';
 import { EsError } from './es_error';
 
-export function renderSearchError(error: Error): { title: string; body: ReactNode; actions?: ReactNode[] } | undefined {
+export function renderSearchError(
+  error: Error
+): { title: string; body: ReactNode; actions?: ReactNode[] } | undefined {
   if (error instanceof EsError) {
     return {
       title: i18n.translate('searchErrors.search.esErrorTitle', {

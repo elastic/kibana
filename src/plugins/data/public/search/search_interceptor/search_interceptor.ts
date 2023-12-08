@@ -50,11 +50,7 @@ import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plug
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { BfetchRequestError } from '@kbn/bfetch-error';
-import {
-  createEsError,
-  isEsError,
-  renderSearchError,
-} from '@kbn/search-errors';
+import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -238,12 +234,12 @@ export class SearchInterceptor {
       };
       return createEsError(
         e,
-        openInInspector, 
+        openInInspector,
         {
           application: this.application,
           docLinks: this.docLinks,
         },
-        options?.indexPattern,
+        options?.indexPattern
       );
     }
 

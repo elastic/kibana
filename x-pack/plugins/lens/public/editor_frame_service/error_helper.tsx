@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { ExpressionRenderError } from '@kbn/expressions-plugin/public';
 import { renderSearchError } from '@kbn/search-errors';
 import React from 'react';
@@ -20,15 +19,14 @@ export function getOriginalRequestErrorMessages(
     if (searchErrorDisplay) {
       errorMessages.push({
         short: error.original.message,
-        long: searchErrorDisplay.actions 
-          ? (
-            <>
-              {searchErrorDisplay.body}
-              {searchErrorDisplay.actions}
-            </>
-          ) : (
-            searchErrorDisplay.body
-          ),
+        long: searchErrorDisplay.actions ? (
+          <>
+            {searchErrorDisplay.body}
+            {searchErrorDisplay.actions}
+          </>
+        ) : (
+          searchErrorDisplay.body
+        ),
       });
     } else {
       errorMessages.push(error.original.message);

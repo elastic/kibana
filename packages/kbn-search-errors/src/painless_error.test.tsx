@@ -17,9 +17,9 @@ const servicesMock = {
   docLinks: {
     links: {
       fleet: {
-        datastreamsTSDSMetrics: ''
-      }
-    }
+        datastreamsTSDSMetrics: '',
+      },
+    },
   } as CoreStart['docLinks'],
 };
 
@@ -65,7 +65,7 @@ describe('Painless error', () => {
     },
     () => {},
     servicesMock,
-    dataViewMock,
+    dataViewMock
   );
 
   test('should set error.message to painless reason', () => {
