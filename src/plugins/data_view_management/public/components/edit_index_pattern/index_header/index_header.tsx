@@ -77,8 +77,19 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
     <EuiPageHeader
       pageTitle={<span data-test-subj="indexPatternTitle">{indexPattern.getName()}</span>}
       rightSideItems={[
-        <EuiToolTip content={<p>{refreshTooltip}</p>}>
+        canSave && (
           <EuiButton
+            onClick={editIndexPatternClick}
+            iconType="pencil"
+            aria-label={editAriaLabel}
+            data-test-subj="editIndexPatternButton"
+            color="primary"
+          >
+            {editTooltip}
+          </EuiButton>
+        ),
+        <EuiToolTip content={<p>{refreshTooltip}</p>}>
+          <EuiButtonEmpty
             onClick={refreshIndexPatternClick}
             iconType="refresh"
             aria-label={refreshAriaLabel}
@@ -87,18 +98,8 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
             isDisabled={isRefreshing}
           >
             {isRefreshing ? isLoadingLabel : refreshLabel}
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiToolTip>,
-        canSave && (
-          <EuiButton
-            onClick={editIndexPatternClick}
-            iconType="pencil"
-            aria-label={editAriaLabel}
-            data-test-subj="editIndexPatternButton"
-          >
-            {editTooltip}
-          </EuiButton>
-        ),
         defaultIndex !== indexPattern.id && setDefault && canSave && indexPattern.isPersisted() && (
           <EuiButton
             onClick={setDefault}
