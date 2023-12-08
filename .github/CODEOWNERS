@@ -1399,7 +1399,6 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detection-engine
 /x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-detection-engine
 
-<<<<<<< Updated upstream
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions  @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation @elastic/security-detection-engine
@@ -1407,21 +1406,6 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/user_roles  @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/detection_engine @elastic/security-detection-engine
-=======
-/x-pack/test/security_solution_cypress/cypress/e2e/detection_response/sourcerer @elastic/security-detection-engine
-/x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_alerts @elastic/security-detection-engine
-/x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_actions @elastic/security-detection-engine
-/x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_creation @elastic/security-detection-engine
-/x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_edit @elastic/security-detection-engine
-/x-pack/test/security_solution_cypress/cypress/e2e/detection_response/value_lists @elastic/security-detection-engine
-/x-pack/test/security_solution_cypress/cypress/e2e/exceptions @elastic/security-detection-engine
-/x-pack/test/security_solution_cypress/cypress/e2e/overview @elastic/security-detection-engine
-x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions  @elastic/security-detection-engine
-x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation @elastic/security-detection-engine
-x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions @elastic/security-detection-engine
-x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts @elastic/security-detection-engine
-x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/user_roles  @elastic/security-detection-engine
->>>>>>> Stashed changes
 /x-pack/plugins/security_solution/server/lib/detection_engine/scripts/roles_users @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists @elastic/security-detection-engine
 
@@ -1496,14 +1480,10 @@ x-pack/plugins/security_solution/public/overview/components/entity_analytics
 x-pack/plugins/security_solution/server/lib/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/server/lib/risk_score @elastic/security-entity-analytics
 x-pack/test/security_solution_api_integration/test_suites/entity_analytics @elastic/security-entity-analytics
-<<<<<<< Updated upstream
 x-pack/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
 x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
 /x-pack/plugins/security_solution/public/entity_analytics @elastic/security-entity-analytics
 /x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-entity-analytics
-=======
-x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-entity-analytics
->>>>>>> Stashed changes
 
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
