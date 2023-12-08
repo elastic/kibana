@@ -1024,6 +1024,7 @@ export class Embeddable
 
     this.renderComplete.dispatchComplete();
     this.updateOutput({
+      ...this.getOutput(),
       rendered: true,
     });
   };
@@ -1119,7 +1120,7 @@ export class Embeddable
               executionContext={this.getExecutionContext()}
               addUserMessages={(messages) => this.addUserMessages(messages)}
               onRuntimeError={(message) => {
-                this.updateOutput({ error: new Error(message), loading: false });
+                this.updateOutput({ error: new Error(message) });
                 this.logError('runtime');
               }}
               noPadding={this.visDisplayOptions.noPadding}
@@ -1146,8 +1147,6 @@ export class Embeddable
     });
 
     if (errors.length && this.domNode) {
-      this.updateOutput({ loading: false });
-
       render(
         <>
           <KibanaThemeProvider theme$={this.deps.theme.theme$}>
