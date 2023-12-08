@@ -58,7 +58,7 @@ export const FlyoutWrapper = ({
                   <EuiToolTip
                     content={
                       language
-                        ? i18n.translate('xpack.lens.config.experimentalLabel', {
+                        ? i18n.translate('xpack.lens.config.experimentalLabelTextBased', {
                             defaultMessage:
                               'Technical preview, {lang} currently offers limited configuration options',
                             values: { lang: language },
