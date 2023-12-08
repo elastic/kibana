@@ -78,7 +78,7 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
         <EuiFlexGroup direction="column" gutterSize="none">
           {pipeline.modelState === TrainedModelState.NotDeployed && (
             <EuiFlexItem>
-              <div>
+              <span>
                 <EuiButtonEmpty
                   data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-fixIssueInTrainedModels`}
                   size="s"
@@ -98,11 +98,11 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
                     }
                   )}
                 </EuiButtonEmpty>
-              </div>
+              </span>
             </EuiFlexItem>
           )}
           <EuiFlexItem>
-            <div>
+            <span>
               <EuiButtonEmpty
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-stackManagement`}
                 size="s"
@@ -120,10 +120,10 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
                   defaultMessage: 'View in Stack Management',
                 })}
               </EuiButtonEmpty>
-            </div>
+            </span>
           </EuiFlexItem>
           <EuiFlexItem>
-            <div>
+            <span>
               <EuiButtonEmpty
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-detachPipeline`}
                 size="s"
@@ -139,16 +139,16 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
                   defaultMessage: 'Detach pipeline',
                 })}
               </EuiButtonEmpty>
-            </div>
+            </span>
           </EuiFlexItem>
           <EuiFlexItem>
-            <div>
+            <span>
               <DeleteInferencePipelineButton
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-deletePipeline`}
                 onClick={showConfirmDeleteModal}
                 pipeline={pipeline}
               />
-            </div>
+            </span>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopover>
