@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { screen, within } from '@testing-library/react';
 
 export const getButtonGroupInputValue = (testId: string) => () => {
