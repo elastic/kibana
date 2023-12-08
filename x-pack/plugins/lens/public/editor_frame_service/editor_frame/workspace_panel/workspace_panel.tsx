@@ -731,24 +731,27 @@ export const VisualizationWrapper = ({
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
   if (errors.length) {
+    const configurationErrorTitle = i18n.translate('xpack.lens.editorFrame.configurationFailureErrors', {
+      defaultMessage: `A configuration error occurred`,
+    });
     return (
       <div
         data-shared-items-container
         data-render-complete={true}
         data-shared-item=""
-        data-render-error={i18n.translate('xpack.lens.editorFrame.configurationFailureErrors', {
-          defaultMessage: `A configuration error occurred`,
-        })}
+        data-render-error={configurationErrorTitle}
       >
         <PaginatedErrors
           errors={errors}
-          title={i18n.translate('xpack.lens.editorFrame.configurationFailureErrors', {
-            defaultMessage: `A configuration error occurred`,
-          })}
+          title={configurationErrorTitle}
         />
       </div>
     );
   }
+
+  const dataLoadingErrorTitle = i18n.translate('xpack.lens.editorFrame.dataFailure', {
+    defaultMessage: `An error occurred when loading data`,
+  });
 
   return (
     <div
@@ -758,9 +761,7 @@ export const VisualizationWrapper = ({
       data-shared-item=""
       data-render-error={
         hasDynamicError
-          ? i18n.translate('xpack.lens.editorFrame.dataFailure', {
-              defaultMessage: `An error occurred when loading data.`,
-            })
+          ? dataLoadingErrorTitle
           : undefined
       }
       ref={nodeRef}
@@ -793,9 +794,7 @@ export const VisualizationWrapper = ({
           return (
             <PaginatedErrors
               errors={visibleErrorMessages}
-              title={i18n.translate('xpack.lens.editorFrame.dataFailure', {
-                defaultMessage: 'An error occurred when loading data',
-              })}
+              title={dataLoadingErrorTitle}
             />
           );
         }}
