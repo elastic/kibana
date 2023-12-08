@@ -70,12 +70,17 @@ describe('normalize', () => {
 
   it('returns 100 if the number is equal to the max', () => {
     const result = normalize({ number: 100, min: 0, max: 100 });
-    expect(result).toEqual(1);
+    expect(result).toEqual(100);
   });
 
   it('returns 50 if the number is halfway between the min and max', () => {
     const result = normalize({ number: 50, min: 0, max: 100 });
-    expect(result).toEqual(0.5);
+    expect(result).toEqual(50);
+  });
+
+  it('defaults to a min of 0', () => {
+    const result = normalize({ number: 50, max: 100 });
+    expect(result).toEqual(50);
   });
 
   describe('when the domain is diffrent than the range', () => {
@@ -86,12 +91,12 @@ describe('normalize', () => {
 
     it('returns 100 if the number is equal to the max', () => {
       const result = normalize({ number: 40, min: 30, max: 40 });
-      expect(result).toEqual(1);
+      expect(result).toEqual(100);
     });
 
     it('returns 50 if the number is halfway between the min and max', () => {
       const result = normalize({ number: 20, min: 0, max: 40 });
-      expect(result).toEqual(0.5);
+      expect(result).toEqual(50);
     });
   });
 });

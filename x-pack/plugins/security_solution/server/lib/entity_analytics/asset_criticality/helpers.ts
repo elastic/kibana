@@ -73,10 +73,17 @@ export const bayesianUpdate = ({
  * Normalizes a number to the range [0, 100]
  *
  * @param number - The number to be normalized
- * @param min - The minimum possible value of the number
+ * @param min - The minimum possible value of the number. Defaults to 0.
  * @param max - The maximum possible value of the number
  *
  * @returns The updated score with modifiers applied
  */
-export const normalize = ({ number, min, max }: { number: number; min: number; max: number }) =>
-  (number - min) / (max - min);
+export const normalize = ({
+  number,
+  min = 0,
+  max,
+}: {
+  number: number;
+  min?: number;
+  max: number;
+}) => ((number - min) / (max - min)) * 100;
