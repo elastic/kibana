@@ -73,7 +73,7 @@ import {
   wrapErrorAndRejectPromise,
 } from '../../../common/endpoint/data_loaders/utils';
 import { fetchKibanaStatus } from './stack_services';
-import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
+import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
 const fleetGenerator = new FleetAgentGenerator();
