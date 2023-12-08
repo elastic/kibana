@@ -386,6 +386,13 @@ export function getUiSettings(
             }),
           },
           {
+            from: 'now-1m',
+            to: 'now',
+            display: i18n.translate('data.advancedSettings.timepicker.last1Minute', {
+              defaultMessage: 'Last 1 minute',
+            }),
+          },
+          {
             from: 'now-15m',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last15Minutes', {
