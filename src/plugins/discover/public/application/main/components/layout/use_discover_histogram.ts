@@ -297,6 +297,11 @@ export const useDiscoverHistogram = ({
       skipRefetch.current = false;
     });
 
+    // triggering the initial request for total hits hook
+    if (!isPlainRecord && !skipRefetch.current) {
+      unifiedHistogram.refetch();
+    }
+
     return () => {
       subscription.unsubscribe();
     };

@@ -223,10 +223,6 @@ export function Chart({
 
   const a11yCommonProps = {
     id: 'unifiedHistogramCollapsablePanel',
-    'aria-label': i18n.translate('unifiedHistogram.collapsablePanelAriaLabel', {
-      defaultMessage: 'Chart',
-    }),
-    'aria-role': 'region',
   };
 
   if (Boolean(renderCustomChartToggleActions) && !chartVisible) {
