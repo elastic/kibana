@@ -6,7 +6,7 @@
  */
 
 // This file is a copy of x-pack/plugins/alerting/server/alerts_service/lib/create_concrete_write_index.ts
-// original function create index instead of datastream, and their have plan to use datastream in the future
+// original function create index instead of datastream, and they have plans to use datastream in the future
 // so we probably should remove this file and use the original when datastream will be supported
 
 import { get } from 'lodash';
