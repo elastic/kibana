@@ -17,6 +17,7 @@ import styled from '@emotion/styled';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { LogExplorerTabs } from '@kbn/discover-plugin/public';
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { filter, take } from 'rxjs';
@@ -35,13 +36,13 @@ export const LogExplorerTopNavMenu = () => {
 };
 
 const ServerlessTopNav = () => {
+  const { services } = useKibanaContextForPlugin();
+
   return (
-    <EuiHeader data-test-subj="logExplorerHeaderMenu">
+    <EuiHeader data-test-subj="logExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
       <EuiHeaderSection>
         <EuiHeaderSectionItem>
-          <EuiHeaderLinks gutterSize="xs">
-            <ConnectedDiscoverLink />
-          </EuiHeaderLinks>
+          <LogExplorerTabs services={services} selectedTab="log-explorer" />
         </EuiHeaderSectionItem>
       </EuiHeaderSection>
       <EuiHeaderSection
@@ -60,7 +61,10 @@ const ServerlessTopNav = () => {
           />
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
-          <FeedbackLink />
+          <EuiHeaderLinks gutterSize="xs">
+            <ConnectedDiscoverLink />
+            <FeedbackLink />
+          </EuiHeaderLinks>
           <VerticalRule />
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>

@@ -9,13 +9,26 @@ import { createSelector } from 'reselect';
 
 import type { State } from '../../../common/store/types';
 
-import type { UserDetailsPageModel, UsersPageModel, UsersType } from './model';
-import { UsersTableType } from './model';
+import type {
+  UserAssetQuery,
+  UserDetailsPageModel,
+  UserFlyoutQueries,
+  UserAssetTableType,
+  UsersPageModel,
+} from './model';
+import { UsersTableType, UsersType } from './model';
 
 const selectUserPage = (state: State): UsersPageModel => state.users.page;
 
-const selectUsers = (state: State, usersType: UsersType): UsersPageModel | UserDetailsPageModel =>
-  state.users[usersType];
+const selectUsersAndDetailsPage = (
+  state: State,
+  usersType: UsersType
+): UsersPageModel | UserDetailsPageModel | null => {
+  if (usersType === UsersType.details || usersType === UsersType.page) {
+    return state.users[usersType];
+  }
+  return null;
+};
 
 export const allUsersSelector = () =>
   createSelector(selectUserPage, (users) => users.queries[UsersTableType.allUsers]);
@@ -30,7 +43,21 @@ export const authenticationsSelector = () =>
   createSelector(selectUserPage, (users) => users.queries[UsersTableType.authentications]);
 
 export const usersAnomaliesJobIdFilterSelector = () =>
-  createSelector(selectUsers, (users) => users.queries[UsersTableType.anomalies].jobIdSelection);
+  createSelector(
+    selectUsersAndDetailsPage,
+    (users) => users?.queries[UsersTableType.anomalies].jobIdSelection ?? []
+  );
 
 export const usersAnomaliesIntervalSelector = () =>
-  createSelector(selectUsers, (users) => users.queries[UsersTableType.anomalies].intervalSelection);
+  createSelector(
+    selectUsersAndDetailsPage,
+    (users) => users?.queries[UsersTableType.anomalies].intervalSelection ?? 'auto'
+  );
+
+export const selectUserAssetTableById = (
+  state: State,
+  tableId: UserAssetTableType
+): UserAssetQuery => state.users.flyout.queries[tableId];
+
+export const selectUserAssetTables = (state: State): UserFlyoutQueries =>
+  state.users.flyout.queries;

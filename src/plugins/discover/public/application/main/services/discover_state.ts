@@ -26,7 +26,7 @@ import { merge } from 'rxjs';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { loadSavedSearch as loadSavedSearchFn } from './load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
-import { DiscoverDisplayMode, FetchStatus } from '../../types';
+import { DiscoverCustomizationContext, FetchStatus } from '../../types';
 import { changeDataView } from '../hooks/utils/change_data_view';
 import { buildStateSubscribe } from '../hooks/utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
@@ -67,11 +67,10 @@ interface DiscoverStateContainerParams {
    * core ui settings service
    */
   services: DiscoverServices;
-  /*
-   * mode in which discover is running
-   *
-   * */
-  mode?: DiscoverDisplayMode;
+  /**
+   * Context object for customization related properties
+   */
+  customizationContext: DiscoverCustomizationContext;
   /**
    * a custom url state storage
    */
@@ -98,7 +97,6 @@ export interface DiscoverStateContainer {
    * Global State, the _g part of the URL
    */
   globalState: DiscoverGlobalStateContainer;
-
   /**
    * App state, the _a part of the URL
    */
@@ -123,6 +121,10 @@ export interface DiscoverStateContainer {
    * Service for handling search sessions
    */
   searchSessionManager: DiscoverSearchSessionManager;
+  /**
+   * Context object for customization related properties
+   */
+  customizationContext: DiscoverCustomizationContext;
   /**
    * Complex functions to update multiple containers from UI
    */
@@ -194,7 +196,7 @@ export interface DiscoverStateContainer {
      * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
      * This is to prevent duplicate ids messing with our system
      */
-    updateAdHocDataViewId: () => void;
+    updateAdHocDataViewId: () => Promise<DataView | undefined>;
   };
 }
 
@@ -205,7 +207,7 @@ export interface DiscoverStateContainer {
 export function getDiscoverStateContainer({
   history,
   services,
-  mode = 'standalone',
+  customizationContext,
   stateStorageContainer,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
@@ -219,7 +221,7 @@ export function getDiscoverStateContainer({
     createKbnUrlStateStorage({
       useHash: storeInSessionStorage,
       history,
-      useHashQuery: mode !== 'embedded',
+      useHashQuery: customizationContext.displayMode !== 'embedded',
       ...(toasts && withNotifyOnErrors(toasts)),
     });
 
@@ -482,6 +484,7 @@ export function getDiscoverStateContainer({
     savedSearchState: savedSearchContainer,
     stateStorage,
     searchSessionManager,
+    customizationContext,
     actions: {
       initializeAndSync,
       fetchData,

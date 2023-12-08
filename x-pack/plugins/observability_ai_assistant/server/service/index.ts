@@ -12,17 +12,58 @@ import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/serv
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import Ajv, { type ValidateFunction } from 'ajv';
 import { once } from 'lodash';
+import {
+  ContextRegistry,
+  KnowledgeBaseEntryRole,
+  RegisterContextDefinition,
+} from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
+import { ChatFunctionClient } from './chat_function_client';
 import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
 import { kbComponentTemplate } from './kb_component_template';
-import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './kb_service';
-import type { ObservabilityAIAssistantResourceNames } from './types';
+import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './knowledge_base_service';
+import type {
+  ChatRegistrationFunction,
+  FunctionHandlerRegistry,
+  ObservabilityAIAssistantResourceNames,
+  RegisterFunction,
+  RespondFunctionResources,
+} from './types';
 import { splitKbText } from './util/split_kb_text';
+
+const ajv = new Ajv({
+  strict: false,
+});
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
+}
+
+export function createResourceNamesMap() {
+  return {
+    componentTemplate: {
+      conversations: getResourceName('component-template-conversations'),
+      kb: getResourceName('component-template-kb'),
+    },
+    aliases: {
+      conversations: getResourceName('conversations'),
+      kb: getResourceName('kb'),
+    },
+    indexPatterns: {
+      conversations: getResourceName('conversations*'),
+      kb: getResourceName('kb*'),
+    },
+    indexTemplate: {
+      conversations: getResourceName('index-template-conversations'),
+      kb: getResourceName('index-template-kb'),
+    },
+    pipelines: {
+      kb: getResourceName('kb-ingest-pipeline'),
+    },
+  };
 }
 
 export const ELSER_MODEL_ID = '.elser_model_2';
@@ -45,27 +86,9 @@ export class ObservabilityAIAssistantService {
   private readonly logger: Logger;
   private kbService?: KnowledgeBaseService;
 
-  private readonly resourceNames: ObservabilityAIAssistantResourceNames = {
-    componentTemplate: {
-      conversations: getResourceName('component-template-conversations'),
-      kb: getResourceName('component-template-kb'),
-    },
-    aliases: {
-      conversations: getResourceName('conversations'),
-      kb: getResourceName('kb'),
-    },
-    indexPatterns: {
-      conversations: getResourceName('conversations*'),
-      kb: getResourceName('kb*'),
-    },
-    indexTemplate: {
-      conversations: getResourceName('index-template-conversations'),
-      kb: getResourceName('index-template-kb'),
-    },
-    pipelines: {
-      kb: getResourceName('kb-ingest-pipeline'),
-    },
-  };
+  private readonly resourceNames: ObservabilityAIAssistantResourceNames = createResourceNamesMap();
+
+  private readonly registrations: ChatRegistrationFunction[] = [];
 
   constructor({
     logger,
@@ -96,6 +119,12 @@ export class ObservabilityAIAssistantService {
           };
         },
       },
+    });
+  }
+
+  getKnowledgeBaseStatus() {
+    return this.init().then(() => {
+      return this.kbService!.status();
     });
   }
 
@@ -223,13 +252,18 @@ export class ObservabilityAIAssistantService {
   }: {
     request: KibanaRequest;
   }): Promise<ObservabilityAIAssistantClient> {
+    const controller = new AbortController();
+
+    request.events.aborted$.subscribe(() => {
+      controller.abort();
+    });
+
     const [_, [coreStart, plugins]] = await Promise.all([
       this.init(),
       this.core.getStartServices() as Promise<
         [CoreStart, { security: SecurityPluginStart; actions: ActionsPluginStart }, unknown]
       >,
     ]);
-
     const user = plugins.security.authc.getCurrentUser(request);
 
     if (!user) {
@@ -254,6 +288,37 @@ export class ObservabilityAIAssistantService {
     });
   }
 
+  async getFunctionClient({
+    signal,
+    resources,
+    client,
+  }: {
+    signal: AbortSignal;
+    resources: RespondFunctionResources;
+    client: ObservabilityAIAssistantClient;
+  }): Promise<ChatFunctionClient> {
+    const contextRegistry: ContextRegistry = new Map();
+    const functionHandlerRegistry: FunctionHandlerRegistry = new Map();
+
+    const validators = new Map<string, ValidateFunction>();
+
+    const registerContext: RegisterContextDefinition = (context) => {
+      contextRegistry.set(context.name, context);
+    };
+
+    const registerFunction: RegisterFunction = (definition, respond) => {
+      validators.set(definition.name, ajv.compile(definition.parameters));
+      functionHandlerRegistry.set(definition.name, { definition, respond });
+    };
+    await Promise.all(
+      this.registrations.map((fn) =>
+        fn({ signal, registerContext, registerFunction, resources, client })
+      )
+    );
+
+    return new ChatFunctionClient(contextRegistry, functionHandlerRegistry, validators);
+  }
+
   addToKnowledgeBase(entries: KnowledgeBaseEntryRequest[]): void {
     this.init()
       .then(() => {
@@ -262,13 +327,14 @@ export class ObservabilityAIAssistantService {
             const entryWithSystemProperties = {
               ...entry,
               '@timestamp': new Date().toISOString(),
+              doc_id: entry.id,
               public: true,
               confidence: 'high' as const,
               is_correction: false,
               labels: {
                 ...entry.labels,
-                document_id: entry.id,
               },
+              role: KnowledgeBaseEntryRole.Elastic,
             };
 
             const operations =
@@ -305,5 +371,9 @@ export class ObservabilityAIAssistantService {
         };
       })
     );
+  }
+
+  register(fn: ChatRegistrationFunction) {
+    this.registrations.push(fn);
   }
 }

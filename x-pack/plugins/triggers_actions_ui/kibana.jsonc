@@ -18,6 +18,7 @@
       "kibanaUtils",
       "savedObjects",
       "unifiedSearch",
+      "fieldFormats",
       "dataViews",
       "dataViewEditor",
       "alerting",

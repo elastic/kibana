@@ -10,6 +10,7 @@ import { LogExplorerFlyoutContentProps, LogDocument } from './types';
 import { useDocDetail } from './use_doc_detail';
 import { FlyoutHeader } from './flyout_header';
 import { FlyoutHighlights } from './flyout_highlights';
+import { DiscoverActionsProvider } from '../../hooks/use_discover_action';
 
 export function FlyoutDetail({
   dataView,
@@ -19,9 +20,9 @@ export function FlyoutDetail({
   const parsedDoc = useDocDetail(doc as LogDocument, { dataView });
 
   return (
-    <>
+    <DiscoverActionsProvider value={actions}>
       <FlyoutHeader doc={parsedDoc} />
       <FlyoutHighlights formattedDoc={parsedDoc} flattenedDoc={doc.flattened} actions={actions} />
-    </>
+    </DiscoverActionsProvider>
   );
 }
