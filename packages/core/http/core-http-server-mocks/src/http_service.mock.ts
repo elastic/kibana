@@ -20,6 +20,7 @@ import type {
   HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
+  IStaticAssets,
 } from '@kbn/core-http-server';
 import { AuthStatus } from '@kbn/core-http-server';
 import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
@@ -34,17 +35,19 @@ import type {
 import { sessionStorageMock } from './cookie_session_storage.mocks';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
-type StaticAssetsMocked = jest.Mocked<InternalHttpServiceSetup['staticAssets']>;
+type InternalStaticAssetsMocked = jest.Mocked<InternalHttpServiceSetup['staticAssets']>;
+type StaticAssetsMocked = jest.Mocked<IStaticAssets>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;
 
 export type HttpServicePrebootMock = jest.Mocked<HttpServicePreboot>;
 export type InternalHttpServicePrebootMock = jest.Mocked<
   Omit<InternalHttpServicePreboot, 'basePath' | 'staticAssets'>
-> & { basePath: BasePathMocked; staticAssets: StaticAssetsMocked };
+> & { basePath: BasePathMocked; staticAssets: InternalStaticAssetsMocked };
 export type HttpServiceSetupMock<
   ContextType extends RequestHandlerContextBase = RequestHandlerContextBase
 > = jest.Mocked<Omit<HttpServiceSetup<ContextType>, 'basePath' | 'createRouter'>> & {
   basePath: BasePathMocked;
+  staticAssets: StaticAssetsMocked;
   createRouter: jest.MockedFunction<() => RouterMock>;
 };
 export type InternalHttpServiceSetupMock = jest.Mocked<
@@ -55,15 +58,17 @@ export type InternalHttpServiceSetupMock = jest.Mocked<
 > & {
   auth: AuthMocked;
   basePath: BasePathMocked;
-  staticAssets: StaticAssetsMocked;
+  staticAssets: InternalStaticAssetsMocked;
   createRouter: jest.MockedFunction<(path: string) => RouterMock>;
   authRequestHeaders: jest.Mocked<IAuthHeadersStorage>;
 };
 export type HttpServiceStartMock = jest.Mocked<HttpServiceStart> & {
   basePath: BasePathMocked;
+  staticAssets: StaticAssetsMocked;
 };
 export type InternalHttpServiceStartMock = jest.Mocked<InternalHttpServiceStart> & {
   basePath: BasePathMocked;
+  staticAssets: InternalStaticAssetsMocked;
 };
 
 const createBasePathMock = (
@@ -78,11 +83,12 @@ const createBasePathMock = (
   remove: jest.fn(),
 });
 
-const createStaticAssetsMock = (
+const createInternalStaticAssetsMock = (
   basePath: BasePathMocked,
   cdnUrl: undefined | string = undefined
-): StaticAssetsMocked => ({
+): InternalStaticAssetsMocked => ({
   getHrefBase: jest.fn(() => cdnUrl ?? basePath.serverBasePath),
+  getPluginAssetHref: jest.fn().mockReturnValue(cdnUrl ?? basePath.serverBasePath),
 });
 
 const createAuthMock = () => {
@@ -106,6 +112,7 @@ const createAuthHeaderStorageMock = () => {
 interface CreateMockArgs {
   cdnUrl?: string;
 }
+
 const createInternalPrebootContractMock = (args: CreateMockArgs = {}) => {
   const basePath = createBasePathMock();
   const mock: InternalHttpServicePrebootMock = {
@@ -113,7 +120,7 @@ const createInternalPrebootContractMock = (args: CreateMockArgs = {}) => {
     registerRouteHandlerContext: jest.fn(),
     registerStaticDir: jest.fn(),
     basePath,
-    staticAssets: createStaticAssetsMock(basePath, args.cdnUrl),
+    staticAssets: createInternalStaticAssetsMock(basePath, args.cdnUrl),
     csp: CspConfig.DEFAULT,
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
@@ -144,6 +151,7 @@ const createPrebootContractMock = () => {
 };
 
 const createInternalSetupContractMock = () => {
+  const basePath = createBasePathMock();
   const mock: InternalHttpServiceSetupMock = {
     // we can mock other hapi server methods when we need it
     server: {
@@ -164,9 +172,9 @@ const createInternalSetupContractMock = () => {
     registerOnPreResponse: jest.fn(),
     createRouter: jest.fn().mockImplementation(() => mockRouter.create({})),
     registerStaticDir: jest.fn(),
-    basePath: createBasePathMock(),
+    basePath,
     csp: CspConfig.DEFAULT,
-    staticAssets: { getHrefBase: jest.fn(() => mock.basePath.serverBasePath) },
+    staticAssets: createInternalStaticAssetsMock(basePath),
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
     authRequestHeaders: createAuthHeaderStorageMock(),
@@ -202,6 +210,9 @@ const createSetupContractMock = <
     createRouter: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
     getServerInfo: internalMock.getServerInfo,
+    staticAssets: {
+      getPluginAssetHref: jest.fn().mockImplementation((assetPath: string) => assetPath),
+    },
   };
 
   mock.createRouter.mockImplementation(() => internalMock.createRouter(''));
@@ -214,14 +225,19 @@ const createStartContractMock = () => {
     auth: createAuthMock(),
     basePath: createBasePathMock(),
     getServerInfo: jest.fn(),
+    staticAssets: {
+      getPluginAssetHref: jest.fn().mockImplementation((assetPath: string) => assetPath),
+    },
   };
 
   return mock;
 };
 
 const createInternalStartContractMock = () => {
+  const basePath = createBasePathMock();
   const mock: InternalHttpServiceStartMock = {
     ...createStartContractMock(),
+    staticAssets: createInternalStaticAssetsMock(basePath),
     isListening: jest.fn(),
   };
 

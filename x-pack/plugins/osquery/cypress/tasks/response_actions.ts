@@ -10,6 +10,7 @@ import { ServerlessRoleName } from '../support/roles';
 import { cleanupRule, loadRule } from './api_fixtures';
 import { closeDateTabIfVisible } from './integrations';
 
+export const RESPONSE_ACTIONS_ERRORS = 'response-actions-error';
 export const RESPONSE_ACTIONS_ITEM_0 = 'response-actions-list-item-0';
 export const RESPONSE_ACTIONS_ITEM_1 = 'response-actions-list-item-1';
 export const RESPONSE_ACTIONS_ITEM_2 = 'response-actions-list-item-2';
@@ -40,10 +41,12 @@ export const checkOsqueryResponseActionsPermissions = (enabled: boolean) => {
   it(`response actions should ${enabled ? 'be available ' : 'not be available'}`, () => {
     cy.visit('/app/security/rules');
     clickRuleName(ruleName);
+    cy.getBySel('globalLoadingIndicator').should('not.exist');
     cy.getBySel('editRuleSettingsLink').click();
     cy.getBySel('globalLoadingIndicator').should('not.exist');
     closeDateTabIfVisible();
     cy.getBySel('edit-rule-actions-tab').click();
+    cy.getBySel('globalLoadingIndicator').should('not.exist');
     cy.contains('Response actions are run on each rule execution.');
     cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
     if (enabled) {

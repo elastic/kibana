@@ -395,6 +395,29 @@ describe('<IndexDetailsPage />', () => {
       expect(testBed.actions.overview.addDocCodeBlockExists()).toBe(true);
     });
 
+    it('renders index name badges from the extensions service', async () => {
+      const testBadges = ['testBadge1', 'testBadge2'];
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: {
+              extensionsService: {
+                _badges: testBadges.map((badge) => ({
+                  matchIndex: () => true,
+                  label: badge,
+                  color: 'primary',
+                })),
+              },
+            },
+          },
+        });
+      });
+      testBed.component.update();
+      const header = testBed.actions.getHeader();
+      expect(header).toEqual(`${testIndexName} ${testBadges.join(' ')}`);
+    });
+
     describe('extension service overview content', () => {
       it('renders the content instead of the default code block', async () => {
         const extensionsServiceOverview = 'Test content via extensions service';
@@ -477,6 +500,28 @@ describe('<IndexDetailsPage />', () => {
         await testBed.actions.mappings.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
       });
+    });
+
+    it('renders the content set via the extensions service', async () => {
+      const mappingsContent = 'test mappings extension';
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: {
+              extensionsService: {
+                _indexMappingsContent: {
+                  renderContent: () => mappingsContent,
+                },
+              },
+            },
+          },
+        });
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      const content = testBed.actions.getActiveTabContent();
+      expect(content).toContain(mappingsContent);
     });
   });
 

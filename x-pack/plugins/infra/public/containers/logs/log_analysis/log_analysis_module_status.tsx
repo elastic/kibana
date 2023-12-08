@@ -7,6 +7,7 @@
 
 import { useReducer } from 'react';
 
+import { IdFormat, JobType } from '../../../../common/http_api/latest';
 import {
   JobStatus,
   getDatafeedId,
@@ -18,8 +19,8 @@ import { FetchJobStatusResponsePayload, JobSummary } from './api/ml_get_jobs_sum
 import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 import { MandatoryProperty } from '../../../../common/utility_types';
 
-interface StatusReducerState<JobType extends string> {
-  jobStatus: Record<JobType, JobStatus>;
+interface StatusReducerState<T extends JobType> {
+  jobStatus: Record<T, JobStatus>;
   jobSummaries: JobSummary[];
   lastSetupErrorMessages: string[];
   setupStatus: SetupStatus;
@@ -31,6 +32,7 @@ type StatusReducerAction =
       type: 'finishedSetup';
       logViewId: string;
       spaceId: string;
+      idFormat: IdFormat;
       jobSetupResults: SetupMlModuleResponsePayload['jobs'];
       jobSummaries: FetchJobStatusResponsePayload;
       datafeedSetupResults: SetupMlModuleResponsePayload['datafeeds'];
@@ -41,22 +43,23 @@ type StatusReducerAction =
       type: 'fetchedJobStatuses';
       spaceId: string;
       logViewId: string;
+      idFormat: IdFormat;
       payload: FetchJobStatusResponsePayload;
     }
   | { type: 'failedFetchingJobStatuses' }
   | { type: 'viewedResults' };
 
-const createInitialState = <JobType extends string>({
+const createInitialState = <T extends JobType>({
   jobTypes,
 }: {
-  jobTypes: JobType[];
-}): StatusReducerState<JobType> => ({
+  jobTypes: T[];
+}): StatusReducerState<T> => ({
   jobStatus: jobTypes.reduce(
     (accumulatedJobStatus, jobType) => ({
       ...accumulatedJobStatus,
       [jobType]: 'unknown',
     }),
-    {} as Record<JobType, JobStatus>
+    {} as Record<T, JobStatus>
   ),
   jobSummaries: [],
   lastSetupErrorMessages: [],
@@ -64,11 +67,8 @@ const createInitialState = <JobType extends string>({
 });
 
 const createStatusReducer =
-  <JobType extends string>(jobTypes: JobType[]) =>
-  (
-    state: StatusReducerState<JobType>,
-    action: StatusReducerAction
-  ): StatusReducerState<JobType> => {
+  <T extends JobType>(jobTypes: T[]) =>
+  (state: StatusReducerState<T>, action: StatusReducerAction): StatusReducerState<T> => {
     switch (action.type) {
       case 'startedSetup': {
         return {
@@ -78,25 +78,34 @@ const createStatusReducer =
               ...accumulatedJobStatus,
               [jobType]: 'initializing',
             }),
-            {} as Record<JobType, JobStatus>
+            {} as Record<T, JobStatus>
           ),
           setupStatus: { type: 'pending' },
         };
       }
       case 'finishedSetup': {
-        const { datafeedSetupResults, jobSetupResults, jobSummaries, spaceId, logViewId } = action;
+        const {
+          datafeedSetupResults,
+          jobSetupResults,
+          jobSummaries,
+          spaceId,
+          logViewId,
+          idFormat,
+        } = action;
         const nextJobStatus = jobTypes.reduce(
           (accumulatedJobStatus, jobType) => ({
             ...accumulatedJobStatus,
             [jobType]:
-              hasSuccessfullyCreatedJob(getJobId(spaceId, logViewId, jobType))(jobSetupResults) &&
-              hasSuccessfullyStartedDatafeed(getDatafeedId(spaceId, logViewId, jobType))(
+              hasSuccessfullyCreatedJob(getJobId(spaceId, logViewId, idFormat, jobType))(
+                jobSetupResults
+              ) &&
+              hasSuccessfullyStartedDatafeed(getDatafeedId(spaceId, logViewId, idFormat, jobType))(
                 datafeedSetupResults
               )
                 ? 'started'
                 : 'failed',
           }),
-          {} as Record<JobType, JobStatus>
+          {} as Record<T, JobStatus>
         );
         const nextSetupStatus: SetupStatus = Object.values<JobStatus>(nextJobStatus).every(
           (jobState) => jobState === 'started' || jobState === 'starting'
@@ -129,7 +138,7 @@ const createStatusReducer =
               ...accumulatedJobStatus,
               [jobType]: 'failed',
             }),
-            {} as Record<JobType, JobStatus>
+            {} as Record<T, JobStatus>
           ),
           setupStatus: { type: 'failed', reasons: action.reason ? [action.reason] : ['unknown'] },
         };
@@ -142,15 +151,15 @@ const createStatusReducer =
         };
       }
       case 'fetchedJobStatuses': {
-        const { payload: jobSummaries, spaceId, logViewId } = action;
+        const { payload: jobSummaries, spaceId, logViewId, idFormat } = action;
         const { setupStatus } = state;
 
         const nextJobStatus = jobTypes.reduce(
           (accumulatedJobStatus, jobType) => ({
             ...accumulatedJobStatus,
-            [jobType]: getJobStatus(getJobId(spaceId, logViewId, jobType))(jobSummaries),
+            [jobType]: getJobStatus(getJobId(spaceId, logViewId, idFormat, jobType))(jobSummaries),
           }),
-          {} as Record<JobType, JobStatus>
+          {} as Record<T, JobStatus>
         );
         const nextSetupStatus = getSetupStatus(nextJobStatus)(setupStatus);
 
@@ -170,7 +179,7 @@ const createStatusReducer =
               ...accumulatedJobStatus,
               [jobType]: 'unknown',
             }),
-            {} as Record<JobType, JobStatus>
+            {} as Record<T, JobStatus>
           ),
         };
       }
@@ -243,7 +252,7 @@ const getJobStatus =
       })[0] || 'missing';
 
 const getSetupStatus =
-  <JobType extends string>(everyJobStatus: Record<JobType, JobStatus>) =>
+  <T extends JobType>(everyJobStatus: Record<T, JobStatus>) =>
   (previousSetupStatus: SetupStatus): SetupStatus =>
     Object.entries<JobStatus>(everyJobStatus).reduce<SetupStatus>((setupStatus, [, jobStatus]) => {
       if (jobStatus === 'missing') {
@@ -265,6 +274,6 @@ const hasError = <Value extends { error?: any }>(
   value: Value
 ): value is MandatoryProperty<Value, 'error'> => value.error != null;
 
-export const useModuleStatus = <JobType extends string>(jobTypes: JobType[]) => {
+export const useModuleStatus = <T extends JobType>(jobTypes: T[]) => {
   return useReducer(createStatusReducer(jobTypes), { jobTypes }, createInitialState);
 };

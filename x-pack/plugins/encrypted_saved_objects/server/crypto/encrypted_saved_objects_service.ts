@@ -10,7 +10,7 @@ import stringify from 'json-stable-stringify';
 import typeDetect from 'type-detect';
 
 import type { Logger } from '@kbn/core/server';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
@@ -286,11 +286,15 @@ export class EncryptedSavedObjectsService {
           encryptedAttributes[attributeName] = (yield [attributeValue, encryptionAAD])!;
         } catch (err) {
           this.options.logger.error(
-            `Failed to encrypt "${attributeName}" attribute: ${err.message || err}`
+            `Failed to encrypt "${attributeName}" attribute of saved object "${descriptorToArray(
+              descriptor
+            )}": ${err.message || err}`
           );
 
           throw new EncryptionError(
-            `Unable to encrypt attribute "${attributeName}"`,
+            `Unable to encrypt attribute "${attributeName}" of saved object "${descriptorToArray(
+              descriptor
+            )}"`,
             attributeName,
             EncryptionErrorOperation.Encryption,
             err
@@ -544,11 +548,15 @@ export class EncryptedSavedObjectsService {
         decryptedAttributes[attributeName] = (yield [attributeValue, encryptionAADs])!;
       } catch (err) {
         this.options.logger.error(
-          `Failed to decrypt "${attributeName}" attribute: ${err.message || err}`
+          `Failed to decrypt attribute "${attributeName}" of saved object "${descriptorToArray(
+            descriptor
+          )}": ${err.message || err}`
         );
 
         throw new EncryptionError(
-          `Unable to decrypt attribute "${attributeName}"`,
+          `Unable to decrypt attribute "${attributeName}" of saved object "${descriptorToArray(
+            descriptor
+          )}"`,
           attributeName,
           EncryptionErrorOperation.Decryption,
           err

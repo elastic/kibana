@@ -38,7 +38,7 @@ export const ConnectedStreamPageContent: React.FC = () => {
       jumpToTargetPosition: (targetPosition: TimeKey | null) => {
         logStreamPageSend({ type: 'JUMP_TO_TARGET_POSITION', targetPosition });
       },
-      jumpToTargetPositionTime: (time: number) => {
+      jumpToTargetPositionTime: (time: string) => {
         logStreamPageSend({ type: 'JUMP_TO_TARGET_POSITION', targetPosition: { time } });
       },
       reportVisiblePositions: (visiblePositions: VisiblePositions) => {

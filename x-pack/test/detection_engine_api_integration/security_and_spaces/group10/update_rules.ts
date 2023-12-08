@@ -566,7 +566,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message: '[request body]: Invalid input',
+            message: '[request body]: threshold: Required',
             statusCode: 400,
           });
         });
@@ -955,7 +955,9 @@ export default ({ getService }: FtrProviderContext) => {
           .send(updatedRule)
           .expect(400);
 
-        expect(body.message).to.eql('[request body]: Invalid input');
+        expect(body.message).to.eql(
+          '[request body]: investigation_fields: Expected object, received array'
+        );
       });
 
       it('unsets legacy investigation fields when field not specified for update', async () => {

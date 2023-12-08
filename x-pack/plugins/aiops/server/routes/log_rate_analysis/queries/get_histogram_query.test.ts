@@ -5,34 +5,30 @@
  * 2.0.
  */
 
-import { getHistogramQuery } from './get_histogram_query';
+import { paramsSearchQueryMock } from './__mocks__/params_search_query';
 
-const paramsMock = {
-  index: 'the-index',
-  timeFieldName: 'the-time-field-name',
-  start: 1577836800000,
-  end: 1609459200000,
-  baselineMin: 10,
-  baselineMax: 20,
-  deviationMin: 30,
-  deviationMax: 40,
-  includeFrozen: false,
-  searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
-};
+import { getHistogramQuery } from './get_histogram_query';
 
 describe('getHistogramQuery', () => {
   it('returns histogram query without additional filters', () => {
-    const query = getHistogramQuery(paramsMock);
+    const query = getHistogramQuery(paramsSearchQueryMock);
     expect(query).toEqual({
       bool: {
         filter: [
-          { bool: { filter: [], must: [{ match_all: {} }], must_not: [] } },
+          {
+            bool: {
+              filter: [],
+              minimum_should_match: 1,
+              must_not: [],
+              should: [{ term: { 'the-term': { value: 'the-value' } } }],
+            },
+          },
           {
             range: {
               'the-time-field-name': {
                 format: 'epoch_millis',
-                gte: 1577836800000,
-                lte: 1609459200000,
+                gte: 0,
+                lte: 50,
               },
             },
           },
@@ -42,7 +38,7 @@ describe('getHistogramQuery', () => {
   });
 
   it('returns histogram query with additional filters', () => {
-    const query = getHistogramQuery(paramsMock, [
+    const query = getHistogramQuery(paramsSearchQueryMock, [
       {
         term: { ['the-filter-fieldName']: 'the-filter-fieldValue' },
       },
@@ -50,7 +46,14 @@ describe('getHistogramQuery', () => {
     expect(query).toEqual({
       bool: {
         filter: [
-          { bool: { filter: [], must: [{ match_all: {} }], must_not: [] } },
+          {
+            bool: {
+              filter: [],
+              minimum_should_match: 1,
+              must_not: [],
+              should: [{ term: { 'the-term': { value: 'the-value' } } }],
+            },
+          },
           {
             term: {
               'the-filter-fieldName': 'the-filter-fieldValue',
@@ -60,8 +63,8 @@ describe('getHistogramQuery', () => {
             range: {
               'the-time-field-name': {
                 format: 'epoch_millis',
-                gte: 1577836800000,
-                lte: 1609459200000,
+                gte: 0,
+                lte: 50,
               },
             },
           },

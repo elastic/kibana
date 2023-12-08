@@ -35,5 +35,9 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/search-connectors",
     "@kbn/shared-ux-router",
+    "@kbn/data-views-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/index-management-plugin",
+    "@kbn/usage-collection-plugin",
   ]
 }

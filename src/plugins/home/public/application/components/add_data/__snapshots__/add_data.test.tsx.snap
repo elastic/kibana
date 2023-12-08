@@ -42,11 +42,13 @@ exports[`AddData render 1`] = `
           grow={false}
         >
           <RedirectAppLinks
-            application={
+            coreStart={
               Object {
-                "capabilities": Object {
-                  "navLinks": Object {
-                    "integrations": true,
+                "application": Object {
+                  "capabilities": Object {
+                    "navLinks": Object {
+                      "integrations": true,
+                    },
                   },
                 },
               }

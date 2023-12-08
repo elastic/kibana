@@ -33,13 +33,13 @@
     "@kbn/cases-components",
     "@kbn/security-solution-plugin",
     "@kbn/dev-utils",
-    "@kbn/expandable-flyout",
     "@kbn/config-schema",
     "@kbn/lists-plugin",
     "@kbn/securitysolution-list-constants",
     "@kbn/security-plugin",
     "@kbn/management-settings-ids",
     "@kbn/es-query",
-    "@kbn/ml-plugin"
+    "@kbn/ml-plugin",
+    "@kbn/license-management-plugin"
   ]
 }

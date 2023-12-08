@@ -16,6 +16,7 @@ import { useExplorerUrlState } from './hooks/use_explorer_url_state';
 import { AnomalyChartsStateService } from './anomaly_charts_state_service';
 import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
 import { useTableSeverity } from '../components/controls/select_severity';
+import { AnomalyDetectionAlertsStateService } from './alerts';
 
 export type AnomalyExplorerContextValue =
   | {
@@ -24,6 +25,7 @@ export type AnomalyExplorerContextValue =
       anomalyTimelineService: AnomalyTimelineService;
       anomalyTimelineStateService: AnomalyTimelineStateService;
       chartsStateService: AnomalyChartsStateService;
+      anomalyDetectionAlertsStateService: AnomalyDetectionAlertsStateService;
     }
   | undefined;
 
@@ -59,6 +61,7 @@ export const AnomalyExplorerContextProvider: FC = ({ children }) => {
     services: {
       mlServices: { mlApiServices },
       uiSettings,
+      data,
     },
   } = useMlKibana();
 
@@ -102,12 +105,19 @@ export const AnomalyExplorerContextProvider: FC = ({ children }) => {
       tableSeverityState
     );
 
+    const anomalyDetectionAlertsStateService = new AnomalyDetectionAlertsStateService(
+      anomalyTimelineStateService,
+      data,
+      timefilter
+    );
+
     setAnomalyExplorerContextValue({
       anomalyExplorerChartsService,
       anomalyExplorerCommonStateService,
       anomalyTimelineService,
       anomalyTimelineStateService,
       chartsStateService,
+      anomalyDetectionAlertsStateService,
     });
 
     return () => {
@@ -116,6 +126,7 @@ export const AnomalyExplorerContextProvider: FC = ({ children }) => {
       anomalyExplorerCommonStateService.destroy();
       anomalyTimelineStateService.destroy();
       chartsStateService.destroy();
+      anomalyDetectionAlertsStateService.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

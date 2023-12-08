@@ -75,6 +75,7 @@ describe('filterByAgent', () => {
           'profiling_inferred_spans_min_duration',
           'profiling_inferred_spans_sampling_interval',
           'recording',
+          'context_propagation_only',
           'sanitize_field_names',
           'server_timeout',
           'span_frames_min_duration',

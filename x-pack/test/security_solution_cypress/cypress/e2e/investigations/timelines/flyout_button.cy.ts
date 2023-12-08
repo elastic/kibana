@@ -6,29 +6,19 @@
  */
 
 import { TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON } from '../../../screens/security_main';
-import { CREATE_NEW_TIMELINE, TIMELINE_FLYOUT_HEADER } from '../../../screens/timeline';
-import { cleanKibana } from '../../../tasks/common';
+import { TIMELINE_FLYOUT_HEADER } from '../../../screens/timeline';
 
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   closeTimelineUsingCloseButton,
-  closeTimelineUsingToggle,
   openTimelineUsingToggle,
 } from '../../../tasks/security_main';
-import {
-  closeCreateTimelineOptionsPopover,
-  openCreateTimelineOptionsPopover,
-} from '../../../tasks/timeline';
 
 import { hostsUrl } from '../../../urls/navigation';
 
 describe('timeline flyout button', () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
@@ -38,7 +28,7 @@ describe('timeline flyout button', () => {
   it('toggles open the timeline', { tags: ['@ess', '@serverless'] }, () => {
     openTimelineUsingToggle();
     cy.get(TIMELINE_FLYOUT_HEADER).should('have.css', 'visibility', 'visible');
-    closeTimelineUsingToggle();
+    closeTimelineUsingCloseButton();
   });
 
   it(
@@ -46,7 +36,7 @@ describe('timeline flyout button', () => {
     { tags: ['@ess', '@serverless'] },
     () => {
       openTimelineUsingToggle();
-      closeTimelineUsingToggle();
+      closeTimelineUsingCloseButton();
 
       cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).should('have.focus');
     }
@@ -71,18 +61,6 @@ describe('timeline flyout button', () => {
       cy.get('body').type('{esc}');
 
       cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).should('have.focus');
-    }
-  );
-
-  it(
-    'the `(+)` button popover menu owns focus when open',
-    { tags: ['@ess', '@serverless'] },
-    () => {
-      openCreateTimelineOptionsPopover();
-      cy.get(CREATE_NEW_TIMELINE).focus();
-      cy.get(CREATE_NEW_TIMELINE).should('have.focus');
-      closeCreateTimelineOptionsPopover();
-      cy.get(CREATE_NEW_TIMELINE).should('not.exist');
     }
   );
 

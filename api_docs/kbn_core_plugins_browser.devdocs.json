@@ -174,7 +174,15 @@
             "label": "stop",
             "description": [],
             "signature": [
-              "(() => void) | undefined"
+              "(() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<void>) | undefined"
             ],
             "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
             "deprecated": false,

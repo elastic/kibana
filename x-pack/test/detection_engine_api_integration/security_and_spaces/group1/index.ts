@@ -14,15 +14,11 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     // action migration code. We are monitoring legacy action telemetry to clean up once we see their
     // existence being near 0.
 
-    loadTestFile(require.resolve('./aliases'));
-    loadTestFile(require.resolve('./check_privileges'));
-    loadTestFile(require.resolve('./create_index'));
     loadTestFile(require.resolve('./create_rules_bulk'));
     loadTestFile(require.resolve('./delete_rules'));
     loadTestFile(require.resolve('./delete_rules_bulk'));
     loadTestFile(require.resolve('./export_rules'));
     loadTestFile(require.resolve('./find_rules'));
-    loadTestFile(require.resolve('./find_rule_exception_references'));
     loadTestFile(require.resolve('./get_rule_management_filters'));
   });
 };

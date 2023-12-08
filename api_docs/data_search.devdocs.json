@@ -5,114 +5,6 @@
     "functions": [
       {
         "parentPluginId": "data",
-        "id": "def-public.getSearchErrorOverrideDisplay",
-        "type": "Function",
-        "tags": [],
-        "label": "getSearchErrorOverrideDisplay",
-        "description": [],
-        "signature": [
-          "({\n  error,\n  application,\n}: { error: Error; application: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.ApplicationStart",
-            "text": "ApplicationStart"
-          },
-          "; }) => { title: string; body: React.ReactNode; } | undefined"
-        ],
-        "path": "src/plugins/data/public/search/search_interceptor/utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.getSearchErrorOverrideDisplay.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  error,\n  application,\n}",
-            "description": [],
-            "path": "src/plugins/data/public/search/search_interceptor/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.getSearchErrorOverrideDisplay.$1.error",
-                "type": "Object",
-                "tags": [],
-                "label": "error",
-                "description": [],
-                "signature": [
-                  "Error"
-                ],
-                "path": "src/plugins/data/public/search/search_interceptor/utils.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-public.getSearchErrorOverrideDisplay.$1.application",
-                "type": "Object",
-                "tags": [],
-                "label": "application",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.ApplicationStart",
-                    "text": "ApplicationStart"
-                  }
-                ],
-                "path": "src/plugins/data/public/search/search_interceptor/utils.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.isEsError",
-        "type": "Function",
-        "tags": [],
-        "label": "isEsError",
-        "description": [
-          "\nChecks if a given errors originated from Elasticsearch.\nThose params are assigned to the attributes property of an error.\n"
-        ],
-        "signature": [
-          "(e: any) => boolean"
-        ],
-        "path": "src/plugins/data/public/search/errors/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.isEsError.$1",
-            "type": "Any",
-            "tags": [],
-            "label": "e",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/data/public/search/errors/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.waitUntilNextSessionCompletes$",
         "type": "Function",
         "tags": [],
@@ -267,7 +159,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; readonly state$: ",
+              "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -277,7 +169,7 @@
                 "section": "def-public.SearchSessionState",
                 "text": "SearchSessionState"
               },
-              ">; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly sessionMeta$: ",
+              ">; readonly sessionMeta$: ",
               "Observable",
               "<",
               "SessionMeta",
@@ -497,7 +389,15 @@
                 "section": "def-common.IEsSearchRequest",
                 "text": "IEsSearchRequest"
               },
-              ", SearchStrategyResponse extends ",
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchRequestParams",
+                "text": "ISearchRequestParams"
+              },
+              ">, SearchStrategyResponse extends ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -715,7 +615,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; readonly state$: ",
+              "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -725,7 +625,7 @@
                 "section": "def-public.SearchSessionState",
                 "text": "SearchSessionState"
               },
-              ">; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly sessionMeta$: ",
+              ">; readonly sessionMeta$: ",
               "Observable",
               "<",
               "SessionMeta",
@@ -1184,36 +1084,6 @@
     "misc": [
       {
         "parentPluginId": "data",
-        "id": "def-public.IEsError",
-        "type": "Type",
-        "tags": [],
-        "label": "IEsError",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.KibanaServerError",
-            "text": "KibanaServerError"
-          },
-          "<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IEsErrorAttributes",
-            "text": "IEsErrorAttributes"
-          },
-          ">"
-        ],
-        "path": "src/plugins/data/public/search/errors/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.ISessionsClient",
         "type": "Type",
         "tags": [],
@@ -1271,7 +1141,7 @@
         "label": "ISessionService",
         "description": [],
         "signature": [
-          "{ start: () => string; readonly state$: ",
+          "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
           "Observable",
           "<",
           {
@@ -1281,7 +1151,7 @@
             "section": "def-public.SearchSessionState",
             "text": "SearchSessionState"
           },
-          ">; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly sessionMeta$: ",
+          ">; readonly sessionMeta$: ",
           "Observable",
           "<",
           "SessionMeta",
@@ -1472,7 +1342,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; }>"
+                  "Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; enableUiSettingsValidations: boolean; }>"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
                 "deprecated": false,
@@ -1648,9 +1518,9 @@
               "SearchSessionDependencies",
               ", user: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -1708,9 +1578,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "security",
+                    "pluginId": "@kbn/security-plugin-types-common",
                     "scope": "common",
-                    "docId": "kibSecurityPluginApi",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                     "section": "def-common.AuthenticatedUser",
                     "text": "AuthenticatedUser"
                   },
@@ -1774,9 +1644,9 @@
               "SearchSessionDependencies",
               ", user: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -1826,9 +1696,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "security",
+                    "pluginId": "@kbn/security-plugin-types-common",
                     "scope": "common",
-                    "docId": "kibSecurityPluginApi",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                     "section": "def-common.AuthenticatedUser",
                     "text": "AuthenticatedUser"
                   },
@@ -1869,9 +1739,9 @@
               "SearchSessionStatusDependencies",
               ", user: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -1921,9 +1791,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "security",
+                    "pluginId": "@kbn/security-plugin-types-common",
                     "scope": "common",
-                    "docId": "kibSecurityPluginApi",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                     "section": "def-common.AuthenticatedUser",
                     "text": "AuthenticatedUser"
                   },
@@ -1972,9 +1842,9 @@
               "SearchSessionDependencies",
               ", user: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -2032,9 +1902,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "security",
+                    "pluginId": "@kbn/security-plugin-types-common",
                     "scope": "common",
-                    "docId": "kibSecurityPluginApi",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                     "section": "def-common.AuthenticatedUser",
                     "text": "AuthenticatedUser"
                   },
@@ -2098,9 +1968,9 @@
               "SearchSessionDependencies",
               ", user: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -2150,9 +2020,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "security",
+                    "pluginId": "@kbn/security-plugin-types-common",
                     "scope": "common",
-                    "docId": "kibSecurityPluginApi",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                     "section": "def-common.AuthenticatedUser",
                     "text": "AuthenticatedUser"
                   },
@@ -2208,9 +2078,9 @@
               "SearchSessionDependencies",
               ", user: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -2260,9 +2130,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "security",
+                    "pluginId": "@kbn/security-plugin-types-common",
                     "scope": "common",
-                    "docId": "kibSecurityPluginApi",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                     "section": "def-common.AuthenticatedUser",
                     "text": "AuthenticatedUser"
                   },
@@ -2303,9 +2173,9 @@
               "SearchSessionDependencies",
               ", user: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -2339,9 +2209,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "security",
+                    "pluginId": "@kbn/security-plugin-types-common",
                     "scope": "common",
-                    "docId": "kibSecurityPluginApi",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                     "section": "def-common.AuthenticatedUser",
                     "text": "AuthenticatedUser"
                   },
@@ -2382,9 +2252,9 @@
               "SearchSessionDependencies",
               ", user: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -2418,9 +2288,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "security",
+                    "pluginId": "@kbn/security-plugin-types-common",
                     "scope": "common",
-                    "docId": "kibSecurityPluginApi",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                     "section": "def-common.AuthenticatedUser",
                     "text": "AuthenticatedUser"
                   },
@@ -2461,9 +2331,9 @@
               "SearchSessionStatusDependencies",
               ", user: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -2505,9 +2375,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "security",
+                    "pluginId": "@kbn/security-plugin-types-common",
                     "scope": "common",
-                    "docId": "kibSecurityPluginApi",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                     "section": "def-common.AuthenticatedUser",
                     "text": "AuthenticatedUser"
                   },
@@ -27275,8 +27145,8 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
           }
         ],
         "path": "src/plugins/data/common/search/strategies/ese_search/types.ts",
@@ -27595,7 +27465,7 @@
             "section": "def-common.IEsSearchRequest",
             "text": "IEsSearchRequest"
           },
-          " extends ",
+          "<T> extends ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -27603,15 +27473,7 @@
             "section": "def-common.IKibanaSearchRequest",
             "text": "IKibanaSearchRequest"
           },
-          "<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchRequestParams",
-            "text": "ISearchRequestParams"
-          },
-          ">"
+          "<T>"
         ],
         "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
         "deprecated": false,
@@ -28084,7 +27946,15 @@
                 "section": "def-common.IEsSearchRequest",
                 "text": "IEsSearchRequest"
               },
-              ", SearchStrategyResponse extends ",
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchRequestParams",
+                "text": "ISearchRequestParams"
+              },
+              ">, SearchStrategyResponse extends ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -30034,7 +29904,15 @@
                 "section": "def-common.IEsSearchRequest",
                 "text": "IEsSearchRequest"
               },
-              ", SearchStrategyResponse extends ",
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchRequestParams",
+                "text": "ISearchRequestParams"
+              },
+              ">, SearchStrategyResponse extends ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -34106,7 +33984,15 @@
             "section": "def-common.IEsSearchRequest",
             "text": "IEsSearchRequest"
           },
-          ", SearchStrategyResponse extends ",
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.ISearchRequestParams",
+            "text": "ISearchRequestParams"
+          },
+          ">, SearchStrategyResponse extends ",
           {
             "pluginId": "data",
             "scope": "common",

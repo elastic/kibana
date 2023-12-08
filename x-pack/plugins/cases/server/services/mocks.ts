@@ -55,7 +55,8 @@ export const createCaseServiceMock = (): CaseServiceMock => {
     getResolveCase: jest.fn(),
     getTags: jest.fn(),
     getReporters: jest.fn(),
-    postNewCase: jest.fn(),
+    createCase: jest.fn(),
+    bulkCreateCases: jest.fn(),
     patchCase: jest.fn(),
     patchCases: jest.fn(),
     findCasesGroupedByID: jest.fn(),
@@ -101,6 +102,7 @@ const createUserActionPersisterServiceMock = (): CaseUserActionPersisterServiceM
     bulkCreateAttachmentDeletion: jest.fn(),
     bulkCreateAttachmentCreation: jest.fn(),
     createUserAction: jest.fn(),
+    bulkCreateUserAction: jest.fn(),
   };
 
   return service as unknown as CaseUserActionPersisterServiceMock;

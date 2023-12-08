@@ -7,7 +7,6 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { ProfilingPlugin } from './plugin';
 
 /**
  * These properties are used to create both the Collector and the Symbolizer integrations
@@ -56,7 +55,8 @@ export const config: PluginConfigDescriptor<ProfilingConfig> = {
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { ProfilingPlugin } = await import('./plugin');
   return new ProfilingPlugin(initializerContext);
 }
 

@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { ArrayInput } from './array_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
@@ -60,34 +59,17 @@ describe('ArrayInput', () => {
     expect(screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`)).toHaveValue('foo, bar, baz');
   });
 
-  it('formats array when blurred', () => {
+  it('calls the onInputChange prop when the value changes', async () => {
     render(wrap(<ArrayInput {...defaultProps} />));
     const input = screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
-    fireEvent.focus(input);
-    userEvent.type(input, ',baz');
-    expect(input).toHaveValue('foo, bar,baz');
-    input.blur();
-    expect(input).toHaveValue('foo, bar, baz');
-  });
+    fireEvent.change(input, { target: { value: 'foo, bar,baz' } });
 
-  it('only calls onInputChange when blurred ', () => {
-    render(wrap(<ArrayInput {...defaultProps} />));
-    const input = screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
-
-    fireEvent.focus(input);
-    userEvent.type(input, ',baz');
-
-    expect(input).toHaveValue('foo, bar,baz');
-    expect(defaultProps.onInputChange).not.toHaveBeenCalled();
-
-    act(() => {
-      input.blur();
-    });
-
-    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
-      type: 'array',
-      unsavedValue: ['foo', 'bar', 'baz'],
-    });
+    await waitFor(() =>
+      expect(defaultProps.onInputChange).toHaveBeenCalledWith({
+        type: 'array',
+        unsavedValue: ['foo', 'bar', 'baz'],
+      })
+    );
   });
 
   it('disables the input when isDisabled prop is true', () => {

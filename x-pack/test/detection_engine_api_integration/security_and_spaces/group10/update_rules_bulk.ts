@@ -853,7 +853,9 @@ export default ({ getService }: FtrProviderContext) => {
           ])
           .expect(400);
 
-        expect(body.message).to.eql('[request body]: 0: Invalid input');
+        expect(body.message).to.eql(
+          '[request body]: 0.investigation_fields: Expected object, received array'
+        );
       });
 
       it('updates a rule with legacy investigation fields and transforms field in response', async () => {

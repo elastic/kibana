@@ -21,9 +21,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useRef } from 'react';
+import { TimeKey } from '@kbn/io-ts-utils';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { LogViewReference } from '../../../../common/log_views';
-import { TimeKey } from '../../../../common/time';
 import { useLogEntry } from '../../../containers/logs/log_entry';
 import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
 import { DataSearchErrorCallout } from '../../data_search_error_callout';
@@ -101,7 +101,9 @@ export const LogEntryFlyout = ({
   logViewReference,
 }: LogEntryFlyoutProps) => {
   const {
-    services: { observabilityAIAssistant },
+    services: {
+      observabilityAIAssistant: { service: observabilityAIAssistantService },
+    },
   } = useKibanaContextForPlugin();
 
   const {
@@ -184,7 +186,10 @@ export const LogEntryFlyout = ({
         >
           <EuiFlexGroup direction="column" gutterSize="m">
             <EuiFlexItem grow={false}>
-              <LogAIAssistant aiAssistant={observabilityAIAssistant} doc={logEntry} />
+              <LogAIAssistant
+                observabilityAIAssistant={observabilityAIAssistantService}
+                doc={logEntry}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={onSetFieldFilter} />

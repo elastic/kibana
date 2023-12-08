@@ -7,8 +7,8 @@
 
 import deepMerge from 'deepmerge';
 import type { Logger, LogMeta } from '@kbn/core/server';
-import { TaskRunMetrics } from '@kbn/reporting-common';
-import { PLUGIN_ID } from '../../../common/constants';
+import type { TaskRunMetrics } from '@kbn/reporting-common/types';
+import { PLUGIN_ID } from '@kbn/reporting-common';
 import { IReport } from '../store';
 import { ActionType } from '.';
 import { EcsLogAdapter } from './adapter';

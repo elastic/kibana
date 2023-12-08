@@ -19,39 +19,50 @@ import {
   EuiFormLabel,
   EuiSpacer,
 } from '@elastic/eui';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Connector } from '@kbn/search-connectors';
 import { CANCEL_LABEL, CONNECTOR_LABEL, SAVE_LABEL } from '../../../../common/i18n_string';
 import { useKibanaServices } from '../../hooks/use_kibana';
+import { useConnector } from '../../hooks/api/use_connector';
+import { useShowErrorToast } from '../../hooks/use_error_toast';
 
 interface EditNameProps {
-  connectorId: string;
-  name: string;
-  onSuccess: () => void;
+  connector: Connector;
 }
 
-export const EditName: React.FC<EditNameProps> = ({ connectorId, name, onSuccess }) => {
+export const EditName: React.FC<EditNameProps> = ({ connector }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [newName, setNewName] = useState(name);
+  const [newName, setNewName] = useState(connector.name || CONNECTOR_LABEL);
   const { http } = useKibanaServices();
+  const showErrorToast = useShowErrorToast();
+  const queryClient = useQueryClient();
+  const { queryKey } = useConnector(connector.id);
 
-  useEffect(() => setNewName(name), [name]);
+  useEffect(() => setNewName(connector.name), [connector.name]);
 
-  const { isLoading, isSuccess, mutate } = useMutation({
+  const { isLoading, mutate } = useMutation({
     mutationFn: async (inputName: string) => {
       const body = { name: inputName };
-      const result = await http.post(`/internal/serverless_search/connectors/${connectorId}/name`, {
+      await http.post(`/internal/serverless_search/connectors/${connector.id}/name`, {
         body: JSON.stringify(body),
       });
-      return result;
+      return inputName;
+    },
+    onError: (error) =>
+      showErrorToast(
+        error,
+        i18n.translate('xpack.serverlessSearch.connectors.config.connectorNameError', {
+          defaultMessage: 'Error updating name',
+        })
+      ),
+    onSuccess: (successData) => {
+      queryClient.setQueryData(queryKey, {
+        connector: { ...connector, service_type: successData },
+      });
+      queryClient.invalidateQueries(queryKey);
+      setIsEditing(false);
     },
   });
-
-  useEffect(() => {
-    if (isSuccess) {
-      setIsEditing(false);
-      onSuccess();
-    }
-  }, [isSuccess, onSuccess]);
 
   return (
     <EuiFlexGroup direction="row">
@@ -59,7 +70,7 @@ export const EditName: React.FC<EditNameProps> = ({ connectorId, name, onSuccess
         <>
           <EuiFlexItem grow={false}>
             <EuiTitle>
-              <h1>{name || CONNECTOR_LABEL}</h1>
+              <h1>{connector.name || CONNECTOR_LABEL}</h1>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem
@@ -69,6 +80,7 @@ export const EditName: React.FC<EditNameProps> = ({ connectorId, name, onSuccess
             `}
           >
             <EuiButtonIcon
+              data-test-subj="serverlessSearchEditNameButton"
               color="text"
               iconType="pencil"
               aria-label={i18n.translate('xpack.serverlessSearch.connectors.editNameLabel', {
@@ -86,7 +98,11 @@ export const EditName: React.FC<EditNameProps> = ({ connectorId, name, onSuccess
                 defaultMessage: 'Name',
               })}
             </EuiFormLabel>
-            <EuiFieldText onChange={(event) => setNewName(event.target.value)} value={newName} />
+            <EuiFieldText
+              data-test-subj="serverlessSearchEditNameFieldText"
+              onChange={(event) => setNewName(event.target.value)}
+              value={newName}
+            />
           </EuiFlexItem>
           <EuiSpacer />
           <EuiFlexGroup direction="row" justifyContent="center" alignItems="center">
@@ -97,6 +113,7 @@ export const EditName: React.FC<EditNameProps> = ({ connectorId, name, onSuccess
               `}
             >
               <EuiButton
+                data-test-subj="serverlessSearchEditNameButton"
                 color="primary"
                 fill
                 type="submit"
@@ -114,10 +131,11 @@ export const EditName: React.FC<EditNameProps> = ({ connectorId, name, onSuccess
               `}
             >
               <EuiButton
+                data-test-subj="serverlessSearchEditNameButton"
                 size="s"
                 isLoading={isLoading}
                 onClick={() => {
-                  setNewName(name);
+                  setNewName(connector.name);
                   setIsEditing(false);
                 }}
               >

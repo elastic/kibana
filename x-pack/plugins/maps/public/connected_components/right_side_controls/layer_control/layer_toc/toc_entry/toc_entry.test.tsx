@@ -50,6 +50,9 @@ const mockLayer = {
   hasErrors: () => {
     return false;
   },
+  getErrors: () => {
+    return [];
+  },
   hasLegendDetails: () => {
     return true;
   },
@@ -60,6 +63,7 @@ const mockLayer = {
 
 const defaultProps = {
   depth: 0,
+  inspectorAdapters: {},
   layer: mockLayer,
   selectedLayer: undefined,
   openLayerPanel: async () => {},

@@ -23,9 +23,6 @@ export const useStyles = () => {
       border-bottom: none;
       margin-bottom: ${euiTheme.size.s};
       border-top: none;
-      & .euiButtonEmpty {
-        font-weight: ${euiTheme.font.weight.bold};
-      }
     }
     & .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
       border-bottom: ${euiTheme.border.width.thick} solid ${euiTheme.colors.fullShade};
@@ -76,7 +73,6 @@ export const useStyles = () => {
   `;
 
   const groupBySelector = css`
-    width: 188px;
     margin-left: auto;
   `;
 

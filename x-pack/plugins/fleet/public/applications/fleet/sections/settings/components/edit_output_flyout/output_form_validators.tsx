@@ -11,11 +11,11 @@ import { safeLoad } from 'js-yaml';
 const toSecretValidator =
   (validator: (value: string) => string[] | undefined) =>
   (value: string | { id: string } | undefined) => {
-    if (!value || typeof value === 'object') {
+    if (typeof value === 'object') {
       return undefined;
     }
 
-    return validator(value);
+    return validator(value ?? '');
   };
 
 export function validateKafkaHosts(value: string[]) {
@@ -269,6 +269,8 @@ export function validateServiceToken(value: string) {
     ];
   }
 }
+
+export const validateServiceTokenSecret = toSecretValidator(validateServiceToken);
 
 export function validateSSLCertificate(value: string) {
   if (!value || value === '') {

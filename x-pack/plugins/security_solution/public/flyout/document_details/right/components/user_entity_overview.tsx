@@ -19,7 +19,7 @@ import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRightPanelContext } from '../context';
 import type { DescriptionList } from '../../../../../common/utility_types';
@@ -70,7 +70,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
   const { openLeftPanel } = useExpandableFlyoutContext();
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
       params: {
         id: eventId,
@@ -155,7 +155,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     return [
       {
         title: (
-          <EuiFlexGroup alignItems="flexEnd" gutterSize="none">
+          <EuiFlexGroup alignItems="flexEnd" gutterSize="none" responsive={false}>
             <EuiFlexItem grow={false}>{USER_RISK_LEVEL}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.user} />
@@ -176,9 +176,14 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
   }, [userRisk]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={ENTITIES_USER_OVERVIEW_TEST_ID}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      responsive={false}
+      data-test-subj={ENTITIES_USER_OVERVIEW_TEST_ID}
+    >
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="m">
+        <EuiFlexGroup gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiIcon type={USER_ICON} />
           </EuiFlexItem>
@@ -206,7 +211,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
             data-test-subj={ENTITIES_USER_OVERVIEW_LOADING_TEST_ID}
           />
         ) : (
-          <EuiFlexGroup>
+          <EuiFlexGroup responsive={false}>
             <EuiFlexItem>
               <OverviewDescriptionList
                 dataTestSubj={ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID}

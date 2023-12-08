@@ -39,7 +39,7 @@ export function checkpointLogsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-checkpoint.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/checkpoint.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/checkpoint.svg'),
     artifacts: {
       dashboards: [],
       application: {

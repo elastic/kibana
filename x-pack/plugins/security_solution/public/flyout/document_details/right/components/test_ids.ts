@@ -19,6 +19,10 @@ export const RISK_SCORE_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreValue`
 export const SHARE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ShareButton` as const;
 export const CHAT_BUTTON_TEST_ID = 'newChatById' as const;
 
+export const ASSIGNEES_HEADER_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesHeader` as const;
+export const ASSIGNEES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesTitle` as const;
+export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesAddButton` as const;
+
 /* About section */
 
 export const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
@@ -38,6 +42,10 @@ export const REASON_DETAILS_PREVIEW_BUTTON_TEST_ID = `${REASON_TEST_ID}PreviewBu
 const MITRE_ATTACK_TEST_ID = `${PREFIX}MitreAttack` as const;
 export const MITRE_ATTACK_TITLE_TEST_ID = `${MITRE_ATTACK_TEST_ID}Title` as const;
 export const MITRE_ATTACK_DETAILS_TEST_ID = `${MITRE_ATTACK_TEST_ID}Details` as const;
+
+export const WORKFLOW_STATUS_TEST_ID = `${PREFIX}WorkflowStatus` as const;
+export const WORKFLOW_STATUS_TITLE_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Title` as const;
+export const WORKFLOW_STATUS_DETAILS_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Details` as const;
 
 /* Investigation section */
 
@@ -97,8 +105,6 @@ export const ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}LastSeen` as const;
 export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}RiskLevel` as const;
-export const TECHNICAL_PREVIEW_ICON_TEST_ID =
-  `${INSIGHTS_ENTITIES_TEST_ID}TechnicalPreviewIcon` as const;
 
 /* Threat intelligence */
 
@@ -125,15 +131,12 @@ export const PREVALENCE_TEST_ID = `${PREFIX}InsightsPrevalence` as const;
 
 /* Visualizations section */
 
-const VISUALIZATIONS_TEST_ID = `${PREFIX}Visualizations` as const;
-export const VISUALIZATIONS_SECTION_TEST_ID = `${VISUALIZATIONS_TEST_ID}Title` as const;
-export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
-  `${VISUALIZATIONS_TEST_ID}TitleHeader` as const;
+export const VISUALIZATIONS_TEST_ID = `${PREFIX}Visualizations` as const;
+export const VISUALIZATIONS_SECTION_HEADER_TEST_ID = `${VISUALIZATIONS_TEST_ID}Header` as const;
 export const ANALYZER_PREVIEW_TEST_ID = `${PREFIX}AnalyzerPreview` as const;
 export const ANALYZER_PREVIEW_LOADING_TEST_ID = `${ANALYZER_PREVIEW_TEST_ID}Loading` as const;
 
 export const SESSION_PREVIEW_TEST_ID = `${PREFIX}SessionPreview` as const;
-export const SESSION_PREVIEW_UPSELL_TEST_ID = `${SESSION_PREVIEW_TEST_ID}UpSell` as const;
 
 /* Response section */
 

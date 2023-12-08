@@ -524,6 +524,9 @@ export class FleetPlugin
 
     this.policyWatcher.start(licenseService);
 
+    // We only retry when this feature flag is enabled (Serverless)
+    const setupAttempts = this.configInitialValue.internal?.retrySetupOnBoot ? 25 : 1;
+
     const fleetSetupPromise = (async () => {
       try {
         // Fleet remains `available` during setup as to excessively delay Kibana's boot process.
@@ -555,10 +558,9 @@ export class FleetPlugin
             );
           },
           {
-            // We only retry when this feature flag is enabled
-            numOfAttempts: this.configInitialValue.internal?.retrySetupOnBoot ? Infinity : 1,
-            // 250ms initial backoff
-            startingDelay: 250,
+            numOfAttempts: setupAttempts,
+            // 1s initial backoff
+            startingDelay: 1000,
             // 5m max backoff
             maxDelay: 60000 * 5,
             timeMultiple: 2,
@@ -566,7 +568,7 @@ export class FleetPlugin
             jitter: 'full',
             retry: (error: any, attemptCount: number) => {
               const summary = `Fleet setup attempt ${attemptCount} failed, will retry after backoff`;
-              logger.debug(summary, { error: { message: error } });
+              logger.warn(summary, { error: { message: error } });
 
               this.fleetStatus$.next({
                 level: ServiceStatusLevels.available,
@@ -586,7 +588,9 @@ export class FleetPlugin
           summary: 'Fleet is available',
         });
       } catch (error) {
-        logger.warn('Fleet setup failed', { error: { message: error } });
+        logger.warn(`Fleet setup failed after ${setupAttempts} attempts`, {
+          error: { message: error },
+        });
 
         this.fleetStatus$.next({
           // As long as Fleet has a dependency on EPR, we can't reliably set Kibana status to `unavailable` here.
