@@ -28,7 +28,6 @@ import {
   EuiCallOut,
   EuiAccordion,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import * as i18n from '../translations';
@@ -63,47 +62,6 @@ const RiskScoreErrorPanel = ({ errors }: { errors: string[] }) => (
             </div>
           ))}
         </>
-      </EuiAccordion>
-
-      <EuiAccordion id="risk-engine-privileges" buttonContent={i18n.CHECK_PRIVILEGES}>
-        <p>
-          {i18n.NEED_TO_HAVE}
-          <ul>
-            <li>
-              <FormattedMessage
-                id="xpack.securitySolution.riskScore.errors.privileges.requiredPrivilege"
-                defaultMessage="{required_privilege} privileges for {index} index"
-                values={{
-                  required_privilege: <b>{'all'}</b>,
-                  index: <b>{'risk-score.risk-score-*'}</b>,
-                }}
-              />
-            </li>
-            <li>
-              <FormattedMessage
-                id="xpack.securitySolution.riskScore.errors.privileges.securityPrivilege"
-                defaultMessage="{security_privileges} security privileges"
-                values={{
-                  security_privileges: (
-                    <span>
-                      <b>{'manage_index_templates'}</b>
-                      {','} <b>{'manage_transform'}</b>
-                    </span>
-                  ),
-                }}
-              />
-            </li>
-            <li>
-              <FormattedMessage
-                id="xpack.securitySolution.riskScore.errors.privileges.kibanaPrivilege"
-                defaultMessage="{kibana_privilege} Kibana privilege"
-                values={{
-                  kibana_privilege: <b>{'Saved Objects Management'}</b>,
-                }}
-              />
-            </li>
-          </ul>
-        </p>
       </EuiAccordion>
     </EuiCallOut>
   </>
