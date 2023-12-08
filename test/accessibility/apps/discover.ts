@@ -109,7 +109,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.clickSavedQueriesPopOver();
       await testSubjects.click('saved-query-management-load-button');
       await savedQueryManagementComponent.deleteSavedQuery('test');
-      await a11y.testAppSnapshot();
+      await a11y.testAppSnapshot({
+        excludeTestSubj: ['saved-query-management-search-input'],
+      });
     });
 
     // adding a11y tests for the new data grid

@@ -642,10 +642,13 @@ export class DiscoverPageObject extends FtrService {
 
   public async saveCurrentSavedQuery() {
     await this.testSubjects.click('savedQueryFormSaveButton');
+    await this.retry.try(async () => {
+      await this.testSubjects.missingOrFail('queryBarMenuPanel');
+    });
   }
 
   public async deleteSavedQuery() {
-    await this.testSubjects.click('delete-saved-query-TEST-button');
+    await this.testSubjects.click('delete-saved-query-button');
   }
 
   public async confirmDeletionOfSavedQuery() {

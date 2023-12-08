@@ -330,6 +330,7 @@ export function SavedQueryManagementList({
                 }
               ),
               onChange: debouncedSetSearchTerm,
+              'data-test-subj': 'saved-query-management-search-input',
             }}
             loadingMessage={i18n.translate(
               'unifiedSearch.search.searchBar.savedQueryLoadingQueriesText',

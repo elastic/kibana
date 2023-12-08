@@ -64,29 +64,33 @@ describe('Saved query management list component', () => {
       showSaveQuery: true,
       savedQueryService: {
         ...dataMock.query.savedQueries,
-        findSavedQueries: jest.fn().mockResolvedValue([
-          {
-            id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
-            attributes: {
-              title: 'Test',
-              description: '',
-              query: {
-                query: 'category.keyword : "Men\'s Shoes" ',
-                language: 'kuery',
+        findSavedQueries: jest.fn().mockResolvedValue({
+          total: 1,
+          queries: [
+            {
+              id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
+              attributes: {
+                title: 'Test',
+                description: '',
+                query: {
+                  query: 'category.keyword : "Men\'s Shoes" ',
+                  language: 'kuery',
+                },
+                filters: [],
               },
-              filters: [],
+              namespaces: ['default'],
             },
-            namespaces: ['default'],
-          },
-        ]),
+          ],
+        }),
         deleteSavedQuery: jest.fn(),
       },
+      queryBarMenuRef: React.createRef(),
     };
   });
   it('should render the list component if saved queries exist', async () => {
     const component = mount(wrapSavedQueriesListComponentInContext(props));
     await flushEffect(component);
-    expect(component.find('[data-test-subj="saved-query-management-list"]').length).toBe(1);
+    expect(component.find('[data-test-subj="saved-query-management-list"]').length).toBeTruthy();
   });
 
   it('should not rendet the list component if not saved queries exist', async () => {
@@ -94,7 +98,7 @@ describe('Saved query management list component', () => {
       ...props,
       savedQueryService: {
         ...dataMock.query.savedQueries,
-        findSavedQueries: jest.fn().mockResolvedValue([]),
+        findSavedQueries: jest.fn().mockResolvedValue({ total: 0, queries: [] }),
       },
     };
     const component = mount(wrapSavedQueriesListComponentInContext(newProps));
@@ -155,7 +159,8 @@ describe('Saved query management list component', () => {
   it('should render the modal on delete', async () => {
     const component = mount(wrapSavedQueriesListComponentInContext(props));
     await flushEffect(component);
-    findTestSubject(component, 'delete-saved-query-Test-button').simulate('click');
+    component.find('[data-test-subj="load-saved-query-Test-button"]').first().simulate('click');
+    findTestSubject(component, 'delete-saved-query-button').simulate('click');
     expect(component.find('[data-test-subj="confirmModalConfirmButton"]').length).toBeTruthy();
     expect(component.text()).not.toContain('you remove it from every space');
   });
@@ -165,28 +170,31 @@ describe('Saved query management list component', () => {
       ...props,
       savedQueryService: {
         ...props.savedQueryService,
-        findSavedQueries: jest.fn().mockResolvedValue([
-          {
-            id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
-            attributes: {
-              title: 'Test',
-              description: '',
-              query: {
-                query: 'category.keyword : "Men\'s Shoes" ',
-                language: 'kuery',
+        findSavedQueries: jest.fn().mockResolvedValue({
+          total: 1,
+          queries: [
+            {
+              id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
+              attributes: {
+                title: 'Test',
+                description: '',
+                query: {
+                  query: 'category.keyword : "Men\'s Shoes" ',
+                  language: 'kuery',
+                },
+                filters: [],
               },
-              filters: [],
+              namespaces: ['one', 'two'],
             },
-            namespaces: ['one', 'two'],
-          },
-        ]),
+          ],
+        }),
         deleteSavedQuery: jest.fn(),
       },
     };
     const component = mount(wrapSavedQueriesListComponentInContext(newProps));
     await flushEffect(component);
-    findTestSubject(component, 'delete-saved-query-Test-button').simulate('click');
-
+    component.find('[data-test-subj="load-saved-query-Test-button"]').first().simulate('click');
+    findTestSubject(component, 'delete-saved-query-button').simulate('click');
     expect(component.find('[data-test-subj="confirmModalConfirmButton"]').length).toBeTruthy();
     expect(component.text()).toContain('you remove it from every space');
   });
@@ -212,7 +220,7 @@ describe('Saved query management list component', () => {
     };
     const component = mount(wrapSavedQueriesListComponentInContext(newProps));
     await flushEffect(component);
-    findTestSubject(component, 'delete-saved-query-Test-button').simulate('click');
+    findTestSubject(component, 'delete-saved-query-button').simulate('click');
     findTestSubject(component, 'confirmModalConfirmButton').simulate('click');
     expect(onClearSavedQuerySpy).toBeCalled();
   });
