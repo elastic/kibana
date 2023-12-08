@@ -18,8 +18,6 @@ export type SecurityRoleName = ServerlessSecurityRoleName | EssSecurityRoleName;
 
 export enum ROLES {
   // Serverless roles
-  viewer = 'viewer_copy',
-  editor = 'editor_copy',
   t1_analyst = 't1_analyst',
   t2_analyst = 't2_analyst',
   t3_analyst = 't3_analyst',

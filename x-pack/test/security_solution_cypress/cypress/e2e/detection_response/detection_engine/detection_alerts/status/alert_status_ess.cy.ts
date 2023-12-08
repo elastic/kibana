@@ -6,23 +6,23 @@
  */
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { ruleDetailsUrl } from '../../../../urls/rule_details';
-import { getNewRule } from '../../../../objects/rule';
+import { ruleDetailsUrl } from '../../../../../urls/rule_details';
+import { getNewRule } from '../../../../../objects/rule';
 import {
   CLOSE_SELECTED_ALERTS_BTN,
   MARK_ALERT_ACKNOWLEDGED_BTN,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
-} from '../../../../screens/alerts';
+} from '../../../../../screens/alerts';
 
-import { selectNumberOfAlerts } from '../../../../tasks/alerts';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { deleteAlertsAndRules } from '../../../../tasks/common';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
+import { selectNumberOfAlerts } from '../../../../../tasks/alerts';
+import { createRule } from '../../../../../tasks/api_calls/rules';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
+import { login } from '../../../../../tasks/login';
+import { visit } from '../../../../../tasks/navigation';
 
-import { ALERTS_URL } from '../../../../urls/navigation';
+import { ALERTS_URL } from '../../../../../urls/navigation';
 
 describe('Changing alert status privileges - ESS', { tags: ['@ess'] }, () => {
   before(() => {

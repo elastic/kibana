@@ -5,53 +5,27 @@
  * 2.0.
  */
 
-<<<<<<<< HEAD:x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_alerts/alert_status/alert_status.cy.ts
-import { getNewRule } from '../../../../objects/rule';
-import { ALERTS_COUNT, SELECTED_ALERTS } from '../../../../screens/alerts';
-========
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { getNewRule } from '../../../../../objects/rule';
+import { visit } from '../../../../../tasks/navigation';
+import { ALERTS_COUNT, SELECTED_ALERTS } from '../../../../../screens/alerts';
+import { ruleDetailsUrl } from '../../../../../urls/rule_details';
 import {
-  ALERTS_COUNT,
-  CLOSE_SELECTED_ALERTS_BTN,
-  MARK_ALERT_ACKNOWLEDGED_BTN,
-  SELECTED_ALERTS,
-  TAKE_ACTION_POPOVER_BTN,
-  TIMELINE_CONTEXT_MENU_BTN,
-} from '../../../../../screens/alerts';
->>>>>>>> 8d3e8cd838ad80f8955c986fe830a9e6590a60de:x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine/detection_alerts/status/alert_status.cy.ts
-
-import {
-  selectNumberOfAlerts,
-  waitForAlerts,
-  markAcknowledgedFirstAlert,
-  markAlertsAcknowledged,
-  goToAcknowledgedAlertsOnRuleDetailsPage,
-  closeFirstAlert,
   closeAlerts,
-  openAlerts,
-  openFirstAlert,
-<<<<<<<< HEAD:x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_alerts/alert_status/alert_status.cy.ts
+  closeFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
-} from '../../../../tasks/alerts';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { deleteAlertsAndRules } from '../../../../tasks/common';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
-
-import { ruleDetailsUrl } from '../../../../urls/rule_details';
-========
+  markAcknowledgedFirstAlert,
+  markAlertsAcknowledged,
+  openAlerts,
+  openFirstAlert,
+  selectNumberOfAlerts,
+  waitForAlerts,
 } from '../../../../../tasks/alerts';
-import { createRule } from '../../../../../tasks/api_calls/rules';
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { login } from '../../../../../tasks/login';
-import { visit } from '../../../../../tasks/navigation';
-
-import { ALERTS_URL } from '../../../../../urls/navigation';
->>>>>>>> 8d3e8cd838ad80f8955c986fe830a9e6590a60de:x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine/detection_alerts/status/alert_status.cy.ts
+import { goToAcknowledgedAlertsOnRuleDetailsPage } from '../../../../../tasks/alerts';
+import { getNewRule } from '../../../../../objects/rule';
+import { createRule } from '../../../../../tasks/api_calls/rules';
 
 describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
@@ -254,35 +228,4 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
         });
     });
   });
-<<<<<<<< HEAD:x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_alerts/alert_status/alert_status.cy.ts
-========
-
-  // This test is unable to be run in serverless as `reader` is not available and viewer is currently reserved
-  // https://github.com/elastic/kibana/pull/169723#issuecomment-1793191007
-  // https://github.com/elastic/kibana/issues/170583
-  context('User is readonly', { tags: ['@ess', '@brokenInServerless'] }, () => {
-    beforeEach(() => {
-      login();
-      visit(ALERTS_URL);
-      deleteAlertsAndRules();
-      createRule(getNewRule());
-      login(ROLES.reader);
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-    });
-    it('should not allow users to change a single alert status', () => {
-      // This is due to the reader role which makes everything in security 'read only'
-      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
-    });
-
-    it('should not allow users to bulk change the alert status', () => {
-      selectNumberOfAlerts(2);
-      cy.get(TAKE_ACTION_POPOVER_BTN).first().click();
-      cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible');
-
-      cy.get(CLOSE_SELECTED_ALERTS_BTN).should('not.exist');
-      cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('not.exist');
-    });
-  });
->>>>>>>> 8d3e8cd838ad80f8955c986fe830a9e6590a60de:x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine/detection_alerts/status/alert_status.cy.ts
 });
