@@ -25,7 +25,7 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { GcpCredentialsType } from '../../../common/types';
+import { GcpCredentialsType } from '../../../common/types_old';
 import {
   CLOUDBEAT_GCP,
   SETUP_ACCESS_CLOUD_SHELL,

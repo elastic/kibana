@@ -33,6 +33,9 @@ export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.sev
 
 export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 
+export const ALERT_TABLE_ROW = (rowIndex: number) =>
+  `[data-grid-row-index="${rowIndex}"] [data-test-subj="dataGridRowCell"]`;
+
 export const ALERT_DATA_GRID_ROW = `${ALERT_DATA_GRID} .euiDataGridRow`;
 
 export const ALERTS_COUNT = '[data-test-subj="toolbar-alerts-count"]';
@@ -182,6 +185,9 @@ export const ALERT_RENDERER_HOST_NAME =
   '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
 
 export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hover-actions-container');
+
+export const SECURITY_SOLUTION_USERS_AVATAR = (user: string) =>
+  `[data-test-subj="securitySolutionUsersAvatar-${user}"]`;
 
 export const ALERT_USERS_PROFILES_SELECTABLE_MENU_ITEM = '.euiSelectableListItem';
 export const ALERT_USERS_PROFILES_CLEAR_SEARCH_BUTTON = '[data-test-subj="clearSearchButton"]';

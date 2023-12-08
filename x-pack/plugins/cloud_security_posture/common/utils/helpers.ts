@@ -17,7 +17,7 @@ import {
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CLOUDBEAT_VANILLA,
-  CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP,
   GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP,
   AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP,
@@ -30,7 +30,7 @@ import type {
   GcpCredentialsType,
   AzureCredentialsType,
   RuleSection,
-} from '../types';
+} from '../types_old';
 
 /**
  * @example
@@ -50,9 +50,9 @@ export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'
 };
 
 export const getBenchmarkFilter = (type: BenchmarkId, section?: RuleSection): string =>
-  `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"${
+  `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"${
     section
-      ? ` AND ${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${section}"`
+      ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${section}"`
       : ''
   }`;
 

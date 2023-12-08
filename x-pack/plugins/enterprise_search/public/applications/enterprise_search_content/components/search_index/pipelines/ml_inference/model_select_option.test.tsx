@@ -32,7 +32,7 @@ const DEFAULT_PROPS: ModelSelectOptionProps = {
   title: 'Model 1',
   description: 'Model 1 description',
   licenseType: 'elastic',
-  licensePageUrl: 'https://licen.se',
+  modelDetailsPageUrl: 'https://my-model.ai',
   deploymentState: MlModelDeploymentState.NotDeployed,
   startTime: 0,
   targetAllocationCount: 0,
@@ -102,7 +102,7 @@ describe('LicenseBadge', () => {
     const wrapper = shallow(
       <LicenseBadge
         licenseType={DEFAULT_PROPS.licenseType!}
-        licensePageUrl={DEFAULT_PROPS.licensePageUrl}
+        modelDetailsPageUrl={DEFAULT_PROPS.modelDetailsPageUrl}
       />
     );
     expect(wrapper.find(EuiLink)).toHaveLength(1);
