@@ -19,7 +19,6 @@ import {
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
   PartialRule,
-  IsSystemAction,
 } from '../types';
 
 const paramSchema = schema.object({
@@ -27,29 +26,26 @@ const paramSchema = schema.object({
   newId: schema.maybe(schema.string()),
 });
 
-const rewriteBodyRes = (
-  {
-    actions,
-    alertTypeId,
-    scheduledTaskId,
-    createdBy,
-    updatedBy,
-    createdAt,
-    updatedAt,
-    apiKeyOwner,
-    apiKeyCreatedByUser,
-    notifyWhen,
-    muteAll,
-    mutedInstanceIds,
-    executionStatus,
-    snoozeSchedule,
-    isSnoozedUntil,
-    lastRun,
-    nextRun,
-    ...rest
-  }: PartialRule<RuleTypeParams>,
-  isSystemAction: IsSystemAction
-) => ({
+const rewriteBodyRes = ({
+  actions,
+  alertTypeId,
+  scheduledTaskId,
+  createdBy,
+  updatedBy,
+  createdAt,
+  updatedAt,
+  apiKeyOwner,
+  apiKeyCreatedByUser,
+  notifyWhen,
+  muteAll,
+  mutedInstanceIds,
+  executionStatus,
+  snoozeSchedule,
+  isSnoozedUntil,
+  lastRun,
+  nextRun,
+  ...rest
+}: PartialRule<RuleTypeParams>) => ({
   ...rest,
   api_key_owner: apiKeyOwner,
   created_by: createdBy,
@@ -74,7 +70,7 @@ const rewriteBodyRes = (
     : {}),
   ...(actions
     ? {
-        actions: rewriteActionsRes(actions, isSystemAction),
+        actions: rewriteActionsRes(actions),
       }
     : {}),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
@@ -97,12 +93,11 @@ export const cloneRuleRoute = (
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
-          const { isSystemAction } = (await context.actions).getActionsClient();
           const { id, newId } = req.params;
           try {
             const cloneRule = await rulesClient.clone(id, { newId });
             return res.ok({
-              body: rewriteBodyRes(cloneRule, isSystemAction),
+              body: rewriteBodyRes(cloneRule),
             });
           } catch (e) {
             if (e instanceof RuleTypeDisabledError) {

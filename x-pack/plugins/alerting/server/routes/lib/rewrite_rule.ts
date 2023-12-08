@@ -6,7 +6,13 @@
  */
 import { omit } from 'lodash';
 
-import { RuleTypeParams, SanitizedRule, RuleLastRun } from '../../types';
+import {
+  RuleTypeParams,
+  SanitizedRule,
+  RuleLastRun,
+  RuleActionTypes,
+  RuleDefaultAction,
+} from '../../types';
 
 export const rewriteRuleLastRun = (lastRun: RuleLastRun) => {
   const { outcomeMsg, outcomeOrder, alertsCount, ...rest } = lastRun;
@@ -58,23 +64,37 @@ export const rewriteRule = ({
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params, frequency, uuid, alertsFilter }) => ({
-    group,
-    id,
-    params,
-    connector_type_id: actionTypeId,
-    ...(frequency
-      ? {
-          frequency: {
-            summary: frequency.summary,
-            notify_when: frequency.notifyWhen,
-            throttle: frequency.throttle,
-          },
-        }
-      : {}),
-    ...(uuid && { uuid }),
-    ...(alertsFilter && { alerts_filter: alertsFilter }),
-  })),
+  actions: actions.map(
+    ({ id, actionTypeId, params, uuid, type, useAlertDataForTemplate, ...action }) => {
+      if (type === RuleActionTypes.SYSTEM) {
+        return {
+          ...action,
+          connector_type_id: actionTypeId,
+          ...(typeof useAlertDataForTemplate !== 'undefined'
+            ? { use_alert_data_for_template: useAlertDataForTemplate }
+            : {}),
+        };
+      }
+      const { group, frequency, alertsFilter } = action as RuleDefaultAction;
+      return {
+        group,
+        id,
+        params,
+        connector_type_id: actionTypeId,
+        ...(frequency
+          ? {
+              frequency: {
+                summary: frequency.summary,
+                notify_when: frequency.notifyWhen,
+                throttle: frequency.throttle,
+              },
+            }
+          : {}),
+        ...(uuid && { uuid }),
+        ...(alertsFilter && { alerts_filter: alertsFilter }),
+      };
+    }
+  ),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),

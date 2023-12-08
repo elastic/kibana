@@ -57,10 +57,7 @@ export const rewriteActionsReq = (
   );
 };
 
-export const rewriteActionsRes = (
-  actions: RuleAction[] | undefined,
-  isSystemAction: IsSystemAction
-) => {
+export const rewriteActionsRes = (actions?: RuleAction[]) => {
   const rewriteFrequency = ({
     notifyWhen,
     ...rest
@@ -70,7 +67,7 @@ export const rewriteActionsRes = (
   });
   if (!actions) return [];
   return actions.map(({ actionTypeId, useAlertDataForTemplate, ...action }) => {
-    if (isSystemAction(action.id)) {
+    if (action.type === RuleActionTypes.SYSTEM) {
       return {
         ...action,
         connector_type_id: actionTypeId,
