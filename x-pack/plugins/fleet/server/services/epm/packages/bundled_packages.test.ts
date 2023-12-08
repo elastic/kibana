@@ -16,6 +16,7 @@ import {
   getBundledPackages,
   _purgeBundledPackagesCache,
 } from './bundled_packages';
+import { omit } from 'lodash';
 
 jest.mock('fs/promises');
 jest.mock('../../app_context');
@@ -68,8 +69,18 @@ describe('bundledPackages', () => {
     it('should use cache if called multiple time', async () => {
       const packagesRes1 = await getBundledPackages();
       const packagesRes2 = await getBundledPackages();
-      expect(packagesRes1).toEqual(packagesRes2);
+      expect(packagesRes1.map((p) => omit(p, 'getBuffer'))).toEqual(
+        packagesRes2.map((p) => omit(p, 'getBuffer'))
+      );
       expect(fs.readdir).toBeCalledTimes(1);
+    });
+
+    it('should cache getBuffer if called multiple time in the scope of getBundledPackages', async () => {
+      const packagesRes1 = await getBundledPackages();
+
+      await packagesRes1[0].getBuffer();
+      await packagesRes1[0].getBuffer();
+      expect(fs.readFile).toBeCalledTimes(1);
     });
 
     it('should not use cache if called multiple time and cache is disabled', async () => {
