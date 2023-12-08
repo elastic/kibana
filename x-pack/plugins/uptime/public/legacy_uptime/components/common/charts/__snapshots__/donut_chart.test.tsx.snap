@@ -523,7 +523,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
             "tooltip": Object {
               "defaultDotColor": "black",
               "maxTableHeight": 120,
-              "maxWidth": 500,
+              "maxWidth": 260,
             },
           }
         }
