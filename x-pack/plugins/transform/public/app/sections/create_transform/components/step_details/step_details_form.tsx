@@ -109,6 +109,8 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [destIndexAvailableTimeFields, setDestIndexAvailableTimeFields] = useState<string[]>([]);
     const [dataViewTimeField, setDataViewTimeField] = useState<string | undefined>();
 
+    // @TODO: remove
+    console.log(`--@@destIndexAvailableTimeFields`, destIndexAvailableTimeFields);
     const onTimeFieldChanged = React.useCallback(
       (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
@@ -162,6 +164,8 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     useEffect(() => {
       if (transformPreview) {
         const properties = transformPreview.generated_dest_index.mappings.properties;
+        // @TODO: remove
+        console.log(`--@@properties`, properties);
         const timeFields: string[] = Object.keys(properties).filter(
           (col) => properties[col].type === 'date'
         );
@@ -273,15 +277,10 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const isRetentionPolicyMaxAgeValid = retentionPolicyMaxAgeValidator(retentionPolicyMaxAge);
 
     useEffect(() => {
-      if (!isRetentionPolicyAvailable) {
-        setRetentionPolicyEnabled(false);
-      }
       // Reset retention policy settings when the user disables the whole option
       if (!isRetentionPolicyEnabled) {
         setRetentionPolicyDateField(
-          isRetentionPolicyAvailable && destIndexAvailableTimeFields.length > 0
-            ? destIndexAvailableTimeFields[0]
-            : ''
+          isRetentionPolicyAvailable ? destIndexAvailableTimeFields[0] : ''
         );
         setRetentionPolicyMaxAge('');
       }
@@ -290,7 +289,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       if (
         isRetentionPolicyAvailable &&
         isRetentionPolicyEnabled &&
-        retentionPolicyDateField === undefined
+        retentionPolicyDateField === ''
       ) {
         // If a time field '@timestamp' exists, prioritize that
         const prioritizeTimestamp = destIndexAvailableTimeFields.find((d) => d === '@timestamp');
