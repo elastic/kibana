@@ -53,6 +53,7 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { memoize } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { getHistory } from './kibana_services';
 import { DiscoverStartPlugins } from './plugin';
 import { DiscoverContextAppLocator } from './application/context/services/locator';
@@ -111,6 +112,7 @@ export interface DiscoverServices {
   uiActions: UiActionsStart;
   contentClient: ContentClient;
   noDataPage?: NoDataPagePluginStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export const buildServices = memoize(function (
@@ -171,5 +173,6 @@ export const buildServices = memoize(function (
     uiActions: plugins.uiActions,
     contentClient: plugins.contentManagement.client,
     noDataPage: plugins.noDataPage,
+    serverless: plugins.serverless,
   };
 });

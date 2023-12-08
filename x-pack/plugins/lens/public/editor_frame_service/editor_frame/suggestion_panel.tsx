@@ -549,35 +549,37 @@ export function SuggestionPanel({
       forceState={hideSuggestions ? 'closed' : 'open'}
       onToggle={toggleSuggestions}
       extraAction={
-        !hideSuggestions && (
-          <>
-            {existsStagedPreview && (
-              <EuiToolTip
-                content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
-                  defaultMessage: 'Refresh the suggestions based on the selected visualization.',
-                })}
-              >
-                <EuiButtonEmpty
-                  data-test-subj="lensSubmitSuggestion"
-                  size="xs"
-                  iconType="refresh"
-                  onClick={() => {
-                    dispatchLens(submitSuggestion());
-                  }}
-                >
-                  {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
-                    defaultMessage: 'Refresh',
+        <>
+          {!hideSuggestions && (
+            <>
+              {existsStagedPreview && (
+                <EuiToolTip
+                  content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
+                    defaultMessage: 'Refresh the suggestions based on the selected visualization.',
                   })}
-                </EuiButtonEmpty>
-              </EuiToolTip>
-            )}
-            {wrapSuggestions && (
-              <EuiNotificationBadge size="m" color="subdued">
-                {suggestions.length + 1}
-              </EuiNotificationBadge>
-            )}
-          </>
-        )
+                >
+                  <EuiButtonEmpty
+                    data-test-subj="lensSubmitSuggestion"
+                    size="xs"
+                    iconType="refresh"
+                    onClick={() => {
+                      dispatchLens(submitSuggestion());
+                    }}
+                  >
+                    {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
+                      defaultMessage: 'Refresh',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              )}
+            </>
+          )}
+          {wrapSuggestions && (
+            <EuiNotificationBadge size="m" color="subdued">
+              {suggestions.length + 1}
+            </EuiNotificationBadge>
+          )}
+        </>
       }
     >
       <div
