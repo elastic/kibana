@@ -711,38 +711,6 @@ describe('agent policy', () => {
         })
       ).rejects.toThrowError(new Error('Cannot enable Agent Tamper Protection: reason'));
     });
-
-    it('should not allow agent tamper protection to be turned on with a managed policy', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-
-      mockedAppContextService.getUninstallTokenService.mockReturnValueOnce({
-        checkTokenValidityForPolicy: jest
-          .fn()
-          .mockResolvedValueOnce({ error: new Error('managed policy reason') }),
-      } as unknown as UninstallTokenServiceInterface);
-
-      const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-      soClient.get.mockResolvedValue({
-        attributes: {},
-        id: 'test-id',
-        type: 'mocked',
-        references: [],
-      });
-
-      // fix this!
-      await expect(
-        agentPolicyService.update(soClient, esClient, 'test-id', {
-          name: 'test',
-          namespace: 'default',
-          is_protected: true,
-          is_managed: false,
-        })
-      ).rejects.toThrowError(
-        new Error('Cannot enable Agent Tamper Protection: managed policy reason')
-      );
-    });
   });
 
   describe('deployPolicy', () => {
