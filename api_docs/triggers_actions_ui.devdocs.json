@@ -177,7 +177,15 @@
             "label": "start",
             "description": [],
             "signature": [
-              "() => ",
+              "(_: ",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              },
+              ", plugins: PluginsStart) => ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -189,7 +197,44 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.Plugin.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "_",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.Plugin.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "PluginsStart"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -5870,6 +5915,36 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.fieldFormats",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fieldFormats",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatsRegistry",
+                "text": "FieldFormatsRegistry"
+              },
+              ", \"init\" | \"register\"> & { deserialize: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FormatFactory",
+                "text": "FormatFactory"
+              },
+              "; }"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9896,6 +9971,18 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.ALERT_TABLE_GENERIC_CONFIG_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_TABLE_GENERIC_CONFIG_ID",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/common/alert_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "triggersActionsUi",
         "id": "def-common.BASE_TRIGGERS_ACTIONS_UI_API_PATH",

@@ -13,9 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibanaServices } from '../hooks/use_kibana';
 
 export const PipelineButtonOverview: React.FC = () => {
-  const {
-    application: { navigateToUrl },
-  } = useKibanaServices();
+  const { http } = useKibanaServices();
 
   return (
     <>
@@ -23,7 +21,7 @@ export const PipelineButtonOverview: React.FC = () => {
       <EuiButton
         iconType="plusInCircle"
         size="s"
-        onClick={() => navigateToUrl('/app/management/ingest/ingest_pipelines/create')}
+        href={http.basePath.prepend('/app/management/ingest/ingest_pipelines/create')}
         data-test-subj="create-a-pipeline-button"
       >
         <EuiText size="s">
