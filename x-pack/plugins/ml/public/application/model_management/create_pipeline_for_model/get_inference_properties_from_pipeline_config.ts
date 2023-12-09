@@ -6,6 +6,10 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  IngestInferenceProcessor,
+  IngestInferenceConfig,
+} from '@elastic/elasticsearch/lib/api/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { DEFAULT_INPUT_FIELD } from '../test_models/models/inference_base';
@@ -22,10 +26,20 @@ const MODEL_INFERENCE_CONFIG_PROPERTIES = {
 type SupportedModelInferenceConfigPropertiesType = keyof typeof MODEL_INFERENCE_CONFIG_PROPERTIES;
 
 // Currently, estypes doesn't include pipeline processor types with the trained model processors
-type MLInferencePipelineInferenceConfig = estypes.IngestPipeline & {
+type MLInferencePipelineInferenceConfig = IngestInferenceConfig & {
   zero_shot_classification?: estypes.MlZeroShotClassificationInferenceOptions;
   question_answering?: estypes.MlQuestionAnsweringInferenceUpdateOptions;
 };
+
+interface GetInferencePropertiesFromPipelineConfigReturnType {
+  inputField: string;
+  inferenceConfig?: MLInferencePipelineInferenceConfig;
+  inferenceObj?: any;
+  fieldMap?: IngestInferenceProcessor['field_map'];
+  labels?: string | string[];
+  multi_label?: boolean;
+  question?: string;
+}
 
 function isSupportedInferenceConfigPropertyType(
   arg: unknown
@@ -45,8 +59,8 @@ function isMlInferencePipelineInferenceConfig(
 export function getInferencePropertiesFromPipelineConfig(
   type: string,
   pipelineConfig: estypes.IngestPipeline
-): any {
-  const propertiesToReturn: Record<string, any> = {
+): GetInferencePropertiesFromPipelineConfigReturnType {
+  const propertiesToReturn: GetInferencePropertiesFromPipelineConfigReturnType = {
     [INPUT_FIELD]: '',
   };
 
@@ -75,7 +89,8 @@ export function getInferencePropertiesFromPipelineConfig(
         isSupportedInferenceConfigPropertyType(type)
       ) {
         MODEL_INFERENCE_CONFIG_PROPERTIES[type]?.forEach((property) => {
-          const configSettings = propertiesToReturn.inferenceConfig[type];
+          const configSettings =
+            propertiesToReturn.inferenceConfig && propertiesToReturn.inferenceConfig[type];
           propertiesToReturn[property] =
             configSettings && configSettings.hasOwnProperty(property)
               ? // @ts-ignore

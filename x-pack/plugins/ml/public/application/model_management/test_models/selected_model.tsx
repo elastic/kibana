@@ -79,8 +79,10 @@ export const SelectedModel: FC<Props> = ({
           );
           if (pipelineConfigValues) {
             const { labels, multi_label: multiLabel } = pipelineConfigValues;
-            tempInferrer.setLabelsText(Array.isArray(labels) ? labels.join(',') : labels);
-            tempInferrer.setMultiLabel(Boolean(multiLabel));
+            if (labels && multiLabel !== undefined) {
+              tempInferrer.setLabelsText(Array.isArray(labels) ? labels.join(',') : labels);
+              tempInferrer.setMultiLabel(Boolean(multiLabel));
+            }
           }
           break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING:
@@ -96,7 +98,7 @@ export const SelectedModel: FC<Props> = ({
             inputType,
             deploymentId
           );
-          if (pipelineConfigValues) {
+          if (pipelineConfigValues?.question) {
             tempInferrer.setQuestionText(pipelineConfigValues.question);
           }
           break;
