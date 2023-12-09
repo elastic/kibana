@@ -41,6 +41,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onOverrideFieldGroupDetails?: OverrideFieldGroupDetails;
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
+  isCompatibleField?: (fields: DataViewField) => boolean;
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
@@ -53,6 +54,7 @@ export interface GroupedFieldsResult<T extends FieldListItem> {
     screenReaderDescriptionId?: string;
   };
   allFields: T[] | null; // `null` is for loading indicator
+  hasNewFields: boolean;
 }
 
 export function useGroupedFields<T extends FieldListItem = DataViewField>({
@@ -66,6 +68,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   onOverrideFieldGroupDetails,
   onSupportedFieldFilter,
   onSelectedFieldFilter,
+  isCompatibleField,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
   const fieldsExistenceReader = useExistingFieldsReader();
   const fieldListFilters = useFieldFilters<T>({
@@ -74,7 +77,8 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     getCustomFieldType,
     onSupportedFieldFilter,
   });
-  const fieldsToSort = useRef(allFields);
+  const allFieldsInclNew = useRef(allFields);
+  const hasNewFields = useRef(false);
   const onFilterFieldList = fieldListFilters.onFilterField;
   const [dataView, setDataView] = useState<DataView | null>(null);
   const isAffectedByTimeFilter = Boolean(dataView?.timeFieldName);
@@ -122,16 +126,23 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     };
 
     const selectedFields = sortedSelectedFields || [];
-    const newFields = dataViewId ? fieldsExistenceReader.getNewFields(dataViewId) : [];
-    fieldsToSort.current =
-      allFields && newFields.length
-        ? allFields.map((field) => {
-            return (dataView?.getFieldByName(field.name) as unknown as T) ?? field;
-          })
-        : allFields;
+    const newFields = dataViewId
+      ? fieldsExistenceReader
+          .getNewFields(dataViewId)
+          .filter((field) => (isCompatibleField ? isCompatibleField(field) : true))
+      : [];
+    // remove fields from allFields that are available in newFields, because they can be provided in unmapped state
+    const allFieldsWithoutNewFields = !newFields.length
+      ? allFields
+      : allFields?.filter((field) => !newFields.find((newField) => newField.name === field.name));
+    // append new fields to the end of the list allFieldsWithoutNewFields
+    const allFieldsWithNewFields = allFieldsWithoutNewFields
+      ? [...allFieldsWithoutNewFields, ...newFields]
+      : newFields;
 
-    const sortedFields = [...(fieldsToSort.current || [])].sort(sortFields);
-
+    const sortedFields = [...((allFieldsWithNewFields as unknown as T[]) || [])].sort(sortFields);
+    allFieldsInclNew.current = sortedFields;
+    hasNewFields.current = Boolean(newFields.length);
     const groupedFields = {
       ...getDefaultFieldGroups(),
       ...groupBy(sortedFields, (field) => {
@@ -336,6 +347,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     onSelectedFieldFilter,
     onSupportedFieldFilter,
     dataView,
+    isCompatibleField,
   ]);
 
   const fieldGroups: FieldListGroups<T> = useMemo(() => {
@@ -394,7 +406,8 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   return {
     fieldListGroupedProps,
     fieldListFiltersProps: fieldListFilters.fieldListFiltersProps,
-    allFields: fieldsToSort.current,
+    allFields: allFieldsInclNew.current,
+    hasNewFields: hasNewFields.current,
   };
 }
 
@@ -417,6 +430,5 @@ function getDefaultFieldGroups() {
     metaFields: [],
     unmappedFields: [],
     skippedFields: [],
-    newFields: [],
   };
 }

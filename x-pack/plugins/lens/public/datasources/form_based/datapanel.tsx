@@ -28,6 +28,7 @@ import {
   useGroupedFields,
 } from '@kbn/unified-field-list';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import type {
   DatasourceDataPanelProps,
   FramePublicAPI,
@@ -249,18 +250,20 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     }
   }, []);
 
-  const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields<IndexPatternField>({
-    dataViewId: currentIndexPatternId,
-    allFields,
-    services: {
-      dataViews,
-      core,
-    },
-    isAffectedByGlobalFilter: Boolean(filters.length),
-    onSupportedFieldFilter,
-    onSelectedFieldFilter,
-    onOverrideFieldGroupDetails,
-  });
+  const { fieldListFiltersProps, fieldListGroupedProps, hasNewFields } =
+    useGroupedFields<IndexPatternField>({
+      dataViewId: currentIndexPatternId,
+      allFields,
+      services: {
+        dataViews,
+        core,
+      },
+      isAffectedByGlobalFilter: Boolean(filters.length),
+      onSupportedFieldFilter,
+      onSelectedFieldFilter,
+      onOverrideFieldGroupDetails,
+      isCompatibleField: isFieldLensCompatible,
+    });
 
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -296,6 +299,11 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     frame.dataViews.indexPatterns,
     data.search.session,
   ]);
+  useEffect(() => {
+    if (hasNewFields) {
+      refreshFieldList();
+    }
+  }, [hasNewFields, refreshFieldList]);
 
   const editField = useMemo(
     () =>
