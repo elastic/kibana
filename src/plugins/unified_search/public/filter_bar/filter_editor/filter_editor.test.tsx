@@ -12,6 +12,7 @@ import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { FilterEditorProps } from '.';
 import { FilterEditor } from '.';
+import { dataViewMockList, dataViewsMock } from '@kbn/unified-data-table/__mocks__/data_views';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
@@ -50,6 +51,7 @@ describe('<FilterEditor />', () => {
         onCancel: jest.fn(),
         onSubmit: jest.fn(),
         docLinks: coreMock.createStart().docLinks,
+        dataViewService: dataViewsMock,
       };
       testBed = await registerTestBed(FilterEditor, { defaultProps })();
     });
@@ -74,6 +76,38 @@ describe('<FilterEditor />', () => {
       });
 
       expect(find('saveFilter').props().disabled).toBe(false);
+    });
+  });
+  describe('handling data view fallback', () => {
+    let testBed: TestBed;
+
+    beforeEach(async () => {
+      const defaultProps: Omit<FilterEditorProps, 'intl'> = {
+        theme: {
+          euiTheme: {} as unknown as EuiThemeComputed<{}>,
+          colorMode: 'DARK',
+          modifications: [],
+        } as UseEuiTheme<{}>,
+        filter: {
+          meta: {
+            type: 'phase',
+            index: dataViewMockList[1].id,
+          } as any,
+        },
+        indexPatterns: [dataViewMockList[0]],
+        onCancel: jest.fn(),
+        onSubmit: jest.fn(),
+        docLinks: coreMock.createStart().docLinks,
+        dataViewService: dataViewsMock,
+      };
+      testBed = await registerTestBed(FilterEditor, { defaultProps })();
+    });
+
+    it('renders the right data view to be selected', async () => {
+      const { exists, component, find } = testBed;
+      component.update();
+      expect(exists('filterIndexPatternsSelect')).toBe(true);
+      expect(find('filterIndexPatternsSelect').text()).toBe(dataViewMockList[1].getName());
     });
   });
 });

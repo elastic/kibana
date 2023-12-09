@@ -119,6 +119,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
           filtersForSuggestions={filtersForSuggestions}
           suggestionsAbstraction={suggestionsAbstraction}
           docLinks={docLinks}
+          dataViewService={data.dataViews}
         />
       )}
     </div>
