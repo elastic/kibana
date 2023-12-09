@@ -842,6 +842,7 @@
     "@kbn/vis-type-vislib-plugin": "link:src/plugins/vis_types/vislib",
     "@kbn/vis-type-xy-plugin": "link:src/plugins/vis_types/xy",
     "@kbn/visualization-ui-components": "link:packages/kbn-visualization-ui-components",
+    "@kbn/visualization-utils": "link:packages/kbn-visualization-utils",
     "@kbn/visualizations-plugin": "link:src/plugins/visualizations",
     "@kbn/watcher-plugin": "link:x-pack/plugins/watcher",
     "@kbn/xstate-utils": "link:packages/kbn-xstate-utils",
