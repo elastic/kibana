@@ -168,7 +168,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "recommended",
-            "description": [],
+            "description": [
+              "Indicates if model version is recommended for deployment based on the cluster configuration"
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -196,7 +198,25 @@
             "type": "string",
             "tags": [],
             "label": "license",
-            "description": [],
+            "description": [
+              "Software license of a model, e.g. MIT"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-trained-models-utils",
+            "id": "def-common.ModelDefinition.licenseUrl",
+            "type": "string",
+            "tags": [],
+            "label": "licenseUrl",
+            "description": [
+              "Link to the external license/documentation page"
+            ],
             "signature": [
               "string | undefined"
             ],
