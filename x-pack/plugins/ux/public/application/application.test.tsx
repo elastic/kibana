@@ -67,6 +67,9 @@ const mockCorePlugins = {
       ),
     },
   },
+  observabilityAIAssistant: {
+    service: {},
+  },
   data: {
     query: {
       timefilter: {

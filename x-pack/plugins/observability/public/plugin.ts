@@ -8,6 +8,7 @@
 import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import {
   AppDeepLink,
@@ -23,6 +24,7 @@ import {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { LOG_EXPLORER_LOCATOR_ID, LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
@@ -33,6 +35,8 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
@@ -59,8 +63,9 @@ import {
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
+
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -82,13 +87,14 @@ import {
   ObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+
 export interface ConfigSchema {
   unsafe: {
     alertDetails: {
       metrics: {
         enabled: boolean;
       };
-      logs: {
+      logs?: {
         enabled: boolean;
       };
       uptime: {
@@ -103,9 +109,7 @@ export interface ConfigSchema {
     };
   };
 }
-
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
-
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
@@ -115,9 +119,9 @@ export interface ObservabilityPublicPluginsSetup {
   home?: HomePublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   embeddable: EmbeddableSetup;
+  uiActions: UiActionsSetup;
   licensing: LicensingPluginSetup;
 }
-
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
   cases: CasesUiStart;
@@ -145,8 +149,9 @@ export interface ObservabilityPublicPluginsStart {
   cloud?: CloudStart;
   aiops: AiopsPluginStart;
   serverless?: ServerlessPluginStart;
+  uiSettings: IUiSettingsClient;
+  uiActions: UiActionsStart;
 }
-
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
 export class Plugin
@@ -239,6 +244,9 @@ export class Plugin
     const sloEditLocator = pluginsSetup.share.url.locators.create(new SloEditLocatorDefinition());
     const sloListLocator = pluginsSetup.share.url.locators.create(new SloListLocatorDefinition());
 
+    const logExplorerLocator =
+      pluginsSetup.share.url.locators.get<LogExplorerLocatorParams>(LOG_EXPLORER_LOCATOR_ID);
+
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
       const { renderApp } = await import('./application');
@@ -292,7 +300,7 @@ export class Plugin
 
     coreSetup.application.register(app);
 
-    registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
+    registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry, logExplorerLocator);
 
     const assertPlatinumLicense = async () => {
       const licensing = await pluginsSetup.licensing;
@@ -308,6 +316,25 @@ export class Plugin
           pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
         };
         registerSloOverviewEmbeddableFactory();
+        const registerSloAlertsEmbeddableFactory = async () => {
+          const { SloAlertsEmbeddableFactoryDefinition } = await import(
+            './embeddable/slo/alerts/slo_alerts_embeddable_factory'
+          );
+          const factory = new SloAlertsEmbeddableFactoryDefinition(
+            coreSetup.getStartServices,
+            kibanaVersion
+          );
+          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
+        };
+        registerSloAlertsEmbeddableFactory();
+
+        const registerAsyncSloAlertsUiActions = async () => {
+          if (pluginsSetup.uiActions) {
+            const { registerSloAlertsUiActions } = await import('./ui_actions');
+            registerSloAlertsUiActions(pluginsSetup.uiActions, coreSetup);
+          }
+        };
+        registerAsyncSloAlertsUiActions();
       }
     };
 
@@ -413,6 +440,17 @@ export class Plugin
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
 
     getAsyncO11yAlertsTableConfiguration().then((alertsTableConfig) => {
+      alertsTableConfigurationRegistry.register(alertsTableConfig);
+    });
+
+    const getAsyncSloEmbeddableAlertsTableConfiguration = async () => {
+      const { getSloAlertsTableConfiguration } = await import(
+        './components/alerts_table/slo/get_slo_alerts_table_configuration'
+      );
+      return getSloAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
+    };
+
+    getAsyncSloEmbeddableAlertsTableConfiguration().then((alertsTableConfig) => {
       alertsTableConfigurationRegistry.register(alertsTableConfig);
     });
 
