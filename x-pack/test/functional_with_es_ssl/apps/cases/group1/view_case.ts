@@ -1025,6 +1025,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it("shows the 'activity' tab when clicked", async () => {
+        // Go to the files tab first
+        await testSubjects.click('case-view-tab-title-files');
+        await testSubjects.existOrFail('case-view-tab-content-files');
+
         await testSubjects.click('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-content-activity');
       });
