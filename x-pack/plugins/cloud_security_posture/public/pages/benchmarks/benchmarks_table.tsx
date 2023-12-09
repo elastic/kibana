@@ -161,7 +161,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     },
   },
   {
-    field: 'benchmark_evaluation',
+    field: 'evaluation',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.evaluated', {
       defaultMessage: 'Evaluated',
     }),

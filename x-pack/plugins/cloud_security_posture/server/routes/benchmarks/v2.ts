@@ -163,7 +163,6 @@ export const getBenchmarks = async (
     ...packagePolicies,
     items: benchmarksVersion2,
     items_policies_information: benchmarks,
-    items2: { benchmarksVersion2, benchmarks },
   };
   return getBenchmarkResponse;
 };
