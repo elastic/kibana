@@ -11,14 +11,16 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { getTimeZone } from './get_timezone';
 
 describe('getTimeZone', () => {
-  let originalTimezone: moment.MomentZone | null;
+  const originalTimezone = moment.tz.guess();
 
   beforeAll(() => {
     moment.tz.setDefault('America/New_York');
   });
 
   afterAll(() => {
-    moment.tz.setDefault(originalTimezone ? originalTimezone.name : '');
+    if (originalTimezone) {
+      moment.tz.setDefault(originalTimezone);
+    }
   });
 
   it('returns local time zone when uiSettings returns Browser', () => {
