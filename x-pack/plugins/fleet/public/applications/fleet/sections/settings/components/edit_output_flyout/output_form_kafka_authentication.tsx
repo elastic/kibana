@@ -182,6 +182,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                 )}
                 {...inputs.kafkaSslKeySecretInput.formRowProps}
                 onUsePlainText={onUsePlainText}
+                cancelEdit={inputs.kafkaSslKeySecretInput.cancelEdit}
               >
                 <EuiTextArea
                   fullWidth
@@ -247,6 +248,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                 )}
                 {...inputs.kafkaAuthPasswordSecretInput.formRowProps}
                 onUsePlainText={onUsePlainText}
+                cancelEdit={inputs.kafkaAuthPasswordSecretInput.cancelEdit}
               >
                 <EuiFieldPassword
                   type={'dual'}
