@@ -23,7 +23,7 @@ export function WorkspaceErrors(props: Props) {
     <EuiEmptyPrompt
       actions={
         props.errors.length > 1 ? (
-          <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexGroup justifyContent="spaceAround" data-test-subj="lnsWorkspaceErrorsPaginationControl">
             <EuiFlexItem grow={false}>
               <EuiPagination
                 pageCount={props.errors.length}
@@ -44,6 +44,7 @@ export function WorkspaceErrors(props: Props) {
       title={<h2>{props.title}</h2>}
       iconColor="danger"
       iconType="warning"
+      data-test-subj="lnsWorkspaceErrors"
     />
   );
 }
