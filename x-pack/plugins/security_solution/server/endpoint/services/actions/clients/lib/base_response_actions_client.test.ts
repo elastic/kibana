@@ -29,7 +29,7 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
 import type { DeepMutable } from '../../../../../../common/endpoint/types/utility_types';
 import { set } from 'lodash';
-import { responseActionsClientMock } from './mocks';
+import { responseActionsClientMock } from '../mocks';
 
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');

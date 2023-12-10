@@ -6,7 +6,7 @@
  */
 
 import type { ResponseActionsClient } from '../lib/types';
-import { responseActionsClientMock } from '../lib/mocks';
+import { responseActionsClientMock } from '../mocks';
 import type { SentinelOneActionsClientOptions } from '../../..';
 import { SentinelOneActionsClient } from '../../..';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
