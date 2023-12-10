@@ -67,8 +67,8 @@ function runEvaluations() {
           log.info(`Using connector ${connector.id}`);
 
           const scenarios =
-            (argv.grep !== undefined &&
-              castArray(argv.grep).map((file) => Path.join(process.cwd(), file))) ||
+            (argv.files !== undefined &&
+              castArray(argv.files).map((file) => Path.join(process.cwd(), file))) ||
             glob.sync(Path.join(__dirname, './scenarios/**/*.ts'));
 
           if (!scenarios.length) {

@@ -12,10 +12,10 @@ export function options(y: Argv) {
   const config = readKibanaConfig();
 
   return y
-    .positional('grep', {
+    .positional('files', {
       string: true as const,
       array: true,
-      describe: 'A glob pattern for which scenarios to evaluate',
+      describe: 'A file or list of files containing the scenarios to evaluate. Defaults to all',
     })
     .option('kibana', {
       describe: 'Where Kibana is running',
