@@ -13,6 +13,8 @@ import { createAppMockRenderer } from '../../common/mock';
 import '../../common/mock/match_media';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation/hooks';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import { useGetActionTypes } from '../../containers/configure/use_action_types';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { basicCaseClosed, connectorsMock, getCaseUsersMockResponse } from '../../containers/mock';
 import type { UseGetCase } from '../../containers/use_get_case';
 import { useGetCase } from '../../containers/use_get_case';
@@ -36,7 +38,7 @@ import {
 import type { CaseViewPageProps } from './types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
-import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { actionTypesMock, getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 import { useGetCaseUserActionsStats } from '../../containers/use_get_case_user_actions_stats';
 import { createQueryWithMarkup } from '../../common/test_utils';
@@ -44,6 +46,9 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 import { CaseMetricsFeature } from '../../../common/types/api';
 import { useGetCategories } from '../../containers/use_get_categories';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
+import { casesConfigurationsMock } from '../../containers/configure/mock';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -54,6 +59,8 @@ jest.mock('../../containers/use_get_case_user_actions_stats');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
+jest.mock('../../containers/configure/use_action_types');
+jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_case_connectors');
 jest.mock('../../containers/use_get_case_users');
@@ -68,6 +75,7 @@ jest.mock('../../common/hooks');
 jest.mock('../connectors/resilient/api');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_categories');
+jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useUrlParamsMock = useUrlParams as jest.Mock;
@@ -77,6 +85,8 @@ const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
 const useGetCaseUserActionsStatsMock = useGetCaseUserActionsStats as jest.Mock;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
+const useGetActionTypesMock = useGetActionTypes as jest.Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
@@ -85,6 +95,7 @@ const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
 const useGetCategoriesMock = useGetCategories as jest.Mock;
 const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
+const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 
 const mockGetCase = (props: Partial<UseGetCase> = {}) => {
   const data = {
@@ -101,7 +112,6 @@ const mockGetCase = (props: Partial<UseGetCase> = {}) => {
 
 export const caseProps: CaseViewPageProps = {
   ...caseViewProps,
-  caseId: caseData.id,
   caseData,
   fetchCase: jest.fn(),
 };
@@ -161,6 +171,8 @@ describe('CaseViewPage', () => {
       configurable: true,
       writable: true,
     });
+
+    jest.useFakeTimers();
   });
 
   beforeEach(() => {
@@ -180,6 +192,11 @@ describe('CaseViewPage', () => {
       data: caseConnectors,
     });
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
+    useGetActionTypesMock.mockReturnValue({ data: actionTypesMock, isLoading: false });
+    useGetCaseConfigurationMock.mockReturnValue({
+      data: casesConfigurationsMock,
+      isLoading: false,
+    });
     useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
     useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
     useCasesFeaturesMock.mockReturnValue({
@@ -192,12 +209,14 @@ describe('CaseViewPage', () => {
     useGetCategoriesMock.mockReturnValue({ data: [], isLoading: false });
     useSuggestUserProfilesMock.mockReturnValue({ data: [], isLoading: false });
     useUrlParamsMock.mockReturnValue({});
+    useGetCurrentUserProfileMock.mockReturnValue({ isLoading: false, data: userProfiles[0] });
 
     appMockRenderer = createAppMockRenderer({ license: platinumLicense });
   });
 
   afterAll(() => {
     Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+    jest.useRealTimers();
   });
 
   for (let index = 0; index < 50; index++) {
