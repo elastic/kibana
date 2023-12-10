@@ -17,8 +17,8 @@ import { dump } from '../../../../utils/dump';
 import { ResponseActionsClientError } from '../errors';
 import type { ActionDetails } from '../../../../../../common/endpoint/types';
 import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
-import type { ResponseActionsClientOptions } from '../../../../lib/response_actions/base_response_actions_client';
-import { ResponseActionsClientImpl } from '../../../../lib/response_actions/base_response_actions_client';
+import type { ResponseActionsClientOptions } from '../lib/base_response_actions_client';
+import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 
 export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: ActionsClient;

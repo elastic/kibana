@@ -18,7 +18,7 @@ import type {
   UploadActionApiRequestBody,
   ResponseActionsRequestBody,
 } from '../../../../../common/api/endpoint';
-import { ResponseActionsClientImpl } from '../../../lib/response_actions/base_response_actions_client';
+import { ResponseActionsClientImpl } from './lib/base_response_actions_client';
 import type {
   ActionDetails,
   HostMetadata,

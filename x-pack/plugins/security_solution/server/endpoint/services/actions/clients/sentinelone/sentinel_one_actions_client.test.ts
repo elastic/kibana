@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ResponseActionsClient } from '../../../../lib/response_actions/types';
-import { responseActionsClientMock } from '../../../../lib/response_actions/mocks';
+import type { ResponseActionsClient } from '../lib/types';
+import { responseActionsClientMock } from '../lib/mocks';
 import type { SentinelOneActionsClientOptions } from '../../..';
 import { SentinelOneActionsClient } from '../../..';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
@@ -20,6 +20,9 @@ describe('SentinelOneActionsClient class', () => {
 
   beforeEach(() => {
     connectorActionsMock = actionsClientMock.create();
+
+    connectorActionsMock.getAll();
+
     classConstructorOptions = {
       ...responseActionsClientMock.createConstructorOptions(),
       connectorActions: connectorActionsMock,
@@ -38,6 +41,7 @@ describe('SentinelOneActionsClient class', () => {
   ] as Array<keyof ResponseActionsClient>)(
     'should throw an un-supported error for %s',
     async (methodName) => {
+      // @ts-expect-error Purposely passing in empty object for options
       await expect(s1ActionsClient[methodName]({})).rejects.toBeInstanceOf(
         ResponseActionsNotSupportedError
       );
@@ -62,7 +66,7 @@ describe('SentinelOneActionsClient class', () => {
 
   it.todo('should error if no connector is defined');
 
-  describe(`and isolate response action`, () => {
+  describe(`#isolate()`, () => {
     it.todo('should send action to sentinelone');
 
     it.todo('should write action request and response to endpoint indexes');

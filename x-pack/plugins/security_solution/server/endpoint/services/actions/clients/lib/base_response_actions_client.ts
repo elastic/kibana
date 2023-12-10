@@ -11,23 +11,20 @@ import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
-import type { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { APP_ID } from '../../../../common';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
-import { getActionDetailsById } from '../../services/actions/action_details_by_id';
-import {
-  ResponseActionsClientError,
-  ResponseActionsNotSupportedError,
-} from '../../services/actions/clients/errors';
+import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
+import { APP_ID } from '../../../../../../common';
+import type { ResponseActionsApiCommandNames } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { getActionDetailsById } from '../../action_details_by_id';
+import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import {
   addRuleInfoToAction,
   getActionParameters,
   getActionRequestExpiration,
-} from '../../services/actions/create/write_action_to_indices';
+} from '../../create/write_action_to_indices';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
-} from '../../../../common/endpoint/constants';
+} from '../../../../../../common/endpoint/constants';
 import type { ResponseActionsClient } from './types';
 import type {
   ActionDetails,
@@ -45,7 +42,7 @@ import type {
   LogsEndpointAction,
   EndpointActionDataParameterTypes,
   LogsEndpointActionResponse,
-} from '../../../../common/endpoint/types';
+} from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
   ExecuteActionRequestBody,
@@ -53,9 +50,9 @@ import type {
   ResponseActionGetFileRequestBody,
   UploadActionApiRequestBody,
   ResponseActionsRequestBody,
-} from '../../../../common/api/endpoint';
-import type { CreateActionPayload } from '../../services/actions/create/types';
-import { dump } from '../../utils/dump';
+} from '../../../../../../common/api/endpoint';
+import type { CreateActionPayload } from '../../create/types';
+import { dump } from '../../../../utils/dump';
 
 export interface ResponseActionsClientOptions {
   endpointService: EndpointAppContextService;

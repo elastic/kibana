@@ -8,7 +8,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import { getResponseActionsClient } from '../../services';
-import type { ResponseActionsClient } from '../../lib/response_actions/types';
+import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type {
   NoParametersRequestSchema,

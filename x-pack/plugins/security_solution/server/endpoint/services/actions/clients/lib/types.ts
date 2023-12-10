@@ -18,14 +18,14 @@ import type {
   ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
-} from '../../../../common/endpoint/types';
+} from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
   GetProcessesRequestBody,
   ResponseActionGetFileRequestBody,
   ExecuteActionRequestBody,
   UploadActionApiRequestBody,
-} from '../../../../common/api/endpoint';
+} from '../../../../../../common/api/endpoint';
 
 /**
  * The interface required for a Response Actions provider

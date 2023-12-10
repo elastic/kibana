@@ -11,12 +11,12 @@ import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { Mutable } from 'utility-types';
 import { merge } from 'lodash';
-import type { IsolationRouteRequestBody } from '../../../../common/api/endpoint';
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
+import { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
-} from '../../mocks';
+} from '../../../../mocks';
 import type { ResponseActionsClientOptions } from './base_response_actions_client';
 
 export interface ResponseActionsClientOptionsMock extends ResponseActionsClientOptions {
@@ -24,7 +24,7 @@ export interface ResponseActionsClientOptionsMock extends ResponseActionsClientO
   casesClient?: CasesClientMock;
 }
 
-const createConstructorOptions = (): ResponseActionsClientOptionsMock => {
+const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMock> => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
   const casesClient = createCasesClientMock();
   const endpointService = new EndpointAppContextService();
@@ -40,7 +40,7 @@ const createConstructorOptions = (): ResponseActionsClientOptionsMock => {
   };
 };
 
-const createIsolateOptions = (
+const createIsolateOptionsMock = (
   overrides: Partial<IsolationRouteRequestBody> = {}
 ): Mutable<IsolationRouteRequestBody> => {
   const isolateOptions: IsolationRouteRequestBody = {
@@ -52,7 +52,8 @@ const createIsolateOptions = (
 };
 
 export const responseActionsClientMock = Object.freeze({
-  createConstructorOptions,
-  createIsolateOptions,
+  createConstructorOptions: createConstructorOptionsMock,
+  createIsolateOptions: createIsolateOptionsMock,
+  createReleaseOptions: createIsolateOptionsMock,
   // TODO:PT add more methods to get option mocks for other class methods
 });

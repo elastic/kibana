@@ -6,8 +6,8 @@
  */
 
 import type { SentinelOneActionsClientOptions } from './sentinelone/sentinel_one_actions_client';
-import type { ResponseActionsClient } from '../../../lib/response_actions/types';
-import type { ResponseActionsClientOptions } from '../../../lib/response_actions/base_response_actions_client';
+import type { ResponseActionsClient } from './lib/types';
+import type { ResponseActionsClientOptions } from './lib/base_response_actions_client';
 import { EndpointActionsClient } from './endpoint_actions_client';
 import { SentinelOneActionsClient } from './sentinelone/sentinel_one_actions_client';
 import { UnsupportedResponseActionsAgentTypeError } from './errors';
