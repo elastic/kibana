@@ -126,7 +126,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     const started = new Date();
     const hasTimedOut = (): boolean => {
       const elapsedTime = Date.now() - started.getTime();
-      return elapsedTime > 60 * 1000;
+      return elapsedTime > 2 * 60 * 1000;
     };
 
     let packagePolicy: CreatePackagePolicyResponse | undefined;

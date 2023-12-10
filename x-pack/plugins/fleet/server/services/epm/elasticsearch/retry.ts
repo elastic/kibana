@@ -17,11 +17,6 @@ const retryResponseStatuses = [
   410, // Gone
 ];
 
-// const retryableErrorMessages: Readonly<Array<string | RegExp>> = [
-//   'no_shard_available_action_exception',
-//   'illegal_index_shard_state_exception',
-// ];
-
 const isRetryableError = (e: any, additionalResponseStatuses: number[] = []) =>
   e instanceof EsErrors.NoLivingConnectionsError ||
   e instanceof EsErrors.ConnectionError ||
@@ -57,6 +52,7 @@ export const retryTransientEsErrors = async <T>(
       await setTimeout(retryDelaySec * 1000);
       return retryTransientEsErrors(esCall, { logger, attempt: retryCount });
     }
+
     throw e;
   }
 };
