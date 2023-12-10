@@ -75,8 +75,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Create index template', () => {
+      const TEST_TEMPLATE_NAME = `test_template_${Math.random()}`;
+
       after(async () => {
-        await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE }, { ignore: [404] });
+        await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE_NAME }, { ignore: [404] });
       });
 
       it('Creates index template', async () => {
@@ -93,9 +95,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('nextButton');
         await testSubjects.click('nextButton');
 
+        await pageObjects.common.sleep(2000);
+
         await retry.try(async () => {
           const url = await browser.getCurrentUrl();
-          expect(url).to.contain(`/${TEST_TEMPLATE}`);
+          expect(url).to.contain(`/${TEST_TEMPLATE_NAME}`);
         });
       });
     });
