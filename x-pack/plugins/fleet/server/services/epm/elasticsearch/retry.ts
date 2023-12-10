@@ -55,6 +55,7 @@ export const retryTransientEsErrors = async <T>(
       await setTimeout(retryDelaySec * 1000);
       return retryTransientEsErrors(esCall, { logger, attempt: retryCount });
     }
+
     throw e;
   }
 };
