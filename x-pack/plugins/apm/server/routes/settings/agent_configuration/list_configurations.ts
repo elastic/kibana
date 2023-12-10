@@ -9,7 +9,7 @@ import { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
-import { getEtagsAppliedThroughFleet } from './get_config_applied_to_agent_through_fleet';
+import { getAgentConfigEtagMetrics } from './get_agent_config_etag_metrics';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/apm_system_index_constants';
 
@@ -32,7 +32,7 @@ export async function listConfigurations({
       'list_agent_configuration',
       params
     ),
-    apmEventClient ? getEtagsAppliedThroughFleet(apmEventClient) : undefined,
+    apmEventClient ? getAgentConfigEtagMetrics(apmEventClient) : undefined,
   ]);
 
   return agentConfigs.hits.hits

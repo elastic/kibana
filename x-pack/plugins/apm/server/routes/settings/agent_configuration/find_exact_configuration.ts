@@ -15,7 +15,7 @@ import {
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/apm_system_index_constants';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
-import { getEtagsAppliedThroughFleet } from './get_config_applied_to_agent_through_fleet';
+import { getAgentConfigEtagMetrics } from './get_agent_config_etag_metrics';
 
 export async function findExactConfiguration({
   service,
@@ -79,7 +79,7 @@ async function getIsAppliedByAgent({
     return true;
   }
 
-  const appliedEtags = await getEtagsAppliedThroughFleet(
+  const appliedEtags = await getAgentConfigEtagMetrics(
     apmEventClient,
     agentConfiguration.etag
   );

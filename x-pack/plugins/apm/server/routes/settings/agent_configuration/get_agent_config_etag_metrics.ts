@@ -11,7 +11,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { METRICSET_NAME } from '../../../../common/es_fields/apm';
 
-export async function getEtagsAppliedThroughFleet(
+export async function getAgentConfigEtagMetrics(
   apmEventClient: APMEventClient,
   etag?: string
 ) {
