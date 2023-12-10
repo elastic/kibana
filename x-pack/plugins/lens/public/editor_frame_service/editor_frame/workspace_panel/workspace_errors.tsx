@@ -23,7 +23,10 @@ export function WorkspaceErrors(props: Props) {
     <EuiEmptyPrompt
       actions={
         props.errors.length > 1 ? (
-          <EuiFlexGroup justifyContent="spaceAround" data-test-subj="lnsWorkspaceErrorsPaginationControl">
+          <EuiFlexGroup
+            justifyContent="spaceAround"
+            data-test-subj="lnsWorkspaceErrorsPaginationControl"
+          >
             <EuiFlexItem grow={false}>
               <EuiPagination
                 pageCount={props.errors.length}

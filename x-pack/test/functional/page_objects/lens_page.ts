@@ -926,7 +926,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         return 0;
       }
 
-      const paginationControlExists = await testSubjects.exists('lnsWorkspaceErrorsPaginationControl');
+      const paginationControlExists = await testSubjects.exists(
+        'lnsWorkspaceErrorsPaginationControl'
+      );
       if (!paginationControlExists) {
         // pagination control only displayed when there are multiple errors
         return 1;
