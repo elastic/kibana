@@ -84,7 +84,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Creates index template', async () => {
         await testSubjects.click('createTemplateButton');
 
-        await testSubjects.setValue('nameField', TEST_TEMPLATE);
+        await testSubjects.setValue('nameField', TEST_TEMPLATE_NAME);
         await testSubjects.setValue('indexPatternsField', 'test*');
 
         // Finish wizard flow
