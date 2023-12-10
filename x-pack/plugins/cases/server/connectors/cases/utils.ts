@@ -21,3 +21,14 @@ export const partitionRecordsByError = (
 
   return [validRecords, errors];
 };
+
+export const partitionByNonFoundErrors = <T extends Array<{ statusCode: number }>>(
+  errors: T
+): [T, T] => {
+  const [nonFoundErrors, restOfErrors] = partition(errors, (error) => error.statusCode === 404) as [
+    T,
+    T
+  ];
+
+  return [nonFoundErrors, restOfErrors];
+};

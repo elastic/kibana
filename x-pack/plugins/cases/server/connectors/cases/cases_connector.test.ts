@@ -19,6 +19,7 @@ import { createCasesClientMock } from '../../client/mocks';
 import { mockCases } from '../../mocks';
 import type { Cases } from '../../../common';
 import { CaseStatuses } from '@kbn/cases-components';
+import { CaseError } from '../../common/error';
 
 jest.mock('./cases_oracle_service');
 jest.mock('./cases_service');
@@ -167,6 +168,7 @@ describe('CasesConnector', () => {
       casesClientMock.cases.bulkGet.mockResolvedValue({ cases, errors: [] });
       casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [] });
       casesClientMock.cases.bulkUpdate.mockResolvedValue([]);
+      casesClientMock.attachments.bulkCreate.mockResolvedValue(cases[0]);
 
       getCasesClient.mockReturnValue(casesClientMock);
 
@@ -262,42 +264,6 @@ describe('CasesConnector', () => {
           expect(mockBulkCreateRecord).not.toHaveBeenCalled();
         });
 
-        it('does not create oracle records if there are other errors than 404', async () => {
-          mockBulkGetRecords.mockResolvedValue([
-            {
-              id: groupedAlertsWithOracleKey[2].oracleKey,
-              type: CASE_ORACLE_SAVED_OBJECT,
-              message: 'Conflict',
-              statusCode: 409,
-              error: 'Conflict',
-            },
-          ]);
-
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
-
-          /**
-           * TODO: Change it to: expect(mockBulkCreateRecord).not.toHaveBeenCalled();
-           */
-          expect(mockBulkCreateRecord).toHaveBeenCalledWith([]);
-        });
-
-        it('does not increase the counter if the time window has not passed', async () => {
-          mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
-
-          expect(mockBulkUpdateRecord).not.toHaveBeenCalled();
-        });
-
-        it('updates the counter correctly if the time window has passed', async () => {
-          dateMathMock.parse.mockImplementation(() => moment('2023-11-10T10:23:42.769Z'));
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
-
-          expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
-            { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
-            { payload: { counter: 2 }, recordId: 'so-oracle-record-1', version: 'so-version-1' },
-          ]);
-        });
-
         it('run correctly with all records: valid, counter increased, counter did not increased, created', async () => {
           dateMathMock.parse.mockImplementation(() => moment('2023-10-11T10:23:42.769Z'));
           mockBulkCreateRecord.mockResolvedValue([
@@ -309,27 +275,9 @@ describe('CasesConnector', () => {
               createdAt: '2023-11-13T10:23:42.769Z',
               updatedAt: '2023-11-13T10:23:42.769Z',
             },
-            // Returning errors to verify that the code does not return them
-            {
-              id: 'test-id',
-              type: CASE_ORACLE_SAVED_OBJECT,
-              message: 'Conflict',
-              statusCode: 409,
-              error: 'Conflict',
-            },
           ]);
 
-          mockBulkUpdateRecord.mockResolvedValue([
-            { ...oracleRecords[0], counter: 2 },
-            // Returning errors to verify that the code does not return them
-            {
-              id: 'test-id',
-              type: CASE_ORACLE_SAVED_OBJECT,
-              message: 'Conflict',
-              statusCode: 409,
-              error: 'Conflict',
-            },
-          ]);
+          mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
 
           await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
 
@@ -355,6 +303,25 @@ describe('CasesConnector', () => {
           // 3. Update the counter for the records where the time window has passed
           expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
             { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
+          ]);
+        });
+      });
+
+      describe('Time window', () => {
+        it('does not increase the counter if the time window has not passed', async () => {
+          mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
+
+          expect(mockBulkUpdateRecord).not.toHaveBeenCalled();
+        });
+
+        it('updates the counter correctly if the time window has passed', async () => {
+          dateMathMock.parse.mockImplementation(() => moment('2023-11-10T10:23:42.769Z'));
+          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
+
+          expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
+            { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
+            { payload: { counter: 2 }, recordId: 'so-oracle-record-1', version: 'so-version-1' },
           ]);
         });
       });
@@ -441,12 +408,6 @@ describe('CasesConnector', () => {
                 status: 404,
                 caseId: 'mock-id-3',
               },
-              {
-                error: 'Forbidden',
-                message: 'Unauthorized to access case',
-                status: 403,
-                caseId: 'mock-id-3',
-              },
             ],
           });
 
@@ -473,24 +434,6 @@ describe('CasesConnector', () => {
               },
             ],
           });
-        });
-
-        it('does not create when there are no 404 errors', async () => {
-          casesClientMock.cases.bulkGet.mockResolvedValue({
-            cases: [cases[0], cases[1]],
-            errors: [
-              {
-                error: 'Forbidden',
-                message: 'Unauthorized to access case',
-                status: 403,
-                caseId: 'mock-id-3',
-              },
-            ],
-          });
-
-          await connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases });
-
-          expect(casesClientMock.cases.bulkCreate).not.toHaveBeenCalled();
         });
 
         it('does not reopen closed cases if reopenClosedCases=false', async () => {
@@ -800,6 +743,232 @@ describe('CasesConnector', () => {
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
         });
       });
+
+      describe('Error handling', () => {
+        it('throws an error when bulk getting records and there are different errors from 404', async () => {
+          mockBulkGetRecords.mockResolvedValue([
+            {
+              id: groupedAlertsWithOracleKey[2].oracleKey,
+              type: CASE_ORACLE_SAVED_OBJECT,
+              message: 'getting records: mockBulkGetRecords error',
+              statusCode: 409,
+              error: 'Conflict',
+            },
+            {
+              id: groupedAlertsWithOracleKey[2].oracleKey,
+              type: CASE_ORACLE_SAVED_OBJECT,
+              message: 'Input not accepted',
+              statusCode: 400,
+              error: 'Bad request',
+            },
+          ]);
+
+          await expect(() =>
+            connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Conflict: getting records: mockBulkGetRecords error"`
+          );
+
+          expect(mockBulkCreateRecord).not.toHaveBeenCalled();
+        });
+
+        it('throws an error when bulk creating non found records and there is an error', async () => {
+          mockBulkCreateRecord.mockResolvedValue([
+            {
+              id: groupedAlertsWithOracleKey[2].oracleKey,
+              type: CASE_ORACLE_SAVED_OBJECT,
+              message: 'creating records: mockBulkCreateRecord error',
+              statusCode: 400,
+              error: 'Bad request',
+            },
+            {
+              id: groupedAlertsWithOracleKey[2].oracleKey,
+              type: CASE_ORACLE_SAVED_OBJECT,
+              message: 'Version mismatch',
+              statusCode: 409,
+              error: 'Conflict',
+            },
+          ]);
+
+          await expect(() =>
+            connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Bad request: creating records: mockBulkCreateRecord error"`
+          );
+
+          expect(casesClientMock.cases.bulkGet).not.toHaveBeenCalled();
+        });
+
+        it('throws an error when updating the counter if the time window has passed and there is an error', async () => {
+          dateMathMock.parse.mockImplementation(() => moment('2023-11-10T10:23:42.769Z'));
+
+          mockBulkUpdateRecord.mockResolvedValue([
+            {
+              id: groupedAlertsWithOracleKey[2].oracleKey,
+              type: CASE_ORACLE_SAVED_OBJECT,
+              message: 'timeWindow: bulkUpdateRecord error',
+              statusCode: 400,
+              error: 'Bad request',
+            },
+            {
+              id: groupedAlertsWithOracleKey[2].oracleKey,
+              type: CASE_ORACLE_SAVED_OBJECT,
+              message: 'Version mismatch',
+              statusCode: 409,
+              error: 'Conflict',
+            },
+          ]);
+
+          await expect(() =>
+            connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Bad request: timeWindow: bulkUpdateRecord error"`
+          );
+
+          expect(casesClientMock.cases.bulkGet).not.toHaveBeenCalled();
+        });
+
+        it('throws an error when bulk getting cases and there are different errors from 404', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [cases[0], cases[1]],
+            errors: [
+              {
+                error: 'Forbidden',
+                message: 'getting cases: bulkGet error',
+                status: 403,
+                caseId: 'mock-id-3',
+              },
+              {
+                message: 'Input not accepted',
+                status: 400,
+                error: 'Bad request',
+                caseId: 'mock-id-4',
+              },
+            ],
+          });
+
+          await expect(() =>
+            connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"Forbidden: getting cases: bulkGet error"`);
+
+          expect(casesClientMock.cases.bulkCreate).not.toHaveBeenCalled();
+        });
+
+        it('throws an error when bulk creating non found cases and there is an error', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [cases[0], cases[1]],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-3',
+              },
+            ],
+          });
+
+          casesClientMock.cases.bulkCreate.mockRejectedValue(
+            new CaseError('creating non found cases: bulkCreate error')
+          );
+
+          await expect(() =>
+            connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"creating non found cases: bulkCreate error"`
+          );
+
+          expect(casesClientMock.attachments.bulkCreate).not.toHaveBeenCalled();
+        });
+
+        it('throws an error when reopening cases and there is an error', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [{ ...cases[0], status: CaseStatuses.closed }],
+            errors: [],
+          });
+
+          casesClientMock.cases.bulkUpdate.mockRejectedValue(
+            new CaseError('reopening closed cases: bulkUpdate error')
+          );
+
+          await expect(() =>
+            connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases: true })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"reopening closed cases: bulkUpdate error"`
+          );
+
+          expect(casesClientMock.attachments.bulkCreate).not.toHaveBeenCalled();
+        });
+
+        it('throws an error when creating new cases for closed cases and increasing the counters returns an error', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [{ ...cases[0], status: CaseStatuses.closed }],
+            errors: [],
+          });
+
+          mockBulkUpdateRecord.mockResolvedValue([
+            {
+              id: groupedAlertsWithOracleKey[2].oracleKey,
+              type: CASE_ORACLE_SAVED_OBJECT,
+              message: 'creating new cases for closed cases: bulkUpdateRecord error',
+              statusCode: 400,
+              error: 'Bad request',
+            },
+            {
+              id: groupedAlertsWithOracleKey[2].oracleKey,
+              type: CASE_ORACLE_SAVED_OBJECT,
+              message: 'Version mismatch',
+              statusCode: 409,
+              error: 'Conflict',
+            },
+          ]);
+
+          await expect(() =>
+            connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases: false })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Bad request: creating new cases for closed cases: bulkUpdateRecord error"`
+          );
+
+          expect(casesClientMock.cases.bulkCreate).not.toHaveBeenCalled();
+        });
+
+        it('throws an error when creating new cases for closed cases and there is an error', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [{ ...cases[0], status: CaseStatuses.closed }],
+            errors: [],
+          });
+
+          mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+
+          casesClientMock.cases.bulkCreate.mockRejectedValue(
+            new CaseError('creating non found cases: bulkCreate error')
+          );
+
+          await expect(() =>
+            connector.run({
+              alerts,
+              groupingBy,
+              owner,
+              rule,
+              timeWindow,
+              reopenClosedCases: false,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"creating non found cases: bulkCreate error"`
+          );
+
+          expect(casesClientMock.attachments.bulkCreate).not.toHaveBeenCalled();
+        });
+
+        it('throws an error if there is an error when attaching alerts to cases', async () => {
+          casesClientMock.attachments.bulkCreate.mockRejectedValue(
+            new CaseError('attaching alerts: bulkCreate error')
+          );
+
+          await expect(() =>
+            connector.run({ alerts, groupingBy, owner, rule, timeWindow, reopenClosedCases })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"attaching alerts: bulkCreate error"`);
+        });
+      });
     });
   });
 
@@ -833,6 +1002,7 @@ describe('CasesConnector', () => {
       });
 
       casesClientMock.cases.bulkGet.mockResolvedValue({ cases: [cases[0]], errors: [] });
+      casesClientMock.attachments.bulkCreate.mockResolvedValue(cases[0]);
 
       getCasesClient.mockReturnValue(casesClientMock);
 

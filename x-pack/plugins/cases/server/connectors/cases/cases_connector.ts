@@ -14,6 +14,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from '@kbn/core/server';
 import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { MAX_ALERTS_PER_CASE } from '../../../common/constants';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
@@ -28,10 +29,15 @@ import type {
 } from './types';
 import { CasesConnectorRunParamsSchema } from './schema';
 import { CasesOracleService } from './cases_oracle_service';
-import { partitionRecordsByError } from './utils';
+import { partitionByNonFoundErrors, partitionRecordsByError } from './utils';
 import { CasesService } from './cases_service';
 import type { CasesClient } from '../../client';
 import type { BulkCreateArgs as BulkCreateAlertsReq } from '../../client/attachments/types';
+import {
+  CasesConnectorError,
+  isCasesClientError,
+  isCasesConnectorError,
+} from './cases_connector_error';
 
 interface CasesConnectorParams {
   connectorParams: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>;
@@ -101,6 +107,22 @@ export class CasesConnector extends SubActionConnector<
   }
 
   public async run(params: CasesConnectorRunParams) {
+    try {
+      await this._run(params);
+    } catch (error) {
+      if (isCasesConnectorError(error)) {
+        throw error;
+      }
+
+      if (isCasesClientError(error)) {
+        throw new CasesConnectorError(error.message, error.boomify().output.statusCode);
+      }
+
+      throw error;
+    }
+  }
+
+  private async _run(params: CasesConnectorRunParams) {
     const { alerts, groupingBy } = params;
     const casesClient = await this.casesParams.getCasesClient(this.kibanaRequest);
 
@@ -218,10 +240,13 @@ export class CasesConnector extends SubActionConnector<
       return oracleRecordMap;
     }
 
-    /**
-     * TODO: Throw/retry for other errors
-     */
-    const nonFoundErrors = bulkGetRecordsErrors.filter((error) => error.statusCode === 404);
+    const [nonFoundErrors, restOfErrors] = partitionByNonFoundErrors(bulkGetRecordsErrors);
+
+    this.handleAndThrowErrors(restOfErrors);
+
+    if (nonFoundErrors.length === 0) {
+      return oracleRecordMap;
+    }
 
     for (const error of nonFoundErrors) {
       if (error.id && groupedAlertsWithOracleKey.has(error.id)) {
@@ -235,11 +260,9 @@ export class CasesConnector extends SubActionConnector<
     }
 
     const bulkCreateRes = await this.casesOracleService.bulkCreateRecord(bulkCreateReq);
+    const [bulkCreateValidRecords, bulkCreateErrors] = partitionRecordsByError(bulkCreateRes);
 
-    /**
-     * TODO: Throw/Retry on errors
-     */
-    const [bulkCreateValidRecords, _bulkCreateErrors] = partitionRecordsByError(bulkCreateRes);
+    this.handleAndThrowErrors(bulkCreateErrors);
 
     addRecordToMap(bulkCreateValidRecords);
 
@@ -288,10 +311,9 @@ export class CasesConnector extends SubActionConnector<
     }));
 
     const bulkUpdateRes = await this.casesOracleService.bulkUpdateRecord(bulkUpdateReq);
-    /**
-     * TODO: Throw/Retry on errors
-     */
-    const [bulkUpdateValidRecords, _bulkUpdateErrors] = partitionRecordsByError(bulkUpdateRes);
+    const [bulkUpdateValidRecords, bulkUpdateErrors] = partitionRecordsByError(bulkUpdateRes);
+
+    this.handleAndThrowErrors(bulkUpdateErrors);
 
     return bulkUpdateValidRecords;
   }
@@ -374,10 +396,15 @@ export class CasesConnector extends SubActionConnector<
       return casesMap;
     }
 
-    /**
-     * TODO: Throw/retry for other errors
-     */
-    const nonFoundErrors = errors.filter((error) => error.status === 404);
+    const [nonFoundErrors, restOfErrors] = partitionByNonFoundErrors(
+      /**
+       * The format of error returned from bulkGet is different
+       * from what expected. We need to transform to a SavedObjectError
+       */
+      errors.map((error) => ({ ...error, statusCode: error.status ?? 500, id: error.caseId }))
+    );
+
+    this.handleAndThrowErrors(restOfErrors);
 
     if (nonFoundErrors.length === 0) {
       return casesMap;
@@ -391,9 +418,6 @@ export class CasesConnector extends SubActionConnector<
       }
     }
 
-    /**
-     * TODO: bulkCreate throws an error. Retry on errors.
-     */
     const bulkCreateCasesResponse = await casesClient.cases.bulkCreate({ cases: bulkCreateReq });
 
     for (const res of bulkCreateCasesResponse.cases) {
@@ -501,9 +525,6 @@ export class CasesConnector extends SubActionConnector<
       status: CaseStatuses.open,
     }));
 
-    /**
-     * TODO: bulkUpdate throws an error. Retry on errors.
-     */
     const bulkUpdateCasesResponse = await casesClient.cases.bulkUpdate({ cases: bulkUpdateReq });
 
     for (const res of bulkUpdateCasesResponse) {
@@ -553,9 +574,6 @@ export class CasesConnector extends SubActionConnector<
       this.getCreateCaseRequest(params, record)
     );
 
-    /**
-     * TODO: bulkCreate throws an error. Retry on errors.
-     */
     const bulkCreateCasesResponse = await casesClient.cases.bulkCreate({ cases: bulkCreateReq });
 
     for (const res of bulkCreateCasesResponse.cases) {
@@ -603,5 +621,16 @@ export class CasesConnector extends SubActionConnector<
         concurrency: MAX_CONCURRENT_ES_REQUEST,
       }
     );
+  }
+
+  private handleAndThrowErrors(errors: SavedObjectError[]) {
+    if (errors.length === 0) {
+      return;
+    }
+
+    const firstError = errors[0];
+    const message = `${firstError.error}: ${firstError.message}`;
+
+    throw new CasesConnectorError(message, firstError.statusCode);
   }
 }
