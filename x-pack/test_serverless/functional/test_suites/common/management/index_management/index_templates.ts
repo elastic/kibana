@@ -94,7 +94,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('nextButton');
 
         await retry.try(async () => {
-          expect(await testSubjects.getVisibleText('title')).to.contain(TEST_TEMPLATE);
+          const url = await browser.getCurrentUrl();
+          expect(url).to.contain(`/${TEST_TEMPLATE}`);
         });
       });
     });
