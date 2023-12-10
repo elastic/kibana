@@ -28,15 +28,24 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import React, { useState } from 'react';
 import { useToggle } from 'react-use';
+import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics/common';
 import type { AssetCriticalityRecord } from '../../../common/api/entity_analytics/asset_criticality';
 
-import { createAssetCriticality, fetchAssetCriticality } from '../api/api';
+import {
+  createAssetCriticality,
+  fetchAssetCriticality,
+  fetchAssetCriticalityPrivileges,
+} from '../api/api';
 
 interface Props {
   entity: Entity;
 }
 export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
   const criticality = useAssetCriticality(entity);
+
+  if (criticality.privileges.isLoading || !criticality.privileges.data?.has_all_required) {
+    return null;
+  }
 
   return (
     <>
@@ -135,10 +144,15 @@ const useAssetCriticality = (entity: Entity): State => {
 
   const QC = useQueryClient();
 
+  const privileges = useQuery({
+    queryKey: ['ASSET_CRITICALITY', 'PRIVILEGES', entity.name],
+    queryFn: fetchAssetCriticalityPrivileges,
+  });
   const query = useQuery<AssetCriticalityRecord, { body: { statusCode: number } }>({
     queryKey: ['ASSET_CRITICALITY', entity.name],
     queryFn: () => fetchAssetCriticality({ idField: `${entity.type}.name`, idValue: entity.name }),
     retry: (failureCount, error) => error.body.statusCode === 404 && failureCount > 0,
+    enabled: privileges.data?.has_all_required,
   });
 
   const mutation = useMutation({
@@ -154,12 +168,14 @@ const useAssetCriticality = (entity: Entity): State => {
     query,
     mutation,
     modal,
+    privileges,
   };
 };
 
 interface State {
   status: 'create' | 'update';
   query: UseQueryResult<AssetCriticalityRecord>;
+  privileges: UseQueryResult<EntityAnalyticsPrivileges>;
   mutation: UseMutationResult<AssetCriticalityRecord, unknown, Params, unknown>;
   modal: ModalState;
 }
