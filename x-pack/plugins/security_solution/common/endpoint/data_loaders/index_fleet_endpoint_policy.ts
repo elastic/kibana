@@ -137,7 +137,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     while (!packagePolicy && !hasTimedOut()) {
       packagePolicy = await retryOnError(
         async () => fetchPackagePolicy(),
-        [...RETRYABLE_TRANSIENT_ERRORS, '500'],
+        RETRYABLE_TRANSIENT_ERRORS,
         log
       );
 
