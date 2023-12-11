@@ -9,3 +9,28 @@ export interface ReportedAlert {
 export function reportAlert(alert: ReportedAlert) {
   console.log(`createAlert:${JSON.stringify(alert)}`);
 }
+
+function setAlertData(alert: Pick<ReportedAlert, 'id' | 'context' | 'payload'>) {
+  console.log(`setAlertData:${JSON.stringify(alert)}`);
+}
+
+function getAlertLimitValue() {
+  // TODO Get actual limit
+  return 1000;
+}
+
+function setAlertLimitReached(reached: boolean) {
+  console.log(`setAlertLimitReached:${reached}`);
+}
+
+function getRecoveredAlerts() {
+  // TODO return recovered alerts
+}
+
+export const alertsClient = {
+  reportAlert,
+  setAlertData,
+  getAlertLimitValue,
+  setAlertLimitReached,
+  getRecoveredAlerts,
+};

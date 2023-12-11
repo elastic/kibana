@@ -1,7 +1,7 @@
 import process from 'node:process';
 
 import { esClient } from './lib/es_client.ts';
-import { reportAlert } from './lib/alerts_client.ts';
+import { alertsClient, reportAlert } from './lib/alerts_client.ts';
 
 (async () => {
   try {
