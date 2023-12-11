@@ -22,7 +22,7 @@ const switchTabMock = jest.fn();
 const TestComponent = () => {
   return (
     <TestProviders>
-      <TimelineTour activeTab={TimelineTabs.query} switchTab={switchTabMock} />
+      <TimelineTour activeTab={TimelineTabs.query} switchToTab={switchTabMock} />
       {Object.values(TIMELINE_TOUR_CONFIG_ANCHORS).map((anchor) => {
         return <div id={anchor} key={anchor} />;
       })}
