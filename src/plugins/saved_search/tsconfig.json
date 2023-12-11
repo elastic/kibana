@@ -31,7 +31,7 @@
     "@kbn/discover-utils",
     "@kbn/logging",
     "@kbn/core-plugins-server",
-    "@kbn/unified-data-table",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",
