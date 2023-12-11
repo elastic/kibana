@@ -42,12 +42,12 @@ export const integrationRt = rt.intersection([
   }),
 ]);
 
-export const malformedDocsRt = rt.type({
+export const degradedDocsRt = rt.type({
   dataset: rt.string,
   percentage: rt.number,
 });
 
-export type MalformedDocs = rt.TypeOf<typeof malformedDocsRt>;
+export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
 
 export const getDataStreamsStatsResponseRt = rt.exact(
   rt.intersection([
@@ -60,8 +60,8 @@ export const getDataStreamsStatsResponseRt = rt.exact(
   ])
 );
 
-export const getDataStreamsMalformedDocsStatsResponseRt = rt.exact(
+export const getDataStreamsDegradedDocsStatsResponseRt = rt.exact(
   rt.type({
-    malformedDocs: rt.array(malformedDocsRt),
+    degradedDocs: rt.array(degradedDocsRt),
   })
 );

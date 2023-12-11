@@ -36,9 +36,9 @@ export const useDatasetQualityTable = () => {
 
   const { dataStreamsStatsServiceClient: client } = useDatasetQualityContext();
   const { data = [], loading } = useFetcher(async () => client.getDataStreamsStats(), []);
-  const { data: malformedStats = [], loading: loadingMalformedStats } = useFetcher(
+  const { data: degradedStats = [], loading: loadingDegradedStats } = useFetcher(
     async () =>
-      client.getDataStreamsMalformedStats({
+      client.getDataStreamsDegradedStats({
         start: defaultTimeRange.from,
         end: defaultTimeRange.to,
       }),
@@ -46,8 +46,8 @@ export const useDatasetQualityTable = () => {
   );
 
   const columns = useMemo(
-    () => getDatasetQualitTableColumns({ fieldFormats, loadingMalformedStats }),
-    [fieldFormats, loadingMalformedStats]
+    () => getDatasetQualitTableColumns({ fieldFormats, loadingDegradedStats }),
+    [fieldFormats, loadingDegradedStats]
   );
 
   const pagination = {
@@ -77,18 +77,18 @@ export const useDatasetQualityTable = () => {
   const renderedItems = useMemo(() => {
     const overridenSortingField = sortingOverrides[sortField] || sortField;
     const mergedData = data.map((dataStream) => {
-      const malformedDocs = find(malformedStats, { dataset: dataStream.name });
+      const degradedDocs = find(degradedStats, { dataset: dataStream.name });
 
       return {
         ...dataStream,
-        malformedDocs: malformedDocs?.percentage,
+        degradedDocs: degradedDocs?.percentage,
       };
     });
 
     const sortedItems = orderBy(mergedData, overridenSortingField, sortDirection);
 
     return sortedItems.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-  }, [data, malformedStats, sortField, sortDirection, pageIndex, pageSize]);
+  }, [data, degradedStats, sortField, sortDirection, pageIndex, pageSize]);
 
   const resultsCount = useMemo(() => {
     const startNumberItemsOnPage = pageSize * pageIndex + (renderedItems.length ? 1 : 0);
