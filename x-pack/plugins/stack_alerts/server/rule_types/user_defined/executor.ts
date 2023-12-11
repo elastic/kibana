@@ -5,56 +5,88 @@
  * 2.0.
  */
 
-import { exec } from 'child_process';
+import ChildProcess from 'child_process';
+import { promisify } from 'util';
 import fs from 'fs';
 import { RuleExecutorOptions } from '../../types';
 import { StackAlertType } from '../types';
 import { ActionGroupId, Params } from './rule_type';
+const exec = promisify(ChildProcess.exec);
 
 export async function executor(
   options: RuleExecutorOptions<Params, {}, {}, {}, typeof ActionGroupId, StackAlertType>
 ) {
-  const {
-    rule: { id: ruleId, name },
-    apiKey,
-    services,
-    params,
-    logger,
-    getTimeRange,
-  } = options;
+  const { apiKey, services, params, logger } = options;
   const { alertsClient } = services;
-
-  const userDefinedCode = params.stringifiedUserCode;
-  // Wrap customCode with our own code file to provide utilities
-  const wrappedCode = wrapUserDefinedCode(userDefinedCode);
 
   if (!apiKey) {
     throw new Error(`User defined rule requires API key to run but none is provided`);
   }
 
-  // Run code in child process
-  exec(
-    `cat <<'EOF' | deno run --allow-net=127.0.0.1:9200 --allow-env --allow-sys - \n${wrappedCode}\nEOF`,
-    {
-      cwd: __dirname,
-      env: {
-        PATH: process.env.PATH,
-        DENO_NO_PROMPT: 1,
-        ELASTICSEARCH_API_KEY: apiKey,
-      },
-    },
-    (error, stdout, stderr) => {
-      if (error) {
-        console.log('ERROR:', error);
-      }
-      if (stderr) {
-        console.log('STDERR:', stderr);
-      }
+  if (!alertsClient) {
+    throw new Error(`Alerts client is not defined`);
+  }
 
-      console.log('STDOUT:', stdout.split('\n'));
-      console.log('Alerts to create', getDetectedAlerts(stdout));
+  const userDefinedCode = params.stringifiedUserCode;
+  // Wrap customCode with our own code file to provide utilities
+  const wrappedCode = wrapUserDefinedCode(userDefinedCode);
+
+  const alertLimit = alertsClient.getAlertLimitValue();
+
+  // Run code in child process
+  try {
+    const { stdout, stderr } = await exec(
+      `cat <<'EOF' | deno run --allow-net=127.0.0.1:9200 --allow-env --allow-sys --no-prompt - \n${wrappedCode}\nEOF`,
+      {
+        cwd: __dirname,
+        env: {
+          PATH: process.env.PATH,
+          ELASTICSEARCH_API_KEY: apiKey,
+        },
+      }
+    );
+    if (stderr) {
+      throw new Error(stderr);
     }
-  );
+
+    if (stdout) {
+      logger.info(`Info returned from user defined code ${stdout.split('\n')}`);
+      const alertsToCreate: string[] = getDetectedAlerts(stdout);
+      let hasReachedLimit = false;
+      let alertCount = 0;
+      for (const alertStr of alertsToCreate) {
+        if (alertCount++ >= alertLimit) {
+          hasReachedLimit = true;
+          break;
+        }
+        try {
+          const alert = JSON.parse(alertStr);
+          alertsClient.report({
+            id: alert.id,
+            actionGroup: ActionGroupId,
+            state: {},
+            context: {},
+          });
+        } catch (e) {
+          logger.warn(`Couldn't parse reported alert ${alertStr}`);
+        }
+      }
+      alertsClient.setAlertLimitReached(hasReachedLimit);
+
+      const { getRecoveredAlerts } = alertsClient;
+      for (const recoveredAlert of getRecoveredAlerts()) {
+        const alertId = recoveredAlert.alert.getId();
+        alertsClient?.setAlertData({
+          id: alertId,
+          context: {},
+        });
+      }
+    }
+  } catch (error) {
+    if (error) {
+      logger.error(`Error executing user-defined code - ${error.message}`);
+    }
+  }
 
   return { state: {} };
 }
