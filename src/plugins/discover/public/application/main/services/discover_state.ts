@@ -71,6 +71,10 @@ interface DiscoverStateContainerParams {
    * Context object for customization related properties
    */
   customizationContext: DiscoverCustomizationContext;
+  /**
+   * a custom url state storage
+   */
+  stateStorageContainer?: IKbnUrlStateStorage;
 }
 
 export interface LoadParams {
@@ -204,6 +208,7 @@ export function getDiscoverStateContainer({
   history,
   services,
   customizationContext,
+  stateStorageContainer,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
@@ -211,12 +216,14 @@ export function getDiscoverStateContainer({
   /**
    * state storage for state in the URL
    */
-  const stateStorage = createKbnUrlStateStorage({
-    useHash: storeInSessionStorage,
-    history,
-    useHashQuery: customizationContext.displayMode !== 'embedded',
-    ...(toasts && withNotifyOnErrors(toasts)),
-  });
+  const stateStorage =
+    stateStorageContainer ??
+    createKbnUrlStateStorage({
+      useHash: storeInSessionStorage,
+      history,
+      useHashQuery: customizationContext.displayMode !== 'embedded',
+      ...(toasts && withNotifyOnErrors(toasts)),
+    });
 
   /**
    * Search session logic
