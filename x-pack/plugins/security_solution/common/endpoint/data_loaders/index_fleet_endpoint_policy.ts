@@ -120,7 +120,10 @@ export const indexFleetEndpointPolicy = usageTracker.track(
             'elastic-api-version': API_VERSIONS.public.v1,
           },
         })
-        .catch(catchAxiosErrorFormatAndThrow)
+        .catch((err) => {
+          log?.info('Caught error creating package policy', err);
+          return catchAxiosErrorFormatAndThrow(err);
+        })
         .then((res) => res.data);
 
     const started = new Date();

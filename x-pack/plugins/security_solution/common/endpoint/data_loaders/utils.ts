@@ -58,6 +58,7 @@ export const retryOnError = async <T>(
   const log = logger ?? createToolingLogger('silent');
   const msg = (message: string): string => `retryOnError(): ${message}`;
   const isRetryableError = (err: Error): boolean => {
+    log.info('=+= isRetryableError() =+=', err);
     return errors.some((retryMessage) => {
       if (typeof retryMessage === 'string') {
         return err.message.includes(retryMessage);
