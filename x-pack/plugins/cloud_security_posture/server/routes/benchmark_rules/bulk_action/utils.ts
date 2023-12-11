@@ -57,12 +57,11 @@ export const createCspSettingObjectSafe = async (
   soClient: SavedObjectsClientContract,
   logger: Logger
 ) => {
-  const cspSettings = await getCspSettings(soClient, logger);
-
-  if (!cspSettings) return (await createCspSettingObject(soClient)).attributes;
+  const cspSettings = await getCspSettingsSafe(soClient, logger);
+  return cspSettings;
 };
 
-export const getCspSettings = async (
+export const getCspSettingsSafe = async (
   soClient: SavedObjectsClientContract,
   logger: Logger
 ): Promise<CspSettings> => {
@@ -78,17 +77,6 @@ export const getCspSettings = async (
     logger.warn(`Trying to create new csp settings object`);
     return (await createCspSettingObject(soClient)).attributes;
   }
-};
-
-export const getCspSettingsSafe = async (
-  soClient: SavedObjectsClientContract,
-  logger: Logger
-): Promise<CspSettings> => {
-  const cspSettings = await getCspSettings(soClient, logger);
-
-  if (!cspSettings) return (await createCspSettingObject(soClient)).attributes;
-
-  return cspSettings;
 };
 
 export const buildRuleKey = (benchmarkId: string, benchmarkVersion: string, ruleNumber: string) => {

@@ -11,7 +11,7 @@ import {
   setRulesStates,
   createCspSettingObject,
   createCspSettingObjectSafe,
-  getCspSettings,
+  getCspSettingsSafe,
 } from './utils';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
@@ -75,7 +75,7 @@ describe('CSP Rule State Management', () => {
 
     mockSoClient.get.mockResolvedValueOnce(mockExistingCspSettings);
 
-    const result = await getCspSettings(mockSoClient, mockLogger);
+    const result = await getCspSettingsSafe(mockSoClient, mockLogger);
 
     expect(result).toEqual({
       rules: { rule1: { muted: false } },
