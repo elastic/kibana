@@ -8,15 +8,19 @@
 import * as t from 'io-ts';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 
-export const dataStreamTypesRt = t.partial({
-  type: t.union([
-    t.literal('logs'),
-    t.literal('metrics'),
-    t.literal('traces'),
-    t.literal('synthetics'),
-    t.literal('profiling'),
-  ]),
+export const dataStreamTypesRt = t.union([
+  t.literal('logs'),
+  t.literal('metrics'),
+  t.literal('traces'),
+  t.literal('synthetics'),
+  t.literal('profiling'),
+]);
+
+export const typeRt = t.partial({
+  type: dataStreamTypesRt,
 });
+
+export type DataStreamTypes = t.TypeOf<typeof dataStreamTypesRt>;
 
 export const rangeRt = t.type({
   start: isoToEpochRt,

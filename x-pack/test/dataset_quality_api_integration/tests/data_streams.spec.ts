@@ -43,7 +43,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('when required privileges are set', () => {
-      describe('and uncategorized datastreams', () => {
+      describe('and categorized datastreams', () => {
         const integration = 'my-custom-integration';
 
         before(async () => {
@@ -67,8 +67,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(stats.body.dataStreamsStats.length).to.be(1);
           expect(stats.body.dataStreamsStats[0].integration).to.be(integration);
           expect(stats.body.dataStreamsStats[0].size).not.empty();
-          expect(stats.body.dataStreamsStats[0].size_bytes).greaterThan(0);
-          expect(stats.body.dataStreamsStats[0].last_activity).greaterThan(0);
+          expect(stats.body.dataStreamsStats[0].sizeBytes).greaterThan(0);
+          expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
         });
 
         after(async () => {
@@ -77,7 +77,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('and categorized datastreams', () => {
+      describe('and uncategorized datastreams', () => {
         before(async () => {
           await synthtrace.index([
             timerange('2023-11-20T15:00:00.000Z', '2023-11-20T15:01:00.000Z')
@@ -97,8 +97,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(stats.body.dataStreamsStats.length).to.be(1);
           expect(stats.body.dataStreamsStats[0].integration).not.ok();
           expect(stats.body.dataStreamsStats[0].size).not.empty();
-          expect(stats.body.dataStreamsStats[0].size_bytes).greaterThan(0);
-          expect(stats.body.dataStreamsStats[0].last_activity).greaterThan(0);
+          expect(stats.body.dataStreamsStats[0].sizeBytes).greaterThan(0);
+          expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
         });
 
         after(async () => {
