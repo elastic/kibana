@@ -5,4 +5,28 @@
  * 2.0.
  */
 
-export { AllDatasetSelection, UnresolvedDatasetSelection } from './dataset_selection';
+export {
+  availableControlPanelFields,
+  availableControlsPanels,
+  controlPanelConfigs,
+  ControlPanelRT,
+} from './control_panels';
+export type { AvailableControlPanels, ControlPanels } from './control_panels';
+export {
+  AllDatasetSelection,
+  datasetSelectionPlainRT,
+  hydrateDatasetSelection,
+  UnresolvedDatasetSelection,
+} from './dataset_selection';
+export type { DatasetSelectionPlain } from './dataset_selection';
+export type {
+  ChartDisplayOptions,
+  DisplayOptions,
+  GridColumnDisplayOptions,
+  GridDisplayOptions,
+  GridRowsDisplayOptions,
+  PartialChartDisplayOptions,
+  PartialDisplayOptions,
+  PartialGridDisplayOptions,
+  PartialGridRowsDisplayOptions,
+} from './display_options';

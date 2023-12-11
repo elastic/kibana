@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import { AllDatasetSelection } from '../../../../common/dataset_selection';
-import { ControlPanels, DefaultLogExplorerProfileState } from './types';
-
-export const DEFAULT_CONTEXT: DefaultLogExplorerProfileState = {
-  datasetSelection: AllDatasetSelection.create(),
-};
-
-export const CONTROL_PANELS_URL_KEY = 'controlPanels';
+import { ControlPanels } from './types';
 
 export const availableControlsPanels = {
   NAMESPACE: 'data_stream.namespace',
-};
+} as const;
+
+export type AvailableControlPanels = typeof availableControlsPanels;
 
 export const controlPanelConfigs: ControlPanels = {
   [availableControlsPanels.NAMESPACE]: {

@@ -5,23 +5,15 @@
  * 2.0.
  */
 
-import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { InvokeCreator } from 'xstate';
-import { LogExplorerProfileContext, LogExplorerProfileEvent } from './types';
-
-interface LogExplorerProfileDataViewStateDependencies {
-  stateContainer: DiscoverStateContainer;
-}
+import { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
 
 export const createAndSetDataView =
-  ({
-    stateContainer,
-  }: LogExplorerProfileDataViewStateDependencies): InvokeCreator<
-    LogExplorerProfileContext,
-    LogExplorerProfileEvent
-  > =>
+  (): InvokeCreator<LogExplorerControllerContext, LogExplorerControllerEvent> =>
   async (context) => {
-    const dataView = await stateContainer.actions.createAndAppendAdHocDataView(
+    if (!('discoverStateContainer' in context)) return;
+    const { discoverStateContainer } = context;
+    const dataView = await discoverStateContainer.actions.createAndAppendAdHocDataView(
       context.datasetSelection.toDataviewSpec()
     );
     /**
@@ -32,5 +24,5 @@ export const createAndSetDataView =
      * to the existing one or the default logs-*.
      * We set explicitly the data view here to be used when restoring the data view on the initial load.
      */
-    stateContainer.actions.setDataView(dataView);
+    discoverStateContainer.actions.setDataView(dataView);
   };

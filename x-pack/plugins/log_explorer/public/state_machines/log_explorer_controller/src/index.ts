@@ -5,6 +5,6 @@
  * 2.0.
  */
 
+export * from './defaults';
 export * from './state_machine';
 export * from './types';
-export * from './utils';
