@@ -23,14 +23,18 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import React, { useState } from 'react';
 import { useToggle } from 'react-use';
-import { euiLightVars } from '@kbn/ui-theme';
+import {
+  ASSET_CRITICALITY_OPTION_TEXT,
+  CREATE_ASSET_CRITICALITY,
+  CRITICALITY_LEVEL_COLOR,
+  PICK_ASSET_CRITICALITY,
+} from '../../../common/asset_criticality';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics/common';
 import type { AssetCriticalityRecord } from '../../../common/api/entity_analytics/asset_criticality';
 
@@ -201,54 +205,6 @@ const criticalityDisplayText: Record<AssetCriticalityRecord['criticality_level']
   not_important: 'Not important',
   important: 'Important',
   very_important: 'Very important',
-};
-export const CRITICALITY_LEVEL_COLOR: Record<AssetCriticalityRecord['criticality_level'], string> =
-  {
-    very_important: '#E7664C',
-    important: '#D6BF57',
-    normal: '#54B399',
-    not_important: euiLightVars.euiColorMediumShade,
-  };
-
-const PICK_ASSET_CRITICALITY = i18n.translate(
-  'xpack.securitySolution.timeline.sidePanel.hostDetails.assetCriticality.pick',
-  {
-    defaultMessage: 'Pick asset criticality level',
-  }
-);
-
-const CREATE_ASSET_CRITICALITY = i18n.translate(
-  'xpack.securitySolution.timeline.sidePanel.hostDetails.assetCriticality.create',
-  {
-    defaultMessage: 'No criticality assigned yet',
-  }
-);
-
-const ASSET_CRITICALITY_OPTION_TEXT: Record<AssetCriticalityRecord['criticality_level'], string> = {
-  normal: i18n.translate(
-    'xpack.securitySolution.timeline.sidePanel.hostDetails.assetCriticality.pickerOption.normal',
-    {
-      defaultMessage: 'Entity risk score rises at normal speed',
-    }
-  ),
-  not_important: i18n.translate(
-    'xpack.securitySolution.timeline.sidePanel.hostDetails.assetCriticality.pickerOption.notImportant',
-    {
-      defaultMessage: 'Entity risk score rises slower',
-    }
-  ),
-  important: i18n.translate(
-    'xpack.securitySolution.timeline.sidePanel.hostDetails.assetCriticality.pickerOption.important',
-    {
-      defaultMessage: 'Entity risk score rises faster',
-    }
-  ),
-  very_important: i18n.translate(
-    'xpack.securitySolution.timeline.sidePanel.hostDetails.assetCriticality.pickerOption.veryImportant',
-    {
-      defaultMessage: 'Entity risk score rises much faster',
-    }
-  ),
 };
 
 const option = (
