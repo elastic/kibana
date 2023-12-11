@@ -63,10 +63,6 @@ export const defaultExpression: MetricExpression = {
   timeSize: 1,
   timeUnit: 'm',
 };
-const defaultQuery = {
-  query: '',
-  language: 'kuery',
-};
 
 // eslint-disable-next-line import/no-default-export
 export default function Expressions(props: Props) {
@@ -155,15 +151,6 @@ export default function Expressions(props: Props) {
         setParamsError(error);
       }
     };
-
-    if (!ruleParams.searchConfiguration) {
-      if (metadata?.currentOptions?.searchConfiguration) {
-        setRuleParams('searchConfiguration', {
-          ...metadata.currentOptions.searchConfiguration,
-          query: defaultQuery,
-        });
-      }
-    }
 
     initSearchSource();
     // eslint-disable-next-line react-hooks/exhaustive-deps

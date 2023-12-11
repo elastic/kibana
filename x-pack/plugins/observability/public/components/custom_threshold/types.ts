@@ -34,13 +34,13 @@ import {
 } from '../../../common/custom_threshold_rule/types';
 import { ObservabilityPublicStart } from '../../plugin';
 
-export type CustomThresholdPreFillOptions = Partial<
+export type CustomThresholdPrefillOptions = Partial<
   Omit<ThresholdParams, 'criteria'> & { criteria: Array<Partial<MetricExpressionParams>> }
 >;
 
 export interface AlertContextMeta {
   adHocDataViewList: DataView[];
-  currentOptions?: CustomThresholdPreFillOptions;
+  currentOptions?: CustomThresholdPrefillOptions;
 }
 
 export type MetricExpression = Omit<CustomMetricExpressionParams, 'timeSize' | 'timeUnit'> & {
