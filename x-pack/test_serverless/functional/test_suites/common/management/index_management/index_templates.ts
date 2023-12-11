@@ -93,14 +93,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('nextButton');
         await testSubjects.click('nextButton');
         await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
 
-        await pageObjects.common.sleep(2000);
-
-        await retry.try(async () => {
-          const url = await browser.getCurrentUrl();
-          expect(url).to.contain(`/${TEST_TEMPLATE_NAME}`);
-        });
+        expect(await testSubjects.getVisibleText('stepTitle')).to.contain(TEST_TEMPLATE_NAME);
       });
     });
   });
