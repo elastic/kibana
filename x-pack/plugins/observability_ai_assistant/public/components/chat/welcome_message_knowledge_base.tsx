@@ -32,7 +32,6 @@ export function WelcomeMessageKnowledgeBase({
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
 }) {
-  console.log('knowledgebase', knowledgeBase, knowledgeBase.status.value);
   const previouslyNotInstalled = usePrevious(knowledgeBase.status.value?.ready === false);
 
   const [showHasBeenInstalled, setShowHasBeenInstalled] = useState(false);
