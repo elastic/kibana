@@ -161,7 +161,7 @@ describe('AllCasesListGeneric', () => {
     useGetCasesMock.mockReturnValue(defaultGetCases);
     useGetTagsMock.mockReturnValue({ data: ['coke', 'pepsi'], isLoading: false });
     useGetCategoriesMock.mockReturnValue({ data: ['twix', 'snickers'], isLoading: false });
-    useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0], isLoading: false });
+    useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0].uid, isLoading: false });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
@@ -1088,11 +1088,13 @@ describe('AllCasesListGeneric', () => {
 
         appMockRenderer.render(<AllCasesList />);
 
+        // Opens assignees filter and checks an option
         const assigneesButton = screen.getByTestId('options-filter-popover-button-assignees');
         userEvent.click(assigneesButton);
         userEvent.click(screen.getByText('Damaged Raccoon'));
         expect(within(assigneesButton).getByLabelText('1 active filters')).toBeInTheDocument();
 
+        // Deactivates assignees filter
         userEvent.click(screen.getByRole('button', { name: 'More' }));
         await waitForEuiPopoverOpen();
         userEvent.click(screen.getByRole('option', { name: 'Assignees' }));
@@ -1106,11 +1108,21 @@ describe('AllCasesListGeneric', () => {
           queryParams: DEFAULT_QUERY_PARAMS,
         });
 
-        userEvent.click(screen.getByRole('button', { name: 'More' }));
-        await waitForEuiPopoverOpen();
+        // Reopens assignees filter
         userEvent.click(screen.getByRole('option', { name: 'Assignees' }));
-
-        expect(within(assigneesButton).getByLabelText('2 filters filters')).toBeInTheDocument();
+        // Opens the assignees popup
+        userEvent.click(assigneesButton);
+        expect(screen.getByLabelText('click to filter assignees')).toBeInTheDocument();
+        expect(
+          within(screen.getByTestId('options-filter-popover-button-assignees')).queryByLabelText(
+            '1 active filters'
+          )
+        ).not.toBeInTheDocument();
+        expect(
+          within(screen.getByTestId('options-filter-popover-button-assignees')).getByLabelText(
+            '4 available filters'
+          )
+        ).toBeInTheDocument();
       });
     });
   });
