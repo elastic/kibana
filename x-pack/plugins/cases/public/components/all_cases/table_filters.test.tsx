@@ -583,7 +583,7 @@ describe('CasesTableFilters ', () => {
       userEvent.click(screen.getByRole('option', { name: 'Toggle' }));
       expect(screen.getByRole('button', { name: 'Toggle' })).toBeInTheDocument();
 
-      const filterBar = screen.getByTestId('cases-table-filters-group');
+      const filterBar = screen.getByTestId('cases-table-filters');
       const allFilters = within(filterBar).getAllByRole('button');
       const orderedFilterLabels = ['Severity', 'Status', 'Tags', 'Categories', 'Toggle', 'More'];
       orderedFilterLabels.forEach((label, index) => {
@@ -636,7 +636,7 @@ describe('CasesTableFilters ', () => {
       userEvent.click(screen.getByRole('option', { name: 'Status' }));
       expect(screen.queryByRole('button', { name: 'Status' })).not.toBeInTheDocument();
 
-      const filterBar = screen.getByTestId('cases-table-filters-group');
+      const filterBar = screen.getByTestId('cases-table-filters');
       const allFilters = within(filterBar).getAllByRole('button');
       const orderedFilterLabels = ['Severity', 'Tags', 'Categories', 'More'];
       orderedFilterLabels.forEach((label, index) => {
@@ -722,7 +722,7 @@ describe('CasesTableFilters ', () => {
 
       appMockRender.render(<CasesTableFilters {...props} />);
 
-      const filterBar = screen.getByTestId('cases-table-filters-group');
+      const filterBar = screen.getByTestId('cases-table-filters');
       let allFilters: HTMLElement[];
       await waitFor(() => {
         allFilters = within(filterBar).getAllByRole('button');
@@ -752,7 +752,7 @@ describe('CasesTableFilters ', () => {
 
       appMockRender.render(<CasesTableFilters {...props} />);
 
-      const filterBar = screen.getByTestId('cases-table-filters-group');
+      const filterBar = screen.getByTestId('cases-table-filters');
       let allFilters: HTMLElement[];
       await waitFor(() => {
         allFilters = within(filterBar).getAllByRole('button');
@@ -805,7 +805,7 @@ describe('CasesTableFilters ', () => {
     it('when a filter is active and isnt last in the list, it should move the filter to last position after deactivating and activating', async () => {
       appMockRender.render(<CasesTableFilters {...props} />);
 
-      const filterBar = screen.getByTestId('cases-table-filters-group');
+      const filterBar = screen.getByTestId('cases-table-filters');
       let allFilters = within(filterBar).getAllByRole('button');
       let orderedFilterLabels = ['Severity', 'Status', 'Tags', 'Categories', 'More'];
       orderedFilterLabels.forEach((label, index) => {
@@ -837,7 +837,7 @@ describe('CasesTableFilters ', () => {
       });
       appMockRender.render(<CasesTableFilters {...props} />);
 
-      const filterBar = screen.getByTestId('cases-table-filters-group');
+      const filterBar = screen.getByTestId('cases-table-filters');
       let allFilters: HTMLElement[];
       await waitFor(() => {
         allFilters = within(filterBar).getAllByRole('button');
