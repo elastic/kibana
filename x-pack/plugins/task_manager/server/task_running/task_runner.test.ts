@@ -2430,6 +2430,7 @@ describe('TaskManagerRunner', () => {
           asOk({
             state: {},
             taskRunError,
+            skipAttempts: 20,
           })
         );
       });

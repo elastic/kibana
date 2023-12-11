@@ -466,6 +466,16 @@ export function getDiscoverStateContainer({
       timefilter: services.timefilter,
     });
     const newAppState = getDefaultAppState(nextSavedSearch, services);
+
+    // a saved search can't have global (pinned) filters so we can reset global filters state
+    const globalFilters = globalStateContainer.get()?.filters;
+    if (globalFilters) {
+      await globalStateContainer.set({
+        ...globalStateContainer.get(),
+        filters: [],
+      });
+    }
+
     await appStateContainer.replaceUrlState(newAppState);
     return nextSavedSearch;
   };
