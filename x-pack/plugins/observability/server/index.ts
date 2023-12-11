@@ -36,8 +36,7 @@ const configSchema = schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
       logs: schema.object({
-        // Enable it by default: https://github.com/elastic/kibana/issues/159945
-        enabled: schema.boolean({ defaultValue: true }),
+        enabled: schema.boolean({ defaultValue: false }),
       }),
       uptime: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
@@ -48,8 +47,8 @@ const configSchema = schema.object({
     }),
     thresholdRule: schema.object({
       enabled: offeringBasedSchema({
-        serverless: schema.boolean({ defaultValue: true }),
-        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+        traditional: schema.boolean({ defaultValue: false }),
       }),
     }),
   }),
@@ -71,6 +70,10 @@ export const config: PluginConfigDescriptor = {
     },
   },
   schema: configSchema,
+  deprecations: ({ unused }) => [
+    unused('unsafe.thresholdRule.enabled', { level: 'warning' }),
+    unused('unsafe.alertDetails.logs.enabled', { level: 'warning' }),
+  ],
 };
 
 export type ObservabilityConfig = TypeOf<typeof configSchema>;

@@ -23,7 +23,7 @@ import {
   addFieldToTable,
   convertNBSPToSP,
 } from '../../../../tasks/discover';
-import { createNewTimeline, gotToEsqlTab } from '../../../../tasks/timeline';
+import { createNewTimeline, goToEsqlTab } from '../../../../tasks/timeline';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -44,7 +44,7 @@ describe.skip(
       login();
       visitWithTimeRange(ALERTS_URL);
       createNewTimeline();
-      gotToEsqlTab();
+      goToEsqlTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
 

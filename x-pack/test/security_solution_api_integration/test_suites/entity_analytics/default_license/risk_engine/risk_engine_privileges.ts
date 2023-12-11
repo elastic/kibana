@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { riskEngineRouteHelpersFactoryNoAuth } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-
+import { usersAndRolesFactory } from '../../utils/users_and_roles';
 const USER_PASSWORD = 'changeme';
 const ROLES = [
   {
@@ -80,38 +80,17 @@ const USERNAME_TO_ROLES = {
 };
 
 export default ({ getService }: FtrProviderContext) => {
-  describe('@ess privileges_apis', () => {
+  const userHelper = usersAndRolesFactory(getService('security'));
+  describe('@ess Entity Analytics - Risk Engine Privileges API', () => {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const riskEngineRoutesNoAuth = riskEngineRouteHelpersFactoryNoAuth(supertestWithoutAuth);
-    const security = getService('security');
-
-    const createRole = async ({ name, privileges }: { name: string; privileges: any }) => {
-      return await security.role.create(name, privileges);
-    };
-
-    const createUser = async ({
-      username,
-      password,
-      roles,
-    }: {
-      username: string;
-      password: string;
-      roles: string[];
-    }) => {
-      return await security.user.create(username, {
-        password,
-        roles,
-        full_name: username.replace('_', ' '),
-        email: `${username}@elastic.co`,
-      });
-    };
 
     async function createPrivilegeTestUsers() {
-      const rolePromises = ROLES.map((role) => createRole(role));
+      const rolePromises = ROLES.map((role) => userHelper.createRole(role));
 
       await Promise.all(rolePromises);
       const userPromises = Object.entries(USERNAME_TO_ROLES).map(([username, roles]) =>
-        createUser({ username, roles, password: USER_PASSWORD })
+        userHelper.createUser({ username, roles, password: USER_PASSWORD })
       );
 
       return Promise.all(userPromises);
@@ -127,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Risk engine privileges API', () => {
-      it('should return has_all_required true for user with all risk engine privileges', async () => {
+      it('returns has_all_required true for user with all risk engine privileges', async () => {
         const { body } = await getPrivilegesForUsername('all');
         expect(body.has_all_required).to.eql(true);
         expect(body.privileges).to.eql({
@@ -145,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
       });
-      it('should return has_all_required false for user with no write access to risk indices', async () => {
+      it('returns has_all_required false for user with no write access to risk indices', async () => {
         const { body } = await getPrivilegesForUsername('no_risk_score_index_write');
         expect(body.has_all_required).to.eql(false);
         expect(body.privileges).to.eql({
@@ -163,7 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
       });
-      it('should return has_all_required false for user with no read access to risk indices', async () => {
+      it('returns has_all_required false for user with no read access to risk indices', async () => {
         const { body } = await getPrivilegesForUsername('no_risk_score_index_read');
         expect(body.has_all_required).to.eql(false);
         expect(body.privileges).to.eql({
@@ -181,7 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
       });
-      it('should return has_all_required false for user with no cluster manage transform privilege', async () => {
+      it('returns has_all_required false for user with no cluster manage transform privilege', async () => {
         const { body } = await getPrivilegesForUsername('no_cluster_manage_transform');
         expect(body.has_all_required).to.eql(false);
         expect(body.privileges).to.eql({
@@ -199,7 +178,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
       });
-      it('should return has_all_required false for user with no cluster manage index templates privilege', async () => {
+      it('returns has_all_required false for user with no cluster manage index templates privilege', async () => {
         const { body } = await getPrivilegesForUsername('no_cluster_manage_index_templates');
         expect(body.has_all_required).to.eql(false);
         expect(body.privileges).to.eql({

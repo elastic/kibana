@@ -21,8 +21,11 @@ import {
   loadESOutput,
   loadKafkaOutput,
   loadLogstashOutput,
+  loadRemoteESOutput,
   resetKafkaOutputForm,
+  selectESOutput,
   selectKafkaOutput,
+  selectRemoteESOutput,
   shouldDisplayError,
   validateOutputTypeChangeToKafka,
   validateSavedKafkaOutputForm,
@@ -35,6 +38,175 @@ import { visit } from '../tasks/common';
 describe('Outputs', () => {
   beforeEach(() => {
     login();
+  });
+
+  describe('Elasticsearch', () => {
+    describe('Preset input', () => {
+      it('is set to balanced by default', () => {
+        selectESOutput();
+
+        cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT).should('have.value', 'balanced');
+      });
+
+      it('forces custom when reserved key is included in config YAML box', () => {
+        selectESOutput();
+
+        cy.getBySel('kibanaCodeEditor').click().focused().type('bulk_max_size: 1000');
+
+        cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT)
+          .should('have.value', 'custom')
+          .should('be.disabled');
+      });
+
+      it('allows balanced when reserved key is not included in config yaml box', () => {
+        selectESOutput();
+
+        cy.getBySel('kibanaCodeEditor').click().focused().type('some_random_key: foo');
+
+        cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT)
+          .should('have.value', 'balanced')
+          .should('be.enabled');
+      });
+
+      const cases = [
+        {
+          name: 'Preset: Balanced',
+          preset: 'balanced',
+        },
+        {
+          name: 'Preset: Custom',
+          preset: 'custom',
+        },
+        {
+          name: 'Preset: Throughput',
+          preset: 'throughput',
+        },
+        {
+          name: 'Preset: Scale',
+          preset: 'scale',
+        },
+        {
+          name: 'Preset: Latency',
+          preset: 'latency',
+        },
+      ];
+
+      for (const type of ['elasticsearch', 'remote_elasticsearch']) {
+        for (const testCase of cases) {
+          describe(`When type is ${type} and preset is ${testCase.preset}`, () => {
+            it('successfully creates output', () => {
+              if (type === 'elasticsearch') {
+                selectESOutput();
+              } else if (type === 'remote_elasticsearch') {
+                selectRemoteESOutput();
+              }
+
+              cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).type(`${type} - ${testCase.name}`);
+              cy.get(`[placeholder="Specify host URL"]`).type(
+                `http://${testCase.preset}.elasticsearch.com:9200`
+              );
+              cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT).select(testCase.preset);
+
+              if (type === 'remote_elasticsearch') {
+                cy.getBySel('serviceTokenSecretInput').type('secret');
+              }
+
+              cy.intercept('POST', '**/api/fleet/outputs').as('saveOutput');
+              cy.getBySel(SETTINGS_SAVE_BTN).click();
+
+              cy.wait('@saveOutput').then((interception) => {
+                const responseBody = interception.response?.body;
+                cy.visit(`/app/fleet/settings/outputs/${responseBody?.item?.id}`);
+              });
+
+              cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).should(
+                'have.value',
+                `${type} - ${testCase.name}`
+              );
+              cy.get(`[placeholder="Specify host URL"]`).should(
+                'have.value',
+                `http://${testCase.preset}.elasticsearch.com:9200`
+              );
+              cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT).should('have.value', testCase.preset);
+            });
+          });
+        }
+      }
+    });
+  });
+
+  describe('Remote ES', () => {
+    it('displays proper error messages', () => {
+      selectRemoteESOutput();
+      cy.getBySel(SETTINGS_SAVE_BTN).click();
+
+      cy.contains('Name is required');
+      cy.contains('URL is required');
+      cy.contains('Service Token is required');
+      shouldDisplayError(SETTINGS_OUTPUTS.NAME_INPUT);
+      shouldDisplayError('serviceTokenSecretInput');
+    });
+
+    describe('Form submit', () => {
+      let outputId: string;
+
+      before(() => {
+        interceptOutputId((id) => {
+          outputId = id;
+        });
+      });
+
+      after(() => {
+        cleanupOutput(outputId);
+      });
+
+      it('saves the output', () => {
+        selectRemoteESOutput();
+
+        cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).type('name');
+        cy.get('[placeholder="Specify host URL"').clear().type('https://localhost:5000');
+        cy.getBySel('serviceTokenSecretInput').type('service_token');
+
+        cy.intercept('POST', '**/api/fleet/outputs').as('saveOutput');
+
+        cy.getBySel(SETTINGS_SAVE_BTN).click();
+
+        cy.wait('@saveOutput').then((interception) => {
+          const responseBody = interception.response?.body;
+          cy.visit(`/app/fleet/settings/outputs/${responseBody?.item?.id}`);
+          expect(responseBody?.item.service_token).to.equal(undefined);
+          expect(responseBody?.item.secrets.service_token.id).not.to.equal(undefined);
+        });
+
+        cy.get('[placeholder="Specify host URL"').should('have.value', 'https://localhost:5000');
+        cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).should('have.value', 'name');
+      });
+    });
+
+    describe('Form edit', () => {
+      let outputId: string;
+
+      before(() => {
+        loadRemoteESOutput().then((data) => {
+          outputId = data.item.id;
+        });
+      });
+      after(() => {
+        cleanupOutput(outputId);
+      });
+
+      it('edits the output', () => {
+        visit(`/app/fleet/settings/outputs/${outputId}`);
+
+        cy.get('[placeholder="Specify host URL"').clear().type('https://localhost:5001');
+
+        cy.getBySel(SETTINGS_SAVE_BTN).click();
+        cy.getBySel(SETTINGS_CONFIRM_MODAL_BTN).click();
+        visit(`/app/fleet/settings/outputs/${outputId}`);
+
+        cy.get('[placeholder="Specify host URL"').should('have.value', 'https://localhost:5001');
+      });
+    });
   });
 
   describe('Kafka', () => {
@@ -204,7 +376,7 @@ describe('Outputs', () => {
         cy.contains('Name is required');
         cy.contains('Host is required');
         cy.contains('Username is required');
-        // cy.contains('Password is required'); // TODO
+        cy.contains('Password is required');
         cy.contains('Default topic is required');
         cy.contains('Topic is required');
         cy.contains(
@@ -213,7 +385,7 @@ describe('Outputs', () => {
         cy.contains('Must be a key, value pair i.e. "http.response.code: 200"');
         shouldDisplayError(SETTINGS_OUTPUTS.NAME_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_INPUT);
-        // shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT); // TODO
+        shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_DEFAULT_TOPIC_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT);

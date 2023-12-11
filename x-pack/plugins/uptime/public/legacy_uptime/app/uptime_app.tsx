@@ -127,7 +127,9 @@ const Application = (props: UptimeAppProps) => {
                 cases: startPlugins.cases,
               }}
             >
-              <ObservabilityAIAssistantProvider value={startPlugins.observabilityAIAssistant}>
+              <ObservabilityAIAssistantProvider
+                value={startPlugins.observabilityAIAssistant.service}
+              >
                 <Router history={appMountParameters.history}>
                   <EuiThemeProvider darkMode={darkMode}>
                     <UptimeRefreshContextProvider>
