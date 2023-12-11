@@ -20,10 +20,16 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCode,
 } from '@elastic/eui';
 import type { BoolQuery, TimeRange, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { RiskScoreEntity, type RiskScore } from '../../../common/entity_analytics/risk_engine';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  RiskScoreEntity,
+  RISK_SCORE_INDEX_PATTERN,
+  type RiskScore,
+} from '../../../common/entity_analytics/risk_engine';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../translations';
 import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
@@ -85,8 +91,17 @@ const MissingPermissionsCallout = () => {
       color="primary"
       iconType="iInCircle"
       data-test-subj="missing-risk-engine-preview-permissions"
-      size="s"
-    />
+    >
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.securitySolution.riskScore.riskScorePreview.missingPermissionsCallout.description"
+          defaultMessage="Read permission is required for the {index} index pattern in order to preview data. Contact your administrator for further assistance."
+          values={{
+            index: <EuiCode>{RISK_SCORE_INDEX_PATTERN}</EuiCode>,
+          }}
+        />
+      </EuiText>
+    </EuiCallOut>
   );
 };
 
