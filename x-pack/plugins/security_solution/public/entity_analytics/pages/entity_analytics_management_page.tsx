@@ -36,7 +36,7 @@ export const EntityAnalyticsManagementPage = () => {
           <RiskScoreEnableSection privileges={privileges} />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <RiskScorePreviewSection />
+          <RiskScorePreviewSection privileges={privileges} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
