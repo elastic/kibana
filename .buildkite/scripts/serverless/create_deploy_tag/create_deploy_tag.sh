@@ -2,8 +2,7 @@
 set -euo pipefail
 
 DEPLOY_TAG="deploy@$(date +%s)"
-# KIBANA_COMMIT_SHA=$(buildkite-agent meta-data get selected-commit-hash)
-KIBANA_COMMIT_SHA=$(git rev-parse HEAD)
+KIBANA_COMMIT_SHA=$(buildkite-agent meta-data get selected-commit-hash)
 
 if [[ -z "$KIBANA_COMMIT_SHA" ]]; then
   echo "Commit sha is not set, exiting."
