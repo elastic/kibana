@@ -101,4 +101,12 @@ describe('outputYmlIncludesReservedPerformanceKey', () => {
       expect(outputYmlIncludesReservedPerformanceKey(configYml, safeLoad)).toBe(false);
     });
   });
+
+  describe('comment', () => {
+    it('returns false when reserved key is present only in a comment', () => {
+      const configYml = `true`;
+
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, safeLoad)).toBe(false);
+    });
+  });
 });
