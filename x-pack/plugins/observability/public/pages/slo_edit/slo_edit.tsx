@@ -33,7 +33,7 @@ export function SloEditPage() {
   const { sloId } = useParams<{ sloId: string | undefined }>();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
-  const { data: slo, isInitialLoading } = useFetchSloDetails({ sloId });
+  const { data: slo } = useFetchSloDetails({ sloId });
 
   useBreadcrumbs([
     {
@@ -64,10 +64,6 @@ export function SloEditPage() {
 
   if (hasRightLicense === false || !hasWriteCapabilities || hasErrorInGlobalDiagnosis) {
     navigateToUrl(basePath.prepend(paths.observability.slos));
-  }
-
-  if (sloId && isInitialLoading) {
-    return null;
   }
 
   return (

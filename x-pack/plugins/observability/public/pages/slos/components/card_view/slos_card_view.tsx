@@ -68,27 +68,29 @@ export function SloListCardView({
   }
 
   return (
-    <EuiFlexGrid columns={columns}>
-      {sloList.map((slo) => (
-        <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? 'ALL_VALUE'}`}>
-          <SloCardItem
-            slo={slo}
-            loading={loading}
-            error={error}
-            activeAlerts={activeAlertsBySlo.get(slo)}
-            rules={rulesBySlo?.[slo.id]}
-            historicalSummary={
-              historicalSummaries.find(
-                (historicalSummary) =>
-                  historicalSummary.sloId === slo.id &&
-                  historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
-              )?.data
-            }
-            historicalSummaryLoading={historicalSummaryLoading}
-            cardsPerRow={Number(cardsPerRow)}
-          />
-        </EuiFlexItem>
-      ))}
+    <EuiFlexGrid columns={columns} gutterSize="m">
+      {sloList
+        .filter((slo) => slo.summary)
+        .map((slo) => (
+          <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? 'ALL_VALUE'}`}>
+            <SloCardItem
+              slo={slo}
+              loading={loading}
+              error={error}
+              activeAlerts={activeAlertsBySlo.get(slo)}
+              rules={rulesBySlo?.[slo.id]}
+              historicalSummary={
+                historicalSummaries.find(
+                  (historicalSummary) =>
+                    historicalSummary.sloId === slo.id &&
+                    historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+                )?.data
+              }
+              historicalSummaryLoading={historicalSummaryLoading}
+              cardsPerRow={Number(cardsPerRow)}
+            />
+          </EuiFlexItem>
+        ))}
     </EuiFlexGrid>
   );
 }
