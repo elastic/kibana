@@ -18,8 +18,6 @@ export const mergeEnrichments: MergeEnrichments = (enrichmentsList = []) => {
   return enrichmentsList.reduce((acc, val) => mergeWith(acc, val, customizer), {});
 };
 
-// TODO, figure out what all this does. and why it could be needed.
-// start here on nov 15
 export const applyEnrichmentsToEvents: ApplyEnrichmentsToEvents = ({
   events,
   enrichmentsList,
