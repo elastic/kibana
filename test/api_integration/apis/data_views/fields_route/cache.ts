@@ -14,6 +14,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   describe('cache headers', () => {
     before(() =>
@@ -32,10 +33,32 @@ export default function ({ getService }: FtrProviderContext) {
 
       const cacheControlHeader = response.get('cache-control');
 
+      expect(cacheControlHeader).to.contain('private');
       expect(cacheControlHeader).to.contain('max-age');
       expect(cacheControlHeader).to.contain('stale-while-revalidate');
       expect(response.get('vary')).to.equal('accept-encoding, user-hash');
       expect(response.get('etag')).to.not.be.empty();
+    });
+
+    it('no-cache when data_views:cache_max_age set to zero', async () => {
+      await kibanaServer.uiSettings.update({ 'data_views:cache_max_age': 0 });
+
+      const response = await supertest.get(FIELDS_PATH).query({
+        pattern: 'b*',
+        include_unmapped: true,
+        apiVersion: INITIAL_REST_VERSION_INTERNAL,
+      });
+
+      const cacheControlHeader = response.get('cache-control');
+
+      expect(cacheControlHeader).to.contain('private');
+      expect(cacheControlHeader).to.contain('no-cache');
+      expect(cacheControlHeader).to.not.contain('max-age');
+      expect(cacheControlHeader).to.not.contain('stale-while-revalidate');
+      expect(response.get('vary')).to.equal('accept-encoding, user-hash');
+      expect(response.get('etag')).to.not.be.empty();
+
+      kibanaServer.uiSettings.replace({ 'data_views:cache_max_age': 5 });
     });
 
     it('returns 304 on matching etag', async () => {
@@ -54,6 +77,17 @@ export default function ({ getService }: FtrProviderContext) {
           apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
         .expect(304);
+    });
+
+    it('handles empty field lists', async () => {
+      const response = await supertest.get(FIELDS_PATH).query({
+        pattern: 'xyz',
+        include_unmapped: true,
+        apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        allow_no_index: true,
+      });
+
+      expect(response.body.fields).to.be.empty();
     });
   });
 }

@@ -78,9 +78,13 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
       };
 
       // field cache is configurable in classic environment but not on serverless
-      const cacheMaxAge =
-        (await uiSettings.get<number | undefined>('data_views:cache_max_age')) ||
-        DEFAULT_FIELD_CACHE_FRESHNESS;
+      let cacheMaxAge = DEFAULT_FIELD_CACHE_FRESHNESS;
+      const cacheMaxAgeSetting = await uiSettings.get<number | undefined>(
+        'data_views:cache_max_age'
+      );
+      if (cacheMaxAgeSetting !== undefined) {
+        cacheMaxAge = cacheMaxAgeSetting;
+      }
 
       if (cacheMaxAge && fields.length) {
         const stale = 365 * 24 * 60 * 60 - cacheMaxAge;

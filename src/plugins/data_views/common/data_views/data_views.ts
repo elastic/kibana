@@ -536,7 +536,9 @@ export class DataViewsService {
       ...options,
       pattern: indexPattern.title as string,
       allowHidden:
-        (indexPattern as DataViewSpec).allowHidden || (indexPattern as DataView)?.getAllowHidden(),
+        (indexPattern as DataViewSpec).allowHidden ||
+        (indexPattern as DataView)?.getAllowHidden() ||
+        undefined,
     });
 
   private getFieldsAndIndicesForDataView = async (
@@ -551,7 +553,7 @@ export class DataViewsService {
       pattern: dataView.getIndexPattern(),
       metaFields,
       forceRefresh,
-      allowHidden: dataView.getAllowHidden(),
+      allowHidden: dataView.getAllowHidden() || undefined,
     });
   };
 
