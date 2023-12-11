@@ -150,7 +150,7 @@ export const getDatasetQualitTableColumns = ({
             <EuiFlexItem grow={false}>
               <QualityPercentageIndicator percentage={dataStreamStat.degradedDocs} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{`${dataStreamStat.degradedDocs}%`}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{`${dataStreamStat.degradedDocs ?? 0}%`}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiSkeletonRectangle>
       ),
