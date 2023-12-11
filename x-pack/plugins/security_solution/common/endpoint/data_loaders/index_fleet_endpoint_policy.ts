@@ -112,6 +112,23 @@ export const indexFleetEndpointPolicy = usageTracker.track(
       },
     };
 
+    try {
+      const abv = await kbnClient.request({
+        path: '/api/fleet/epm/packages/endpoint',
+        method: 'POST',
+        headers: {
+          'elastic-api-version': API_VERSIONS.public.v1,
+        },
+        body: {
+          force: true,
+        },
+      });
+
+      log?.info('-+== ', abv);
+    } catch (error) {
+      log?.info('error installing endpoint package', error);
+    }
+
     const fetchPackagePolicy = async (): Promise<CreatePackagePolicyResponse> =>
       kbnClient
         .request<CreatePackagePolicyResponse>({
@@ -123,10 +140,10 @@ export const indexFleetEndpointPolicy = usageTracker.track(
           },
         })
         .catch(async (err) => {
-          const c = await esClient?.cat.indices({
-            format: 'json',
-          });
-          log?.info('Caught package policy _cat', c);
+          // const c = await esClient?.cat.indices({
+          //   format: 'json',
+          // });
+          // log?.info('Caught package policy _cat', c);
 
           return catchAxiosErrorFormatAndThrow(err);
         })
@@ -138,10 +155,10 @@ export const indexFleetEndpointPolicy = usageTracker.track(
       return elapsedTime > 2 * 60 * 1000;
     };
 
-    const a = await esClient?.cat.indices({
-      format: 'json',
-    });
-    log?.info('Before package policy _cat', a);
+    // const a = await esClient?.cat.indices({
+    //   format: 'json',
+    // });
+    // log?.info('Before package policy _cat', a);
 
     let packagePolicy: CreatePackagePolicyResponse | undefined;
     log?.info(`Creating package policy for ${policyName}`);
@@ -163,11 +180,11 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     }
 
     log?.info(`Created package policy for ${policyName}`);
-    const b = await esClient?.cat.indices({
-      format: 'json',
-    });
-
-    log?.info('after package policy _cat', b);
+    // const b = await esClient?.cat.indices({
+    //   format: 'json',
+    // });
+    //
+    // log?.info('after package policy _cat', b);
 
     response.integrationPolicies.push(packagePolicy.item as PolicyData);
 
