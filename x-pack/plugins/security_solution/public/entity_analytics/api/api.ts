@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SnakeToCamelCase } from '@kbn/cases-plugin/common/types';
 import type { AssetCriticalityRecord } from '../../../common/api/entity_analytics/asset_criticality';
 import {
   RISK_ENGINE_STATUS_URL,
@@ -27,18 +26,17 @@ import type {
 } from '../../../server/lib/entity_analytics/types';
 import type { RiskScorePreviewRequestSchema } from '../../../common/entity_analytics/risk_engine/risk_score_preview/request_schema';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics/common';
+import type { SnakeToCamelCase } from '../common/utils';
+
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
 export const useEntityAnalyticsRoutes = () => {
   const http = useKibana().services.http;
 
-  /**
+  /** 
    * Fetches preview risks scores
    */
   const fetchRiskScorePreview = ({
-    signal,
-    params,
-  }: {
     signal?: AbortSignal;
     params: RiskScorePreviewRequestSchema;
   }) =>

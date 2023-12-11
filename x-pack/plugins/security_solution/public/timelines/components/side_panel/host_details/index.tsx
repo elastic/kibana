@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { AssetCriticalitySelector } from '../../../../entity_analytics/components/asset_criticality_selector';
+import { AssetCriticalitySelector } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import {
   ExpandableHostDetails,
   ExpandableHostDetailsPageLink,
