@@ -79,15 +79,36 @@ export async function getQAFBuildContainingCommit(
   const qafBuilds = await buildkite.getBuildsAfterDate(QA_FTR_TEST_SLUG, date, 30);
   qafBuilds.reverse();
 
+  if (commitSha === '8362b85885bb384e37620871b121f3dd65458955') {
+    console.log(
+      'Checking QAF builds: ',
+      qafBuilds.map((b) => b.number)
+    );
+    console.log('One build looks like: ', qafBuilds[0]);
+  }
+
   // Find the first build that contains this commit
   const build = qafBuilds
     // Only search across scheduled builds, triggered builds might run with different commits
-    .filter((e) => e.env.BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG === '')
+    .filter((e) => e.source === 'schedule')
     .find((kbBuild) => {
       // Check if build.commit is after commitSha?
       const kibanaCommitSha = tryGetKibanaBuildHashFromQAFBuild(kbBuild);
       const buildkiteBuildShaIndex = commitShaList.findIndex((c) => c.sha === kibanaCommitSha);
       const commitShaIndex = commitShaList.findIndex((c) => c.sha === commitSha);
+
+      if (commitSha === '8362b85885bb384e37620871b121f3dd65458955') {
+        console.log('Checking QAF build: ', {
+          url: kbBuild.url,
+          started_at: kbBuild.started_at,
+          state: kbBuild.state,
+        });
+        console.log({
+          kibanaCommitSha,
+          commitShaIndex,
+          buildkiteBuildShaIndex,
+        });
+      }
 
       return (
         commitShaIndex !== -1 &&
