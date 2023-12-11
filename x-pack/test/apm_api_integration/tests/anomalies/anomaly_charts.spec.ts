@@ -87,7 +87,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
+  // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/172766
+  registry.when.skip(
     'fetching service anomalies with a trial license',
     { config: 'trial', archives: [] },
     () => {

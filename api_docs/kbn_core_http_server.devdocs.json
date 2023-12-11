@@ -13375,7 +13375,7 @@
               },
               {
                 "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/server/routes/csp_rule_template/get_csp_rule_template.ts"
+                "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/find/find.ts"
               },
               {
                 "plugin": "cloudSecurityPosture",
@@ -13676,6 +13676,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/get.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/privileges.ts"
               },
               {
                 "plugin": "securitySolution",

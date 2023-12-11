@@ -32,6 +32,7 @@ export interface Props {
 }
 
 export type SortField = 'sli_value' | 'error_budget_consumed' | 'error_budget_remaining' | 'status';
+export type SortDirection = 'asc' | 'desc';
 
 export type Item<T> = EuiSelectableOption & {
   label: string;

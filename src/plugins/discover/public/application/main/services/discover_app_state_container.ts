@@ -16,6 +16,7 @@ import {
   COMPARE_ALL_OPTIONS,
   compareFilters,
   Filter,
+  FilterCompareOptions,
   FilterStateStore,
   Query,
 } from '@kbn/es-query';
@@ -328,13 +329,17 @@ export function setState(
 /**
  * Helper function to compare 2 different filter states
  */
-export function isEqualFilters(filtersA?: Filter[] | Filter, filtersB?: Filter[] | Filter) {
+export function isEqualFilters(
+  filtersA?: Filter[] | Filter,
+  filtersB?: Filter[] | Filter,
+  comparatorOptions: FilterCompareOptions = COMPARE_ALL_OPTIONS
+) {
   if (!filtersA && !filtersB) {
     return true;
   } else if (!filtersA || !filtersB) {
     return false;
   }
-  return compareFilters(filtersA, filtersB, COMPARE_ALL_OPTIONS);
+  return compareFilters(filtersA, filtersB, comparatorOptions);
 }
 
 /**

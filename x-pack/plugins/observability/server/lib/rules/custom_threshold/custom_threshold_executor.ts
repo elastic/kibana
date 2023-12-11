@@ -99,6 +99,7 @@ export const createCustomThresholdExecutor = ({
       getAlertByAlertUuid,
       getAlertStartedDate,
       searchSourceClient,
+      alertFactory: baseAlertFactory,
     } = services;
 
     const alertFactory: CustomThresholdAlertFactory = (
@@ -177,8 +178,17 @@ export const createCustomThresholdExecutor = ({
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
     let scheduledActionsCount = 0;
 
+    const alertLimit = baseAlertFactory.alertLimit.getValue();
+    let hasReachedLimit = false;
+
     // The key of `groups` is the alert instance ID.
     for (const group of groups) {
+      if (scheduledActionsCount >= alertLimit) {
+        // need to set this so that warning is displayed in the UI and in the logs
+        hasReachedLimit = true;
+        break; // once limit is reached, we break out of the loop and don't schedule any more alerts
+      }
+
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) => result[group]?.shouldFire);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
@@ -296,6 +306,8 @@ export const createCustomThresholdExecutor = ({
         });
       }
     }
+
+    baseAlertFactory.alertLimit.setLimitReached(hasReachedLimit);
     const { getRecoveredAlerts } = services.alertFactory.done();
     const recoveredAlerts = getRecoveredAlerts();
 
