@@ -11,8 +11,10 @@ import { CodeHighlightNode, CodeNode } from '@lexical/code';
 import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
+import { $convertFromMarkdownString, TRANSFORMERS } from '@lexical/markdown';
 import { LensNode } from './lens/node';
 import { MentionNode } from './mentions/node';
+import { initialState } from './initial_state';
 
 const theme: InitialConfigType['theme'] = {
   ltr: 'ltr',
@@ -47,4 +49,5 @@ export const editorConfig: InitialConfigType = {
   theme,
   nodes: EDITOR_NODES,
   onError,
+  editorState: () => $convertFromMarkdownString(initialState, TRANSFORMERS),
 };
