@@ -221,6 +221,8 @@ export class ElasticsearchStore extends VectorStore {
 
         return getFlattenedHits(maybeEsqlMsearchResponse);
       });
+      // add telemetry here, knowledgeBaseAccessed(this.kbResource, results.length, result.response_time);
+      // type, and how many returned, how long it took for ES to deliver results
 
       this.logger.debug(
         `Similarity search metadata source:\n${JSON.stringify(
