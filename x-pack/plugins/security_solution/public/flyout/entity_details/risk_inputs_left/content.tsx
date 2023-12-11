@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import type { RiskInputs } from '../../../../common/risk_engine';
+import type { RiskInputs } from '../../../../common/entity_analytics/risk_engine';
 import { ActionColumn } from './components/action_column';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { RiskInputsUtilityBar } from './components/utility_bar';

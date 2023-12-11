@@ -168,12 +168,12 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.defaultIndexTitle', {
         defaultMessage: 'Default data view',
       }),
-      value: null,
+      value: '',
       type: 'string',
       description: i18n.translate('data.advancedSettings.defaultIndexText', {
         defaultMessage: 'Used by discover and visualizations when a data view is not set.',
       }),
-      schema: schema.nullable(schema.string()),
+      schema: schema.string(),
     },
     [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: {
       name: i18n.translate('data.advancedSettings.courier.ignoreFilterTitle', {
