@@ -72,9 +72,15 @@ export class ThemeService {
     });
 
     _setDarkMode(darkMode);
+    updateKbnThemeTag(darkMode);
     this.theme$.next({ darkMode });
   }
 }
+
+const updateKbnThemeTag = (darkMode: boolean) => {
+  const globals: any = typeof window === 'undefined' ? {} : window;
+  globals.__kbnThemeTag__ = darkMode ? 'v8dark' : 'v8light';
+};
 
 const createStyleSheet = ({ href }: { href: string }) => {
   const head = document.getElementsByTagName('head')[0];
