@@ -2349,6 +2349,19 @@
       }
     }
   },
+  "cloud-security-posture-settings": {
+    "dynamic": false,
+    "properties": {
+      "rules": {
+        "type": "object",
+        "properties": {
+          "muted": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  },
   "slo": {
     "dynamic": false,
     "properties": {
