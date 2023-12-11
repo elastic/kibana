@@ -34,8 +34,9 @@ export async function executor(
 
   // Run code in child process
   exec(
-    `cat <<'EOF' | deno run --allow-net=127.0.0.1:9200 --allow-env --allow-sys - ${wrappedCode}\nEOF`,
+    `cat <<'EOF' | deno run --allow-net=127.0.0.1:9200 --allow-env --allow-sys - \n${wrappedCode}\nEOF`,
     {
+      cwd: __dirname,
       env: {
         PATH: process.env.PATH,
         DENO_NO_PROMPT: 1,
