@@ -8,7 +8,12 @@ import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
-import { ALERT_EVALUATION_VALUE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+  ALERT_URL,
+} from '@kbn/rule-data-utils';
 
 import { ComparatorFns } from '../../../common';
 import {
@@ -62,7 +67,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   let latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
   const { dateStart, dateEnd } = getTimeRange(`${params.timeWindowSize}${params.timeWindowUnit}`);
 
-  const { parsedResults, link } = searchSourceRule
+  const { parsedResults, link, index } = searchSourceRule
     ? await fetchSearchSourceQuery({
         ruleId,
         alertLimit,
@@ -145,6 +150,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       baseContext: baseActiveContext,
       params,
       ...(isGroupAgg ? { group: alertId } : {}),
+      index,
     });
 
     const id = alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId;
@@ -160,6 +166,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_TITLE]: actionContext.title,
         [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
+        [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
       },
     });
     if (!isGroupAgg) {
@@ -199,6 +206,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       params,
       isRecovered: true,
       ...(isGroupAgg ? { group: alertId } : {}),
+      index,
     });
     alertsClient?.setAlertData({
       id: alertId,
@@ -209,6 +217,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_TITLE]: recoveryContext.title,
         [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${recoveryContext.value}`,
+        [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
       },
     });
   }

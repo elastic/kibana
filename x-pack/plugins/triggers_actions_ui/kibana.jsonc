@@ -18,6 +18,7 @@
       "kibanaUtils",
       "savedObjects",
       "unifiedSearch",
+      "fieldFormats",
       "dataViews",
       "dataViewEditor",
       "alerting",
@@ -30,7 +31,8 @@
       "cloud",
       "features",
       "home",
-      "spaces"
+      "spaces",
+      "serverless",
     ],
     "requiredBundles": [
       "alerting",

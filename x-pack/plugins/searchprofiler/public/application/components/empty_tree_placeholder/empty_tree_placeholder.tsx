@@ -6,25 +6,26 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiEmptyPrompt } from '@elastic/eui';
 
 export const EmptyTreePlaceHolder = () => {
   return (
-    <div className="prfDevTool__main__emptyTreePlaceholder">
-      <EuiText color="subdued">
-        {/* TODO: translations */}
+    <EuiEmptyPrompt
+      title={
         <h1>
           {i18n.translate('xpack.searchProfiler.emptyProfileTreeTitle', {
             defaultMessage: 'No queries to profile',
           })}
         </h1>
+      }
+      body={
         <p>
           {i18n.translate('xpack.searchProfiler.emptyProfileTreeDescription', {
             defaultMessage: 'Enter a query, click Profile, and see the results here.',
           })}
         </p>
-      </EuiText>
-    </div>
+      }
+    />
   );
 };

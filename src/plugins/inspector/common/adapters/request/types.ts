@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { ConnectionRequestParams } from '@elastic/transport';
+
 /**
  * The status a request can have.
  */
@@ -52,6 +54,8 @@ export interface RequestStatistic {
 }
 
 export interface Response {
+  // TODO replace object with IKibanaSearchResponse once IKibanaSearchResponse is seperated from data plugin.
   json?: object;
+  requestParams?: ConnectionRequestParams;
   time?: number;
 }

@@ -29,31 +29,33 @@ const mock = new RedirectAppLinksStorybookMock();
 
 export const RedirectAppLinks = () => {
   return (
-    <>
-      <Component {...mock.getProps()}>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="storybookButton"
-              iconType="plusInCircle"
-              href="/some-test-url"
-            >
-              Button with URL
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="storybookButton"
-              iconType="plusInCircle"
-              onClick={action('onClick')}
-            >
-              Button without URL
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Component>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <Component {...mock.getProps()}>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="storybookButton"
+                iconType="plusInCircle"
+                href="/some-test-url"
+              >
+                Button with URL
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="storybookButton"
+                iconType="plusInCircle"
+                onClick={action('onClick')}
+              >
+                Button without URL
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Component>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <div>
           <EuiButton
             data-test-subj="storybookButton"
             iconType="plusInCircle"
@@ -61,9 +63,9 @@ export const RedirectAppLinks = () => {
           >
             Button outside RedirectAppLinks
           </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+        </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

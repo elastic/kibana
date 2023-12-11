@@ -13,13 +13,13 @@ import type {
   ManagementSection,
   ManagementSetup,
 } from '@kbn/management-plugin/public';
+import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 
 import { apiKeysManagementApp } from './api_keys';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
 import { usersManagementApp } from './users';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticationServiceSetup } from '../authentication';
+import type { SecurityLicense } from '../../common';
 import type { PluginStartDependencies } from '../plugin';
 
 export interface ManagementAppConfigType {
@@ -66,7 +66,7 @@ export class ManagementService {
   }
 
   start({ capabilities, uiConfig }: StartParams) {
-    this.licenseFeaturesSubscription = this.license.features$.subscribe(async (features) => {
+    this.licenseFeaturesSubscription = this.license.features$.subscribe((features) => {
       const securitySection = this.securitySection!;
 
       const securityManagementAppsStatuses: Array<[ManagementApp, boolean]> = [

@@ -7,8 +7,8 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
-import { v1 as uuidv1 } from 'uuid';
-import { SLO_SUMMARY_TEMP_INDEX_NAME } from '../../assets/constants';
+import { v4 as uuidv4 } from 'uuid';
+import { SLO_SUMMARY_TEMP_INDEX_NAME } from '../../../common/slo/constants';
 import { Duration, DurationUnit, SLO } from '../../domain/models';
 import { validateSLO } from '../../domain/services';
 import { SLORepository } from './slo_repository';
@@ -61,7 +61,7 @@ export class CreateSLO {
     const now = new Date();
     return {
       ...params,
-      id: params.id ?? uuidv1(),
+      id: params.id ?? uuidv4(),
       settings: {
         syncDelay: params.settings?.syncDelay ?? new Duration(1, DurationUnit.Minute),
         frequency: params.settings?.frequency ?? new Duration(1, DurationUnit.Minute),

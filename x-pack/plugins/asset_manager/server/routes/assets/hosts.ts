@@ -11,28 +11,39 @@ import { GetHostAssetsQueryOptions, getHostAssetsQueryOptionsRT } from '../../..
 import { debug } from '../../../common/debug_log';
 import { SetupRouteOptions } from '../types';
 import * as routePaths from '../../../common/constants_routes';
-import { getClientsFromContext } from '../utils';
+import { getClientsFromContext, validateStringAssetFilters } from '../utils';
 import { AssetsValidationError } from '../../lib/validators/validation_error';
 
 export function hostsRoutes<T extends RequestHandlerContext>({
   router,
   assetClient,
 }: SetupRouteOptions<T>) {
+  const validate = createRouteValidationFunction(getHostAssetsQueryOptionsRT);
   router.get<unknown, GetHostAssetsQueryOptions, unknown>(
     {
       path: routePaths.GET_HOSTS,
       validate: {
-        query: createRouteValidationFunction(getHostAssetsQueryOptionsRT),
+        query: (q, res) => {
+          const [invalidResponse, validatedFilters] = validateStringAssetFilters(q, res);
+          if (invalidResponse) {
+            return invalidResponse;
+          }
+          if (validatedFilters) {
+            q.filters = validatedFilters;
+          }
+          return validate(q, res);
+        },
       },
     },
     async (context, req, res) => {
-      const { from = 'now-24h', to = 'now' } = req.query || {};
+      const { from = 'now-24h', to = 'now', filters } = req.query || {};
       const { elasticsearchClient, savedObjectsClient } = await getClientsFromContext(context);
 
       try {
         const response = await assetClient.getHosts({
           from,
           to,
+          filters, // safe due to route validation, are there better ways to do this?
           elasticsearchClient,
           savedObjectsClient,
         });

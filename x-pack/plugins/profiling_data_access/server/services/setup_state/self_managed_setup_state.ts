@@ -10,7 +10,6 @@ import {
   validateResourceManagement,
 } from '../../../common/cluster_settings';
 import { hasProfilingData } from '../../../common/has_profiling_data';
-import { validateSecurityRole } from '../../../common/security_role';
 import {
   createDefaultSetupState,
   mergePartialSetupStates,
@@ -21,12 +20,7 @@ import {
 export async function selfManagedSetupState(params: ProfilingSetupOptions): Promise<SetupState> {
   const state = createDefaultSetupState();
 
-  const verifyFunctions = [
-    validateMaximumBuckets,
-    validateResourceManagement,
-    validateSecurityRole,
-    hasProfilingData,
-  ];
+  const verifyFunctions = [validateMaximumBuckets, validateResourceManagement, hasProfilingData];
 
   const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(params)));
 

@@ -10,6 +10,7 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { omitBy, isUndefined } from 'lodash';
 
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
@@ -44,6 +45,7 @@ export class ToastsApi implements IToasts {
   private uiSettings: IUiSettingsClient;
 
   private overlays?: OverlayStart;
+  private analytics?: AnalyticsServiceStart;
   private i18n?: I18nStart;
   private theme?: ThemeServiceStart;
 
@@ -187,6 +189,7 @@ export class ToastsApi implements IToasts {
           error={error}
           title={options.title}
           toastMessage={message}
+          analytics={this.analytics!}
           i18n={this.i18n!}
           theme={this.theme!}
         />

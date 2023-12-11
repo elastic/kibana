@@ -26,9 +26,12 @@ export type {
   DiscoverCustomization,
   DiscoverCustomizationService,
   FlyoutCustomization,
+  FlyoutContentActions,
+  FlyoutContentProps,
   SearchBarCustomization,
   UnifiedHistogramCustomization,
   TopNavCustomization,
 } from './customizations';
 export { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './embeddable';
 export { loadSharingDataHelpers } from './utils';
+export { LogExplorerTabs, type LogExplorerTabsProps } from './components/log_explorer_tabs';

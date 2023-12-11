@@ -20,7 +20,7 @@ import {
   XYBrushEvent,
 } from '@elastic/charts';
 import moment from 'moment';
-import { IUiSettingsClient } from '@kbn/core/public';
+import { getTimeZone } from '@kbn/visualization-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { LogRateHistogramItem } from '@kbn/aiops-utils';
 
@@ -37,16 +37,6 @@ interface Props {
 }
 
 const SPEC_ID = 'document_count';
-
-function getTimezone(uiSettings: IUiSettingsClient) {
-  if (uiSettings.isDefault('dateFormat:tz')) {
-    const detectedTimezone = moment.tz.guess();
-    if (detectedTimezone) return detectedTimezone;
-    else return moment().format('Z');
-  } else {
-    return uiSettings.get('dateFormat:tz', 'Browser');
-  }
-}
 
 export function LoadingSpinner() {
   return (
@@ -80,11 +70,6 @@ export const DocumentCountChart: FC<Props> = ({
       defaultMessage: 'document count',
     }
   );
-
-  const xDomain = {
-    min: timeRangeEarliest,
-    max: timeRangeLatest,
-  };
 
   const adjustedChartPoints = useMemo(() => {
     // Display empty chart when no data in range
@@ -131,7 +116,7 @@ export const DocumentCountChart: FC<Props> = ({
     timefilterUpdateHandler(range);
   };
 
-  const timeZone = getTimezone(uiSettings);
+  const timeZone = getTimeZone(uiSettings);
 
   return (
     <EuiFlexGroup
@@ -149,7 +134,6 @@ export const DocumentCountChart: FC<Props> = ({
           }}
         >
           <Settings
-            xDomain={xDomain}
             onBrushEnd={onBrushEnd as BrushEndListener}
             onElementClick={onElementClick}
             theme={chartTheme}

@@ -40,7 +40,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         deepLinkId: 'securitySolutionUI:alerts' as AppDeepLinkId,
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Alerts' });
-      await svlCommonNavigation.breadcrumbs.clickHome();
+      await svlCommonNavigation.clickLogo();
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Get started' });
     });
 

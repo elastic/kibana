@@ -22,11 +22,8 @@ import {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesContextProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -124,7 +121,11 @@ export const JobsListPage: FC<Props> = ({
   }
 
   return (
-    <RedirectAppLinks application={coreStart.application}>
+    <RedirectAppLinks
+      coreStart={{
+        application: coreStart.application,
+      }}
+    >
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider

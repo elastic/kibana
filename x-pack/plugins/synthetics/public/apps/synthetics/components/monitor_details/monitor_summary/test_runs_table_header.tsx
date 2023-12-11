@@ -35,7 +35,7 @@ export const TestRunsTableHeader = ({
   const { monitor } = useSelectedMonitor();
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="l">
+    <EuiFlexGroup alignItems="center" gutterSize="l" wrap={true}>
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <h3>{paginable || pings?.length < 10 ? TEST_RUNS : LAST_10_TEST_RUNS}</h3>

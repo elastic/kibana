@@ -1,11 +1,15 @@
 {
   "paths": {
     "advancedSettings": "src/plugins/advanced_settings",
+    "aiAssistantManagementSelection": "src/plugins/ai_assistant_management/selection",
+    "aiAssistantManagementObservability": "src/plugins/ai_assistant_management/observability",
     "alerts": "packages/kbn-alerts/src",
     "alertsUIShared": "packages/kbn-alerts-ui-shared/src",
+    "alertingTypes": "packages/kbn-alerting-types",
     "apmOss": "src/plugins/apm_oss",
     "autocomplete": "packages/kbn-securitysolution-autocomplete/src",
     "bfetch": "src/plugins/bfetch",
+    "bfetchError": "packages/kbn-bfetch-error",
     "cases": ["packages/kbn-cases-components"],
     "cellActions": "packages/kbn-cell-actions",
     "charts": "src/plugins/charts",
@@ -90,7 +94,7 @@
     "randomSampling": "x-pack/packages/kbn-random-sampling",
     "reactPackages": "packages/react",
     "textBasedEditor": "packages/kbn-text-based-editor",
-    "reporting": "packages/kbn-reporting/common",
+    "reporting": "packages/kbn-reporting",
     "savedObjects": "src/plugins/saved_objects",
     "savedObjectsFinder": "src/plugins/saved_objects_finder",
     "savedObjectsManagement": "src/plugins/saved_objects_management",
@@ -99,6 +103,8 @@
     "share": "src/plugins/share",
     "sharedUXPackages": "packages/shared-ux",
     "searchApiPanels": "packages/kbn-search-api-panels/",
+    "searchErrors": "packages/kbn-search-errors",
+    "searchIndexDocuments": "packages/kbn-search-index-documents",
     "searchResponseWarnings": "packages/kbn-search-response-warnings",
     "securitySolutionPackages": "x-pack/packages/security-solution",
     "serverlessPackages": "packages/serverless",
@@ -132,7 +138,8 @@
     "unifiedSearch": "src/plugins/unified_search",
     "unifiedFieldList": "packages/kbn-unified-field-list",
     "unifiedHistogram": "src/plugins/unified_histogram",
-    "unifiedDataTable": "packages/kbn-unified-data-table"
+    "unifiedDataTable": "packages/kbn-unified-data-table",
+    "unsavedChangesBadge": "packages/kbn-unsaved-changes-badge"
   },
   "translations": []
 }

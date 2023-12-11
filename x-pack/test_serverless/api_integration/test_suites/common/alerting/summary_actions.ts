@@ -41,13 +41,10 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('Summary actions', function () {
-    // flaky on MKI, see https://github.com/elastic/kibana/issues/169204
-    this.tags(['failsOnMKI']);
-
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     const ALERT_INDEX = '.alerts-stack.alerts-default';
-    let actionId: string;
+    let connectorId: string;
     let ruleId: string;
     const fields = [
       '@timestamp',
@@ -67,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     afterEach(async () => {
       await supertest
-        .delete(`/api/actions/connector/${actionId}`)
+        .delete(`/api/actions/connector/${connectorId}`)
         .set('kbn-xsrf', 'foo')
         .set('x-elastic-internal-origin', 'foo')
         .expect(204);
@@ -81,12 +78,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should schedule actions for summary of alerts per rule run', async () => {
       const testStart = new Date();
-      const createdAction = await createIndexConnector({
+      const createdConnector = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      actionId = createdAction.id;
+      connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -106,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
         actions: [
           {
             group: 'query matched',
-            id: actionId,
+            id: connectorId,
             params: {
               documents: [
                 {
@@ -119,6 +116,8 @@ export default function ({ getService }: FtrProviderContext) {
                   recovered: '{{alerts.recovered.count}}',
                   recoveredIds:
                     '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                  date: '{{date}}',
+                  ruleId: '{{rule.id}}',
                 },
               ],
             },
@@ -138,6 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
       const resp = await waitForDocumentInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
+        ruleId,
       });
       expect(resp.hits.hits.length).to.be(1);
 
@@ -151,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resp2.hits.hits.length).to.be(1);
 
       const document = resp.hits.hits[0];
-      expect(document._source).to.eql({
+      expect(omit(document, '_source.date')._source).to.eql({
         all: '1',
         new: '1',
         newIds: '[query matched,]',
@@ -159,6 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
         ongoingIds: '[]',
         recovered: '0',
         recoveredIds: '[]',
+        ruleId,
       });
 
       const alertDocument = resp2.hits.hits[0]._source as Record<string, any>;
@@ -166,6 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
         [EVENT_KIND]: 'signal',
         ['kibana.alert.title']: "rule 'always fire' matched query",
         ['kibana.alert.evaluation.conditions']: 'Number of matching documents is greater than -1',
+        ['kibana.alert.evaluation.threshold']: -1,
         ['kibana.alert.evaluation.value']: '0',
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
@@ -189,7 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
           groupBy: 'all',
           searchType: 'esQuery',
         },
-        [ALERT_RULE_PRODUCER]: 'stackAlerts',
+        [ALERT_RULE_PRODUCER]: alertDocument[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
         [ALERT_RULE_TAGS]: [],
@@ -201,12 +203,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should filter alerts by kql', async () => {
       const testStart = new Date();
-      const createdAction = await createIndexConnector({
+      const createdConnector = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      actionId = createdAction.id;
+      connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -226,7 +228,7 @@ export default function ({ getService }: FtrProviderContext) {
         actions: [
           {
             group: 'query matched',
-            id: actionId,
+            id: connectorId,
             params: {
               documents: [
                 {
@@ -239,6 +241,8 @@ export default function ({ getService }: FtrProviderContext) {
                   recovered: '{{alerts.recovered.count}}',
                   recoveredIds:
                     '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                  date: '{{date}}',
+                  ruleId: '{{rule.id}}',
                 },
               ],
             },
@@ -258,6 +262,7 @@ export default function ({ getService }: FtrProviderContext) {
       const resp = await waitForDocumentInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
+        ruleId,
       });
       expect(resp.hits.hits.length).to.be(1);
 
@@ -271,7 +276,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resp2.hits.hits.length).to.be(1);
 
       const document = resp.hits.hits[0];
-      expect(document._source).to.eql({
+      expect(omit(document, '_source.date')._source).to.eql({
         all: '1',
         new: '1',
         newIds: '[query matched,]',
@@ -279,6 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
         ongoingIds: '[]',
         recovered: '0',
         recoveredIds: '[]',
+        ruleId,
       });
 
       const alertDocument = resp2.hits.hits[0]._source as Record<string, any>;
@@ -286,6 +292,7 @@ export default function ({ getService }: FtrProviderContext) {
         [EVENT_KIND]: 'signal',
         ['kibana.alert.title']: "rule 'always fire' matched query",
         ['kibana.alert.evaluation.conditions']: 'Number of matching documents is greater than -1',
+        ['kibana.alert.evaluation.threshold']: -1,
         ['kibana.alert.evaluation.value']: '0',
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
@@ -309,7 +316,7 @@ export default function ({ getService }: FtrProviderContext) {
           groupBy: 'all',
           searchType: 'esQuery',
         },
-        [ALERT_RULE_PRODUCER]: 'stackAlerts',
+        [ALERT_RULE_PRODUCER]: alertDocument[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
         [ALERT_RULE_TAGS]: [],
@@ -330,12 +337,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       await createIndex({ esClient, indexName: ALERT_ACTION_INDEX });
 
-      const createdAction = await createIndexConnector({
+      const createdConnector = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      actionId = createdAction.id;
+      connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -356,7 +363,7 @@ export default function ({ getService }: FtrProviderContext) {
         actions: [
           {
             group: 'query matched',
-            id: actionId,
+            id: connectorId,
             params: {
               documents: [
                 {
@@ -369,6 +376,8 @@ export default function ({ getService }: FtrProviderContext) {
                   recovered: '{{alerts.recovered.count}}',
                   recoveredIds:
                     '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                  date: '{{date}}',
+                  ruleId: '{{rule.id}}',
                 },
               ],
             },
@@ -393,18 +402,19 @@ export default function ({ getService }: FtrProviderContext) {
       const resp = await getDocumentsInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
+        ruleId,
       });
       expect(resp.hits.hits.length).to.be(0);
     });
 
     it('should schedule actions for summary of alerts on a custom interval', async () => {
       const testStart = new Date();
-      const createdAction = await createIndexConnector({
+      const createdConnector = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      actionId = createdAction.id;
+      connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -425,7 +435,7 @@ export default function ({ getService }: FtrProviderContext) {
         actions: [
           {
             group: 'query matched',
-            id: actionId,
+            id: connectorId,
             params: {
               documents: [
                 {
@@ -438,6 +448,8 @@ export default function ({ getService }: FtrProviderContext) {
                   recovered: '{{alerts.recovered.count}}',
                   recoveredIds:
                     '[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]',
+                  date: '{{date}}',
+                  ruleId: '{{rule.id}}',
                 },
               ],
             },
@@ -454,7 +466,9 @@ export default function ({ getService }: FtrProviderContext) {
       const resp = await waitForDocumentInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
+        ruleId,
         num: 2,
+        sort: 'asc',
       });
 
       const resp2 = await waitForAlertInIndex({
@@ -467,7 +481,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resp2.hits.hits.length).to.be(1);
 
       const document = resp.hits.hits[0];
-      expect(document._source).to.eql({
+      expect(omit(document, '_source.date')._source).to.eql({
         all: '1',
         new: '1',
         newIds: '[query matched,]',
@@ -475,10 +489,11 @@ export default function ({ getService }: FtrProviderContext) {
         ongoingIds: '[]',
         recovered: '0',
         recoveredIds: '[]',
+        ruleId,
       });
 
       const document1 = resp.hits.hits[1];
-      expect(document1._source).to.eql({
+      expect(omit(document1, '_source.date')._source).to.eql({
         all: '1',
         new: '0',
         newIds: '[]',
@@ -486,6 +501,7 @@ export default function ({ getService }: FtrProviderContext) {
         ongoingIds: '[query matched,]',
         recovered: '0',
         recoveredIds: '[]',
+        ruleId,
       });
 
       const alertDocument = resp2.hits.hits[0]._source as Record<string, any>;
@@ -493,6 +509,7 @@ export default function ({ getService }: FtrProviderContext) {
         [EVENT_KIND]: 'signal',
         ['kibana.alert.title']: "rule 'always fire' matched query",
         ['kibana.alert.evaluation.conditions']: 'Number of matching documents is greater than -1',
+        ['kibana.alert.evaluation.threshold']: -1,
         ['kibana.alert.evaluation.value']: '0',
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
@@ -516,7 +533,7 @@ export default function ({ getService }: FtrProviderContext) {
           groupBy: 'all',
           searchType: 'esQuery',
         },
-        [ALERT_RULE_PRODUCER]: 'stackAlerts',
+        [ALERT_RULE_PRODUCER]: alertDocument[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
         [ALERT_RULE_TAGS]: [],

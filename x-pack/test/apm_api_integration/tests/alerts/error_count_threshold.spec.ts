@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import { errorCountActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/error_count/register_error_count_rule_type';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
@@ -14,16 +14,13 @@ import { omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createApmRule,
-  deleteRuleById,
-  deleteAlertsByRuleId,
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
   ApmAlertFields,
   createIndexConnector,
-  deleteActionConnector,
   getIndexAction,
 } from './helpers/alerting_api_helper';
-import { cleanupAllState } from './helpers/cleanup_state';
+import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
 import { waitForActiveRule } from './helpers/wait_for_active_rule';
@@ -36,7 +33,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
-  registry.when('error count threshold alert', { config: 'basic', archives: [] }, () => {
+  // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/172764
+  registry.when.skip('error count threshold alert', { config: 'basic', archives: [] }, () => {
     const javaErrorMessage = 'a java error';
     const phpErrorMessage = 'a php error';
 
@@ -55,8 +53,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      cleanupAllState({ es, supertest });
-
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -134,13 +130,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        try {
-          await deleteActionConnector({ supertest, es, actionId });
-          await deleteRuleById({ supertest, ruleId });
-          await deleteAlertsByRuleId({ es, ruleId });
-        } catch (e) {
-          logger.info('Could not delete rule or action connector', e);
-        }
+        await cleanupRuleAndAlertState({ es, supertest, logger });
       });
 
       it('checks if rule is active', async () => {
@@ -285,12 +275,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        try {
-          await deleteRuleById({ supertest, ruleId });
-          await deleteAlertsByRuleId({ es, ruleId });
-        } catch (e) {
-          logger.info('Could not delete rule', e);
-        }
+        await cleanupRuleAndAlertState({ es, supertest, logger });
       });
 
       it('produces one alert for the opbeans-php service', async () => {

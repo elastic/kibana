@@ -7026,6 +7026,12 @@
           "_meta": {
             "description": "The Serverless Project ID"
           }
+        },
+        "projectType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Serverless Project type"
+          }
         }
       }
     },
@@ -7702,6 +7708,42 @@
                   }
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "connectors": {
+      "properties": {
+        "native": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "clients": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "connectors_serverless": {
+      "properties": {
+        "native": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "clients": {
+          "properties": {
+            "total": {
+              "type": "long"
             }
           }
         }

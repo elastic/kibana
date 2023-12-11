@@ -92,6 +92,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
 
   const {
     application: { capabilities },
+    isServerless,
   } = useKibana().services;
   const {
     rulesSettings: {
@@ -229,7 +230,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
             hasError={hasFlappingError}
           />
         )}
-        {queryDelaySettings && (
+        {isServerless && queryDelaySettings && (
           <>
             <EuiSpacer />
             <RulesSettingsQueryDelaySection

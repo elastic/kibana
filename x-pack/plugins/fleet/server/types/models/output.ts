@@ -115,12 +115,56 @@ export const ElasticSearchSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Elasticsearch),
   hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
+  preset: schema.maybe(
+    schema.oneOf([
+      schema.literal('balanced'),
+      schema.literal('custom'),
+      schema.literal('throughput'),
+      schema.literal('scale'),
+      schema.literal('latency'),
+    ])
+  ),
 };
 
 const ElasticSearchUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Elasticsearch)),
   hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 })),
+  preset: schema.maybe(
+    schema.oneOf([
+      schema.literal('balanced'),
+      schema.literal('custom'),
+      schema.literal('throughput'),
+      schema.literal('scale'),
+      schema.literal('latency'),
+    ])
+  ),
+};
+
+/**
+ * Remote Elasticsearch schemas
+ */
+
+export const RemoteElasticSearchSchema = {
+  ...ElasticSearchSchema,
+  type: schema.literal(outputType.RemoteElasticsearch),
+  service_token: schema.maybe(schema.string()),
+  secrets: schema.maybe(
+    schema.object({
+      service_token: schema.maybe(secretRefSchema),
+    })
+  ),
+};
+
+const RemoteElasticSearchUpdateSchema = {
+  ...ElasticSearchUpdateSchema,
+  type: schema.maybe(schema.literal(outputType.RemoteElasticsearch)),
+  service_token: schema.maybe(schema.string()),
+  secrets: schema.maybe(
+    schema.object({
+      service_token: schema.maybe(secretRefSchema),
+    })
+  ),
 };
 
 /**
@@ -287,12 +331,14 @@ const KafkaUpdateSchema = {
 
 export const OutputSchema = schema.oneOf([
   schema.object({ ...ElasticSearchSchema }),
+  schema.object({ ...RemoteElasticSearchSchema }),
   schema.object({ ...LogstashSchema }),
   schema.object({ ...KafkaSchema }),
 ]);
 
 export const UpdateOutputSchema = schema.oneOf([
   schema.object({ ...ElasticSearchUpdateSchema }),
+  schema.object({ ...RemoteElasticSearchUpdateSchema }),
   schema.object({ ...LogstashUpdateSchema }),
   schema.object({ ...KafkaUpdateSchema }),
 ]);

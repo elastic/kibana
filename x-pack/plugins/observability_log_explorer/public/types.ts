@@ -7,11 +7,13 @@
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { LogExplorerPluginStart } from '@kbn/log-explorer-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { AppMountParameters, ScopedHistory } from '@kbn/core/public';
+import { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
+import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
 import {
   ObservabilityLogExplorerLocators,
   ObservabilityLogExplorerLocationState,
@@ -25,6 +27,7 @@ export interface ObservabilityLogExplorerPluginSetup {
 export interface ObservabilityLogExplorerPluginStart {}
 
 export interface ObservabilityLogExplorerSetupDeps {
+  discover: DiscoverSetup;
   serverless?: ServerlessPluginStart;
   share: SharePluginSetup;
 }
@@ -33,9 +36,11 @@ export interface ObservabilityLogExplorerStartDeps {
   data: DataPublicPluginStart;
   discover: DiscoverStart;
   logExplorer: LogExplorerPluginStart;
+  logsShared: LogsSharedClientStartExports;
   observabilityShared: ObservabilitySharedPluginStart;
   serverless?: ServerlessPluginStart;
   share: SharePluginStart;
+  datasetQuality: DatasetQualityPluginStart;
 }
 
 export type ObservabilityLogExplorerHistory = ScopedHistory<ObservabilityLogExplorerLocationState>;

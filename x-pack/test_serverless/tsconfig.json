@@ -48,7 +48,7 @@
     "@kbn/rison",
     "@kbn/discover-plugin",
     "@kbn/data-plugin",
-    "@kbn/security-api-integration-helpers",
+    "@kbn/std",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/data-plugin",
     "@kbn/dev-utils",
@@ -56,7 +56,6 @@
     "@kbn/es-archiver",
     "@kbn/rule-data-utils",
     "@kbn/rison",
-    "@kbn/std",
     "@kbn/serverless-common-settings",
     "@kbn/serverless-observability-settings",
     "@kbn/serverless-search-settings",
@@ -64,5 +63,11 @@
     "@kbn/cloud-security-posture-plugin",
     "@kbn/reporting-plugin",
     "@kbn/management-settings-ids",
+    "@kbn/fleet-plugin",
+    "@kbn/apm-synthtrace",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/reporting-export-types-csv-common",
+    "@kbn/mock-idp-plugin",
+    "@kbn/index-management-plugin",
   ]
 }

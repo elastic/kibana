@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/error-boundary-example-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "A plugin which exemplifes the KibanaErrorBoundary",
+  "plugin": {
+    "id": "error_boundary_example",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "developerExamples"
+    ]
+  }
+}

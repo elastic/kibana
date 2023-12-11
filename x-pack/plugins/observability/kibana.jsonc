@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": "@elastic/actionable-observability",
+  "owner": "@elastic/obs-ux-management-team",
   "plugin": {
     "id": "observability",
     "server": true,
@@ -20,10 +20,10 @@
       "dataViews",
       "dataViewEditor",
       "embeddable",
+      "uiActions",
       "exploratoryView",
       "features",
       "files",
-      "guidedOnboarding",
       "inspector",
       "lens",
       "observabilityShared",
@@ -35,15 +35,18 @@
       "unifiedSearch",
       "visualizations",
       "dashboard",
-      "expressions"
+      "expressions",
+      "logExplorer",
+      "licensing"
     ],
     "optionalPlugins": [
       "discover",
       "home",
-      "licensing",
       "usageCollection",
       "cloud",
-      "spaces"
+      "spaces",
+      "serverless",
+      "guidedOnboarding"
     ],
     "requiredBundles": [
       "data",

@@ -135,7 +135,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           palette: getColorPalette('danger'),
         },
         columnType: FORMULA_COLUMN,
-        formula: 'unique_count(state.id, kql=\'monitor.status: "down"\')',
+        formula: `unique_count(state.id, kql='${FINAL_SUMMARY_KQL} and monitor.status: "down"')`,
         format: 'number',
       },
       {

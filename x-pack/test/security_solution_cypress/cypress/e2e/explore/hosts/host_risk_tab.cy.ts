@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cleanKibana } from '../../../tasks/common';
 import {
   navigateToHostRiskDetailTab,
   openRiskTableFilterAndSelectTheCriticalOption,
@@ -28,7 +27,6 @@ import { enableRiskEngine } from '../../../tasks/entity_analytics';
 describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   describe('with legacy risk score', () => {
     before(() => {
-      cleanKibana();
       login();
       deleteRiskEngineConfiguration();
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
@@ -78,7 +76,6 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('with new risk score', () => {
     before(() => {
-      cleanKibana();
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
       login();
       enableRiskEngine();

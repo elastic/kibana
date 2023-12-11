@@ -6,11 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
+
 import { IKibanaResponse, kibanaResponseFactory } from '@kbn/core/server';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
 import { i18n } from '@kbn/i18n';
 import { Counters } from '..';
 import { ReportingCore } from '../../..';
-import { ReportApiJSON } from '../../../lib/store/report';
 import { ReportingUser } from '../../../types';
 import { jobsQueryFactory } from './jobs_query';
 

@@ -21,10 +21,13 @@ export type Props = Omit<PromptContext, 'id'> & {
   iconType?: string | null;
   /** Optionally specify a well known ID, or default to a UUID */
   promptContextId?: string;
+  /** Optionally specify color of empty button */
+  color?: 'text' | 'accent' | 'primary' | 'success' | 'warning' | 'danger';
 };
 
 const NewChatComponent: React.FC<Props> = ({
   category,
+  color = 'primary',
   children = i18n.NEW_CHAT,
   conversationId,
   description,
@@ -58,11 +61,11 @@ const NewChatComponent: React.FC<Props> = ({
 
   return useMemo(
     () => (
-      <EuiButtonEmpty data-test-subj="newChat" onClick={showOverlay} iconType={icon}>
+      <EuiButtonEmpty color={color} data-test-subj="newChat" onClick={showOverlay} iconType={icon}>
         {children}
       </EuiButtonEmpty>
     ),
-    [children, icon, showOverlay]
+    [children, icon, showOverlay, color]
   );
 };
 

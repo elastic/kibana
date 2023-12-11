@@ -45,6 +45,11 @@ describe('CreateMaintenanceWindowForm', () => {
             addDanger: jest.fn(),
           },
         },
+        unifiedSearch: {
+          ui: {
+            SearchBar: <div />,
+          },
+        },
       },
     });
 
@@ -136,13 +141,13 @@ describe('CreateMaintenanceWindowForm', () => {
 
     const observabilityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-observability');
+    ).getByTestId('option-observability');
     const securityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-securitySolution');
+    ).getByTestId('option-securitySolution');
     const managementInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-management');
+    ).getByTestId('option-management');
 
     expect(observabilityInput).toBeChecked();
     expect(securityInput).toBeChecked();
@@ -176,17 +181,54 @@ describe('CreateMaintenanceWindowForm', () => {
 
     const observabilityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-observability');
+    ).getByTestId('option-observability');
     const securityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-securitySolution');
+    ).getByTestId('option-securitySolution');
     const managementInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-management');
+    ).getByTestId('option-management');
 
     expect(observabilityInput).toBeChecked();
     expect(securityInput).toBeChecked();
     expect(managementInput).toBeChecked();
+  });
+
+  it('should initialize MWs with selected category ids properly', async () => {
+    const result = appMockRenderer.render(
+      <CreateMaintenanceWindowForm
+        {...formProps}
+        initialValue={{
+          title: 'test',
+          startDate: '2023-03-24',
+          endDate: '2023-03-26',
+          timezone: ['America/Los_Angeles'],
+          recurring: true,
+          categoryIds: ['observability', 'management'],
+        }}
+        maintenanceWindowId="test"
+      />
+    );
+
+    await waitFor(() => {
+      expect(
+        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+      ).not.toBeInTheDocument();
+    });
+
+    const observabilityInput = within(
+      result.getByTestId('maintenanceWindowCategorySelection')
+    ).getByTestId('option-observability');
+    const securityInput = within(
+      result.getByTestId('maintenanceWindowCategorySelection')
+    ).getByTestId('option-securitySolution');
+    const managementInput = within(
+      result.getByTestId('maintenanceWindowCategorySelection')
+    ).getByTestId('option-management');
+
+    expect(observabilityInput).toBeChecked();
+    expect(managementInput).toBeChecked();
+    expect(securityInput).not.toBeChecked();
   });
 
   it('can select category IDs', async () => {
@@ -200,13 +242,13 @@ describe('CreateMaintenanceWindowForm', () => {
 
     const observabilityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-observability');
+    ).getByTestId('option-observability');
     const securityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-securitySolution');
+    ).getByTestId('option-securitySolution');
     const managementInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-management');
+    ).getByTestId('option-management');
 
     expect(observabilityInput).toBeChecked();
     expect(securityInput).toBeChecked();

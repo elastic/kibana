@@ -6,6 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { createLogAIAssistant } from './components/log_ai_assistant';
 import { LogViewsService } from './services/log_views';
 import { LogsSharedClientPluginClass, LogsSharedClientStartDeps } from './types';
 
@@ -23,14 +24,22 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
   }
 
   public start(core: CoreStart, plugins: LogsSharedClientStartDeps) {
+    const { http } = core;
+    const { data, dataViews, observabilityAIAssistant } = plugins;
+
     const logViews = this.logViews.start({
-      http: core.http,
-      dataViews: plugins.dataViews,
-      search: plugins.data.search,
+      http,
+      dataViews,
+      search: data.search,
+    });
+
+    const LogAIAssistant = createLogAIAssistant({
+      observabilityAIAssistant: observabilityAIAssistant.service,
     });
 
     return {
       logViews,
+      LogAIAssistant,
     };
   }
 

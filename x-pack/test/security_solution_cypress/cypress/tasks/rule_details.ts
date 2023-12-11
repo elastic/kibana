@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import type { Exception } from '../objects/exception';
 import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../screens/breadcrumbs';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
@@ -47,20 +47,32 @@ import { visit } from './navigation';
 
 interface VisitRuleDetailsPageOptions {
   tab?: RuleDetailsTabs;
-  role?: ROLES;
+  role?: SecurityRoleName;
 }
 
 export function visitRuleDetailsPage(ruleId: string, options?: VisitRuleDetailsPageOptions): void {
-  visit(ruleDetailsUrl(ruleId, options?.tab), { role: options?.role });
+  visit(ruleDetailsUrl(ruleId, options?.tab));
 }
 
-export const enablesRule = () => {
+export const clickEnableRuleSwitch = () => {
   // Rules get enabled via _bulk_action endpoint
   cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
   cy.wait('@bulk_action').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
+    cy.wrap(response?.body.attributes.results.updated[0].enabled).should('eql', true);
+  });
+};
+
+export const clickDisableRuleSwitch = () => {
+  // Rules get enabled via _bulk_action endpoint
+  cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
+  cy.get(RULE_SWITCH).should('be.visible');
+  cy.get(RULE_SWITCH).click();
+  cy.wait('@bulk_action').then(({ response }) => {
+    cy.wrap(response?.statusCode).should('eql', 200);
+    cy.wrap(response?.body.attributes.results.updated[0].enabled).should('eql', false);
   });
 };
 

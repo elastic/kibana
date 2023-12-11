@@ -9,7 +9,7 @@ import { get } from 'lodash/fp';
 import type { Action } from 'redux';
 import type { Epic } from 'redux-observable';
 import type { Observable } from 'rxjs';
-import { from, empty } from 'rxjs';
+import { from, EMPTY } from 'rxjs';
 import { filter, mergeMap, switchMap, withLatestFrom, startWith, takeUntil } from 'rxjs/operators';
 
 import { updateNote, addError } from '../../../common/store/app/actions';
@@ -26,15 +26,20 @@ import {
 } from './actions';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
-import type { ActionTimeline, TimelineById } from './types';
+import type { TimelineById } from './types';
 import { persistNote } from '../../containers/notes/api';
 import type { ResponseNote } from '../../../../common/api/timeline';
 
-export const timelineNoteActionsType = [addNote.type, addNoteToEvent.type];
+type NoteAction = ReturnType<typeof addNote | typeof addNoteToEvent>;
+
+const timelineNoteActionsType = new Set([addNote.type, addNoteToEvent.type]);
+
+export function isNoteAction(action: Action): action is NoteAction {
+  return timelineNoteActionsType.has(action.type);
+}
 
 export const epicPersistNote = (
-  action: ActionTimeline,
-  timeline: TimelineById,
+  action: NoteAction,
   notes: NotesById,
   action$: Observable<Action>,
   timeline$: Observable<TimelineById>,
@@ -47,7 +52,7 @@ export const epicPersistNote = (
       noteId: null,
       version: null,
       note: {
-        eventId: action.payload.eventId,
+        eventId: 'eventId' in action.payload ? action.payload.eventId : undefined,
         note: getNote(action.payload.noteId, notes),
         timelineId: myEpicTimelineId.getTimelineId(),
       },
@@ -93,7 +98,7 @@ export const epicPersistNote = (
         endTimelineSaving({
           id: action.payload.id,
         }),
-      ].filter((item) => item != null);
+      ].filter(Boolean);
     }),
     startWith(startTimelineSaving({ id: action.payload.id })),
     takeUntil(
@@ -125,10 +130,10 @@ export const createTimelineNoteEpic =
   <State>(): Epic<Action, Action, State> =>
   (action$) =>
     action$.pipe(
-      filter((action) => timelineNoteActionsType.includes(action.type)),
+      filter(isNoteAction),
       switchMap((action) => {
         dispatcherTimelinePersistQueue.next({ action });
-        return empty();
+        return EMPTY;
       })
     );
 

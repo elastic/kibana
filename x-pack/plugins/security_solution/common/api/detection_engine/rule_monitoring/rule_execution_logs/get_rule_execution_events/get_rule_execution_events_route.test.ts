@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-
+import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers';
 import {
   GetRuleExecutionEventsRequestParams,
   GetRuleExecutionEventsRequestQuery,
-} from './get_rule_execution_events_route';
+} from './get_rule_execution_events_route.gen';
 
 describe('Request schema of Get rule execution events', () => {
   describe('GetRuleExecutionEventsRequestParams', () => {
@@ -22,11 +19,10 @@ describe('Request schema of Get rule execution events', () => {
           ruleId: 'some id',
         };
 
-        const decoded = GetRuleExecutionEventsRequestParams.decode(input);
-        const message = pipe(decoded, foldLeftRight);
+        const results = GetRuleExecutionEventsRequestParams.safeParse(input);
+        expectParseSuccess(results);
 
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(
+        expect(results.data).toEqual(
           expect.objectContaining({
             ruleId: 'some id',
           })
@@ -39,23 +35,21 @@ describe('Request schema of Get rule execution events', () => {
           foo: 'bar', // this one is not in the schema and will be stripped
         };
 
-        const decoded = GetRuleExecutionEventsRequestParams.decode(input);
-        const message = pipe(decoded, foldLeftRight);
+        const results = GetRuleExecutionEventsRequestParams.safeParse(input);
+        expectParseSuccess(results);
 
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual({
-          ruleId: 'some id',
-        });
+        expect(results.data).toEqual(
+          expect.objectContaining({
+            ruleId: 'some id',
+          })
+        );
       });
     });
 
     describe('Validation fails', () => {
       const test = (input: unknown) => {
-        const decoded = GetRuleExecutionEventsRequestParams.decode(input);
-        const message = pipe(decoded, foldLeftRight);
-
-        expect(getPaths(left(message.errors)).length).toBeGreaterThan(0);
-        expect(message.schema).toEqual({});
+        const results = GetRuleExecutionEventsRequestParams.safeParse(input);
+        expectParseError(results);
       };
 
       it('when not all the required parameters are passed', () => {
@@ -84,11 +78,10 @@ describe('Request schema of Get rule execution events', () => {
           per_page: 6,
         };
 
-        const decoded = GetRuleExecutionEventsRequestQuery.decode(input);
-        const message = pipe(decoded, foldLeftRight);
+        const result = GetRuleExecutionEventsRequestQuery.safeParse(input);
+        expectParseSuccess(result);
 
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual({
+        expect(result.data).toEqual({
           event_types: ['message', 'status-change'],
           log_levels: ['debug', 'info', 'error'],
           sort_order: 'asc',
@@ -107,11 +100,10 @@ describe('Request schema of Get rule execution events', () => {
           foo: 'bar', // this one is not in the schema and will be stripped
         };
 
-        const decoded = GetRuleExecutionEventsRequestQuery.decode(input);
-        const message = pipe(decoded, foldLeftRight);
+        const result = GetRuleExecutionEventsRequestQuery.safeParse(input);
+        expectParseSuccess(result);
 
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual({
+        expect(result.data).toEqual({
           event_types: ['message', 'status-change'],
           log_levels: ['debug', 'info', 'error'],
           sort_order: 'asc',
@@ -119,25 +111,12 @@ describe('Request schema of Get rule execution events', () => {
           per_page: 6,
         });
       });
-
-      it('when no parameters are passed (all are have default values)', () => {
-        const input = {};
-
-        const decoded = GetRuleExecutionEventsRequestQuery.decode(input);
-        const message = pipe(decoded, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(expect.any(Object));
-      });
     });
 
     describe('Validation fails', () => {
       const test = (input: unknown) => {
-        const decoded = GetRuleExecutionEventsRequestQuery.decode(input);
-        const message = pipe(decoded, foldLeftRight);
-
-        expect(getPaths(left(message.errors)).length).toBeGreaterThan(0);
-        expect(message.schema).toEqual({});
+        const result = GetRuleExecutionEventsRequestQuery.safeParse(input);
+        expectParseError(result);
       };
 
       it('when invalid parameters are passed', () => {
@@ -147,21 +126,18 @@ describe('Request schema of Get rule execution events', () => {
       });
     });
 
-    describe('Validation sets default values', () => {
-      it('when optional parameters are not passed', () => {
-        const input = {};
+    it('Validation sets default values when optional parameters are not passed', () => {
+      const input = {};
 
-        const decoded = GetRuleExecutionEventsRequestQuery.decode(input);
-        const message = pipe(decoded, foldLeftRight);
+      const result = GetRuleExecutionEventsRequestQuery.safeParse(input);
+      expectParseSuccess(result);
 
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual({
-          event_types: [],
-          log_levels: [],
-          sort_order: 'desc',
-          page: 1,
-          per_page: 20,
-        });
+      expect(result.data).toEqual({
+        event_types: [],
+        log_levels: [],
+        sort_order: 'desc',
+        page: 1,
+        per_page: 20,
       });
     });
   });

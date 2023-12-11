@@ -110,7 +110,13 @@ export const WithAppDependencies =
   (Comp: any, httpSetup: HttpSetup, overridingDependencies: any = {}) =>
   (props: any) => {
     httpService.setup(httpSetup);
-    const mergedDependencies = merge({}, appDependencies, overridingDependencies);
+    const mergedDependencies = merge(
+      {
+        services: { httpService },
+      },
+      appDependencies,
+      overridingDependencies
+    );
     return (
       <KibanaReactContextProvider>
         <AppContextProvider value={mergedDependencies}>

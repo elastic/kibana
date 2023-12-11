@@ -21,6 +21,7 @@ export type {
   RootNavigationItemDefinition,
   PanelComponentProps,
   PanelContent,
+  PanelContentProvider,
 } from './src/ui';
 
 export type { NavigationServices } from './types';

@@ -27,6 +27,15 @@
     "@kbn/tooling-log",
     "@kbn/rule-data-utils",
     "@kbn/securitysolution-list-constants",
-    "@kbn/core-saved-objects-server"
+    "@kbn/core-saved-objects-server",
+    "@kbn/core",
+    "@kbn/alerting-plugin",
+    "@kbn/securitysolution-ecs",
+    "@kbn/securitysolution-rules",
+    "@kbn/core-http-common",
+    "@kbn/securitysolution-ecs",
+    "@kbn/fleet-plugin",
+    "@kbn/repo-info",
+    "@kbn/securitysolution-es-utils",
   ]
 }

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import type { CustomRequestHandlerContext, IRouter, KibanaRequest } from '@kbn/core/server';
+import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { IRouter } from '@kbn/core-http-server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
+import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
+import type { UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
+import type { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type {
   PdfScreenshotOptions as BasePdfScreenshotOptions,
@@ -29,10 +32,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { Writable } from 'stream';
-import type { BaseParams, BasePayload, ReportApiJSON, UrlOrUrlLocatorTuple } from '../common/types';
-import type { ReportingConfigType } from './config';
-import { ReportingCore } from './core';
+
 import { ExportTypesRegistry } from './lib';
 
 /**
@@ -40,8 +40,6 @@ import { ExportTypesRegistry } from './lib';
  */
 export interface ReportingSetup {
   registerExportTypes: ExportTypesRegistry['register'];
-  getSpaceId: ReportingCore['getSpaceId'];
-  getScreenshots?: ReportingCore['getScreenshots'];
   /**
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
    */
@@ -55,6 +53,31 @@ export type ReportingStart = ReportingSetup;
 export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
+
+export interface ReportingSetupDeps {
+  features: FeaturesPluginSetup;
+  screenshotMode: ScreenshotModePluginSetup;
+  taskManager: TaskManagerSetupContract;
+  security?: SecurityPluginSetup;
+  spaces?: SpacesPluginSetup;
+  usageCollection?: UsageCollectionSetup;
+}
+
+export interface ReportingStartDeps {
+  data: DataPluginStart;
+  discover: DiscoverServerPluginStart;
+  fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
+  taskManager: TaskManagerStartContract;
+  screenshotting?: ScreenshottingStart;
+  security?: SecurityPluginStart;
+}
+
+export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
+  reporting: ReportingStart | null;
+}>;
+
+export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
 
 /**
  * Interface of a response to an HTTP request for our plugin to generate a report.
@@ -73,49 +96,6 @@ export interface ReportingJobResponse {
   job: ReportApiJSON;
 }
 
-/**
- * Internal Types
- */
-// standard type for create job function of any ExportType implementation
-export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
-  jobParams: JobParamsType,
-  context: ReportingRequestHandlerContext,
-  req: KibanaRequest
-) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
-
-// standard type for run task function of any ExportType implementation
-export type RunTaskFn<TaskPayloadType = BasePayload> = (
-  jobId: string,
-  payload: TaskPayloadType,
-  cancellationToken: CancellationToken,
-  stream: Writable
-) => Promise<TaskRunResult>;
-
-export interface ReportingSetupDeps {
-  features: FeaturesPluginSetup;
-  screenshotMode?: ScreenshotModePluginSetup;
-  security?: SecurityPluginSetup;
-  spaces?: SpacesPluginSetup;
-  taskManager: TaskManagerSetupContract;
-  usageCollection?: UsageCollectionSetup;
-}
-
-export interface ReportingStartDeps {
-  data: DataPluginStart;
-  discover: DiscoverServerPluginStart;
-  fieldFormats: FieldFormatsStart;
-  licensing: LicensingPluginStart;
-  screenshotting?: ScreenshottingStart;
-  security?: SecurityPluginStart;
-  taskManager: TaskManagerStartContract;
-}
-
-export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
-  reporting: ReportingStart | null;
-}>;
-
-export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
-
 export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
 }
@@ -123,5 +103,3 @@ export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'ti
 export interface PngScreenshotOptions extends Omit<BasePngScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
 }
-
-export type { BaseParams, BasePayload };

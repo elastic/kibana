@@ -25,14 +25,15 @@ import type {
   Threats,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
+import { requiredOptional } from '@kbn/zod-helpers';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 import { ThreatEuiFlexGroup } from '../../../../detections/components/rules/description_step/threat_description';
 
 import { BadgeList } from './badge_list';
-import { DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
+import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
 
 const OverrideColumn = styled(EuiFlexItem)`
@@ -71,9 +72,15 @@ interface AuthorProps {
   author: string[];
 }
 
-const Author = ({ author }: AuthorProps) => <BadgeList badges={author} />;
+const Author = ({ author }: AuthorProps) => (
+  <BadgeList badges={author} data-test-subj="authorPropertyValue" />
+);
 
-const BuildingBlock = () => <EuiText size="s">{i18n.BUILDING_BLOCK_FIELD_DESCRIPTION}</EuiText>;
+const BuildingBlock = () => (
+  <EuiText size="s" data-test-subj="buildingBlockPropertyValue">
+    {i18n.BUILDING_BLOCK_FIELD_DESCRIPTION}
+  </EuiText>
+);
 
 interface SeverityMappingItemProps {
   severityMappingItem: SeverityMappingItemType;
@@ -86,7 +93,7 @@ const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItemProps) 
         content={severityMappingItem.field}
         data-test-subj={`severityOverrideField-${severityMappingItem.value}`}
       >
-        <>{`${severityMappingItem.field}:`}</>
+        <span data-test-subj="severityOverrideField">{`${severityMappingItem.field}:`}</span>
       </EuiToolTip>
     </OverrideColumn>
     <OverrideValueColumn>
@@ -94,7 +101,9 @@ const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItemProps) 
         content={severityMappingItem.value}
         data-test-subj={`severityOverrideValue-${severityMappingItem.value}`}
       >
-        {defaultToEmptyTag(severityMappingItem.value)}
+        <span data-test-subj="severityOverrideValue">
+          {defaultToEmptyTag(severityMappingItem.value)}
+        </span>
       </EuiToolTip>
     </OverrideValueColumn>
     <EuiFlexItem grow={false}>
@@ -102,7 +111,7 @@ const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItemProps) 
     </EuiFlexItem>
     <EuiFlexItem>
       <SeverityBadge
-        data-test-subj={`severityOverrideSeverity-${severityMappingItem.value}`}
+        data-test-subj="severityOverrideSeverity"
         value={severityMappingItem.severity}
       />
     </EuiFlexItem>
@@ -113,7 +122,11 @@ interface RiskScoreProps {
   riskScore: number;
 }
 
-const RiskScore = ({ riskScore }: RiskScoreProps) => <EuiText size="s">{riskScore}</EuiText>;
+const RiskScore = ({ riskScore }: RiskScoreProps) => (
+  <EuiText size="s" data-test-subj="riskScorePropertyValue">
+    {riskScore}
+  </EuiText>
+);
 
 interface RiskScoreMappingItemProps {
   riskScoreMappingItem: RiskScoreMappingItemType;
@@ -126,13 +139,15 @@ const RiskScoreMappingItem = ({ riskScoreMappingItem }: RiskScoreMappingItemProp
         content={riskScoreMappingItem.field}
         data-test-subj={`riskScoreOverrideField-${riskScoreMappingItem.value}`}
       >
-        <>{riskScoreMappingItem.field}</>
+        <span data-test-subj="riskScoreOverridePropertyFieldName">
+          {riskScoreMappingItem.field}
+        </span>
       </EuiToolTip>
     </OverrideColumn>
     <EuiFlexItem grow={false}>
       <EuiIcon type={'sortRight'} />
     </EuiFlexItem>
-    <EuiFlexItem>{ALERT_RISK_SCORE}</EuiFlexItem>
+    <EuiFlexItem data-test-subj="riskScoreOverridePropertyOverride">{ALERT_RISK_SCORE}</EuiFlexItem>
   </EuiFlexGroup>
 );
 
@@ -161,7 +176,7 @@ const FalsePositives = ({ falsePositives }: { falsePositives: string[] }) => (
     <ul>
       {falsePositives.map((falsePositivesItem) => (
         <li
-          data-test-subj="unorderedListArrayDescriptionItem"
+          data-test-subj="falsePositivesPropertyValueItem"
           key={`falsePositives-${falsePositivesItem}`}
         >
           {falsePositivesItem}
@@ -176,21 +191,27 @@ interface InvestigationFieldsProps {
 }
 
 const InvestigationFields = ({ investigationFields }: InvestigationFieldsProps) => (
-  <BadgeList badges={investigationFields} />
+  <BadgeList badges={investigationFields} data-test-subj="investigationFieldsPropertyValue" />
 );
 
 interface LicenseProps {
   license: string;
 }
 
-const License = ({ license }: LicenseProps) => <EuiText size="s">{license}</EuiText>;
+const License = ({ license }: LicenseProps) => (
+  <EuiText size="s" data-test-subj="licensePropertyValue">
+    {license}
+  </EuiText>
+);
 
 interface RuleNameOverrideProps {
   ruleNameOverride: string;
 }
 
 const RuleNameOverride = ({ ruleNameOverride }: RuleNameOverrideProps) => (
-  <EuiText size="s">{ruleNameOverride}</EuiText>
+  <EuiText size="s" data-test-subj="ruleNameOverridePropertyValue">
+    {ruleNameOverride}
+  </EuiText>
 );
 
 interface ThreatProps {
@@ -198,7 +219,7 @@ interface ThreatProps {
 }
 
 const Threat = ({ threat }: ThreatProps) => (
-  <ThreatEuiFlexGroup threat={filterEmptyThreats(threat)} label="" />
+  <ThreatEuiFlexGroup threat={filterEmptyThreats(threat)} data-test-subj="threatPropertyValue" />
 );
 
 interface ThreatIndicatorPathProps {
@@ -214,14 +235,18 @@ interface TimestampOverrideProps {
 }
 
 const TimestampOverride = ({ timestampOverride }: TimestampOverrideProps) => (
-  <EuiText size="s">{timestampOverride}</EuiText>
+  <EuiText size="s" data-test-subj="timestampOverridePropertyValue">
+    {timestampOverride}
+  </EuiText>
 );
 
 interface TagsProps {
   tags: string[];
 }
 
-const Tags = ({ tags }: TagsProps) => <BadgeList badges={tags} />;
+const Tags = ({ tags }: TagsProps) => (
+  <BadgeList badges={tags} data-test-subj="tagsPropertyValue" />
+);
 
 // eslint-disable-next-line complexity
 const prepareAboutSectionListItems = (
@@ -247,22 +272,24 @@ const prepareAboutSectionListItems = (
 
   if (rule.author && rule.author.length > 0) {
     aboutSectionListItems.push({
-      title: i18n.AUTHOR_FIELD_LABEL,
+      title: <span data-test-subj="authorPropertyTitle">{i18n.AUTHOR_FIELD_LABEL}</span>,
       description: <Author author={rule.author} />,
     });
   }
 
   if (rule.building_block_type) {
     aboutSectionListItems.push({
-      title: i18n.BUILDING_BLOCK_FIELD_LABEL,
+      title: (
+        <span data-test-subj="buildingBlockPropertyTitle">{i18n.BUILDING_BLOCK_FIELD_LABEL}</span>
+      ),
       description: <BuildingBlock />,
     });
   }
 
   if (rule.severity) {
     aboutSectionListItems.push({
-      title: i18n.SEVERITY_FIELD_LABEL,
-      description: <SeverityBadge value={rule.severity} />,
+      title: <span data-test-subj="severityPropertyTitle">{i18n.SEVERITY_FIELD_LABEL}</span>,
+      description: <SeverityBadge value={rule.severity} data-test-subj="severityPropertyValue" />,
     });
   }
 
@@ -272,7 +299,14 @@ const prepareAboutSectionListItems = (
         .filter((severityMappingItem) => severityMappingItem.field !== '')
         .map((severityMappingItem, index) => {
           return {
-            title: index === 0 ? i18n.SEVERITY_MAPPING_FIELD_LABEL : '',
+            title:
+              index === 0 ? (
+                <span data-test-subj="severityOverridePropertyTitle">
+                  {i18n.SEVERITY_MAPPING_FIELD_LABEL}
+                </span>
+              ) : (
+                ''
+              ),
             description: <SeverityMappingItem severityMappingItem={severityMappingItem} />,
           };
         })
@@ -281,7 +315,7 @@ const prepareAboutSectionListItems = (
 
   if (rule.risk_score) {
     aboutSectionListItems.push({
-      title: i18n.RISK_SCORE_FIELD_LABEL,
+      title: <span data-test-subj="riskScorePropertyTitle">{i18n.RISK_SCORE_FIELD_LABEL}</span>,
       description: <RiskScore riskScore={rule.risk_score} />,
     });
   }
@@ -292,8 +326,17 @@ const prepareAboutSectionListItems = (
         .filter((riskScoreMappingItem) => riskScoreMappingItem.field !== '')
         .map((riskScoreMappingItem, index) => {
           return {
-            title: index === 0 ? i18n.RISK_SCORE_MAPPING_FIELD_LABEL : '',
-            description: <RiskScoreMappingItem riskScoreMappingItem={riskScoreMappingItem} />,
+            title:
+              index === 0 ? (
+                <span data-test-subj="riskScoreOverridePropertyTitle">
+                  {i18n.RISK_SCORE_MAPPING_FIELD_LABEL}
+                </span>
+              ) : (
+                ''
+              ),
+            description: (
+              <RiskScoreMappingItem riskScoreMappingItem={requiredOptional(riskScoreMappingItem)} />
+            ),
           };
         })
     );
@@ -301,21 +344,27 @@ const prepareAboutSectionListItems = (
 
   if (rule.references && rule.references.length > 0) {
     aboutSectionListItems.push({
-      title: i18n.REFERENCES_FIELD_LABEL,
+      title: <span data-test-subj="referencesPropertyTitle">{i18n.REFERENCES_FIELD_LABEL}</span>,
       description: <References references={rule.references} />,
     });
   }
 
   if (rule.false_positives && rule.false_positives.length > 0) {
     aboutSectionListItems.push({
-      title: i18n.FALSE_POSITIVES_FIELD_LABEL,
+      title: (
+        <span data-test-subj="falsePositivesPropertyTitle">{i18n.FALSE_POSITIVES_FIELD_LABEL}</span>
+      ),
       description: <FalsePositives falsePositives={rule.false_positives} />,
     });
   }
 
   if (rule.investigation_fields && rule.investigation_fields.field_names.length > 0) {
     aboutSectionListItems.push({
-      title: i18n.INVESTIGATION_FIELDS_FIELD_LABEL,
+      title: (
+        <span data-test-subj="investigationFieldsPropertyTitle">
+          {i18n.INVESTIGATION_FIELDS_FIELD_LABEL}
+        </span>
+      ),
       description: (
         <InvestigationFields investigationFields={rule.investigation_fields.field_names} />
       ),
@@ -324,21 +373,25 @@ const prepareAboutSectionListItems = (
 
   if (rule.license) {
     aboutSectionListItems.push({
-      title: i18n.LICENSE_FIELD_LABEL,
+      title: <span data-test-subj="licensePropertyTitle">{i18n.LICENSE_FIELD_LABEL}</span>,
       description: <License license={rule.license} />,
     });
   }
 
   if (rule.rule_name_override) {
     aboutSectionListItems.push({
-      title: i18n.RULE_NAME_OVERRIDE_FIELD_LABEL,
+      title: (
+        <span data-test-subj="ruleNameOverridePropertyTitle">
+          {i18n.RULE_NAME_OVERRIDE_FIELD_LABEL}
+        </span>
+      ),
       description: <RuleNameOverride ruleNameOverride={rule.rule_name_override} />,
     });
   }
 
   if (rule.threat && rule.threat.length > 0) {
     aboutSectionListItems.push({
-      title: i18n.THREAT_FIELD_LABEL,
+      title: <span data-test-subj="threatPropertyTitle">{i18n.THREAT_FIELD_LABEL}</span>,
       description: <Threat threat={rule.threat} />,
     });
   }
@@ -352,14 +405,18 @@ const prepareAboutSectionListItems = (
 
   if (rule.timestamp_override) {
     aboutSectionListItems.push({
-      title: i18n.TIMESTAMP_OVERRIDE_FIELD_LABEL,
+      title: (
+        <span data-test-subj="timestampOverridePropertyTitle">
+          {i18n.TIMESTAMP_OVERRIDE_FIELD_LABEL}
+        </span>
+      ),
       description: <TimestampOverride timestampOverride={rule.timestamp_override} />,
     });
   }
 
   if (rule.tags && rule.tags.length > 0) {
     aboutSectionListItems.push({
-      title: i18n.TAGS_FIELD_LABEL,
+      title: <span data-test-subj="tagsPropertyTitle">{i18n.TAGS_FIELD_LABEL}</span>,
       description: <Tags tags={rule.tags} />,
     });
   }
@@ -369,12 +426,14 @@ const prepareAboutSectionListItems = (
 
 export interface RuleAboutSectionProps extends React.ComponentProps<typeof EuiDescriptionList> {
   rule: Partial<RuleResponse>;
+  columnWidths?: EuiDescriptionListProps['columnWidths'];
   hideName?: boolean;
   hideDescription?: boolean;
 }
 
 export const RuleAboutSection = ({
   rule,
+  columnWidths = DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
   hideName,
   hideDescription,
   ...descriptionListProps
@@ -388,7 +447,7 @@ export const RuleAboutSection = ({
         type={descriptionListProps.type ?? 'column'}
         rowGutterSize={descriptionListProps.rowGutterSize ?? 'm'}
         listItems={aboutSectionListItems}
-        columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
+        columnWidths={columnWidths}
         data-test-subj="listItemColumnStepRuleDescription"
         {...descriptionListProps}
       />

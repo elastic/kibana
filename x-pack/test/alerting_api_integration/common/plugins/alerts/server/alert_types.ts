@@ -28,6 +28,7 @@ export const EscapableStrings = {
   escapableHtml: '<&>',
   escapableDoubleQuote: '"double quote"',
   escapableLineFeed: 'line\x0afeed',
+  escapableLink: 'https://te_st.com/',
 };
 
 export const DeepContextVariables = {
@@ -551,7 +552,7 @@ function getPatternFiringAlertsAsDataRuleType() {
     id: 'test.patternFiringAad',
     name: 'Test: Firing on a Pattern and writing Alerts as Data',
     actionGroups: [{ id: 'default', name: 'Default' }],
-    category: 'kibana',
+    category: 'management',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',

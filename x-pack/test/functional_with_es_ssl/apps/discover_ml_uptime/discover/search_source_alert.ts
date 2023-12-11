@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             rule_id: { type: 'text' },
             rule_name: { type: 'text' },
             alert_id: { type: 'text' },
-            context_message: { type: 'text' },
+            context_link: { type: 'text' },
           },
         },
       },
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       "rule_id": "{{rule.id}}",
       "rule_name": "{{rule.name}}",
       "alert_id": "{{alert.id}}",
-      "context_message": "{{context.message}}"
+      "context_link": "{{context.link}}"
     }`);
   };
 
@@ -199,11 +199,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getResultsLink = async () => {
     // getting the link
     await dataGrid.clickRowToggle();
-    const contextMessageElement = await testSubjects.find('tableDocViewRow-context_message-value');
+    const contextMessageElement = await testSubjects.find('tableDocViewRow-context_link-value');
     const contextMessage = await contextMessageElement.getVisibleText();
-    const [, link] = contextMessage.split(`Link\: `);
 
-    return link;
+    return contextMessage;
   };
 
   const openAlertResults = async (value: string, type: 'id' | 'name' = 'name') => {

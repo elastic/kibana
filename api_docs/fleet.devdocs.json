@@ -782,7 +782,8 @@
                 "docId": "kibGuidedOnboardingPluginApi",
                 "section": "def-public.GuidedOnboardingPluginStart",
                 "text": "GuidedOnboardingPluginStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/fleet/public/plugin.ts",
             "deprecated": false,
@@ -2367,6 +2368,18 @@
         "label": "KibanaSavedObjectType",
         "description": [],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.SetupTechnology",
+        "type": "Enum",
+        "tags": [],
+        "label": "SetupTechnology",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/models/setup_technology.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4828,7 +4841,11 @@
               "\nList agents"
             ],
             "signature": [
-              "(options: Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; }) => Promise<{ agents: ",
+              "(options: Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; aggregations?: Record<string, ",
+              "AggregationsAggregationContainer",
+              "> | undefined; searchAfter?: ",
+              "SortResults",
+              " | undefined; pitId?: string | undefined; getStatusSummary?: boolean | undefined; }) => Promise<{ agents: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -4836,7 +4853,9 @@
                 "section": "def-common.Agent",
                 "text": "Agent"
               },
-              "[]; total: number; page: number; perPage: number; }>"
+              "[]; total: number; page: number; perPage: number; aggregations?: Record<string, ",
+              "AggregationsAggregate",
+              "> | undefined; }>"
             ],
             "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
             "deprecated": false,
@@ -4850,7 +4869,11 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; }"
+                  "Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; aggregations?: Record<string, ",
+                  "AggregationsAggregationContainer",
+                  "> | undefined; searchAfter?: ",
+                  "SortResults",
+                  " | undefined; pitId?: string | undefined; getStatusSummary?: boolean | undefined; }"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
                 "deprecated": false,
@@ -7135,9 +7158,9 @@
               },
               ", options?: { spaceId?: string | undefined; id?: string | undefined; user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -7292,9 +7315,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -7558,9 +7581,9 @@
               "NewPackagePolicyWithId",
               "[], options?: { user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -7674,9 +7697,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -7768,9 +7791,9 @@
               },
               "[], options?: { user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -7882,9 +7905,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -8371,9 +8394,9 @@
               },
               ", options?: { user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -8489,9 +8512,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -8575,9 +8598,9 @@
               },
               ", ids: string[], options?: { user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -8688,9 +8711,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -8803,9 +8826,9 @@
               },
               ", ids: string[], options?: { user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -8908,9 +8931,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -18164,17 +18187,19 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-common.BundledPackage.buffer",
-            "type": "Object",
+            "id": "def-common.BundledPackage.getBuffer",
+            "type": "Function",
             "tags": [],
-            "label": "buffer",
+            "label": "getBuffer",
             "description": [],
             "signature": [
-              "Buffer"
+              "() => Promise<Buffer>"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -20628,6 +20653,21 @@
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.latest_install_failed_attempts",
+            "type": "Array",
+            "tags": [],
+            "label": "latest_install_failed_attempts",
+            "description": [],
+            "signature": [
+              "InstallFailedAttempt",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -22478,7 +22518,7 @@
             "label": "owner",
             "description": [],
             "signature": [
-              "{ github: string; }"
+              "{ github: string; type?: \"elastic\" | \"partner\" | \"community\" | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
             "deprecated": false,
@@ -22501,6 +22541,20 @@
                 "text": "RegistryElasticsearch"
               },
               ", \"index_template.settings\" | \"index_template.mappings\" | \"index_template.data_stream\"> | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PackageSpecManifest.agent",
+            "type": "Object",
+            "tags": [],
+            "label": "agent",
+            "description": [],
+            "signature": [
+              "{ privileges?: { root?: boolean | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
             "deprecated": false,
@@ -22857,6 +22911,36 @@
             "description": [],
             "signature": [
               "RegistryDataStreamLifecycle",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.lifecycle",
+            "type": "Object",
+            "tags": [],
+            "label": "[RegistryDataStreamKeys.lifecycle]",
+            "description": [],
+            "signature": [
+              "RegistryDataStreamLifecycle",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.agent",
+            "type": "Object",
+            "tags": [],
+            "label": "[RegistryDataStreamKeys.agent]",
+            "description": [],
+            "signature": [
+              "RegistryAgent",
               " | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
@@ -23371,7 +23455,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"integer\" | \"select\" | \"bool\" | \"password\" | \"yaml\" | \"textarea\""
+              "\"string\" | \"text\" | \"integer\" | \"select\" | \"textarea\" | \"bool\" | \"password\" | \"yaml\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -24998,6 +25082,8 @@
         "description": [],
         "signature": [
           "NewElasticsearchOutput",
+          " | ",
+          "NewRemoteElasticsearchOutput",
           " | ",
           "NewLogstashOutput",
           " | ",

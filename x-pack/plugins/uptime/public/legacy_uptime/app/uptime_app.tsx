@@ -11,11 +11,8 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
@@ -130,7 +127,9 @@ const Application = (props: UptimeAppProps) => {
                 cases: startPlugins.cases,
               }}
             >
-              <ObservabilityAIAssistantProvider value={startPlugins.observabilityAIAssistant}>
+              <ObservabilityAIAssistantProvider
+                value={startPlugins.observabilityAIAssistant.service}
+              >
                 <Router history={appMountParameters.history}>
                   <EuiThemeProvider darkMode={darkMode}>
                     <UptimeRefreshContextProvider>
@@ -140,8 +139,9 @@ const Application = (props: UptimeAppProps) => {
                             <UptimeDataViewContextProvider dataViews={startPlugins.dataViews}>
                               <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
                                 <RedirectAppLinks
-                                  className={APP_WRAPPER_CLASS}
-                                  application={core.application}
+                                  coreStart={{
+                                    application: core.application,
+                                  }}
                                 >
                                   <InspectorContextProvider>
                                     <UptimeAlertsFlyoutWrapper />

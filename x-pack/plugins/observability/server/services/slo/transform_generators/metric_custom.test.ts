@@ -142,6 +142,20 @@ describe('Metric Custom Transform Generator', () => {
     expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
   });
 
+  it('support the same field used twice in the equation', async () => {
+    const anSLO = createSLO({
+      indicator: createMetricCustomIndicator({
+        good: {
+          metrics: [{ name: 'A', aggregation: 'sum', field: 'good' }],
+          equation: 'A + A * 100',
+        },
+      }),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
+  });
+
   it('aggregates using the numerator equation with filter', async () => {
     const anSLO = createSLO({
       indicator: createMetricCustomIndicator({
@@ -149,6 +163,20 @@ describe('Metric Custom Transform Generator', () => {
           metrics: [
             { name: 'A', aggregation: 'sum', field: 'good', filter: 'outcome: "success" ' },
           ],
+          equation: 'A * 100',
+        },
+      }),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
+  });
+
+  it('aggregates using doc_count the numerator equation with filter', async () => {
+    const anSLO = createSLO({
+      indicator: createMetricCustomIndicator({
+        good: {
+          metrics: [{ name: 'A', aggregation: 'doc_count', filter: 'outcome: "success" ' }],
           equation: 'A * 100',
         },
       }),
@@ -177,6 +205,20 @@ describe('Metric Custom Transform Generator', () => {
       indicator: createMetricCustomIndicator({
         total: {
           metrics: [{ name: 'A', aggregation: 'sum', field: 'total', filter: 'outcome: *' }],
+          equation: 'A / 100',
+        },
+      }),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
+  });
+
+  it('aggregates using doc_count for the denominator equation with filter', async () => {
+    const anSLO = createSLO({
+      indicator: createMetricCustomIndicator({
+        total: {
+          metrics: [{ name: 'A', aggregation: 'doc_count', filter: 'outcome: *' }],
           equation: 'A / 100',
         },
       }),

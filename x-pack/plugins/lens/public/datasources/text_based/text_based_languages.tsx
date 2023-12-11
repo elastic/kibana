@@ -42,10 +42,10 @@ import type {
 } from './types';
 import { FieldSelect } from './field_select';
 import type { Datasource } from '../../types';
-import { LayerPanel } from './layerpanel';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
+import { canColumnBeUsedBeInMetricDimension, MAX_NUM_OF_COLUMNS } from './utils';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
@@ -88,12 +88,20 @@ export function getTextBasedDatasource({
           layerId: id,
           columns:
             layer.columns?.map((f) => {
+              const inMetricDimension = canColumnBeUsedBeInMetricDimension(
+                layer.allColumns,
+                f?.meta?.type
+              );
               return {
                 columnId: f.columnId,
                 operation: {
                   dataType: f?.meta?.type as DataType,
                   label: f.fieldName,
                   isBucketed: Boolean(f?.meta?.type !== 'number'),
+                  // makes non-number fields to act as metrics, used for datatable suggestions
+                  ...(inMetricDimension && {
+                    inMetricDimension,
+                  }),
                 },
               };
             }) ?? [],
@@ -113,11 +121,23 @@ export function getTextBasedDatasource({
     if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
       const newLayerId = generateId();
       const textBasedQueryColumns = context.textBasedColumns ?? [];
+      // Number fields are assigned automatically as metrics (!isBucketed). There are cases where the query
+      // will not return number fields. In these cases we want to suggest a datatable
+      // Datatable works differently in this case. On the metrics dimension can be all type of fields
+      const hasNumberTypeColumns = textBasedQueryColumns?.some((c) => c?.meta?.type === 'number');
       const newColumns = textBasedQueryColumns.map((c) => {
+        const inMetricDimension = canColumnBeUsedBeInMetricDimension(
+          textBasedQueryColumns,
+          c?.meta?.type
+        );
         return {
           columnId: c.id,
           fieldName: c.name,
           meta: c.meta,
+          // makes non-number fields to act as metrics, used for datatable suggestions
+          ...(inMetricDimension && {
+            inMetricDimension,
+          }),
         };
       });
 
@@ -125,13 +145,25 @@ export function getTextBasedDatasource({
       const query = context.query;
       const updatedState = {
         ...state,
+        initialContext: undefined,
         fieldList: textBasedQueryColumns,
+        ...(context.dataViewSpec.id
+          ? {
+              indexPatternRefs: [
+                {
+                  id: context.dataViewSpec.id,
+                  title: context.dataViewSpec.title,
+                  timeField: context.dataViewSpec.timeFieldName,
+                },
+              ],
+            }
+          : {}),
         layers: {
           ...state.layers,
           [newLayerId]: {
             index,
             query,
-            columns: newColumns ?? [],
+            columns: newColumns.slice(0, MAX_NUM_OF_COLUMNS) ?? [],
             allColumns: newColumns ?? [],
             timeField: context.dataViewSpec.timeFieldName,
           },
@@ -146,9 +178,10 @@ export function getTextBasedDatasource({
           table: {
             changeType: 'initial' as TableChangeType,
             isMultiRow: false,
+            notAssignedMetrics: !hasNumberTypeColumns,
             layerId: newLayerId,
             columns:
-              newColumns?.map((f) => {
+              newColumns?.slice(0, MAX_NUM_OF_COLUMNS)?.map((f) => {
                 return {
                   columnId: f.columnId,
                   operation: {
@@ -304,6 +337,13 @@ export function getTextBasedDatasource({
     getLayers(state: TextBasedPrivateState) {
       return state && state.layers ? Object.keys(state?.layers) : [];
     },
+    // there are cases where a query can return a big amount of columns
+    // at this case we don't suggest all columns in a table but the first
+    // MAX_NUM_OF_COLUMNS
+    suggestsLimitedColumns(state: TextBasedPrivateState) {
+      const fieldsList = state?.fieldList ?? [];
+      return fieldsList.length >= MAX_NUM_OF_COLUMNS;
+    },
     isTimeBased: (state, indexPatterns) => {
       if (!state) return false;
       const { layers } = state;
@@ -382,20 +422,21 @@ export function getTextBasedDatasource({
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
       const fields = props.state.fieldList;
-      const selectedField = props.state.layers[props.layerId]?.allColumns?.find(
-        (column) => column.columnId === props.columnId
-      );
+      const allColumns = props.state.layers[props.layerId]?.allColumns;
+      const selectedField = allColumns?.find((column) => column.columnId === props.columnId);
+      const hasNumberTypeColumns = allColumns?.some((c) => c?.meta?.type === 'number');
 
       const updatedFields = fields?.map((f) => {
         return {
           ...f,
-          compatible: props.isMetricDimension
-            ? props.filterOperations({
-                dataType: f.meta.type as DataType,
-                isBucketed: Boolean(f?.meta?.type !== 'number'),
-                scale: 'ordinal',
-              })
-            : true,
+          compatible:
+            props.isMetricDimension && hasNumberTypeColumns
+              ? props.filterOperations({
+                  dataType: f.meta.type as DataType,
+                  isBucketed: Boolean(f?.meta?.type !== 'number'),
+                  scale: 'ordinal',
+                })
+              : true,
         };
       });
       return (
@@ -472,7 +513,7 @@ export function getTextBasedDatasource({
     },
 
     LayerPanelComponent: (props: DatasourceLayerPanelProps<TextBasedPrivateState>) => {
-      return <LayerPanel {...props} />;
+      return null;
     },
 
     uniqueLabels(state: TextBasedPrivateState) {
@@ -519,6 +560,7 @@ export function getTextBasedDatasource({
               dataType: column?.meta?.type as DataType,
               label: columnLabelMap[columnId] ?? column?.fieldName,
               isBucketed: Boolean(column?.meta?.type !== 'number'),
+              inMetricDimension: column.inMetricDimension,
               hasTimeShift: false,
               hasReducedTimeRange: false,
             };

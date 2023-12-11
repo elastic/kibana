@@ -158,6 +158,17 @@ describe('Cloud Plugin', () => {
         });
         expect(setup.serverless.projectName).toBe('My Awesome Project');
       });
+
+      it('exposes `serverless.projectType`', () => {
+        const { setup } = setupPlugin({
+          serverless: {
+            project_id: 'my-awesome-project',
+            project_name: 'My Awesome Project',
+            project_type: 'security',
+          },
+        });
+        expect(setup.serverless.projectType).toBe('security');
+      });
     });
   });
 
@@ -186,8 +197,10 @@ describe('Cloud Plugin', () => {
       return { coreSetup, plugin };
     };
 
-    it('registers help support URL', async () => {
-      const { plugin } = startPlugin();
+    it('registers help support URL: default', async () => {
+      const { plugin } = startPlugin({
+        id: undefined,
+      });
 
       const coreStart = coreMock.createStart();
       plugin.start(coreStart);
@@ -196,6 +209,41 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setHelpSupportUrl.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "https://support.elastic.co/",
+        ]
+      `);
+    });
+
+    it('registers help support URL: serverless projects', async () => {
+      const { plugin } = startPlugin({
+        id: 'my-awesome-project-id',
+        serverless: {
+          project_id: 'my-awesome-serverless-project-id',
+        },
+      });
+
+      const coreStart = coreMock.createStart();
+      plugin.start(coreStart);
+
+      expect(coreStart.chrome.setHelpSupportUrl).toHaveBeenCalledTimes(1);
+      expect(coreStart.chrome.setHelpSupportUrl.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "https://support.elastic.co/?serverless_project_id=my-awesome-serverless-project-id",
+        ]
+      `);
+    });
+
+    it('registers help support URL: non-serverless projects', async () => {
+      const { plugin } = startPlugin({
+        id: 'my-awesome-project-id',
+      });
+
+      const coreStart = coreMock.createStart();
+      plugin.start(coreStart);
+
+      expect(coreStart.chrome.setHelpSupportUrl).toHaveBeenCalledTimes(1);
+      expect(coreStart.chrome.setHelpSupportUrl.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "https://support.elastic.co/?cloud_deployment_id=my-awesome-project-id",
         ]
       `);
     });

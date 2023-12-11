@@ -75,6 +75,10 @@ export const AGGREGATION_OPTIONS = [
   },
 ];
 
+export const CUSTOM_METRIC_AGGREGATION_OPTIONS = AGGREGATION_OPTIONS.filter((option) =>
+  ['doc_count', 'sum'].includes(option.value)
+);
+
 export function aggValueToLabel(value: string) {
   const aggregation = AGGREGATION_OPTIONS.find((agg) => agg.value === value);
   if (aggregation) {

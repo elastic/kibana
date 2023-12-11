@@ -14,5 +14,5 @@ import { z } from 'zod';
 
 export type SortOrder = z.infer<typeof SortOrder>;
 export const SortOrder = z.enum(['asc', 'desc']);
-export const SortOrderEnum = SortOrder.enum;
 export type SortOrderEnum = typeof SortOrder.enum;
+export const SortOrderEnum = SortOrder.enum;

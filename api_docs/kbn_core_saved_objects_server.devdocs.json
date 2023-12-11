@@ -6335,6 +6335,215 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.SavedObjectDoc",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectDoc",
+        "description": [
+          "\nSaved Object base document\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectDoc",
+            "text": "SavedObjectDoc"
+          },
+          "<T>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectDoc.attributes",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectDoc.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectDoc.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectDoc.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectDoc.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectDoc.migrationVersion",
+            "type": "Object",
+            "tags": [],
+            "label": "migrationVersion",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsMigrationVersion",
+                "text": "SavedObjectsMigrationVersion"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectDoc.coreMigrationVersion",
+            "type": "string",
+            "tags": [],
+            "label": "coreMigrationVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectDoc.typeMigrationVersion",
+            "type": "string",
+            "tags": [],
+            "label": "typeMigrationVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectDoc.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectDoc.updated_at",
+            "type": "string",
+            "tags": [],
+            "label": "updated_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectDoc.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectDoc.originId",
+            "type": "string",
+            "tags": [],
+            "label": "originId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectDoc.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-common.SavedObjectExportBaseOptions",
         "type": "Interface",
         "tags": [],
@@ -6654,7 +6863,14 @@
                 "label": "doc",
                 "description": [],
                 "signature": [
-                  "SavedObjectDoc<InputAttributes> & { references?: ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectDoc",
+                    "text": "SavedObjectDoc"
+                  },
+                  "<InputAttributes> & { references?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-common",
                     "scope": "common",
@@ -6831,7 +7047,14 @@
             "label": "document",
             "description": [],
             "signature": [
-              "SavedObjectDoc<DocAttrs> & { references?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectDoc",
+                "text": "SavedObjectDoc"
+              },
+              "<DocAttrs> & { references?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -7827,7 +8050,14 @@
                 "label": "document",
                 "description": [],
                 "signature": [
-                  "SavedObjectDoc<InputAttributes> & { references?: ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectDoc",
+                    "text": "SavedObjectDoc"
+                  },
+                  "<InputAttributes> & { references?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-common",
                     "scope": "common",
@@ -8096,7 +8326,14 @@
                 "label": "document",
                 "description": [],
                 "signature": [
-                  "SavedObjectDoc<InputAttributes> & { references?: ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectDoc",
+                    "text": "SavedObjectDoc"
+                  },
+                  "<InputAttributes> & { references?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-common",
                     "scope": "common",
@@ -10316,6 +10553,10 @@
                 "path": "x-pack/plugins/saved_objects_tagging/server/saved_objects/tag.ts"
               },
               {
+                "plugin": "visualizations",
+                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
+              },
+              {
                 "plugin": "savedSearch",
                 "path": "src/plugins/saved_search/server/saved_objects/search.ts"
               },
@@ -10330,10 +10571,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/server/saved_objects/graph_workspace.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
               },
               {
                 "plugin": "lists",
@@ -11251,7 +11488,14 @@
             "label": "doc",
             "description": [],
             "signature": [
-              "SavedObjectDoc<InputAttributes> & { references?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectDoc",
+                "text": "SavedObjectDoc"
+              },
+              "<InputAttributes> & { references?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -11337,7 +11581,14 @@
             "label": "document",
             "description": [],
             "signature": [
-              "SavedObjectDoc<InputAttributes> & { references?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectDoc",
+                "text": "SavedObjectDoc"
+              },
+              "<InputAttributes> & { references?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -11384,7 +11635,14 @@
           "\nDocument type used during model migration.\n"
         ],
         "signature": [
-          "SavedObjectDoc<T> & { references?: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectDoc",
+            "text": "SavedObjectDoc"
+          },
+          "<T> & { references?: ",
           {
             "pluginId": "@kbn/core-saved-objects-common",
             "scope": "common",
@@ -11448,7 +11706,14 @@
             "label": "document",
             "description": [],
             "signature": [
-              "SavedObjectDoc<InputAttributes> & { references?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectDoc",
+                "text": "SavedObjectDoc"
+              },
+              "<InputAttributes> & { references?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -11534,7 +11799,14 @@
             "label": "document",
             "description": [],
             "signature": [
-              "SavedObjectDoc<InputAttributes> & { references?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectDoc",
+                "text": "SavedObjectDoc"
+              },
+              "<InputAttributes> & { references?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -11671,7 +11943,14 @@
           "\nDescribes Saved Object documents that have passed through the migration\nframework and are guaranteed to have a `references` root property.\n"
         ],
         "signature": [
-          "SavedObjectDoc<T> & { references: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectDoc",
+            "text": "SavedObjectDoc"
+          },
+          "<T> & { references: ",
           {
             "pluginId": "@kbn/core-saved-objects-common",
             "scope": "common",
@@ -12505,7 +12784,14 @@
           "\nDescribes Saved Object documents from Kibana < 7.0.0 which don't have a\n`references` root property defined. This type should only be used in\nmigrations.\n"
         ],
         "signature": [
-          "SavedObjectDoc<T> & { references?: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectDoc",
+            "text": "SavedObjectDoc"
+          },
+          "<T> & { references?: ",
           {
             "pluginId": "@kbn/core-saved-objects-common",
             "scope": "common",

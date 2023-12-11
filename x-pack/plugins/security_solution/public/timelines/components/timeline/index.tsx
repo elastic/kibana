@@ -12,12 +12,13 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import type { CellValueElementProps } from './cell_rendering';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
+import { FlyoutHeaderPanel } from '../flyout/header';
 import type { TimelineId, RowRenderer } from '../../../../common/types/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -30,6 +31,7 @@ import { useTimelineFullScreen } from '../../../common/containers/use_full_scree
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { sourcererSelectors } from '../../../common/store';
+import { TimelineTour } from './tour';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -78,6 +80,8 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     description,
     sessionViewConfig,
     initialized,
+    show: isOpen,
+    isLoading,
   } = useDeepEqualSelector((state) =>
     pick(
       [
@@ -89,10 +93,16 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         'description',
         'sessionViewConfig',
         'initialized',
+        'show',
+        'isLoading',
       ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
+
+  const {
+    kibanaSecuritySolutionsPrivileges: { crud: canEditTimeline },
+  } = useUserPrivileges();
 
   const { timelineFullScreen } = useTimelineFullScreen();
 
@@ -183,6 +193,8 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const timelineContext = useMemo(() => ({ timelineId }), [timelineId]);
   const resolveConflictComponent = useResolveConflict();
 
+  const showTimelineTour = isOpen && !isLoading && canEditTimeline;
+
   return (
     <TimelineContext.Provider value={timelineContext}>
       <TimelineContainer
@@ -192,29 +204,33 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         ref={containerElement}
       >
         <TimelineSavingProgress timelineId={timelineId} />
-        {timelineType === TimelineType.template && (
-          <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
-        )}
-        {resolveConflictComponent}
-        <HideShowContainer
-          $isVisible={!timelineFullScreen}
-          data-test-subj="timeline-hide-show-container"
-        >
-          <FlyoutHeaderPanel timelineId={timelineId} />
-          <FlyoutHeader timelineId={timelineId} />
-        </HideShowContainer>
+        <div className="timeline-body" data-test-subj="timeline-body">
+          {timelineType === TimelineType.template && (
+            <TimelineTemplateBadge className="timeline-template-badge">
+              {i18n.TIMELINE_TEMPLATE}
+            </TimelineTemplateBadge>
+          )}
+          {resolveConflictComponent}
+          <HideShowContainer
+            $isVisible={!timelineFullScreen}
+            data-test-subj="timeline-hide-show-container"
+          >
+            <FlyoutHeaderPanel timelineId={timelineId} />
+          </HideShowContainer>
 
-        <TabsContent
-          graphEventId={graphEventId}
-          sessionViewConfig={sessionViewConfig}
-          renderCellValue={renderCellValue}
-          rowRenderers={rowRenderers}
-          timelineId={timelineId}
-          timelineType={timelineType}
-          timelineDescription={description}
-          timelineFullScreen={timelineFullScreen}
-        />
+          <TabsContent
+            graphEventId={graphEventId}
+            sessionViewConfig={sessionViewConfig}
+            renderCellValue={renderCellValue}
+            rowRenderers={rowRenderers}
+            timelineId={timelineId}
+            timelineType={timelineType}
+            timelineDescription={description}
+            timelineFullScreen={timelineFullScreen}
+          />
+        </div>
       </TimelineContainer>
+      {showTimelineTour ? <TimelineTour /> : null}
     </TimelineContext.Provider>
   );
 };

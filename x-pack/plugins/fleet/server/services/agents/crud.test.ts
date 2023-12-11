@@ -9,7 +9,9 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { AGENTS_INDEX } from '../../constants';
+import { createAppContextStartContractMock } from '../../mocks';
 import type { Agent } from '../../types';
+import { appContextService } from '../app_context';
 
 import { auditLoggingService } from '../audit_logging';
 
@@ -25,11 +27,20 @@ jest.mock('../audit_logging');
 jest.mock('../../../common/services/is_agent_upgradeable', () => ({
   isAgentUpgradeable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
 }));
+jest.mock('./versions', () => {
+  return {
+    getAvailableVersions: jest
+      .fn()
+      .mockResolvedValue(['8.4.0', '8.5.0', '8.6.0', '8.7.0', '8.8.0']),
+    getLatestAvailableVersion: jest.fn().mockResolvedValue('8.8.0'),
+  };
+});
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
 describe('Agents CRUD test', () => {
   const soClientMock = savedObjectsClientMock.create();
+  let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   let esClientMock: ElasticsearchClient;
   let searchMock: jest.Mock;
 
@@ -41,6 +52,9 @@ describe('Agents CRUD test', () => {
       openPointInTime: jest.fn().mockResolvedValue({ id: '1' }),
       closePointInTime: jest.fn(),
     } as unknown as ElasticsearchClient;
+
+    mockContract = createAppContextStartContractMock();
+    appContextService.start(mockContract);
   });
 
   function getEsResponse(ids: string[], total: number) {

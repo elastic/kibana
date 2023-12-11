@@ -24,63 +24,21 @@ import {
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { TimeUnitChar } from '../../../common/utils/formatters';
-import { MetricsExplorerSeries } from '../../../common/custom_threshold_rule/metrics_explorer';
 import {
-  Comparator,
   CustomMetricExpressionParams,
-  MetricExpressionParams,
-  MetricsSourceStatus,
-  NonCountMetricExpressionParams,
-  SnapshotCustomMetricInput,
+  BaseMetricExpressionParams,
+  aggType,
 } from '../../../common/custom_threshold_rule/types';
 import { ObservabilityPublicStart } from '../../plugin';
-import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
 
 export interface AlertContextMeta {
   adHocDataViewList: DataView[];
-  currentOptions?: Partial<MetricsExplorerOptions>;
-  series?: MetricsExplorerSeries;
 }
 
-export type MetricExpression = Omit<
-  MetricExpressionParams,
-  'metric' | 'timeSize' | 'timeUnit' | 'metrics' | 'equation'
-> & {
-  metric?: NonCountMetricExpressionParams['metric'];
-  metrics?: CustomMetricExpressionParams['metrics'];
-  label?: CustomMetricExpressionParams['label'];
-  equation?: CustomMetricExpressionParams['equation'];
-  timeSize?: MetricExpressionParams['timeSize'];
-  timeUnit?: MetricExpressionParams['timeUnit'];
+export type MetricExpression = Omit<CustomMetricExpressionParams, 'timeSize' | 'timeUnit'> & {
+  timeSize?: BaseMetricExpressionParams['timeSize'];
+  timeUnit?: BaseMetricExpressionParams['timeUnit'];
 };
-
-export enum AGGREGATION_TYPES {
-  COUNT = 'count',
-  AVERAGE = 'avg',
-  SUM = 'sum',
-  MIN = 'min',
-  MAX = 'max',
-  RATE = 'rate',
-  CARDINALITY = 'cardinality',
-  P95 = 'p95',
-  P99 = 'p99',
-  CUSTOM = 'custom',
-}
-
-export interface MetricThresholdAlertParams {
-  criteria?: MetricExpression[];
-  groupBy?: string | string[];
-  filterQuery?: string;
-  sourceId?: string;
-}
-
-export interface ExpressionChartRow {
-  timestamp: number;
-  value: number;
-}
-
-export type ExpressionChartSeries = ExpressionChartRow[][];
 
 export interface TimeRange {
   from?: string;
@@ -106,8 +64,6 @@ export interface InfraClientStartDeps {
   discover: DiscoverStart;
   embeddable?: EmbeddableStart;
   lens: LensPublicStart;
-  // TODO:: check if needed => https://github.com/elastic/kibana/issues/159340
-  // ml: MlPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   osquery?: unknown; // OsqueryPluginStart;
@@ -118,63 +74,126 @@ export interface InfraClientStartDeps {
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
-  // TODO:: check if needed => https://github.com/elastic/kibana/issues/159340
-  // telemetry: ITelemetryClient;
 }
 
 export type RendererResult = React.ReactElement<any> | null;
 
 export type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) => Result;
-export interface DerivedIndexPattern {
-  fields: MetricsSourceStatus['indexFields'];
-  title: string;
-}
 
-export const SnapshotMetricTypeKeys = {
-  count: null,
-  cpu: null,
-  diskLatency: null,
-  load: null,
-  memory: null,
-  memoryTotal: null,
-  tx: null,
-  rx: null,
-  logRate: null,
-  diskIOReadBytes: null,
-  diskIOWriteBytes: null,
-  s3TotalRequests: null,
-  s3NumberOfObjects: null,
-  s3BucketSize: null,
-  s3DownloadBytes: null,
-  s3UploadBytes: null,
-  rdsConnections: null,
-  rdsQueriesExecuted: null,
-  rdsActiveTransactions: null,
-  rdsLatency: null,
-  sqsMessagesVisible: null,
-  sqsMessagesDelayed: null,
-  sqsMessagesSent: null,
-  sqsMessagesEmpty: null,
-  sqsOldestMessage: null,
-  custom: null,
-};
-export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
-
-export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
-export interface InventoryMetricConditions {
-  metric: SnapshotMetricType;
-  timeSize: number;
-  timeUnit: TimeUnitChar;
-  sourceId?: string;
-  threshold: number[];
-  comparator: Comparator;
-  customMetric?: SnapshotCustomMetricInput;
-  warningThreshold?: number[];
-  warningComparator?: Comparator;
-}
-
-export interface MetricThresholdRuleTypeParams extends RuleTypeParams {
-  criteria: MetricExpressionParams[];
+export interface CustomThresholdRuleTypeParams extends RuleTypeParams {
+  criteria: CustomMetricExpressionParams[];
   searchConfiguration: SerializedSearchSourceFields;
   groupBy?: string | string[];
 }
+
+export const expressionTimestampsRT = rt.type({
+  fromTimestamp: rt.number,
+  toTimestamp: rt.number,
+  interval: rt.string,
+  timeFieldName: rt.string,
+});
+export type ExpressionTimestampsRT = rt.TypeOf<typeof expressionTimestampsRT>;
+
+/*
+ * Expression options
+ */
+export const metricsExplorerMetricRT = rt.intersection([
+  rt.type({
+    name: rt.string,
+    aggregation: aggType,
+  }),
+  rt.partial({
+    field: rt.string,
+    filter: rt.string,
+  }),
+]);
+const customThresholdExpressionMetricRT = rt.intersection([
+  rt.type({
+    aggregation: rt.string,
+  }),
+  rt.partial({
+    field: rt.union([rt.string, rt.undefined]),
+    custom_metrics: rt.array(metricsExplorerMetricRT),
+    equation: rt.string,
+  }),
+]);
+export const expressionOptionsRT = rt.intersection([
+  rt.type({
+    aggregation: rt.string,
+    metrics: rt.array(customThresholdExpressionMetricRT),
+  }),
+  rt.partial({
+    limit: rt.number,
+    groupBy: rt.union([rt.string, rt.array(rt.string)]),
+    filterQuery: rt.string,
+    source: rt.string,
+    forceInterval: rt.boolean,
+    dropLastBucket: rt.boolean,
+  }),
+]);
+
+export type MetricsExplorerMetricRT = rt.TypeOf<typeof metricsExplorerMetricRT>;
+export type ExpressionOptions = rt.TypeOf<typeof expressionOptionsRT>;
+/*
+ * End of expression options
+ */
+
+/*
+ * Metrics explorer types
+ */
+export const timeRangeRT = rt.type({
+  from: rt.number,
+  to: rt.number,
+  interval: rt.string,
+});
+
+export const afterKeyObjectRT = rt.record(rt.string, rt.union([rt.string, rt.null]));
+
+export const metricsExplorerPageInfoRT = rt.type({
+  total: rt.number,
+  afterKey: rt.union([rt.string, rt.null, afterKeyObjectRT]),
+});
+
+export const metricsExplorerColumnTypeRT = rt.keyof({
+  date: null,
+  number: null,
+  string: null,
+});
+
+export const metricsExplorerColumnRT = rt.type({
+  name: rt.string,
+  type: metricsExplorerColumnTypeRT,
+});
+
+export const metricsExplorerRowRT = rt.intersection([
+  rt.type({
+    timestamp: rt.number,
+  }),
+  rt.record(
+    rt.string,
+    rt.union([rt.string, rt.number, rt.null, rt.undefined, rt.array(rt.object)])
+  ),
+]);
+
+export const metricsExplorerSeriesRT = rt.intersection([
+  rt.type({
+    id: rt.string,
+    columns: rt.array(metricsExplorerColumnRT),
+    rows: rt.array(metricsExplorerRowRT),
+  }),
+  rt.partial({
+    keys: rt.array(rt.string),
+  }),
+]);
+
+export const metricsExplorerResponseRT = rt.type({
+  series: rt.array(metricsExplorerSeriesRT),
+  pageInfo: metricsExplorerPageInfoRT,
+});
+
+export type MetricsExplorerRow = rt.TypeOf<typeof metricsExplorerRowRT>;
+export type MetricsExplorerSeries = rt.TypeOf<typeof metricsExplorerSeriesRT>;
+export type MetricsExplorerResponse = rt.TypeOf<typeof metricsExplorerResponseRT>;
+/*
+ * End of metrics explorer types
+ */

@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
+import {
+  ADD_PACK_HEADER_BUTTON,
+  ADD_QUERY_BUTTON,
+  formFieldInputSelector,
+  SAVED_QUERY_DROPDOWN_SELECT,
+  TABLE_ROWS,
+} from '../../screens/packs';
 import {
   cleanupPack,
   cleanupAgentPolicy,
@@ -28,7 +36,6 @@ import {
   interceptAgentPolicyId,
   policyContainsIntegration,
 } from '../../tasks/integrations';
-import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
@@ -66,8 +73,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     }
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/169702
-  describe.skip('Add and upgrade integration', { tags: ['@ess', '@serverless'] }, () => {
+  describe('Add and upgrade integration', { tags: ['@ess', '@serverless'] }, () => {
     const oldVersion = '0.7.4';
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
@@ -120,12 +126,13 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('epmList.searchBar').type('osquery');
       cy.getBySel('integration-card:epr:osquery_manager').click();
       cy.getBySel('addIntegrationPolicyButton').click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+
       cy.getBySel('agentPolicySelect').within(() => {
         cy.contains(policyName);
       });
-      cy.getBySel('packagePolicyNameInput')
-        .wait(500)
-        .type(`{selectall}{backspace}${integrationName}`);
+      cy.getBySel('packagePolicyNameInput').clear().wait(500);
+      cy.getBySel('packagePolicyNameInput').type(`${integrationName}`);
       cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
       cy.getBySel('confirmModalCancelButton').click();
       cy.get(`[title="${integrationName}"]`).should('exist');
@@ -172,14 +179,16 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('euiFlyoutCloseButton').click();
 
       navigateTo('app/osquery/packs');
-      findAndClickButton('Add pack');
-      findFormFieldByRowsLabelAndType('Name', packName);
-      findFormFieldByRowsLabelAndType(
-        'Scheduled agent policies (optional)',
-        `${policyName} {downArrow}{enter}{esc}`
-      );
-      findAndClickButton('Add query');
-      cy.getBySel('savedQuerySelect').click().type('{downArrow}{enter}');
+      cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+
+      cy.get(formFieldInputSelector('name')).type(`${packName}{downArrow}{enter}`);
+      cy.getBySel('policyIdsComboBox').type(`${policyName} {downArrow}{enter}`);
+
+      cy.getBySel(ADD_QUERY_BUTTON).click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
+      cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).click().type('{downArrow}{enter}');
       cy.contains(/^Save$/).click();
       cy.contains(/^Save pack$/).click();
       cy.contains(`Successfully created "${packName}" pack`).click();
@@ -204,7 +213,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
 
       // test list of prebuilt queries
       navigateTo('/app/osquery/saved_queries');
-      cy.react('EuiTableRow').should('have.length.above', 5);
+      cy.get(TABLE_ROWS).should('have.length.above', 5);
     });
   });
 });

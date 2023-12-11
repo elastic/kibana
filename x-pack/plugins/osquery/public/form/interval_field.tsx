@@ -72,7 +72,7 @@ const IntervalFieldComponent = ({ euiFieldProps }: IntervalFieldProps) => {
         onChange={handleChange}
         fullWidth
         type="number"
-        data-test-subj="input"
+        data-test-subj="osquery-interval-field"
         {...euiFieldProps}
       />
     </EuiFormRow>

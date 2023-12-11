@@ -16,8 +16,6 @@ import {
 } from '../../../screens/timeline';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 
-import { cleanKibana } from '../../../tasks/common';
-
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
@@ -31,7 +29,6 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 
 describe.skip('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     login();
     visit(TIMELINES_URL);
     createTimeline(getTimeline())

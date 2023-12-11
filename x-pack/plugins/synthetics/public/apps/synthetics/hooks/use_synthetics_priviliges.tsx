@@ -19,6 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { selectOverviewStatus } from '../state/overview_status';
+import { useCanReadSyntheticsIndex } from '../../../hooks/use_capabilities';
 import {
   LICENSE_MISSING_ERROR,
   LICENSE_NOT_ACTIVE_ERROR,
@@ -28,9 +29,11 @@ import {
 import { useSyntheticsSettingsContext } from '../contexts';
 
 export const useSyntheticsPrivileges = () => {
+  const { canRead: canReadSyntheticsIndex, loading: isCanReadLoading } =
+    useCanReadSyntheticsIndex();
   const { error } = useSelector(selectOverviewStatus);
 
-  if (error?.body?.message?.startsWith('MissingIndicesPrivileges:')) {
+  if (!isCanReadLoading && !canReadSyntheticsIndex) {
     return (
       <EuiFlexGroup
         alignItems="center"

@@ -39,13 +39,13 @@ export async function runDockerGenerator(
   }
 ) {
   let baseImageName = '';
-  if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:22.04';
+  if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
   if (flags.baseImage === 'ubi8') baseImageName = 'docker.elastic.co/ubi8/ubi-minimal:latest';
   if (flags.baseImage === 'ubi9') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
 
   let imageFlavor = '';
   if (flags.baseImage === 'ubi8') imageFlavor += `-ubi8`;
-  if (flags.baseImage === 'ubi9') imageFlavor += `-ubi9`;
+  if (flags.baseImage === 'ubi9') imageFlavor += `-ubi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';

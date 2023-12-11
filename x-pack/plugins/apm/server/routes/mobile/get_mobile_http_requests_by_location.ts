@@ -6,15 +6,15 @@
  */
 
 import {
-  termQuery,
   kqlQuery,
   rangeQuery,
+  termQuery,
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   SERVICE_NAME,
-  SPAN_TYPE,
   SPAN_SUBTYPE,
+  SPAN_TYPE,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -111,9 +111,7 @@ export async function getHttpRequestsByLocation({
     timeseries:
       response.aggregations?.timeseries?.buckets.map((bucket) => ({
         x: bucket.key,
-        y:
-          response.aggregations?.requests?.requestsByLocation?.buckets[0]
-            ?.doc_count ?? 0,
+        y: bucket?.requests?.requestsByLocation?.buckets[0]?.doc_count ?? 0,
       })) ?? [],
   };
 }

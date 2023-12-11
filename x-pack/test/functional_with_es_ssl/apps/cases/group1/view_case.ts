@@ -33,6 +33,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
 
+  const hasFocus = async (testSubject: string) => {
+    const targetElement = await testSubjects.find(testSubject);
+    const activeElement = await find.activeElement();
+    return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
+  };
+
   describe('View case', () => {
     describe('page', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
@@ -122,6 +128,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await desc.getVisibleText()).equal('Description with space');
       });
 
+      it('comment area does not have focus on page load', async () => {
+        browser.refresh();
+        expect(await hasFocus('euiMarkdownEditorTextArea')).to.be(false);
+      });
+
       it('adds a comment to a case', async () => {
         const commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
@@ -135,7 +146,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const newComment = await find.byCssSelector(
           '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
+
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
+      });
+
+      it('quotes a comment on a case', async () => {
+        const commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        await testSubjects.click('property-actions-user-action-ellipses');
+        await testSubjects.click('property-actions-user-action-quote');
+
+        expect(await commentArea.getVisibleText()).equal('> Test comment from automation ');
+        expect(await hasFocus('euiMarkdownEditorTextArea')).to.be(true);
       });
 
       it('adds a category to a case', async () => {

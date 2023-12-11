@@ -17,7 +17,7 @@ import {
   getFieldType,
   getDataGridSchemaFromKibanaFieldType,
   getDataGridSchemaFromESFieldType,
-  getFieldsFromKibanaIndexPattern,
+  getFieldsFromKibanaDataView,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
@@ -140,7 +140,7 @@ export const useIndexData = (
       allPopulatedFields = [...new Set(docs.map(Object.keys).flat(1))];
     }
 
-    const allDataViewFields = getFieldsFromKibanaIndexPattern(dataView);
+    const allDataViewFields = getFieldsFromKibanaDataView(dataView);
     return allPopulatedFields.filter((d) => allDataViewFields.includes(d)).sort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataViewFieldsData, populatedFields]);

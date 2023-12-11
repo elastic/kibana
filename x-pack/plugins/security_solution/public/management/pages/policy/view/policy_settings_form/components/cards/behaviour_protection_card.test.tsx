@@ -55,7 +55,6 @@ describe('Policy Behaviour Protection Card', () => {
     expect(getByTestId(testSubj.enableDisableSwitch));
     expect(getByTestId(testSubj.protectionPreventRadio));
     expect(getByTestId(testSubj.notifyUserCheckbox));
-    expect(getByTestId(testSubj.rulesCallout));
     expect(queryByTestId(testSubj.reputationServiceCheckbox)).not.toBeInTheDocument();
   });
 
@@ -109,27 +108,32 @@ describe('Policy Behaviour Protection Card', () => {
         prebuiltRules: false,
       };
       const config = { ...defaults, ...args };
-      return [
+
+      const baseText = [
         'Type',
         'Malicious behavior',
         'Operating system',
         'Windows, Mac, Linux ',
         `Malicious behavior protections ${config.enabled ? 'enabled' : 'disabled'}`,
-        'Protection level',
-        'Prevent',
-        ...(config.reputationServices
-          ? ['Reputation serviceInfo', "Don't use reputation service"]
-          : []),
-        'User notification',
-        'Agent version 7.15+',
-        ...(config.notifyUser ? ['Notify user', 'Notification message', '—'] : ['Notify user']),
-        ...(config.prebuiltRules
+      ];
+
+      return (
+        config.enabled
           ? [
-              'View related detection rules. ',
-              'Prebuilt rules are tagged “Elastic” on the Detection Rules page.',
+              ...baseText,
+              'Protection level',
+              'Prevent',
+              ...(config.reputationServices
+                ? ['Reputation serviceInfo', "Don't use reputation service"]
+                : []),
+              'User notification',
+              'Agent version 7.15+',
+              ...(config.notifyUser
+                ? ['Notify user', 'Notification message', '—']
+                : ['Notify user']),
             ]
-          : ['View related detection rules.']),
-      ].join('');
+          : baseText
+      ).join('');
     };
 
     beforeEach(() => {

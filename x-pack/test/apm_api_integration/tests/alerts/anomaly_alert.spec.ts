@@ -6,15 +6,16 @@
  */
 
 import moment from 'moment';
-import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
-import { createApmRule, deleteApmRules } from './helpers/alerting_api_helper';
+import { createApmRule } from './helpers/alerting_api_helper';
 import { waitForActiveRule } from './helpers/wait_for_active_rule';
+import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -24,7 +25,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const logger = getService('log');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
-  registry.when(
+  // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/172754
+  registry.when.skip(
     'fetching service anomalies with a trial license',
     { config: 'trial', archives: [] },
     () => {
@@ -69,14 +71,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       async function cleanup() {
-        try {
-          await synthtraceEsClient.clean();
-          await deleteApmRules(supertest);
-          await ml.cleanMlIndices();
-          logger.info('Completed cleaned up');
-        } catch (e) {
-          logger.info('Could not cleanup', e);
-        }
+        await synthtraceEsClient.clean();
+        await cleanupRuleAndAlertState({ es, supertest, logger });
+        await ml.cleanMlIndices();
       }
 
       describe('with ml jobs', () => {

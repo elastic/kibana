@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { RESPONSE_ACTIONS_ITEM_0, RESPONSE_ACTIONS_ITEM_1 } from '../../tasks/response_actions';
 import {
@@ -25,7 +26,9 @@ describe(
   () => {
     let ruleId: string;
     let ruleName: string;
-
+    before(() => {
+      initializeDataViews();
+    });
     beforeEach(() => {
       loadRule().then((data) => {
         ruleId = data.id;
@@ -39,15 +42,15 @@ describe(
     });
 
     it('should be able to add investigation guides to response actions', () => {
-      const investigationGuideNote =
-        'You have queries in the investigation guide. Add them as response actions?';
       cy.getBySel('editRuleSettingsLink').click();
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
+      cy.getBySel('osquery-investigation-guide-text').should('exist');
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.contains('Loading connectors...').should('not.exist');
 
-      cy.contains(investigationGuideNote);
       cy.getBySel('osqueryAddInvestigationGuideQueries').click();
-      cy.contains(investigationGuideNote).should('not.exist');
+      cy.getBySel('osquery-investigation-guide-text').should('not.exist');
 
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
         cy.contains("SELECT * FROM os_version where name='{{host.os.name}}';");
@@ -57,6 +60,7 @@ describe(
       cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
         cy.contains('select * from users');
       });
+
       cy.contains('Save changes').click();
       cy.contains(`${ruleName} was saved`).should('exist');
       closeToastIfVisible();

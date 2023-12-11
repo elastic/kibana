@@ -29,6 +29,7 @@ import {
   createCopyToClipboardDiscoverCellActionFactory,
 } from './copy_to_clipboard';
 import { createToggleColumnCellActionFactory } from './toggle_column';
+import { createToggleUserAssetFieldCellActionFactory } from './toggle_asset_column';
 import { SecurityCellActionsTrigger } from './constants';
 import type {
   DiscoverCellActionName,
@@ -37,7 +38,9 @@ import type {
   SecurityCellActions,
 } from './types';
 import { enhanceActionWithTelemetry } from './telemetry';
-import { registerDiscoverHistogramActions } from './discover_in_timeline/vis_apply_filter';
+import { registerDiscoverHistogramActions } from './register_discover_histogram_actions';
+import { createFilterInLensAction } from './filter/lens/filter_in';
+import { createFilterOutLensAction } from './filter/lens/filter_out';
 
 export const registerUIActions = (
   store: SecurityAppStore,
@@ -47,16 +50,23 @@ export const registerUIActions = (
   registerLensEmbeddableActions(store, services);
   registerDiscoverCellActions(store, services);
   registerCellActions(store, history, services);
+  // TODO: Remove discover histogram actions when timeline esql tab is extracted from discover
   registerDiscoverHistogramActions(store, history, services);
 };
 
 const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartServices) => {
   const { uiActions } = services;
 
-  const addToTimelineAction = createAddToTimelineLensAction({ store, order: 1 });
+  const filterInLegendActions = createFilterInLensAction({ store, order: 2, services });
+  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterInLegendActions);
+
+  const filterOutLegendActions = createFilterOutLensAction({ store, order: 3, services });
+  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterOutLegendActions);
+
+  const addToTimelineAction = createAddToTimelineLensAction({ store, order: 4 });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, addToTimelineAction);
 
-  const copyToClipboardAction = createCopyToClipboardLensAction({ order: 2 });
+  const copyToClipboardAction = createCopyToClipboardLensAction({ order: 5 });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, copyToClipboardAction);
 };
 
@@ -108,6 +118,7 @@ const registerCellActions = (
     showTopN: createShowTopNCellActionFactory({ services }),
     copyToClipboard: createCopyToClipboardCellActionFactory({ services }),
     toggleColumn: createToggleColumnCellActionFactory({ store, services }),
+    toggleUserAssetField: createToggleUserAssetFieldCellActionFactory({ store }),
   };
 
   const registerCellActionsTrigger = (
@@ -138,6 +149,7 @@ const registerCellActions = (
     'filterOut',
     'addToTimeline',
     'toggleColumn',
+    'toggleUserAssetField',
     'showTopN',
     'copyToClipboard',
   ]);

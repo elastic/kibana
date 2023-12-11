@@ -6,28 +6,32 @@
  * Side Public License, v 1.
  */
 
-import {
-  UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
-  UI_SETTINGS_DATEFORMAT_TZ,
-} from '@kbn/reporting-common';
-import { IUiSettingsClient } from '@kbn/core/server';
+import type { IUiSettingsClient } from '@kbn/core/server';
 import {
   loggingSystemMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
+import type { ReportingConfigType } from '@kbn/reporting-server';
+
+import {
+  UI_SETTINGS_CSV_QUOTE_VALUES,
+  UI_SETTINGS_CSV_SEPARATOR,
+  UI_SETTINGS_DATEFORMAT_TZ,
+  UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
+} from './constants';
 import { getExportSettings } from './get_export_settings';
-import { CsvConfig } from '@kbn/generate-csv-types';
-import { UI_SETTINGS_CSV_QUOTE_VALUES, UI_SETTINGS_CSV_SEPARATOR } from './constants';
 
 describe('getExportSettings', () => {
   let uiSettingsClient: IUiSettingsClient;
-  const config: CsvConfig = {
+  const config: ReportingConfigType['csv'] = {
     checkForFormulas: true,
     escapeFormulaValues: false,
     maxSizeBytes: 180000,
     scroll: { size: 500, duration: '30s' },
     useByteOrderMarkEncoding: false,
+    maxConcurrentShardRequests: 5,
+    enablePanelActionDownload: true,
   };
   const logger = loggingSystemMock.createLogger();
 
@@ -59,6 +63,7 @@ describe('getExportSettings', () => {
         "escapeFormulaValues": false,
         "escapeValue": [Function],
         "includeFrozen": false,
+        "maxConcurrentShardRequests": 5,
         "maxSizeBytes": 180000,
         "scroll": Object {
           "duration": "30s",

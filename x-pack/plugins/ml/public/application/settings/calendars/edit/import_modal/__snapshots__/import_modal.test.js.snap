@@ -63,11 +63,9 @@ exports[`ImportModal Renders import modal 1`] = `
         />
       </EuiButtonEmpty>
       <EuiButton
-        color="primary"
         disabled={true}
         fill={true}
         onClick={[Function]}
-        size="m"
       >
         <FormattedMessage
           defaultMessage="Import"

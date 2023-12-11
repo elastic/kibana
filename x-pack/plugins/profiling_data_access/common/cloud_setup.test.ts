@@ -14,9 +14,6 @@ import { mergePartialSetupStates } from './setup';
 
 const createCloudState = (available: boolean): PartialCloudSetupState => ({ cloud: { available } });
 const createDataState = (available: boolean): PartialCloudSetupState => ({ data: { available } });
-const createPermissionState = (configured: boolean): PartialCloudSetupState => ({
-  permissions: { configured },
-});
 const createCollectorPolicyState = (installed: boolean): PartialCloudSetupState => ({
   policies: { collector: { installed } },
 });
@@ -75,18 +72,6 @@ describe('Merging partial state operations', () => {
     expect(mergedState.policies.collector.installed).toEqual(true);
     expect(mergedState.policies.symbolizer.installed).toEqual(true);
   });
-  it('returns false when permission is not configured', () => {
-    const mergedState = mergePartialSetupStates(defaultSetupState, [
-      createCollectorPolicyState(true),
-      createSymbolizerPolicyState(true),
-      createProfilingInApmPolicyState(true),
-      createResourceState({ enabled: true, created: true }),
-      createSettingsState(true),
-      createPermissionState(false),
-    ]);
-
-    expect(areCloudResourcesSetup(mergedState)).toBeFalsy();
-  });
 
   it('returns false when resource management is not enabled', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
@@ -95,7 +80,6 @@ describe('Merging partial state operations', () => {
       createProfilingInApmPolicyState(true),
       createResourceState({ enabled: false, created: true }),
       createSettingsState(true),
-      createPermissionState(true),
     ]);
 
     expect(areCloudResourcesSetup(mergedState)).toBeFalsy();
@@ -108,7 +92,6 @@ describe('Merging partial state operations', () => {
       createProfilingInApmPolicyState(true),
       createResourceState({ enabled: true, created: false }),
       createSettingsState(true),
-      createPermissionState(true),
     ]);
 
     expect(areCloudResourcesSetup(mergedState)).toBeFalsy();
@@ -121,7 +104,6 @@ describe('Merging partial state operations', () => {
       createProfilingInApmPolicyState(true),
       createResourceState({ enabled: true, created: true }),
       createSettingsState(false),
-      createPermissionState(true),
     ]);
 
     expect(areCloudResourcesSetup(mergedState)).toBeFalsy();
@@ -134,7 +116,6 @@ describe('Merging partial state operations', () => {
       createProfilingInApmPolicyState(false),
       createResourceState({ enabled: true, created: true }),
       createSettingsState(true),
-      createPermissionState(true),
     ]);
 
     expect(areCloudResourcesSetup(mergedState)).toBeTruthy();
@@ -147,7 +128,6 @@ describe('Merging partial state operations', () => {
       createProfilingInApmPolicyState(false),
       createResourceState({ enabled: true, created: true }),
       createSettingsState(true),
-      createPermissionState(true),
     ]);
 
     expect(areCloudResourcesSetup(mergedState)).toBeFalsy();
@@ -160,7 +140,6 @@ describe('Merging partial state operations', () => {
       createProfilingInApmPolicyState(false),
       createResourceState({ enabled: true, created: true }),
       createSettingsState(true),
-      createPermissionState(true),
     ]);
 
     expect(areCloudResourcesSetup(mergedState)).toBeFalsy();
@@ -173,7 +152,6 @@ describe('Merging partial state operations', () => {
       createProfilingInApmPolicyState(true),
       createResourceState({ enabled: true, created: true }),
       createSettingsState(true),
-      createPermissionState(true),
     ]);
 
     expect(areCloudResourcesSetup(mergedState)).toBeFalsy();

@@ -8,7 +8,10 @@
 import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 /**
+ * @deprecated use `getCustomQueryRuleParams()` instead
+ *
  * This is a typical simple rule for testing that is easy for most basic testing
+ *
  * @param ruleId
  * @param enabled Enables the rule on creation or not. Defaulted to true.
  */

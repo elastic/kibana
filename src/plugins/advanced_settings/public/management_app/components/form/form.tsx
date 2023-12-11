@@ -191,6 +191,7 @@ export class Form extends PureComponent<FormProps> {
       title: i18n.translate('advancedSettings.form.requiresPageReloadToastDescription', {
         defaultMessage: 'One or more settings require you to reload the page to take effect.',
       }),
+      toastLifeTimeMs: 15000,
       text: toMountPoint(
         <KibanaThemeProvider theme$={this.props.theme}>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">

@@ -42,10 +42,6 @@
       }
     }
   },
-  "metrics-data-source": {
-    "dynamic": false,
-    "properties": {}
-  },
   "url": {
     "dynamic": false,
     "properties": {
@@ -1473,6 +1469,10 @@
       }
     }
   },
+  "metrics-data-source": {
+    "dynamic": false,
+    "properties": {}
+  },
   "canvas-element": {
     "dynamic": false,
     "properties": {
@@ -1680,6 +1680,10 @@
         "type": "keyword",
         "index": false
       },
+      "service_token": {
+        "type": "keyword",
+        "index": false
+      },
       "config": {
         "type": "flattened"
       },
@@ -1840,8 +1844,20 @@
                 }
               }
             }
+          },
+          "service_token": {
+            "dynamic": false,
+            "properties": {
+              "id": {
+                "type": "keyword"
+              }
+            }
           }
         }
+      },
+      "preset": {
+        "type": "keyword",
+        "index": false
       }
     }
   },
@@ -1954,6 +1970,10 @@
             "type": "boolean"
           }
         }
+      },
+      "latest_install_failed_attempts": {
+        "type": "object",
+        "enabled": false
       },
       "installed_kibana": {
         "dynamic": false,
@@ -2164,6 +2184,9 @@
       "interval": {
         "type": "keyword"
       },
+      "timeout": {
+        "type": "short"
+      },
       "ecs_mapping": {
         "dynamic": false,
         "properties": {}
@@ -2212,6 +2235,9 @@
           "interval": {
             "type": "text"
           },
+          "timeout": {
+            "type": "short"
+          },
           "platform": {
             "type": "keyword"
           },
@@ -2253,6 +2279,9 @@
           },
           "interval": {
             "type": "text"
+          },
+          "timeout": {
+            "type": "short"
           },
           "platform": {
             "type": "keyword"
@@ -2476,6 +2505,14 @@
       },
       "datafeeds": {
         "type": "object"
+      },
+      "tags": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },
@@ -2664,50 +2701,6 @@
     "properties": {
       "reportedClusterUuids": {
         "type": "keyword"
-      }
-    }
-  },
-  "apm-telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "apm-server-schema": {
-    "properties": {
-      "schemaJson": {
-        "type": "text",
-        "index": false
-      }
-    }
-  },
-  "apm-service-group": {
-    "properties": {
-      "groupName": {
-        "type": "keyword"
-      },
-      "kuery": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "color": {
-        "type": "text"
-      }
-    }
-  },
-  "apm-custom-dashboards": {
-    "properties": {
-      "dashboardSavedObjectId": {
-        "type": "keyword"
-      },
-      "kuery": {
-        "type": "text"
-      },
-      "serviceEnvironmentFilterEnabled": {
-        "type": "boolean"
-      },
-      "serviceNameFilterEnabled": {
-        "type": "boolean"
       }
     }
   },
@@ -3182,6 +3175,50 @@
       "note": {
         "type": "text",
         "index": false
+      }
+    }
+  },
+  "apm-telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "apm-server-schema": {
+    "properties": {
+      "schemaJson": {
+        "type": "text",
+        "index": false
+      }
+    }
+  },
+  "apm-service-group": {
+    "properties": {
+      "groupName": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "color": {
+        "type": "text"
+      }
+    }
+  },
+  "apm-custom-dashboards": {
+    "properties": {
+      "dashboardSavedObjectId": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "serviceEnvironmentFilterEnabled": {
+        "type": "boolean"
+      },
+      "serviceNameFilterEnabled": {
+        "type": "boolean"
       }
     }
   }

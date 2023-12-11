@@ -1,7 +1,4 @@
 {
-  "bin": {
-    "openapi-generator": "./bin/openapi-generator.js"
-  },
   "description": "OpenAPI code generator for Kibana",
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "name": "@kbn/openapi-generator",

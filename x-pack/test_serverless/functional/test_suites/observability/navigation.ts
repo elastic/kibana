@@ -41,15 +41,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
       await svlCommonNavigation.sidenav.expectSectionClosed('project_settings_project_nav');
 
-      // navigate to log explorer
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-log-explorer' });
-      await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'observability-log-explorer',
-      });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'observability-log-explorer',
-      });
-      await expect(await browser.getCurrentUrl()).contain('/app/observability-log-explorer');
+      // navigate to discover
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
+      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'discover' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ deepLinkId: 'discover' });
+      expect(await browser.getCurrentUrl()).contain('/app/discover');
 
       // check the aiops subsection
       await svlCommonNavigation.sidenav.openSection('observability_project_nav.aiops'); // open ai ops subsection
@@ -76,7 +72,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ deepLinkId: 'management' });
 
       // navigate back to serverless oblt overview
-      await svlCommonNavigation.breadcrumbs.clickHome();
+      await svlCommonNavigation.clickLogo();
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'observabilityOnboarding',
       });
@@ -125,6 +121,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         deepLinkId: 'observability-overview:cases',
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Settings']);
+    });
+
+    it('navigates to alerts app', async () => {
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:alerts' });
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'observability-overview:alerts',
+      });
+      await testSubjects.click('manageRulesPageButton');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Alerts', 'Rules']);
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'observability-overview:alerts',
+      });
     });
 
     it('navigates to integrations', async () => {

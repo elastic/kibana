@@ -29,9 +29,12 @@ export const validateEndpointPackagePolicy = (inputs: NewPackagePolicyInput[]) =
           'Global manifest version is too far in the past. Please use either "latest" or a date within the last 18 months. The earliest valid date is October 1, 2023, in UTC time.'
         );
       }
-      if (parsedDate.isAfter(moment.utc())) {
+      const minAllowedDate = moment.utc().subtract(1, 'day');
+      if (parsedDate.isAfter(minAllowedDate)) {
         throw createManifestVersionError(
-          'Global manifest version cannot be in the future. UTC time.'
+          `Global manifest version cannot be in the future. Latest selectable date is ${minAllowedDate.format(
+            'MMMM DD, YYYY'
+          )} UTC time.`
         );
       }
     }
