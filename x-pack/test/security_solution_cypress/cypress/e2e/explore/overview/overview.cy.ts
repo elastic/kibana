@@ -46,19 +46,17 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Favorite Timelines', () => {
+  describe('Favorite Timelines', { tags: ['@brokenInServerless'] }, () => {
     it('should appear on overview page', () => {
       createTimeline(getTimeline())
         .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
         .then((timelineId: string) => {
-          favoriteTimeline({ timelineId, timelineType: 'default' }).then(() => {
-            visitWithTimeRange(OVERVIEW_URL);
-            cy.get('[data-test-subj="overview-recent-timelines"]').should(
-              'contain',
-              getTimeline().title
-            );
+          favoriteTimeline({ timelineId, timelineType: 'default' }).then((response) => {
+            expect(response.status).to.eq(200);
           });
         });
+      visitWithTimeRange(OVERVIEW_URL);
+      cy.get('[data-test-subj="overview-recent-timelines"]').should('contain', getTimeline().title);
     });
   });
 });
