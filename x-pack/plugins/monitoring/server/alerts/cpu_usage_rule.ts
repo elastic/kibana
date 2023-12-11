@@ -11,7 +11,6 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { Alert } from '@kbn/alerting-plugin/server';
 import { RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -47,7 +46,7 @@ export class CpuUsageRule extends BaseRule {
         {
           name: 'node',
           description: i18n.translate('xpack.monitoring.alerts.cpuUsage.actionVariables.node', {
-            defaultMessage: 'The node reporting high CPU usage.',
+            defaultMessage: 'The node reporting high cpu usage.',
           }),
         },
         ...Object.values(AlertingDefaults.ALERT_TYPE.context),
@@ -63,52 +62,28 @@ export class CpuUsageRule extends BaseRule {
     const duration = parseDuration(params.duration);
     const endMs = +new Date();
     const startMs = endMs - duration;
-
-    let filterQuery;
-    if (params.filterQuery) {
-      try {
-        filterQuery = JSON.parse(params.filterQuery) as QueryDslQueryContainer;
-      } catch (error) {
-        throw new Error(`Failed to parse filter query in CPU usage rule ${error}`);
-      }
-    }
-
     const stats = await fetchCpuUsageNodeStats(
-      {
-        esClient,
-        clusterUuids: clusters.map((cluster) => cluster.clusterUuid),
-        startMs,
-        endMs,
-        filterQuery,
-        logger: this.scopedLogger,
-      },
-      Globals.app.config
+      esClient,
+      clusters,
+      startMs,
+      endMs,
+      Globals.app.config.ui.max_bucket_size,
+      params.filterQuery
     );
-
-    return stats.map((stat) => ({
-      clusterUuid: stat.clusterUuid,
-      ...this.outcomeAndSeverity(stat, params.threshold!),
-      meta: {
-        ...stat,
-        threshold: params.threshold!,
-      },
-      ccs: stat.ccs,
-    }));
-  }
-
-  private outcomeAndSeverity(
-    stat: AlertCpuUsageNodeStats,
-    threshold: number
-  ): { shouldFire: boolean; severity: AlertSeverity } {
-    if (stat.limitsChanged || stat.unexpectedLimits || stat.cpuUsage === undefined) {
-      let severity = AlertSeverity.Warning;
-      if (stat.cpuUsage && stat.cpuUsage > threshold) {
-        severity = AlertSeverity.Danger;
+    return stats.map((stat) => {
+      if (Globals.app.config.ui.container.elasticsearch.enabled) {
+        stat.cpuUsage =
+          (stat.containerUsage / (stat.containerPeriods * stat.containerQuota * 1000)) * 100;
       }
-      return { shouldFire: true, severity };
-    }
 
-    return { shouldFire: stat.cpuUsage > threshold, severity: AlertSeverity.Danger };
+      return {
+        clusterUuid: stat.clusterUuid,
+        shouldFire: stat.cpuUsage > params.threshold!,
+        severity: AlertSeverity.Danger,
+        meta: stat,
+        ccs: stat.ccs,
+      };
+    });
   }
 
   protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
@@ -127,67 +102,13 @@ export class CpuUsageRule extends BaseRule {
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const stat = item.meta as AlertCpuUsageNodeStats & Pick<CommonAlertParams, 'threshold'>;
-    const tokens = [
-      {
-        startToken: '#start_link',
-        endToken: '#end_link',
-        type: AlertMessageTokenType.Link,
-        url: `elasticsearch/nodes/${stat.nodeId}`,
-      } as AlertMessageLinkToken,
-      {
-        startToken: '#absolute',
-        type: AlertMessageTokenType.Time,
-        isAbsolute: true,
-        isRelative: false,
-        timestamp: alertState.ui.triggeredMS,
-      } as AlertMessageTimeToken,
-    ];
-
-    if (stat.unexpectedLimits) {
-      return {
-        text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.unexpectedLimits', {
-          defaultMessage: `Kibana is configured for non-containerized workloads but node #start_link{nodeName}#end_link has resource limits configured. Node reports usage of {cpuUsage}%. Last checked at #absolute`,
-          values: {
-            nodeName: stat.nodeName,
-            cpuUsage: numeral(stat.cpuUsage).format(ROUNDED_FLOAT),
-          },
-        }),
-        tokens,
-      };
-    }
-
-    if (stat.limitsChanged) {
-      return {
-        text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.limitsChanged', {
-          defaultMessage: `Resource limits for node #start_link{nodeName}#end_link has changed within the look back window, unable to confidently calculate CPU usage for alerting. Please monitor the usage until the window has moved. Last checked at #absolute`,
-          values: {
-            nodeName: stat.nodeName,
-          },
-        }),
-        tokens,
-      };
-    }
-
-    if (stat.cpuUsage === undefined) {
-      return {
-        text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.failedToComputeUsage', {
-          defaultMessage: `Failed to compute CPU usage for node #start_link{nodeName}#end_link. Please check the Kibana logs for more details. Last checked at #absolute`,
-          values: {
-            nodeName: stat.nodeName,
-          },
-        }),
-        tokens,
-      };
-    }
-
+    const stat = item.meta as AlertCpuUsageNodeStats;
     return {
       text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.firingMessage', {
-        defaultMessage: `Node #start_link{nodeName}#end_link is reporting CPU usage of {cpuUsage}% which is above the configured threshold of {threshold}%. Last checked at #absolute`,
+        defaultMessage: `Node #start_link{nodeName}#end_link is reporting cpu usage of {cpuUsage}% at #absolute`,
         values: {
           nodeName: stat.nodeName,
           cpuUsage: numeral(stat.cpuUsage).format(ROUNDED_FLOAT),
-          threshold: stat.threshold,
         },
       }),
       nextSteps: [
@@ -204,7 +125,21 @@ export class CpuUsageRule extends BaseRule {
           `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html`
         ),
       ],
-      tokens,
+      tokens: [
+        {
+          startToken: '#absolute',
+          type: AlertMessageTokenType.Time,
+          isAbsolute: true,
+          isRelative: false,
+          timestamp: alertState.ui.triggeredMS,
+        } as AlertMessageTimeToken,
+        {
+          startToken: '#start_link',
+          endToken: '#end_link',
+          type: AlertMessageTokenType.Link,
+          url: `elasticsearch/nodes/${stat.nodeId}`,
+        } as AlertMessageLinkToken,
+      ],
     };
   }
 
@@ -222,7 +157,7 @@ export class CpuUsageRule extends BaseRule {
       return;
     }
     const shortActionText = i18n.translate('xpack.monitoring.alerts.cpuUsage.shortAction', {
-      defaultMessage: 'Verify CPU usage of node.',
+      defaultMessage: 'Verify CPU level of node.',
     });
     const fullActionText = i18n.translate('xpack.monitoring.alerts.cpuUsage.fullAction', {
       defaultMessage: 'View node',
@@ -234,8 +169,28 @@ export class CpuUsageRule extends BaseRule {
       ccs
     );
     const action = `[${fullActionText}](${globalStateLink})`;
-    const internalShortMessage = this.getMessage(firingNode, cluster.clusterName, shortActionText);
-    const internalFullMessage = this.getMessage(firingNode, cluster.clusterName, action);
+    const internalShortMessage = i18n.translate(
+      'xpack.monitoring.alerts.cpuUsage.firing.internalShortMessage',
+      {
+        defaultMessage: `CPU usage alert is firing for node {nodeName} in cluster: {clusterName}. {shortActionText}`,
+        values: {
+          clusterName: cluster.clusterName,
+          nodeName: firingNode.nodeName,
+          shortActionText,
+        },
+      }
+    );
+    const internalFullMessage = i18n.translate(
+      'xpack.monitoring.alerts.cpuUsage.firing.internalFullMessage',
+      {
+        defaultMessage: `CPU usage alert is firing for node {nodeName} in cluster: {clusterName}. {action}`,
+        values: {
+          clusterName: cluster.clusterName,
+          nodeName: firingNode.nodeName,
+          action,
+        },
+      }
+    );
     instance.scheduleActions('default', {
       internalShortMessage,
       internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
@@ -249,30 +204,6 @@ export class CpuUsageRule extends BaseRule {
       clusterName: cluster.clusterName,
       action,
       actionPlain: shortActionText,
-    });
-  }
-
-  private getMessage(state: AlertCpuUsageState, clusterName: string, action: string) {
-    const stat = state.meta as AlertCpuUsageNodeStats;
-
-    if (stat.limitsChanged || stat.unexpectedLimits || stat.cpuUsage === undefined) {
-      return i18n.translate('xpack.monitoring.alerts.cpuUsage.firing.internalMessageForFailure', {
-        defaultMessage: `CPU usage alert for node {nodeName} in cluster {clusterName} faced issues while evaluating the usage. {action}`,
-        values: {
-          clusterName,
-          nodeName: state.nodeName,
-          action,
-        },
-      });
-    }
-
-    return i18n.translate('xpack.monitoring.alerts.cpuUsage.firing.internalMessage', {
-      defaultMessage: `CPU usage alert is firing for node {nodeName} in cluster {clusterName}. {action}`,
-      values: {
-        clusterName,
-        nodeName: state.nodeName,
-        action,
-      },
     });
   }
 }

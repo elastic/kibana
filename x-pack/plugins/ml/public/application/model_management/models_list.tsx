@@ -91,6 +91,8 @@ export type ModelItem = TrainedModelConfigResponse & {
   modelName?: string;
   os?: string;
   arch?: string;
+  softwareLicense?: string;
+  licenseUrl?: string;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -280,6 +282,8 @@ export const ModelsList: FC<Props> = ({
               modelName: modelDefinition.modelName,
               os: modelDefinition.os,
               arch: modelDefinition.arch,
+              softwareLicense: modelDefinition.license,
+              licenseUrl: modelDefinition.licenseUrl,
             } as ModelItem;
           });
         resultItems = [...resultItems, ...notDownloaded];
@@ -534,7 +538,7 @@ export const ModelsList: FC<Props> = ({
             content={
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
-                defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
+                defaultMessage="Recommended model version for your cluster's hardware configuration"
               />
             }
           >
