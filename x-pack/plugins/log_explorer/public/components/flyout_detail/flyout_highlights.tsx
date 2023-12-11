@@ -9,7 +9,7 @@ import { AgentIcon, CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
 import { useMeasure } from 'react-use/lib';
 import { AgentName } from '@kbn/elastic-agent-utils';
 import { first } from 'lodash';
-import { FlyoutDoc, FlyoutProps, LogDocument } from './types';
+import { FlyoutDoc, LogDocument } from './types';
 import * as constants from '../../../common/constants';
 import { HighlightField } from './sub_components/highlight_field';
 import {
@@ -39,11 +39,9 @@ import { useFlyoutColumnWidth } from '../../hooks/use_flyouot_column_width';
 export function FlyoutHighlights({
   formattedDoc,
   flattenedDoc,
-  actions,
 }: {
   formattedDoc: FlyoutDoc;
   flattenedDoc: LogDocument['flattened'];
-  actions: FlyoutProps['actions'];
 }) {
   const [ref, dimensions] = useMeasure<HTMLDivElement>();
   const { columns, fieldWidth } = useFlyoutColumnWidth(dimensions.width);
