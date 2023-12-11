@@ -7,3 +7,4 @@
  */
 
 export { getTimeZone } from './src/get_timezone';
+export { getLensAttributes } from './src/get_lens_attributes';

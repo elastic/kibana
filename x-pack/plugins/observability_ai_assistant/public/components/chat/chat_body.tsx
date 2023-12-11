@@ -241,6 +241,24 @@ export function ChatBody({
                         })
                       );
                       break;
+                    case ChatActionClickType.visualizeEsqlQuery:
+                      next(
+                        messages.concat({
+                          '@timestamp': new Date().toISOString(),
+                          message: {
+                            role: MessageRole.Assistant,
+                            content: '',
+                            function_call: {
+                              name: 'visualize_query',
+                              arguments: JSON.stringify({
+                                query: payload.query,
+                              }),
+                              trigger: MessageRole.User,
+                            },
+                          },
+                        })
+                      );
+                      break;
                   }
                 }}
               />

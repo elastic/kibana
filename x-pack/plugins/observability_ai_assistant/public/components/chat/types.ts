@@ -10,7 +10,7 @@ type ChatActionClickPayloadBase<TType extends ChatActionClickType, TExtraProps e
 } & TExtraProps;
 
 type ChatActionClickPayloadExecuteEsql = ChatActionClickPayloadBase<
-  ChatActionClickType.executeEsqlQuery,
+  ChatActionClickType.executeEsqlQuery | ChatActionClickType.visualizeEsqlQuery,
   { query: string }
 >;
 
@@ -18,6 +18,7 @@ type ChatActionClickPayload = ChatActionClickPayloadExecuteEsql;
 
 export enum ChatActionClickType {
   executeEsqlQuery = 'executeEsqlQuery',
+  visualizeEsqlQuery = 'visualizeEsqlQuery',
 }
 
 export type ChatActionClickHandler = (payload: ChatActionClickPayload) => void;
