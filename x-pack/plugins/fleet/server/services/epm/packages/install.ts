@@ -767,10 +767,12 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
         `Found bundled package for requested install of ${pkgkey} - installing from bundled package archive`
       );
 
+      const archiveBuffer = await matchingBundledPackage.getBuffer();
+
       const response = await installPackageByUpload({
         savedObjectsClient,
         esClient,
-        archiveBuffer: matchingBundledPackage.buffer,
+        archiveBuffer,
         contentType: 'application/zip',
         spaceId,
         version: matchingBundledPackage.version,

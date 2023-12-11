@@ -269,7 +269,7 @@ describe('install', () => {
       mockGetBundledPackageByPkgKey.mockResolvedValue({
         name: 'test_package',
         version: '1.0.0',
-        buffer: Buffer.from('test_package'),
+        getBuffer: async () => Buffer.from('test_package'),
       });
 
       const response = await installPackage({

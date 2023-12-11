@@ -66,5 +66,5 @@ export const logActionResponse = (
   state: LogAwareState,
   res: unknown
 ) => {
-  logger.debug(logMessagePrefix + `${state.controlState} RESPONSE`, res as LogMeta);
+  logger.debug(logMessagePrefix + `${state.controlState} RESPONSE`);
 };

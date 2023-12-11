@@ -55,12 +55,19 @@ export const useStepContentStyles = () => {
         }
       `,
       rightPanelContentStyles: css`
-        &.right-content-panel {
+        &.right-panel-wrapper {
           height: ${RIGHT_CONTENT_HEIGHT}px;
           width: ${RIGHT_CONTENT_WIDTH}px;
-          border-radius: ${euiTheme.border.radius.medium};
+        }
+      `,
+      getRightContentStyles: ({ shadow }: { shadow: boolean }) => css`
+        &.right-panel-content {
+          height: 100%;
+          width: 100%;
+          position: relative;
           overflow: hidden;
-          ${imageShadow};
+          ${shadow ? imageShadow : ''}
+          border-radius: ${euiTheme.border.radius.medium};
         }
       `,
     }),
