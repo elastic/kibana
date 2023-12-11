@@ -94,9 +94,9 @@ export function generateSummaryTransformForTimeslicesAndRolling(
         errorBudgetRemaining: {
           bucket_script: {
             buckets_path: {
-              errorBudgetConsummed: 'errorBudgetConsumed',
+              errorBudgetConsumed: 'errorBudgetConsumed',
             },
-            script: '1 - params.errorBudgetConsummed',
+            script: '1 - params.errorBudgetConsumed',
           },
         },
         statusCode: {
