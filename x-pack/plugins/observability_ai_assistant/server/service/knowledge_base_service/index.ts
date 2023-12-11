@@ -280,11 +280,13 @@ export class KnowledgeBaseService {
         ready: deploymentState === 'started' && allocationState === 'fully_allocated',
         deployment_state: deploymentState,
         allocation_state: allocationState,
+        model_name: ELSER_MODEL_ID,
       };
     } catch (error) {
       return {
         error: error instanceof errors.ResponseError ? error.body.error : String(error),
         ready: false,
+        model_name: ELSER_MODEL_ID,
       };
     }
   };

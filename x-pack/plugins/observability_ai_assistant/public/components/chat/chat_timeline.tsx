@@ -9,19 +9,18 @@ import React, { ReactNode, useMemo } from 'react';
 import { css } from '@emotion/css';
 import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { ChatItem } from './chat_item';
-import { ChatWelcomePanel } from './chat_welcome_panel';
-import { ChatConsolidatedItems } from './chat_consolidated_items';
 import type { Feedback } from '../feedback_buttons';
-import { type Message } from '../../../common';
+import type { Message } from '../../../common';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import type { ChatActionClickHandler } from './types';
+import type { ObservabilityAIAssistantChatService } from '../../types';
+import { ChatItem } from './chat_item';
+import { ChatConsolidatedItems } from './chat_consolidated_items';
+import { ChatState } from '../../hooks/use_chat';
 import {
   getTimelineItemsfromConversation,
   StartedFrom,
 } from '../../utils/get_timeline_items_from_conversation';
-import { ObservabilityAIAssistantChatService } from '../../types';
-import { ChatState } from '../../hooks/use_chat';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
@@ -105,11 +104,9 @@ export function ChatTimeline({
     return consolidatedChatItems;
   }, [chatService, hasConnector, messages, currentUser, startedFrom, chatState]);
 
-  return items.length <= 1 ? (
-    <ChatWelcomePanel knowledgeBase={knowledgeBase} />
-  ) : (
+  return (
     <EuiCommentList
-      css={css`
+      className={css`
         padding-bottom: 32px;
       `}
     >

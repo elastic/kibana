@@ -5,44 +5,48 @@
  * 2.0.
  */
 
+import React, { useEffect, useRef, useState } from 'react';
+import { css } from '@emotion/css';
 import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Conversation, Message, MessageRole } from '../../../common/types';
 import { ChatState } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
-import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
-import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
-import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
+import { type Conversation, type Message, MessageRole } from '../../../common/types';
 import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { ChatTimeline } from './chat_timeline';
-import { IncorrectLicensePanel } from './incorrect_license_panel';
-import { InitialSetupPanel } from './initial_setup_panel';
-import { ChatActionClickType } from './types';
-import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { Feedback } from '../feedback_buttons';
+import { IncorrectLicensePanel } from './incorrect_license_panel';
+import { WelcomeMessage } from './welcome_message';
+import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { MESSAGE_FEEDBACK } from '../../analytics/schema';
+import { ChatActionClickType } from './types';
+import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+
+const fullHeightClassName = css`
+  height: 100%;
+`;
 
 const timelineClassName = css`
   overflow-y: auto;
 `;
 
-const loadingSpinnerContainerClassName = css`
-  align-self: center;
+const promptEditorClassname = css`
+  overflow: hidden;
+  transition: height ${euiThemeVars.euiAnimSpeedFast} ${euiThemeVars.euiAnimSlightResistance};
 `;
 
 const incorrectLicenseContainer = css`
@@ -175,87 +179,80 @@ export function ChatBody({
         </EuiFlexItem>
       </>
     );
-  } else if (
-    connectors.loading ||
-    knowledgeBase.status.loading ||
-    (!conversation.value && conversation.loading)
-  ) {
-    footer = (
-      <EuiFlexItem className={loadingSpinnerContainerClassName}>
-        <EuiLoadingSpinner />
-      </EuiFlexItem>
-    );
-  } else if (connectors.connectors?.length === 0 && !initialConversationId) {
-    footer = (
-      <InitialSetupPanel
-        connectors={connectors}
-        connectorsManagementHref={connectorsManagementHref}
-        knowledgeBase={knowledgeBase}
-      />
-    );
+  } else if (!conversation.value && conversation.loading) {
+    footer = null;
   } else {
     footer = (
       <>
         <EuiFlexItem grow className={timelineClassName}>
-          <div ref={timelineContainerRef} style={{ height: '100%' }}>
+          <div ref={timelineContainerRef} className={fullHeightClassName}>
             <EuiPanel
               grow
               hasBorder={false}
               hasShadow={false}
               paddingSize="m"
-              style={{ height: '100%' }}
+              className={fullHeightClassName}
             >
-              <ChatTimeline
-                startedFrom={startedFrom}
-                messages={messages}
-                knowledgeBase={knowledgeBase}
-                chatService={chatService}
-                currentUser={currentUser}
-                chatState={state}
-                hasConnector={!!connectors.connectors?.length}
-                onEdit={(editedMessage, newMessage) => {
-                  const indexOf = messages.indexOf(editedMessage);
-                  next(messages.slice(0, indexOf).concat(newMessage));
-                }}
-                onFeedback={handleFeedback}
-                onRegenerate={(message) => {
-                  const indexOf = messages.indexOf(message);
-                  next(messages.slice(0, indexOf));
-                }}
-                onStopGenerating={() => {
-                  stop();
-                }}
-                onActionClick={(payload) => {
-                  setStickToBottom(true);
-                  switch (payload.type) {
-                    case ChatActionClickType.executeEsqlQuery:
-                      next(
-                        messages.concat({
-                          '@timestamp': new Date().toISOString(),
-                          message: {
-                            role: MessageRole.Assistant,
-                            content: '',
-                            function_call: {
-                              name: 'execute_query',
-                              arguments: JSON.stringify({
-                                query: payload.query,
-                              }),
-                              trigger: MessageRole.User,
+              {connectors.connectors?.length === 0 || messages.length === 1 ? (
+                <WelcomeMessage connectors={connectors} knowledgeBase={knowledgeBase} />
+              ) : (
+                <ChatTimeline
+                  startedFrom={startedFrom}
+                  messages={messages}
+                  knowledgeBase={knowledgeBase}
+                  chatService={chatService}
+                  currentUser={currentUser}
+                  chatState={state}
+                  hasConnector={!!connectors.connectors?.length}
+                  onEdit={(editedMessage, newMessage) => {
+                    const indexOf = messages.indexOf(editedMessage);
+                    next(messages.slice(0, indexOf).concat(newMessage));
+                  }}
+                  onFeedback={handleFeedback}
+                  onRegenerate={(message) => {
+                    const indexOf = messages.indexOf(message);
+                    next(messages.slice(0, indexOf));
+                  }}
+                  onStopGenerating={() => {
+                    stop();
+                  }}
+                  onActionClick={(payload) => {
+                    setStickToBottom(true);
+                    switch (payload.type) {
+                      case ChatActionClickType.executeEsqlQuery:
+                        next(
+                          messages.concat({
+                            '@timestamp': new Date().toISOString(),
+                            message: {
+                              role: MessageRole.Assistant,
+                              content: '',
+                              function_call: {
+                                name: 'execute_query',
+                                arguments: JSON.stringify({
+                                  query: payload.query,
+                                }),
+                                trigger: MessageRole.User,
+                              },
                             },
-                          },
-                        })
-                      );
-                      break;
-                  }
-                }}
-              />
+                          })
+                        );
+                        break;
+                    }
+                  }}
+                />
+              )}
             </EuiPanel>
           </div>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+
+        <EuiFlexItem
+          grow={false}
+          className={promptEditorClassname}
+          style={{
+            height: !connectors.loading && connectors.connectors?.length !== 0 ? 121 : 0,
+          }}
+        >
           <EuiHorizontalRule margin="none" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
             <ChatPromptEditor
               loading={isLoading}
