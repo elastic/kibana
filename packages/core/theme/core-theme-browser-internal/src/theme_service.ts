@@ -8,6 +8,7 @@
 
 import { Subject, ReplaySubject } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
+import { _setDarkMode } from '@kbn/ui-theme';
 import type { InjectedMetadataTheme } from '@kbn/core-injected-metadata-common-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -70,6 +71,7 @@ export class ThemeService {
       this.stylesheets.push(createStyleSheet({ href: stylesheet }));
     });
 
+    _setDarkMode(darkMode);
     this.theme$.next({ darkMode });
   }
 }
