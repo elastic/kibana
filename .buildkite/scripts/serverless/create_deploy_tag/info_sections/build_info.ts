@@ -77,6 +77,7 @@ export async function getQAFBuildContainingCommit(
 
   // List of QAF builds
   const qafBuilds = await buildkite.getBuildsAfterDate(QA_FTR_TEST_SLUG, date, 30);
+  qafBuilds.reverse();
 
   // Find the first build that contains this commit
   const build = qafBuilds.find((kbBuild) => {
