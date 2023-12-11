@@ -203,6 +203,9 @@ export const ALERT_ASSIGNEES_SELECT_PANEL =
 export const ALERT_ASSIGNEES_UPDATE_BUTTON =
   '[data-test-subj="securitySolutionAssigneesApplyButton"]';
 
+export const ALERT_ASSIGNEES_SELECTABLE_OPTIONS =
+  '[data-test-subj="securitySolutionAssigneesSelectable"] .euiSelectableListItem[role="option"]';
+
 export const ALERT_USER_AVATAR = (assignee: string) => {
   let expectedAssignee = assignee;
 

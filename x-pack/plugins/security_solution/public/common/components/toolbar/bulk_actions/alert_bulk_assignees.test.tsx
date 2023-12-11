@@ -16,10 +16,13 @@ import { useSuggestUsers } from '../../user_profiles/use_suggest_users';
 import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
+import type { SetAlertAssigneesFunc } from './use_set_alert_assignees';
+import { useSetAlertAssignees } from './use_set_alert_assignees';
 
 jest.mock('../../user_profiles/use_get_current_user_profile');
 jest.mock('../../user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../user_profiles/use_suggest_users');
+jest.mock('./use_set_alert_assignees');
 
 const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'user1' }, data: {} },
@@ -71,7 +74,6 @@ const mockAlertsWithAssignees = [
 const renderAssigneesMenu = (
   items: TimelineItem[],
   closePopover: () => void = jest.fn(),
-  onSubmit: () => Promise<void> = jest.fn(),
   setIsLoading: () => void = jest.fn()
 ) => {
   return render(
@@ -80,42 +82,57 @@ const renderAssigneesMenu = (
         alertItems={items}
         setIsLoading={setIsLoading}
         closePopoverMenu={closePopover}
-        onSubmit={onSubmit}
       />
     </TestProviders>
   );
 };
 
 describe('BulkAlertAssigneesPanel', () => {
+  let setAlertAssigneesMock: jest.Mocked<SetAlertAssigneesFunc>;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    setAlertAssigneesMock = jest.fn().mockReturnValue(Promise.resolve());
+    (useSetAlertAssignees as jest.Mock).mockReturnValue(setAlertAssigneesMock);
   });
 
   test('it renders', () => {
     const wrapper = renderAssigneesMenu(mockAlertsWithAssignees);
 
     expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeDisabled();
     expect(useSuggestUsers).toHaveBeenCalled();
   });
 
-  test('it calls expected functions on submit when nothing has changed', () => {
-    const mockedClosePopover = jest.fn();
-    const mockedOnSubmit = jest.fn();
-    const mockedSetIsLoading = jest.fn();
+  test('it updates apply button state correctly on assignees selection', () => {
+    const wrapper = renderAssigneesMenu(mockAlertsWithAssignees);
 
-    const wrapper = renderAssigneesMenu(
-      mockAlertsWithAssignees,
-      mockedClosePopover,
-      mockedOnSubmit,
-      mockedSetIsLoading
-    );
+    // No changes => Apply button is disabled
+    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeDisabled();
 
     act(() => {
-      fireEvent.click(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
+      fireEvent.click(wrapper.getByText('user1'));
     });
-    expect(mockedClosePopover).toHaveBeenCalled();
-    expect(mockedOnSubmit).not.toHaveBeenCalled();
-    expect(mockedSetIsLoading).not.toHaveBeenCalled();
+    // Assign 'user1' => Apply button is enabled
+    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).not.toBeDisabled();
+
+    act(() => {
+      fireEvent.click(wrapper.getByText('user2'));
+    });
+    // Assign 'user1' & 'user2' => Apply button is enabled
+    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).not.toBeDisabled();
+
+    act(() => {
+      fireEvent.click(wrapper.getByText('user2'));
+    });
+    // Assign 'user1' => Apply button is enabled
+    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).not.toBeDisabled();
+
+    act(() => {
+      fireEvent.click(wrapper.getByText('user1'));
+    });
+    // No changes => Apply button is disabled
+    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeDisabled();
   });
 
   test('it updates state correctly', () => {
@@ -149,13 +166,11 @@ describe('BulkAlertAssigneesPanel', () => {
 
   test('it calls expected functions on submit when alerts have changed', () => {
     const mockedClosePopover = jest.fn();
-    const mockedOnSubmit = jest.fn();
     const mockedSetIsLoading = jest.fn();
 
     const wrapper = renderAssigneesMenu(
       mockAlertsWithAssignees,
       mockedClosePopover,
-      mockedOnSubmit,
       mockedSetIsLoading
     );
     act(() => {
@@ -175,14 +190,13 @@ describe('BulkAlertAssigneesPanel', () => {
       fireEvent.click(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
     });
     expect(mockedClosePopover).toHaveBeenCalled();
-    expect(mockedOnSubmit).toHaveBeenCalled();
-    expect(mockedOnSubmit).toHaveBeenCalledWith(
+    expect(setAlertAssigneesMock).toHaveBeenCalledWith(
       {
         add: ['user-id-4', 'user-id-3'],
         remove: ['user-id-1', 'user-id-2'],
       },
       ['test-id', 'test-id'],
-      expect.anything(), // An anonymous callback defined in the onSubmit function
+      expect.anything(),
       mockedSetIsLoading
     );
   });

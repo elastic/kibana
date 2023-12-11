@@ -14,26 +14,28 @@ import { AssigneesApplyPanel } from './assignees_apply_panel';
 import { useGetCurrentUserProfile } from '../user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUsers } from '../user_profiles/use_suggest_users';
+import type { SetAlertAssigneesFunc } from '../toolbar/bulk_actions/use_set_alert_assignees';
+import { useSetAlertAssignees } from '../toolbar/bulk_actions/use_set_alert_assignees';
 import { TestProviders } from '../../mock';
-import * as i18n from './translations';
 import { mockUserProfiles } from './mocks';
+import { noop } from 'lodash';
 
 jest.mock('../user_profiles/use_get_current_user_profile');
 jest.mock('../user_profiles/use_bulk_get_user_profiles');
 jest.mock('../user_profiles/use_suggest_users');
+jest.mock('../toolbar/bulk_actions/use_set_alert_assignees');
 
 const renderAssigneesApplyPanel = (
   {
+    alertIds,
     assignedUserIds,
-    showUnassignedOption,
-    onSelectionChange,
-    onAssigneesApply,
   }: {
+    alertIds: string[];
     assignedUserIds: string[];
-    showUnassignedOption?: boolean;
-    onSelectionChange?: () => void;
-    onAssigneesApply?: () => void;
-  } = { assignedUserIds: [] }
+  } = {
+    alertIds: [],
+    assignedUserIds: [],
+  }
 ) => {
   const assignedProfiles = mockUserProfiles.filter((user) => assignedUserIds.includes(user.uid));
   (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
@@ -43,16 +45,19 @@ const renderAssigneesApplyPanel = (
   return render(
     <TestProviders>
       <AssigneesApplyPanel
+        alertIds={alertIds}
         assignedUserIds={assignedUserIds}
-        showUnassignedOption={showUnassignedOption}
-        onSelectionChange={onSelectionChange}
-        onAssigneesApply={onAssigneesApply}
+        onApplyStarted={noop}
+        onApplySuccess={noop}
+        setTableLoading={noop}
       />
     </TestProviders>
   );
 };
 
 describe('<AssigneesApplyPanel />', () => {
+  let setAlertAssigneesMock: jest.Mocked<SetAlertAssigneesFunc>;
+
   beforeEach(() => {
     jest.clearAllMocks();
     (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
@@ -63,77 +68,37 @@ describe('<AssigneesApplyPanel />', () => {
       isLoading: false,
       data: mockUserProfiles,
     });
+    setAlertAssigneesMock = jest.fn().mockReturnValue(Promise.resolve());
+    (useSetAlertAssignees as jest.Mock).mockReturnValue(setAlertAssigneesMock);
   });
 
   it('should render component', () => {
-    const { getByTestId, queryByTestId } = renderAssigneesApplyPanel();
-
-    expect(getByTestId(ASSIGNEES_APPLY_PANEL_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('should render apply button if `onAssigneesApply` callback provided', () => {
-    const { getByTestId } = renderAssigneesApplyPanel({
-      assignedUserIds: [],
-      onAssigneesApply: jest.fn(),
-    });
+    const { getByTestId } = renderAssigneesApplyPanel();
 
     expect(getByTestId(ASSIGNEES_APPLY_PANEL_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeDisabled();
   });
 
-  it('should render `no assignees` option', () => {
-    const { getByTestId } = renderAssigneesApplyPanel({
-      assignedUserIds: [],
-      showUnassignedOption: true,
-      onAssigneesApply: jest.fn(),
-    });
-
-    const assigneesList = getByTestId('euiSelectableList');
-    expect(assigneesList).toHaveTextContent(i18n.ASSIGNEES_NO_ASSIGNEES);
-  });
-
-  it('should call `onAssigneesApply` on apply button click', () => {
-    const onAssigneesApplyMock = jest.fn();
+  it('should call `setAlertAssignees` on apply button click', () => {
     const { getByText, getByTestId } = renderAssigneesApplyPanel({
+      alertIds: ['alert1', 'alert4'],
       assignedUserIds: ['user-id-1'],
-      onAssigneesApply: onAssigneesApplyMock,
     });
 
+    expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeDisabled();
     getByText(mockUserProfiles[1].user.full_name).click();
+    expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).not.toBeDisabled();
     getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID).click();
 
-    expect(onAssigneesApplyMock).toHaveBeenCalledTimes(1);
-    expect(onAssigneesApplyMock).toHaveBeenLastCalledWith(['user-id-2', 'user-id-1']);
-  });
-
-  it('should call `onSelectionChange` on user selection', () => {
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
-      isLoading: false,
-      data: [],
-    });
-
-    const onSelectionChangeMock = jest.fn();
-    const { getByText } = renderAssigneesApplyPanel({
-      assignedUserIds: [],
-      onSelectionChange: onSelectionChangeMock,
-    });
-
-    getByText('User 1').click();
-    getByText('User 2').click();
-    getByText('User 3').click();
-    getByText('User 3').click();
-    getByText('User 2').click();
-    getByText('User 1').click();
-
-    expect(onSelectionChangeMock).toHaveBeenCalledTimes(6);
-    expect(onSelectionChangeMock.mock.calls).toEqual([
-      [['user-id-1']],
-      [['user-id-2', 'user-id-1']],
-      [['user-id-3', 'user-id-2', 'user-id-1']],
-      [['user-id-2', 'user-id-1']],
-      [['user-id-1']],
-      [[]],
-    ]);
+    expect(setAlertAssigneesMock).toHaveBeenCalledWith(
+      {
+        add: ['user-id-2'],
+        remove: [],
+      },
+      ['alert1', 'alert4'],
+      expect.anything(),
+      expect.anything()
+    );
   });
 });
