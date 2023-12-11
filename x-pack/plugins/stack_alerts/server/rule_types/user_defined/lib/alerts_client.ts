@@ -10,27 +10,27 @@ export function reportAlert(alert: ReportedAlert) {
   console.log(`reportAlert:${JSON.stringify(alert)}`);
 }
 
-function setAlertData(alert: Pick<ReportedAlert, 'id' | 'context' | 'payload'>) {
-  console.log(`setAlertData:${JSON.stringify(alert)}`);
-}
+// function setAlertData(alert: Pick<ReportedAlert, 'id' | 'context' | 'payload'>) {
+//   console.log(`setAlertData:${JSON.stringify(alert)}`);
+// }
 
-function getAlertLimitValue() {
-  // TODO Get actual limit
-  return 1000;
-}
+// function getAlertLimitValue() {
+//   // TODO Get actual limit
+//   return 1000;
+// }
 
-function setAlertLimitReached(reached: boolean) {
-  console.log(`setAlertLimitReached:${reached}`);
-}
+// function setAlertLimitReached(reached: boolean) {
+//   console.log(`setAlertLimitReached:${reached}`);
+// }
 
-function getRecoveredAlerts() {
-  // TODO return recovered alerts
-}
+// function getRecoveredAlerts() {
+//   // TODO return recovered alerts
+// }
 
 export const alertsClient = {
   reportAlert,
-  setAlertData,
-  getAlertLimitValue,
-  setAlertLimitReached,
-  getRecoveredAlerts,
+  // setAlertData,
+  // getAlertLimitValue,
+  // setAlertLimitReached,
+  // getRecoveredAlerts,
 };
