@@ -70,16 +70,4 @@ export function withHoverActionsReady() {
       delay: 500,
     }
   );
-  // cy.get('body').then(($body) => {
-  //   if ($body.find(actionsButtonInPortal).length > 0) {
-  //     cy.get(actionsButtonInPortal).should('be.visible');
-  //     action();
-  //   } else if (maxTries <= 0) {
-  //     throw new Error(`Max tries reached. The element ${actionsButtonInPortal} is not visible.`);
-  //   } else {
-  //     openHoverActions();
-  //     mouseoverOnToOverflowItem();
-  //     withHoverActionsReady(action, maxTries - 1);
-  //   }
-  // });
 }
