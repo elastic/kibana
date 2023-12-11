@@ -68,6 +68,8 @@ import {
   ALERT_RULE_TIMELINE_TITLE,
   ALERT_RULE_INDICES,
   ALERT_RULE_TIMESTAMP_OVERRIDE,
+  ALERT_HOST_CRITICALITY,
+  ALERT_USER_CRITICALITY,
 } from '../../../../../../../common/field_maps/field_names';
 
 export const createAlert = (
@@ -194,6 +196,8 @@ export const createAlert = (
       rule_name_override: undefined,
       timestamp_override: undefined,
     },
+    [ALERT_HOST_CRITICALITY]: undefined,
+    [ALERT_USER_CRITICALITY]: undefined,
     ...data,
   },
 });

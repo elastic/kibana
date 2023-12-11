@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import type { BaseFields8120 } from '../../../../../../../common/api/detection_engine/model/alerts/8.12.0';
+import type { BaseFieldsLatest } from '../../../../../../../common/api/detection_engine/model/alerts';
 import type { EventsForEnrichment, GetEventValue, GetFieldValue } from '../types';
 
 export const getEventValue: GetEventValue = (event, path) => {
@@ -22,7 +22,7 @@ export const getEventValue: GetEventValue = (event, path) => {
 export const getFieldValue: GetFieldValue = (event, path) => get(event?.fields, path)?.[0];
 
 /** Given an eventField, returns a map of values found in that field to the events that contain that value. */
-export function getEventsMapByFieldValue<T extends BaseFields8120>(
+export function getEventsMapByFieldValue<T extends BaseFieldsLatest>(
   events: Array<EventsForEnrichment<T>>,
   eventField: string
 ): Record<
