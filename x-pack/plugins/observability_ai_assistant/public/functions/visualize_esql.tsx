@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getLensAttributes } from '@kbn/visualization-utils';
-// import { i18n } from '@kbn/i18n';
 import type { LensPublicStart, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
@@ -91,8 +91,8 @@ function ESQLLens({
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          {/* <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+            {/* <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="observabilityAiAssistantLensOpenInLensButton"
                 iconType="lensApp"
@@ -104,7 +104,7 @@ function ESQLLens({
                   defaultMessage: 'Open in Lens',
                 })}
               </EuiButton>
-            </EuiFlexItem>
+            </EuiFlexItem> */}
             <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="observabilityAiAssistantLensSaveButton"
@@ -118,7 +118,7 @@ function ESQLLens({
                 })}
               </EuiButton>
             </EuiFlexItem>
-          </EuiFlexGroup> */}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <lens.EmbeddableComponent
@@ -135,6 +135,8 @@ function ESQLLens({
           onClose={() => {
             setIsSaveModalOpen(() => false);
           }}
+          // For now, we don't want to allow saving ESQL charts to the library
+          isSaveable={false}
         />
       ) : null}
     </>
