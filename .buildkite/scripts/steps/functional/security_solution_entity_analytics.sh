@@ -5,12 +5,12 @@ set -euo pipefail
 source .buildkite/scripts/steps/functional/common.sh
 source .buildkite/scripts/steps/functional/common_cypress.sh
 
-export JOB=kibana-serverless-security-cypress
+export JOB=kibana-security-solution-chrome
 export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
-echo "--- Security Serverless Cypress Tests"
+echo "--- Entity Analytics - Security Solution Cypress Tests"
 
 cd x-pack/test/security_solution_cypress
 
 set +e
-yarn cypress:run:serverless; status=$?; yarn junit:merge || :; exit $status
+yarn cypress:entity_analytics:run:ess; status=$?; yarn junit:merge || :; exit $status

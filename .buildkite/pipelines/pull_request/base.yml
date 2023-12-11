@@ -57,8 +57,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_serverless.sh
-    label: 'Serverless Security Cypress Tests'
+  - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
+    label: 'Serverless Entity Analytics - Security Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
@@ -153,13 +153,13 @@ steps:
         - exit_status: '*'
           limit: 1        
 
-  - command: .buildkite/scripts/steps/functional/security_solution.sh
-    label: 'Security Solution Cypress Tests'
+  - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
+    label: 'Entity Analytics - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '*'
