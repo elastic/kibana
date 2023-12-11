@@ -7,6 +7,7 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type {
   CspRequestHandlerContext,
   CspServerPluginStart,
@@ -20,7 +21,6 @@ import { defineGetCspStatusRoute } from './status/status';
 import { defineFindCspBenchmarkRuleRoute } from './benchmark_rules/find/find';
 import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_detection_engine_alerts_count_by_rule_tags';
 import { defineBulkActionCspBenchmarkRulesRoute } from './benchmark_rules/bulk_action/bulk_action';
-import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/cloud-security-posture-plugin/common/constants';
 
 /**
  * 1. Registers routes
