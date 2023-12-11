@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { Logger } from '@kbn/core/server';
 import { CspBenchmarkRules } from '../../../../common/types/rules/v3';
 import { buildRuleKey, getCspSettings, setRulesStates, updateRulesStates } from './utils';
-import { Logger } from '@kbn/core/server';
 
 const muteStatesMap = {
   mute: true,
