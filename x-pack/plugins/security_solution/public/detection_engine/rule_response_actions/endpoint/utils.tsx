@@ -6,7 +6,7 @@
  */
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiText, EuiTitle, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EnabledAutomatedResponseActionsCommands } from '../../../../common/endpoint/service/response_actions/constants';
 
@@ -20,11 +20,11 @@ const EndpointActionTextComponent = ({ name, isDisabled }: EndpointActionTextPro
 
   const content = (
     <>
-      <EuiTitle size="xs">
-        <EuiText>{title}</EuiText>
-      </EuiTitle>
+      <EuiText size="s">
+        <b>{title}</b>
+      </EuiText>
       <EuiSpacer size="xs" />
-      <EuiText>{description}</EuiText>
+      <EuiText size="xs">{description}</EuiText>
     </>
   );
   if (isDisabled) {
