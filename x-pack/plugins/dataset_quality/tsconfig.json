@@ -13,7 +13,6 @@
     "@kbn/core",
     "@kbn/core-plugins-server",
     "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/deeplinks-observability",
     "@kbn/fleet-plugin",
     "@kbn/observability-shared-plugin",
     "@kbn/server-route-repository",
