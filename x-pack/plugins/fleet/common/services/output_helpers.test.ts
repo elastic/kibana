@@ -109,4 +109,12 @@ describe('outputYmlIncludesReservedPerformanceKey', () => {
       expect(outputYmlIncludesReservedPerformanceKey(configYml, safeLoad)).toBe(false);
     });
   });
+
+  describe('empty string', () => {
+    it('returns false when YML is empty', () => {
+      const configYml = ``;
+
+      expect(outputYmlIncludesReservedPerformanceKey(configYml, safeLoad)).toBe(false);
+    });
+  });
 });
