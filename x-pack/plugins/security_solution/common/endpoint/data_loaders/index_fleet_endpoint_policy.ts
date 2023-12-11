@@ -88,7 +88,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     // Create integration (package) policy
     const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
       name: policyName,
-      skip_ensure_installed: true,
+      // skip_ensure_installed: true,
       description: 'Protect the worlds data',
       policy_id: agentPolicy.data.item.id,
       enabled: true,
