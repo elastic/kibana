@@ -18,6 +18,7 @@ import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import * as i18n from './translations';
 import { useCreateTimelineButton } from './use_create_timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
+import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../tour/step_config';
 
 const NotesCountBadge = styled(EuiBadge)`
   margin-left: 5px;
@@ -56,6 +57,7 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({
 
   return compact ? (
     <EuiButtonIcon
+      id={TIMELINE_TOUR_CONFIG_ANCHORS.ADD_TO_FAVORITES}
       iconType={isFavorite ? 'starFilled' : 'starEmpty'}
       isSelected={isFavorite}
       onClick={handleClick}
@@ -66,6 +68,7 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({
     />
   ) : (
     <EuiButton
+      id={TIMELINE_TOUR_CONFIG_ANCHORS.ADD_TO_FAVORITES}
       isSelected={isFavorite}
       fill={isFavorite}
       iconType={isFavorite ? 'starFilled' : 'starEmpty'}

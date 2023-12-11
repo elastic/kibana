@@ -49,6 +49,13 @@ export const TIMELINE_TOUR_CHANGE_DATA_VIEW_TITLE = i18n.translate(
   }
 );
 
+export const TIMELINE_TOUR_ADD_TO_FAVORITES_STEP_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.tour.addToFavorites.title',
+  {
+    defaultMessage: 'Add to Favorites is now easier to access',
+  }
+);
+
 export const TIMELINE_TOUR_NEXT = i18n.translate('xpack.securitySolution.timeline.tour.next', {
   defaultMessage: 'Next',
 });
@@ -76,6 +83,13 @@ export const TIMELINE_TOUR_OPEN = i18n.translate('xpack.securitySolution.timelin
 export const TIMELINE_TOUR_EDIT = i18n.translate('xpack.securitySolution.timeline.tour.edit', {
   defaultMessage: 'Edit',
 });
+
+export const TIMELINE_TOUR_ADD_TO_FAV = i18n.translate(
+  'xpack.securitySolution.timeline.tour.edit',
+  {
+    defaultMessage: 'Add to Favorites',
+  }
+);
 
 export const TIMELINE_TOUR_DATA_VIEW = i18n.translate(
   'xpack.securitySolution.timeline.tour.dataView',

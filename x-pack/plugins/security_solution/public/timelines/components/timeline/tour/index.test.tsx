@@ -59,6 +59,12 @@ describe('Timeline Tour', () => {
     fireEvent.click(screen.getByText('Next'));
 
     await waitFor(() => {
+      expect(screen.getByTestId('timeline-tour-step-4')).toBeVisible();
+    });
+
+    fireEvent.click(screen.getByText('Next'));
+
+    await waitFor(() => {
       expect(screen.queryByText('Finish tour')).toBeVisible();
     });
   });

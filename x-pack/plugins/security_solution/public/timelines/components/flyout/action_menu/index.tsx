@@ -49,11 +49,6 @@ const TimelineActionMenuComponent = ({
       <EuiFlexItem data-test-subj="open-timeline-action">
         <OpenTimelineAction />
       </EuiFlexItem>
-      {userCasesPermissions.create && userCasesPermissions.read ? (
-        <EuiFlexItem>
-          <AddToCaseButton timelineId={timelineId} />
-        </EuiFlexItem>
-      ) : null}
       <EuiFlexItem data-test-subj="inspect-timeline-action">
         <InspectButton
           compact={mode === 'compact'}
@@ -63,6 +58,11 @@ const TimelineActionMenuComponent = ({
           title=""
         />
       </EuiFlexItem>
+      {userCasesPermissions.create && userCasesPermissions.read ? (
+        <EuiFlexItem>
+          <AddToCaseButton timelineId={timelineId} />
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem data-test-subj="save-timeline-action">
         <SaveTimelineButton timelineId={timelineId} />
       </EuiFlexItem>

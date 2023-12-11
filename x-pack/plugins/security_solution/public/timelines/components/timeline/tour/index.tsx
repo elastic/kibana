@@ -12,6 +12,7 @@
 
 import React, { useEffect, useCallback, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
+import type { TimelineTabs } from '../../../../../common/types';
 import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -25,7 +26,13 @@ interface TourState {
   tourSubtitle: string;
 }
 
-const TimelineTourComp = () => {
+interface TimelineTourProps {
+  activeTab: TimelineTabs;
+  switchToTab: (tab: TimelineTabs) => void;
+}
+
+const TimelineTourComp = (props: TimelineTourProps) => {
+  const { activeTab, switchToTab } = props;
   const {
     services: { storage },
   } = useKibana();
@@ -86,6 +93,12 @@ const TimelineTourComp = () => {
 
   const isElementAtCurrentStepMounted = useIsElementMounted(nextEl);
 
+  const currentStepConfig = timelineTourSteps[tourState.currentTourStep - 1];
+
+  if (currentStepConfig.timelineTab && currentStepConfig.timelineTab !== activeTab) {
+    switchToTab(currentStepConfig.timelineTab);
+  }
+
   if (!tourState.isTourActive || !isElementAtCurrentStepMounted) {
     return null;
   }
@@ -93,14 +106,15 @@ const TimelineTourComp = () => {
   return (
     <>
       {timelineTourSteps.map((steps, idx) => {
-        if (tourState.currentTourStep !== idx + 1) return null;
+        const step = idx + 1;
+        if (tourState.currentTourStep !== step) return null;
         return (
           <EuiTourStep
             panelProps={{
               'data-test-subj': `timeline-tour-step-${idx + 1}`,
             }}
             key={idx}
-            step={steps.step}
+            step={step}
             isStepOpen={tourState.isTourActive && tourState.currentTourStep === idx + 1}
             minWidth={tourState.tourPopoverWidth}
             stepsTotal={timelineTourSteps.length}
@@ -109,7 +123,7 @@ const TimelineTourComp = () => {
             content={steps.content}
             anchor={`#${steps.anchor}`}
             subtitle={tourConfig.tourSubtitle}
-            footerAction={getFooterAction(steps.step)}
+            footerAction={getFooterAction(step)}
           />
         );
       })}

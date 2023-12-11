@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { EuiTextColor, EuiText } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { EuiText, EuiBadge } from '@elastic/eui';
 
 import styled from 'styled-components';
 import { TimelineStatus } from '../../../../../common/api/timeline';
@@ -29,21 +28,13 @@ export const TimelineStatusInfo = React.memo<TimelineStatusInfoProps>(
 
     let statusContent: React.ReactNode = null;
     if (isUnsaved || !updated) {
-      statusContent = <EuiTextColor color="warning">{i18n.UNSAVED}</EuiTextColor>;
+      statusContent = <EuiBadge color="warning">{i18n.UNSAVED}</EuiBadge>;
     } else if (changed) {
-      statusContent = <EuiTextColor color="warning">{i18n.UNSAVED_CHANGES}</EuiTextColor>;
-    } else {
-      statusContent = (
-        <>
-          {i18n.SAVED}
-          <FormattedRelative
-            data-test-subj="timeline-status"
-            key="timeline-status-autosaved"
-            value={new Date(updated)}
-          />
-        </>
-      );
+      statusContent = <EuiBadge color="warning">{i18n.UNSAVED_CHANGES}</EuiBadge>;
     }
+
+    if (!statusContent) return null;
+
     return (
       <NoWrapText size="xs" data-test-subj="timeline-status">
         {statusContent}
