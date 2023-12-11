@@ -1,0 +1,564 @@
+{
+  "id": "@kbn/search-errors",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/search-errors",
+        "id": "def-common.EsError",
+        "type": "Class",
+        "tags": [],
+        "label": "EsError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/search-errors",
+            "scope": "common",
+            "docId": "kibKbnSearchErrorsPluginApi",
+            "section": "def-common.EsError",
+            "text": "EsError"
+          },
+          " extends Error"
+        ],
+        "path": "packages/kbn-search-errors/src/es_error.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-errors",
+            "id": "def-common.EsError.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "IEsErrorAttributes | undefined"
+            ],
+            "path": "packages/kbn-search-errors/src/es_error.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-errors",
+            "id": "def-common.EsError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-search-errors/src/es_error.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/search-errors",
+                "id": "def-common.EsError.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "err",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/search-errors",
+                    "scope": "common",
+                    "docId": "kibKbnSearchErrorsPluginApi",
+                    "section": "def-common.IEsError",
+                    "text": "IEsError"
+                  }
+                ],
+                "path": "packages/kbn-search-errors/src/es_error.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/search-errors",
+                "id": "def-common.EsError.Unnamed.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "openInInspector",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "packages/kbn-search-errors/src/es_error.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/search-errors",
+            "id": "def-common.EsError.getErrorMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "getErrorMessage",
+            "description": [],
+            "signature": [
+              "() => JSX.Element | null"
+            ],
+            "path": "packages/kbn-search-errors/src/es_error.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/search-errors",
+            "id": "def-common.EsError.getActions",
+            "type": "Function",
+            "tags": [],
+            "label": "getActions",
+            "description": [],
+            "signature": [
+              "(application: ",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.ApplicationStart",
+                "text": "ApplicationStart"
+              },
+              ") => JSX.Element[]"
+            ],
+            "path": "packages/kbn-search-errors/src/es_error.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/search-errors",
+                "id": "def-common.EsError.getActions.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "application",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-application-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                    "section": "def-common.ApplicationStart",
+                    "text": "ApplicationStart"
+                  }
+                ],
+                "path": "packages/kbn-search-errors/src/es_error.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-errors",
+        "id": "def-common.PainlessError",
+        "type": "Class",
+        "tags": [],
+        "label": "PainlessError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/search-errors",
+            "scope": "common",
+            "docId": "kibKbnSearchErrorsPluginApi",
+            "section": "def-common.PainlessError",
+            "text": "PainlessError"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/search-errors",
+            "scope": "common",
+            "docId": "kibKbnSearchErrorsPluginApi",
+            "section": "def-common.EsError",
+            "text": "EsError"
+          }
+        ],
+        "path": "packages/kbn-search-errors/src/painless_error.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-errors",
+            "id": "def-common.PainlessError.painlessStack",
+            "type": "string",
+            "tags": [],
+            "label": "painlessStack",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-errors/src/painless_error.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-errors",
+            "id": "def-common.PainlessError.indexPattern",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-errors/src/painless_error.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-errors",
+            "id": "def-common.PainlessError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-search-errors/src/painless_error.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/search-errors",
+                "id": "def-common.PainlessError.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "err",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/search-errors",
+                    "scope": "common",
+                    "docId": "kibKbnSearchErrorsPluginApi",
+                    "section": "def-common.IEsError",
+                    "text": "IEsError"
+                  }
+                ],
+                "path": "packages/kbn-search-errors/src/painless_error.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/search-errors",
+                "id": "def-common.PainlessError.Unnamed.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "openInInspector",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "packages/kbn-search-errors/src/painless_error.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/search-errors",
+                "id": "def-common.PainlessError.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-search-errors/src/painless_error.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/search-errors",
+            "id": "def-common.PainlessError.getErrorMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "getErrorMessage",
+            "description": [],
+            "signature": [
+              "() => JSX.Element"
+            ],
+            "path": "packages/kbn-search-errors/src/painless_error.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/search-errors",
+            "id": "def-common.PainlessError.getActions",
+            "type": "Function",
+            "tags": [],
+            "label": "getActions",
+            "description": [],
+            "signature": [
+              "(application: ",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.ApplicationStart",
+                "text": "ApplicationStart"
+              },
+              ") => JSX.Element[]"
+            ],
+            "path": "packages/kbn-search-errors/src/painless_error.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/search-errors",
+                "id": "def-common.PainlessError.getActions.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "application",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-application-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                    "section": "def-common.ApplicationStart",
+                    "text": "ApplicationStart"
+                  }
+                ],
+                "path": "packages/kbn-search-errors/src/painless_error.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/search-errors",
+        "id": "def-common.isEsError",
+        "type": "Function",
+        "tags": [],
+        "label": "isEsError",
+        "description": [
+          "\nChecks if a given errors originated from Elasticsearch.\nThose params are assigned to the attributes property of an error.\n"
+        ],
+        "signature": [
+          "(e: any) => boolean"
+        ],
+        "path": "packages/kbn-search-errors/src/es_error.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-errors",
+            "id": "def-common.isEsError.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "e",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-search-errors/src/es_error.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-errors",
+        "id": "def-common.isPainlessError",
+        "type": "Function",
+        "tags": [],
+        "label": "isPainlessError",
+        "description": [],
+        "signature": [
+          "(err: Error | ",
+          {
+            "pluginId": "@kbn/search-errors",
+            "scope": "common",
+            "docId": "kibKbnSearchErrorsPluginApi",
+            "section": "def-common.IEsError",
+            "text": "IEsError"
+          },
+          ") => boolean"
+        ],
+        "path": "packages/kbn-search-errors/src/painless_error.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-errors",
+            "id": "def-common.isPainlessError.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "err",
+            "description": [],
+            "signature": [
+              "Error | ",
+              {
+                "pluginId": "@kbn/search-errors",
+                "scope": "common",
+                "docId": "kibKbnSearchErrorsPluginApi",
+                "section": "def-common.IEsError",
+                "text": "IEsError"
+              }
+            ],
+            "path": "packages/kbn-search-errors/src/painless_error.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-errors",
+        "id": "def-common.renderSearchError",
+        "type": "Function",
+        "tags": [],
+        "label": "renderSearchError",
+        "description": [],
+        "signature": [
+          "({\n  error,\n  application,\n}: { error: Error; application: ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.ApplicationStart",
+            "text": "ApplicationStart"
+          },
+          "; }) => { title: string; body: React.ReactNode; actions?: React.ReactNode[] | undefined; } | undefined"
+        ],
+        "path": "packages/kbn-search-errors/src/render_search_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-errors",
+            "id": "def-common.renderSearchError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  error,\n  application,\n}",
+            "description": [],
+            "path": "packages/kbn-search-errors/src/render_search_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/search-errors",
+                "id": "def-common.renderSearchError.$1.error",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "packages/kbn-search-errors/src/render_search_error.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/search-errors",
+                "id": "def-common.renderSearchError.$1.application",
+                "type": "Object",
+                "tags": [],
+                "label": "application",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-application-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                    "section": "def-common.ApplicationStart",
+                    "text": "ApplicationStart"
+                  }
+                ],
+                "path": "packages/kbn-search-errors/src/render_search_error.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/search-errors",
+        "id": "def-common.IEsError",
+        "type": "Type",
+        "tags": [],
+        "label": "IEsError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KibanaServerError",
+            "text": "KibanaServerError"
+          },
+          "<IEsErrorAttributes>"
+        ],
+        "path": "packages/kbn-search-errors/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
