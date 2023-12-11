@@ -144,11 +144,9 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
             numActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length : undefined}
             aria-label={buttonLabel}
           >
-            <EuiTextTruncate text={buttonLabel || ''} truncation={'end'} width={128}>
-              {(truncatedText: string) => (
-                <EuiText size="s" dangerouslySetInnerHTML={{ __html: truncatedText }} />
-              )}
-            </EuiTextTruncate>
+            <EuiText size="s" className="eui-textTruncate">
+              {buttonLabel}
+            </EuiText>
           </EuiFilterButton>
         }
         isOpen={isPopoverOpen}

@@ -126,7 +126,12 @@ const CasesTableFiltersComponent = ({
   }, [onCreateCasePressed]);
 
   return (
-    <EuiFlexGroup gutterSize="s" justifyContent="flexStart" wrap={true}>
+    <EuiFlexGroup
+      gutterSize="s"
+      justifyContent="flexStart"
+      wrap={true}
+      data-test-subj="cases-table-filters"
+    >
       {isSelectorView && onCreateCasePressed ? (
         <EuiFlexItem grow={false}>
           <EuiButton
