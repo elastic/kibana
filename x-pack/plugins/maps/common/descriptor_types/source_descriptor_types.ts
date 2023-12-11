@@ -37,6 +37,12 @@ export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
   tooltipProperties: string[];
 };
 
+export type EsqlSourceDescriptor = AbstractSourceDescriptor & {
+  // id: UUID
+  id: string;
+  esql: string;
+};
+
 export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
   // id: UUID
   id: string;
