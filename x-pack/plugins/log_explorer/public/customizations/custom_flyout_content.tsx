@@ -5,57 +5,53 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { FlyoutDetail } from '../components/flyout_detail/flyout_detail';
-import { useLogExplorerCustomizationsContext } from '../hooks/use_log_explorer_customizations';
-import { LogDocument } from '../components/flyout_detail';
+import { LogExplorerFlyoutContentProps } from '../components/flyout_detail';
+import { useLogExplorerControllerContext } from '../controller';
 
-export const CustomFlyoutContent = ({
-  filter,
-  onAddColumn,
-  onRemoveColumn,
-  dataView,
-  hit: doc,
-}: DocViewRenderProps) => {
-  const { flyout } = useLogExplorerCustomizationsContext();
+export const CustomFlyoutContent = (props: LogExplorerFlyoutContentProps) => {
+  const {
+    customizations: { flyout },
+  } = useLogExplorerControllerContext();
 
-  const actions = useMemo(
-    () => ({
-      addFilter: filter,
-      addColumn: onAddColumn,
-      removeColumn: onRemoveColumn,
-    }),
-    [filter, onAddColumn, onRemoveColumn]
+  const renderCustomizedContent = useMemo(
+    () => flyout?.renderContent?.(renderContent) ?? renderContent,
+    [flyout]
   );
-
-  const renderPreviousContent = useCallback(
-    () => (
-      <>
-        {/* Apply custom Log Explorer detail */}
-        <EuiFlexItem>
-          <FlyoutDetail actions={actions} dataView={dataView} doc={doc as LogDocument} />
-        </EuiFlexItem>
-      </>
-    ),
-    [actions, dataView, doc]
-  );
-
-  const content = flyout?.renderContent
-    ? flyout?.renderContent(renderPreviousContent, { doc })
-    : renderPreviousContent();
 
   return (
     <>
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column">
         {/* Apply custom Log Explorer detail */}
-        {content}
+        {renderCustomizedContent(props)}
       </EuiFlexGroup>
     </>
   );
 };
+
+const renderContent = ({   filter,
+  onAddColumn,
+  onRemoveColumn,
+  dataView,
+  hit: doc }: LogExplorerFlyoutContentProps) => (
+  <>
+    {/* Apply custom Log Explorer detail */}
+    <EuiFlexItem>
+      <FlyoutDetail 
+        actions={{
+          addFilter: filter,
+          addColumn: onAddColumn,
+          removeColumn: onRemoveColumn,
+        }} 
+        dataView={dataView} 
+        doc={doc as LogDocument}
+      />
+    </EuiFlexItem>
+  </>
+);
 
 // eslint-disable-next-line import/no-default-export
 export default CustomFlyoutContent;
