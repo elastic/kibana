@@ -160,7 +160,10 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, modal, entit
           fill
           data-test-subj="asset-criticality-modal-save-btn"
         >
-          {'Save'}
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.assetCriticality.saveButton"
+            defaultMessage="Save"
+          />
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
