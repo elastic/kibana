@@ -118,6 +118,7 @@ export const NewPackagePolicySchema = schema.object({
   ...PackagePolicyBaseSchema,
   id: schema.maybe(schema.string()),
   force: schema.maybe(schema.boolean()),
+  skip_ensure_installed: schema.maybe(schema.boolean()),
 });
 
 const CreatePackagePolicyProps = {
@@ -210,6 +211,7 @@ export const UpdatePackagePolicyRequestBodySchema = schema.object({
   ),
   version: schema.maybe(schema.string()),
   force: schema.maybe(schema.boolean()),
+  skip_ensure_installed: schema.maybe(schema.boolean()),
 });
 
 export const UpdatePackagePolicySchema = schema.object({
