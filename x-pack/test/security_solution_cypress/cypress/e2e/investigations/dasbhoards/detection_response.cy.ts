@@ -35,6 +35,7 @@ import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { investigateDashboardItemInTimeline } from '../../../tasks/dashboards/common';
 import { waitToNavigateAwayFrom } from '../../../tasks/kibana_navigation';
 import { login } from '../../../tasks/login';
+
 import { visit } from '../../../tasks/navigation';
 import { kqlSearch } from '../../../tasks/security_header';
 import { createNewTimeline } from '../../../tasks/timeline';
