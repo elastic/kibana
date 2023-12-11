@@ -17,7 +17,7 @@ export async function executor(
   options: RuleExecutorOptions<Params, {}, {}, {}, typeof ActionGroupId, StackAlertType>
 ) {
   const { apiKey, services, params, logger } = options;
-  const { alertsClient } = services;
+  const { alertsClient, shouldStopExecution } = services;
 
   if (!apiKey) {
     throw new Error(`User defined rule requires API key to run but none is provided`);
@@ -27,11 +27,30 @@ export async function executor(
     throw new Error(`Alerts client is not defined`);
   }
 
+  const controller = new AbortController();
+  let timeoutId: NodeJS.Timeout | null = null;
+  async function checkTimeout() {
+    logger.info(`Checking timed out ${shouldStopExecution()}`);
+    timeoutId = null;
+
+    if (shouldStopExecution()) {
+      logger.info(`Aborting exec`);
+      controller.abort();
+    } else {
+      logger.info(`Resetting setTimout to check again`);
+      // check again in 30 seconds
+      timeoutId = setTimeout(checkTimeout, 30000);
+    }
+  }
+  // Periodically check whether we should continue execution or abort the child
+  checkTimeout();
+
   const userDefinedCode = params.stringifiedUserCode;
   // Wrap customCode with our own code file to provide utilities
   const wrappedCode = wrapUserDefinedCode(userDefinedCode);
 
   const alertLimit = alertsClient.getAlertLimitValue();
+  let hasReachedLimit = false;
 
   // Run code in child process
   try {
@@ -39,6 +58,7 @@ export async function executor(
       `cat <<'EOF' | deno run --allow-net=127.0.0.1:9200 --allow-env --allow-sys --no-prompt - \n${wrappedCode}\nEOF`,
       {
         cwd: __dirname,
+        signal: controller.signal,
         env: {
           PATH: process.env.PATH,
           ELASTICSEARCH_API_KEY: apiKey,
@@ -52,7 +72,6 @@ export async function executor(
     if (stdout) {
       logger.info(`Info returned from user defined code ${stdout.split('\n')}`);
       const alertsToCreate: string[] = getDetectedAlerts(stdout);
-      let hasReachedLimit = false;
       let alertCount = 0;
       for (const alertStr of alertsToCreate) {
         if (alertCount++ >= alertLimit) {
@@ -71,7 +90,6 @@ export async function executor(
           logger.warn(`Couldn't parse reported alert ${alertStr}`);
         }
       }
-      alertsClient.setAlertLimitReached(hasReachedLimit);
 
       const { getRecoveredAlerts } = alertsClient;
       for (const recoveredAlert of getRecoveredAlerts()) {
@@ -82,10 +100,15 @@ export async function executor(
         });
       }
     }
-  } catch (error) {
-    if (error) {
-      logger.error(`Error executing user-defined code - ${error.message}`);
+
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
     }
+    alertsClient.setAlertLimitReached(hasReachedLimit);
+  } catch (error) {
+    logger.error(`Error executing user-defined code - ${error.message}`);
+    throw error;
   }
 
   return { state: {} };
