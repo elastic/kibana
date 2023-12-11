@@ -8,7 +8,7 @@
 import React from 'react';
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode';
 import type { EditorConfig, LexicalEditor, LexicalNode } from 'lexical';
-import { LensMarkDownRenderer } from '../../markdown_editor/plugins/lens/processor';
+import { LensRenderer } from '../../visualizations/lens_renderer';
 
 const attributes = {
   title: '',
@@ -206,7 +206,8 @@ export class LensNode extends DecoratorBlockNode {
   }
 
   decorate(_editor: LexicalEditor, config: EditorConfig): JSX.Element {
-    return <LensMarkDownRenderer attributes={attributes} timeRange={timeRange} />;
+    // @ts-expect-error
+    return <LensRenderer attributes={attributes} timeRange={timeRange} />;
   }
 }
 
