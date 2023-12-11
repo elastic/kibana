@@ -9,13 +9,13 @@ import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { find, merge } from 'lodash';
 import {
-  getDataStreamsMalformedDocsStatsResponseRt,
+  getDataStreamsDegradedDocsStatsResponseRt,
   getDataStreamsStatsResponseRt,
 } from '../../../common/api_types';
 import {
   DataStreamStatServiceResponse,
-  GetDataStreamsMalformedDocsStatsQuery,
-  GetDataStreamsMalformedDocsStatsResponse,
+  GetDataStreamsDegradedDocsStatsQuery,
+  GetDataStreamsDegradedDocsStatsResponse,
   GetDataStreamsStatsError,
   GetDataStreamsStatsQuery,
   GetDataStreamsStatsResponse,
@@ -52,10 +52,10 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     return mergedDataStreamsStats.map(DataStreamStat.create);
   }
 
-  public async getDataStreamsMalformedStats(params: GetDataStreamsMalformedDocsStatsQuery) {
+  public async getDataStreamsDegradedStats(params: GetDataStreamsDegradedDocsStatsQuery) {
     const response = await this.http
-      .get<GetDataStreamsMalformedDocsStatsResponse>(
-        '/internal/dataset_quality/data_streams/malformed_docs',
+      .get<GetDataStreamsDegradedDocsStatsResponse>(
+        '/internal/dataset_quality/data_streams/degraded_docs',
         {
           query: {
             ...params,
@@ -65,18 +65,18 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
       )
       .catch((error) => {
         throw new GetDataStreamsStatsError(
-          `Failed to fetch data streams malformed stats": ${error}`
+          `Failed to fetch data streams degraded stats": ${error}`
         );
       });
 
-    const { malformedDocs } = decodeOrThrow(
-      getDataStreamsMalformedDocsStatsResponseRt,
+    const { degradedDocs } = decodeOrThrow(
+      getDataStreamsDegradedDocsStatsResponseRt,
       (message: string) =>
         new GetDataStreamsStatsError(
-          `Failed to decode data streams malformed docs stats response: ${message}"`
+          `Failed to decode data streams degraded docs stats response: ${message}"`
         )
     )(response);
 
-    return malformedDocs;
+    return degradedDocs;
   }
 }

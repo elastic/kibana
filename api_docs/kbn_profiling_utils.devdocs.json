@@ -1276,50 +1276,6 @@
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.BaseFlameGraph.SelfAnnualCO2Tons",
-            "type": "number",
-            "tags": [],
-            "label": "SelfAnnualCO2Tons",
-            "description": [],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.BaseFlameGraph.TotalAnnualCO2Tons",
-            "type": "number",
-            "tags": [],
-            "label": "TotalAnnualCO2Tons",
-            "description": [],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.BaseFlameGraph.SelfAnnualCostsUSD",
-            "type": "number",
-            "tags": [],
-            "label": "SelfAnnualCostsUSD",
-            "description": [],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.BaseFlameGraph.TotalAnnualCostsUSD",
-            "type": "number",
-            "tags": [],
-            "label": "TotalAnnualCostsUSD",
-            "description": [],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1569,28 +1525,6 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.ElasticFlameGraph.SelfAnnualCO2Kgs",
-            "type": "number",
-            "tags": [],
-            "label": "SelfAnnualCO2Kgs",
-            "description": [],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.ElasticFlameGraph.TotalAnnualCO2Kgs",
-            "type": "number",
-            "tags": [],
-            "label": "TotalAnnualCO2Kgs",
-            "description": [],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
