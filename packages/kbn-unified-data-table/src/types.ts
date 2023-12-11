@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-
 /**
  * User configurable state of data grid, persisted in saved search
  */
-export interface UnifiedDataTableSettings extends SerializableRecord {
+export interface UnifiedDataTableSettings {
   columns?: Record<string, UnifiedDataTableSettingsColumn>;
 }
 
-export interface UnifiedDataTableSettingsColumn extends SerializableRecord {
+export interface UnifiedDataTableSettingsColumn {
   width?: number;
 }
 

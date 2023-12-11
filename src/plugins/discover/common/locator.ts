@@ -10,7 +10,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
+import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import { VIEW_MODE } from './constants';
@@ -74,7 +74,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    * Data Grid related state
    */
-  grid?: UnifiedDataTableSettings;
+  grid?: DiscoverGridSettings;
 
   /**
    * Used interval of the histogram
@@ -161,7 +161,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       filters?: Filter[];
       index?: string;
       columns?: string[];
-      grid?: UnifiedDataTableSettings;
+      grid?: DiscoverGridSettings;
       interval?: string;
       sort?: string[][];
       savedQuery?: string;
