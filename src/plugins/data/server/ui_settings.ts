@@ -386,6 +386,13 @@ export function getUiSettings(
             }),
           },
           {
+            from: 'now-1m',
+            to: 'now',
+            display: i18n.translate('data.advancedSettings.timepicker.last1Minute', {
+              defaultMessage: 'Last 1 minute',
+            }),
+          },
+          {
             from: 'now-15m',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last15Minutes', {
@@ -471,7 +478,7 @@ export function getUiSettings(
               to: schema.string(),
               display: schema.string(),
             }),
-            { maxSize: 10 }
+            { maxSize: 12 }
           )
         : schema.arrayOf(
             schema.object({
