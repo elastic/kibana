@@ -53,16 +53,22 @@ export const clickOnCopyValue = () => {
 };
 
 export function withHoverActionsReady() {
-  // NOTE: not sure if this is precise enough, but it seems to work
   const actionsButtonInPortal = '[data-euiportal="true"] button[data-test-subj*="cellActions"]';
   recurse(
     () => {
       openHoverActions();
       mouseoverOnToOverflowItem();
-      return cy.root();
+      return cy.get('body').then(($body) => {
+        return $body.find(actionsButtonInPortal);
+      });
     },
     // Check if actions portal element is visible
-    ($el) => $el.find(actionsButtonInPortal).length > 0
+    ($el) => {
+      return $el.length > 0;
+    },
+    {
+      delay: 500,
+    }
   );
   // cy.get('body').then(($body) => {
   //   if ($body.find(actionsButtonInPortal).length > 0) {

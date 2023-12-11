@@ -18,8 +18,7 @@ import {
   clickOnFilterIn,
   clickOnFilterOut,
   clickOnShowTopN,
-  mouseoverOnToOverflowItem,
-  openHoverActions,
+  withHoverActionsReady,
 } from '../../../tasks/network/flows';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 
@@ -43,8 +42,7 @@ describe('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(NETWORK_URL, { visitOptions: { onBeforeLoad: onBeforeLoadCallback } });
-    openHoverActions();
-    mouseoverOnToOverflowItem();
+    withHoverActionsReady();
   });
 
   it('Adds global filter - filter in', () => {
