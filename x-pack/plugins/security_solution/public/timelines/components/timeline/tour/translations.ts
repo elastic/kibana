@@ -85,7 +85,7 @@ export const TIMELINE_TOUR_EDIT = i18n.translate('xpack.securitySolution.timelin
 });
 
 export const TIMELINE_TOUR_ADD_TO_FAV = i18n.translate(
-  'xpack.securitySolution.timeline.tour.edit',
+  'xpack.securitySolution.timeline.tour.addToFavorites',
   {
     defaultMessage: 'Add to Favorites',
   }

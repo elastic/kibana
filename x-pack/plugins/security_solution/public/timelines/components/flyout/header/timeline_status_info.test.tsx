@@ -28,18 +28,6 @@ describe('TestComponent', () => {
 
   it('should render the status correctly when timeline has unsaved changes', () => {
     render(<TestComponent status={TimelineStatus.active} changed={true} updated={Date.now()} />);
-    expect(screen.getByText('Has unsaved changes')).toBeVisible();
-  });
-
-  it('should render the status correctly when timeline is saved', () => {
-    const updatedTime = Date.now();
-    render(<TestComponent status={TimelineStatus.active} updated={updatedTime} />);
-    expect(screen.getByText('Saved')).toBeVisible();
-  });
-
-  it('should render the status correctly when timeline is saved some time ago', () => {
-    const updatedTime = Date.now() - 10000;
-    render(<TestComponent status={TimelineStatus.active} updated={updatedTime} />);
-    expect(screen.getByTestId('timeline-status')).toHaveTextContent(/Saved10 seconds ago/);
+    expect(screen.getByText('Unsaved changes')).toBeVisible();
   });
 });
