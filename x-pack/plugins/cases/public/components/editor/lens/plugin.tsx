@@ -26,8 +26,8 @@ export const LensPlugin: React.FC = () => {
     return editor.registerCommand<string>(
       INSERT_LENS_COMMAND,
       () => {
-        const figmaNode = $createLensNode();
-        $insertNodeToNearestRoot(figmaNode);
+        const lensNode = $createLensNode();
+        $insertNodeToNearestRoot(lensNode);
         return true;
       },
       COMMAND_PRIORITY_EDITOR

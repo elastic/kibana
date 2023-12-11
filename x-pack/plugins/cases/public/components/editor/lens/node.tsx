@@ -12,174 +12,74 @@ import { LensRenderer } from '../../visualizations/lens_renderer';
 
 const attributes = {
   title: '',
-  description: '',
   visualizationType: 'lnsXY',
   type: 'lens',
   references: [
     {
       type: 'index-pattern',
-      id: 'security-solution-default',
-      name: 'indexpattern-datasource-layer-9b9eddff-5318-4a47-805d-7c70b4ad1404',
-    },
-    {
-      type: 'index-pattern',
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-      name: 'indexpattern-datasource-layer-43637802-434b-4113-9640-895be76a9a52',
+      id: '390329a2-e67a-43b7-9c2b-72089a06b259',
+      name: 'indexpattern-datasource-layer-36d070f1-6db5-4925-9352-738f5eaa1da9',
     },
   ],
   state: {
     visualization: {
-      legend: {
-        isVisible: true,
-        position: 'right',
-      },
+      legend: { isVisible: true, position: 'right' },
       valueLabels: 'hide',
       fittingFunction: 'None',
-      axisTitlesVisibilitySettings: {
-        x: true,
-        yLeft: true,
-        yRight: true,
-      },
-      tickLabelsVisibilitySettings: {
-        x: true,
-        yLeft: true,
-        yRight: true,
-      },
-      labelsOrientation: {
-        x: 0,
-        yLeft: 0,
-        yRight: 0,
-      },
-      gridlinesVisibilitySettings: {
-        x: true,
-        yLeft: true,
-        yRight: true,
-      },
+      axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      labelsOrientation: { x: 0, yLeft: 0, yRight: 0 },
+      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       preferredSeriesType: 'bar_stacked',
       layers: [
         {
-          layerId: '9b9eddff-5318-4a47-805d-7c70b4ad1404',
-          accessors: ['068d0d3a-11f7-4376-bbd5-6dda52bd573a'],
+          layerId: '36d070f1-6db5-4925-9352-738f5eaa1da9',
+          accessors: ['d47f5950-9fee-480f-920b-9e1dcb8a2534'],
           position: 'top',
           seriesType: 'bar_stacked',
           showGridlines: false,
           layerType: 'data',
-          xAccessor: '0dcd0341-1043-429d-bbf4-8d56fbb05a0b',
-        },
-        {
-          layerId: '43637802-434b-4113-9640-895be76a9a52',
-          seriesType: 'bar_stacked',
-          xAccessor: '280c85e7-806b-4242-aa3a-ec53c38a35e9',
-          accessors: ['4520e1e8-b45a-443d-bfad-692a3f9bf10b'],
-          layerType: 'data',
+          xAccessor: '5f3a0416-007e-49ab-835c-e79ab9f1fa5a',
         },
       ],
     },
-    query: {
-      query: '',
-      language: 'kuery',
-    },
+    query: { query: '', language: 'kuery' },
     filters: [],
     datasourceStates: {
       formBased: {
         layers: {
-          '9b9eddff-5318-4a47-805d-7c70b4ad1404': {
+          '36d070f1-6db5-4925-9352-738f5eaa1da9': {
             columns: {
-              '0dcd0341-1043-429d-bbf4-8d56fbb05a0b': {
-                label: 'Top 5 values of host.name',
-                dataType: 'string',
-                operationType: 'terms',
-                scale: 'ordinal',
-                sourceField: 'host.name',
+              '5f3a0416-007e-49ab-835c-e79ab9f1fa5a': {
+                label: 'cases.created_at',
+                dataType: 'date',
+                operationType: 'date_histogram',
+                sourceField: 'cases.created_at',
                 isBucketed: true,
-                params: {
-                  size: 5,
-                  orderBy: {
-                    type: 'column',
-                    columnId: '068d0d3a-11f7-4376-bbd5-6dda52bd573a',
-                  },
-                  orderDirection: 'desc',
-                  otherBucket: true,
-                  missingBucket: false,
-                  parentFormat: {
-                    id: 'terms',
-                  },
-                  include: [],
-                  exclude: [],
-                  includeIsRegex: false,
-                  excludeIsRegex: false,
-                },
+                scale: 'interval',
+                params: { interval: 'auto', includeEmptyRows: true, dropPartials: false },
               },
-              '068d0d3a-11f7-4376-bbd5-6dda52bd573a': {
+              'd47f5950-9fee-480f-920b-9e1dcb8a2534': {
                 label: 'Count of records',
                 dataType: 'number',
                 operationType: 'count',
                 isBucketed: false,
                 scale: 'ratio',
                 sourceField: '___records___',
-                params: {
-                  emptyAsNull: true,
-                },
+                params: { emptyAsNull: true },
               },
             },
             columnOrder: [
-              '0dcd0341-1043-429d-bbf4-8d56fbb05a0b',
-              '068d0d3a-11f7-4376-bbd5-6dda52bd573a',
-            ],
-            incompleteColumns: {},
-            sampling: 1,
-          },
-          '43637802-434b-4113-9640-895be76a9a52': {
-            columns: {
-              '280c85e7-806b-4242-aa3a-ec53c38a35e9': {
-                label: 'Top 5 values of agent.keyword',
-                dataType: 'string',
-                operationType: 'terms',
-                scale: 'ordinal',
-                sourceField: 'agent.keyword',
-                isBucketed: true,
-                params: {
-                  size: 5,
-                  orderBy: {
-                    type: 'column',
-                    columnId: '4520e1e8-b45a-443d-bfad-692a3f9bf10b',
-                  },
-                  orderDirection: 'desc',
-                  otherBucket: true,
-                  missingBucket: false,
-                  parentFormat: {
-                    id: 'terms',
-                  },
-                  include: [],
-                  exclude: [],
-                  includeIsRegex: false,
-                  excludeIsRegex: false,
-                },
-              },
-              '4520e1e8-b45a-443d-bfad-692a3f9bf10b': {
-                label: 'Count of records',
-                dataType: 'number',
-                operationType: 'count',
-                isBucketed: false,
-                scale: 'ratio',
-                sourceField: '___records___',
-                params: {
-                  emptyAsNull: true,
-                },
-              },
-            },
-            columnOrder: [
-              '280c85e7-806b-4242-aa3a-ec53c38a35e9',
-              '4520e1e8-b45a-443d-bfad-692a3f9bf10b',
+              '5f3a0416-007e-49ab-835c-e79ab9f1fa5a',
+              'd47f5950-9fee-480f-920b-9e1dcb8a2534',
             ],
             incompleteColumns: {},
             sampling: 1,
           },
         },
       },
-      textBased: {
-        layers: {},
-      },
+      indexpattern: { layers: {} },
+      textBased: { layers: {} },
     },
     internalReferences: [],
     adHocDataViews: {},
