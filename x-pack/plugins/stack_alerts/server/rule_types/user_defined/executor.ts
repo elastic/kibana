@@ -128,6 +128,6 @@ function wrapUserDefinedCode(code: string) {
 function getDetectedAlerts(output: string) {
   return output
     .split('\n')
-    .filter((str) => str.indexOf('createAlert:') === 0)
+    .filter((str) => str.indexOf('reportAlert:') === 0)
     .map((str) => str.substring(12));
 }

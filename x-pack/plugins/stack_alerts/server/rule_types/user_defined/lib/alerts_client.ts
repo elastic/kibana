@@ -7,7 +7,7 @@ export interface ReportedAlert {
 }
 
 export function reportAlert(alert: ReportedAlert) {
-  console.log(`createAlert:${JSON.stringify(alert)}`);
+  console.log(`reportAlert:${JSON.stringify(alert)}`);
 }
 
 function setAlertData(alert: Pick<ReportedAlert, 'id' | 'context' | 'payload'>) {
