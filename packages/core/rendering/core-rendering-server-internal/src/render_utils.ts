@@ -25,33 +25,42 @@ export const getSettingValue = <T>(
 export const getBundlesHref = (baseHref: string, buildNr: string): string =>
   `${baseHref}/${buildNr}/bundles`;
 
-export const getStylesheetPaths = ({
-  themeVersion,
-  darkMode,
+export const getCommonStylesheetPaths = ({
   baseHref,
   buildNum,
 }: {
-  themeVersion: UiSharedDepsNpm.ThemeVersion;
-  darkMode: boolean;
   buildNum: number;
   baseHref: string;
 }) => {
   const bundlesHref = getBundlesHref(baseHref, String(buildNum));
-  return [
-    ...(darkMode
-      ? [
-          `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.darkCssDistFilename(
-            themeVersion
-          )}`,
-          `${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
-          `${baseHref}/ui/legacy_dark_theme.min.css`,
-        ]
-      : [
-          `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename(
-            themeVersion
-          )}`,
-          `${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
-          `${baseHref}/ui/legacy_light_theme.min.css`,
-        ]),
-  ];
+  return [`${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`];
 };
+
+export const getDarkModeStylesheetPaths =
+  ({
+    themeVersion,
+    baseHref,
+    buildNum,
+  }: {
+    themeVersion: UiSharedDepsNpm.ThemeVersion;
+    buildNum: number;
+    baseHref: string;
+  }) =>
+  ({ darkMode }: { darkMode: boolean }) => {
+    const bundlesHref = getBundlesHref(baseHref, String(buildNum));
+    return [
+      ...(darkMode
+        ? [
+            `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.darkCssDistFilename(
+              themeVersion
+            )}`,
+            `${baseHref}/ui/legacy_dark_theme.min.css`,
+          ]
+        : [
+            `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename(
+              themeVersion
+            )}`,
+            `${baseHref}/ui/legacy_light_theme.min.css`,
+          ]),
+    ];
+  };

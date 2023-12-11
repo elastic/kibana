@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-export type {
-  UiSettingsType,
-  ReadonlyModeType,
-  DeprecationSettings,
-  UiSettingsParams,
-  UserProvidedValues,
-  UiSettingsScope,
-} from './src/ui_settings';
-export type { DarkModeValue } from './src/dark_mode';
-
-export { TIMEZONE_OPTIONS } from './src/timezones';
+/**
+ * The list of possible values for the dark mode UI setting.
+ * - false: dark mode is disabled
+ * - true: dark mode is enabled
+ * - "system": dark mode will follow the user system preference.
+ */
+export type DarkModeValue = true | false | 'system';

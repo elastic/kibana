@@ -18,7 +18,7 @@ import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
-import { UserProvidedValues } from '@kbn/core-ui-settings-common';
+import { UserProvidedValues, DarkModeValue } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -29,7 +29,11 @@ import {
   RenderingMetadata,
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
-import { getSettingValue, getStylesheetPaths } from './render_utils';
+import {
+  getSettingValue,
+  getCommonStylesheetPaths,
+  getDarkModeStylesheetPaths,
+} from './render_utils';
 import { filterUiPlugins } from './filter_ui_plugins';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
@@ -41,6 +45,8 @@ type RenderOptions =
       customBranding?: never;
       userSettings?: never;
     });
+
+const themeVersion: ThemeVersion = 'v8';
 
 /** @internal */
 export class RenderingService {
@@ -160,27 +166,32 @@ export class RenderingService {
       // swallow error
     }
 
-    let userSettingDarkMode: boolean | undefined;
-
-    if (!isAnonymousPage) {
-      userSettingDarkMode = await userSettings?.getUserSettingDarkMode(request);
-    }
-
-    let darkMode: boolean;
+    // dark mode
+    const userSettingDarkMode = isAnonymousPage
+      ? undefined
+      : await userSettings?.getUserSettingDarkMode(request);
 
     const isThemeOverridden = settings.user['theme:darkMode']?.isOverridden ?? false;
 
+    let darkMode: DarkModeValue;
     if (userSettingDarkMode !== undefined && !isThemeOverridden) {
       darkMode = userSettingDarkMode;
     } else {
-      darkMode = getSettingValue('theme:darkMode', settings, Boolean);
+      darkMode = getSettingValue<DarkModeValue>(
+        'theme:darkMode',
+        settings,
+        (v) => v as DarkModeValue
+      );
     }
+    // end dark mode
 
-    const themeVersion: ThemeVersion = 'v8';
-
-    const stylesheetPaths = getStylesheetPaths({
-      darkMode,
+    const themeStylesheetPaths = getDarkModeStylesheetPaths({
       themeVersion,
+      baseHref: staticAssetsHrefBase,
+      buildNum,
+    });
+
+    const commonStylesheetPaths = getCommonStylesheetPaths({
       baseHref: staticAssetsHrefBase,
       buildNum,
     });
@@ -195,7 +206,7 @@ export class RenderingService {
       locale: i18n.getLocale(),
       darkMode,
       themeVersion,
-      stylesheetPaths,
+      stylesheetPaths: commonStylesheetPaths,
       customBranding: {
         faviconSVG: branding?.faviconSVG,
         faviconPNG: branding?.faviconPNG,
@@ -220,6 +231,10 @@ export class RenderingService {
         theme: {
           darkMode,
           version: themeVersion,
+          stylesheetPaths: {
+            default: themeStylesheetPaths({ darkMode: false }),
+            dark: themeStylesheetPaths({ darkMode: true }),
+          },
         },
         customBranding: {
           logo: branding?.logo,

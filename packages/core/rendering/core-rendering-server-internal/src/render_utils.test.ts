@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { getStylesheetPaths } from './render_utils';
+import { getDarkModeStylesheetPaths } from './render_utils';
 
 describe('getStylesheetPaths', () => {
   describe('when darkMode is `true`', () => {
     describe('when themeVersion is `v8`', () => {
       it('returns the correct list', () => {
         expect(
-          getStylesheetPaths({
+          getDarkModeStylesheetPaths({
             darkMode: true,
             themeVersion: 'v8',
             baseHref: '/base-path',
@@ -33,7 +33,7 @@ describe('getStylesheetPaths', () => {
     describe('when themeVersion is `v8`', () => {
       it('returns the correct list', () => {
         expect(
-          getStylesheetPaths({
+          getDarkModeStylesheetPaths({
             darkMode: false,
             themeVersion: 'v8',
             baseHref: '/base-path',
