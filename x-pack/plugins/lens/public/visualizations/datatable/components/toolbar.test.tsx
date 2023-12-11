@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { getButtonGroupInputValue } from '@kbn/rtl-eui';
+import { getButtonGroupInputValue } from '@kbn/test-jest-helpers2';
 import { DataTableToolbar } from './toolbar';
 import { DatatableVisualizationState } from '../visualization';
 import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
@@ -55,16 +55,6 @@ describe('datatable toolbar', () => {
       userEvent.click(screen.getByRole('button', { name: /visual options/i }));
     };
 
-    const getButtonGroupInputValue = (testId: string) => () => {
-      const buttonGroup = screen.getByTestId(testId);
-      const options = within(buttonGroup).getAllByRole('radio');
-      const checkedOption = options.find((option) => option.getAttribute('checked') === '');
-      if (checkedOption == null) {
-        throw new Error(`No checked option found in button group ${testId}`);
-      }
-      return checkedOption.nextSibling;
-    };
-
     const selectOptionFromButtonGroup = (testId: string) => (optionName: string | RegExp) => {
       const buttonGroup = screen.getByTestId(testId);
       const option = within(buttonGroup).getByRole('radio', { name: optionName });
@@ -81,7 +71,6 @@ describe('datatable toolbar', () => {
 
     return {
       ...rtlRender,
-
       togglePopover,
       getRowHeightValue: getButtonGroupInputValue(ROW_HEIGHT_SETTINGS_TEST_ID),
       getRowHeightCustomValue: () => getNumberInput(ROW_HEIGHT_SETTINGS_TEST_ID),

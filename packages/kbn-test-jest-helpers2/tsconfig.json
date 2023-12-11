@@ -8,11 +8,7 @@
     "**/*.ts",
     "**/*.tsx",
   ],
-  "kbn_references": [
-    "@kbn/i18n-react",
-    "@kbn/axe-config",
-    "@kbn/shared-ux-router",
-  ],
+  "kbn_references": [],
   "exclude": [
     "target/**/*",
   ],
