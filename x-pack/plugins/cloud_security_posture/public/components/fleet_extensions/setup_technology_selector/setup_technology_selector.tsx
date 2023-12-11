@@ -18,6 +18,10 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import {
+  SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ,
+  SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
+} from '../../test_subjects';
 
 export const SetupTechnologySelector = ({
   disabled,
@@ -100,7 +104,7 @@ export const SetupTechnologySelector = ({
             />
           </EuiLink>
         }
-        data-test-subj={'setup-technology-selector-accordion'}
+        data-test-subj={SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ}
       >
         <EuiSpacer size="l" />
         <EuiFormRow
@@ -126,7 +130,7 @@ export const SetupTechnologySelector = ({
             itemLayoutAlign="top"
             hasDividers
             fullWidth
-            data-test-subj={'setup-technology-selector'}
+            data-test-subj={SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ}
           />
         </EuiFormRow>
       </EuiAccordion>

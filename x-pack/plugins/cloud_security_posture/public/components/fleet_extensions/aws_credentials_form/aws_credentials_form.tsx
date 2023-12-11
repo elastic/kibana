@@ -30,6 +30,7 @@ import { SetupFormat, useAwsCredentialsForm } from './hooks';
 import { AWS_ORGANIZATION_ACCOUNT } from '../policy_template_form';
 import { AwsCredentialsType } from '../../../../common/types_old';
 import { AwsInputVarFields } from './aws_input_var_fields';
+import { AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ, AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from '../../test_subjects';
 
 interface AWSSetupInfoContentProps {
   info: ReactNode;
@@ -58,14 +59,14 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
   {
     id: 'cloud_formation',
     label: 'CloudFormation',
-    testId: 'aws-cloudformation-setup-option',
+    testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUDFORMATION,
   },
   {
     id: 'manual',
     label: i18n.translate('xpack.csp.awsIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
-    testId: 'aws-manual-setup-option',
+    testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL,
   },
 ];
 
@@ -294,7 +295,7 @@ export const AwsCredentialTypeSelector = ({
       onChange={(optionElem) => {
         onChange(optionElem.target.value as AwsCredentialsType);
       }}
-      data-test-subj={'aws-credentials-type-selector'}
+      data-test-subj={AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ}
     />
   </EuiFormRow>
 );

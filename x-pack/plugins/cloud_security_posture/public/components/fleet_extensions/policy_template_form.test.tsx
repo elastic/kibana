@@ -47,6 +47,12 @@ import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 import { CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS } from './gcp_credential_form';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import {
+  AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
+  AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+  SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ,
+  SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
+} from '../test_subjects';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -1451,10 +1457,11 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={newPackagePolicy} agentlessPolicy={agentlessPolicy} />
       );
 
-      // TODO: move test ids to constants
-      const setupTechnologySelectorAccordion = getByTestId('setup-technology-selector-accordion');
-      const setupTechnologySelector = getByTestId('setup-technology-selector');
-      const awsCredentialsTypeSelector = getByTestId('aws-credentials-type-selector');
+      const setupTechnologySelectorAccordion = getByTestId(
+        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+      const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
       const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
         'option'
       );
@@ -1475,8 +1482,10 @@ describe('<CspPolicyTemplateForm />', () => {
       await waitForEuiPopoverOpen();
       userEvent.click(agentBasedOption);
       await waitFor(() => {
-        expect(getByTestId('aws-cloudformation-setup-option')).toBeInTheDocument();
-        expect(getByTestId('aws-manual-setup-option')).toBeInTheDocument();
+        expect(
+          getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUDFORMATION)
+        ).toBeInTheDocument();
+        expect(getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL)).toBeInTheDocument();
       });
     });
 
@@ -1488,7 +1497,9 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={newPackagePolicy} agentlessPolicy={agentlessPolicy} />
       );
 
-      const setupTechnologySelectorAccordion = queryByTestId('setup-technology-selector-accordion');
+      const setupTechnologySelectorAccordion = queryByTestId(
+        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
+      );
 
       expect(setupTechnologySelectorAccordion).not.toBeInTheDocument();
     });
@@ -1501,7 +1512,9 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={newPackagePolicy} agentlessPolicy={agentlessPolicy} />
       );
 
-      const setupTechnologySelectorAccordion = queryByTestId('setup-technology-selector-accordion');
+      const setupTechnologySelectorAccordion = queryByTestId(
+        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
+      );
 
       expect(setupTechnologySelectorAccordion).not.toBeInTheDocument();
     });
@@ -1518,7 +1531,9 @@ describe('<CspPolicyTemplateForm />', () => {
         />
       );
 
-      const setupTechnologySelectorAccordion = queryByTestId('setup-technology-selector-accordion');
+      const setupTechnologySelectorAccordion = queryByTestId(
+        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
+      );
 
       expect(setupTechnologySelectorAccordion).not.toBeInTheDocument();
     });
@@ -1538,7 +1553,9 @@ describe('<CspPolicyTemplateForm />', () => {
         />
       );
 
-      const setupTechnologySelectorAccordion = queryByTestId('setup-technology-selector-accordion');
+      const setupTechnologySelectorAccordion = queryByTestId(
+        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
+      );
 
       expect(setupTechnologySelectorAccordion).not.toBeInTheDocument();
     });
