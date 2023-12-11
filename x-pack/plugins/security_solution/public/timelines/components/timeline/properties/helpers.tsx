@@ -59,6 +59,7 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({
     <EuiButtonIcon
       id={TIMELINE_TOUR_CONFIG_ANCHORS.ADD_TO_FAVORITES}
       iconType={isFavorite ? 'starFilled' : 'starEmpty'}
+      iconSize="m"
       isSelected={isFavorite}
       onClick={handleClick}
       data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
