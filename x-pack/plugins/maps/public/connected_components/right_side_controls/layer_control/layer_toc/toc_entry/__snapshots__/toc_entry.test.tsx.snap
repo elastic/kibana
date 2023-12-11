@@ -479,6 +479,7 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
     data-test-subj="mapLayerTOCDetailslayer_1"
   >
     <LegendDetails
+      inspectorAdapters={Object {}}
       layer={
         Object {
           "getDisplayName": [Function],

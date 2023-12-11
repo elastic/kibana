@@ -66,6 +66,7 @@ export type AlertsTableStateProps = {
   pageSize?: number;
   browserFields?: BrowserFields;
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
+  onLoaded?: () => void;
   runtimeMappings?: MappingRuntimeFields;
   showAlertStatusWithFlapping?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
@@ -77,6 +78,7 @@ export type AlertsTableStateProps = {
    * Enable when rows may have variable heights (disables virtualization)
    */
   dynamicRowHeight?: boolean;
+  lastReloadRequestTime?: number;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -146,11 +148,13 @@ const AlertsTableStateWithQueryProvider = ({
   gridStyle,
   browserFields: propBrowserFields,
   onUpdate,
+  onLoaded,
   runtimeMappings,
   showAlertStatusWithFlapping,
   toolbarVisibility,
   shouldHighlightRow,
   dynamicRowHeight,
+  lastReloadRequestTime,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
   const hasAlertsTableConfiguration =
@@ -245,6 +249,7 @@ const AlertsTableStateWithQueryProvider = ({
     query,
     pagination,
     onPageChange,
+    onLoaded,
     runtimeMappings,
     sort,
     skip: false,
@@ -267,6 +272,11 @@ const AlertsTableStateWithQueryProvider = ({
       onUpdate({ isLoading, totalCount: alertsCount, refresh });
     }
   }, [isLoading, alertsCount, onUpdate, refresh]);
+  useEffect(() => {
+    if (lastReloadRequestTime) {
+      refresh();
+    }
+  }, [lastReloadRequestTime, refresh]);
 
   const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
   const maintenanceWindowIds = useMemo(() => getMaintenanceWindowIdsFromAlerts(alerts), [alerts]);

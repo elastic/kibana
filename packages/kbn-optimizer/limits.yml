@@ -1,6 +1,8 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 27596
+  aiAssistantManagementObservability: 19279
+  aiAssistantManagementSelection: 19146
   aiops: 10000
   alerting: 106936
   apm: 64385

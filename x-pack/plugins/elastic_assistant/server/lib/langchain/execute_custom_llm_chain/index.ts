@@ -8,7 +8,7 @@
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
-import { ChainTool, Tool } from 'langchain/tools';
+import { Tool } from 'langchain/tools';
 
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
@@ -16,6 +16,7 @@ import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/con
 import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { APMTracer } from '../tracers/apm_tracer';
+import { getApplicableTools } from '../tools';
 
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
@@ -26,14 +27,21 @@ export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
  */
 export const callAgentExecutor = async ({
   actions,
+  alertsIndexPattern,
+  allow,
+  allowReplacement,
+  assistantLangChain,
   connectorId,
+  elserId,
   esClient,
+  kbResource,
   langChainMessages,
   llmType,
   logger,
+  onNewReplacements,
+  replacements,
   request,
-  elserId,
-  kbResource,
+  size,
   traceOptions,
 }: AgentExecutorParams): AgentExecutorResponse => {
   const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
@@ -59,25 +67,25 @@ export const callAgentExecutor = async ({
   );
 
   const modelExists = await esStore.isModelInstalled();
-  if (!modelExists) {
-    throw new Error(
-      'Please ensure ELSER is configured to use the Knowledge Base, otherwise disable the Knowledge Base in Advanced Settings to continue.'
-    );
-  }
 
   // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
   const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
 
-  // TODO: Dependency inject these tools
-  const tools: Tool[] = [
-    new ChainTool({
-      name: 'ESQLKnowledgeBaseTool',
-      description:
-        'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language.',
-      chain,
-      tags: ['esql', 'query-generation', 'knowledge-base'],
-    }),
-  ];
+  const tools: Tool[] = getApplicableTools({
+    allow,
+    allowReplacement,
+    alertsIndexPattern,
+    assistantLangChain,
+    chain,
+    esClient,
+    modelExists,
+    onNewReplacements,
+    replacements,
+    request,
+    size,
+  });
+
+  logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
   const executor = await initializeAgentExecutorWithOptions(tools, llm, {
     agentType: 'chat-conversational-react-description',
@@ -116,6 +124,7 @@ export const callAgentExecutor = async ({
     connector_id: connectorId,
     data: llm.getActionResultData(), // the response from the actions framework
     trace_data: traceData,
+    replacements,
     status: 'ok',
   };
 };

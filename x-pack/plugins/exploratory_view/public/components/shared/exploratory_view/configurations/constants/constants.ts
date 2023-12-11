@@ -11,7 +11,7 @@ import { ReportViewType } from '../../types';
 import {
   CLS_FIELD,
   FCP_FIELD,
-  FID_FIELD,
+  INP_FIELD,
   LCP_FIELD,
   TBT_FIELD,
   TRANSACTION_DURATION,
@@ -31,7 +31,7 @@ import {
   ENVIRONMENT_LABEL,
   EVENT_DATASET_LABEL,
   FCP_LABEL,
-  FID_LABEL,
+  INP_LABEL,
   HEATMAP_LABEL,
   HOST_NAME_LABEL,
   KPI_LABEL,
@@ -102,7 +102,7 @@ export const FieldLabels: Record<string, string> = {
   [LCP_FIELD]: LCP_LABEL,
   [FCP_FIELD]: FCP_LABEL,
   [TBT_FIELD]: TBT_LABEL,
-  [FID_FIELD]: FID_LABEL,
+  [INP_FIELD]: INP_LABEL,
   [CLS_FIELD]: CLS_LABEL,
 
   [SYNTHETICS_CLS]: CLS_LABEL,

@@ -68,7 +68,7 @@ export const renderApp = ({
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
 
-  const aiAssistantService = plugins.observabilityAIAssistant;
+  const aiAssistantService = plugins.observabilityAIAssistant.service;
 
   ReactDOM.render(
     <EuiErrorBoundary>

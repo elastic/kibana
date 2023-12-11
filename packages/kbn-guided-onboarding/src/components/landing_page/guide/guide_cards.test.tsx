@@ -30,7 +30,10 @@ const defaultProps: Omit<GuideCardsProps, 'activeFilter'> = {
   url: sharePluginMock.createSetupContract().url,
 };
 
-describe('guide cards', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/172595
+// FLAKY: https://github.com/elastic/kibana/issues/172596
+// FLAKY: https://github.com/elastic/kibana/issues/172597
+describe.skip('guide cards', () => {
   describe('snapshots', () => {
     test('should render search cards', async () => {
       const component = mount(

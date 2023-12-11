@@ -696,6 +696,7 @@ exports[`guide cards snapshots should render observability cards 1`] = `
         "security": Object {
           "apiKeyServiceSettings": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings",
           "clusterPrivileges": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-cluster",
+          "definingRoles": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/defining-roles.html",
           "elasticsearchEnableApiKeys": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings",
           "elasticsearchEnableSecurity": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/configuring-stack-security.html",
           "elasticsearchSettings": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html",
@@ -713,7 +714,7 @@ exports[`guide cards snapshots should render observability cards 1`] = `
           "createEsqlRuleType": "https://www.elastic.co/guide/en/security/mocked-test-branch/rules-ui-create.html#create-esql-rule",
           "endpointArtifacts": "https://www.elastic.co/guide/en/security/mocked-test-branch/endpoint-artifacts.html",
           "entityAnalytics": Object {
-            "entityRiskScoring": "https://www.elastic.co/guide/en/security/mocked-test-branch/advanced-entity-analytics-overview.html#entity-risk-scoring",
+            "entityRiskScoring": "https://www.elastic.co/guide/en/security/mocked-test-branch/advanced-entity-analytics-overview.html",
             "hostRiskScore": "https://www.elastic.co/guide/en/security/mocked-test-branch/host-risk-score.html",
             "riskScorePrerequisites": "https://www.elastic.co/guide/en/security/mocked-test-branch/ers-requirements.html",
             "userRiskScore": "https://www.elastic.co/guide/en/security/mocked-test-branch/user-risk-score.html",
@@ -1695,6 +1696,7 @@ exports[`guide cards snapshots should render search cards 1`] = `
         "security": Object {
           "apiKeyServiceSettings": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings",
           "clusterPrivileges": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-cluster",
+          "definingRoles": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/defining-roles.html",
           "elasticsearchEnableApiKeys": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings",
           "elasticsearchEnableSecurity": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/configuring-stack-security.html",
           "elasticsearchSettings": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html",
@@ -1712,7 +1714,7 @@ exports[`guide cards snapshots should render search cards 1`] = `
           "createEsqlRuleType": "https://www.elastic.co/guide/en/security/mocked-test-branch/rules-ui-create.html#create-esql-rule",
           "endpointArtifacts": "https://www.elastic.co/guide/en/security/mocked-test-branch/endpoint-artifacts.html",
           "entityAnalytics": Object {
-            "entityRiskScoring": "https://www.elastic.co/guide/en/security/mocked-test-branch/advanced-entity-analytics-overview.html#entity-risk-scoring",
+            "entityRiskScoring": "https://www.elastic.co/guide/en/security/mocked-test-branch/advanced-entity-analytics-overview.html",
             "hostRiskScore": "https://www.elastic.co/guide/en/security/mocked-test-branch/host-risk-score.html",
             "riskScorePrerequisites": "https://www.elastic.co/guide/en/security/mocked-test-branch/ers-requirements.html",
             "userRiskScore": "https://www.elastic.co/guide/en/security/mocked-test-branch/user-risk-score.html",
@@ -2686,6 +2688,7 @@ exports[`guide cards snapshots should render security cards 1`] = `
         "security": Object {
           "apiKeyServiceSettings": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings",
           "clusterPrivileges": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-cluster",
+          "definingRoles": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/defining-roles.html",
           "elasticsearchEnableApiKeys": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings",
           "elasticsearchEnableSecurity": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/configuring-stack-security.html",
           "elasticsearchSettings": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html",
@@ -2703,7 +2706,7 @@ exports[`guide cards snapshots should render security cards 1`] = `
           "createEsqlRuleType": "https://www.elastic.co/guide/en/security/mocked-test-branch/rules-ui-create.html#create-esql-rule",
           "endpointArtifacts": "https://www.elastic.co/guide/en/security/mocked-test-branch/endpoint-artifacts.html",
           "entityAnalytics": Object {
-            "entityRiskScoring": "https://www.elastic.co/guide/en/security/mocked-test-branch/advanced-entity-analytics-overview.html#entity-risk-scoring",
+            "entityRiskScoring": "https://www.elastic.co/guide/en/security/mocked-test-branch/advanced-entity-analytics-overview.html",
             "hostRiskScore": "https://www.elastic.co/guide/en/security/mocked-test-branch/host-risk-score.html",
             "riskScorePrerequisites": "https://www.elastic.co/guide/en/security/mocked-test-branch/ers-requirements.html",
             "userRiskScore": "https://www.elastic.co/guide/en/security/mocked-test-branch/user-risk-score.html",
