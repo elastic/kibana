@@ -187,6 +187,7 @@ export const ControlEditor = ({
           const keyPadMenuItem = (
             <EuiKeyPadMenuItem
               key={controlType}
+              id={`create__${controlType}`}
               aria-label={factory.getDisplayName()}
               data-test-subj={`create__${controlType}`}
               isSelected={controlType === selectedControlType}
@@ -200,6 +201,7 @@ export const ControlEditor = ({
 
           return disabled ? (
             <EuiToolTip
+              key={`disabled__${controlType}`}
               content={ControlGroupStrings.manageControl.dataSource.getControlTypeErrorMessage({
                 fieldSelected: Boolean(selectedField),
                 controlType,
