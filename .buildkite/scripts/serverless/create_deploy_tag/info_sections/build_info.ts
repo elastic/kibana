@@ -79,13 +79,7 @@ export async function getQAFBuildContainingCommit(
   const qafBuilds = await buildkite.getBuildsAfterDate(QA_FTR_TEST_SLUG, date, 30);
   qafBuilds.reverse();
 
-  if (commitSha === '8362b85885bb384e37620871b121f3dd65458955') {
-    console.log(
-      'Checking QAF builds: ',
-      qafBuilds.map((b) => b.number)
-    );
-    console.log('One build looks like: ', qafBuilds[0]);
-  }
+  console.log('For kibana commit: ' + commitSha + ' found ' + qafBuilds.length + ' builds');
 
   // Find the first build that contains this commit
   const build = qafBuilds
@@ -97,12 +91,8 @@ export async function getQAFBuildContainingCommit(
       const buildkiteBuildShaIndex = commitShaList.findIndex((c) => c.sha === kibanaCommitSha);
       const commitShaIndex = commitShaList.findIndex((c) => c.sha === commitSha);
 
-      console.log('Checking QAF build: ', {
-        url: kbBuild.url,
-        started_at: kbBuild.started_at,
-        state: kbBuild.state,
-      });
       console.log({
+        url: kbBuild.url,
         kibanaCommitSha,
         commitShaIndex,
         buildkiteBuildShaIndex,
