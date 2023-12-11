@@ -29,12 +29,6 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
       const CLOUD_PROVIDERS = ['gcp', 'aws', 'azure'];
       const CLOUD_REGION = ['eu-central-1', 'us-east-1', 'area-51'];
 
-      // "ignore_above": 1024 in mapping
-      const DEGRADED_LOG_LEVEL = MORE_THAN_1024_CHARS;
-
-      // "ignore_above": 1024 in mapping
-      const DEGRADED_CLOUD_REGION = MORE_THAN_1024_CHARS;
-
       const CLUSTER = [
         { clusterId: generateShortId(), clusterName: 'synth-cluster-1' },
         { clusterId: generateShortId(), clusterName: 'synth-cluster-2' },
@@ -76,7 +70,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           .create()
           .dataset('synth.2')
           .message(MESSAGE_LOG_LEVELS[index].message as string)
-          .logLevel(isMalformed ? DEGRADED_LOG_LEVEL : MESSAGE_LOG_LEVELS[index].level)
+          .logLevel(isMalformed ? MORE_THAN_1024_CHARS : MESSAGE_LOG_LEVELS[index].level) // "ignore_above": 1024 in mapping
           .service(SERVICE_NAMES[index])
           .defaults({
             'trace.id': generateShortId(),
@@ -101,7 +95,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           .create()
           .dataset('synth.3')
           .message(MESSAGE_LOG_LEVELS[index].message as string)
-          .logLevel(isMalformed ? DEGRADED_LOG_LEVEL : MESSAGE_LOG_LEVELS[index].level)
+          .logLevel(isMalformed ? MORE_THAN_1024_CHARS : MESSAGE_LOG_LEVELS[index].level) // "ignore_above": 1024 in mapping
           .service(SERVICE_NAMES[index])
           .defaults({
             'trace.id': generateShortId(),
@@ -112,7 +106,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
             'cloud.region': CLOUD_REGION[index],
             'cloud.availability_zone': isMalformed
-              ? DEGRADED_CLOUD_REGION
+              ? MORE_THAN_1024_CHARS // "ignore_above": 1024 in mapping
               : `${CLOUD_REGION[index]}a`,
             'cloud.project.id': generateShortId(),
             'cloud.instance.id': generateShortId(),
