@@ -97,18 +97,20 @@ export async function getQAFBuildContainingCommit(
       const buildkiteBuildShaIndex = commitShaList.findIndex((c) => c.sha === kibanaCommitSha);
       const commitShaIndex = commitShaList.findIndex((c) => c.sha === commitSha);
 
-      if (commitSha === '8362b85885bb384e37620871b121f3dd65458955') {
-        console.log('Checking QAF build: ', {
-          url: kbBuild.url,
-          started_at: kbBuild.started_at,
-          state: kbBuild.state,
-        });
-        console.log({
-          kibanaCommitSha,
-          commitShaIndex,
-          buildkiteBuildShaIndex,
-        });
-      }
+      console.log('Checking QAF build: ', {
+        url: kbBuild.url,
+        started_at: kbBuild.started_at,
+        state: kbBuild.state,
+      });
+      console.log({
+        kibanaCommitSha,
+        commitShaIndex,
+        buildkiteBuildShaIndex,
+        willMark:
+          commitShaIndex !== -1 &&
+          buildkiteBuildShaIndex !== -1 &&
+          buildkiteBuildShaIndex <= commitShaIndex,
+      });
 
       return (
         commitShaIndex !== -1 &&
