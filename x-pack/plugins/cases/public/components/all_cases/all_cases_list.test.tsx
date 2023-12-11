@@ -1083,32 +1083,34 @@ describe('AllCasesListGeneric', () => {
         });
       });
 
-      it.only('should reset the assignees when deactivating the filter', async () => {
+      it('should reset the assignees when deactivating the filter', async () => {
         useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
 
         appMockRenderer.render(<AllCasesList />);
 
         const assigneesButton = screen.getByTestId('options-filter-popover-button-assignees');
         userEvent.click(assigneesButton);
-        // await waitForEuiPopoverOpen();
         userEvent.click(screen.getByText('Damaged Raccoon'));
-        console.log(3);
-
         expect(within(assigneesButton).getByLabelText('1 active filters')).toBeInTheDocument();
 
         userEvent.click(screen.getByRole('button', { name: 'More' }));
-        console.log(4);
         await waitForEuiPopoverOpen();
         userEvent.click(screen.getByRole('option', { name: 'Assignees' }));
-        console.log(5);
 
         expect(useGetCasesMock).toHaveBeenLastCalledWith({
           filterOptions: {
             ...DEFAULT_FILTER_OPTIONS,
+            owner: [SECURITY_SOLUTION_OWNER],
             assignees: [],
           },
           queryParams: DEFAULT_QUERY_PARAMS,
         });
+
+        userEvent.click(screen.getByRole('button', { name: 'More' }));
+        await waitForEuiPopoverOpen();
+        userEvent.click(screen.getByRole('option', { name: 'Assignees' }));
+
+        expect(within(assigneesButton).getByLabelText('2 filters filters')).toBeInTheDocument();
       });
     });
   });

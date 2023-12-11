@@ -24,14 +24,17 @@ import { MAX_ASSIGNEES_FILTER_LENGTH } from '../../../common/constants';
 export const NO_ASSIGNEES_VALUE = null;
 
 export interface AssigneesFilterPopoverProps {
-  selectedAssignees: AssigneesFilteringSelection[];
+  selectedAssignees: Array<string | null>;
   currentUserProfile: CurrentUserProfile;
   isLoading: boolean;
-  onSelectionChange: (users: AssigneesFilteringSelection[]) => void;
+  onSelectionChange: (params: {
+    filterId: string;
+    selectedOptionKeys: Array<string | null>;
+  }) => void;
 }
 
 const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = ({
-  selectedAssignees,
+  selectedAssignees: selectedAssigneesUids,
   currentUserProfile,
   isLoading,
   onSelectionChange,
@@ -48,8 +51,10 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
   const onChange = useCallback(
     (users: AssigneesFilteringSelection[]) => {
       const sortedUsers = orderAssigneesIncludingNone(currentUserProfile, users);
-
-      onSelectionChange(sortedUsers);
+      onSelectionChange({
+        filterId: 'assignees',
+        selectedOptionKeys: sortedUsers.map((user) => user?.uid ?? null),
+      });
     },
     [currentUserProfile, onSelectionChange]
   );
@@ -88,15 +93,13 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
     return sortedUsers;
   }, [currentUserProfile, userProfiles, searchTerm]);
 
-  const isLoadingData = isLoading || isLoadingSuggest;
-  console.log({
-    // selectedAssignees,
-    userProfiles,
-    // searchResultProfiles,
-    // owners,
-    // currentUserProfile,
-    // isLoadingSuggest,
+  const selectedAssignees = selectedAssigneesUids.map((uuid) => {
+    const userProfile = searchResultProfiles.find((user) => user?.uid === uuid) ?? null;
+    return userProfile;
   });
+
+  const isLoadingData = isLoading || isLoadingSuggest;
+
   return (
     <UserProfilesPopover
       isOpen={isPopoverOpen}
@@ -111,6 +114,7 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
           onClick={togglePopover}
           isLoading={isLoadingData}
           isSelected={isPopoverOpen}
+          numFilters={searchResultProfiles.length}
           hasActiveFilters={selectedAssignees.length > 0}
           numActiveFilters={selectedAssignees.length}
           aria-label={i18n.FILTER_ASSIGNEES_ARIA_LABEL}

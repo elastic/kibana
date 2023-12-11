@@ -364,7 +364,7 @@ describe('Cases API', () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          assignees: null,
+          assignees: [],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
