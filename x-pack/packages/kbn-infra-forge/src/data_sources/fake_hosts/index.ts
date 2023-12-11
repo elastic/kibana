@@ -149,6 +149,7 @@ export const generateEvent = (index: number, timestamp: Moment, interval: number
           },
         },
       },
+      tags: [`${randomBetween(1, 4, 1)}`],
     },
   ];
 };

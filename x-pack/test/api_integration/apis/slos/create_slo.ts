@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { cleanup } from '@kbn/infra-forge';
 import expect from '@kbn/expect';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 import { SO_SLO_TYPE } from '@kbn/observability-plugin/server/saved_objects';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
+import { loadTestData } from './helper/load_test_data';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('Create SLOs', function () {
@@ -17,6 +19,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     const supertestAPI = getService('supertest');
     const kibanaServer = getService('kibanaServer');
+    const esClient = getService('es');
+    const logger = getService('log');
 
     let _createSLOInput: CreateSLOInput;
     let createSLOInput: CreateSLOInput;
@@ -24,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       _createSLOInput = getFixtureJson('create_slo');
+      await loadTestData(getService);
     });
 
     beforeEach(() => {
@@ -32,6 +37,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     afterEach(async () => {
       await kibanaServer.savedObjects.clean({ types: [SO_SLO_TYPE] });
+    });
+
+    after(async () => {
+      await cleanup({ esClient, logger });
     });
 
     it('creates a new slo and transforms', async () => {
@@ -59,15 +68,15 @@ export default function ({ getService }: FtrProviderContext) {
         createdAt: savedObject.saved_objects[0].attributes.createdAt,
         description: 'Fixture for api integration tests',
         enabled: true,
-        groupBy: 'host',
+        groupBy: 'tags',
         id,
         indicator: {
           params: {
-            filter: 'dataset : *',
-            good: 'latency < 90',
-            index: 'service-logs*',
+            filter: 'system.network.name: eth1',
+            good: 'container.cpu.user.pct < 6',
+            index: 'kbn-data-forge*',
             timestampField: '@timestamp',
-            total: 'latency: *',
+            total: 'container.cpu.user.pct: *',
           },
           type: 'sli.kql.custom',
         },
@@ -105,13 +114,22 @@ export default function ({ getService }: FtrProviderContext) {
             version: '10.0.0',
             create_time: rollUpTransformResponse.body.transforms[0].create_time,
             source: {
-              index: ['service-logs*'],
+              index: ['kbn-data-forge*'],
               query: {
                 bool: {
                   filter: [
                     { range: { '@timestamp': { gte: 'now-30d/d' } } },
                     {
-                      bool: { should: [{ exists: { field: 'dataset' } }], minimum_should_match: 1 },
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              'system.network.name': 'eth1',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
                     },
                   ],
                 },
@@ -134,22 +152,25 @@ export default function ({ getService }: FtrProviderContext) {
               group_by: {
                 'slo.id': { terms: { field: 'slo.id' } },
                 'slo.revision': { terms: { field: 'slo.revision' } },
-                'slo.instanceId': { terms: { field: 'host' } },
-                'slo.groupings.host': { terms: { field: 'host' } },
+                'slo.instanceId': { terms: { field: 'tags' } },
+                'slo.groupings.tags': { terms: { field: 'tags' } },
                 '@timestamp': { date_histogram: { field: '@timestamp', fixed_interval: '1m' } },
               },
               aggregations: {
                 'slo.numerator': {
                   filter: {
                     bool: {
-                      should: [{ range: { latency: { lt: '90' } } }],
+                      should: [{ range: { 'container.cpu.user.pct': { lt: '6' } } }],
                       minimum_should_match: 1,
                     },
                   },
                 },
                 'slo.denominator': {
                   filter: {
-                    bool: { should: [{ exists: { field: 'latency' } }], minimum_should_match: 1 },
+                    bool: {
+                      should: [{ exists: { field: 'container.cpu.user.pct' } }],
+                      minimum_should_match: 1,
+                    },
                   },
                 },
               },
@@ -200,7 +221,9 @@ export default function ({ getService }: FtrProviderContext) {
                 'slo.id': { terms: { field: 'slo.id' } },
                 'slo.revision': { terms: { field: 'slo.revision' } },
                 'slo.instanceId': { terms: { field: 'slo.instanceId' } },
-                'slo.groupings.host': { terms: { field: 'slo.groupings.host' } },
+                'slo.groupings.tags': {
+                  terms: { field: 'slo.groupings.tags' },
+                },
                 'service.name': { terms: { field: 'service.name', missing_bucket: true } },
                 'service.environment': {
                   terms: { field: 'service.environment', missing_bucket: true },

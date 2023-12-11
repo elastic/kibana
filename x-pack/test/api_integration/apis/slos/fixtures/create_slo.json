@@ -4,10 +4,10 @@
     "indicator": {
       "type": "sli.kql.custom",
       "params": {
-        "index": "service-logs*",
-        "filter": "dataset : *",
-        "good": "latency < 90",
-        "total": "latency: *",
+        "index": "kbn-data-forge*",
+        "filter": "system.network.name: eth1",
+        "good": "container.cpu.user.pct < 6",
+        "total": "container.cpu.user.pct: *",
         "timestampField": "@timestamp"
       }
     },
@@ -22,5 +22,5 @@
     "tags": [
       "test"
     ],
-    "groupBy": "host"
+    "groupBy": "tags"
 }
