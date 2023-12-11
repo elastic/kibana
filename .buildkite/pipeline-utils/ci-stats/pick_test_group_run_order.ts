@@ -236,13 +236,21 @@ export async function pickTestGroupRunOrder() {
 
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
-  const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
+  let jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
     ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
         cwd: process.cwd(),
         absolute: false,
         ignore: DISABLED_JEST_CONFIGS,
       })
     : [];
+
+  const target = jestUnitConfigs.find((e) => e.includes('index_management'));
+  if (target) {
+    console.log('Found', { target });
+    jestUnitConfigs = new Array(20).fill(target);
+  } else {
+    console.log('Not found target.');
+  }
 
   const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
     ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
