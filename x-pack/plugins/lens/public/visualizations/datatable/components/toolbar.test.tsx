@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
+import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { getButtonGroupInputValue } from '@kbn/rtl-eui';
 import { DataTableToolbar } from './toolbar';
 import { DatatableVisualizationState } from '../visualization';
 import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
 import { PagingState } from '../../../../common/expressions';
-import { fireEvent, render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -53,16 +53,6 @@ describe('datatable toolbar', () => {
 
     const togglePopover = () => {
       userEvent.click(screen.getByRole('button', { name: /visual options/i }));
-    };
-
-    const getButtonGroupInputValue = (testId: string) => () => {
-      const buttonGroup = screen.getByTestId(testId);
-      const options = within(buttonGroup).getAllByRole('radio');
-      const checkedOption = options.find((option) => option.getAttribute('checked') === '');
-      if (checkedOption == null) {
-        throw new Error(`No checked option found in button group ${testId}`);
-      }
-      return checkedOption.nextSibling;
     };
 
     const selectOptionFromButtonGroup = (testId: string) => (optionName: string | RegExp) => {
