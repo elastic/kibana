@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ExecutionContextSearch } from '@kbn/data-plugin/public';
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { formulaIntervalFn, formulaNowFn, formulaTimeRangeFn } from './context_fns';
@@ -17,7 +16,7 @@ describe('interval', () => {
       getSearchContext: () => ({
         /* no time range */
       }),
-    } as ExecutionContext<Adapters, ExecutionContextSearch>);
+    } as ExecutionContext<Adapters>);
     expect(result).toEqual(0);
   });
 
@@ -34,7 +33,7 @@ describe('interval', () => {
             to: 'now',
           },
         }),
-      } as ExecutionContext<Adapters, ExecutionContextSearch>
+      } as ExecutionContext<Adapters>
     );
     expect(result).toEqual(0);
   });
@@ -47,7 +46,7 @@ describe('interval', () => {
           to: 'now',
         },
       }),
-    } as ExecutionContext<Adapters, ExecutionContextSearch>);
+    } as ExecutionContext<Adapters>);
     expect(result).toEqual(10000);
   });
 });
@@ -59,7 +58,7 @@ describe('time range', () => {
       getSearchContext: () => ({
         /* no time range */
       }),
-    } as ExecutionContext<Adapters, ExecutionContextSearch>);
+    } as ExecutionContext<Adapters>);
     expect(result).toEqual(0);
   });
 
@@ -72,7 +71,7 @@ describe('time range', () => {
         },
         now: 1000000, // important to provide this to make the result consistent
       }),
-    } as ExecutionContext<Adapters, ExecutionContextSearch>);
+    } as ExecutionContext<Adapters>);
 
     expect(result).toBe(900000);
   });
@@ -86,7 +85,7 @@ describe('now', () => {
         getSearchContext: () => ({
           now,
         }),
-      } as ExecutionContext<Adapters, ExecutionContextSearch>)
+      } as ExecutionContext<Adapters>)
     ).toEqual(now);
   });
 });

@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  type ExecutionContextSearch,
-  getAbsoluteTimeRange,
-  calcAutoIntervalNear,
-} from '@kbn/data-plugin/common';
+import { getAbsoluteTimeRange, calcAutoIntervalNear } from '@kbn/data-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
@@ -38,7 +34,7 @@ export const formulaTimeRangeFn: ExpressionFunctionFormulaTimeRange = {
   args: {},
 
   fn(_input, _args, { getSearchContext }) {
-    const { timeRange, now } = getSearchContext() as ExecutionContextSearch;
+    const { timeRange, now } = getSearchContext();
     return getTimeRangeAsNumber(timeRange, now);
   },
 };
@@ -69,7 +65,7 @@ export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
   },
 
   fn(_input, args, { getSearchContext }) {
-    const { timeRange, now } = getSearchContext() as ExecutionContextSearch;
+    const { timeRange, now } = getSearchContext();
     return timeRange && args.targetBars
       ? calcAutoIntervalNear(args.targetBars, getTimeRangeAsNumber(timeRange, now)).asMilliseconds()
       : 0;
@@ -93,6 +89,6 @@ export const formulaNowFn: ExpressionFunctionFormulaNow = {
   args: {},
 
   fn(_input, _args, { getSearchContext }) {
-    return (getSearchContext() as ExecutionContextSearch).now ?? Date.now();
+    return getSearchContext().now ?? Date.now();
   },
 };
