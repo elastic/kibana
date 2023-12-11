@@ -7,6 +7,7 @@
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { riskEngineDisableRoute } from './disable';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { RISK_ENGINE_DISABLE_URL } from '../../../../../common/constants';
 import {
@@ -15,6 +16,27 @@ import {
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 import { riskEngineDataClientMock } from '../risk_engine_data_client.mock';
+
+const createMockSecurityStart = () => {
+  const mockSecurityStart = securityMock.createStart();
+
+  const mockCheckPrivileges = jest.fn().mockResolvedValue({
+    hasAllRequested: true,
+    privileges: {
+      elasticsearch: {
+        cluster: ['manage', 'monitor'],
+        index: {
+          'index-name': ['all'],
+        },
+      },
+    },
+  });
+  mockSecurityStart.authz.checkPrivilegesDynamicallyWithRequest = jest
+    .fn()
+    .mockReturnValue(mockCheckPrivileges);
+
+  return mockSecurityStart;
+};
 
 describe('risk score disable route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -50,7 +72,10 @@ describe('risk score disable route', () => {
     beforeEach(() => {
       getStartServicesMock = jest
         .fn()
-        .mockResolvedValue([{}, { taskManager: mockTaskManagerStart }]);
+        .mockResolvedValue([
+          {},
+          { taskManager: mockTaskManagerStart, security: createMockSecurityStart() },
+        ]);
       riskEngineDisableRoute(server.router, getStartServicesMock);
     });
 
@@ -84,7 +109,9 @@ describe('risk score disable route', () => {
 
   describe('when task manager is unavailable', () => {
     beforeEach(() => {
-      getStartServicesMock = jest.fn().mockResolvedValueOnce([{}, { taskManager: undefined }]);
+      getStartServicesMock = jest
+        .fn()
+        .mockResolvedValue([{}, { taskManager: undefined, security: createMockSecurityStart() }]);
       riskEngineDisableRoute(server.router, getStartServicesMock);
     });
 
