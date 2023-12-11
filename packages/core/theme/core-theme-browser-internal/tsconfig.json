@@ -18,6 +18,7 @@
     "@kbn/core-injected-metadata-browser-mocks",
     "@kbn/test-jest-helpers",
     "@kbn/react-kibana-context-theme",
+    "@kbn/core-injected-metadata-common-internal",
   ],
   "exclude": [
     "target/**/*",
