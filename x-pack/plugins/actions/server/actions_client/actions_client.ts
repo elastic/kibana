@@ -688,7 +688,7 @@ export class ActionsClient {
       AuthorizationMode.RBAC
     ) {
       const additionalPrivileges = this.getSystemActionKibanaPrivileges(actionId, params);
-      let actionTypeId: string = '';
+      let actionTypeId: string | undefined;
 
       try {
         if (this.isPreconfigured(actionId)) {
@@ -696,7 +696,7 @@ export class ActionsClient {
             (inMemoryConnector) => inMemoryConnector.id === actionId
           );
 
-          actionTypeId = connector?.actionTypeId ?? '';
+          actionTypeId = connector?.actionTypeId;
         } else {
           // TODO: Optimize so we don't do another get on top of getAuthorizationModeBySource and within the actionExecutor.execute
           const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
