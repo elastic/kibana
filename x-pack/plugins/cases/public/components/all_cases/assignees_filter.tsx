@@ -114,7 +114,6 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
           onClick={togglePopover}
           isLoading={isLoadingData}
           isSelected={isPopoverOpen}
-          numFilters={availableOwners.length}
           hasActiveFilters={selectedAssignees.length > 0}
           numActiveFilters={selectedAssignees.length}
           aria-label={i18n.FILTER_ASSIGNEES_ARIA_LABEL}
