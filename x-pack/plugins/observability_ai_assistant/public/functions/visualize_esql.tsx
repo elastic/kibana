@@ -6,7 +6,13 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiToolTip,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -106,17 +112,24 @@ function ESQLLens({
               </EuiButton>
             </EuiFlexItem> */}
             <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="observabilityAiAssistantLensSaveButton"
-                iconType="save"
-                onClick={() => {
-                  setIsSaveModalOpen(() => true);
-                }}
-              >
-                {i18n.translate('xpack.observabilityAiAssistant.lensFunction.save', {
-                  defaultMessage: 'Save',
+              <EuiToolTip
+                content={i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.save', {
+                  defaultMessage: 'Save visualization',
                 })}
-              </EuiButton>
+              >
+                <EuiButtonIcon
+                  size="xs"
+                  iconType="save"
+                  onClick={() => setIsSaveModalOpen(true)}
+                  data-test-subj="observabilityAiAssistantLensESQLSaveButton"
+                  aria-label={i18n.translate(
+                    'xpack.observabilityAiAssistant.lensESQLFunction.save',
+                    {
+                      defaultMessage: 'Save visualization',
+                    }
+                  )}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

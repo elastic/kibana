@@ -73,7 +73,7 @@ export function EsqlCodeBlock({
               <EuiButtonEmpty
                 data-test-subj="observabilityAiAssistantEsqlCodeBlockVisualizeThisQueryButton"
                 size="xs"
-                iconType="play"
+                iconType="lensApp"
                 onClick={() =>
                   onActionClick({ type: ChatActionClickType.visualizeEsqlQuery, query: value })
                 }
