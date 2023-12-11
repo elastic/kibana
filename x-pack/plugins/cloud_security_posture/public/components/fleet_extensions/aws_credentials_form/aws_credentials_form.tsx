@@ -24,7 +24,7 @@ import {
   AwsCredentialsTypeOptions,
   getAwsCredentialsFormManualOptions,
 } from './get_aws_credentials_form_options';
-import { RadioGroup } from '../csp_boxed_radio_group';
+import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { SetupFormat, useAwsCredentialsForm } from './hooks';
 import { AWS_ORGANIZATION_ACCOUNT } from '../policy_template_form';
@@ -54,16 +54,18 @@ export const AWSSetupInfoContent = ({ info }: AWSSetupInfoContentProps) => {
   );
 };
 
-const getSetupFormatOptions = (): Array<{ id: SetupFormat; label: string }> => [
+const getSetupFormatOptions = (): CspRadioOption[] => [
   {
     id: 'cloud_formation',
     label: 'CloudFormation',
+    testId: 'aws-cloudformation-setup-option',
   },
   {
     id: 'manual',
     label: i18n.translate('xpack.csp.awsIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
+    testId: 'aws-manual-setup-option',
   },
 ];
 
@@ -292,6 +294,7 @@ export const AwsCredentialTypeSelector = ({
       onChange={(optionElem) => {
         onChange(optionElem.target.value as AwsCredentialsType);
       }}
+      data-test-subj={'aws-credentials-type-selector'}
     />
   </EuiFormRow>
 );

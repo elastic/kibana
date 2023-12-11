@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   CspPolicyTemplateForm,
   AWS_ORGANIZATION_ACCOUNT,
@@ -15,6 +16,7 @@ import {
 } from './policy_template_form';
 import { TestProvider } from '../../test/test_provider';
 import {
+  getMockAgentlessAgentPolicy,
   getMockPackageInfoCspmAWS,
   getMockPackageInfoCspmAzure,
   getMockPackageInfoCspmGCP,
@@ -32,7 +34,6 @@ import type {
   PackageInfo,
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
-import userEvent from '@testing-library/user-event';
 import { getPosturePolicy } from './utils';
 import {
   CLOUDBEAT_AWS,
@@ -45,6 +46,7 @@ import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 import { CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS } from './gcp_credential_form';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -94,12 +96,14 @@ describe('<CspPolicyTemplateForm />', () => {
     edit = false,
     agentPolicy,
     packageInfo = {} as PackageInfo,
+    agentlessPolicy,
   }: {
     edit?: boolean;
     newPolicy: NewPackagePolicy;
     agentPolicy?: AgentPolicy;
     packageInfo?: PackageInfo;
     onChange?: jest.Mock<void, [NewPackagePolicy]>;
+    agentlessPolicy?: AgentPolicy;
   }) => (
     <TestProvider>
       {edit && (
@@ -110,6 +114,7 @@ describe('<CspPolicyTemplateForm />', () => {
           packageInfo={packageInfo}
           isEditPage={true}
           agentPolicy={agentPolicy}
+          agentlessPolicy={agentlessPolicy}
         />
       )}
       {!edit && (
@@ -119,6 +124,7 @@ describe('<CspPolicyTemplateForm />', () => {
           packageInfo={packageInfo}
           isEditPage={false}
           agentPolicy={agentPolicy}
+          agentlessPolicy={agentlessPolicy}
         />
       )}
     </TestProvider>
@@ -1433,6 +1439,108 @@ describe('<CspPolicyTemplateForm />', () => {
         isValid: true,
         updatedPolicy: policy,
       });
+    });
+  });
+
+  describe('Agentless', () => {
+    it('should render setup technology selector for AWS and allow to select agent-based', async () => {
+      const agentlessPolicy = getMockAgentlessAgentPolicy();
+      const newPackagePolicy = getMockPolicyAWS();
+
+      const { getByTestId, getByRole } = render(
+        <WrappedComponent newPolicy={newPackagePolicy} agentlessPolicy={agentlessPolicy} />
+      );
+
+      // TODO: move test ids to constants
+      const setupTechnologySelectorAccordion = getByTestId('setup-technology-selector-accordion');
+      const setupTechnologySelector = getByTestId('setup-technology-selector');
+      const awsCredentialsTypeSelector = getByTestId('aws-credentials-type-selector');
+      const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
+        'option'
+      );
+      const optionValues = options.map((option) => option.value);
+
+      // default state
+      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(options).toHaveLength(2);
+      expect(optionValues).toEqual(
+        expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+      );
+
+      // select agent-based and check for cloudformation option
+      userEvent.click(setupTechnologySelector);
+      const agentBasedOption = getByRole('option', { name: /agent-based/i });
+      await waitForEuiPopoverOpen();
+      userEvent.click(agentBasedOption);
+      await waitFor(() => {
+        expect(getByTestId('aws-cloudformation-setup-option')).toBeInTheDocument();
+        expect(getByTestId('aws-manual-setup-option')).toBeInTheDocument();
+      });
+    });
+
+    it('should not render setup technology selector for KSPM', () => {
+      const agentlessPolicy = getMockAgentlessAgentPolicy();
+      const newPackagePolicy = getMockPolicyEKS();
+
+      const { queryByTestId } = render(
+        <WrappedComponent newPolicy={newPackagePolicy} agentlessPolicy={agentlessPolicy} />
+      );
+
+      const setupTechnologySelectorAccordion = queryByTestId('setup-technology-selector-accordion');
+
+      expect(setupTechnologySelectorAccordion).not.toBeInTheDocument();
+    });
+
+    it('should not render setup technology selector for CNVM', () => {
+      const agentlessPolicy = getMockAgentlessAgentPolicy();
+      const newPackagePolicy = getMockPolicyVulnMgmtAWS();
+
+      const { queryByTestId } = render(
+        <WrappedComponent newPolicy={newPackagePolicy} agentlessPolicy={agentlessPolicy} />
+      );
+
+      const setupTechnologySelectorAccordion = queryByTestId('setup-technology-selector-accordion');
+
+      expect(setupTechnologySelectorAccordion).not.toBeInTheDocument();
+    });
+
+    it('should not render setup technology selector for CSPM GCP', () => {
+      const agentlessPolicy = getMockAgentlessAgentPolicy();
+      const newPackagePolicy = getMockPolicyGCP();
+
+      const { queryByTestId } = render(
+        <WrappedComponent
+          newPolicy={newPackagePolicy}
+          packageInfo={getMockPackageInfoCspmGCP()}
+          agentlessPolicy={agentlessPolicy}
+        />
+      );
+
+      const setupTechnologySelectorAccordion = queryByTestId('setup-technology-selector-accordion');
+
+      expect(setupTechnologySelectorAccordion).not.toBeInTheDocument();
+    });
+
+    it('should not render setup technology selector for CSPM Azure', () => {
+      const agentlessPolicy = getMockAgentlessAgentPolicy();
+      let newPackagePolicy = getMockPolicyAzure();
+      newPackagePolicy = getPosturePolicy(newPackagePolicy, CLOUDBEAT_AZURE, {
+        'azure.credentials.type': { value: 'service_principal_with_client_certificate' },
+      });
+
+      const { queryByTestId } = render(
+        <WrappedComponent
+          newPolicy={newPackagePolicy}
+          packageInfo={getMockPackageInfoCspmAzure('1.7.0')}
+          agentlessPolicy={agentlessPolicy}
+        />
+      );
+
+      const setupTechnologySelectorAccordion = queryByTestId('setup-technology-selector-accordion');
+
+      expect(setupTechnologySelectorAccordion).not.toBeInTheDocument();
     });
   });
 

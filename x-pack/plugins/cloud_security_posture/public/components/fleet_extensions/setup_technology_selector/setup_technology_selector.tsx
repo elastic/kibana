@@ -100,6 +100,7 @@ export const SetupTechnologySelector = ({
             />
           </EuiLink>
         }
+        data-test-subj={'setup-technology-selector-accordion'}
       >
         <EuiSpacer size="l" />
         <EuiFormRow
@@ -125,6 +126,7 @@ export const SetupTechnologySelector = ({
             itemLayoutAlign="top"
             hasDividers
             fullWidth
+            data-test-subj={'setup-technology-selector'}
           />
         </EuiFormRow>
       </EuiAccordion>
