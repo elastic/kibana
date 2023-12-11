@@ -26,9 +26,9 @@ export const BENCHMARKS_API_CURRENT_VERSION = '1';
 export const FIND_CSP_BENCHMARK_RULE_ROUTE_PATH = '/internal/cloud_security_posture/rules/_find';
 export const FIND_CSP_BENCHMARK_RULE_API_CURRENT_VERSION = '1';
 
-export const CSP_BENCHMARK_RULE_BULK_ACTION_ROUTE_PATH =
+export const CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH =
   '/internal/cloud_security_posture/rules/_bulk_action';
-export const CSP_BENCHMARK_RULE_BULK_ACTION_API_CURRENT_VERSION = '1';
+export const CSP_BENCHMARK_RULES_BULK_ACTION_API_CURRENT_VERSION = '1';
 
 export const GET_DETECTION_RULE_ALERTS_STATUS_PATH =
   '/internal/cloud_security_posture/detection_engine_rules/alerts/_status';

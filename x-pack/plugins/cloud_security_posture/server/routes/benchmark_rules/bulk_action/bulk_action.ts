@@ -12,14 +12,14 @@ import {
 } from '../../../../common/types/rules/v3';
 import { CspRouter } from '../../../types';
 
-import { CSP_BENCHMARK_RULE_BULK_ACTION_ROUTE_PATH } from '../../../../common/constants';
+import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../../common/constants';
 import { bulkActionBenchmarkRulesHandler } from './v1';
 
 export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
   router.versioned
     .post({
       access: 'internal',
-      path: CSP_BENCHMARK_RULE_BULK_ACTION_ROUTE_PATH,
+      path: CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH,
     })
     .addVersion(
       {
@@ -41,16 +41,17 @@ export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
 
           const benchmarkRulesToUpdate = requestBody.rules;
 
-          const newCspSettings = await bulkActionBenchmarkRulesHandler(
+          const handlerResponse = await bulkActionBenchmarkRulesHandler(
             cspContext.soClient,
             benchmarkRulesToUpdate,
             requestBody.action,
             cspContext.logger
           );
 
+          const updatedBenchmarkRules = handlerResponse.attributes.rules;
           return response.ok({
             body: {
-              new_csp_settings: newCspSettings,
+              updated_benchmark_rules: updatedBenchmarkRules,
               message: 'The bulk operation has been executed successfully.',
             },
           });

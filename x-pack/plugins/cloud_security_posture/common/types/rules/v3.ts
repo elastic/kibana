@@ -157,7 +157,7 @@ const rulesStates = schema.recordOf(
 );
 
 export const cspSettingsSchema = schema.object({
-  rules_states: rulesStates,
+  rules: rulesStates,
 });
 
 export type CspBenchmarkRulesStates = TypeOf<typeof rulesStates>;
