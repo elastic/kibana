@@ -5,16 +5,6 @@
  * 2.0.
  */
 
-import { AggregateQuery, Filter, Query } from '@kbn/es-query';
-
-export interface AppState {
-  index?: string;
-  query?: Query | AggregateQuery;
-  filters?: Filter[];
-  columns?: string[];
-  sort?: string[][];
-}
-
 export interface DatasetLocatorDependencies {
   useHash: boolean;
 }
