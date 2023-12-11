@@ -169,13 +169,14 @@ export const dataLoaders = (
       endpointPackageVersion?: string;
       agentPolicyName?: string;
     }) => {
-      const { kbnClient, log } = await stackServicesPromise;
+      const { kbnClient, log, esClient } = await stackServicesPromise;
       return indexFleetEndpointPolicy(
         kbnClient,
         policyName,
         endpointPackageVersion,
         agentPolicyName,
-        log
+        log,
+        esClient
       );
     },
 
