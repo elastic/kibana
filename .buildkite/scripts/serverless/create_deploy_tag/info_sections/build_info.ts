@@ -77,8 +77,6 @@ export async function getQAFBuildContainingCommit(
   const qafBuilds = await buildkite.getBuildsAfterDate(QA_FTR_TEST_SLUG, date, 30);
   qafBuilds.reverse();
 
-  console.log('For kibana commit: ' + commitSha + ' found ' + qafBuilds.length + ' builds');
-
   // Find the first build that contains this commit
   const build = qafBuilds
     // Only search across scheduled builds, triggered builds might run with different commits
@@ -90,17 +88,6 @@ export async function getQAFBuildContainingCommit(
       const buildkiteBuildShaIndex = recentGitCommits.findIndex((c) => c.sha === kibanaCommitOfFTR);
 
       // Check if build.commit is after commitSha?
-      console.log({
-        url: kbBuild.url,
-        kibanaCommitOfFTR,
-        commitShaIndex,
-        buildkiteBuildShaIndex,
-        willMark:
-          commitShaIndex !== -1 &&
-          buildkiteBuildShaIndex !== -1 &&
-          buildkiteBuildShaIndex <= commitShaIndex,
-      });
-
       return (
         commitShaIndex !== -1 &&
         buildkiteBuildShaIndex !== -1 &&
