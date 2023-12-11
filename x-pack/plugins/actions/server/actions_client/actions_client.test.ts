@@ -3091,7 +3091,6 @@ describe('bulkEnqueueExecution()', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
         operation: 'execute',
       });
     });
