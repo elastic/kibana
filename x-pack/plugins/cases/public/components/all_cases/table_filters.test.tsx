@@ -12,7 +12,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 
-import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
+import { CaseStatuses, CustomFieldTypes, CaseSeverity } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -165,6 +165,18 @@ describe('CasesTableFilters ', () => {
         "assignees": Array [
           "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
         ],
+        "category": Array [],
+        "customFields": Object {},
+        "owner": Array [],
+        "reporters": Array [],
+        "search": "",
+        "searchFields": Array [
+          "title",
+          "description",
+        ],
+        "severity": Array [],
+        "status": Array [],
+        "tags": Array [],
       }
     `);
   });
@@ -206,12 +218,11 @@ describe('CasesTableFilters ', () => {
   it('should remove assignee from selected assignees when assignee no longer exists', async () => {
     const overrideProps = {
       ...props,
-      initial: {
+      filterOptions: {
         ...DEFAULT_FILTER_OPTIONS,
         assignees: [
           // invalid profile uid
           '123',
-          'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
         ],
       },
     };
@@ -233,6 +244,18 @@ describe('CasesTableFilters ', () => {
         "assignees": Array [
           "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
         ],
+        "category": Array [],
+        "customFields": Object {},
+        "owner": Array [],
+        "reporters": Array [],
+        "search": "",
+        "searchFields": Array [
+          "title",
+          "description",
+        ],
+        "severity": Array [],
+        "status": Array [],
+        "tags": Array [],
       }
     `);
   });
@@ -304,6 +327,32 @@ describe('CasesTableFilters ', () => {
       appMockRender.render(<CasesTableFilters {...props} />);
 
       expect(screen.getByTestId('options-filter-popover-button-assignees')).toBeInTheDocument();
+    });
+
+    it('shuld reset the assignees when deactivating the filter', async () => {
+      const overrideProps = {
+        ...props,
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          assignees: ['u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0'],
+        },
+      };
+      const license = licensingMock.createLicense({
+        license: { type: 'platinum' },
+      });
+
+      appMockRender = createAppMockRenderer({ license });
+      appMockRender.render(<CasesTableFilters {...overrideProps} />);
+
+      // deactivate the assignees filter
+      userEvent.click(screen.getByRole('button', { name: 'More' }));
+      await waitForEuiPopoverOpen();
+      userEvent.click(screen.getByRole('option', { name: 'Assignees' }));
+
+      expect(onFilterChanged).toHaveBeenCalledWith({
+        ...DEFAULT_FILTER_OPTIONS,
+        assignees: [],
+      });
     });
   });
 
@@ -534,7 +583,7 @@ describe('CasesTableFilters ', () => {
       userEvent.click(screen.getByRole('option', { name: 'Toggle' }));
       expect(screen.getByRole('button', { name: 'Toggle' })).toBeInTheDocument();
 
-      const filterBar = screen.getByTestId('cases-table-filters-group');
+      const filterBar = screen.getByTestId('cases-table-filters');
       const allFilters = within(filterBar).getAllByRole('button');
       const orderedFilterLabels = ['Severity', 'Status', 'Tags', 'Categories', 'Toggle', 'More'];
       orderedFilterLabels.forEach((label, index) => {
@@ -587,7 +636,7 @@ describe('CasesTableFilters ', () => {
       userEvent.click(screen.getByRole('option', { name: 'Status' }));
       expect(screen.queryByRole('button', { name: 'Status' })).not.toBeInTheDocument();
 
-      const filterBar = screen.getByTestId('cases-table-filters-group');
+      const filterBar = screen.getByTestId('cases-table-filters');
       const allFilters = within(filterBar).getAllByRole('button');
       const orderedFilterLabels = ['Severity', 'Tags', 'Categories', 'More'];
       orderedFilterLabels.forEach((label, index) => {
@@ -673,7 +722,7 @@ describe('CasesTableFilters ', () => {
 
       appMockRender.render(<CasesTableFilters {...props} />);
 
-      const filterBar = screen.getByTestId('cases-table-filters-group');
+      const filterBar = screen.getByTestId('cases-table-filters');
       let allFilters: HTMLElement[];
       await waitFor(() => {
         allFilters = within(filterBar).getAllByRole('button');
@@ -703,7 +752,7 @@ describe('CasesTableFilters ', () => {
 
       appMockRender.render(<CasesTableFilters {...props} />);
 
-      const filterBar = screen.getByTestId('cases-table-filters-group');
+      const filterBar = screen.getByTestId('cases-table-filters');
       let allFilters: HTMLElement[];
       await waitFor(() => {
         allFilters = within(filterBar).getAllByRole('button');
@@ -756,7 +805,7 @@ describe('CasesTableFilters ', () => {
     it('when a filter is active and isnt last in the list, it should move the filter to last position after deactivating and activating', async () => {
       appMockRender.render(<CasesTableFilters {...props} />);
 
-      const filterBar = screen.getByTestId('cases-table-filters-group');
+      const filterBar = screen.getByTestId('cases-table-filters');
       let allFilters = within(filterBar).getAllByRole('button');
       let orderedFilterLabels = ['Severity', 'Status', 'Tags', 'Categories', 'More'];
       orderedFilterLabels.forEach((label, index) => {
@@ -788,7 +837,7 @@ describe('CasesTableFilters ', () => {
       });
       appMockRender.render(<CasesTableFilters {...props} />);
 
-      const filterBar = screen.getByTestId('cases-table-filters-group');
+      const filterBar = screen.getByTestId('cases-table-filters');
       let allFilters: HTMLElement[];
       await waitFor(() => {
         allFilters = within(filterBar).getAllByRole('button');
@@ -856,5 +905,35 @@ describe('CasesTableFilters ', () => {
         ]
       `);
     });
+  });
+
+  it('should activate a filter when there is a value in the global state as this means that it has a value set in the url', async () => {
+    const previousState = [
+      { key: 'severity', isActive: false }, // notice severity filter not active
+      { key: 'status', isActive: false }, // notice status filter not active
+      { key: 'tags', isActive: true },
+      { key: 'category', isActive: false },
+    ];
+
+    localStorage.setItem('testAppId.cases.list.tableFiltersConfig', JSON.stringify(previousState));
+
+    const overrideProps = {
+      ...props,
+      filterOptions: {
+        ...DEFAULT_FILTER_OPTIONS,
+        severity: [CaseSeverity.MEDIUM], // but they have values
+        status: [CaseStatuses.open, CaseStatuses['in-progress']],
+      },
+    };
+
+    appMockRender.render(<CasesTableFilters {...overrideProps} />);
+
+    const statusButton = await screen.findByRole('button', { name: 'Status' });
+    expect(statusButton).toBeInTheDocument();
+    expect(within(statusButton).getByLabelText('2 active filters')).toBeInTheDocument();
+
+    const severityButton = await screen.findByRole('button', { name: 'Severity' });
+    expect(severityButton).toBeInTheDocument();
+    expect(within(severityButton).getByLabelText('1 active filters')).toBeInTheDocument();
   });
 });

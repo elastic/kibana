@@ -55,6 +55,7 @@ import {
   getListHandler,
   getInstalledListHandler,
   getLimitedListHandler,
+  getFileHandler,
   getInfoHandler,
   getBulkAssetsHandler,
   installPackageFromRegistryHandler,
@@ -69,7 +70,6 @@ import {
   createCustomIntegrationHandler,
   getInputsHandler,
 } from './handlers';
-import { getFileHandler } from './file_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 

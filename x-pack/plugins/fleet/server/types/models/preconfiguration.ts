@@ -11,7 +11,12 @@ import semverValid from 'semver/functions/valid';
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
 import type { PreconfiguredOutput } from '../../../common/types';
 
-import { ElasticSearchSchema, KafkaSchema, LogstashSchema } from './output';
+import {
+  ElasticSearchSchema,
+  KafkaSchema,
+  LogstashSchema,
+  RemoteElasticSearchSchema,
+} from './output';
 
 import { AgentPolicyBaseSchema } from './agent_policy';
 import { NamespaceSchema } from './package_policy';
@@ -87,6 +92,7 @@ export const PreconfiguredOutputsSchema = schema.arrayOf(
     schema.object({ ...ElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema),
     schema.object({ ...LogstashSchema }).extends(PreconfiguredOutputBaseSchema),
     schema.object({ ...KafkaSchema }).extends(PreconfiguredOutputBaseSchema),
+    schema.object({ ...RemoteElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema),
   ]),
   { defaultValue: [], validate: validatePreconfiguredOutputs }
 );

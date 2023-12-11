@@ -1732,6 +1732,20 @@
           },
           {
             "parentPluginId": "expressionXY",
+            "id": "def-common.XYArgs.minBarHeight",
+            "type": "number",
+            "tags": [],
+            "label": "minBarHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
             "id": "def-common.XYArgs.splitRowAccessor",
             "type": "CompoundType",
             "tags": [],
@@ -2302,7 +2316,7 @@
         "label": "AxisMode",
         "description": [],
         "signature": [
-          "\"normal\" | \"percentage\" | \"wiggle\" | \"silhouette\""
+          "\"percentage\" | \"normal\" | \"wiggle\" | \"silhouette\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,

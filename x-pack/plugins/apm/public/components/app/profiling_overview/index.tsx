@@ -11,13 +11,18 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiTabbedContent,
   EuiTabbedContentProps,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EmbeddableProfilingSearchBar } from '@kbn/observability-shared-plugin/public';
+import {
+  EmbeddableProfilingSearchBar,
+  ProfilingEmptyState,
+} from '@kbn/observability-shared-plugin/public';
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -38,7 +43,7 @@ export function ProfilingOverview() {
     path: { serviceName },
     query: { rangeFrom, rangeTo, environment, kuery },
   } = useApmParams('/services/{serviceName}/profiling');
-  const { isProfilingAvailable } = useProfilingPlugin();
+  const { isProfilingAvailable, isLoading } = useProfilingPlugin();
   const { start, end, refreshTimeRange } = useTimeRange({ rangeFrom, rangeTo });
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
@@ -101,8 +106,21 @@ export function ProfilingOverview() {
     ];
   }, [end, environment, kuery, preferred?.source, serviceName, start]);
 
-  if (!isProfilingAvailable) {
-    return null;
+  if (isLoading) {
+    return (
+      <div
+        css={css`
+          display: flex;
+          justify-content: center;
+        `}
+      >
+        <EuiLoadingSpinner size="m" />
+      </div>
+    );
+  }
+
+  if (isProfilingAvailable === false) {
+    return <ProfilingEmptyState />;
   }
 
   return (

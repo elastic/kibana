@@ -19,6 +19,6 @@ buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" "true
 cd x-pack/test/security_solution_cypress
 set +e
 
-QA_API_KEY=$(retry 5 5 vault read -field=qa_api_key secret/kibana-issues/dev/security-solution-qg-enc-key)
+QA_API_KEY=$(vault_get security-solution-qg-enc-key qa_api_key)
 
 CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
