@@ -74,10 +74,7 @@ describe('Summary Search Client', () => {
     const SLO_ID3 = 'slo-three';
     const SLO_ID4 = 'slo-four';
     const SLO_ID5 = 'slo-five';
-    esClientMock.count.mockResolvedValue({
-      count: 8,
-      _shards: { failed: 0, successful: 1, total: 1 },
-    });
+
     esClientMock.search.mockResolvedValue({
       took: 0,
       timed_out: false,
@@ -89,7 +86,7 @@ describe('Summary Search Client', () => {
       },
       hits: {
         total: {
-          value: 6,
+          value: 8,
           relation: 'eq',
         },
         max_score: 1,
