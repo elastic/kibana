@@ -136,6 +136,16 @@ function toJsonHelper(value: any) {
 }
 handlebars.registerHelper('to_json', toJsonHelper);
 
+function percentEncodeHelper(input: string) {
+    let encodedString = encodeURIComponent(input);
+    // handle left out characters
+    encodedString = encodedString
+    .replace(/[!'()*]/g, (char) => '%' + char.charCodeAt(0).toString(16).toUpperCase());
+
+    return encodedString
+}
+handlebars.registerHelper('percent_encode', percentEncodeHelper);
+
 function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yamlTemplate: string) {
   if (Object.keys(yamlVariables).length === 0 || !yamlTemplate) {
     return yamlTemplate;

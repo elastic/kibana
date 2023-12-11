@@ -363,3 +363,39 @@ paths:
     );
   });
 });
+
+describe('encode', () => {
+  it('should correctly percent encode a string', () => {
+    const streamTemplate = `
+    hosts: 
+      - sqlserver://{{percent_encode username}}:{{percent_encode password}}@{{hosts}}`;
+
+    const vars = {
+      username: { value: 'db_elastic_agent', type: 'text' },
+      password: { value: 'dbelasticagent[!#@2023', type: 'text' },
+      hosts: { value: 'localhost', type: 'text' },
+    };
+
+    const output = compileTemplate(vars, streamTemplate);
+    expect(output).toEqual({
+      hosts: ['sqlserver://db_elastic_agent:dbelasticagent%5B%21%23%402023@localhost']
+    })
+  })
+
+  it('should handle special cases to percent encode a string', () => {
+    const streamTemplate = `
+    hosts: 
+      - sqlserver://{{percent_encode username}}:{{percent_encode password}}@{{hosts}}`;
+
+    const vars = {
+      username: { value: 'db_elastic_agent', type: 'text' },
+      password: { value: "Special Characters: ! * ( )'", type: 'password' },
+      hosts: { value: 'localhost', type: 'text' },
+    };
+
+    const output = compileTemplate(vars, streamTemplate);
+    expect(output).toEqual({
+      hosts: ['sqlserver://db_elastic_agent:Special%20Characters%3A%20%21%20%2A%20%28%20%29%27@localhost']
+    })
+  })
+})
