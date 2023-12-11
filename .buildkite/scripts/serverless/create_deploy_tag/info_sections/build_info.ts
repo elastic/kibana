@@ -92,7 +92,7 @@ export async function getQAFBuildContainingCommit(
       return (
         commitShaIndex !== -1 &&
         buildkiteBuildShaIndex !== -1 &&
-        buildkiteBuildShaIndex < commitShaIndex
+        buildkiteBuildShaIndex <= commitShaIndex
       );
     });
 
