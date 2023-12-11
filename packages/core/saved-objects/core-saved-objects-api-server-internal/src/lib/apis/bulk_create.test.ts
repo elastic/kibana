@@ -65,7 +65,7 @@ interface ExpectedErrorResult {
   error: Record<string, any>;
 }
 
-describe('SavedObjectsRepository', () => {
+describe('#bulkCreate', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
@@ -135,7 +135,7 @@ describe('SavedObjectsRepository', () => {
     references: [{ name: 'search_0', type: 'search', id: '123' }],
   });
 
-  describe('#bulkCreate', () => {
+  describe('performBulkCreate', () => {
     beforeEach(() => {
       mockPreflightCheckForCreate.mockReset();
       mockPreflightCheckForCreate.mockImplementation(({ objects }) => {

@@ -8,14 +8,16 @@
 
 import {
   pointInTimeFinderMock,
+  mockInternalBulkResolve,
   mockGetCurrentTime,
   mockGetSearchDsl,
-} from './repository.test.mock';
+} from '../repository.test.mock';
 
-import { SavedObjectsRepository } from './repository';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { kibanaMigratorMock } from '../mocks';
+import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
@@ -24,9 +26,9 @@ import {
   createRegistry,
   createDocumentMigrator,
   createSpySerializer,
-} from '../test_helpers/repository.test.common';
+} from '../../test_helpers/repository.test.common';
 
-describe('SavedObjectsRepository', () => {
+describe('#bulkResolve', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
@@ -67,23 +69,59 @@ describe('SavedObjectsRepository', () => {
     mockGetSearchDsl.mockClear();
   });
 
-  describe('#getCurrentNamespace', () => {
-    it('returns `undefined` for `undefined` namespace argument', async () => {
-      expect(repository.getCurrentNamespace()).toBeUndefined();
+  describe('performBulkResolve', () => {
+    afterEach(() => {
+      mockInternalBulkResolve.mockReset();
     });
 
-    it('throws if `*` namespace argument is provided', async () => {
-      expect(() => repository.getCurrentNamespace('*')).toThrowErrorMatchingInlineSnapshot(
-        `"\\"options.namespace\\" cannot be \\"*\\": Bad Request"`
-      );
+    it('passes arguments to the internalBulkResolve module and returns the expected results', async () => {
+      mockInternalBulkResolve.mockResolvedValue({
+        resolved_objects: [
+          {
+            saved_object: { type: 'mock', id: 'mock-object', attributes: {}, references: [] },
+            outcome: 'exactMatch',
+          },
+          {
+            type: 'obj-type',
+            id: 'obj-id-2',
+            error: SavedObjectsErrorHelpers.createGenericNotFoundError('obj-type', 'obj-id-2'),
+          },
+        ],
+      });
+
+      const objects = [
+        { type: 'obj-type', id: 'obj-id-1' },
+        { type: 'obj-type', id: 'obj-id-2' },
+      ];
+      await expect(repository.bulkResolve(objects)).resolves.toEqual({
+        resolved_objects: [
+          {
+            saved_object: { type: 'mock', id: 'mock-object', attributes: {}, references: [] },
+            outcome: 'exactMatch',
+          },
+          {
+            saved_object: {
+              type: 'obj-type',
+              id: 'obj-id-2',
+              error: {
+                error: 'Not Found',
+                message: 'Saved object [obj-type/obj-id-2] not found',
+                statusCode: 404,
+              },
+            },
+            outcome: 'exactMatch',
+          },
+        ],
+      });
+      expect(mockInternalBulkResolve).toHaveBeenCalledTimes(1);
+      expect(mockInternalBulkResolve).toHaveBeenCalledWith(expect.objectContaining({ objects }));
     });
 
-    it('properly handles `default` namespace', async () => {
-      expect(repository.getCurrentNamespace('default')).toBeUndefined();
-    });
+    it('throws when internalBulkResolve throws', async () => {
+      const error = new Error('Oh no!');
+      mockInternalBulkResolve.mockRejectedValue(error);
 
-    it('properly handles non-`default` namespace', async () => {
-      expect(repository.getCurrentNamespace('space-a')).toBe('space-a');
+      await expect(repository.resolve('some-type', 'some-id')).rejects.toEqual(error);
     });
   });
 });
