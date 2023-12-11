@@ -18,6 +18,11 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { merge } from 'lodash';
 import type * as esTypes from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
+import { BaseDataGenerator } from '../../../../../common/endpoint/data_generators/base_data_generator';
+import {
+  createActionRequestsEsSearchResultsMock,
+  createActionResponsesEsSearchResultsMock,
+} from '../mocks';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
@@ -30,6 +35,7 @@ import {
 } from '../../../mocks';
 import type { IsolationRouteRequestBody } from '../../../../../common/api/endpoint';
 import type { ResponseActionsClientOptions } from './lib/base_response_actions_client';
+import { ACTION_RESPONSE_INDICES } from '../constants';
 
 export interface ResponseActionsClientOptionsMock extends ResponseActionsClientOptions {
   esClient: ElasticsearchClientMock;
@@ -50,6 +56,17 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     }
 
     throw new Error(`no esClient.index() mock defined for index ${payload.index}`);
+  });
+
+  esClient.search.mockImplementation(async (payload) => {
+    switch (payload.index) {
+      case ENDPOINT_ACTIONS_INDEX:
+        return createActionRequestsEsSearchResultsMock();
+      case ACTION_RESPONSE_INDICES:
+        return createActionResponsesEsSearchResultsMock();
+    }
+
+    return BaseDataGenerator.toEsSearchResponse([]);
   });
 
   endpointService.setup(createMockEndpointAppContextServiceSetupContract());
@@ -118,7 +135,10 @@ const createConnectorActionsClientMock = (): ActionsClientMock => {
   (client.getAll as jest.Mock).mockImplementation(async () => {
     const result: ConnectorWithExtraFindData[] = [
       // SentinelOne connector
-      createConnectorMock({ actionTypeId: SENTINELONE_CONNECTOR_ID }),
+      createConnectorMock({
+        actionTypeId: SENTINELONE_CONNECTOR_ID,
+        id: 's1-connector-instance-id',
+      }),
     ];
 
     return result;
