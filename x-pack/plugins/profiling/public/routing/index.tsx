@@ -37,18 +37,6 @@ import { StorageExplorerView } from '../views/storage_explorer';
 import { RouteBreadcrumb } from './route_breadcrumb';
 
 const routes = {
-  '/settings': {
-    element: (
-      <RouteBreadcrumb
-        title={i18n.translate('xpack.profiling.breadcrumb.settings', {
-          defaultMessage: 'Settings',
-        })}
-        href="/settings"
-      >
-        <Settings />
-      </RouteBreadcrumb>
-    ),
-  },
   '/': {
     element: (
       <RouteBreadcrumb
@@ -61,8 +49,29 @@ const routes = {
       </RouteBreadcrumb>
     ),
     children: {
+      '/settings': {
+        element: (
+          <RouteBreadcrumb
+            title={i18n.translate('xpack.profiling.breadcrumb.settings', {
+              defaultMessage: 'Settings',
+            })}
+            href="/settings"
+          >
+            <Settings />
+          </RouteBreadcrumb>
+        ),
+      },
       '/add-data-instructions': {
-        element: <AddDataView />,
+        element: (
+          <RouteBreadcrumb
+            title={i18n.translate('xpack.profiling.breadcrumb.addDataView', {
+              defaultMessage: 'Add profiling data',
+            })}
+            href="/add-data-instructions"
+          >
+            <AddDataView />
+          </RouteBreadcrumb>
+        ),
         params: t.type({
           query: t.type({
             selectedTab: t.union([
