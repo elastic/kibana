@@ -19,7 +19,6 @@ import {
   EuiSpacer,
   useEuiTheme,
   EuiFilterGroup,
-  EuiTextTruncate,
   EuiText,
 } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
