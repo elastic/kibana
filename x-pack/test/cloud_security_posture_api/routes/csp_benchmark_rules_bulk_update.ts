@@ -96,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body.new_csp_settings.type).to.eql('cloud-security-posture-settings');
       expect(body.new_csp_settings.id).to.eql('csp-internal-settings');
 
-      expectExpect(body.new_csp_settings.attributes.rules_states).toEqual(
+      expectExpect(body.new_csp_settings.attributes.rules).toEqual(
         expectExpect.objectContaining({
           [generateRuleKey(rule1)]: { muted: true },
           [generateRuleKey(rule2)]: { muted: true },
@@ -132,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(body.new_csp_settings.type).to.eql('cloud-security-posture-settings');
       expect(body.new_csp_settings.id).to.eql('csp-internal-settings');
-      expectExpect(body.new_csp_settings.attributes.rules_states).toEqual(
+      expectExpect(body.new_csp_settings.attributes.rules).toEqual(
         expectExpect.objectContaining({
           [generateRuleKey(rule1)]: { muted: false },
           [generateRuleKey(rule2)]: { muted: false },
@@ -168,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expectExpect(cspSettingsResponse.body.new_csp_settings.attributes.rules_states).toEqual(
+      expectExpect(cspSettingsResponse.body.new_csp_settings.attributes.rules).toEqual(
         expectExpect.objectContaining({
           [generateRuleKey(rule1)]: { muted: false },
           [generateRuleKey(rule2)]: { muted: false },
@@ -198,9 +198,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expectExpect(
-        updatedCspSettingsResponse.body.new_csp_settings.attributes.rules_states
-      ).toEqual(
+      expectExpect(updatedCspSettingsResponse.body.new_csp_settings.attributes.rules).toEqual(
         expectExpect.objectContaining({
           [generateRuleKey(rule1)]: { muted: true },
           [generateRuleKey(rule2)]: { muted: false },

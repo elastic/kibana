@@ -22,7 +22,7 @@ export const updateRulesStates = async (
   return await soClient.update<CspSettings>(
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
-    { rules_states: newRulesStates }
+    { rules: newRulesStates }
   );
 };
 
@@ -47,7 +47,7 @@ export const createCspSettingObject = async (soClient: SavedObjectsClientContrac
   return soClient.create<CspSettings>(
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
     {
-      rules_states: {},
+      rules: {},
     },
     { id: INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID }
   );
@@ -65,7 +65,7 @@ export const createCspSettingObjectSafe = async (
 export const getCspSettings = async (
   soClient: SavedObjectsClientContract,
   logger: Logger
-): Promise<CspSettings | undefined> => {
+): Promise<CspSettings> => {
   try {
     const cspSettings = await soClient.get<CspSettings>(
       INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
@@ -74,11 +74,9 @@ export const getCspSettings = async (
     return cspSettings.attributes;
   } catch (err) {
     const error = transformError(err);
-    if (error.statusCode === 404) {
-      return undefined;
-    } else {
-      logger.error(`An error occurred while trying to fetch csp settings: ${error}`);
-    }
+    logger.error(`An error occurred while trying to fetch csp settings: ${error}`);
+    logger.warn(`Trying to create new csp settings object`);
+    return (await createCspSettingObject(soClient)).attributes;
   }
 };
 

@@ -39,7 +39,7 @@ describe('CSP Rule State Management', () => {
     expect(mockSoClient.create).toHaveBeenCalledWith(
       INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
       {
-        rules_states: {},
+        rules: {},
       },
       { id: INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID }
     );
@@ -69,7 +69,7 @@ describe('CSP Rule State Management', () => {
       type: INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
       references: [],
       attributes: {
-        rules_states: { rule1: { muted: false } },
+        rules: { rule1: { muted: false } },
       },
     };
 
@@ -78,7 +78,7 @@ describe('CSP Rule State Management', () => {
     const result = await getCspSettings(mockSoClient, mockLogger);
 
     expect(result).toEqual({
-      rules_states: { rule1: { muted: false } },
+      rules: { rule1: { muted: false } },
     });
   });
 
@@ -92,7 +92,7 @@ describe('CSP Rule State Management', () => {
       type: INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
       references: [],
       attributes: {
-        rules_states: {},
+        rules: {},
       },
     });
 
@@ -106,13 +106,13 @@ describe('CSP Rule State Management', () => {
     expect(mockSoClient.create).toHaveBeenCalledWith(
       INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
       {
-        rules_states: {},
+        rules: {},
       },
       { id: INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID }
     );
 
     expect(result).toEqual({
-      rules_states: {},
+      rules: {},
     });
   });
 });

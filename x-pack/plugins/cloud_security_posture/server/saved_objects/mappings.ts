@@ -64,7 +64,7 @@ export const cspBenchmarkRuleSavedObjectMapping: SavedObjectsTypeMappingDefiniti
 export const cspSettingsSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
-    rules_states: {
+    rules: {
       type: 'object',
       properties: {
         muted: {
