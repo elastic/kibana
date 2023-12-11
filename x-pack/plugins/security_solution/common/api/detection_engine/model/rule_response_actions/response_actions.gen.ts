@@ -77,8 +77,20 @@ export const RuleResponseOsqueryAction = z.object({
 
 export type EndpointParams = z.infer<typeof EndpointParams>;
 export const EndpointParams = z.object({
-  command: z.literal('isolate'),
+  command: z.enum(['isolate', 'kill-process', 'suspend-process']),
   comment: z.string().optional(),
+  config: z
+    .object({
+      /**
+       * Field to use instead of process.pid
+       */
+      field: z.string(),
+      /**
+       * Whether to overwrite field with process.pid
+       */
+      overwrite: z.boolean().optional().default(true),
+    })
+    .optional(),
 });
 
 export type EndpointResponseAction = z.infer<typeof EndpointResponseAction>;

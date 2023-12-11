@@ -116,8 +116,22 @@ components:
           type: string
           enum:
             - isolate
+            - kill-process
+            - suspend-process
         comment:
           type: string
+        config:
+          required:
+            - field
+          type: object
+          properties:
+            field:
+              type: string
+              description: Field to use instead of process.pid
+            overwrite:
+              type: boolean
+              description: Whether to overwrite field with process.pid
+              default: true
       required:
         - command
 

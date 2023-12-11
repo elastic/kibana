@@ -7,9 +7,11 @@
 
 import { each, flatMap, flatten, map, reduce } from 'lodash';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import type { EndpointParamsConfig } from '../../../../common/api/detection_engine';
+import type {
+  RuleResponseEndpointAction,
+  EndpointParams,
+} from '../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import type { RuleResponseEndpointAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 
 import type {
   Alert,
@@ -120,7 +122,7 @@ export const endpointResponseAction = (
 const getProcessAlerts = (
   acc: EndpointResponseActionAlerts,
   alert: Alert,
-  config?: EndpointParamsConfig,
+  config?: EndpointParams['config'],
   checkErrors?: boolean
 ) => {
   if (!config) {
@@ -128,7 +130,7 @@ const getProcessAlerts = (
   }
   const { overwrite, field } = config;
   const valueFromAlert = overwrite ? alert.process?.pid : alert[field];
-  const isEntityId = field.includes('entity_id');
+  const isEntityId = !overwrite && field.includes('entity_id');
   const key = isEntityId ? 'entity_id' : 'pid';
   const { _id, agent } = alert;
   const { id: agentId, name } = agent as AlertAgent;
