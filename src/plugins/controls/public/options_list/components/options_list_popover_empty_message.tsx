@@ -29,7 +29,7 @@ export const OptionsListPopoverEmptyMessage = ({
       return OptionsListStrings.popover.getSelectionsEmptyMessage();
     }
     if (!searchString.valid && fieldSpec && searchTechnique) {
-      return OptionsListStrings.popover.getInvalidSearchMessage(fieldSpec.type, searchTechnique);
+      return OptionsListStrings.popover.getInvalidSearchMessage(fieldSpec.type);
     }
     return OptionsListStrings.popover.getEmptyMessage();
   }, [showOnlySelected, fieldSpec, searchString.valid, searchTechnique]);
