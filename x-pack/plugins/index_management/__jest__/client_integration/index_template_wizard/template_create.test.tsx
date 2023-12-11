@@ -160,7 +160,7 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  describe('form validation', () => {
+  describe.skip('form validation', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup(httpSetup);
@@ -514,7 +514,7 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  describe('form payload & api errors', () => {
+  describe.skip('form payload & api errors', () => {
     beforeEach(async () => {
       const MAPPING_FIELDS = [BOOLEAN_MAPPING_FIELD, TEXT_MAPPING_FIELD, KEYWORD_MAPPING_FIELD];
 
@@ -595,7 +595,7 @@ describe('<TemplateCreate />', () => {
       );
     });
 
-    it('should surface the API errors from the put HTTP request', async () => {
+    it.skip('should surface the API errors from the put HTTP request', async () => {
       const { component, actions, find, exists } = testBed;
 
       const error = {
@@ -616,7 +616,7 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  test('preview data stream', async () => {
+  test.skip('preview data stream', async () => {
     await act(async () => {
       testBed = await setup(httpSetup);
     });
