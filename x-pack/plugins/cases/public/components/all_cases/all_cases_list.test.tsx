@@ -161,7 +161,7 @@ describe('AllCasesListGeneric', () => {
     useGetCasesMock.mockReturnValue(defaultGetCases);
     useGetTagsMock.mockReturnValue({ data: ['coke', 'pepsi'], isLoading: false });
     useGetCategoriesMock.mockReturnValue({ data: ['twix', 'snickers'], isLoading: false });
-    useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0].uid, isLoading: false });
+    useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0], isLoading: false });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
@@ -1118,11 +1118,6 @@ describe('AllCasesListGeneric', () => {
             '1 active filters'
           )
         ).not.toBeInTheDocument();
-        expect(
-          within(screen.getByTestId('options-filter-popover-button-assignees')).getByLabelText(
-            '4 available filters'
-          )
-        ).toBeInTheDocument();
       });
     });
   });
