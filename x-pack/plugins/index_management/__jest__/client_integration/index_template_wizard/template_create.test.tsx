@@ -514,7 +514,7 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  describe.skip('form payload & api errors', () => {
+  describe('form payload & api errors', () => {
     beforeEach(async () => {
       const MAPPING_FIELDS = [BOOLEAN_MAPPING_FIELD, TEXT_MAPPING_FIELD, KEYWORD_MAPPING_FIELD];
 
@@ -595,7 +595,7 @@ describe('<TemplateCreate />', () => {
       );
     });
 
-    it.skip('should surface the API errors from the put HTTP request', async () => {
+    it('should surface the API errors from the put HTTP request', async () => {
       const { component, actions, find, exists } = testBed;
 
       const error = {
