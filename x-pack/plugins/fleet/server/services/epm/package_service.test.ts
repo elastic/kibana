@@ -169,12 +169,16 @@ function getTest(
       };
       break;
     case testKeys[5]:
-      const bundledPackage = { name: 'package name', version: '8.0.0', buffer: Buffer.from([]) };
+      const bundledPackage = {
+        name: 'package name',
+        version: '8.0.0',
+        getBuffer: () => Buffer.from([]),
+      };
       test = {
         method: mocks.packageClient.readBundledPackage.bind(mocks.packageClient),
         args: [bundledPackage],
         spy: jest.spyOn(epmArchiveParse, 'generatePackageInfoFromArchiveBuffer'),
-        spyArgs: [bundledPackage.buffer, 'application/zip'],
+        spyArgs: [bundledPackage.getBuffer(), 'application/zip'],
         spyResponse: {
           packageInfo: { name: 'readBundledPackage test' },
           paths: ['/some/test/path'],

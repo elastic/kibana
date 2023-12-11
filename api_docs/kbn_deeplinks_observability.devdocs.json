@@ -512,6 +512,36 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.LOGS_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LOGS_APP_ID",
+        "description": [],
+        "signature": [
+          "\"logs\""
+        ],
+        "path": "packages/deeplinks/observability/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.OBSERVABILITY_LOG_EXPLORER",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_LOG_EXPLORER",
+        "description": [],
+        "signature": [
+          "\"observability-log-explorer\""
+        ],
+        "path": "packages/deeplinks/observability/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.OBSERVABILITY_ONBOARDING_APP_ID",
         "type": "string",
         "tags": [],
@@ -536,6 +566,21 @@
           "\"OBSERVABILITY_ONBOARDING_LOCATOR\""
         ],
         "path": "packages/deeplinks/observability/locators/observability_onboarding.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.OBSERVABILITY_OVERVIEW_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_OVERVIEW_APP_ID",
+        "description": [],
+        "signature": [
+          "\"observability-overview\""
+        ],
+        "path": "packages/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
