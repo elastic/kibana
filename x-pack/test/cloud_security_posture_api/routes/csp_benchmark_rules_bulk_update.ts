@@ -26,20 +26,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  /**
-   * required before indexing findings
-   */
-  const waitForPluginInitialized = (): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      const response = await supertest
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
-    });
-
   const generateRuleKey = (ruleParams: RuleIdentifier): string => {
     return `${ruleParams.benchmarkId};${ruleParams.benchmarkVersion};${ruleParams.ruleNumber}`;
   };
@@ -59,6 +45,20 @@ export default function ({ getService }: FtrProviderContext) {
       ruleNumber: `${majorVersionNumber}.${minorVersionNumber}`,
     };
   };
+
+  /**
+   * required before indexing findings
+   */
+  const waitForPluginInitialized = (): Promise<void> =>
+    retry.try(async () => {
+      log.debug('Check CSP plugin is initialized');
+      const response = await supertest
+        .get('/internal/cloud_security_posture/status?check=init')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .expect(200);
+      expect(response.body).to.eql({ isPluginInitialized: true });
+      log.debug('CSP plugin is initialized');
+    });
 
   describe('Verify update csp rules states API', async () => {
     before(async () => {
