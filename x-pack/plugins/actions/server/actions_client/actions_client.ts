@@ -747,6 +747,7 @@ export class ActionsClient {
        * for system actions (kibana privileges) will be performed
        * inside the ActionExecutor at execution time
        */
+      await this.context.authorization.ensureAuthorized({ operation: 'execute' });
       await Promise.all(
         uniq(options.map((o) => o.actionTypeId)).map((actionTypeId) =>
           this.context.authorization.ensureAuthorized({ operation: 'execute', actionTypeId })
