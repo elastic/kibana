@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { MalformedDocs } from '../../../common/api_types';
+import { DegradedDocs } from '../../../common/api_types';
 import {
   DATA_STREAM_DATASET,
   DATA_STREAM_NAMESPACE,
@@ -17,7 +17,7 @@ import {
 import { DataStreamTypes } from '../../types/data_stream';
 import { createDatasetQualityESClient, wildcardQuery } from '../../utils';
 
-export async function getMalformedDocsPaginated(options: {
+export async function getDegradedDocsPaginated(options: {
   esClient: ElasticsearchClient;
   type?: DataStreamTypes;
   start: number;
@@ -27,8 +27,8 @@ export async function getMalformedDocsPaginated(options: {
     dataset: string;
     namespace: string;
   };
-  prevResults?: MalformedDocs[];
-}): Promise<MalformedDocs[]> {
+  prevResults?: DegradedDocs[];
+}): Promise<DegradedDocs[]> {
   const { esClient, type = 'logs', datasetQuery, start, end, after, prevResults = [] } = options;
 
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
@@ -61,7 +61,7 @@ export async function getMalformedDocsPaginated(options: {
           ],
         },
         aggs: {
-          malformed: {
+          degraded: {
             filter: {
               exists: {
                 field: _IGNORED,
@@ -73,16 +73,16 @@ export async function getMalformedDocsPaginated(options: {
     },
   });
 
-  const currMalformedDocs =
+  const currDegradedDocs =
     response.aggregations?.datasets.buckets.map((bucket) => ({
       dataset: `${type}-${bucket.key.dataset}-${bucket.key.namespace}`,
-      percentage: (bucket.malformed.doc_count * 100) / bucket.doc_count,
+      percentage: (bucket.degraded.doc_count * 100) / bucket.doc_count,
     })) ?? [];
 
-  const malformedDocs = [...prevResults, ...currMalformedDocs];
+  const degradedDocs = [...prevResults, ...currDegradedDocs];
 
   if (response.aggregations?.datasets.after_key) {
-    return getMalformedDocsPaginated({
+    return getDegradedDocsPaginated({
       esClient,
       type,
       start,
@@ -92,9 +92,9 @@ export async function getMalformedDocsPaginated(options: {
         dataset: response.aggregations?.datasets.after_key.dataset as string,
         namespace: response.aggregations?.datasets.after_key.namespace as string,
       },
-      prevResults: malformedDocs,
+      prevResults: degradedDocs,
     });
   }
 
-  return malformedDocs;
+  return degradedDocs;
 }
