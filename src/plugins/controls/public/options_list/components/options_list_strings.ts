@@ -140,14 +140,23 @@ export const OptionsListStrings = {
         defaultMessage: 'You have no selections',
       }),
     getInvalidSearchMessage: (fieldType: string, searchTechnique: string) => {
-      if (fieldType === 'ip' && searchTechnique === 'exact') {
-        return i18n.translate('controls.optionsList.popover.invalidSearch.ip', {
-          defaultMessage: 'Your search string is not a valid IP address.',
-        });
+      switch (fieldType) {
+        case 'ip': {
+          return i18n.translate('controls.optionsList.popover.invalidSearch.ip', {
+            defaultMessage: 'Your search is not a valid IP address.',
+          });
+        }
+        case 'number': {
+          return i18n.translate('controls.optionsList.popover.invalidSearch.number', {
+            defaultMessage: 'Your search is not a valid number.',
+          });
+        }
+        default: {
+          return i18n.translate('controls.optionsList.popover.invalidSearch.invalidCharacters', {
+            defaultMessage: 'Your search contains invalid characters.',
+          });
+        }
       }
-      return i18n.translate('controls.optionsList.popover.invalidSearch.invalidCharacters', {
-        defaultMessage: 'Your search string contains invalid characters.',
-      });
     },
     getAllOptionsButtonTitle: () =>
       i18n.translate('controls.optionsList.popover.allOptionsTitle', {
