@@ -17,6 +17,8 @@ import {
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import type { UserDetailsLeftPanelTab } from '../../../../flyout/entity_details/user_detais_left/tabs';
 import { UserAssetTableType } from '../../../../explore/users/store/model';
 import type { ManagedUserFields } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
@@ -36,10 +38,12 @@ export const ManagedUser = ({
   managedUser,
   contextID,
   isDraggable,
+  openDetailsPanel,
 }: {
   managedUser: ManagedUserData;
   contextID: string;
   isDraggable: boolean;
+  openDetailsPanel: (tab: UserDetailsLeftPanelTab) => void;
 }) => {
   const entraManagedUser = managedUser.data?.[ManagedUserDatasetKey.ENTRA];
   const oktaManagedUser = managedUser.data?.[ManagedUserDatasetKey.OKTA];
@@ -71,6 +75,9 @@ export const ManagedUser = ({
               title={i18n.MANAGED_USER_INSPECT_TITLE}
             />
           }
+          css={css`
+            width: 100%;
+          `}
         >
           <EuiSpacer size="m" />
 
@@ -115,9 +122,8 @@ export const ManagedUser = ({
                     <ManagedUserAccordion
                       title={i18n.ENTRA_DATA_PANEL_TITLE}
                       managedUser={entraManagedUser.fields}
-                      indexName={entraManagedUser._index}
-                      eventId={entraManagedUser._id}
                       tableType={UserAssetTableType.assetEntra}
+                      openDetailsPanel={openDetailsPanel}
                     >
                       <ManagedUserTable
                         isDraggable={isDraggable}
@@ -134,9 +140,8 @@ export const ManagedUser = ({
                     <ManagedUserAccordion
                       title={i18n.OKTA_DATA_PANEL_TITLE}
                       managedUser={oktaManagedUser.fields}
-                      indexName={oktaManagedUser._index}
-                      eventId={oktaManagedUser._id}
                       tableType={UserAssetTableType.assetOkta}
+                      openDetailsPanel={openDetailsPanel}
                     >
                       <ManagedUserTable
                         isDraggable={isDraggable}

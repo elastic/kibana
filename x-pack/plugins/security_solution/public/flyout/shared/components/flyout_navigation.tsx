@@ -79,7 +79,7 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
       () => (
         <EuiButtonEmpty
           iconSide="left"
-          onClick={expandDetails}
+          onClick={expandDetails ? () => expandDetails() : undefined}
           iconType="arrowStart"
           size="s"
           data-test-subj={EXPAND_DETAILS_BUTTON_TEST_ID}

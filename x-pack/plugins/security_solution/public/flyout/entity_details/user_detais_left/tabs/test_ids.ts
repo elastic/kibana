@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PREFIX } from '../../shared/test_ids';
+import { PREFIX } from '../../../shared/test_ids';
 
 export const TABLE_TAB_TEST_ID = `${PREFIX}AssetTableTab` as const;
 export const JSON_TAB_TEST_ID = `${PREFIX}AssetJsonTab` as const;
