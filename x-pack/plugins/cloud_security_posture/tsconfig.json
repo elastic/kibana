@@ -62,7 +62,6 @@
     "@kbn/data-view-field-editor-plugin",
     "@kbn/securitysolution-grouping",
     "@kbn/core-saved-objects-api-server-mocks",
-    "@kbn/cloud-security-posture-plugin",
   ],
   "exclude": ["target/**/*"]
 }
