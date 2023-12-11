@@ -11,7 +11,7 @@ import {
   DiscoverStateContainer,
   createSearchSessionRestorationDataProvider,
 } from './discover_state';
-import { createBrowserHistory, History } from 'history';
+import { createBrowserHistory, createMemoryHistory, History } from 'history';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
@@ -27,6 +27,7 @@ import { waitFor } from '@testing-library/react';
 import { DiscoverCustomizationContext, FetchStatus } from '../../types';
 import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 import { copySavedSearch } from './discover_saved_search_container';
+import { createKbnUrlStateStorage, IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 const startSync = (appState: DiscoverAppStateContainer) => {
   const { start, stop } = appState.syncState();
@@ -151,6 +152,68 @@ describe('Test discover state', () => {
     expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!t,value:5000))');
   });
 });
+
+describe('Test discover state with overridden state storage', () => {
+  let stopSync = () => {};
+  let history: History;
+  let stateStorage: IKbnUrlStateStorage;
+  let state: DiscoverStateContainer;
+
+  beforeEach(async () => {
+    jest.useFakeTimers();
+    history = createMemoryHistory({
+      initialEntries: [
+        {
+          pathname: '/',
+          hash: `?_a=()`,
+        },
+      ],
+    });
+    stateStorage = createKbnUrlStateStorage({
+      history,
+      useHash: false,
+      useHashQuery: true,
+    });
+    state = getDiscoverStateContainer({
+      services: discoverServiceMock,
+      history,
+      customizationContext,
+      stateStorageContainer: stateStorage,
+    });
+    state.savedSearchState.set(savedSearchMock);
+    state.appState.update({}, true);
+    stopSync = startSync(state.appState);
+  });
+
+  afterEach(() => {
+    stopSync();
+    stopSync = () => {};
+    jest.useRealTimers();
+  });
+
+  test('setting app state and syncing to URL', async () => {
+    state.appState.update({ index: 'modified' });
+
+    await jest.runAllTimersAsync();
+
+    expect(history.createHref(history.location)).toMatchInlineSnapshot(
+      `"/#?_a=(columns:!(default_column),index:modified,interval:auto,sort:!())"`
+    );
+  });
+
+  test('changing URL to be propagated to appState', async () => {
+    history.push('/#?_a=(index:modified)');
+
+    await jest.runAllTimersAsync();
+
+    expect(state.appState.getState()).toMatchInlineSnapshot(`
+      Object {
+        "index": "modified",
+      }
+    `);
+  });
+});
+
 describe('Test discover initial state sort handling', () => {
   test('Non-empty sort in URL should not be overwritten by saved search sort', async () => {
     const savedSearch = {
