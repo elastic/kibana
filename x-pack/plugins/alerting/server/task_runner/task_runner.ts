@@ -525,6 +525,7 @@ export class TaskRunner<
                 muteAll,
                 snoozeSchedule,
               },
+              ...(this.ruleType.requiresAPIkey ? { apiKey } : {}),
               logger: this.logger,
               flappingSettings,
               ...(maintenanceWindowsWithoutScopedQueryIds.length

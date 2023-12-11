@@ -136,6 +136,7 @@ export interface RuleExecutorOptions<
   spaceId: string;
   startedAt: Date;
   state: State;
+  apiKey?: string | null;
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
   maintenanceWindowIds?: string[];
@@ -320,6 +321,7 @@ export interface RuleType<
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
   fieldsForAAD?: string[];
+  requiresAPIkey?: boolean;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
