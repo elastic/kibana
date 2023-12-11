@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import {
   ADD_TO_TIMELINE,
   COPY,
@@ -50,3 +51,29 @@ export const clickOnCopyValue = () => {
   cy.get(COPY).first().focus();
   cy.focused().click({ force: true }); // eslint-disable-line cypress/unsafe-to-chain-command
 };
+
+export function withHoverActionsReady() {
+  // NOTE: not sure if this is precise enough, but it seems to work
+  const actionsButtonInPortal = '[data-euiportal="true"] button[data-test-subj*="cellActions"]';
+  recurse(
+    () => {
+      openHoverActions();
+      mouseoverOnToOverflowItem();
+      return cy.root();
+    },
+    // Check if actions portal element is visible
+    ($el) => $el.find(actionsButtonInPortal).length > 0
+  );
+  // cy.get('body').then(($body) => {
+  //   if ($body.find(actionsButtonInPortal).length > 0) {
+  //     cy.get(actionsButtonInPortal).should('be.visible');
+  //     action();
+  //   } else if (maxTries <= 0) {
+  //     throw new Error(`Max tries reached. The element ${actionsButtonInPortal} is not visible.`);
+  //   } else {
+  //     openHoverActions();
+  //     mouseoverOnToOverflowItem();
+  //     withHoverActionsReady(action, maxTries - 1);
+  //   }
+  // });
+}
