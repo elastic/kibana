@@ -51,15 +51,17 @@ export const NoDataButtonLink = ({
           {createDataViewText}
         </EuiButton>
         <EuiSpacer size="m" />
-        <EuiText>
+        - OR -
+        <EuiSpacer size="m" />
+        <EuiText size="s">
           <FormattedMessage
             id="sharedUx.no_data_views.button"
-            defaultMessage="Query your data directly with ES|QL (Beta)."
+            defaultMessage="Query your data directly with ES|QL (Beta).  "
           />
+          <EuiLink href={esqlLocator} target={'_blank'} external>
+            Try ES|QL
+          </EuiLink>
         </EuiText>
-        <EuiLink href="" target={'_blank'} external>
-          Try ES|QL
-        </EuiLink>
       </>
     );
   }
