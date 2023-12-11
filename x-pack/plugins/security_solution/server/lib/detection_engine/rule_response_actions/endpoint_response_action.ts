@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { each, flatMap, flatten, map, reduce } from 'lodash';
+import { each, flatMap, flatten, map } from 'lodash';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type {
   RuleResponseEndpointAction,
@@ -18,6 +18,7 @@ import type {
   AlertAgent,
   EndpointResponseActionAlerts,
   ResponseActionAlerts,
+  AlertsFoundFields,
 } from './types';
 
 export const endpointResponseAction = (
@@ -26,40 +27,34 @@ export const endpointResponseAction = (
   { alerts }: ResponseActionAlerts
 ) => {
   const { comment, command } = responseAction.params;
-  const uniqueAlerts = reduce(
-    alerts,
-    (acc: EndpointResponseActionAlerts, alert) => {
-      const agentId = alert.agent.id;
-      const agentName = alert.agent?.name;
-      return {
-        ...acc,
-        [agentId]: {
-          ...acc[agentId],
-          agent: {
-            ...acc[agentId]?.agent,
-            id: agentId,
-            name: agentName,
-          },
-          foundFields: {
-            ...(acc[agentId]?.foundFields || {}),
-            ...getProcessAlerts(acc, alert, responseAction.params.config, false),
-          },
-          notFoundFields: {
-            ...(acc[agentId]?.notFoundFields || {}),
-            ...getProcessAlerts(acc, alert, responseAction.params.config, true),
-          },
-          hosts: {
-            ...(acc[agentId]?.hosts || {}),
-            [agentId]: {
-              name: agentName ? agentName : acc[agentId]?.hosts[agentId].name ?? '',
-            },
-          },
-          alertIds: [...(acc[agentId]?.alertIds || []), alert._id],
+  const uniqueAlerts = alerts.reduce((acc: EndpointResponseActionAlerts, alert) => {
+    const { id: agentId, name: agentName } = alert.agent || {};
+    const existingAgent = acc[agentId];
+
+    const foundFields = getProcessAlerts(acc, alert, responseAction.params.config, false);
+    const notFoundFields = getProcessAlerts(acc, alert, responseAction.params.config, true);
+
+    return {
+      ...acc,
+      [agentId]: {
+        ...existingAgent,
+        agent: {
+          ...existingAgent?.agent,
+          id: agentId,
+          name: agentName,
         },
-      };
-    },
-    {}
-  );
+        foundFields: { ...(existingAgent?.foundFields || {}), ...foundFields },
+        notFoundFields: { ...(existingAgent?.notFoundFields || {}), ...notFoundFields },
+        hosts: {
+          ...(existingAgent?.hosts || {}),
+          [agentId]: {
+            name: agentName || existingAgent?.hosts?.[agentId]?.name || '',
+          },
+        },
+        alertIds: [...(existingAgent?.alertIds || []), alert._id],
+      },
+    };
+  }, {});
 
   const commonData = {
     comment,
@@ -83,39 +78,36 @@ export const endpointResponseAction = (
     return Promise.all(actions);
   }
 
-  if (command === 'kill-process' || command === 'suspend-process') {
-    // TODO think if we could merge these 2 calculation of actions
-    const flatAlerts = flatten(map(uniqueAlerts, (agent) => flatMap(agent.foundFields)));
-    const flatAlertsWithErrors = flatten(
-      map(uniqueAlerts, (agent) => flatMap(agent.notFoundFields))
-    );
-    const actions = each(flatAlerts, async (alert) => {
-      return endpointAppContextService.getActionCreateService().createActionFromAlert(
-        {
-          hosts: alert.hosts,
-          endpoint_ids: [alert.agentId],
-          alert_ids: alert.alertIds,
-          parameters: alert.parameters,
-          ...commonData,
-        },
-        [alert.agentId]
-      );
-    });
+  const createActionFromAlerts = (
+    actionAlerts: EndpointResponseActionAlerts,
+    type: 'foundFields' | 'notFoundFields',
+    hasErrors: boolean
+  ) => {
+    const flatAlerts = flatten(map(actionAlerts, (agent) => flatMap(agent[type])));
+    const createAction = async (alert: AlertsFoundFields) => {
+      const { hosts, agentId, alertIds, parameters, error } = alert;
+      const actionData = {
+        hosts,
+        endpoint_ids: [agentId],
+        alert_ids: alertIds,
+        error: hasErrors ? error : undefined,
+        parameters,
+        ...commonData,
+      };
 
-    const errorActions = each(flatAlertsWithErrors, async (alert, test) => {
-      return endpointAppContextService.getActionCreateService().createActionFromAlert(
-        {
-          hosts: alert.hosts,
-          endpoint_ids: [alert.agentId],
-          alert_ids: alert.alertIds,
-          error: alert.error,
-          parameters: alert.parameters,
-          ...commonData,
-        },
-        [alert.agentId]
-      );
-    });
-    return Promise.all([actions, errorActions]);
+      return endpointAppContextService
+        .getActionCreateService()
+        .createActionFromAlert(actionData, [agentId]);
+    };
+
+    return each(flatAlerts, createAction);
+  };
+
+  if (command === 'kill-process' || command === 'suspend-process') {
+    const processActions = createActionFromAlerts(uniqueAlerts, 'foundFields', false);
+    const processActionsWithError = createActionFromAlerts(uniqueAlerts, 'notFoundFields', true);
+
+    return Promise.all([processActions, processActionsWithError]);
   }
 };
 
@@ -134,37 +126,25 @@ const getProcessAlerts = (
   const key = isEntityId ? 'entity_id' : 'pid';
   const { _id, agent } = alert;
   const { id: agentId, name } = agent as AlertAgent;
+
+  const baseFields = {
+    alertIds: [
+      ...(acc?.[agentId]?.[checkErrors ? 'notFoundFields' : 'foundFields']?.[field]?.alertIds ||
+        []),
+      _id,
+    ],
+    parameters: { [key]: valueFromAlert || `${field} not found` },
+    agentId,
+    hosts: { [agentId]: { name: name || '' } },
+  };
   if (valueFromAlert && !checkErrors) {
     return {
-      [valueFromAlert]: {
-        alertIds: [...(acc?.[agentId]?.foundFields?.[valueFromAlert]?.alertIds || []), _id],
-        parameters: {
-          [key]: valueFromAlert,
-        },
-        agentId,
-        hosts: {
-          [agentId]: {
-            name: name || '',
-          },
-        },
-      },
+      [valueFromAlert]: baseFields,
     };
   } else if (!valueFromAlert && checkErrors) {
     const errorField = overwrite ? 'process.pid' : field;
     return {
-      [errorField]: {
-        alertIds: [...(acc?.[agentId]?.notFoundFields?.[field]?.alertIds || []), _id],
-        parameters: {
-          [key]: `${errorField} not found`,
-        },
-        error: errorField,
-        agentId,
-        hosts: {
-          [agentId]: {
-            name: name || '',
-          },
-        },
-      },
+      [errorField]: { ...baseFields, error: errorField },
     };
   }
   return {};
