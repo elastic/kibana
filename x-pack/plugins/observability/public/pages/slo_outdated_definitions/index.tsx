@@ -8,13 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBetaBadge,
-  EuiSpacer,
-  EuiTablePagination,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elastic/eui';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { useLicense } from '../../hooks/use_license';
@@ -97,19 +91,6 @@ export function SlosOutdatedDefinitions() {
         {i18n.translate('xpack.observability.slo.slosOutdatedDefintions.pageTitle', {
           defaultMessage: 'Outdated SLO Definitions',
         })}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBetaBadge
-          label="Beta"
-          tooltipPosition="bottom"
-          tooltipContent={i18n.translate(
-            'xpack.observability.slo.slosOutdatedDefinitions.headerTitle.betaBadgeDescription',
-            {
-              defaultMessage:
-                'This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features.',
-            }
-          )}
-        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

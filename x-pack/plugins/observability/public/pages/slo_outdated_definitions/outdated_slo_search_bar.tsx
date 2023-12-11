@@ -24,10 +24,8 @@ export function OutdatedSloSearchBar({
 
   const refreshOrUpdateSearch = () => {
     if (tempSearch !== search) {
-      setSearch(() => {
-        onSearch(tempSearch);
-        return tempSearch;
-      });
+      setSearch(tempSearch);
+      onSearch(tempSearch);
     } else {
       onRefresh();
     }
@@ -41,6 +39,11 @@ export function OutdatedSloSearchBar({
           fullWidth
           value={tempSearch}
           onChange={(e) => setTempSearch(e.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              refreshOrUpdateSearch();
+            }
+          }}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={0}>

@@ -42,7 +42,7 @@ export function SloResetConfirmationModal({
       onConfirm={onConfirm}
     >
       {i18n.translate('xpack.observability.slo.resetConfirmationModal.descriptionText', {
-        defaultMessage: 'Resetting this SLO will also regenrate the historical data.',
+        defaultMessage: 'Resetting this SLO will also regenerate the historical data.',
       })}
     </EuiConfirmModal>
   );
