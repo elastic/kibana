@@ -18,7 +18,7 @@ import { useKibana } from '../../common/hooks/use_kibana';
 export const useCspIntegrationInfo = ({ packagePolicyId, policyId }: PageUrlParams) => {
   const { http } = useKibana().services;
 
-  return useQuery(['cspRulesInfo', { packagePolicyId, policyId }], () =>
+  return useQuery(['cspBenchmarkRuleInfo', { packagePolicyId, policyId }], () =>
     Promise.all([
       http
         .get<GetOnePackagePolicyResponse>(packagePolicyRouteService.getInfoPath(packagePolicyId), {
