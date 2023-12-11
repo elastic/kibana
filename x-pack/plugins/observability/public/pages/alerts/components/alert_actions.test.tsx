@@ -59,7 +59,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react
 const config = {
   unsafe: {
     alertDetails: {
-      logs: { enabled: false },
       metrics: { enabled: false },
       uptime: { enabled: false },
     },

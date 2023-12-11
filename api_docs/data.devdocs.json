@@ -12670,6 +12670,10 @@
             },
             {
               "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_row/distinct_values.tsx"
+            },
+            {
+              "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/top_values/top_values.tsx"
             },
             {
