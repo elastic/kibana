@@ -139,7 +139,7 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.selectionsEmpty', {
         defaultMessage: 'You have no selections',
       }),
-    getInvalidSearchMessage: (fieldType: string, searchTechnique: string) => {
+    getInvalidSearchMessage: (fieldType: string) => {
       switch (fieldType) {
         case 'ip': {
           return i18n.translate('controls.optionsList.popover.invalidSearch.ip', {
@@ -152,6 +152,7 @@ export const OptionsListStrings = {
           });
         }
         default: {
+          // this shouldn't happen, but giving a fallback error message just in case
           return i18n.translate('controls.optionsList.popover.invalidSearch.invalidCharacters', {
             defaultMessage: 'Your search contains invalid characters.',
           });
