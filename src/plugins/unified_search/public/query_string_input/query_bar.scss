@@ -1,13 +1,9 @@
 .kbnQueryBar__datePickerWrapper {
   .euiDatePopoverButton-isInvalid {
     background-image: euiFormControlGradient($euiColorDanger);
-
-    // @todo Remove when EUI issue is resolved.
-    // @see https://github.com/elastic/eui/issues/4612
-    &:focus {
-      color: $euiTextColor;
-      background-color: $euiFormBackgroundColor;
-      background-image: euiFormControlGradient($euiColorPrimary);
-    }
   }
+}
+// increase the section height to avoid vertical scrolling
+.euiQuickSelectPopover__section {
+  max-height: 142px;
 }

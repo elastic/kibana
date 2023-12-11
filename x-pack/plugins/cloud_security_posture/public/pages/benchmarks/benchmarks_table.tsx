@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TimestampTableCell } from '../../components/timestamp_table_cell';
-import type { Benchmark } from '../../../common/types';
+import type { Benchmark } from '../../../common/types_old';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { benchmarksNavigation } from '../../common/navigation/constants';
 import * as TEST_SUBJ from './test_subjects';
