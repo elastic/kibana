@@ -39,6 +39,7 @@ import {
   clickingOnCreateTemplateFromTimelineBtn,
   closeTimeline,
   createNewTimelineTemplate,
+  createTimelineTemplateOptionsPopoverBottomBar,
   expandEventAction,
   markAsFavorite,
   openTimelineTemplateFromSettings,
@@ -112,5 +113,11 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
     cy.wait('@timeline', { timeout: 100000 });
     cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
     cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
+  });
+
+  it('should create timeline template from bottombar', () => {
+    visit(TIMELINES_URL);
+    createTimelineTemplateOptionsPopoverBottomBar();
+    cy.get(TIMELINE_TITLE).should('have.text', 'Untitled template');
   });
 });

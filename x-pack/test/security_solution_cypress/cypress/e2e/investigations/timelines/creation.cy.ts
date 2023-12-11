@@ -20,6 +20,7 @@ import {
   TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
   SAVE_TIMELINE_ACTION_BTN,
   SAVE_TIMELINE_TOOLTIP,
+  TIMELINE_TITLE,
 } from '../../../screens/timeline';
 import { ROWS } from '../../../screens/timelines';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
@@ -27,7 +28,10 @@ import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 import { deleteTimelines } from '../../../tasks/api_calls/common';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
-import { openTimelineUsingToggle } from '../../../tasks/security_main';
+import {
+  closeTimelineUsingCloseButton,
+  openTimelineUsingToggle,
+} from '../../../tasks/security_main';
 import { selectCustomTemplates } from '../../../tasks/templates';
 import {
   addFilter,
@@ -43,6 +47,7 @@ import {
   populateTimeline,
   addNameToTimelineAndSave,
   addNameToTimelineAndSaveAsNew,
+  createTimelineOptionsPopoverBottomBar,
 } from '../../../tasks/timeline';
 import { createTimeline } from '../../../tasks/timelines';
 
@@ -141,12 +146,17 @@ describe('Timelines', (): void => {
         cy.get(LOCKED_ICON).should('be.visible');
       });
 
-      // TO-DO: Issue 163398
-      it.skip('can be added notes', () => {
+      it('can be added notes', () => {
         addNotesToTimeline(getTimeline().notes);
         cy.get(TIMELINE_TAB_CONTENT_GRAPHS_NOTES)
           .find(NOTES_TEXT)
           .should('have.text', getTimeline().notes);
+      });
+
+      it('create new timeline from bottom bar ', () => {
+        closeTimelineUsingCloseButton();
+        createTimelineOptionsPopoverBottomBar();
+        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
       });
     }
   );
