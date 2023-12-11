@@ -9,7 +9,6 @@ import type { ResponseActionsClient } from '../lib/types';
 import { responseActionsClientMock } from '../mocks';
 import type { SentinelOneActionsClientOptions } from '../../..';
 import { SentinelOneActionsClient } from '../../..';
-import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
@@ -19,7 +18,7 @@ describe('SentinelOneActionsClient class', () => {
   let connectorActionsMock: ActionsClientMock;
 
   beforeEach(() => {
-    connectorActionsMock = actionsClientMock.create();
+    connectorActionsMock = responseActionsClientMock.createConnectorActionsClient();
 
     connectorActionsMock.getAll();
 
@@ -67,7 +66,11 @@ describe('SentinelOneActionsClient class', () => {
   it.todo('should error if no connector is defined');
 
   describe(`#isolate()`, () => {
-    it.todo('should send action to sentinelone');
+    it('should send action to sentinelone', async () => {
+      await s1ActionsClient.isolate(responseActionsClientMock.createIsolateOptions());
+
+      expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({});
+    });
 
     it.todo('should write action request and response to endpoint indexes');
 
