@@ -23,7 +23,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { memoize } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type Client from '@elastic/elasticsearch/lib/client';
+import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
 import { usageTracker } from './usage_tracker';
 import { getEndpointPackageInfo } from '../utils/package';
@@ -47,8 +47,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     policyName: string,
     endpointPackageVersion?: string,
     agentPolicyName?: string,
-    log?: ToolingLog,
-    esClient?: Client
+    log?: ToolingLog
   ): Promise<IndexedFleetEndpointPolicyResponse> => {
     const response: IndexedFleetEndpointPolicyResponse = {
       integrationPolicies: [],
@@ -89,6 +88,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     // Create integration (package) policy
     const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
       name: policyName,
+      skip_ensure_installed: true,
       description: 'Protect the worlds data',
       policy_id: agentPolicy.data.item.id,
       enabled: true,
@@ -111,22 +111,48 @@ export const indexFleetEndpointPolicy = usageTracker.track(
         version: packageVersion,
       },
     };
+    log?.info('Installing package');
 
-    try {
-      const installedPackage = await kbnClient.request({
-        path: '/api/fleet/epm/packages/endpoint',
-        method: 'POST',
-        headers: {
-          'elastic-api-version': API_VERSIONS.public.v1,
-        },
-        body: {
-          force: false,
-        },
-      });
-      log?.info('Installed package', installedPackage);
-    } catch (error) {
-      throw new Error(`Installing endpoint package failed: ${error}`);
+    const installEndpointPackage = async (): Promise<InstallPackageResponse> =>
+      kbnClient
+        .request<InstallPackageResponse>({
+          path: '/api/fleet/epm/packages/endpoint',
+          method: 'POST',
+          headers: {
+            'elastic-api-version': API_VERSIONS.public.v1,
+          },
+          body: {
+            force: false,
+          },
+        })
+        .catch(catchAxiosErrorFormatAndThrow)
+        .then((res) => res.data);
+
+    const startedPackageInstallation = new Date();
+    const packageInstallationHasTimedOut = (): boolean => {
+      const elapsedTime = Date.now() - startedPackageInstallation.getTime();
+      return elapsedTime > 2 * 60 * 1000;
+    };
+
+    let installedPackage: InstallPackageResponse | undefined;
+
+    while (!installedPackage && !packageInstallationHasTimedOut()) {
+      installedPackage = await retryOnError(
+        async () => installEndpointPackage(),
+        RETRYABLE_TRANSIENT_ERRORS,
+        log
+      );
+
+      if (!installedPackage) {
+        await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
+      }
     }
+
+    if (!installedPackage) {
+      throw new Error(`Package installation failed`);
+    }
+
+    log?.info('Installed endpoint package');
 
     const fetchPackagePolicy = async (): Promise<CreatePackagePolicyResponse> =>
       kbnClient
