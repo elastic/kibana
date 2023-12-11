@@ -12,7 +12,7 @@ import {
   createCspSettingObject,
   createCspSettingObjectSafe,
   getCspSettings,
-} from './v1';
+} from './utils';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';

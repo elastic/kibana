@@ -4,95 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { CspBenchmarkRules } from '../../../../common/types/rules/v3';
+import { buildRuleKey, getCspSettings, setRulesStates, updateRulesStates } from './utils';
+import { Logger } from '@kbn/core/server';
 
-import { transformError } from '@kbn/securitysolution-es-utils';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { Logger } from '@kbn/core/server';
-import { CspBenchmarkRulesStates, CspSettings } from '../../../../common/types/rules/v3';
+const muteStatesMap = {
+  mute: true,
+  unmute: false,
+};
 
-import {
-  INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
-  INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-} from '../../../../common/constants';
-
-export const updateRulesStates = async (
+export const bulkActionBenchmarkRulesHandler = async (
   soClient: SavedObjectsClientContract,
-  newRulesStates: CspBenchmarkRulesStates
-) => {
-  return await soClient.update<CspSettings>(
-    INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-    INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
-    { rules_states: newRulesStates }
-  );
-};
-
-export const setRulesStates = (
-  rulesStates: CspBenchmarkRulesStates,
-  ruleIds: string[],
-  state: boolean
-): CspBenchmarkRulesStates => {
-  ruleIds.forEach((ruleId) => {
-    if (rulesStates[ruleId]) {
-      // Rule exists, set entry
-      rulesStates[ruleId] = { muted: state };
-    } else {
-      // Rule does not exist, create an entry
-      rulesStates[ruleId] = { muted: state };
-    }
-  });
-  return rulesStates;
-};
-
-export const createCspSettingObject = async (soClient: SavedObjectsClientContract) => {
-  return soClient.create<CspSettings>(
-    INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-    {
-      rules_states: {},
-    },
-    { id: INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID }
-  );
-};
-
-export const createCspSettingObjectSafe = async (
-  soClient: SavedObjectsClientContract,
+  rulesToUpdate: CspBenchmarkRules,
+  action: 'mute' | 'unmute',
   logger: Logger
 ) => {
   const cspSettings = await getCspSettings(soClient, logger);
-
-  if (!cspSettings) return (await createCspSettingObject(soClient)).attributes;
-};
-
-export const getCspSettings = async (
-  soClient: SavedObjectsClientContract,
-  logger: Logger
-): Promise<CspSettings | undefined> => {
-  try {
-    const cspSettings = await soClient.get<CspSettings>(
-      INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-      INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID
-    );
-    return cspSettings.attributes;
-  } catch (err) {
-    const error = transformError(err);
-    if (error.statusCode === 404) {
-      return undefined;
-    } else {
-      logger.error(`An error occurred while trying to fetch csp settings: ${error}`);
-    }
+  if (!cspSettings) {
+    throw logger.error(`Failed to read csp settings`);
   }
-};
+  const currentRulesStates = cspSettings.rules_states;
+  const ruleKeys = rulesToUpdate.rules.map((rule) =>
+    buildRuleKey(rule.benchmark_id, rule.benchmark_version, rule.rule_number)
+  );
+  const newRulesStates = setRulesStates(currentRulesStates, ruleKeys, muteStatesMap[action]);
+  const newCspSettings = await updateRulesStates(soClient, newRulesStates);
 
-export const getCspSettingsSafe = async (
-  soClient: SavedObjectsClientContract,
-  logger: Logger
-): Promise<CspSettings> => {
-  const cspSettings = await getCspSettings(soClient, logger);
-
-  if (!cspSettings) return (await createCspSettingObject(soClient)).attributes;
-
-  return cspSettings;
-};
-
-export const buildRuleKey = (benchmarkId: string, benchmarkVersion: string, ruleNumber: string) => {
-  return `${benchmarkId};${benchmarkVersion};${ruleNumber}`;
+  return newCspSettings;
 };

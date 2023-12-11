@@ -130,8 +130,7 @@ export interface FindCspBenchmarkRuleResponse {
   perPage: number;
 }
 
-export const cspBenchmarkRulesBulkActionRequestSchema = schema.object({
-  action: schema.oneOf([schema.literal('mute'), schema.literal('unmute')]),
+export const cspBenchmarkRules = schema.object({
   rules: schema.arrayOf(
     schema.object({
       benchmark_id: schema.string(),
@@ -140,6 +139,13 @@ export const cspBenchmarkRulesBulkActionRequestSchema = schema.object({
     })
   ),
 });
+
+export const cspBenchmarkRulesBulkActionRequestSchema = schema.object({
+  action: schema.oneOf([schema.literal('mute'), schema.literal('unmute')]),
+  rules: cspBenchmarkRules,
+});
+
+export type CspBenchmarkRules = TypeOf<typeof cspBenchmarkRules>;
 
 export type CspBenchmarkRulesBulkActionRequestSchema = TypeOf<
   typeof cspBenchmarkRulesBulkActionRequestSchema

@@ -11,13 +11,9 @@ import {
   cspBenchmarkRulesBulkActionRequestSchema,
 } from '../../../../common/types/rules/v3';
 import { CspRouter } from '../../../types';
-import { buildRuleKey, getCspSettings, setRulesStates, updateRulesStates } from './v1';
-import { CSP_BENCHMARK_RULE_BULK_ACTION_ROUTE_PATH } from '../../../../common/constants';
 
-const muteStatesMap = {
-  mute: true,
-  unmute: false,
-};
+import { CSP_BENCHMARK_RULE_BULK_ACTION_ROUTE_PATH } from '../../../../common/constants';
+import { bulkActionBenchmarkRulesHandler } from './v1';
 
 export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
   router.versioned
@@ -43,26 +39,14 @@ export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
         try {
           const requestBody: CspBenchmarkRulesBulkActionRequestSchema = request.body;
 
-          const cspSettings = await getCspSettings(cspContext.soClient, cspContext.logger);
+          const benchmarkRulesToUpdate = requestBody.rules;
 
-          if (!cspSettings) {
-            throw cspContext.logger.error(`Failed to read csp settings`);
-          }
-
-          // TODO: create handler function
-          const currentRulesStates = cspSettings.rules_states;
-
-          const ruleKeys = requestBody.rules.map((rule) =>
-            buildRuleKey(rule.benchmark_id, rule.benchmark_version, rule.rule_number)
+          const newCspSettings = await bulkActionBenchmarkRulesHandler(
+            cspContext.soClient,
+            benchmarkRulesToUpdate,
+            requestBody.action,
+            cspContext.logger
           );
-
-          const newRulesStates = setRulesStates(
-            currentRulesStates,
-            ruleKeys,
-            muteStatesMap[requestBody.action]
-          );
-
-          const newCspSettings = await updateRulesStates(cspContext.soClient, newRulesStates);
 
           return response.ok({
             body: {
