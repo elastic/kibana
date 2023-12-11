@@ -7,7 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 import dateMath from '@kbn/datemath';
 import { fetchRiskScorePreview } from '../api';
-import type { RiskScorePreviewRequestSchema } from '../../../../common/risk_engine/risk_score_preview/request_schema';
+import type { RiskScorePreviewRequestSchema } from '../../../../common/entity_analytics/risk_engine/risk_score_preview/request_schema';
 
 export const useRiskScorePreview = ({
   data_view_id: dataViewId,
