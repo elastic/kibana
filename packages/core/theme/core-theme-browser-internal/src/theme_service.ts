@@ -34,8 +34,7 @@ export class ThemeService {
       this.applyTheme(darkMode);
       onSystemPrefersColorSchemeChange((mode) => this.applyTheme(mode));
     } else {
-      // if browser doesn't support required capabilities we fallback to default theme
-      const darkMode = theme.darkMode === 'system' ? false : toBoolean(theme.darkMode);
+      const darkMode = theme.darkMode === 'system' ? false : theme.darkMode;
       this.applyTheme(darkMode);
     }
 
@@ -103,14 +102,4 @@ const browsersSupportsPrefersColorScheme = (): boolean => {
   } catch (e) {
     return false;
   }
-};
-
-const toBoolean = (val: string | boolean): boolean => {
-  if (val === true || val === 'true') {
-    return true;
-  }
-  if (val === false || val === 'false') {
-    return false;
-  }
-  return Boolean(val);
 };

@@ -17,8 +17,12 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
-import { CustomBranding } from '@kbn/core-custom-branding-common';
-import { UserProvidedValues, DarkModeValue } from '@kbn/core-ui-settings-common';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import {
+  type UserProvidedValues,
+  type DarkModeValue,
+  parseDarkModeValue,
+} from '@kbn/core-ui-settings-common';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -177,13 +181,8 @@ export class RenderingService {
     if (userSettingDarkMode !== undefined && !isThemeOverridden) {
       darkMode = userSettingDarkMode;
     } else {
-      darkMode = getSettingValue<DarkModeValue>(
-        'theme:darkMode',
-        settings,
-        (v) => v as DarkModeValue
-      );
+      darkMode = getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
     }
-    // end dark mode
 
     const themeStylesheetPaths = getDarkModeStylesheetPaths({
       themeVersion,

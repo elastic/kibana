@@ -13,3 +13,16 @@
  * - "system": dark mode will follow the user system preference.
  */
 export type DarkModeValue = true | false | 'system';
+
+export const parseDarkModeValue = (rawValue: unknown): DarkModeValue => {
+  if (rawValue === true || rawValue === 'true' || rawValue === 'enabled') {
+    return true;
+  }
+  if (rawValue === false || rawValue === 'false' || rawValue === 'disabled') {
+    return false;
+  }
+  if (rawValue === 'system') {
+    return 'system';
+  }
+  return Boolean(rawValue);
+};

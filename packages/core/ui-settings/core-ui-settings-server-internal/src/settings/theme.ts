@@ -46,20 +46,30 @@ export const getThemeSettings = (
       name: i18n.translate('core.ui_settings.params.darkModeTitle', {
         defaultMessage: 'Dark mode',
       }),
-      value: defaultDarkMode,
+      value: defaultDarkMode ? 'enabled' : 'disabled',
       description: i18n.translate('core.ui_settings.params.darkModeText', {
         defaultMessage: `Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.`,
       }),
       type: 'select',
-      options: ['true', 'false', 'system'],
+      options: ['enabled', 'disabled', 'system'],
       optionLabels: {
-        true: 'Enabled',
-        false: 'Disabled',
-        system: 'Automatic',
+        enabled: i18n.translate('core.ui_settings.params.darkMode.options.enabled', {
+          defaultMessage: `Enabled`,
+        }),
+        disabled: i18n.translate('core.ui_settings.params.darkMode.options.disabled', {
+          defaultMessage: `Disabled`,
+        }),
+        system: i18n.translate('core.ui_settings.params.darkMode.options.system', {
+          defaultMessage: `Sync with system`,
+        }),
       },
-      // TODO: should no longer need reload in the end
       requiresPageReload: true,
-      schema: schema.oneOf([schema.boolean(), schema.literal('system')]),
+      schema: schema.oneOf([
+        schema.boolean(),
+        schema.literal('enabled'),
+        schema.literal('disabled'),
+        schema.literal('system'),
+      ]),
     },
     /**
      * Theme is sticking around as there are still a number of places reading it and
