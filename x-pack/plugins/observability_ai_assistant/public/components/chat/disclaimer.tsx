@@ -14,7 +14,7 @@ export function Disclaimer() {
     <EuiText color="subdued" size="xs" textAlign="center">
       {i18n.translate('xpack.observabilityAiAssistant.disclaimer.disclaimerLabel', {
         defaultMessage:
-          "This chat is powered by an integration with your LLM provider. LLMs are known to sometimes present incorrect information as if it's correct, also called a hallucination. Elastic supports the configuration and connection to the LLM provider and to your knowledge base, but is not responsible for the LLM's responses.",
+          "This chat is powered by an integration with your LLM provider. LLMs are known to sometimes present incorrect information as if it's correct. Elastic supports configuration and connection to the LLM provider and your knowledge base, but is not responsible for the LLM's responses.",
       })}
     </EuiText>
   );

@@ -10,27 +10,39 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCode,
-  EuiPanel,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiLink,
   EuiSpacer,
+  EuiIcon,
+  EuiText,
+  EuiHorizontalRule,
+  EuiPanel,
 } from '@elastic/eui';
-import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
+import { css } from '@emotion/css';
 import { useKibana } from '../../hooks/use_kibana';
+import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
+
+const panelContainerClassName = css`
+  width: 330px;
+`;
 
 export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
   knowledgeBase,
+  onRetryInstall,
 }: {
   knowledgeBase: UseKnowledgeBaseResult;
+  onRetryInstall: () => void;
 }) {
   const { http } = useKibana().services;
+
   const modelName = knowledgeBase.status.value?.model_name;
+
   return (
-    <EuiPanel color="subdued">
-      <EuiDescriptionList>
-        <>
+    <div className={panelContainerClassName}>
+      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+        <EuiDescriptionList>
           <EuiDescriptionListTitle>
             {i18n.translate(
               'xpack.observabilityAiAssistant.welcomeMessage.issuesDescriptionListTitleLabel',
@@ -38,40 +50,82 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
             )}
           </EuiDescriptionListTitle>
 
+          <EuiSpacer size="s" />
+
           <EuiDescriptionListDescription>
             <ul>
-              {knowledgeBase.status.value?.deployment_state !== 'started' ? (
+              {!knowledgeBase.status.value?.deployment_state ? (
                 <li>
+                  <EuiIcon type="alert" color="subdued" />{' '}
                   <FormattedMessage
-                    id="xpack.observabilityAiAssistant.welcomeMessage.modelIsNotStartedLabel"
-                    defaultMessage="{model} is not started"
-                    values={{ model: <EuiCode>{modelName}</EuiCode> }}
+                    id="xpack.observabilityAiAssistant.welcomeMessage.modelIsNotDeployedLabel"
+                    defaultMessage="Model {modelName} is not deployed"
+                    values={{
+                      modelName: <EuiCode>{modelName}</EuiCode>,
+                    }}
                   />
                 </li>
               ) : null}
-              {knowledgeBase.status.value?.allocation_state !== 'fully_allocated' ? (
+
+              {knowledgeBase.status.value?.deployment_state &&
+              knowledgeBase.status.value.deployment_state !== 'started' ? (
                 <li>
+                  <EuiIcon type="alert" color="subdued" />{' '}
+                  <FormattedMessage
+                    id="xpack.observabilityAiAssistant.welcomeMessage.modelIsNotStartedLabel"
+                    defaultMessage="Deployment state of {modelName} is {deploymentState}"
+                    values={{
+                      modelName: <EuiCode>{modelName}</EuiCode>,
+                      deploymentState: (
+                        <EuiCode>{knowledgeBase.status.value?.deployment_state}</EuiCode>
+                      ),
+                    }}
+                  />
+                </li>
+              ) : null}
+
+              {knowledgeBase.status.value?.allocation_state &&
+              knowledgeBase.status.value.allocation_state !== 'fully_allocated' ? (
+                <li>
+                  <EuiIcon type="alert" color="subdued" />{' '}
                   <FormattedMessage
                     id="xpack.observabilityAiAssistant.welcomeMessage.modelIsNotFullyAllocatedLabel"
-                    defaultMessage="{model} is not fully allocated"
-                    values={{ model: <EuiCode>{modelName}</EuiCode> }}
+                    defaultMessage="Allocation state of {modelName} is {allocationState}"
+                    values={{
+                      modelName: <EuiCode>{modelName}</EuiCode>,
+                      allocationState: (
+                        <EuiCode>{knowledgeBase.status.value?.allocation_state}</EuiCode>
+                      ),
+                    }}
                   />
                 </li>
               ) : null}
             </ul>
           </EuiDescriptionListDescription>
-        </>
-      </EuiDescriptionList>
+        </EuiDescriptionList>
+      </EuiPanel>
 
-      {knowledgeBase.status.value?.ready === false ? (
-        <div>
-          <EuiSpacer size="m" />
+      <EuiHorizontalRule margin="none" />
 
+      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+        <EuiText color="subdued" size="xs">
           <FormattedMessage
             id="xpack.observabilityAiAssistant.welcomeMessage.div.checkTrainedModelsToLabel"
             defaultMessage="
-                Check {trainedModelsLink} to make sure {modelName} is deployed and running."
+                {retryInstallingLink} or check {trainedModelsLink} to ensure {modelName} is deployed and running."
             values={{
+              modelName,
+              retryInstallingLink: (
+                <EuiLink
+                  data-test-subj="observabilityAiAssistantWelcomeMessageKnowledgeBaseSetupErrorPanelRetryInstallingLink"
+                  onClick={onRetryInstall}
+                >
+                  {i18n.translate(
+                    'xpack.observabilityAiAssistant.welcomeMessageKnowledgeBaseSetupErrorPanel.retryInstallingLinkLabel',
+                    { defaultMessage: 'Retry install' }
+                  )}
+                </EuiLink>
+              ),
               trainedModelsLink: (
                 <EuiLink
                   data-test-subj="observabilityAiAssistantWelcomeMessageTrainedModelsLink"
@@ -85,11 +139,10 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
                   )}
                 </EuiLink>
               ),
-              modelName: <EuiCode>{modelName}</EuiCode>,
             }}
           />
-        </div>
-      ) : null}
-    </EuiPanel>
+        </EuiText>
+      </EuiPanel>
+    </div>
   );
 }

@@ -30,7 +30,7 @@ const fullHeightClassName = css`
 `;
 
 const centerMaxWidthClassName = css`
-  max-width: 550px;
+  max-width: 600px;
   text-align: center;
 `;
 
@@ -86,7 +86,7 @@ export function WelcomeMessage({
           <EuiImage
             src={ctaImage}
             alt="Elastic AI Assistant"
-            size={breakpoint === 'xl' ? 'l' : 'm'}
+            size={breakpoint === 'xl' ? 300 : 'm'}
           />
 
           <EuiSpacer size="m" />
@@ -94,7 +94,7 @@ export function WelcomeMessage({
           <EuiTitle size={breakpoint === 'xl' ? 'm' : 'l' ? 'm' : 's'}>
             <h2>
               {i18n.translate('xpack.observabilityAiAssistant.disclaimer.title', {
-                defaultMessage: 'Welcome to the Elastic AI Assistant for Observability',
+                defaultMessage: 'Welcome to the AI Assistant for Observability',
               })}
             </h2>
           </EuiTitle>
@@ -110,6 +110,7 @@ export function WelcomeMessage({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
+          <EuiSpacer size="m" />
           <Disclaimer />
         </EuiFlexItem>
       </EuiFlexGroup>

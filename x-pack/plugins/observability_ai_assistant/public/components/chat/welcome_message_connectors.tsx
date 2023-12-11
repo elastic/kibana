@@ -6,9 +6,24 @@
  */
 
 import React from 'react';
+import { css, keyframes } from '@emotion/css';
 import { EuiBetaBadge, EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+
+const fadeInAnimation = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`;
+
+const fadeInClassName = css`
+  animation: ${fadeInAnimation} ${euiThemeVars.euiAnimSpeedNormal} ease-in-out;
+`;
 
 export function WelcomeMessageConnectors({
   connectors,
@@ -18,7 +33,7 @@ export function WelcomeMessageConnectors({
   onSetupConnectorClick?: () => void;
 }) {
   return !connectors.loading && connectors.connectors?.length === 0 && onSetupConnectorClick ? (
-    <>
+    <div className={fadeInClassName}>
       <EuiText color="subdued" size="s">
         {i18n.translate(
           'xpack.observabilityAiAssistant.initialSetupPanel.setupConnector.description2',
@@ -59,6 +74,6 @@ export function WelcomeMessageConnectors({
           )}
         </EuiButton>
       </div>
-    </>
+    </div>
   ) : null;
 }

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { css } from '@emotion/css';
+import { css, keyframes } from '@emotion/css';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -56,6 +56,29 @@ const incorrectLicenseContainer = css`
 
 const chatBodyContainerClassNameWithError = css`
   align-self: center;
+`;
+
+const promptEditorContainerClassName = css`
+  padding-top: 12px;
+  padding-bottom: 8px;
+`;
+
+const fadeInAnimation = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+`;
+
+const animClassName = css`
+  height: 100%;
+  opacity: 0;
+  animation: ${fadeInAnimation} ${euiThemeVars.euiAnimSpeedNormal}
+    ${euiThemeVars.euiAnimSlightBounce} ${euiThemeVars.euiAnimSpeedNormal} forwards;
 `;
 
 export function ChatBody({
@@ -191,7 +214,7 @@ export function ChatBody({
               hasBorder={false}
               hasShadow={false}
               paddingSize="m"
-              className={fullHeightClassName}
+              className={animClassName}
             >
               {connectors.connectors?.length === 0 || messages.length === 1 ? (
                 <WelcomeMessage connectors={connectors} knowledgeBase={knowledgeBase} />
@@ -249,11 +272,16 @@ export function ChatBody({
           grow={false}
           className={promptEditorClassname}
           style={{
-            height: !connectors.loading && connectors.connectors?.length !== 0 ? 121 : 0,
+            height: !connectors.loading && connectors.connectors?.length !== 0 ? 110 : 0,
           }}
         >
           <EuiHorizontalRule margin="none" />
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+          <EuiPanel
+            hasBorder={false}
+            hasShadow={false}
+            paddingSize="m"
+            className={promptEditorContainerClassName}
+          >
             <ChatPromptEditor
               loading={isLoading}
               disabled={!connectors.selectedConnector || !hasCorrectLicense}
