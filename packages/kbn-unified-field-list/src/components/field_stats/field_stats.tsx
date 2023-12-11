@@ -8,6 +8,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { getTimeZone } from '@kbn/visualization-utils';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -518,7 +519,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
                 yAccessors={['count']}
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
-                timeZone="local"
+                timeZone={getTimeZone(uiSettings)}
               />
             </Chart>
           </div>
