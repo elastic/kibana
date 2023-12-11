@@ -349,13 +349,23 @@ export class TaskManagerRunner implements TaskRunner {
         }
       }
 
-      const result = taskParamsValidation?.error
+      const hasSkipError = !isUndefined(taskParamsValidation?.error);
+      let shouldSkip = false;
+      let shouldKeepSkipAttempts = false;
+
+      if (hasSkipError) {
+        const reachedMaxSkipAttempts = this.hasReachedMaxSkipAttempts(modifiedContext.taskInstance);
+        shouldSkip = !reachedMaxSkipAttempts;
+        shouldKeepSkipAttempts = reachedMaxSkipAttempts;
+      }
+
+      const result = shouldSkip
         ? taskParamsValidation
         : await this.executionContext.withContext(ctx, () =>
             withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
           );
 
-      const validatedResult = this.validateResult(result);
+      const validatedResult = this.validateResult(shouldKeepSkipAttempts, result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
         this.processResult(validatedResult, stopTaskTimer())
       );
@@ -383,8 +393,7 @@ export class TaskManagerRunner implements TaskRunner {
 
   private validateTaskParams({ taskInstance }: RunContext) {
     let error;
-    const { state, taskType, params, id, numSkippedRuns = 0 } = taskInstance;
-    const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
+    const { state, taskType, params, id } = taskInstance;
 
     try {
       const paramsSchema = this.definition.paramsSchema;
@@ -393,13 +402,7 @@ export class TaskManagerRunner implements TaskRunner {
       }
     } catch (err) {
       this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${err.message}`);
-      if (numSkippedRuns < maxAttempts) {
-        error = createSkipError(err);
-      } else {
-        this.logger.warn(
-          `Task Manager has reached the max skip attempts for task ${taskType}/${id}`
-        );
-      }
+      error = createSkipError(err);
     }
 
     return { ...(error ? { error } : {}), state };
@@ -418,8 +421,7 @@ export class TaskManagerRunner implements TaskRunner {
 
   private async validateIndirectTaskParams({ taskInstance }: RunContext) {
     let error;
-    const { state, taskType, id, numSkippedRuns = 0 } = taskInstance;
-    const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
+    const { state, taskType, id } = taskInstance;
     const indirectParamsSchema = this.definition.indirectParamsSchema;
 
     if (this.task?.loadIndirectParams && !!indirectParamsSchema) {
@@ -433,13 +435,7 @@ export class TaskManagerRunner implements TaskRunner {
           this.logger.warn(
             `Task (${taskType}/${id}) has a validation error in its indirect params: ${err.message}`
           );
-          if (numSkippedRuns < maxAttempts) {
-            error = createSkipError(err);
-          } else {
-            this.logger.warn(
-              `Task Manager has reached the max skip attempts for task ${taskType}/${id}`
-            );
-          }
+          error = createSkipError(err);
         }
       }
     }
@@ -577,11 +573,17 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private validateResult(
+    shouldKeepSkipAttempts: boolean,
     result?: SuccessfulRunResult | FailedRunResult | void
   ): Result<SuccessfulRunResult, FailedRunResult> {
     return isFailedRunResult(result)
       ? asErr({ ...result, error: result.error })
-      : asOk(result || EMPTY_RUN_RESULT);
+      : asOk({
+          ...(result || EMPTY_RUN_RESULT),
+          ...(shouldKeepSkipAttempts
+            ? { skipAttempts: this.requeueInvalidTasksConfig.max_attempts }
+            : {}),
+        });
   }
 
   private async releaseClaimAndIncrementAttempts(): Promise<Result<ConcreteTaskInstance, Error>> {
@@ -685,14 +687,14 @@ export class TaskManagerRunner implements TaskRunner {
           state,
           attempts = 0,
           skipAttempts,
-        }: SuccessfulRunResult & { attempts: number; skipAttempts: number }) => {
+        }: SuccessfulRunResult & { attempts: number }) => {
           const { startedAt, schedule, numSkippedRuns } = this.instance.task;
           const { taskRunError } = unwrap(result);
           let requeueInvalidTaskAttempts = skipAttempts || numSkippedRuns || 0;
 
           // Alerting TaskRunner returns SuccessResult even though there is an error
           // therefore we use "taskRunError" to be sure that there wasn't any error
-          if (isUndefined(skipAttempts) && taskRunError === undefined) {
+          if (isUndefined(skipAttempts) && isUndefined(taskRunError)) {
             requeueInvalidTaskAttempts = 0;
           }
 
@@ -860,6 +862,18 @@ export class TaskManagerRunner implements TaskRunner {
     return this.definition.maxAttempts !== undefined
       ? this.definition.maxAttempts
       : this.defaultMaxAttempts;
+  }
+
+  private hasReachedMaxSkipAttempts(taskInstance: ConcreteTaskInstance) {
+    const { taskType, id, numSkippedRuns = 0 } = taskInstance;
+    const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
+
+    if (numSkippedRuns >= maxAttempts) {
+      this.logger.warn(`Task Manager has reached the max skip attempts for task ${taskType}/${id}`);
+      return true;
+    }
+
+    return false;
   }
 }
 
