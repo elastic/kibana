@@ -9,6 +9,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import _ from 'lodash';
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { SLOId, Status, Summary } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
@@ -67,17 +68,9 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     pagination: Pagination
   ): Promise<Paginated<SLOSummary>> {
     try {
-      const { count: total } = await this.esClient.count({
-        index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-        query: getElastichsearchQueryOrThrow(kqlQuery),
-      });
-
-      if (total === 0) {
-        return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };
-      }
-
       const summarySearch = await this.esClient.search<EsSummaryDocument>({
         index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+        track_total_hits: true,
         query: getElastichsearchQueryOrThrow(kqlQuery),
         sort: {
           // non-temp first, then temp documents
@@ -91,6 +84,11 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         from: (pagination.page - 1) * pagination.perPage,
         size: pagination.perPage * 2, // twice as much as we return, in case they are all duplicate temp/non-temp summary
       });
+
+      const total = (summarySearch.hits.total as SearchTotalHits).value ?? 0;
+      if (total === 0) {
+        return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };
+      }
 
       const [tempSummaryDocuments, summaryDocuments] = _.partition(
         summarySearch.hits.hits,
