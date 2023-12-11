@@ -7,10 +7,10 @@
 
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { DatasetQualityApiClientKey } from '../common/config';
-import { DatasetQualityApiError } from '../common/dataset_quality_api_supertest';
-import { FtrProviderContext } from '../common/ftr_provider_context';
-import { expectToReject } from '../utils';
+import { DatasetQualityApiClientKey } from '../../common/config';
+import { DatasetQualityApiError } from '../../common/dataset_quality_api_supertest';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { expectToReject } from '../../utils';
 import { cleanLogIndexTemplate, addIntegrationToLogIndexTemplate } from './es_utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
