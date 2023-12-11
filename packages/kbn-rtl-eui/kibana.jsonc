@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/test-jest-helpers2",
+  "id": "@kbn/rtl-eui",
   "devOnly": true,
   "owner": ["@elastic/kibana-visualizations"],
 }

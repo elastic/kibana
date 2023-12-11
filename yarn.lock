@@ -6055,7 +6055,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-jest-helpers2@link:packages/kbn-test-jest-helpers2":
+"@kbn/rtl-eui@link:packages/kbn-rtl-eui":
   version "0.0.0"
   uid ""
 

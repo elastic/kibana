@@ -785,7 +785,7 @@ packages/kbn-telemetry-tools @elastic/kibana-core
 packages/kbn-test @elastic/kibana-operations @elastic/appex-qa
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
-packages/kbn-test-jest-helpers2 @elastic/kibana-visualizations
+packages/kbn-rtl-eui @elastic/kibana-visualizations
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 packages/kbn-text-based-editor @elastic/kibana-visualizations

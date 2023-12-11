@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-test-jest-helpers2'],
+  roots: ['<rootDir>/packages/kbn-rtl-eui'],
 };

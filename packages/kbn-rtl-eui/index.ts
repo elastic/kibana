@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './src/enzyme_helpers';
+export * from './src/rtl_helpers';
