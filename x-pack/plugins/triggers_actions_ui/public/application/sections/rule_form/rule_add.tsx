@@ -37,7 +37,7 @@ import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
-import { DEFAULT_RULE_INTERVAL } from '../../constants';
+import { DEFAULT_RULE_INTERVAL, MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { getInitialInterval } from './get_initial_interval';
 import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
@@ -65,6 +65,7 @@ const RuleAdd = ({
   filteredRuleTypes,
   validConsumers,
   useRuleProducer,
+  initialSelectedConsumer,
   ...props
 }: RuleAddProps) => {
   const onSaveHandler = onSave ?? reloadRules;
@@ -84,7 +85,6 @@ const RuleAdd = ({
       ...(initialValues ? initialValues : {}),
     };
   }, [ruleTypeId, consumer, initialValues]);
-
   const [{ rule }, dispatch] = useReducer(ruleReducer as InitialRuleReducer, {
     rule: initialRule,
   });
@@ -97,9 +97,14 @@ const RuleAdd = ({
     props.ruleTypeIndex
   );
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
+
+  const selectableConsumer = useMemo(
+    () => rule.ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule.ruleTypeId),
+    [rule]
+  );
   const [selectedConsumer, setSelectedConsumer] = useState<
     RuleCreationValidConsumer | null | undefined
-  >();
+  >(selectableConsumer ? initialSelectedConsumer : null);
 
   const setRule = (value: InitialRule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
@@ -218,12 +223,14 @@ const RuleAdd = ({
       getRuleErrors(
         {
           ...rule,
-          ...(selectedConsumer !== undefined ? { consumer: selectedConsumer } : {}),
+          ...(selectableConsumer && selectedConsumer !== undefined
+            ? { consumer: selectedConsumer }
+            : {}),
         } as Rule,
         ruleType,
         config
       ),
-    [rule, selectedConsumer, ruleType, config]
+    [rule, selectedConsumer, selectableConsumer, ruleType, config]
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this rule
@@ -235,7 +242,7 @@ const RuleAdd = ({
         http,
         rule: {
           ...rule,
-          ...(selectedConsumer ? { consumer: selectedConsumer } : {}),
+          ...(selectableConsumer && selectedConsumer ? { consumer: selectedConsumer } : {}),
         } as RuleUpdates,
       });
       toasts.addSuccess(
@@ -298,6 +305,7 @@ const RuleAdd = ({
                   }
                 )}
                 validConsumers={validConsumers}
+                selectedConsumer={selectedConsumer}
                 actionTypeRegistry={actionTypeRegistry}
                 ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
@@ -305,7 +313,6 @@ const RuleAdd = ({
                 hideGrouping={hideGrouping}
                 hideInterval={hideInterval}
                 onChangeMetaData={onChangeMetaData}
-                selectedConsumer={selectedConsumer}
                 setConsumer={setSelectedConsumer}
                 useRuleProducer={useRuleProducer}
               />

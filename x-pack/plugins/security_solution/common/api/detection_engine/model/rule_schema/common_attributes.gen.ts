@@ -432,3 +432,9 @@ export const RuleExceptionList = z.object({
    */
   namespace_type: z.enum(['agnostic', 'single']),
 });
+
+export type AlertSuppressionDuration = z.infer<typeof AlertSuppressionDuration>;
+export const AlertSuppressionDuration = z.object({
+  value: z.number().int().min(1),
+  unit: z.enum(['s', 'm', 'h']),
+});

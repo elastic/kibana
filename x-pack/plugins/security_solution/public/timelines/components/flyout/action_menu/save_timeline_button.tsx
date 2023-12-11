@@ -6,24 +6,19 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiToolTip, EuiTourStep, EuiCode, EuiText, EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineStatus } from '../../../../../common/api/timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
-import { useLocalStorage } from '../../../../common/components/local_storage';
 
 import { SaveTimelineModal } from './save_timeline_modal';
 import * as timelineTranslations from './translations';
 import { getTimelineStatusByIdSelector } from '../header/selectors';
+import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../../timeline/tour/step_config';
 
 export interface SaveTimelineButtonProps {
   timelineId: string;
 }
-
-const SAVE_BUTTON_ELEMENT_ID = 'SAVE_BUTTON_ELEMENT_ID';
-const LOCAL_STORAGE_KEY = 'security.timelineFlyoutHeader.saveTimelineTour';
 
 export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelineId }) => {
   const [showEditTimelineOverlay, setShowEditTimelineOverlay] = useState<boolean>(false);
@@ -44,39 +39,14 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
   const {
     kibanaSecuritySolutionsPrivileges: { crud: canEditTimelinePrivilege },
   } = useUserPrivileges();
-  const getTimelineStatus = useMemo(() => getTimelineStatusByIdSelector(), []);
-  const {
-    status: timelineStatus,
-    isSaving,
-    isLoading,
-    show: isVisible,
-  } = useDeepEqualSelector((state) => getTimelineStatus(state, timelineId));
 
-  const isSaveButtonMounted = useIsElementMounted(SAVE_BUTTON_ELEMENT_ID);
-  const [timelineTourStatus, setTimelineTourStatus] = useLocalStorage({
-    defaultValue: { isTourActive: true },
-    key: LOCAL_STORAGE_KEY,
-    isInvalidDefault: (valueFromStorage) => {
-      return !valueFromStorage;
-    },
-  });
+  const getTimelineStatus = useMemo(() => getTimelineStatusByIdSelector(), []);
+
+  const { status: timelineStatus, isSaving } = useDeepEqualSelector((state) =>
+    getTimelineStatus(state, timelineId)
+  );
 
   const canEditTimeline = canEditTimelinePrivilege && timelineStatus !== TimelineStatus.immutable;
-  // Why are we checking for so many flags here?
-  // The tour popup should only show when timeline is fully populated and all necessary
-  // elements are visible on screen. If we would not check for all these flags, the tour
-  // popup would show too early and in the wrong place in the DOM.
-  // The last flag, checks if the tour has been dismissed before.
-  const showTimelineSaveTour =
-    canEditTimeline &&
-    isVisible &&
-    !isLoading &&
-    isSaveButtonMounted &&
-    timelineTourStatus?.isTourActive;
-
-  const markTimelineSaveTourAsSeen = useCallback(() => {
-    setTimelineTourStatus({ isTourActive: false });
-  }, [setTimelineTourStatus]);
 
   const isUnsaved = timelineStatus === TimelineStatus.draft;
   const tooltipContent = canEditTimeline ? null : timelineTranslations.CALL_OUT_UNAUTHORIZED_MSG;
@@ -89,6 +59,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
     >
       <>
         <EuiButton
+          id={TIMELINE_TOUR_CONFIG_ANCHORS.SAVE_TIMELINE}
           fill
           color="primary"
           onClick={openEditTimeline}
@@ -97,7 +68,6 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
           isLoading={isSaving}
           disabled={!canEditTimeline}
           data-test-subj="save-timeline-action-btn"
-          id={SAVE_BUTTON_ELEMENT_ID}
         >
           {timelineTranslations.SAVE}
         </EuiButton>
@@ -109,37 +79,6 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
             showWarning={false}
           />
         ) : null}
-        {showTimelineSaveTour && (
-          <EuiTourStep
-            anchor={`#${SAVE_BUTTON_ELEMENT_ID}`}
-            content={
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.securitySolution.timeline.flyout.saveTour.description"
-                  defaultMessage="Click {saveButton} to manually save changes."
-                  values={{
-                    saveButton: <EuiCode>{timelineTranslations.SAVE}</EuiCode>,
-                  }}
-                />
-              </EuiText>
-            }
-            isStepOpen={true}
-            minWidth={300}
-            step={1}
-            stepsTotal={1}
-            onFinish={markTimelineSaveTourAsSeen}
-            footerAction={
-              <EuiButtonEmpty
-                onClick={markTimelineSaveTourAsSeen}
-                data-test-subj="timeline-save-tour-close-button"
-              >
-                {timelineTranslations.SAVE_TOUR_CLOSE}
-              </EuiButtonEmpty>
-            }
-            title={timelineTranslations.SAVE_TOUR_TITLE}
-            anchorPosition="downCenter"
-          />
-        )}
       </>
     </EuiToolTip>
   );

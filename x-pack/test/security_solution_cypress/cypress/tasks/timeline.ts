@@ -156,9 +156,9 @@ export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
   return cy.get(NOTES_TAB_BUTTON);
 };
 
-export const gotToEsqlTab = () => {
+export const goToEsqlTab = () => {
   recurse(
-    () => cy.get(ESQL_TAB).should('be.visible').click({ force: true }),
+    () => cy.get(ESQL_TAB).should('be.visible').click(),
     ($el) => expect($el).to.have.class('euiTab-isSelected'),
     {
       delay: 500,

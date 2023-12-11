@@ -22,7 +22,7 @@ import {
 } from '../../common/mock';
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
 
-import { SortFieldCase, StatusAll } from '../../../common/ui/types';
+import { SortFieldCase } from '../../../common/ui/types';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyCellValue } from '../empty_value';
@@ -38,11 +38,8 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCategories } from '../../containers/use_get_categories';
 import { useUpdateCase } from '../../containers/use_update_case';
-import {
-  useGetCases,
-  DEFAULT_QUERY_PARAMS,
-  DEFAULT_FILTER_OPTIONS,
-} from '../../containers/use_get_cases';
+import { useGetCases } from '../../containers/use_get_cases';
+import { DEFAULT_QUERY_PARAMS, DEFAULT_FILTER_OPTIONS } from '../../containers/constants';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
@@ -100,7 +97,7 @@ describe('AllCasesListGeneric', () => {
   };
 
   const defaultColumnArgs = {
-    filterStatus: CaseStatuses.open,
+    filterStatus: [CaseStatuses.open],
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
     isLoadingColumns: false,
@@ -403,7 +400,8 @@ describe('AllCasesListGeneric', () => {
   it('should sort by status', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(screen.getByTitle('Status'));
+    // 0 is the status filter button label
+    userEvent.click(screen.getAllByTitle('Status')[1]);
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -424,14 +422,16 @@ describe('AllCasesListGeneric', () => {
       expect(screen.getByTitle('Name')).toBeInTheDocument();
       expect(screen.getByTitle('Category')).toBeInTheDocument();
       expect(screen.getByTitle('Created on')).toBeInTheDocument();
-      expect(screen.getByTitle('Severity')).toBeInTheDocument();
+      // 0 is the severity filter button label
+      expect(screen.getAllByTitle('Severity')[1]).toBeInTheDocument();
     });
   });
 
   it('should sort by severity', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(screen.getByTitle('Severity'));
+    // 0 is the severity filter button label
+    userEvent.click(screen.getAllByTitle('Severity')[1]);
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -503,7 +503,7 @@ describe('AllCasesListGeneric', () => {
   it('should filter by category', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(screen.getByTestId('options-filter-popover-button-Categories'));
+    userEvent.click(screen.getByTestId('options-filter-popover-button-category'));
     await waitForEuiPopoverOpen();
     userEvent.click(screen.getByTestId('options-filter-popover-item-twix'));
 
@@ -511,7 +511,7 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          searchFields: [],
+          searchFields: ['title', 'description'],
           owner: ['securitySolution'],
           category: ['twix'],
         },
@@ -520,70 +520,20 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('should filter by status: closed', async () => {
-    appMockRenderer.render(<AllCasesList isSelectorView={false} />);
-    userEvent.click(screen.getByTestId('case-status-filter'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('case-status-filter-closed'));
-    await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          queryParams: { ...DEFAULT_QUERY_PARAMS, sortField: SortFieldCase.closedAt },
-        })
-      );
-    });
-  });
-
-  it('should filter by status: in-progress', async () => {
-    appMockRenderer.render(<AllCasesList isSelectorView={false} />);
-    userEvent.click(screen.getByTestId('case-status-filter'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('case-status-filter-in-progress'));
-    await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          queryParams: DEFAULT_QUERY_PARAMS,
-        })
-      );
-    });
-  });
-
-  it('should filter by status: open', async () => {
-    appMockRenderer.render(<AllCasesList isSelectorView={false} />);
-    userEvent.click(screen.getByTestId('case-status-filter'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('case-status-filter-in-progress'));
-    await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          queryParams: DEFAULT_QUERY_PARAMS,
-        })
-      );
-    });
-  });
-
   it('should show the correct count on stats', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(screen.getByTestId('case-status-filter'));
+    userEvent.click(screen.getByTestId('options-filter-popover-button-status'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('case-status-filter-open')).toHaveTextContent('Open (20)');
-      expect(screen.getByTestId('case-status-filter-in-progress')).toHaveTextContent(
+      expect(screen.getByTestId('options-filter-popover-item-open')).toHaveTextContent('Open (20)');
+      expect(screen.getByTestId('options-filter-popover-item-in-progress')).toHaveTextContent(
         'In progress (40)'
       );
-      expect(screen.getByTestId('case-status-filter-closed')).toHaveTextContent('Closed (130)');
+      expect(screen.getByTestId('options-filter-popover-item-closed')).toHaveTextContent(
+        'Closed (130)'
+      );
     });
-  });
-
-  it('renders the first available status when hiddenStatus is given', async () => {
-    appMockRenderer.render(
-      <AllCasesList hiddenStatuses={[StatusAll, CaseStatuses.open]} isSelectorView={true} />
-    );
-
-    await waitFor(() =>
-      expect(screen.getAllByTestId('case-status-badge-in-progress')[0]).toBeInTheDocument()
-    );
   });
 
   it('shows Solution column if there are no set owners', async () => {
@@ -642,9 +592,9 @@ describe('AllCasesListGeneric', () => {
       expect(checkbox).toBeChecked();
     }
 
-    userEvent.click(screen.getByTestId('case-status-filter'));
+    userEvent.click(screen.getByTestId('options-filter-popover-button-status'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('case-status-filter-closed'));
+    userEvent.click(screen.getByTestId('options-filter-popover-item-open'));
 
     for (const checkbox of checkboxes) {
       expect(checkbox).not.toBeChecked();
@@ -701,24 +651,25 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toHaveBeenCalledWith({
         filterOptions: {
           search: '',
-          searchFields: [],
-          severity: 'all',
+          searchFields: ['title', 'description'],
+          severity: [],
           reporters: [],
-          status: 'all',
+          status: [],
           tags: [],
           assignees: [],
           owner: ['securitySolution', 'observability'],
           category: [],
+          customFields: {},
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
 
-      userEvent.click(getByTestId('solution-filter-popover-button'));
+      userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
       await waitForEuiPopoverOpen();
 
       userEvent.click(
-        getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
         undefined,
         {
           skipPointerEventsCheck: true,
@@ -728,20 +679,21 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toBeCalledWith({
         filterOptions: {
           search: '',
-          searchFields: [],
-          severity: 'all',
+          searchFields: ['title', 'description'],
+          severity: [],
           reporters: [],
-          status: 'all',
+          status: [],
           tags: [],
           assignees: [],
           owner: ['securitySolution'],
           category: [],
+          customFields: {},
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
 
       userEvent.click(
-        getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
         undefined,
         {
           skipPointerEventsCheck: true,
@@ -751,14 +703,15 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith({
         filterOptions: {
           search: '',
-          searchFields: [],
-          severity: 'all',
+          searchFields: ['title', 'description'],
+          severity: [],
           reporters: [],
-          status: 'all',
+          status: [],
           tags: [],
           assignees: [],
           owner: ['securitySolution', 'observability'],
           category: [],
+          customFields: {},
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
@@ -771,7 +724,7 @@ describe('AllCasesListGeneric', () => {
         </TestProviders>
       );
 
-      expect(queryByTestId('solution-filter-popover-button')).toBeFalsy();
+      expect(queryByTestId('options-filter-popover-button-owner')).toBeFalsy();
     });
 
     it('should call useGetCases with the correct owner on initial render', async () => {
@@ -784,14 +737,15 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toHaveBeenCalledWith({
         filterOptions: {
           search: '',
-          searchFields: [],
-          severity: 'all',
+          searchFields: ['title', 'description'],
+          severity: [],
           reporters: [],
-          status: 'all',
+          status: [],
           tags: [],
           assignees: [],
           owner: ['securitySolution'],
           category: [],
+          customFields: {},
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });

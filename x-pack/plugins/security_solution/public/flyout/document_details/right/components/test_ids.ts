@@ -19,6 +19,10 @@ export const RISK_SCORE_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreValue`
 export const SHARE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ShareButton` as const;
 export const CHAT_BUTTON_TEST_ID = 'newChatById' as const;
 
+export const ASSIGNEES_HEADER_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesHeader` as const;
+export const ASSIGNEES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesTitle` as const;
+export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesAddButton` as const;
+
 /* About section */
 
 export const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
@@ -38,6 +42,10 @@ export const REASON_DETAILS_PREVIEW_BUTTON_TEST_ID = `${REASON_TEST_ID}PreviewBu
 const MITRE_ATTACK_TEST_ID = `${PREFIX}MitreAttack` as const;
 export const MITRE_ATTACK_TITLE_TEST_ID = `${MITRE_ATTACK_TEST_ID}Title` as const;
 export const MITRE_ATTACK_DETAILS_TEST_ID = `${MITRE_ATTACK_TEST_ID}Details` as const;
+
+export const WORKFLOW_STATUS_TEST_ID = `${PREFIX}WorkflowStatus` as const;
+export const WORKFLOW_STATUS_TITLE_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Title` as const;
+export const WORKFLOW_STATUS_DETAILS_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Details` as const;
 
 /* Investigation section */
 

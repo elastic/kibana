@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonPage',
     'timePicker',
     'header',
+    'svlCommonNavigation',
   ]);
 
   describe('Header menu', () => {
@@ -27,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
       );
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.svlCommonPage.login();
       await PageObjects.observabilityLogExplorer.navigateTo();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -38,6 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
       );
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     it('should inject the app header menu on the top navbar', async () => {
@@ -61,9 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail('superDatePickerstartDatePopoverButton');
           await testSubjects.existOrFail('superDatePickerendDatePopoverButton');
         });
-
         const timeConfig = await PageObjects.timePicker.getTimeConfig();
-
         // Set query bar value
         await PageObjects.observabilityLogExplorer.submitQuery('*favicon*');
 
@@ -75,7 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql('All logs');
         });
-
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql([
             '@timestamp',
@@ -84,14 +84,77 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'message',
           ]);
         });
-
         await retry.try(async () => {
           expect(await PageObjects.timePicker.getTimeConfig()).to.eql(timeConfig);
         });
-
         await retry.try(async () => {
           expect(await PageObjects.observabilityLogExplorer.getQueryBarValue()).to.eql('*favicon*');
         });
+      });
+    });
+
+    describe('Discover tabs', () => {
+      before(async () => {
+        await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      it('should navigate between discover tabs without keeping the current columns/filters/query/time/data view', async () => {
+        await retry.try(async () => {
+          await testSubjects.existOrFail('superDatePickerstartDatePopoverButton');
+          await testSubjects.existOrFail('superDatePickerendDatePopoverButton');
+        });
+
+        const timeConfig = await PageObjects.timePicker.getTimeConfig();
+
+        // Set query bar value
+        await PageObjects.observabilityLogExplorer.submitQuery('*favicon*');
+
+        // go to discover tab
+        await testSubjects.click('discoverTab');
+        await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+          deepLinkId: 'discover',
+        });
+        await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbMissing({
+          deepLinkId: 'observability-log-explorer',
+        });
+        expect(await browser.getCurrentUrl()).contain('/app/discover');
+
+        await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
+        await PageObjects.discover.waitForDocTableLoadingComplete();
+
+        await retry.try(async () => {
+          expect(await PageObjects.discover.getCurrentlySelectedDataView()).not.to.eql('All logs');
+        });
+
+        await retry.try(async () => {
+          expect(await PageObjects.discover.getColumnHeaders()).not.to.eql([
+            '@timestamp',
+            'service.name',
+            'host.name',
+            'message',
+          ]);
+        });
+
+        await retry.try(async () => {
+          expect(await PageObjects.timePicker.getTimeConfig()).not.to.eql(timeConfig);
+        });
+
+        await retry.try(async () => {
+          expect(await PageObjects.observabilityLogExplorer.getQueryBarValue()).not.to.eql(
+            '*favicon*'
+          );
+        });
+
+        // go to log explorer tab
+        await testSubjects.click('logExplorerTab');
+        await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+          deepLinkId: 'discover',
+        });
+        await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+          deepLinkId: 'observability-log-explorer',
+        });
+        expect(await browser.getCurrentUrl()).contain('/app/observability-log-explorer');
       });
     });
 

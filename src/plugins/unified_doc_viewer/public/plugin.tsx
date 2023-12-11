@@ -16,7 +16,7 @@ import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { type UnifiedDocViewerServices, useUnifiedDocViewerServices } from './hooks';
+import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
   createGetterSetter<UnifiedDocViewerServices>('UnifiedDocViewerServices');
@@ -50,8 +50,7 @@ export class UnifiedDocViewerPublicPlugin
       }),
       order: 10,
       component: (props) => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const { uiSettings } = useUnifiedDocViewerServices();
+        const { uiSettings } = getUnifiedDocViewerServices();
         const DocView = uiSettings.get(DOC_TABLE_LEGACY) ? DocViewerLegacyTable : DocViewerTable;
 
         return (

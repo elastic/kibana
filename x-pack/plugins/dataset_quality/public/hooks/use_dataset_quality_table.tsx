@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { orderBy } from 'lodash';
-import React, { useState, useMemo, useCallback } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
+import { find, orderBy } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
+import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
 import { getDatasetQualitTableColumns } from '../components/dataset_quality/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { useKibanaContextForPlugin } from '../utils';
+import { getDefaultTimeRange, useKibanaContextForPlugin } from '../utils';
 
 const DEFAULT_SORT_FIELD = 'title';
 const DEFAULT_SORT_DIRECTION = 'desc';
@@ -32,10 +32,23 @@ export const useDatasetQualityTable = () => {
   const [sortField, setSortField] = useState<SORT_FIELD>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<DIRECTION>(DEFAULT_SORT_DIRECTION);
 
+  const defaultTimeRange = getDefaultTimeRange();
+
   const { dataStreamsStatsServiceClient: client } = useDatasetQualityContext();
   const { data = [], loading } = useFetcher(async () => client.getDataStreamsStats(), []);
+  const { data: malformedStats = [], loading: loadingMalformedStats } = useFetcher(
+    async () =>
+      client.getDataStreamsMalformedStats({
+        start: defaultTimeRange.from,
+        end: defaultTimeRange.to,
+      }),
+    []
+  );
 
-  const columns = useMemo(() => getDatasetQualitTableColumns({ fieldFormats }), [fieldFormats]);
+  const columns = useMemo(
+    () => getDatasetQualitTableColumns({ fieldFormats, loadingMalformedStats }),
+    [fieldFormats, loadingMalformedStats]
+  );
 
   const pagination = {
     pageIndex,
@@ -63,10 +76,19 @@ export const useDatasetQualityTable = () => {
 
   const renderedItems = useMemo(() => {
     const overridenSortingField = sortingOverrides[sortField] || sortField;
-    const sortedItems = orderBy(data, overridenSortingField, sortDirection);
+    const mergedData = data.map((dataStream) => {
+      const malformedDocs = find(malformedStats, { dataset: dataStream.name });
+
+      return {
+        ...dataStream,
+        malformedDocs: malformedDocs?.percentage,
+      };
+    });
+
+    const sortedItems = orderBy(mergedData, overridenSortingField, sortDirection);
 
     return sortedItems.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-  }, [data, sortField, sortDirection, pageIndex, pageSize]);
+  }, [data, malformedStats, sortField, sortDirection, pageIndex, pageSize]);
 
   const resultsCount = useMemo(() => {
     const startNumberItemsOnPage = pageSize * pageIndex + (renderedItems.length ? 1 : 0);
@@ -84,5 +106,13 @@ export const useDatasetQualityTable = () => {
     );
   }, [data.length, pageIndex, pageSize, renderedItems.length]);
 
-  return { sort, onTableChange, pagination, renderedItems, columns, loading, resultsCount };
+  return {
+    sort,
+    onTableChange,
+    pagination,
+    renderedItems,
+    columns,
+    loading,
+    resultsCount,
+  };
 };

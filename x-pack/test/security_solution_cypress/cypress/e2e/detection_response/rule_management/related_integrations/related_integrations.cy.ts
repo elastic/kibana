@@ -40,7 +40,7 @@ import {
 } from '../../../../tasks/alerts_detection_rules';
 import { fetchRuleAlerts } from '../../../../tasks/api_calls/alerts';
 import {
-  enablesRule,
+  clickEnableRuleSwitch,
   visitRuleDetailsPage,
   waitForPageToBeLoaded,
 } from '../../../../tasks/rule_details';
@@ -213,7 +213,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
         deleteDataStream(DATA_STREAM_NAME);
         createDocument(DATA_STREAM_NAME, generateEvent());
 
-        enablesRule();
+        clickEnableRuleSwitch();
         waitForAlertsToPopulate();
 
         fetchRuleAlerts({

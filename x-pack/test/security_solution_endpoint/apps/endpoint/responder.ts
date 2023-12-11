@@ -82,8 +82,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/170435
-  describe.skip('Response Actions Responder', function () {
+  describe('Response Actions Responder', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -197,8 +196,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.clickWhenNotDisabled('endpointResponseActions-action-item');
         await testSubjects.existOrFail('consolePageOverlay');
 
-        await performResponderSanityChecks();
+        // close tour popup
+        if (await testSubjects.exists('timeline-save-tour-close-button')) {
+          await testSubjects.click('timeline-save-tour-close-button');
+        }
 
+        await performResponderSanityChecks();
         await pageObjects.timeline.closeTimeline();
       });
     });

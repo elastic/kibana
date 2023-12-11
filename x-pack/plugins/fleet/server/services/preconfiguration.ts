@@ -78,8 +78,11 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   }
 
   const packagesToInstall = packages.map((pkg) =>
-    pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
+    pkg.version === PRECONFIGURATION_LATEST_KEYWORD
+      ? { name: pkg.name, prerelease: pkg.prerelease }
+      : pkg
   );
+
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({
     savedObjectsClient: soClient,

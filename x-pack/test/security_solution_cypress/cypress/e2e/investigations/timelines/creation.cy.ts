@@ -48,7 +48,8 @@ import { createTimeline } from '../../../tasks/timelines';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/172304
+describe.skip('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     deleteTimelines();
     login();

@@ -8,12 +8,13 @@
 import { EuiCheckbox } from '@elastic/eui';
 import React, { ChangeEvent, useContext } from 'react';
 import { BulkActionsVerbs } from '../../../../../types';
-import { BulkActionsContext } from '../context';
 import { COLUMN_HEADER_ARIA_LABEL } from '../translations';
+import { AlertsTableContext } from '../../contexts/alerts_table_context';
 
 const BulkActionsHeaderComponent: React.FunctionComponent = () => {
-  const [{ isAllSelected, areAllVisibleRowsSelected }, updateSelectedRows] =
-    useContext(BulkActionsContext);
+  const {
+    bulkActions: [{ isAllSelected, areAllVisibleRowsSelected }, updateSelectedRows],
+  } = useContext(AlertsTableContext);
 
   return (
     <EuiCheckbox

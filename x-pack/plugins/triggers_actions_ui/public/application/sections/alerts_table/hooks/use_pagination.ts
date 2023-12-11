@@ -6,8 +6,8 @@
  */
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { AlertsTableContext } from '../contexts/alerts_table_context';
 import { BulkActionsVerbs } from '../../../../types';
-import { BulkActionsContext } from '../bulk_actions/context';
 
 type PaginationProps = RuleRegistrySearchRequestPagination & {
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
@@ -24,7 +24,9 @@ export type UsePagination = (props: PaginationProps) => {
 };
 
 export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationProps) {
-  const [, updateBulkActionsState] = useContext(BulkActionsContext);
+  const {
+    bulkActions: [, updateBulkActionsState],
+  } = useContext(AlertsTableContext);
   const [pagination, setPagination] = useState<RuleRegistrySearchRequestPagination>({
     pageIndex,
     pageSize,
