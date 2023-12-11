@@ -19,6 +19,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/react-kibana-context-theme",
     "@kbn/core-injected-metadata-common-internal",
+    "@kbn/ui-theme",
   ],
   "exclude": [
     "target/**/*",
