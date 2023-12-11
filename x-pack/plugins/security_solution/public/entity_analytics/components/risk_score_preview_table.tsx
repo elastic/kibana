@@ -12,7 +12,10 @@ import type { RiskSeverity } from '../../../common/search_strategy';
 import { RiskScoreLevel } from '../../explore/components/risk_score/severity/common';
 
 import { HostDetailsLink, UserDetailsLink } from '../../common/components/links';
-import { RiskScoreEntity, type RiskScore as IRiskScore } from '../../../common/risk_engine';
+import {
+  RiskScoreEntity,
+  type RiskScore as IRiskScore,
+} from '../../../common/entity_analytics/risk_engine';
 
 type RiskScoreColumn = EuiBasicTableColumn<IRiskScore> & {
   field: keyof IRiskScore;

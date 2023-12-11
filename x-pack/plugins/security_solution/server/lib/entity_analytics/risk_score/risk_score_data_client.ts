@@ -24,7 +24,7 @@ import {
 import { createDataStream } from '../utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
-import { getRiskScoreLatestIndex } from '../../../../common/risk_engine';
+import { getRiskScoreLatestIndex } from '../../../../common/entity_analytics/risk_engine';
 import { getLatestTransformId, createTransform } from '../utils/transforms';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 
