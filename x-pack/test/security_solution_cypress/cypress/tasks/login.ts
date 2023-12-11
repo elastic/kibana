@@ -43,7 +43,7 @@ export const getEnvAuth = (role: SecurityRoleName): User => {
 export const login = (role?: SecurityRoleName): void => {
   let testRole = '';
 
-  if (IS_SERVERLESS) {
+  if (Cypress.env(IS_SERVERLESS)) {
     if (!role) {
       testRole = Cypress.env(CLOUD_SERVERLESS) ? 'admin' : 'system_indices_superuser';
     } else {
