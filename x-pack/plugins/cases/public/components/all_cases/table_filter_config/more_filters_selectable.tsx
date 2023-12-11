@@ -27,6 +27,7 @@ export const MoreFiltersSelectable = ({
       onChange={onChange}
       options={options}
       selectedOptionKeys={activeFilters}
+      transparentBackground={true}
     />
   );
 };
