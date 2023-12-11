@@ -799,7 +799,7 @@ export const getXyVisualization = ({
       seriesType.includes('percentage') && splitAccessor == null;
 
     // check if the layers in the state are compatible with this type of chart
-    if (state && state.layers.length > 1) {
+    if (state && state?.layers?.length > 1) {
       // Order is important here: Y Axis is fundamental to exist to make it valid
       const checks: Array<[string, (layer: XYDataLayerConfig) => boolean]> = [
         ['Y', hasNoAccessors],
@@ -870,7 +870,7 @@ export const getXyVisualization = ({
 
     const warnings: UserMessage[] = [];
 
-    if (state?.layers.length > 0 && activeData) {
+    if (state?.layers?.length > 0 && activeData) {
       const filteredLayers = [
         ...getDataLayers(state.layers),
         ...getReferenceLayers(state.layers),
