@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, copyToClipboard, EuiTextTruncate } from '@elastic/eui';
-import React, { ReactNode, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextTruncate } from '@elastic/eui';
+import React, { ReactNode } from 'react';
 import { ValuesType } from 'utility-types';
-import {
-  flyoutHoverActionFilterForText,
-  flyoutHoverActionFilterOutText,
-  flyoutHoverActionFilterForFieldPresentText,
-  flyoutHoverActionToggleColumnText,
-  flyoutHoverActionCopyToClipboardText,
-} from '../translations';
-import { useDiscoverActionsContext } from '../../../hooks/use_discover_action';
-import { HoverActionPopover, HoverActionType } from './hover_popover_action';
+import { HoverActionPopover } from './hover_popover_action';
 import { LogDocument } from '../types';
 
 interface HighlightFieldProps {
@@ -37,61 +29,6 @@ export function HighlightField({
   width,
   ...props
 }: HighlightFieldProps) {
-  const filterForText = flyoutHoverActionFilterForText(value);
-  const filterOutText = flyoutHoverActionFilterOutText(value);
-  const actions = useDiscoverActionsContext();
-  const [columnAdded, setColumnAdded] = useState(false);
-
-  const hoverActions: HoverActionType[] = useMemo(
-    () => [
-      {
-        id: 'addToFilterAction',
-        tooltipContent: filterForText,
-        iconType: 'plusInCircle',
-        onClick: () => actions?.addFilter && actions.addFilter(field, value, '+'),
-        display: true,
-      },
-      {
-        id: 'removeFromFilterAction',
-        tooltipContent: filterOutText,
-        iconType: 'minusInCircle',
-        onClick: () => actions?.addFilter && actions.addFilter(field, value, '-'),
-        display: true,
-      },
-      {
-        id: 'filterForFieldPresentAction',
-        tooltipContent: flyoutHoverActionFilterForFieldPresentText,
-        iconType: 'filter',
-        onClick: () => actions?.addFilter && actions.addFilter('_exists_', field, '+'),
-        display: true,
-      },
-      {
-        id: 'toggleColumnAction',
-        tooltipContent: flyoutHoverActionToggleColumnText,
-        iconType: 'listAdd',
-        onClick: () => {
-          if (actions) {
-            if (columnAdded) {
-              actions?.removeColumn?.(field);
-            } else {
-              actions?.addColumn?.(field);
-            }
-            setColumnAdded(!columnAdded);
-          }
-        },
-        display: true,
-      },
-      {
-        id: 'copyToClipboardAction',
-        tooltipContent: flyoutHoverActionCopyToClipboardText,
-        iconType: 'copyClipboard',
-        onClick: () => copyToClipboard(value as string),
-        display: true,
-      },
-    ],
-    [filterForText, filterOutText, actions, field, value, columnAdded]
-  );
-
   return formattedValue ? (
     <EuiFlexGroup direction="column" gutterSize="none" {...props}>
       <EuiFlexItem>
@@ -100,7 +37,7 @@ export function HighlightField({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        <HoverActionPopover actions={hoverActions} title={value as string}>
+        <HoverActionPopover title={value as string} value={value} field={field}>
           <EuiFlexGroup
             responsive={false}
             alignItems="center"
