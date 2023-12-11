@@ -27,6 +27,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { IndexPatternManagementStart } from '.';
 
 export interface IndexPatternManagmentContext {
@@ -47,6 +48,7 @@ export interface IndexPatternManagmentContext {
   fieldFormatEditors: IndexPatternFieldEditorStart['fieldFormatEditors'];
   IndexPatternEditor: DataViewEditorStart['IndexPatternEditorComponent'];
   fieldFormats: FieldFormatsStart;
+  share: SharePluginStart;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;

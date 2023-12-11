@@ -65,6 +65,10 @@ export interface NoDataViewsPromptKibanaDependencies {
 export interface NoDataViewsPromptComponentProps {
   /** True if the user has permission to create a data view, false otherwise. */
   canCreateNewDataView: boolean;
+  /** True if there is ES data and ESQL can be set */
+  showESQL: boolean;
+  /** Link to ES|QL in Discover */
+  esqlLink: string;
   /** Click handler for create button. **/
   onClickCreate?: () => void;
   /** Link to documentation on data views. */
@@ -77,6 +81,10 @@ export interface NoDataViewsPromptComponentProps {
 export interface NoDataViewsPromptProps {
   /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
+  /** if set to true ESQL link will appear even if there are no data views */
+  showESQL: boolean;
+  /** Link to ES|QL in Discover */
+  esqlLink: string;
   /** if set to true allows creation of an ad-hoc data view from data view editor */
   allowAdHocDataView?: boolean;
 }

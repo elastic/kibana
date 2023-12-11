@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
+import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import { EmptyIndexListPrompt } from '../empty_index_list_prompt';
 import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
@@ -69,7 +70,7 @@ interface Props extends RouteComponentProps {
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
-export const IndexPatternTable = ({
+export const IndexPatternTable = async ({
   history,
   canSave,
   showCreateDialog: showCreateDialogProp = false,
@@ -84,6 +85,7 @@ export const IndexPatternTable = ({
     spaces,
     overlays,
     docLinks,
+    share,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [query, setQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
@@ -113,6 +115,18 @@ export const IndexPatternTable = ({
       setQuery(queryText);
     }
   };
+  const defaultDataView = await dataViews.getDefaultDataView({ displayErrors: false });
+
+  const params = {
+    query: {
+      esql: `from ${defaultDataView?.getIndexPattern()} | limit 10`,
+    },
+    dataViewSpec: defaultDataView?.toSpec(),
+  };
+
+  const discoverLocation = await share.url.locators.get(DISCOVER_APP_ID)?.getLocation(params);
+
+  const esqlLink = `/app/${discoverLocation?.app}${discoverLocation?.path}`;
 
   const renderDeleteButton = () => {
     const clickHandler = removeDataView({
@@ -355,6 +369,8 @@ export const IndexPatternTable = ({
           canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
           dataViewsDocLink={docLinks.links.indexPatterns.introduction}
           emptyPromptColor={'subdued'}
+          showESQL
+          esqlLink={esqlLink}
         />
       </>
     );
