@@ -6,6 +6,7 @@
  */
 
 import { EuiFilterButton } from '@elastic/eui';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserProfilesPopover } from '@kbn/user-profile-components';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -93,11 +94,16 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
     return sortedUsers;
   }, [currentUserProfile, userProfiles, searchTerm]);
 
-  const selectedAssignees = selectedAssigneesUids.map((uuid) => {
-    const userProfile = searchResultProfiles.find((user) => user?.uid === uuid) ?? null;
-    return userProfile;
-  });
-
+  const selectedAssignees = selectedAssigneesUids
+    .map((uuid) => {
+      // this is the "no assignees" option
+      if (uuid === null) return null;
+      const userProfile = searchResultProfiles.find((user) => user?.uid === uuid);
+      return userProfile;
+    })
+    .filter(
+      (userProfile): userProfile is UserProfileWithAvatar | null => userProfile !== undefined
+    ); // Filter out profiles that no longer exists
   const isLoadingData = isLoading || isLoadingSuggest;
 
   return (
