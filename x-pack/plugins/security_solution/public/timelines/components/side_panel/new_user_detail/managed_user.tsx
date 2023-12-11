@@ -136,7 +136,7 @@ export const ManagedUser = ({
                       managedUser={oktaManagedUser.fields}
                       indexName={oktaManagedUser._index}
                       eventId={oktaManagedUser._id}
-                      tableType={UserAssetTableType.assetEntra}
+                      tableType={UserAssetTableType.assetOkta}
                     >
                       <ManagedUserTable
                         isDraggable={isDraggable}
