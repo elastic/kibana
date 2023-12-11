@@ -80,18 +80,21 @@ export async function getQAFBuildContainingCommit(
   qafBuilds.reverse();
 
   // Find the first build that contains this commit
-  const build = qafBuilds.find((kbBuild) => {
-    // Check if build.commit is after commitSha?
-    const kibanaCommitSha = tryGetKibanaBuildHashFromQAFBuild(kbBuild);
-    const buildkiteBuildShaIndex = commitShaList.findIndex((c) => c.sha === kibanaCommitSha);
-    const commitShaIndex = commitShaList.findIndex((c) => c.sha === commitSha);
+  const build = qafBuilds
+    // Only search across scheduled builds, triggered builds might run with different commits
+    .filter((e) => e.env.BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG === '')
+    .find((kbBuild) => {
+      // Check if build.commit is after commitSha?
+      const kibanaCommitSha = tryGetKibanaBuildHashFromQAFBuild(kbBuild);
+      const buildkiteBuildShaIndex = commitShaList.findIndex((c) => c.sha === kibanaCommitSha);
+      const commitShaIndex = commitShaList.findIndex((c) => c.sha === commitSha);
 
-    return (
-      commitShaIndex !== -1 &&
-      buildkiteBuildShaIndex !== -1 &&
-      buildkiteBuildShaIndex < commitShaIndex
-    );
-  });
+      return (
+        commitShaIndex !== -1 &&
+        buildkiteBuildShaIndex !== -1 &&
+        buildkiteBuildShaIndex < commitShaIndex
+      );
+    });
 
   if (!build) {
     return null;
