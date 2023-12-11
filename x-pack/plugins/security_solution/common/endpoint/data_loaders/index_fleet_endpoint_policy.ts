@@ -23,6 +23,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { memoize } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type Client from '@elastic/elasticsearch/lib/client';
 import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
 import { usageTracker } from './usage_tracker';
 import { getEndpointPackageInfo } from '../utils/package';
@@ -46,7 +47,8 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     policyName: string,
     endpointPackageVersion?: string,
     agentPolicyName?: string,
-    log?: ToolingLog
+    log?: ToolingLog,
+    esClient?: Client
   ): Promise<IndexedFleetEndpointPolicyResponse> => {
     const response: IndexedFleetEndpointPolicyResponse = {
       integrationPolicies: [],
@@ -120,8 +122,12 @@ export const indexFleetEndpointPolicy = usageTracker.track(
             'elastic-api-version': API_VERSIONS.public.v1,
           },
         })
-        .catch((err) => {
-          log?.info('Caught error creating package policy', err);
+        .catch(async (err) => {
+          const c = await esClient?.cat.indices({
+            format: 'json',
+          });
+          log?.info('Caught package policy _cat', c);
+
           return catchAxiosErrorFormatAndThrow(err);
         })
         .then((res) => res.data);
@@ -132,8 +138,14 @@ export const indexFleetEndpointPolicy = usageTracker.track(
       return elapsedTime > 2 * 60 * 1000;
     };
 
+    const a = await esClient?.cat.indices({
+      format: 'json',
+    });
+    log?.info('Before package policy _cat', a);
+
     let packagePolicy: CreatePackagePolicyResponse | undefined;
     log?.info(`Creating package policy for ${policyName}`);
+
     while (!packagePolicy && !hasTimedOut()) {
       packagePolicy = await retryOnError(
         async () => fetchPackagePolicy(),
@@ -151,6 +163,11 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     }
 
     log?.info(`Created package policy for ${policyName}`);
+    const b = await esClient?.cat.indices({
+      format: 'json',
+    });
+
+    log?.info('after package policy _cat', b);
 
     response.integrationPolicies.push(packagePolicy.item as PolicyData);
 
