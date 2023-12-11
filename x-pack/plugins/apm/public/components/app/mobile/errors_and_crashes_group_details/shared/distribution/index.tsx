@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { EuiTitle, EuiIconTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiIconTip,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiPanel,
+  EuiProgress,
+} from '@elastic/eui';
 import React from 'react';
 import { TimeseriesChartWithContext } from '../../../../../shared/charts/timeseries_chart_with_context';
 import { useLegacyUrlParams } from '../../../../../../context/url_params_context/use_url_params';
-import { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending } from '../../../../../../hooks/use_fetcher';
 import { usePreviousPeriodLabel } from '../../../../../../hooks/use_previous_period_text';
 import { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
 import { getComparisonChartTheme } from '../../../../../shared/time_comparison/get_comparison_chart_theme';
@@ -66,8 +73,11 @@ export function ErrorDistribution({
   const comparisonChartTheme = getComparisonChartTheme();
 
   return (
-    <>
-      <EuiFlexGroup alignItems="center" responsive={false}>
+    <EuiPanel hasBorder={true} style={{ position: 'relative' }}>
+      {isPending(fetchStatus) && (
+        <EuiProgress size="xs" color="accent" position="absolute" />
+      )}
+      <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h2>{title}</h2>
@@ -87,6 +97,6 @@ export function ErrorDistribution({
         timeseries={timeseries}
         customTheme={comparisonChartTheme}
       />
-    </>
+    </EuiPanel>
   );
 }
