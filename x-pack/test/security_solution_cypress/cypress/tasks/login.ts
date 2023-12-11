@@ -49,17 +49,10 @@ export const login = (role?: SecurityRoleName): void => {
     } else {
       testRole = role;
     }
-    const task = Cypress.env(CLOUD_SERVERLESS)
-      ? 'createCloudSAMLSession'
-      : 'createLocalSAMLSession';
-
-    cy.task(task, testRole).then((cookie) => {
+    cy.task('getSessionCookie', testRole).then((cookie) => {
       cy.setCookie('sid', cookie as string);
     });
-
-    if (Cypress.env(CLOUD_SERVERLESS)) {
-      cy.visit('/');
-    }
+    cy.visit('/');
   } else {
     const user = role ? getEnvAuth(role) : defaultUser;
     loginWithUser(user);

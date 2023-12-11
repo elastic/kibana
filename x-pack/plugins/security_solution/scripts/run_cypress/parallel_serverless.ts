@@ -571,6 +571,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               KIBANA_PASSWORD: credentials.password,
 
               CLOUD_SERVERLESS: true,
+              IS_SERVERLESS: true,
             };
 
             if (process.env.DEBUG && !process.env.CI) {

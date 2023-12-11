@@ -6,21 +6,9 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { resolve } from 'path';
-
-import axios from 'axios';
-
-import * as fs from 'fs';
 
 import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
-import { User } from '../../../../test_serverless/shared/services/user_manager/svl_user_manager';
-import {
-  createCloudSAMLSession,
-  CloudSamlSessionParams,
-  LocalSamlSessionParams,
-  createLocalSAMLSession,
-} from '../../../../test_serverless/shared/services/user_manager/saml_auth';
+import { HostOptions, SamlSessionManager } from '@kbn/test';
 
 export const samlAuthentication = async (
   on: Cypress.PluginEvents,
@@ -30,52 +18,24 @@ export const samlAuthentication = async (
 
   const kbnHost = config.env.KIBANA_URL || config.env.BASE_URL;
 
-  const auth = btoa(`${config.env.ELASTICSEARCH_USERNAME}:${config.env.ELASTICSEARCH_PASSWORD}`);
+  const kbnUrl = new URL(kbnHost);
 
-  const response = await axios.get(`${kbnHost}/api/status`, {
-    headers: {
-      Authorization: `Basic ${auth}`,
-    },
-  });
-  const kbnVersion = response.data.version.number;
-
-  const cloudRoleUsersFilePath = resolve(REPO_ROOT, '.ftr', 'role_users.json');
-
-  const roleToUserMap: Map<string, User> = new Map<string, User>();
-
-  const getCloudUserByRole = (role: string) => {
-    const data = fs.readFileSync(cloudRoleUsersFilePath, 'utf8');
-    if (data.length === 0) {
-      throw new Error(`'${cloudRoleUsersFilePath}' is empty: no roles are defined`);
-    }
-    for (const [roleName, user] of Object.entries(JSON.parse(data)) as Array<[string, User]>) {
-      roleToUserMap.set(roleName, user);
-    }
-    return roleToUserMap.get(role)!;
+  const hostOptions: HostOptions = {
+    protocol: kbnUrl.protocol as 'http' | 'https',
+    hostname: kbnUrl.hostname,
+    port: parseInt(kbnUrl.port, 10),
+    username: config.env.ELASTICSEARCH_USERNAME,
+    password: config.env.ELASTICSEARCH_PASSWORD,
   };
 
   on('task', {
-    createCloudSAMLSession: async (role: string | SecurityRoleName): Promise<string> => {
-      const samlSessionParams: CloudSamlSessionParams = {
-        ...getCloudUserByRole(role),
-        kbnHost,
-        kbnVersion,
+    getSessionCookie: async (role: string | SecurityRoleName): Promise<string> => {
+      const sessionManager = new SamlSessionManager({
+        hostOptions,
         log,
-      };
-      const session = await createCloudSAMLSession(samlSessionParams);
-      return session.getCookieValue();
-    },
-    createLocalSAMLSession: async (role: string | SecurityRoleName): Promise<string> => {
-      const localSamlSessionParams: LocalSamlSessionParams = {
-        username: role,
-        email: `${role}@elastic.co`,
-        fullname: role,
-        role,
-        kbnHost,
-        log,
-      };
-      const session = await createLocalSAMLSession(localSamlSessionParams);
-      return session.getCookieValue();
+        isCloud: config.env.CLOUD_SERVERLESS,
+      });
+      return sessionManager.getSessionCookieForRole(role);
     },
   });
 };
