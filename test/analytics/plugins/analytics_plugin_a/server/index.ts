@@ -8,4 +8,4 @@
 
 import { AnalyticsPluginAPlugin } from './plugin';
 
-export const plugin = () => new AnalyticsPluginAPlugin();
+export const plugin = async () => new AnalyticsPluginAPlugin();

@@ -20,26 +20,28 @@ import {
 } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useDispatch } from 'react-redux';
-import { apiService } from '../../../../../utils/api_service';
+import { useDispatch, useSelector } from 'react-redux';
+import { NoPermissionsTooltip } from '../../common/components/permissions';
+import {
+  addNewGlobalParamAction,
+  editGlobalParamAction,
+  getGlobalParamAction,
+  selectGlobalParamState,
+} from '../../../state/global_params';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { ListParamItem } from './params_list';
-import { SyntheticsParamSO } from '../../../../../../common/runtime_types';
+import { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { AddParamForm } from './add_param_form';
-import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import { syncGlobalParamsAction } from '../../../state/settings';
 
 export const AddParamFlyout = ({
   items,
   isEditingItem,
   setIsEditingItem,
-  setRefreshList,
 }: {
   items: ListParamItem[];
-  setRefreshList: React.Dispatch<React.SetStateAction<number>>;
   isEditingItem: ListParamItem | null;
   setIsEditingItem: React.Dispatch<React.SetStateAction<ListParamItem | null>>;
 }) => {
@@ -47,7 +49,7 @@ export const AddParamFlyout = ({
 
   const { id, ...dataToSave } = isEditingItem ?? {};
 
-  const form = useFormWrapped<SyntheticsParamSO>({
+  const form = useFormWrapped<SyntheticsParams>({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
     shouldFocusError: true,
@@ -67,50 +69,48 @@ export const AddParamFlyout = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setIsEditingItem]);
 
-  const [paramData, setParamData] = useState<SyntheticsParamSO | null>(null);
-
   const { application } = useKibana<ClientPluginsStart>().services;
-
-  const { loading, data } = useFetcher(async () => {
-    if (!paramData) {
-      return;
-    }
-    const { namespaces, ...paramRequest } = paramData;
-    const shareAcrossSpaces = namespaces?.includes(ALL_SPACES_ID);
-    if (isEditingItem) {
-      return apiService.put(SYNTHETICS_API_URLS.PARAMS, {
-        id,
-        ...paramRequest,
-        share_across_spaces: shareAcrossSpaces,
-      });
-    }
-    return apiService.post(SYNTHETICS_API_URLS.PARAMS, {
-      ...paramRequest,
-      share_across_spaces: shareAcrossSpaces,
-    });
-  }, [paramData]);
 
   const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
 
-  const onSubmit = (formData: SyntheticsParamSO) => {
-    setParamData(formData);
-  };
-
   const dispatch = useDispatch();
 
+  const { isSaving, savedData } = useSelector(selectGlobalParamState);
+
+  const onSubmit = (formData: SyntheticsParams) => {
+    const { namespaces, ...paramRequest } = formData;
+    const shareAcrossSpaces = namespaces?.includes(ALL_SPACES_ID);
+
+    if (isEditingItem && id) {
+      dispatch(
+        editGlobalParamAction.get({
+          id,
+          paramRequest: { ...paramRequest, share_across_spaces: shareAcrossSpaces },
+        })
+      );
+    } else {
+      dispatch(
+        addNewGlobalParamAction.get({
+          ...paramRequest,
+          share_across_spaces: shareAcrossSpaces,
+        })
+      );
+    }
+  };
+
   useEffect(() => {
-    if (data && !loading) {
+    if (savedData && !isSaving) {
       closeFlyout();
-      setRefreshList(Date.now());
-      setParamData(null);
+      dispatch(getGlobalParamAction.get());
       dispatch(syncGlobalParamsAction.get());
     }
-  }, [data, loading, closeFlyout, setRefreshList, dispatch]);
+  }, [savedData, isSaving, closeFlyout, dispatch]);
 
   useEffect(() => {
     if (isEditingItem) {
+      const { id: _id, ...dataToEdit } = isEditingItem;
       setIsFlyoutVisible(true);
-      form.reset(isEditingItem);
+      form.reset(dataToEdit);
     }
     // no need to add form value, it keeps changing on reset
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -150,7 +150,7 @@ export const AddParamFlyout = ({
                   data-test-subj="syntheticsAddParamFlyoutButton"
                   onClick={handleSubmit(onSubmit)}
                   fill
-                  isLoading={loading}
+                  isLoading={isSaving}
                 >
                   {SAVE_TABLE}
                 </EuiButton>
@@ -164,16 +164,18 @@ export const AddParamFlyout = ({
 
   return (
     <div>
-      <EuiButton
-        data-test-subj="syntheticsAddParamFlyoutButton"
-        fill
-        iconType="plusInCircleFilled"
-        iconSide="left"
-        onClick={() => setIsFlyoutVisible(true)}
-        isDisabled={!canSave}
-      >
-        {CREATE_PARAM}
-      </EuiButton>
+      <NoPermissionsTooltip canEditSynthetics={canSave}>
+        <EuiButton
+          data-test-subj="syntheticsAddParamFlyoutButton"
+          fill
+          iconType="plusInCircleFilled"
+          iconSide="left"
+          onClick={() => setIsFlyoutVisible(true)}
+          isDisabled={!canSave}
+        >
+          {CREATE_PARAM}
+        </EuiButton>
+      </NoPermissionsTooltip>
       {flyout}
     </div>
   );

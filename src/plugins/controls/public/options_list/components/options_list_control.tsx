@@ -9,9 +9,9 @@
 import { Subject } from 'rxjs';
 import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiInputPopover } from '@elastic/eui';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
@@ -19,6 +19,9 @@ import { OptionsListPopover } from './options_list_popover';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 import './options_list.scss';
+import { ControlError } from '../../control_group/component/control_error_component';
+import { MIN_POPOVER_WIDTH } from '../../constants';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
 
 export const OptionsListControl = ({
   typeaheadSubject,
@@ -27,13 +30,13 @@ export const OptionsListControl = ({
   typeaheadSubject: Subject<string>;
   loadMoreSubject: Subject<number>;
 }) => {
-  const resizeRef = useRef(null);
   const optionsList = useOptionsList();
-  const dimensions = useResizeObserver(resizeRef.current);
 
+  const error = optionsList.select((state) => state.componentState.error);
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
   const validSelections = optionsList.select((state) => state.componentState.validSelections);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const fieldSpec = optionsList.select((state) => state.componentState.field);
 
   const id = optionsList.select((state) => state.explicitInput.id);
   const exclude = optionsList.select((state) => state.explicitInput.exclude);
@@ -45,6 +48,8 @@ export const OptionsListControl = ({
   const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
 
   const loading = optionsList.select((state) => state.output.loading);
+  const dataViewId = optionsList.select((state) => state.output.dataViewId);
+  const fieldFormatter = useFieldFormatter({ dataViewId, fieldSpec });
 
   useEffect(() => {
     return () => {
@@ -86,6 +91,8 @@ export const OptionsListControl = ({
   );
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
+    const delimiter = OptionsListStrings.control.getSeparator(fieldSpec?.type);
+
     return {
       hasSelections: !isEmpty(validSelections) || !isEmpty(invalidSelections),
       validSelectionsCount: validSelections?.length,
@@ -106,69 +113,80 @@ export const OptionsListControl = ({
             </span>
           ) : (
             <>
-              {validSelections && (
-                <span>{validSelections.join(OptionsListStrings.control.getSeparator())}</span>
-              )}
-              {invalidSelections && (
-                <span className="optionsList__filterInvalid">
-                  {invalidSelections.join(OptionsListStrings.control.getSeparator())}
+              {validSelections?.length ? (
+                <span className="optionsList__filterValid">
+                  {validSelections.map((value) => fieldFormatter(value)).join(delimiter)}
                 </span>
-              )}
+              ) : null}
+              {validSelections?.length && invalidSelections?.length ? delimiter : null}
+              {invalidSelections?.length ? (
+                <span className="optionsList__filterInvalid">
+                  {invalidSelections.map((value) => fieldFormatter(value)).join(delimiter)}
+                </span>
+              ) : null}
             </>
           )}
         </>
       ),
     };
-  }, [exclude, existsSelected, validSelections, invalidSelections]);
+  }, [
+    exclude,
+    existsSelected,
+    validSelections,
+    invalidSelections,
+    fieldFormatter,
+    fieldSpec?.type,
+  ]);
 
   const button = (
-    <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
-      <EuiFilterButton
-        iconType="arrowDown"
-        isLoading={debouncedLoading}
-        className={classNames('optionsList--filterBtn', {
-          'optionsList--filterBtnSingle': controlStyle !== 'twoLine',
-          'optionsList--filterBtnPlaceholder': !hasSelections,
-        })}
-        data-test-subj={`optionsList-control-${id}`}
-        onClick={() => optionsList.dispatch.setPopoverOpen(!isPopoverOpen)}
-        isSelected={isPopoverOpen}
-        numActiveFilters={validSelectionsCount}
-        hasActiveFilters={Boolean(validSelectionsCount)}
-      >
-        {hasSelections || existsSelected
-          ? selectionDisplayNode
-          : placeholder ?? OptionsListStrings.control.getPlaceholder()}
-      </EuiFilterButton>
-    </div>
+    <EuiFilterButton
+      badgeColor="success"
+      iconType="arrowDown"
+      isLoading={debouncedLoading}
+      className={classNames('optionsList--filterBtn', {
+        'optionsList--filterBtnSingle': controlStyle !== 'twoLine',
+        'optionsList--filterBtnPlaceholder': !hasSelections,
+      })}
+      data-test-subj={`optionsList-control-${id}`}
+      onClick={() => optionsList.dispatch.setPopoverOpen(!isPopoverOpen)}
+      isSelected={isPopoverOpen}
+      numActiveFilters={validSelectionsCount}
+      hasActiveFilters={Boolean(validSelectionsCount)}
+    >
+      {hasSelections || existsSelected
+        ? selectionDisplayNode
+        : placeholder ?? OptionsListStrings.control.getPlaceholder()}
+    </EuiFilterButton>
   );
 
-  return (
+  return error ? (
+    <ControlError error={error} />
+  ) : (
     <EuiFilterGroup
       className={classNames('optionsList--filterGroup', {
         'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
       })}
     >
-      <EuiPopover
+      <EuiInputPopover
         ownFocus
-        button={button}
+        input={button}
+        hasArrow={false}
         repositionOnScroll
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
-        anchorPosition="downCenter"
+        panelMinWidth={MIN_POPOVER_WIDTH}
+        className="optionsList__inputButtonOverride"
         initialFocus={'[data-test-subj=optionsList-control-search-input]'}
-        className="optionsList__popoverOverride"
         closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
-        anchorClassName="optionsList__anchorOverride"
-        aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
+        panelClassName="optionsList__popoverOverride"
+        panelProps={{ 'aria-label': OptionsListStrings.popover.getAriaLabel(fieldName) }}
       >
         <OptionsListPopover
-          width={dimensions.width}
           isLoading={debouncedLoading}
           updateSearchString={updateSearchString}
           loadMoreSuggestions={loadMoreSuggestions}
         />
-      </EuiPopover>
+      </EuiInputPopover>
     </EuiFilterGroup>
   );
 };

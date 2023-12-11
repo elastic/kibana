@@ -9,13 +9,17 @@ import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { RouterProvider } from '@kbn/typed-react-router-config';
 import { License } from '@kbn/licensing-plugin/common/license';
+import {
+  LOGS_LOCATOR_ID,
+  NODE_LOGS_LOCATOR_ID,
+} from '@kbn/logs-shared-plugin/common';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
+  infraLocatorsMock,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../context/license/license_context';
 import * as hooks from '../../../hooks/use_fetcher';
@@ -26,17 +30,29 @@ import {
 } from '../../../utils/test_helpers';
 import { TransactionActionMenu } from './transaction_action_menu';
 import * as Transactions from './__fixtures__/mock_data';
-import { apmRouter } from '../../routing/apm_route_config';
 
-function getMockAPMContext({ canSave }: { canSave: boolean }) {
-  return {
-    ...mockApmPluginContextValue,
-    core: {
-      ...mockApmPluginContextValue.core,
-      application: { capabilities: { apm: { save: canSave }, ml: {} } },
+const apmContextMock = {
+  ...mockApmPluginContextValue,
+  core: {
+    ...mockApmPluginContextValue.core,
+    application: { capabilities: { apm: { save: true }, ml: {} } },
+  },
+  share: {
+    url: {
+      locators: {
+        get: (id: string) => {
+          if (id === LOGS_LOCATOR_ID) {
+            return infraLocatorsMock.logsLocator;
+          }
+
+          if (id === NODE_LOGS_LOCATOR_ID) {
+            return infraLocatorsMock.nodeLogsLocator;
+          }
+        },
+      },
     },
-  } as unknown as ApmPluginContextValue;
-}
+  },
+} as unknown as ApmPluginContextValue;
 
 const history = createMemoryHistory();
 history.replace(
@@ -46,10 +62,8 @@ history.replace(
 function Wrapper({ children }: { children?: React.ReactNode }) {
   return (
     <MemoryRouter>
-      <MockApmPluginContextWrapper value={getMockAPMContext({ canSave: true })}>
-        <RouterProvider history={history} router={apmRouter as any}>
-          {children}
-        </RouterProvider>
+      <MockApmPluginContextWrapper value={apmContextMock} history={history}>
+        {children}
       </MockApmPluginContextWrapper>
     </MemoryRouter>
   );
@@ -66,20 +80,28 @@ const renderTransaction = async (transaction: Record<string, any>) => {
     }
   );
 
-  fireEvent.click(rendered.getByText('Investigate'));
+  await act(async () => {
+    fireEvent.click(rendered.getByText('Investigate'));
+  });
 
   return rendered;
+};
+
+const expectInfraLocatorsToBeCalled = () => {
+  expect(infraLocatorsMock.nodeLogsLocator.getRedirectUrl).toBeCalled();
+  expect(infraLocatorsMock.logsLocator.getRedirectUrl).toBeCalled();
 };
 
 describe('TransactionActionMenu component', () => {
   beforeAll(() => {
     jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-      data: [],
+      // return as Profiling had been initialized
+      data: { initialized: true },
       status: hooks.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
   });
-  afterAll(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
   it('should always render the discover link', async () => {
@@ -90,16 +112,10 @@ describe('TransactionActionMenu component', () => {
     expect(queryByText('View transaction in Discover')).not.toBeNull();
   });
 
-  it('always renders the trace logs link', async () => {
-    const { getByText } = await renderTransaction(
-      Transactions.transactionWithMinimalData
-    );
+  it('should call infra locators getRedirectUrl function', async () => {
+    await renderTransaction(Transactions.transactionWithMinimalData);
 
-    expect(
-      (getByText('Trace logs').parentElement as HTMLAnchorElement).href
-    ).toEqual(
-      'http://localhost/basepath/app/logs/link-to/logs?time=1545092070952&filter=trace.id:%228b60bd32ecc6e1506735a8b6cfcf175c%22%20OR%20(not%20trace.id:*%20AND%20%228b60bd32ecc6e1506735a8b6cfcf175c%22)'
-    );
+    expectInfraLocatorsToBeCalled();
   });
 
   describe('when there is no pod id', () => {
@@ -121,16 +137,10 @@ describe('TransactionActionMenu component', () => {
   });
 
   describe('when there is a pod id', () => {
-    it('renders the pod logs link', async () => {
-      const { getByText } = await renderTransaction(
-        Transactions.transactionWithKubernetesData
-      );
+    it('should call infra locators getRedirectUrl function', async () => {
+      await renderTransaction(Transactions.transactionWithKubernetesData);
 
-      expect(
-        (getByText('Pod logs').parentElement as HTMLAnchorElement).href
-      ).toEqual(
-        'http://localhost/basepath/app/logs/link-to/pod-logs/pod123456abcdef?time=1545092070952'
-      );
+      expectInfraLocatorsToBeCalled();
     });
 
     it('renders the pod metrics link', async () => {
@@ -164,17 +174,11 @@ describe('TransactionActionMenu component', () => {
     });
   });
 
-  describe('when there is a container id', () => {
+  describe('should call infra locators getRedirectUrl function', () => {
     it('renders the Container logs link', async () => {
-      const { getByText } = await renderTransaction(
-        Transactions.transactionWithContainerData
-      );
+      await renderTransaction(Transactions.transactionWithContainerData);
 
-      expect(
-        (getByText('Container logs').parentElement as HTMLAnchorElement).href
-      ).toEqual(
-        'http://localhost/basepath/app/logs/link-to/container-logs/container123456abcdef?time=1545092070952'
-      );
+      expectInfraLocatorsToBeCalled();
     });
 
     it('renders the Container metrics link', async () => {
@@ -209,16 +213,10 @@ describe('TransactionActionMenu component', () => {
   });
 
   describe('when there is a hostname', () => {
-    it('renders the Host logs link', async () => {
-      const { getByText } = await renderTransaction(
-        Transactions.transactionWithHostData
-      );
+    it('should call infra locators getRedirectUrl function', async () => {
+      await renderTransaction(Transactions.transactionWithHostData);
 
-      expect(
-        (getByText('Host logs').parentElement as HTMLAnchorElement).href
-      ).toEqual(
-        'http://localhost/basepath/app/logs/link-to/host-logs/227453131a17?time=1545092070952'
-      );
+      expectInfraLocatorsToBeCalled();
     });
 
     it('renders the Host metrics link', async () => {
@@ -272,6 +270,27 @@ describe('TransactionActionMenu component', () => {
     expect(container).toMatchSnapshot();
   });
 
+  describe('Profiling items', () => {
+    it('renders flamegraph item', async () => {
+      const component = await renderTransaction(
+        Transactions.transactionWithHostData
+      );
+      expectTextsInDocument(component, ['Host flamegraph']);
+    });
+    it('renders topN functions item', async () => {
+      const component = await renderTransaction(
+        Transactions.transactionWithHostData
+      );
+      expectTextsInDocument(component, ['Host topN functions']);
+    });
+    it('renders stacktraces item', async () => {
+      const component = await renderTransaction(
+        Transactions.transactionWithHostData
+      );
+      expectTextsInDocument(component, ['Host stacktraces']);
+    });
+  });
+
   describe('Custom links', () => {
     beforeAll(() => {
       // Mocks callApmAPI because it's going to be used to fecth the transaction in the custom links flyout.
@@ -291,7 +310,7 @@ describe('TransactionActionMenu component', () => {
         { wrapper: Wrapper }
       );
     }
-    it('doesnt show custom links when license is not valid', () => {
+    it('doesnt show custom links when license is not valid', async () => {
       const license = new License({
         signature: 'test signature',
         license: {
@@ -303,12 +322,12 @@ describe('TransactionActionMenu component', () => {
         },
       });
       const component = renderTransactionActionMenuWithLicense(license);
-      act(() => {
+      await act(async () => {
         fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsNotInDocument(component, ['Custom Links']);
     });
-    it('doesnt show custom links when basic license', () => {
+    it('doesnt show custom links when basic license', async () => {
       const license = new License({
         signature: 'test signature',
         license: {
@@ -328,12 +347,12 @@ describe('TransactionActionMenu component', () => {
         </LicenseContext.Provider>,
         { wrapper: Wrapper }
       );
-      act(() => {
+      await act(async () => {
         fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsNotInDocument(component, ['Custom Links']);
     });
-    it('shows custom links when trial license', () => {
+    it('shows custom links when trial license', async () => {
       const license = new License({
         signature: 'test signature',
         license: {
@@ -345,12 +364,12 @@ describe('TransactionActionMenu component', () => {
         },
       });
       const component = renderTransactionActionMenuWithLicense(license);
-      act(() => {
+      await act(async () => {
         fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsInDocument(component, ['Custom Links']);
     });
-    it('shows custom links when gold license', () => {
+    it('shows custom links when gold license', async () => {
       const license = new License({
         signature: 'test signature',
         license: {
@@ -362,12 +381,12 @@ describe('TransactionActionMenu component', () => {
         },
       });
       const component = renderTransactionActionMenuWithLicense(license);
-      act(() => {
+      await act(async () => {
         fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsInDocument(component, ['Custom Links']);
     });
-    it('opens flyout with filters prefilled', () => {
+    it('opens flyout with filters prefilled', async () => {
       const license = new License({
         signature: 'test signature',
         license: {
@@ -379,11 +398,11 @@ describe('TransactionActionMenu component', () => {
         },
       });
       const component = renderTransactionActionMenuWithLicense(license);
-      act(() => {
+      await act(async () => {
         fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsInDocument(component, ['Custom Links']);
-      act(() => {
+      await act(async () => {
         fireEvent.click(component.getByText('Create custom link'));
       });
       expectTextsInDocument(component, ['Create link']);
@@ -410,5 +429,37 @@ describe('TransactionActionMenu component', () => {
       // Forces component to unmount to prevent to update the state when callApmAPI call returns after the test is finished.
       component.unmount();
     });
+  });
+});
+
+describe('Profiling not initialized', () => {
+  beforeAll(() => {
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+      // return as Profiling had not been initialized
+      data: { initialized: false },
+      status: hooks.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
+    });
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  it('does not render flamegraph item', async () => {
+    const component = await renderTransaction(
+      Transactions.transactionWithHostData
+    );
+    expectTextsNotInDocument(component, ['Host flamegraph']);
+  });
+  it('does not render topN functions item', async () => {
+    const component = await renderTransaction(
+      Transactions.transactionWithHostData
+    );
+    expectTextsNotInDocument(component, ['Host topN functions']);
+  });
+  it('does not render stacktraces item', async () => {
+    const component = await renderTransaction(
+      Transactions.transactionWithHostData
+    );
+    expectTextsNotInDocument(component, ['Host stacktraces']);
   });
 });

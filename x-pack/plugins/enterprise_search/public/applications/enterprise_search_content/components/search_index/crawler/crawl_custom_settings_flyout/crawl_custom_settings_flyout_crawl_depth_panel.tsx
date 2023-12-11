@@ -22,10 +22,26 @@ import { i18n } from '@kbn/i18n';
 
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 
-export const CrawlCustomSettingsFlyoutCrawlDepthPanel: React.FC = () => {
+interface CrawlCustomSettingsFlyoutCrawlDepthPanelProps {
+  maxCrawlDepth: number;
+  onSelectMaxCrawlDepth: (depth: number) => void;
+}
+
+export const CrawlCustomSettingsFlyoutCrawlDepthPanelWithLogicProps: React.FC = () => {
   const { maxCrawlDepth } = useValues(CrawlCustomSettingsFlyoutLogic);
   const { onSelectMaxCrawlDepth } = useActions(CrawlCustomSettingsFlyoutLogic);
 
+  return (
+    <CrawlCustomSettingsFlyoutCrawlDepthPanel
+      maxCrawlDepth={maxCrawlDepth}
+      onSelectMaxCrawlDepth={onSelectMaxCrawlDepth}
+    />
+  );
+};
+
+export const CrawlCustomSettingsFlyoutCrawlDepthPanel: React.FC<
+  CrawlCustomSettingsFlyoutCrawlDepthPanelProps
+> = ({ maxCrawlDepth, onSelectMaxCrawlDepth }) => {
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup>

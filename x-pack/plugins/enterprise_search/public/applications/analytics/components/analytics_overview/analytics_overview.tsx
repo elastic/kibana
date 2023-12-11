@@ -13,12 +13,12 @@ import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { KibanaLogic } from '../../../shared/kibana';
+import { LicensingLogic } from '../../../shared/licensing';
 import {
   LicensingCallout,
   LICENSING_FEATURE,
-} from '../../../enterprise_search_content/components/shared/licensing_callout/licensing_callout';
-import { KibanaLogic } from '../../../shared/kibana';
-import { LicensingLogic } from '../../../shared/licensing';
+} from '../../../shared/licensing_callout/licensing_callout';
 import { AddAnalyticsCollection } from '../add_analytics_collections/add_analytics_collection';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';

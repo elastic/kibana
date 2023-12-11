@@ -12,7 +12,10 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiBadge, EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
+import { DataGrid } from '@kbn/ml-data-grid';
+
+import { useToastNotifications } from '../../../../app_dependencies';
 import {
   getTransformConfigQuery,
   getTransformPreviewDevConsoleStatement,
@@ -50,9 +53,6 @@ export const StepDefineSummary: FC<Props> = ({
   },
   searchItems,
 }) => {
-  const {
-    ml: { formatHumanReadableDateTimeSeconds, DataGrid },
-  } = useAppDependencies();
   const toastNotifications = useToastNotifications();
 
   const transformConfigQuery = getTransformConfigQuery(searchQuery);

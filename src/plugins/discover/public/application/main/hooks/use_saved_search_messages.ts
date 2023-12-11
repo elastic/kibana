@@ -7,6 +7,8 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
+import type { DataTableRecord } from '@kbn/discover-utils/src/types';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { FetchStatus } from '../../types';
 import type {
   DataDocuments$,
@@ -15,6 +17,8 @@ import type {
   DataTotalHits$,
   SavedSearchData,
 } from '../services/discover_data_state_container';
+import { RecordRawType } from '../services/discover_data_state_container';
+
 /**
  * Sends COMPLETE message to the main$ observable with the information
  * that no documents have been found, allowing Discover to show a no
@@ -71,6 +75,44 @@ export function sendLoadingMsg<T extends DataMsg>(
 }
 
 /**
+ * Send LOADING_MORE message via main observable
+ */
+export function sendLoadingMoreMsg(documents$: DataDocuments$) {
+  if (documents$.getValue().fetchStatus !== FetchStatus.LOADING_MORE) {
+    documents$.next({
+      ...documents$.getValue(),
+      fetchStatus: FetchStatus.LOADING_MORE,
+    });
+  }
+}
+
+/**
+ * Finishing LOADING_MORE message
+ */
+export function sendLoadingMoreFinishedMsg(
+  documents$: DataDocuments$,
+  {
+    moreRecords,
+    interceptedWarnings,
+  }: {
+    moreRecords: DataTableRecord[];
+    interceptedWarnings: SearchResponseWarning[] | undefined;
+  }
+) {
+  const currentValue = documents$.getValue();
+  if (currentValue.fetchStatus === FetchStatus.LOADING_MORE) {
+    documents$.next({
+      ...currentValue,
+      fetchStatus: FetchStatus.COMPLETE,
+      result: moreRecords?.length
+        ? [...(currentValue.result || []), ...moreRecords]
+        : currentValue.result,
+      interceptedWarnings,
+    });
+  }
+}
+
+/**
  * Send ERROR message
  */
 export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$, error: Error) {
@@ -86,8 +128,11 @@ export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$,
  * Sends a RESET message to all data subjects
  * Needed when data view is switched or a new runtime field is added
  */
-export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchStatus) {
-  const recordRawType = data.main$.getValue().recordRawType;
+export function sendResetMsg(
+  data: SavedSearchData,
+  initialFetchStatus: FetchStatus,
+  recordRawType: RecordRawType
+) {
   data.main$.next({
     fetchStatus: initialFetchStatus,
     foundDocuments: undefined,

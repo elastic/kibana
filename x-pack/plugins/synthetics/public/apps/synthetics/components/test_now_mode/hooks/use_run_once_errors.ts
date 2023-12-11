@@ -7,7 +7,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { kibanaService } from '../../../../../utils/kibana_service';
 import { Locations, ServiceLocationErrors } from '../../monitor_add_edit/types';
 
 export function useRunOnceErrors({
@@ -15,9 +14,7 @@ export function useRunOnceErrors({
   serviceError,
   errors,
   locations,
-  showErrors = true,
 }: {
-  showErrors?: boolean;
   testRunId: string;
   serviceError?: Error;
   errors: ServiceLocationErrors;
@@ -25,10 +22,6 @@ export function useRunOnceErrors({
 }) {
   const [locationErrors, setLocationErrors] = useState<ServiceLocationErrors>([]);
   const [runOnceServiceError, setRunOnceServiceError] = useState<Error | undefined | null>(null);
-  const publicLocations = useMemo(
-    () => (locations ?? []).filter((loc) => loc.isServiceManaged),
-    [locations]
-  );
 
   useEffect(() => {
     setLocationErrors([]);
@@ -50,12 +43,12 @@ export function useRunOnceErrors({
   }, [serviceError]);
 
   const locationsById: Record<string, Locations[number]> = useMemo(
-    () => (publicLocations as Locations).reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
-    [publicLocations]
+    () => (locations as Locations).reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
+    [locations]
   );
 
   const expectPings =
-    publicLocations.length - (locationErrors ?? []).filter(({ locationId }) => !!locationId).length;
+    locations.length - (locationErrors ?? []).filter(({ locationId }) => !!locationId).length;
 
   const locationErrorReasons = useMemo(() => {
     return (locationErrors ?? [])
@@ -65,7 +58,7 @@ export function useRunOnceErrors({
   }, [locationErrors]);
   const hasBlockingError =
     !!runOnceServiceError ||
-    (locationErrors?.length && locationErrors?.length === publicLocations.length);
+    (locationErrors?.length && locationErrors?.length === locations.length);
 
   const errorMessages = useMemo(() => {
     if (hasBlockingError) {
@@ -77,7 +70,7 @@ export function useRunOnceErrors({
               title: RunErrorLabel,
             },
           ]
-        : [{ name: 'Error', message: PushErrorService, title: PushErrorLabel }];
+        : [{ name: 'Error', message: PushErrorService, title: RunErrorLabel }];
     } else if (locationErrors?.length > 0) {
       // If only some of the locations were unsuccessful
       return locationErrors
@@ -93,41 +86,25 @@ export function useRunOnceErrors({
     return [];
   }, [locationsById, locationErrors, locationErrorReasons, hasBlockingError]);
 
-  useEffect(() => {
-    if (showErrors) {
-      errorMessages.forEach(
-        ({ name, message, title }: { name: string; message: string; title: string }) => {
-          kibanaService.toasts.addError({ name, message }, { title });
-        }
-      );
-    }
-  }, [errorMessages, showErrors]);
-
   return {
     expectPings,
     hasBlockingError,
-    blockingErrorTitle: hasBlockingError ? PushErrorLabel : null,
-    blockingErrorMessage: hasBlockingError
-      ? `${PushErrorService} ${errorMessages[0]?.message}`
-      : null,
+    blockingErrorTitle: hasBlockingError ? RunErrorLabel : null,
+    blockingErrorMessage: hasBlockingError ? `${errorMessages[0]?.message}` : null,
     errorMessages,
   };
 }
 
-const PushErrorLabel = i18n.translate('xpack.synthetics.testRun.pushErrorLabel', {
-  defaultMessage: 'Push error',
-});
-
 const RunErrorLabel = i18n.translate('xpack.synthetics.testRun.runErrorLabel', {
-  defaultMessage: 'Error running test',
+  defaultMessage: "Can't run the test now",
 });
 
 const getLocationTestErrorLabel = (locationName: string, reason: string) =>
   i18n.translate('xpack.synthetics.testRun.runErrorLocation.reason', {
-    defaultMessage: 'Failed to run monitor on location {locationName}. {reason}',
+    defaultMessage: 'Failed to run test on location {locationName}. {reason}',
     values: { locationName, reason },
   });
 
 const PushErrorService = i18n.translate('xpack.synthetics.testRun.pushError', {
-  defaultMessage: 'Failed to push the monitor to service.',
+  defaultMessage: 'This test cannot be executed at this time. Try again later.',
 });

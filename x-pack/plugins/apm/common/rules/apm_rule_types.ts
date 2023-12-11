@@ -14,9 +14,12 @@ import type {
 } from '@kbn/observability-plugin/common';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
-import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../ml_constants';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import {
   ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -25,13 +28,6 @@ import {
 import { getEnvironmentLabel } from '../environment_filter_values';
 
 export const APM_SERVER_FEATURE_ID = 'apm';
-
-export enum ApmRuleType {
-  ErrorCount = 'apm.error_rate', // ErrorRate was renamed to ErrorCount but the key is kept as `error_rate` for backwards-compat.
-  TransactionErrorRate = 'apm.transaction_error_rate',
-  TransactionDuration = 'apm.transaction_duration',
-  Anomaly = 'apm.anomaly',
-}
 
 export enum AggregationType {
   Avg = 'avg',
@@ -60,6 +56,8 @@ const getFieldNameLabel = (field: string): string => {
       return 'name';
     case ERROR_GROUP_ID:
       return 'error key';
+    case ERROR_GROUP_NAME:
+      return 'error name';
     default:
       return field;
   }
@@ -241,7 +239,7 @@ export const RULE_TYPES_CONFIG: Record<
   },
   [ApmRuleType.Anomaly]: {
     name: i18n.translate('xpack.apm.anomalyAlert.name', {
-      defaultMessage: 'Anomaly',
+      defaultMessage: 'APM Anomaly',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
@@ -263,32 +261,32 @@ export const RULE_TYPES_CONFIG: Record<
 
 export const ANOMALY_ALERT_SEVERITY_TYPES = [
   {
-    type: ANOMALY_SEVERITY.CRITICAL,
+    type: ML_ANOMALY_SEVERITY.CRITICAL,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.criticalLabel', {
       defaultMessage: 'critical',
     }),
-    threshold: ANOMALY_THRESHOLD.CRITICAL,
+    threshold: ML_ANOMALY_THRESHOLD.CRITICAL,
   },
   {
-    type: ANOMALY_SEVERITY.MAJOR,
+    type: ML_ANOMALY_SEVERITY.MAJOR,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.majorLabel', {
       defaultMessage: 'major',
     }),
-    threshold: ANOMALY_THRESHOLD.MAJOR,
+    threshold: ML_ANOMALY_THRESHOLD.MAJOR,
   },
   {
-    type: ANOMALY_SEVERITY.MINOR,
+    type: ML_ANOMALY_SEVERITY.MINOR,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.minor', {
       defaultMessage: 'minor',
     }),
-    threshold: ANOMALY_THRESHOLD.MINOR,
+    threshold: ML_ANOMALY_THRESHOLD.MINOR,
   },
   {
-    type: ANOMALY_SEVERITY.WARNING,
+    type: ML_ANOMALY_SEVERITY.WARNING,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.warningLabel', {
       defaultMessage: 'warning',
     }),
-    threshold: ANOMALY_THRESHOLD.WARNING,
+    threshold: ML_ANOMALY_THRESHOLD.WARNING,
   },
 ] as const;
 

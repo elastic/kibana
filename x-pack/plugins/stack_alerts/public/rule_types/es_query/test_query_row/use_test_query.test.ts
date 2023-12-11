@@ -20,6 +20,10 @@ describe('useTestQuery', () => {
           },
           isGrouped: false,
           timeWindow: '1s',
+          rawResults: {
+            cols: [{ id: 'ungrouped', name: 'ungrouped', field: 'ungrouped', actions: false }],
+            rows: [{ ungrouped: 'test' }],
+          },
         }),
     });
     await act(async () => {
@@ -29,6 +33,11 @@ describe('useTestQuery', () => {
     expect(result.current.testQueryError).toBe(null);
     expect(result.current.testQueryResult).toContain('1s');
     expect(result.current.testQueryResult).toContain('1 document');
+    expect(result.current.testQueryRawResults).toEqual({
+      cols: [{ id: 'ungrouped', name: 'ungrouped', field: 'ungrouped', actions: false }],
+      rows: [{ ungrouped: 'test' }],
+    });
+    expect(result.current.testQueryAlerts).toEqual(['query matched']);
   });
 
   test('returning a valid result for grouped result', async () => {
@@ -44,6 +53,10 @@ describe('useTestQuery', () => {
           },
           isGrouped: true,
           timeWindow: '1s',
+          rawResults: {
+            cols: [{ id: 'grouped', name: 'grouped', field: 'grouped', actions: false }],
+            rows: [{ grouped: 'test' }],
+          },
         }),
     });
     await act(async () => {
@@ -55,6 +68,11 @@ describe('useTestQuery', () => {
     expect(result.current.testQueryResult).toContain(
       'Grouped query matched 2 groups in the last 1s.'
     );
+    expect(result.current.testQueryRawResults).toEqual({
+      cols: [{ id: 'grouped', name: 'grouped', field: 'grouped', actions: false }],
+      rows: [{ grouped: 'test' }],
+    });
+    expect(result.current.testQueryAlerts).toEqual(['a', 'b']);
   });
 
   test('returning an error', async () => {
@@ -68,5 +86,7 @@ describe('useTestQuery', () => {
     expect(result.current.testQueryLoading).toBe(false);
     expect(result.current.testQueryError).toContain(errorMsg);
     expect(result.current.testQueryResult).toBe(null);
+    expect(result.current.testQueryRawResults).toBe(null);
+    expect(result.current.testQueryAlerts).toBe(null);
   });
 });

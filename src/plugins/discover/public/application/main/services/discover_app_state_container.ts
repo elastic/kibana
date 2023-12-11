@@ -16,23 +16,27 @@ import {
   COMPARE_ALL_OPTIONS,
   compareFilters,
   Filter,
+  FilterCompareOptions,
   FilterStateStore,
   Query,
 } from '@kbn/es-query';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
-import { cloneDeep, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import { DiscoverServices } from '../../../build_services';
+import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
+import type { DiscoverServices } from '../../../build_services';
 import { addLog } from '../../../utils/add_log';
-import { getValidFilters } from '../../../utils/get_valid_filters';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 
 export const APP_STATE_URL_KEY = '_a';
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
+  /**
+   * Returns if the current URL is empty
+   */
+  isEmptyURL: () => boolean;
   /**
    * Returns the previous state, used for diffing e.g. if fetching new data is necessary
    */
@@ -51,12 +55,11 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    * @param newState
    * @param merge if true, the given state is merged with the current state
    */
-  replaceUrlState: (newPartial: DiscoverAppState, merge?: boolean) => void;
+  replaceUrlState: (newPartial: DiscoverAppState, merge?: boolean) => Promise<void>;
   /**
-   * Resets the state by the given saved search
-   * @param savedSearch
+   * Resets the state container to a given state, clearing the previous state
    */
-  resetWithSavedSearch: (savedSearch: SavedSearch) => void;
+  resetToState: (state: DiscoverAppState) => void;
   /**
    * Resets the current state to the initial state
    */
@@ -71,6 +74,12 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    * @param replace
    */
   update: (newPartial: DiscoverAppState, replace?: boolean) => void;
+
+  /*
+   * Get updated AppState when given a saved search
+   *
+   * */
+  getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
 }
 
 export interface DiscoverAppState {
@@ -85,7 +94,7 @@ export interface DiscoverAppState {
   /**
    * Data Grid related state
    */
-  grid?: DiscoverGridSettings;
+  grid?: UnifiedDataTableSettings;
   /**
    * Hide chart
    */
@@ -127,6 +136,10 @@ export interface DiscoverAppState {
    */
   rowsPerPage?: number;
   /**
+   * Custom sample size
+   */
+  sampleSize?: number;
+  /**
    * Breakdown field of chart
    */
   breakdownField?: string;
@@ -150,8 +163,8 @@ export const getDiscoverAppStateContainer = ({
   savedSearch: SavedSearch;
   services: DiscoverServices;
 }): DiscoverAppStateContainer => {
-  let previousState: DiscoverAppState = {};
   let initialState = getInitialState(stateStorage, savedSearch, services);
+  let previousState = initialState;
   const appStateContainer = createStateContainer<DiscoverAppState>(initialState);
 
   const enhancedAppContainer = {
@@ -168,6 +181,19 @@ export const getDiscoverAppStateContainer = ({
     return !isEqualState(initialState, appStateContainer.getState());
   };
 
+  const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
+    return getStateDefaults({
+      savedSearch: newSavedSearch,
+      services,
+    });
+  };
+
+  const resetToState = (state: DiscoverAppState) => {
+    addLog('[appState] reset state to', state);
+    previousState = state;
+    appStateContainer.set(state);
+  };
+
   const resetInitialState = () => {
     addLog('[appState] reset initial state to the current state');
     initialState = appStateContainer.getState();
@@ -180,7 +206,7 @@ export const getDiscoverAppStateContainer = ({
   };
 
   const startAppStateUrlSync = () => {
-    addLog('[appState] startAppStateUrlSync');
+    addLog('[appState] start syncing state with URL');
     return syncState({
       storageKey: APP_STATE_URL_KEY,
       stateContainer: enhancedAppContainer,
@@ -189,24 +215,17 @@ export const getDiscoverAppStateContainer = ({
   };
 
   const initializeAndSync = (currentSavedSearch: SavedSearch) => {
-    addLog('[appState] initializeAndSync', currentSavedSearch);
-    const dataView = currentSavedSearch.searchSource.getField('index')!;
-    if (appStateContainer.getState().index !== dataView.id) {
-      // used data view is different from the given by url/state which is invalid
-      setState(appStateContainer, { index: dataView.id });
-    }
-    // sync initial app filters from state to filterManager
-    const filters = appStateContainer.getState().filters || [];
-    if (filters) {
-      services.filterManager.setAppFilters(cloneDeep(filters));
-    }
-    const query = appStateContainer.getState().query;
-    if (query) {
-      services.data.query.queryString.setQuery(query);
-    }
+    addLog('[appState] initialize state and sync with URL', currentSavedSearch);
+    const { data } = services;
+    const dataView = currentSavedSearch.searchSource.getField('index');
 
+    if (appStateContainer.getState().index !== dataView?.id) {
+      // used data view is different from the given by url/state which is invalid
+      setState(appStateContainer, { index: dataView?.id });
+    }
+    // syncs `_a` portion of url with query services
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
-      services.data.query,
+      data.query,
       appStateContainer,
       {
         filters: FilterStateStore.APP_STATE,
@@ -216,35 +235,19 @@ export const getDiscoverAppStateContainer = ({
 
     // syncs `_g` portion of url with query services
     const { stop: stopSyncingGlobalStateWithUrl } = syncGlobalQueryStateWithUrl(
-      services.data.query,
+      data.query,
       stateStorage
     );
 
-    // some filters may not be valid for this context, so update
-    // the filter manager with a modified list of valid filters
-    const currentFilters = services.filterManager.getFilters();
-    const validFilters = getValidFilters(dataView, currentFilters);
-    if (!isEqual(currentFilters, validFilters)) {
-      services.filterManager.setFilters(validFilters);
-    }
-
     const { start, stop } = startAppStateUrlSync();
-
-    replaceUrlState({}).then(() => {
-      start();
-    });
+    // current state need to be pushed to url
+    replaceUrlState({}).then(() => start());
 
     return () => {
       stopSyncingQueryAppStateWithStateContainer();
       stopSyncingGlobalStateWithUrl();
       stop();
     };
-  };
-
-  const resetWithSavedSearch = (nextSavedSearch: SavedSearch) => {
-    addLog('[appState] reset to saved search', { nextSavedSearch });
-    const nextAppState = getInitialState(stateStorage, nextSavedSearch, services);
-    appStateContainer.set(nextAppState);
   };
 
   const update = (newPartial: DiscoverAppState, replace = false) => {
@@ -257,18 +260,25 @@ export const getDiscoverAppStateContainer = ({
     }
   };
 
+  const isEmptyURL = () => {
+    const urlValue = stateStorage.get(APP_STATE_URL_KEY);
+    return urlValue === undefined || urlValue === null;
+  };
+
   const getPrevious = () => previousState;
 
   return {
     ...enhancedAppContainer,
+    isEmptyURL,
     getPrevious,
     hasChanged,
     initAndSync: initializeAndSync,
-    resetWithSavedSearch,
+    resetToState,
     resetInitialState,
     replaceUrlState,
     syncState: startAppStateUrlSync,
     update,
+    getAppStateFromSavedSearch,
   };
 };
 
@@ -279,23 +289,23 @@ export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
   sort?: string[][] | [string, string];
 }
 
-export const GLOBAL_STATE_URL_KEY = '_g';
-
-function getInitialState(
-  stateStorage: IKbnUrlStateStorage,
+export function getInitialState(
+  stateStorage: IKbnUrlStateStorage | undefined,
   savedSearch: SavedSearch,
   services: DiscoverServices
 ) {
-  const appStateFromUrl = cleanupUrlState(stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl);
+  const stateStorageURL = stateStorage?.get(APP_STATE_URL_KEY) as AppStateUrl;
   const defaultAppState = getStateDefaults({
     savedSearch,
     services,
   });
   return handleSourceColumnState(
-    {
-      ...defaultAppState,
-      ...appStateFromUrl,
-    },
+    stateStorageURL === null
+      ? defaultAppState
+      : {
+          ...defaultAppState,
+          ...cleanupUrlState(stateStorageURL, services.uiSettings),
+        },
     services.uiSettings
   );
 }
@@ -319,13 +329,17 @@ export function setState(
 /**
  * Helper function to compare 2 different filter states
  */
-export function isEqualFilters(filtersA?: Filter[] | Filter, filtersB?: Filter[] | Filter) {
+export function isEqualFilters(
+  filtersA?: Filter[] | Filter,
+  filtersB?: Filter[] | Filter,
+  comparatorOptions: FilterCompareOptions = COMPARE_ALL_OPTIONS
+) {
   if (!filtersA && !filtersB) {
     return true;
   } else if (!filtersA || !filtersB) {
     return false;
   }
-  return compareFilters(filtersA, filtersB, COMPARE_ALL_OPTIONS);
+  return compareFilters(filtersA, filtersB, comparatorOptions);
 }
 
 /**

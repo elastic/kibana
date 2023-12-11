@@ -17,21 +17,25 @@ const DEFAULTS = {
       documentType: ApmDocumentType.ServiceTransactionMetric,
       hasDocs: true,
       rollupInterval: RollupInterval.OneMinute,
+      hasDurationSummaryField: true,
     },
     {
       documentType: ApmDocumentType.TransactionMetric,
       hasDocs: true,
       rollupInterval: RollupInterval.OneMinute,
+      hasDurationSummaryField: true,
     },
     {
       documentType: ApmDocumentType.TransactionEvent,
       hasDocs: true,
       rollupInterval: RollupInterval.None,
+      hasDurationSummaryField: false,
     },
     {
       documentType: ApmDocumentType.ServiceDestinationMetric,
       hasDocs: true,
       rollupInterval: RollupInterval.None,
+      hasDurationSummaryField: false,
     },
   ],
 };

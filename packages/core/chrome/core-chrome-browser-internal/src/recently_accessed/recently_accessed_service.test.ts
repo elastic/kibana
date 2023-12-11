@@ -44,7 +44,10 @@ describe('RecentlyAccessed#start()', () => {
   let originalLocalStorage: Storage;
   beforeAll(() => {
     originalLocalStorage = window.localStorage;
-    window.localStorage = new LocalStorageMock();
+    Object.defineProperty(window, 'localStorage', {
+      value: new LocalStorageMock(),
+      writable: true,
+    });
   });
   beforeEach(() => localStorage.clear());
   afterAll(() => (window.localStorage = originalLocalStorage));

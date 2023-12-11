@@ -14,8 +14,9 @@ import type {
   PackageService,
 } from '@kbn/fleet-plugin/server';
 import moment from 'moment';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { Installation, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { schema } from '@kbn/config-schema';
+import { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   STATUS_ROUTE_PATH,
@@ -28,14 +29,22 @@ import {
   POSTURE_TYPES,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
+  POSTURE_TYPE_ALL,
+  LATEST_VULNERABILITIES_RETENTION_POLICY,
+  LATEST_FINDINGS_RETENTION_POLICY,
 } from '../../../common/constants';
-import type { CspApiRequestHandlerContext, CspRouter, StatusResponseInfo } from '../../types';
+import type {
+  CspApiRequestHandlerContext,
+  CspRequestHandlerContext,
+  CspRouter,
+  StatusResponseInfo,
+} from '../../types';
 import type {
   CspSetupStatus,
   CspStatusCode,
   IndexStatus,
   PostureTypes,
-} from '../../../common/types';
+} from '../../../common/types_old';
 import {
   getAgentStatusesByAgentPolicies,
   getCspAgentPolicies,
@@ -45,6 +54,7 @@ import {
 import { checkIndexStatus } from '../../lib/check_index_status';
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
+export const INDEX_TIMEOUT_IN_MINUTES_CNVM = 240;
 
 interface CspStatusDependencies {
   logger: Logger;
@@ -94,14 +104,17 @@ export const calculateIntegrationStatus = (
     stream: IndexStatus;
     score?: IndexStatus;
   },
+  installation: Installation | undefined,
   healthyAgents: number,
   timeSinceInstallationInMinutes: number,
   installedPolicyTemplates: string[]
 ): CspStatusCode => {
   // We check privileges only for the relevant indices for our pages to appear
   const postureTypeCheck: PostureTypes = POSTURE_TYPES[integration];
+
   if (indicesStatus.latest === 'unprivileged' || indicesStatus.score === 'unprivileged')
     return 'unprivileged';
+  if (!installation) return 'not-installed';
   if (indicesStatus.latest === 'not-empty') return 'indexed';
   if (indicesStatus.stream === 'not-empty' && indicesStatus.latest === 'empty') return 'indexing';
 
@@ -110,7 +123,10 @@ export const calculateIntegrationStatus = (
   if (
     indicesStatus.latest === 'empty' &&
     indicesStatus.stream === 'empty' &&
-    timeSinceInstallationInMinutes < INDEX_TIMEOUT_IN_MINUTES
+    timeSinceInstallationInMinutes <
+      (postureTypeCheck !== VULN_MGMT_POLICY_TEMPLATE
+        ? INDEX_TIMEOUT_IN_MINUTES
+        : INDEX_TIMEOUT_IN_MINUTES_CNVM)
   )
     return 'waiting_for_results';
 
@@ -155,20 +171,53 @@ export const getCspStatus = async ({
     installedPackagePoliciesVulnMgmt,
     installedPolicyTemplates,
   ] = await Promise.all([
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
-    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger),
-    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger),
+    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
+      postureType: POSTURE_TYPE_ALL,
+      retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
+    }),
+    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, {
+      postureType: POSTURE_TYPE_ALL,
+      retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
+    }),
+    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, {
+      postureType: POSTURE_TYPE_ALL,
+      retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
+    }),
 
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'cspm'),
-    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'cspm'),
-    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'cspm'),
+    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
+      postureType: CSPM_POLICY_TEMPLATE,
+      retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
+    }),
+    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, {
+      postureType: CSPM_POLICY_TEMPLATE,
+      retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
+    }),
+    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, {
+      postureType: CSPM_POLICY_TEMPLATE,
+      retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
+    }),
 
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'kspm'),
-    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'kspm'),
-    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'kspm'),
+    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
+      postureType: KSPM_POLICY_TEMPLATE,
+      retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
+    }),
+    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, {
+      postureType: KSPM_POLICY_TEMPLATE,
+      retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
+    }),
+    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, {
+      postureType: KSPM_POLICY_TEMPLATE,
+      retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
+    }),
 
-    checkIndexStatus(esClient, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, logger),
-    checkIndexStatus(esClient, VULNERABILITIES_INDEX_PATTERN, logger, VULN_MGMT_POLICY_TEMPLATE),
+    checkIndexStatus(esClient, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, logger, {
+      postureType: VULN_MGMT_POLICY_TEMPLATE,
+      retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
+    }),
+    checkIndexStatus(esClient, VULNERABILITIES_INDEX_PATTERN, logger, {
+      postureType: VULN_MGMT_POLICY_TEMPLATE,
+      retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
+    }),
 
     packageService.asInternalUser.getInstallation(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
     packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
@@ -258,6 +307,7 @@ export const getCspStatus = async ({
       stream: findingsIndexStatusCspm,
       score: scoreIndexStatusCspm,
     },
+    installation,
     healthyAgentsCspm,
     calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE),
     installedPolicyTemplates
@@ -270,6 +320,7 @@ export const getCspStatus = async ({
       stream: findingsIndexStatusKspm,
       score: scoreIndexStatusKspm,
     },
+    installation,
     healthyAgentsKspm,
     calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE),
     installedPolicyTemplates
@@ -280,7 +331,9 @@ export const getCspStatus = async ({
     {
       latest: vulnerabilitiesLatestIndexStatus,
       stream: vulnerabilitiesIndexStatus,
+      score: scoreIndexStatus,
     },
+    installation,
     healthyAgentsVulMgmt,
     calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE),
     installedPolicyTemplates
@@ -318,44 +371,55 @@ export const statusQueryParamsSchema = schema.object({
   check: schema.oneOf([schema.literal('all'), schema.literal('init')], { defaultValue: 'all' }),
 });
 
-export const defineGetCspStatusRoute = (router: CspRouter): void =>
-  router.get(
-    {
+export const defineGetCspStatusRoute = (
+  router: CspRouter
+): VersionedRoute<'get', CspRequestHandlerContext> =>
+  router.versioned
+    .get({
+      access: 'internal',
       path: STATUS_ROUTE_PATH,
-      validate: { query: statusQueryParamsSchema },
       options: {
         tags: ['access:cloud-security-posture-read'],
       },
-    },
-    async (context, request, response) => {
-      const cspContext = await context.csp;
-      try {
-        if (request.query.check === 'init') {
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: statusQueryParamsSchema,
+          },
+        },
+      },
+      async (context, request, response) => {
+        const cspContext = await context.csp;
+        try {
+          if (request.query.check === 'init') {
+            return response.ok({
+              body: {
+                isPluginInitialized: cspContext.isPluginInitialized(),
+              },
+            });
+          }
+          const status: CspSetupStatus = await getCspStatus({
+            ...cspContext,
+            esClient: cspContext.esClient.asCurrentUser,
+          });
           return response.ok({
-            body: {
-              isPluginInitialized: cspContext.isPluginInitialized(),
-            },
+            body: status,
+          });
+        } catch (err) {
+          cspContext.logger.error(`Error getting csp status`);
+          cspContext.logger.error(err);
+
+          const error = transformError(err);
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
           });
         }
-        const status = await getCspStatus({
-          ...cspContext,
-          esClient: cspContext.esClient.asInternalUser,
-        });
-        return response.ok({
-          body: status,
-        });
-      } catch (err) {
-        cspContext.logger.error(`Error getting csp status`);
-        cspContext.logger.error(err);
-
-        const error = transformError(err);
-        return response.customError({
-          body: { message: error.message },
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 
 const getStatusResponse = (statusResponseInfo: StatusResponseInfo) => {
   const {

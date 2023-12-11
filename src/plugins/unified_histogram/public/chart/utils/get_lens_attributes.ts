@@ -17,7 +17,21 @@ import type {
   TypedLensByValueInput,
   Suggestion,
 } from '@kbn/lens-plugin/public';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import { fieldSupportsBreakdown } from './field_supports_breakdown';
+
+export interface LensRequestData {
+  dataViewId?: string;
+  timeField?: string;
+  timeInterval?: string;
+  breakdownField?: string;
+}
+
+export interface LensAttributesContext {
+  attributes: TypedLensByValueInput['attributes'];
+  requestData: LensRequestData;
+}
 
 export const getLensAttributes = ({
   title,
@@ -35,7 +49,7 @@ export const getLensAttributes = ({
   timeInterval: string | undefined;
   breakdownField: DataViewField | undefined;
   suggestion: Suggestion | undefined;
-}) => {
+}): LensAttributesContext => {
   const showBreakdown = breakdownField && fieldSupportsBreakdown(breakdownField);
 
   let columnOrder = ['date_column', 'count_column'];
@@ -126,7 +140,7 @@ export const getLensAttributes = ({
     ? {
         ...suggestionVisualizationState,
       }
-    : {
+    : ({
         layers: [
           {
             accessors: ['count_column'],
@@ -148,10 +162,13 @@ export const getLensAttributes = ({
         legend: {
           isVisible: true,
           position: 'right',
+          legendSize: LegendSize.EXTRA_LARGE,
+          shouldTruncate: false,
         },
         preferredSeriesType: 'bar_stacked',
         valueLabels: 'hide',
         fittingFunction: 'None',
+        minBarHeight: 2,
         showCurrentTimeMarker: true,
         axisTitlesVisibilitySettings: {
           x: false,
@@ -168,11 +185,11 @@ export const getLensAttributes = ({
           yLeft: true,
           yRight: false,
         },
-      };
-
-  return {
+      } as XYConfiguration);
+  const attributes = {
     title:
       title ??
+      suggestion?.title ??
       i18n.translate('unifiedHistogram.lensTitle', {
         defaultMessage: 'Edit visualization',
       }),
@@ -193,7 +210,24 @@ export const getLensAttributes = ({
       filters,
       query,
       visualization,
+      ...(dataView &&
+        dataView.id &&
+        !dataView.isPersisted() && {
+          adHocDataViews: {
+            [dataView.id]: dataView.toSpec(false),
+          },
+        }),
     },
     visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
   } as TypedLensByValueInput['attributes'];
+
+  return {
+    attributes,
+    requestData: {
+      dataViewId: dataView.id,
+      timeField: dataView.timeFieldName,
+      timeInterval,
+      breakdownField: breakdownField?.name,
+    },
+  };
 };

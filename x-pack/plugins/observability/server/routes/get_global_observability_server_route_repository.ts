@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { ObservabilityConfig } from '..';
 import { rulesRouteRepository } from './rules/route';
-import { slosRouteRepository } from './slo/route';
+import { sloRouteRepository } from './slo/route';
 
-export function getObservabilityServerRouteRepository() {
+export function getObservabilityServerRouteRepository(config: ObservabilityConfig) {
   const repository = {
     ...rulesRouteRepository,
-    ...slosRouteRepository,
+    ...sloRouteRepository,
   };
   return repository;
 }

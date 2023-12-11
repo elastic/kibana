@@ -17,13 +17,17 @@ import {
   EuiIcon,
   EuiPopover,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
+import { useIsFirstTimeAgentUserQuery } from '../../../../../integrations/sections/epm/screens/detail/hooks';
+
 import type { Agent, AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
-import { AGENTS_INDEX } from '../../../../constants';
+import { AGENTS_INDEX, AGENTS_PREFIX } from '../../../../constants';
+import { useFleetServerStandalone } from '../../../../hooks';
 
 import { MAX_TAG_DISPLAY_LENGTH, truncateTag } from '../utils';
 
@@ -37,7 +41,7 @@ const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`
   padding: ${(props) => props.theme.eui.euiSizeS};
 `;
 
-export const SearchAndFilterBar: React.FunctionComponent<{
+export interface SearchAndFilterBarProps {
   agentPolicies: AgentPolicy[];
   draftKuery: string;
   onDraftKueryChange: (kuery: string) => void;
@@ -51,8 +55,10 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   tags: string[];
   selectedTags: string[];
   onSelectedTagsChange: (selectedTags: string[]) => void;
-  totalAgents: number;
+  shownAgents: number;
+  inactiveShownAgents: number;
   totalInactiveAgents: number;
+  totalManagedAgentIds: string[];
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
@@ -62,7 +68,9 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   visibleAgents: Agent[];
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
-}> = ({
+}
+
+export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
   agentPolicies,
   draftKuery,
   onDraftKueryChange,
@@ -76,8 +84,10 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   tags,
   selectedTags,
   onSelectedTagsChange,
-  totalAgents,
+  shownAgents,
+  inactiveShownAgents,
   totalInactiveAgents,
+  totalManagedAgentIds,
   selectionMode,
   currentQuery,
   selectedAgents,
@@ -88,6 +98,12 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onClickAgentActivity,
   showAgentActivityTour,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const { isFleetServerStandalone } = useFleetServerStandalone();
+  const { isFirstTimeAgentUser, isLoading: isFirstTimeAgentUserLoading } =
+    useIsFirstTimeAgentUserQuery();
+  const showAddFleetServerBtn = !isFleetServerStandalone;
+
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
 
@@ -118,7 +134,9 @@ export const SearchAndFilterBar: React.FunctionComponent<{
       <EuiFlexGroup direction="column">
         {/* Top Buttons and Links */}
         <EuiFlexGroup>
-          <EuiFlexItem>{totalAgents > 0 && <DashboardsButtons />}</EuiFlexItem>
+          <EuiFlexItem>
+            {!isFirstTimeAgentUserLoading && !isFirstTimeAgentUser && <DashboardsButtons />}
+          </EuiFlexItem>
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <AgentActivityButton
@@ -126,23 +144,25 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                 showAgentActivityTour={showAgentActivityTour}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.addFleetServerButton.tooltip"
-                    defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
-                  />
-                }
-              >
-                <EuiButton onClick={onClickAddFleetServer} data-test-subj="addFleetServerButton">
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.addFleetServerButton"
-                    defaultMessage="Add Fleet Server"
-                  />
-                </EuiButton>
-              </EuiToolTip>
-            </EuiFlexItem>
+            {showAddFleetServerBtn && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.fleet.agentList.addFleetServerButton.tooltip"
+                      defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
+                    />
+                  }
+                >
+                  <EuiButton onClick={onClickAddFleetServer} data-test-subj="addFleetServerButton">
+                    <FormattedMessage
+                      id="xpack.fleet.agentList.addFleetServerButton"
+                      defaultMessage="Add Fleet Server"
+                    />
+                  </EuiButton>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={
@@ -174,6 +194,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                     onSubmitSearch(newSearch);
                   }
                 }}
+                fieldPrefix={AGENTS_PREFIX}
                 indexPattern={AGENTS_INDEX}
                 dataTestSubj="agentList.queryInput"
               />
@@ -209,7 +230,10 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                   closePopover={() => setIsTagsFilterOpen(false)}
                   panelPaddingSize="none"
                 >
-                  <div className="euiFilterSelect__items">
+                  {/* EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
+                      instead of EuiFilterSelectItem (which is pending deprecation).
+                      @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
+                  <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
                     <>
                       {tags.map((tag, index) => (
                         <EuiFilterSelectItem
@@ -274,7 +298,10 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                   closePopover={() => setIsAgentPoliciesFilterOpen(false)}
                   panelPaddingSize="none"
                 >
-                  <div className="euiFilterSelect__items">
+                  {/* EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
+                      instead of EuiFilterSelectItem (which is pending deprecation).
+                      @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
+                  <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
                     {agentPolicies.map((agentPolicy, index) => (
                       <EuiFilterSelectItem
                         checked={selectedAgentPolicies.includes(agentPolicy.id) ? 'on' : undefined}
@@ -307,11 +334,12 @@ export const SearchAndFilterBar: React.FunctionComponent<{
               </EuiFilterGroup>
             </EuiFlexItem>
             {(selectionMode === 'manual' && selectedAgents.length) ||
-            (selectionMode === 'query' && totalAgents > 0) ? (
+            (selectionMode === 'query' && shownAgents > 0) ? (
               <EuiFlexItem grow={false}>
                 <AgentBulkActions
-                  totalAgents={totalAgents}
-                  totalInactiveAgents={totalInactiveAgents}
+                  shownAgents={shownAgents}
+                  inactiveShownAgents={inactiveShownAgents}
+                  totalManagedAgentIds={totalManagedAgentIds}
                   selectionMode={selectionMode}
                   currentQuery={currentQuery}
                   selectedAgents={selectedAgents}

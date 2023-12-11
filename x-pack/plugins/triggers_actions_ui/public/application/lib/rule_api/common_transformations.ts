@@ -16,11 +16,13 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
   params,
   frequency,
   alerts_filter: alertsFilter,
+  use_alert_data_for_template: useAlertDataForTemplate,
 }) => ({
   group,
   id,
   params,
   actionTypeId,
+  ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
   ...(frequency
     ? {
         frequency: {
@@ -63,6 +65,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   created_at: createdAt,
   updated_at: updatedAt,
   api_key_owner: apiKeyOwner,
+  api_key_created_by_user: apiKeyCreatedByUser,
   notify_when: notifyWhen,
   mute_all: muteAll,
   muted_alert_ids: mutedInstanceIds,
@@ -95,6 +98,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   activeSnoozes,
   ...(lastRun ? { lastRun: transformLastRun(lastRun) } : {}),
   ...(nextRun ? { nextRun } : {}),
+  ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
   ...rest,
 });
 

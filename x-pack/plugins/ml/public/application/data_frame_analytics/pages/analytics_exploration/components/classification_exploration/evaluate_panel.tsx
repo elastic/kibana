@@ -7,9 +7,8 @@
 
 import './_classification_exploration.scss';
 
-import React, { FC, useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FC, useEffect, useState } from 'react';
+
 import {
   EuiButtonEmpty,
   EuiDataGrid,
@@ -20,16 +19,22 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { useMlKibana } from '../../../../../contexts/kibana';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  getDependentVar,
+  type DataFrameAnalyticsConfig,
+  type DataFrameTaskStateType,
+} from '@kbn/ml-data-frame-analytics-utils';
+
+import { useCurrentThemeVars, useMlKibana } from '../../../../../contexts/kibana';
 
 // Separate imports for lazy loadable VegaChart and related code
 import { VegaChart } from '../../../../../components/vega_chart';
 import { VegaChartLoading } from '../../../../../components/vega_chart/vega_chart_loading';
-import { useCurrentEuiTheme } from '../../../../../components/color_range_legend';
 
 import { ErrorCallout } from '../error_callout';
-import { getDependentVar, DataFrameAnalyticsConfig } from '../../../../common';
-import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
 import { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section';
@@ -40,11 +45,11 @@ import { EvaluationQualityMetricsTable } from './evaluation_quality_metrics_tabl
 import { getRocCurveChartVegaLiteSpec } from './get_roc_curve_chart_vega_lite_spec';
 
 import {
-  getColumnData,
-  getTrailingControlColumns,
+  ACTUAL_CLASS_ID,
   ConfusionMatrixColumn,
   ConfusionMatrixColumnData,
-  ACTUAL_CLASS_ID,
+  getColumnData,
+  getTrailingControlColumns,
   MAX_COLUMNS,
 } from './column_data';
 
@@ -108,7 +113,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   const {
     services: { docLinks },
   } = useMlKibana();
-  const { euiTheme } = useCurrentEuiTheme();
+  const { euiTheme } = useCurrentThemeVars();
 
   const [columns, setColumns] = useState<ConfusionMatrixColumn[]>([]);
   const [columnsData, setColumnsData] = useState<ConfusionMatrixColumnData[]>([]);

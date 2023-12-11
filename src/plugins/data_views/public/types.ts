@@ -8,6 +8,10 @@
 
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import { DataViewsServicePublicMethods } from './data_views';
 import { HasDataService } from '../common';
 
@@ -82,6 +86,10 @@ export interface DataViewsPublicSetupDependencies {
    * Field formats
    */
   fieldFormats: FieldFormatsSetup;
+  /**
+   * Content management
+   */
+  contentManagement: ContentManagementPublicSetup;
 }
 
 /**
@@ -92,13 +100,18 @@ export interface DataViewsPublicStartDependencies {
    * Field formats
    */
   fieldFormats: FieldFormatsStart;
+  /**
+   * Content management
+   */
+  contentManagement: ContentManagementPublicStart;
 }
 
 /**
  * Data plugin public Setup contract
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataViewsPublicPluginSetup {}
+export interface DataViewsPublicPluginSetup {
+  enableRollups: () => void;
+}
 
 export interface DataViewsServicePublic extends DataViewsServicePublicMethods {
   getCanSaveSync: () => boolean;
@@ -108,6 +121,14 @@ export interface DataViewsServicePublic extends DataViewsServicePublicMethods {
     showAllIndices?: boolean;
     isRollupIndex: (indexName: string) => boolean;
   }) => Promise<MatchedItem[]>;
+  getRollupsEnabled: () => boolean;
+  scriptedFieldsEnabled: boolean;
+  /**
+   * Get existing index pattern list by providing string array index pattern list.
+   * @param indices - index pattern list
+   * @returns index pattern list of index patterns that match indices
+   */
+  getExistingIndices: (indices: string[]) => Promise<string[]>;
 }
 
 export type DataViewsContract = DataViewsServicePublic;

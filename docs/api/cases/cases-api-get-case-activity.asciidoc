@@ -11,7 +11,7 @@ deprecated::[8.1.0,Use <<cases-api-find-case-activity>> instead.]
 [NOTE]
 ====
 For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification].
 ====
 
 === {api-request-title}

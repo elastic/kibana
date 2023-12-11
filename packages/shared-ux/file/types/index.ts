@@ -226,6 +226,10 @@ export interface FileJSON<Meta = unknown> {
    * User data associated with this file
    */
   user?: FileMetadata['user'];
+  /**
+   * File hash information
+   */
+  hash?: BaseFileMetadata['hash'];
 }
 
 export interface FileKindBase {

@@ -121,10 +121,19 @@ export const SolutionNav: FC<SolutionNavProps> = ({
   const HeadingElement = headingProps?.element || 'h2';
 
   const titleText = (
-    <EuiTitle size="xs" id={headingID}>
+    <EuiTitle
+      size="xs"
+      id={headingID}
+      data-test-subj={headingProps?.['data-test-subj']}
+      className="kbnSolutionNav__title"
+    >
       <HeadingElement>
         {icon && (
-          <KibanaSolutionAvatar className="kbnSolutionNav__avatar" iconType={icon} name={name} />
+          <KibanaSolutionAvatar
+            className="kbnSolutionNav__titleAvatar"
+            iconType={icon}
+            name={name}
+          />
         )}
         <strong>
           <FormattedMessage

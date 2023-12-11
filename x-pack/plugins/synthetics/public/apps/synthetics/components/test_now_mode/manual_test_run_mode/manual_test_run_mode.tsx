@@ -15,14 +15,11 @@ import { Locations } from '../../../../../../common/runtime_types';
 export function ManualTestRunMode({
   manualTestRun,
   onDone,
-  showErrors,
 }: {
-  showErrors: boolean;
   manualTestRun: ManualTestRun;
   onDone: (testRunId: string) => void;
 }) {
   const { expectPings } = useRunOnceErrors({
-    showErrors,
     testRunId: manualTestRun.testRunId!,
     locations: (manualTestRun.monitor!.locations ?? []) as Locations,
     errors: manualTestRun.errors ?? [],
@@ -36,6 +33,7 @@ export function ManualTestRunMode({
     <Fragment key={manualTestRun.testRunId}>
       {isBrowserMonitor ? (
         <BrowserTestRunResult
+          name={manualTestRun.monitor.name}
           expectPings={expectPings}
           onDone={onDone}
           testRunId={manualTestRun.testRunId}
@@ -43,6 +41,7 @@ export function ManualTestRunMode({
         />
       ) : (
         <SimpleTestResults
+          name={manualTestRun.monitor.name}
           expectPings={expectPings}
           onDone={onDone}
           testRunId={manualTestRun.testRunId}

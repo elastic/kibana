@@ -166,7 +166,7 @@ const savedObject = resolveResult.saved_object;
 TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#user-content-example-steps[step 2 of the POC]!
 
 The
-https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.savedobjectsresolveresponse.md[SavedObjectsResolveResponse
+{kib-repo}blob/{branch}/packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts[SavedObjectsResolveResponse
 interface] has four fields, summarized below:
 
 * `saved_object` - The saved object that was found.
@@ -373,7 +373,7 @@ image::images/sharing-saved-objects-step-6.png["Sharing Saved Objects registrati
 > *Update saved object delete API usage to handle multiple spaces*
 
 If an object is shared to multiple spaces, it cannot be deleted without using the
-https://github.com/elastic/kibana/blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsdeleteoptions.md[`force`
+{kib-repo}blob/{branch}/packages/core/saved-objects/core-saved-objects-api-server/src/apis/delete.ts[`force`
 delete option]. You should always be aware when a saved object exists in multiple spaces, and you should warn users in that case.
 
 If your UI allows users to delete your objects, you can define a warning message like this:
@@ -477,7 +477,7 @@ return (
 
 2. Allow users to access your objects in the <<managing-saved-objects,Saved Objects Management page>> in <<management>>. You can do this by
    ensuring that your objects are marked as
-   https://github.com/elastic/kibana/blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectstypemanagementdefinition.md[importable and exportable] in your <<saved-objects-type-registration,saved object type registration>>:
+   {kib-repo}blob/{branch}/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts[importable and exportable] in your <<saved-objects-type-registration,saved object type registration>>:
 +
 ```ts
 name: 'my-object-type',

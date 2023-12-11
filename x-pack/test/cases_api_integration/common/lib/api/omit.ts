@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Case, CommentResponse } from '@kbn/cases-plugin/common/api';
+import { Case, Attachment } from '@kbn/cases-plugin/common/types/domain';
 import { omit } from 'lodash';
 
 interface CommonSavedObjectAttributes {
@@ -41,9 +41,9 @@ export const removeServerGeneratedPropertiesFromCase = (theCase: Case): Partial<
 };
 
 export const removeServerGeneratedPropertiesFromComments = (
-  comments: CommentResponse[] | undefined
-): Array<Partial<CommentResponse>> | undefined => {
+  comments: Attachment[] | undefined
+): Array<Partial<Attachment>> | undefined => {
   return comments?.map((comment) => {
-    return removeServerGeneratedPropertiesFromSavedObject<CommentResponse>(comment, []);
+    return removeServerGeneratedPropertiesFromSavedObject<Attachment>(comment, []);
   });
 };

@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { memo } from 'react';
 import { EuiCode, EuiBreadcrumbs, EuiDescriptionList } from '@elastic/eui';
 
 import styled from 'styled-components';
 
 /**
- * Used by the nodeDetail view to show attributes of the related events.
+ * Used by the nodeDetail view, eventDetail view and control panel to show attributes of the related events.
  */
-export const StyledDescriptionList = styled(EuiDescriptionList)`
-  &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
-    max-width: 10em;
+export const StyledDescriptionList = memo(styled(EuiDescriptionList)`
+  .euiDescriptionList__title {
+    word-break: normal;
   }
-`;
+  .euiDescriptionList__title,
+  .euiDescriptionList__description {
+    overflow-wrap: break-word;
+  }
+`);
 
 /**
  * Used by the nodeDetail view for the label of the node.

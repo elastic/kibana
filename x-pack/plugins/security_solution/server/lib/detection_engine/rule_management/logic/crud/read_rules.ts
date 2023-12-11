@@ -11,10 +11,10 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   RuleObjectId,
   RuleSignatureId,
-} from '../../../../../../common/detection_engine/rule_schema';
+} from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { RuleParams } from '../../../rule_schema';
-import { isAlertType } from '../../../rule_schema';
+import { hasValidRuleType } from '../../../rule_schema';
 import { findRules } from '../search/find_rules';
 
 export interface ReadRuleOptions {
@@ -42,7 +42,7 @@ export const readRules = async ({
     if (id != null) {
       try {
         const rule = await rulesClient.resolve({ id });
-        if (isAlertType(rule)) {
+        if (hasValidRuleType(rule)) {
           if (rule?.outcome === 'exactMatch') {
             const { outcome, ...restOfRule } = rule;
             return restOfRule;
@@ -69,7 +69,7 @@ export const readRules = async ({
         sortField: undefined,
         sortOrder: undefined,
       });
-      if (ruleFromFind.data.length === 0 || !isAlertType(ruleFromFind.data[0])) {
+      if (ruleFromFind.data.length === 0 || !hasValidRuleType(ruleFromFind.data[0])) {
         return null;
       } else {
         return ruleFromFind.data[0];

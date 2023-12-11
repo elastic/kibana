@@ -6,11 +6,22 @@
  */
 
 import React from 'react';
-import { MANAGEMENT_PATH } from '../../common/constants';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { MANAGEMENT_PATH, MANAGE_PATH } from '../../common/constants';
+import { SecurityPageName } from '../app/types';
 import { ManagementContainer } from './pages';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { CurrentLicense } from '../common/components/current_license';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+import { ManageLandingPage } from './pages/landing';
+
+const ManagementLanding = () => (
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.administration}>
+      <ManageLandingPage />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
+);
 
 /**
  * Returns the React Router Routes for the management area
@@ -25,7 +36,11 @@ const ManagementRoutes = () => (
 
 export const routes: SecuritySubPluginRoutes = [
   {
+    path: MANAGE_PATH,
+    component: React.memo(ManagementLanding),
+  },
+  {
     path: MANAGEMENT_PATH,
-    component: ManagementRoutes,
+    component: React.memo(ManagementRoutes),
   },
 ];

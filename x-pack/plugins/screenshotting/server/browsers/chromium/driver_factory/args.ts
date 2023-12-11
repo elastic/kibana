@@ -75,9 +75,8 @@ export const args = ({
 
   // Since chromium v111 headless mode in arm based macs is not working with `--disable-gpu`
   // This is a known issue: headless uses swiftshader by default and swiftshader's support for WebGL is currently disabled on Arm pending the resolution of https://issuetracker.google.com/issues/165000222.
-  // As a workaround, we force hardware GL drivers on mac.
-  // The best way to do this starting with v112 is by passing --enable-gpu,
-  // v111 and older versions should work with --use-angle.
+  // As a workaround, we force hardware GL drivers on mac: v111 and older versions should work with --use-angle.
+  // The best way to do this when the issue is resolved will be to pass --enable-gpu,
   if (os.arch() === 'arm64' && process.platform === 'darwin') {
     flags.push('--use-angle');
   } else {

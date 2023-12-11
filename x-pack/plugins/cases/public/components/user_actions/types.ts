@@ -7,15 +7,15 @@
 
 import type { EuiCommentProps } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { SnakeToCamelCase } from '../../../common/types';
-import type { ActionTypes, UserActionWithResponse } from '../../../common/api';
+import type { UserActionTypes } from '../../../common/types/domain';
 import type {
   CaseUI,
   CaseConnectors,
-  CaseUserActions,
-  Comment,
+  UserActionUI,
+  AttachmentUI,
   UseFetchAlertData,
   CaseUserActionsStats,
+  CasesConfigurationUI,
 } from '../../containers/types';
 import type { AddCommentRefObject } from '../add_comment';
 import type { UserActionMarkdownRefObject } from './markdown_form';
@@ -32,6 +32,7 @@ export interface UserActionTreeProps {
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
   data: CaseUI;
+  casesConfiguration: CasesConfigurationUI;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   actionsNavigation?: ActionsNavigation;
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
@@ -44,18 +45,22 @@ export interface UserActionTreeProps {
 }
 
 type UnsupportedUserActionTypes = typeof UNSUPPORTED_ACTION_TYPES[number];
-export type SupportedUserActionTypes = keyof Omit<typeof ActionTypes, UnsupportedUserActionTypes>;
+export type SupportedUserActionTypes = keyof Omit<
+  typeof UserActionTypes,
+  UnsupportedUserActionTypes
+>;
 
 export interface UserActionBuilderArgs {
   appId?: string;
   caseData: CaseUI;
+  casesConfiguration: CasesConfigurationUI;
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   caseConnectors: CaseConnectors;
-  userAction: CaseUserActions;
-  comments: Comment[];
+  userAction: UserActionUI;
+  comments: AttachmentUI[];
   index: number;
   commentRefs: React.MutableRefObject<
     Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>
@@ -76,7 +81,6 @@ export interface UserActionBuilderArgs {
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
 }
 
-export type UserActionResponse<T> = SnakeToCamelCase<UserActionWithResponse<T>>;
 export type UserActionBuilder = (args: UserActionBuilderArgs) => {
   build: () => EuiCommentProps[];
 };

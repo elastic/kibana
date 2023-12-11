@@ -174,8 +174,8 @@ export class EventLogger {
   public startTransaction(
     action: Transactions.SCREENSHOTTING | Transactions.PDF
   ): TransactionEndFn {
-    this.transactions[action] = apm.startTransaction(action, PLUGIN_ID);
-    const transaction = this.transactions[action];
+    const transaction = apm.startTransaction(action, PLUGIN_ID);
+    this.transactions[action] = transaction;
 
     this.startTiming(action);
     this.logEvent(action, 'start', { action });
@@ -184,10 +184,10 @@ export class EventLogger {
       Object.entries(labels).forEach(([label]) => {
         const labelField = label as keyof SimpleEvent;
         const labelValue = labels[labelField];
-        transaction?.setLabel(label, labelValue, false);
+        transaction.setLabel(label, labelValue, false);
       });
 
-      transaction?.end();
+      transaction.end();
 
       this.logEvent(action, 'complete', { ...labels, action }, this.timings[action]);
     };

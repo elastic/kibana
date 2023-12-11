@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { IO_EVENTS_ROUTE } from '@kbn/session-view-plugin/common/constants';
+import { IO_EVENTS_ROUTE, CURRENT_API_VERSION } from '@kbn/session-view-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const MOCK_INDEX = 'logs-endpoint.events.process*';
@@ -22,6 +22,13 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  function getTestRoute() {
+    return supertest
+      .get(IO_EVENTS_ROUTE)
+      .set('kbn-xsrf', 'foo')
+      .set('Elastic-Api-Version', CURRENT_API_VERSION);
+  }
+
   describe(`Session view - ${IO_EVENTS_ROUTE} - with a basic license`, () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/session_view/process_events');
@@ -33,8 +40,21 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/session_view/io_events');
     });
 
+    it(`${IO_EVENTS_ROUTE} fails when an invalid api version is specified`, async () => {
+      const response = await supertest
+        .get(IO_EVENTS_ROUTE)
+        .set('kbn-xsrf', 'foo')
+        .set('Elastic-Api-Version', '999999')
+        .query({
+          index: MOCK_INDEX,
+          sessionEntityId: MOCK_SESSION_ENTITY_ID,
+          sessionStartTime: MOCK_SESSION_START_TIME,
+        });
+      expect(response.status).to.be(400);
+    });
+
     it(`${IO_EVENTS_ROUTE} returns a page of IO events`, async () => {
-      const response = await supertest.get(IO_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
+      const response = await getTestRoute().query({
         index: MOCK_INDEX,
         sessionEntityId: MOCK_SESSION_ENTITY_ID,
         sessionStartTime: MOCK_SESSION_START_TIME,
@@ -56,7 +76,7 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
     });
 
     it(`${IO_EVENTS_ROUTE} returns a page of IO events (w cursor)`, async () => {
-      const response = await supertest.get(IO_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
+      const response = await getTestRoute().query({
         index: MOCK_INDEX,
         sessionEntityId: MOCK_SESSION_ENTITY_ID,
         sessionStartTime: MOCK_SESSION_START_TIME,

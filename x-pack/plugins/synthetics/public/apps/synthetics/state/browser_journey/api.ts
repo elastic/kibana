@@ -21,7 +21,6 @@ import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface FetchJourneyStepsParams {
   checkGroup: string;
-  syntheticEventTypes?: string[];
 }
 
 export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
@@ -35,7 +34,7 @@ export async function fetchBrowserJourney(
 ): Promise<SyntheticsJourneyApiResponse> {
   return apiService.get(
     SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', params.checkGroup),
-    { syntheticEventTypes: params.syntheticEventTypes },
+    undefined,
     SyntheticsJourneyApiResponseType
   );
 }

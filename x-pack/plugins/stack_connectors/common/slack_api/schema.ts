@@ -11,20 +11,39 @@ export const SlackApiSecretsSchema = schema.object({
   token: schema.string({ minLength: 1 }),
 });
 
-export const GetChannelsParamsSchema = schema.object({
-  subAction: schema.literal('getChannels'),
+export const SlackApiConfigSchema = schema.object({
+  allowedChannels: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string({ minLength: 1 }),
+        name: schema.string({ minLength: 1 }),
+      }),
+      { maxSize: 25 }
+    )
+  ),
+});
+
+export const ValidChannelIdSubActionParamsSchema = schema.object({
+  channelId: schema.maybe(schema.string()),
+});
+
+export const ValidChannelIdParamsSchema = schema.object({
+  subAction: schema.literal('validChannelId'),
+  subActionParams: ValidChannelIdSubActionParamsSchema,
 });
 
 export const PostMessageSubActionParamsSchema = schema.object({
-  channels: schema.arrayOf(schema.string()),
-  text: schema.string(),
+  channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
+  channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
+  text: schema.string({ minLength: 1 }),
 });
+
 export const PostMessageParamsSchema = schema.object({
   subAction: schema.literal('postMessage'),
   subActionParams: PostMessageSubActionParamsSchema,
 });
 
 export const SlackApiParamsSchema = schema.oneOf([
-  GetChannelsParamsSchema,
+  ValidChannelIdParamsSchema,
   PostMessageParamsSchema,
 ]);

@@ -13,8 +13,14 @@ import React, { useCallback, useMemo } from 'react';
 import { encode } from '@kbn/rison';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { isJobStatusWithResults } from '../../../../common/log_analysis';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { useLogViewContext, LogEntryFlyout } from '@kbn/logs-shared-plugin/public';
+import { IdFormatByJobType } from '../../../../common/http_api/latest';
+import {
+  isJobStatusWithResults,
+  logEntryCategoriesJobType,
+  logEntryRateJobType,
+} from '../../../../common/log_analysis';
 import { TimeKey } from '../../../../common/time';
 import {
   CategoryJobNoticesSection,
@@ -23,12 +29,10 @@ import {
 import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
 import { ManageJobsButton } from '../../../components/logging/log_analysis_setup/manage_jobs_button';
 import { useLogAnalysisSetupFlyoutStateContext } from '../../../components/logging/log_analysis_setup/setup_flyout';
-import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis/log_analysis_capabilities';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { useLogEntryFlyoutContext } from '../../../containers/logs/log_flyout';
-import { useLogViewContext } from '../../../hooks/use_log_view';
 import { LogsPageTemplate } from '../shared/page_template';
 import { AnomaliesResults } from './sections/anomalies';
 import { useDatasetFiltering } from './use_dataset_filtering';
@@ -46,7 +50,8 @@ export const PAGINATION_DEFAULTS = {
 
 export const LogEntryRateResultsContent: React.FunctionComponent<{
   pageTitle: string;
-}> = ({ pageTitle }) => {
+  idFormats: IdFormatByJobType | null;
+}> = ({ pageTitle, idFormats }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
 
@@ -83,11 +88,11 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
 
   const jobIds = useMemo(() => {
     return [
-      ...(isJobStatusWithResults(logEntryRateJobStatus['log-entry-rate'])
-        ? [logEntryRateJobIds['log-entry-rate']]
+      ...(isJobStatusWithResults(logEntryRateJobStatus[logEntryRateJobType])
+        ? [logEntryRateJobIds[logEntryRateJobType]]
         : []),
-      ...(isJobStatusWithResults(logEntryCategoriesJobStatus['log-entry-categories-count'])
-        ? [logEntryCategoriesJobIds['log-entry-categories-count']]
+      ...(isJobStatusWithResults(logEntryCategoriesJobStatus[logEntryCategoriesJobType])
+        ? [logEntryCategoriesJobIds[logEntryCategoriesJobType]]
         : []),
     ];
   }, [
@@ -147,6 +152,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     isLoadingDatasets,
   } = useLogEntryAnomaliesResults({
     logViewReference,
+    idFormats,
     startTime: timeRange.value.startTime,
     endTime: timeRange.value.endTime,
     defaultSortOptions: SORT_DEFAULTS,
@@ -200,6 +206,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
 
   return (
     <LogsPageTemplate
+      data-test-subj="logEntryRateResultsPage"
       hasData={logViewStatus?.index !== 'missing'}
       pageHeader={{
         pageTitle,

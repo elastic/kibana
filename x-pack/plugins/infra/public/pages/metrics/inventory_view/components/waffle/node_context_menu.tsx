@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import React, { useMemo, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import {
   Section,
@@ -20,15 +19,15 @@ import {
   SectionLinks,
   SectionLink,
   ActionMenuDivider,
-} from '@kbn/observability-plugin/public';
-import { useLinkProps } from '@kbn/observability-plugin/public';
+  useLinkProps,
+} from '@kbn/observability-shared-plugin/public';
+import { findInventoryModel, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
-import { getNodeDetailUrl, getNodeLogsUrl } from '../../../../link_to';
-import { findInventoryModel, findInventoryFields } from '../../../../../../common/inventory_models';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { useNodeDetailsRedirect } from '../../../../link_to';
 import { navigateToUptime } from '../../lib/navigate_to_uptime';
-import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../types';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -39,11 +38,12 @@ interface Props {
 
 export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme(
   ({ options, currentTime, node, nodeType }) => {
+    const { getNodeDetailUrl } = useNodeDetailsRedirect();
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const inventoryModel = findInventoryModel(nodeType);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
-    const { application, share } = useKibana<InfraClientCoreStart & InfraClientStartDeps>()
-      .services;
+    const { services } = useKibanaContextForPlugin();
+    const { application, share, locators } = services;
     const uiCapabilities = application?.capabilities;
     // Due to the changing nature of the fields between APM and this UI,
     // We need to have some exceptions until 7.0 & ECS is finalized. Reference
@@ -64,7 +64,16 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     const inventoryId = useMemo(() => {
       if (nodeType === 'host') {
         if (node.ip) {
-          return { label: <EuiCode>host.ip</EuiCode>, value: node.ip };
+          return {
+            label: (
+              <EuiCode>
+                {i18n.translate('xpack.infra.inventoryId.host.ipCodeLabel', {
+                  defaultMessage: 'host.ip',
+                })}
+              </EuiCode>
+            ),
+            value: node.ip,
+          };
         }
       } else {
         const { id } = findInventoryFields(nodeType);
@@ -76,19 +85,15 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       return { label: '', value: '' };
     }, [nodeType, node.ip, node.id]);
 
-    const nodeLogsMenuItemLinkProps = useLinkProps(
-      getNodeLogsUrl({
-        nodeType,
-        nodeId: node.id,
-        time: currentTime,
-      })
-    );
     const nodeDetailMenuItemLinkProps = useLinkProps({
       ...getNodeDetailUrl({
-        nodeType,
-        nodeId: node.id,
-        from: nodeDetailFrom,
-        to: currentTime,
+        assetType: nodeType,
+        assetId: node.id,
+        search: {
+          from: nodeDetailFrom,
+          to: currentTime,
+          name: node.name,
+        },
       }),
     });
     const apmTracesMenuItemLinkProps = useLinkProps({
@@ -104,7 +109,11 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         defaultMessage: '{inventoryName} logs',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      ...nodeLogsMenuItemLinkProps,
+      href: locators.nodeLogsLocator.getRedirectUrl({
+        nodeType,
+        nodeId: node.id,
+        time: currentTime,
+      }),
       'data-test-subj': 'viewLogsContextMenuItem',
       isDisabled: !showLogsLink,
     };
@@ -171,7 +180,10 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
             )}
             <SectionLinks>
               <SectionLink data-test-subj="viewLogsContextMenuItem" {...nodeLogsMenuItem} />
-              <SectionLink {...nodeDetailMenuItem} />
+              <SectionLink
+                data-test-subj="viewAssetDetailsContextMenuItem"
+                {...nodeDetailMenuItem}
+              />
               <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
               <SectionLink {...uptimeMenuItem} color={'primary'} />
             </SectionLinks>

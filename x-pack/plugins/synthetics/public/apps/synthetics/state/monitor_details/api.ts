@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/types';
 import moment from 'moment';
 import { apiService } from '../../../../utils/api_service';
 import {
   EncryptedSyntheticsSavedMonitor,
+  EncryptedSyntheticsMonitorCodec,
   PingsResponse,
   PingsResponseType,
-  SyntheticsMonitor,
 } from '../../../../../common/runtime_types';
-import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export const fetchMonitorLastRun = async ({
   monitorId,
@@ -26,6 +25,16 @@ export const fetchMonitorLastRun = async ({
   return fetchMonitorRecentPings({ monitorId, locationId, size: 1 });
 };
 
+export interface MostRecentPingsRequest {
+  monitorId: string;
+  locationId: string;
+  from?: string;
+  to?: string;
+  size?: number;
+  pageIndex?: number;
+  statusFilter?: 'up' | 'down';
+}
+
 export const fetchMonitorRecentPings = async ({
   monitorId,
   locationId,
@@ -33,14 +42,8 @@ export const fetchMonitorRecentPings = async ({
   to,
   size = 10,
   pageIndex = 0,
-}: {
-  monitorId: string;
-  locationId: string;
-  from?: string;
-  to?: string;
-  size?: number;
-  pageIndex?: number;
-}): Promise<PingsResponse> => {
+  statusFilter,
+}: MostRecentPingsRequest): Promise<PingsResponse> => {
   const locations = JSON.stringify([locationId]);
   const sort = 'desc';
 
@@ -54,6 +57,7 @@ export const fetchMonitorRecentPings = async ({
       sort,
       size,
       pageIndex,
+      status: statusFilter,
     },
     PingsResponseType
   );
@@ -63,14 +67,9 @@ export const fetchSyntheticsMonitor = async ({
   monitorId,
 }: {
   monitorId: string;
-}): Promise<EncryptedSyntheticsSavedMonitor> => {
-  const savedObject = (await apiService.get(
-    `${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`
-  )) as SavedObject<SyntheticsMonitor>;
-
-  return {
-    ...savedObject.attributes,
-    updated_at: savedObject.updated_at,
-    created_at: savedObject.created_at,
-  } as EncryptedSyntheticsSavedMonitor;
-};
+}): Promise<EncryptedSyntheticsSavedMonitor> =>
+  apiService.get<EncryptedSyntheticsSavedMonitor>(
+    SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
+    undefined,
+    EncryptedSyntheticsMonitorCodec
+  );

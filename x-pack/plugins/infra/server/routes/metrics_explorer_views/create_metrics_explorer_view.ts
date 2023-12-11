@@ -9,10 +9,18 @@ import { isBoom } from '@hapi/boom';
 import { createValidationFunction } from '../../../common/runtime_types';
 import {
   createMetricsExplorerViewRequestPayloadRT,
+  metricsExplorerViewRequestQueryRT,
   metricsExplorerViewResponsePayloadRT,
   METRICS_EXPLORER_VIEW_URL,
 } from '../../../common/http_api/latest';
 import type { InfraBackendLibs } from '../../lib/infra_types';
+
+const NON_STARTED_SERVICE_ERROR = {
+  statusCode: 500,
+  body: {
+    message: `Handler for "POST ${METRICS_EXPLORER_VIEW_URL}" was registered but MetricsViewService has not started.`,
+  },
+};
 
 export const initCreateMetricsExplorerViewRoute = ({
   framework,
@@ -24,15 +32,25 @@ export const initCreateMetricsExplorerViewRoute = ({
       path: METRICS_EXPLORER_VIEW_URL,
       validate: {
         body: createValidationFunction(createMetricsExplorerViewRequestPayloadRT),
+        query: createValidationFunction(metricsExplorerViewRequestQueryRT),
       },
     },
     async (_requestContext, request, response) => {
-      const { body } = request;
+      const { body, query } = request;
       const [, , { metricsExplorerViews }] = await getStartServices();
+
+      if (metricsExplorerViews === undefined) {
+        return response.customError(NON_STARTED_SERVICE_ERROR);
+      }
+
       const metricsExplorerViewsClient = metricsExplorerViews.getScopedClient(request);
 
       try {
-        const metricsExplorerView = await metricsExplorerViewsClient.create(body.attributes);
+        const metricsExplorerView = await metricsExplorerViewsClient.update(
+          null,
+          body.attributes,
+          query
+        );
 
         return response.custom({
           statusCode: 201,

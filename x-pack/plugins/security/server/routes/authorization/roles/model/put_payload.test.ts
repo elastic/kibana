@@ -7,9 +7,9 @@
 
 import { KibanaFeature } from '@kbn/features-plugin/common';
 
+import { getPutPayloadSchema } from './put_payload';
 import { ALL_SPACES_ID } from '../../../../../common/constants';
 import { validateKibanaPrivileges } from '../../../../lib';
-import { getPutPayloadSchema } from './put_payload';
 
 const basePrivilegeNamesMap = {
   global: ['all', 'read'],
@@ -386,6 +386,49 @@ describe('Put payload schema', () => {
         "metadata": Object {
           "foo": "test-metadata",
         },
+      }
+    `);
+  });
+
+  test('passes through remote_indices when specified', () => {
+    expect(
+      getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
+        elasticsearch: {
+          remote_indices: [
+            {
+              clusters: ['remote_cluster'],
+              names: ['remote_index'],
+              privileges: ['all'],
+            },
+          ],
+        },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "elasticsearch": Object {
+          "remote_indices": Array [
+            Object {
+              "clusters": Array [
+                "remote_cluster",
+              ],
+              "names": Array [
+                "remote_index",
+              ],
+              "privileges": Array [
+                "all",
+              ],
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  // This is important for backwards compatibility
+  test('does not set default value for remote_indices when not specified', () => {
+    expect(getPutPayloadSchema(() => basePrivilegeNamesMap).validate({})).toMatchInlineSnapshot(`
+      Object {
+        "elasticsearch": Object {},
       }
     `);
   });

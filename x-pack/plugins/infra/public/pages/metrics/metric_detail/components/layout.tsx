@@ -6,14 +6,13 @@
  */
 
 import React from 'react';
-import { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { LayoutProps } from '../types';
 import { AwsEC2Layout } from './layouts/aws_ec2_layout';
 import { AwsRDSLayout } from './layouts/aws_rds_layout';
 import { AwsS3Layout } from './layouts/aws_s3_layout';
 import { AwsSQSLayout } from './layouts/aws_sqs_layout';
 import { ContainerLayout } from './layouts/container_layout';
-import { HostLayout } from './layouts/host_layout';
 import { PodLayout } from './layouts/pod_layout';
 
 export const Layout = ({
@@ -31,9 +30,9 @@ export const Layout = ({
       return <AwsSQSLayout {...layoutProps} />;
     case 'container':
       return <ContainerLayout {...layoutProps} />;
-    case 'host':
-      return <HostLayout {...layoutProps} />;
     case 'pod':
       return <PodLayout {...layoutProps} />;
+    default:
+      throw new Error(`${inventoryItemType} is not supported.`);
   }
 };

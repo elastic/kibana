@@ -47,4 +47,21 @@ describe('toggleColumn', () => {
       ]
     `);
   });
+
+  it('adds a column even if no column is currently shown', async () => {
+    expect(
+      toggleColumn({
+        column: { id: '_id', schema: 'string' },
+        columns: [],
+        defaultColumns: [],
+      })
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "_id",
+          "schema": "string",
+        },
+      ]
+    `);
+  });
 });

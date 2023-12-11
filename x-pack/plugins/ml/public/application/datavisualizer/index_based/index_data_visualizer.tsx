@@ -22,29 +22,23 @@ import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
-
-interface RecognizerModule {
-  id: string;
-  title: string;
-  query: Record<string, object>;
-  description: string;
-  logo: {
-    icon: string;
-  };
-}
+import { useEnabledFeatures } from '../../contexts/ml';
 
 export const IndexDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
     services: {
-      http,
       docLinks,
       dataVisualizer,
       data: {
         dataViews: { get: getDataView },
       },
+      mlServices: {
+        mlApiServices: { recognizeIndex },
+      },
     },
   } = useMlKibana();
+  const { showNodeInfo } = useEnabledFeatures();
   const mlLocator = useMlLocator()!;
   const mlFeaturesDisabled = !isFullLicense();
   getMlNodeCount();
@@ -140,18 +134,14 @@ export const IndexDataVisualizerPage: FC = () => {
   const getAsyncRecognizedModuleCards = async (params: GetAdditionalLinksParams) => {
     const { dataViewId, dataViewTitle } = params;
     try {
-      const modules = await http.fetch<RecognizerModule[]>(
-        `/api/ml/modules/recognize/${dataViewTitle}`,
-        {
-          method: 'GET',
-        }
-      );
+      const modules = await recognizeIndex({ indexPatternTitle: dataViewTitle! });
+
       return modules?.map(
         (m): ResultLink => ({
           id: m.id,
           title: m.title,
           description: m.description,
-          icon: m.logo.icon,
+          icon: m.logo?.icon ?? '',
           type: 'index',
           getUrl: async () => {
             return await mlLocator.getUrl({
@@ -200,7 +190,10 @@ export const IndexDataVisualizerPage: FC = () => {
               defaultMessage="Data Visualizer"
             />
           </MlPageHeader>
-          <IndexDataVisualizer getAdditionalLinks={getAdditionalLinks} />
+          <IndexDataVisualizer
+            getAdditionalLinks={getAdditionalLinks}
+            showFrozenDataTierChoice={showNodeInfo}
+          />
         </>
       ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />

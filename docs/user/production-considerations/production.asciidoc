@@ -118,3 +118,12 @@ The option accepts a limit in MB:
 --------
 --max-old-space-size=2048
 --------
+
+[float]
+[[openssl-legacy-provider]]
+=== OpenSSL Legacy Provider
+
+Starting in 8.10.0, {kib} has upgraded its runtime environment, Node.js, from version 16 to version 18 and with it the underlying version of OpenSSL to version 3.
+Algorithms deemed legacy by OpenSSL 3 have been re-enabled to avoid potential breaking changes in a minor version release of {kib}.
+If SSL certificates configured for {kib} are not using any of the legacy algorithms mentioned in the https://www.openssl.org/docs/man3.0/man7/OSSL_PROVIDER-legacy.html[OpenSSL legacy provider documentation],
+we recommend disabling this setting by removing `--openssl-legacy-provider` in the `node.options` config file.

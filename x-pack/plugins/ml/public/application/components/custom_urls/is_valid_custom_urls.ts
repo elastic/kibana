@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { type MlUrlConfig, isMlKibanaUrlConfigWithTimeRange } from '@kbn/ml-anomaly-utils';
 import { isValidLabel, isValidTimeRange } from '../../util/custom_url_utils';
-import { UrlConfig, isKibanaUrlConfigWithTimeRange } from '../../../../common/types/custom_urls';
 
-export function isValidCustomUrls(customUrls: UrlConfig[]) {
+export function isValidCustomUrls(customUrls: MlUrlConfig[]) {
   if (customUrls === undefined || customUrls.length === 0) {
     return true;
   }
@@ -20,7 +20,7 @@ export function isValidCustomUrls(customUrls: UrlConfig[]) {
     const otherUrls = [...customUrls];
     otherUrls.splice(index, 1); // Don't compare label with itself.
     let itemValid = isValidLabel(label, otherUrls);
-    if (itemValid === true && isKibanaUrlConfigWithTimeRange(customUrl)) {
+    if (itemValid === true && isMlKibanaUrlConfigWithTimeRange(customUrl)) {
       // Validate the time range.
       const timeRange = customUrl.time_range;
       itemValid = isValidTimeRange(timeRange);

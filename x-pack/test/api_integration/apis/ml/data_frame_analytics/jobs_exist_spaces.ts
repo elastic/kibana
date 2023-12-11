@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -31,12 +31,12 @@ export default ({ getService }: FtrProviderContext) => {
     allSpaces?: boolean
   ) {
     const { body, status } = await supertest
-      .post(`/s/${space}/api/ml/data_frame/analytics/jobs_exist`)
+      .post(`/s/${space}/internal/ml/data_frame/analytics/jobs_exist`)
       .auth(
         USER.ML_VIEWER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send(allSpaces ? { analyticsIds, allSpaces } : { analyticsIds });
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 

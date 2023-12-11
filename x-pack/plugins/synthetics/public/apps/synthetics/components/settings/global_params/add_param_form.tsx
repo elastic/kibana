@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext, useFormState } from 'react-hook-form';
-import { SyntheticsParamSO } from '../../../../../../common/runtime_types';
+import { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { ListParamItem } from './params_list';
 
 export const AddParamForm = ({
@@ -26,8 +26,8 @@ export const AddParamForm = ({
   items: ListParamItem[];
   isEditingItem: ListParamItem | null;
 }) => {
-  const { register, control } = useFormContext<SyntheticsParamSO>();
-  const { errors } = useFormState<SyntheticsParamSO>();
+  const { register, control } = useFormContext<SyntheticsParams>();
+  const { errors } = useFormState<SyntheticsParams>();
 
   const tagsList = items.reduce((acc, item) => {
     const tags = item.tags || [];

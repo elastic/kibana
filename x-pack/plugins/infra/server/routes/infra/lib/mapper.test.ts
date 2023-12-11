@@ -16,13 +16,16 @@ const metricsApiRequest: GetInfraMetricsRequestBodyPayload = {
       type: 'cpu',
     },
     {
-      type: 'diskLatency',
+      type: 'diskSpaceUsage',
     },
     {
       type: 'memory',
     },
     {
-      type: 'memoryTotal',
+      type: 'memoryFree',
+    },
+    {
+      type: 'normalizedLoad1m',
     },
     {
       type: 'rx',
@@ -45,14 +48,17 @@ describe('mapper', () => {
       {
         key: 'host-0',
         doc_count: 155,
-        diskLatency: {
-          doc_count: 0,
-          result: {
-            value: null,
-          },
+        diskSpaceUsage: {
+          value: 0.2040001,
         },
         memory: {
           value: 0.542838307852529,
+        },
+        memoryFree: {
+          value: 34359.738368,
+        },
+        normalizedLoad1m: {
+          value: 239.2040001,
         },
         tx: {
           doc_count: 155,
@@ -65,9 +71,6 @@ describe('mapper', () => {
           result: {
             value: 3959.4930095127706,
           },
-        },
-        memoryTotal: {
-          value: 66640704.099216014,
         },
         cpu: {
           doc_count: 155,
@@ -99,9 +102,10 @@ describe('mapper', () => {
           ],
           metrics: [
             { name: 'cpu', value: 0.13271302652800487 },
-            { name: 'diskLatency', value: 0 },
+            { name: 'diskSpaceUsage', value: 0.2040001 },
             { name: 'memory', value: 0.542838307852529 },
-            { name: 'memoryTotal', value: 66640704.099216014 },
+            { name: 'memoryFree', value: 34359.738368 },
+            { name: 'normalizedLoad1m', value: 239.2040001 },
             { name: 'rx', value: 3959.4930095127706 },
             { name: 'tx', value: 100.26926542816672 },
           ],

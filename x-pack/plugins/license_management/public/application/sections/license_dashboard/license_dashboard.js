@@ -6,11 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import {
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiPageSection, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { StartTrial } from './start_trial';
 import { LicensePageHeader } from './license_page_header';
@@ -27,7 +23,7 @@ export const LicenseDashboard = ({ setBreadcrumb, telemetry } = { setBreadcrumb:
     <>
       <LicensePageHeader />
 
-      <EuiPageContentBody>
+      <EuiPageSection>
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem>
             <AddLicense />
@@ -36,7 +32,7 @@ export const LicenseDashboard = ({ setBreadcrumb, telemetry } = { setBreadcrumb:
           <RequestTrialExtension />
           <RevertToBasic />
         </EuiFlexGroup>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </>
   );
 };

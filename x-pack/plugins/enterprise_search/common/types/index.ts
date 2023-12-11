@@ -39,6 +39,8 @@ export interface ProductAccess {
 export interface ProductFeatures {
   hasConnectors: boolean;
   hasDefaultIngestPipeline: boolean;
+  hasDocumentLevelSecurityEnabled: boolean;
+  hasIncrementalSyncEnabled: boolean;
   hasNativeConnectors: boolean;
   hasWebCrawler: boolean;
 }
@@ -62,6 +64,9 @@ export interface Meta {
 export interface ClientConfigType {
   canDeployEntSearch: boolean;
   host?: string;
+  ui: {
+    enabled: boolean;
+  };
 }
 
 export type { ElasticsearchIndexWithPrivileges } from './indices';

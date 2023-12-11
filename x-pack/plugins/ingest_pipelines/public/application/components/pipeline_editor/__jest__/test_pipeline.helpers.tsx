@@ -14,7 +14,6 @@ import { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { stubWebWorker } from '@kbn/test-jest-helpers';
 
-import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { uiMetricService, apiService } from '../../../services';
 import { Props } from '..';
 import { initHttpRequests } from './http_requests.helpers';
@@ -40,16 +39,9 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-jest.mock('react-virtualized', () => {
-  const original = jest.requireActual('react-virtualized');
-
-  return {
-    ...original,
-    AutoSizer: ({ children }: { children: any }) => (
-      <div>{children({ height: 500, width: 500 })}</div>
-    ),
-  };
-});
+jest.mock('react-virtualized/dist/commonjs/AutoSizer', () => ({ children }: { children: any }) => (
+  <div>{children({ height: 500, width: 500 })}</div>
+));
 
 const testBedSetup = registerTestBed<TestSubject>(
   (props: Props) => <ProcessorsEditorWithDeps {...props} />,

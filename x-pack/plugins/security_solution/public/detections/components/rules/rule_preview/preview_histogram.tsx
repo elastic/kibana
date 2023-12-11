@@ -69,7 +69,7 @@ interface PreviewHistogramProps {
 
 const DEFAULT_HISTOGRAM_HEIGHT = 300;
 
-export const PreviewHistogram = ({
+const PreviewHistogramComponent = ({
   previewId,
   addNoiseWarning,
   spaceId,
@@ -206,7 +206,7 @@ export const PreviewHistogram = ({
                 applyGlobalQueriesAndFilters={false}
                 extraOptions={extraVisualizationOptions}
                 getLensAttributes={getRulePreviewLensAttributes}
-                height={`${CHART_HEIGHT}px`}
+                height={CHART_HEIGHT}
                 id={`${previewQueryId}-embeddable`}
                 inspectTitle={i18n.QUERY_GRAPH_HITS_TITLE}
                 scopeId={SourcererScopeName.detections}
@@ -262,3 +262,6 @@ export const PreviewHistogram = ({
     </>
   );
 };
+
+export const PreviewHistogram = React.memo(PreviewHistogramComponent);
+PreviewHistogram.displayName = 'PreviewHistogram';

@@ -20,7 +20,8 @@ import { isEmpty } from 'lodash';
 import type { PropsWithChildren } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
+import { RuleAboutSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_about_section';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import type {
@@ -28,8 +29,8 @@ import type {
   AboutStepRuleDetails,
 } from '../../../pages/detection_engine/rules/types';
 import * as i18n from './translations';
-import { StepAboutRule } from '../step_about_rule';
 import { fullHeight } from './styles';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
 const detailsOption: EuiButtonGroupOptionProps = {
   id: 'details',
@@ -51,12 +52,14 @@ interface StepPanelProps {
   stepData: AboutStepRule | null;
   stepDataDetails: AboutStepRuleDetails | null;
   loading: boolean;
+  rule: RuleResponse;
 }
 
 const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
   stepData,
   stepDataDetails,
   loading,
+  rule,
 }) => {
   const [selectedToggleOption, setToggleOption] = useState('details');
   const [aboutPanelHeight, setAboutPanelHeight] = useState(0);
@@ -81,8 +84,8 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
   return (
     <EuiPanel
       hasBorder
-      css={css`
-        position: 'relative';
+      className={css`
+        position: relative;
       `}
     >
       {loading && (
@@ -92,7 +95,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
         </>
       )}
       {stepData != null && stepDataDetails != null && (
-        <EuiFlexGroup gutterSize="xs" direction="column" css={fullHeight}>
+        <EuiFlexGroup gutterSize="xs" direction="column" className={fullHeight}>
           <EuiFlexItem grow={false} key="header">
             <HeaderSection title={i18n.ABOUT_TEXT}>
               {toggleOptions.length > 0 && (
@@ -112,7 +115,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
             {selectedToggleOption === 'details' && (
               <EuiResizeObserver data-test-subj="stepAboutDetailsContent" onResize={onResize}>
                 {(resizeRef) => (
-                  <div ref={resizeRef} css={fullHeight}>
+                  <div ref={resizeRef} className={fullHeight}>
                     <VerticalOverflowContainer maxHeight={120}>
                       <VerticalOverflowContent maxHeight={120}>
                         <EuiText
@@ -124,12 +127,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                       </VerticalOverflowContent>
                     </VerticalOverflowContainer>
                     <EuiSpacer size="m" />
-                    <StepAboutRule
-                      descriptionColumns="singleSplit"
-                      isReadOnlyView={true}
-                      isLoading={false}
-                      defaultValues={stepData}
-                    />
+                    <RuleAboutSection rule={rule} hideName hideDescription />
                   </div>
                 )}
               </EuiResizeObserver>
@@ -175,10 +173,10 @@ function VerticalOverflowContainer({
 }: PropsWithChildren<VerticalOverflowContainerProps>): JSX.Element {
   return (
     <div
-      css={css`
-        max-height: ${maxHeight};
-        overflow-y: 'hidden';
-        word-break: 'break-word';
+      className={css`
+        max-height: ${maxHeight}px;
+        overflow-y: hidden;
+        word-break: break-word;
       `}
       data-test-subj={dataTestSubject}
     >
@@ -193,15 +191,13 @@ interface VerticalOverflowContentProps {
 
 function VerticalOverflowContent({
   maxHeight,
-
   children,
 }: PropsWithChildren<VerticalOverflowContentProps>): JSX.Element {
   return (
     <div
-      className="eui-yScroll"
-      css={css`
-        max-height: ${maxHeight};
-      `}
+      className={`eui-yScroll ${css`
+        max-height: ${maxHeight}px;
+      `}`}
     >
       {children}
     </div>

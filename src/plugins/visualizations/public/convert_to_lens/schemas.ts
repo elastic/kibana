@@ -10,7 +10,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { IAggConfig, METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
 import { AggBasedColumn, PercentageModeConfig, SchemaConfig } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
-import { getCustomBucketsFromSiblingAggs } from '../../common/convert_to_lens/lib/utils';
+import {
+  getAggIdAndValue,
+  getCustomBucketsFromSiblingAggs,
+} from '../../common/convert_to_lens/lib/utils';
 import { BucketColumn } from '../../common/convert_to_lens/lib';
 import type { Vis } from '../types';
 import { getVisSchemas, Schemas } from '../vis_schemas';
@@ -178,11 +181,12 @@ export const getColumnsFromVis = <T>(
 
   if (series && series.length) {
     for (const { metrics: metricAggIds } of series) {
+      const metricAggIdsLookup = new Set(metricAggIds);
       const metrics = aggs.filter(
-        (agg) => agg.aggId && metricAggIds.includes(agg.aggId.split('.')[0])
+        (agg) => agg.aggId && metricAggIdsLookup.has(getAggIdAndValue(agg.aggId)[0])
       );
       const customBucketsForLayer = customBucketsWithMetricIds.filter((c) =>
-        c.metricIds.some((m) => metricAggIds.includes(m))
+        c.metricIds.some((m) => metricAggIdsLookup.has(m))
       );
       const layer = createLayer(
         vis.type.name,

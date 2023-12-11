@@ -2,7 +2,7 @@
 [[data-rollups]]
 == Rollup Jobs
 
-experimental::[]
+deprecated::[8.11.0,'Rollups are deprecated and will be removed in a future version. Use {ref}/downsampling.html[downsampling] instead.']
 
 A rollup job is a periodic task that aggregates data from indices specified by
 an index pattern, and then rolls it into a new index. Rollup indices are a good

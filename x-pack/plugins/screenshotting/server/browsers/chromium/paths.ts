@@ -16,9 +16,8 @@ export interface PackageInfo {
   binaryRelativePath: string;
   isPreInstalled: boolean;
   location: 'custom' | 'common';
+  revision: number;
 }
-
-const REVISION = 1095492;
 
 enum BaseUrl {
   // see https://www.chromium.org/getting-involved/download-chromium
@@ -45,9 +44,10 @@ export class ChromiumArchivePaths {
       platform: 'darwin',
       architecture: 'x64',
       archiveFilename: 'chrome-mac.zip',
-      archiveChecksum: '318ac652b5ba64fb3b37a25e312ffd6e',
-      binaryChecksum: '107a554a0f7828a1844173cb3830716c',
+      archiveChecksum: '35261c7a88f1797d27646c340eeaf7d7d70727f0c4ae884e8400240ed66d7192',
+      binaryChecksum: 'ca90fe7573ddb0723d633fe526acf0fdefdda570a549f35e15c111d10f3ffc0d',
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
+      revision: 1204244, // 1204232 is not available for Mac Intel
       location: 'common',
       archivePath: 'Mac',
       isPreInstalled: false,
@@ -56,9 +56,10 @@ export class ChromiumArchivePaths {
       platform: 'darwin',
       architecture: 'arm64',
       archiveFilename: 'chrome-mac.zip',
-      archiveChecksum: 'e8f09d0c992d181b986d38a13dfb88c3',
-      binaryChecksum: '0a12a34a0d8bc9c616d3cc339abb167e',
+      archiveChecksum: '1ed375086a9505ee6bc9bc1373bebd79e87e5b27af5a93258ea25ffb6f71f03c',
+      binaryChecksum: 'a8556ed7ac2a669fa81f752f7d18a9d1e9b99b05d3504f6bbc08e3e0b02ff71e',
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
+      revision: 1204255, // 1204232 is not available for Mac_Arm
       location: 'common',
       archivePath: 'Mac_Arm',
       isPreInstalled: false,
@@ -66,20 +67,22 @@ export class ChromiumArchivePaths {
     {
       platform: 'linux',
       architecture: 'x64',
-      archiveFilename: 'chromium-7abd50c-locales-linux_x64.zip',
-      archiveChecksum: 'dc141a6cae734c29a1144d3d9f8ca7ee',
-      binaryChecksum: '9b9611ba0c65fc34d1be1e40ae80c036',
+      archiveFilename: 'chromium-38c7255-locales-linux_x64.zip',
+      archiveChecksum: 'bf07734366ece771a85b2452fd63e5981b1abc234ef0ed1c7d0774b8a7b5c6a9',
+      binaryChecksum: '87a991c412ad333549a58524b6be23f2a1ff56af61bb1a1b10c1f4a0206edc2a',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
+      revision: 1204232,
       location: 'custom',
       isPreInstalled: true,
     },
     {
       platform: 'linux',
       architecture: 'arm64',
-      archiveFilename: 'chromium-7abd50c-locales-linux_arm64.zip',
-      archiveChecksum: '1ce431a6cd7b3d7e5aa63fc8f7327b0f',
-      binaryChecksum: 'ef21a88efa18f000e6da6d9c51ee2fd7',
+      archiveFilename: 'chromium-38c7255-locales-linux_arm64.zip',
+      archiveChecksum: '11c1cd2398ae3b57a72e7746e1f1cbbd2c2d18d1b83dec949dc81a3c690688f0',
+      binaryChecksum: '4d914034d466b97c438283dbc914230e087217c25028f403dfa3c933ea755e94',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
+      revision: 1204232,
       location: 'custom',
       isPreInstalled: true,
     },
@@ -87,9 +90,10 @@ export class ChromiumArchivePaths {
       platform: 'win32',
       architecture: 'x64',
       archiveFilename: 'chrome-win.zip',
-      archiveChecksum: '83e7e89ae749668d3eaa8b3bd6120e8a',
-      binaryChecksum: 'cbfe0d2db3117f13554999bdc7aab68d',
+      archiveChecksum: 'd6f5a21973867115435814c2c46d49edd9a0a2ad6da14b4724746374cad80e47',
+      binaryChecksum: '9c0d2404004bd7c4ada649049422de6958460ecf6cec53460a478c6d8c33e444',
       binaryRelativePath: path.join('chrome-win', 'chrome.exe'),
+      revision: 1204234, // 1204232 is not available for win
       location: 'common',
       archivePath: 'Win',
       isPreInstalled: true,
@@ -114,7 +118,9 @@ export class ChromiumArchivePaths {
 
   public getDownloadUrl(p: PackageInfo) {
     if (isCommonPackage(p)) {
-      return `${BaseUrl.common}/${p.archivePath}/${REVISION}/${p.archiveFilename}`;
+      const { common } = BaseUrl;
+      const { archivePath, revision, archiveFilename } = p;
+      return `${common}/${archivePath}/${revision}/${archiveFilename}`;
     }
     return BaseUrl.custom + '/' + p.archiveFilename; // revision is not used for URL if package is a custom build
   }

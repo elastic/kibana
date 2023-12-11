@@ -15,13 +15,13 @@ import useAsync from 'react-use/lib/useAsync';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { StatusResult } from '../common';
 import { ClusterAddressForm } from './cluster_address_form';
 import type { ClusterConfigurationFormProps } from './cluster_configuration_form';
 import { ClusterConfigurationForm } from './cluster_configuration_form';
 import { EnrollmentTokenForm } from './enrollment_token_form';
 import { ProgressIndicator } from './progress_indicator';
 import { useKibana } from './use_kibana';
+import type { StatusResult } from '../common';
 
 export interface AppProps {
   onSuccess?(): void;

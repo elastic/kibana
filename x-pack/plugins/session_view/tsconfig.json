@@ -34,6 +34,10 @@
     "@kbn/config-schema",
     "@kbn/alerting-plugin",
     "@kbn/rule-data-utils",
+    "@kbn/securitysolution-es-utils",
+    "@kbn/shared-ux-router",
+    "@kbn/usage-collection-plugin",
+    "@kbn/analytics",
   ],
   "exclude": [
     "target/**/*",

@@ -14,14 +14,17 @@ import type {
 } from '../types';
 import { PLUGIN_ID } from '../../common';
 import { defineGetComplianceDashboardRoute } from './compliance_dashboard/compliance_dashboard';
+import { defineGetVulnerabilitiesDashboardRoute } from './vulnerabilities_dashboard/vulnerabilities_dashboard';
 import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
 import { defineGetCspStatusRoute } from './status/status';
+import { defineFindCspBenchmarkRuleRoute } from './benchmark_rules/find/find';
+import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_detection_engine_alerts_count_by_rule_tags';
 
 /**
  * 1. Registers routes
  * 2. Registers routes handler context
  */
-export function setupRoutes({
+export async function setupRoutes({
   core,
   logger,
   isPluginInitialized,
@@ -32,8 +35,11 @@ export function setupRoutes({
 }) {
   const router = core.http.createRouter<CspRequestHandlerContext>();
   defineGetComplianceDashboardRoute(router);
+  defineGetVulnerabilitiesDashboardRoute(router);
   defineGetBenchmarksRoute(router);
   defineGetCspStatusRoute(router);
+  defineFindCspBenchmarkRuleRoute(router);
+  defineGetDetectionEngineAlertsStatus(router);
 
   core.http.registerRouteHandlerContext<CspRequestHandlerContext, typeof PLUGIN_ID>(
     PLUGIN_ID,

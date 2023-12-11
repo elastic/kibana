@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { NotificationsStart, CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { DataPublicPluginStart } from './types';
-
-export const [getNotifications, setNotifications] =
-  createGetterSetter<NotificationsStart>('Notifications');
 
 export const [getUiSettings, setUiSettings] =
   createGetterSetter<CoreStart['uiSettings']>('UiSettings');

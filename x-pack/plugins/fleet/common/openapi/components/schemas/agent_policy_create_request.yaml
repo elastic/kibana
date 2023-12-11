@@ -29,9 +29,9 @@ properties:
     type: string
     nullable: true
   unenroll_timeout:
-    type: number
+    type: integer
   inactivity_timeout:
-    type: number
+    type: integer
   agent_features:
     type: array
     items:
@@ -44,6 +44,8 @@ properties:
       required:
         - name
         - enabled
+  is_protected:
+    type: boolean
 required:
   - name
   - namespace

@@ -15,7 +15,8 @@ import { EuiHealth } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
-import { RiskScore } from '.';
+import { RiskScoreLevel } from '.';
+import { SEVERITY_COLOR } from '../../../../../overview/components/detection_response/utils';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -30,14 +31,14 @@ describe('RiskScore', () => {
   it('renders critical severity risk score', () => {
     const { container } = render(
       <TestProviders>
-        <RiskScore severity={RiskSeverity.critical} />
+        <RiskScoreLevel severity={RiskSeverity.critical} />
       </TestProviders>
     );
 
     expect(container).toHaveTextContent(RiskSeverity.critical);
 
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ color: euiThemeVars.euiColorDanger }),
+      expect.objectContaining({ color: SEVERITY_COLOR.critical }),
       context
     );
   });
@@ -45,14 +46,14 @@ describe('RiskScore', () => {
   it('renders hight severity risk score', () => {
     const { container } = render(
       <TestProviders>
-        <RiskScore severity={RiskSeverity.high} />
+        <RiskScoreLevel severity={RiskSeverity.high} />
       </TestProviders>
     );
 
     expect(container).toHaveTextContent(RiskSeverity.high);
 
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ color: euiThemeVars.euiColorVis9_behindText }),
+      expect.objectContaining({ color: SEVERITY_COLOR.high }),
       context
     );
   });
@@ -60,14 +61,14 @@ describe('RiskScore', () => {
   it('renders moderate severity risk score', () => {
     const { container } = render(
       <TestProviders>
-        <RiskScore severity={RiskSeverity.moderate} />
+        <RiskScoreLevel severity={RiskSeverity.moderate} />
       </TestProviders>
     );
 
     expect(container).toHaveTextContent(RiskSeverity.moderate);
 
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ color: euiThemeVars.euiColorWarning }),
+      expect.objectContaining({ color: SEVERITY_COLOR.medium }),
       context
     );
   });
@@ -75,14 +76,14 @@ describe('RiskScore', () => {
   it('renders low severity risk score', () => {
     const { container } = render(
       <TestProviders>
-        <RiskScore severity={RiskSeverity.low} />
+        <RiskScoreLevel severity={RiskSeverity.low} />
       </TestProviders>
     );
 
     expect(container).toHaveTextContent(RiskSeverity.low);
 
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ color: euiThemeVars.euiColorVis0 }),
+      expect.objectContaining({ color: SEVERITY_COLOR.low }),
       context
     );
   });
@@ -90,7 +91,7 @@ describe('RiskScore', () => {
   it('renders unknown severity risk score', () => {
     const { container } = render(
       <TestProviders>
-        <RiskScore severity={RiskSeverity.unknown} />
+        <RiskScoreLevel severity={RiskSeverity.unknown} />
       </TestProviders>
     );
 
@@ -105,7 +106,7 @@ describe('RiskScore', () => {
   it("doesn't render background-color when hideBackgroundColor is true", () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskScore severity={RiskSeverity.critical} hideBackgroundColor />
+        <RiskScoreLevel severity={RiskSeverity.critical} hideBackgroundColor />
       </TestProviders>
     );
 

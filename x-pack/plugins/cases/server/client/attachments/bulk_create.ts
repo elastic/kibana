@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { Case, CommentRequest } from '../../../common/api';
-import { BulkCreateCommentRequestRt, throwErrors } from '../../../common/api';
+import { validateMaxUserActions } from '../../../common/utils';
+import type { AttachmentRequest } from '../../../common/types/api';
+import { BulkCreateAttachmentsRequestRt } from '../../../common/types/api';
+import type { Case } from '../../../common/types/domain';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
@@ -25,50 +23,50 @@ import { Operations } from '../../authorization';
 import type { BulkCreateArgs } from './types';
 import { validateRegisteredAttachments } from './validators';
 
-/**
- * Create an attachment to a case.
- *
- * @ignore
- */
 export const bulkCreate = async (
   args: BulkCreateArgs,
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
   const { attachments, caseId } = args;
 
-  pipe(
-    BulkCreateCommentRequestRt.decode(attachments),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
-
   const {
     logger,
     authorization,
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    services: { userActionService },
   } = clientArgs;
 
-  attachments.forEach((attachment) => {
-    decodeCommentRequest(attachment, externalReferenceAttachmentTypeRegistry);
-    validateRegisteredAttachments({
-      query: attachment,
-      persistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry,
-    });
-  });
-
   try {
-    const [attachmentsWithIds, entities]: [Array<{ id: string } & CommentRequest>, OwnerEntity[]] =
-      attachments.reduce<[Array<{ id: string } & CommentRequest>, OwnerEntity[]]>(
-        ([a, e], attachment) => {
-          const savedObjectID = SavedObjectsUtils.generateId();
-          return [
-            [...a, { id: savedObjectID, ...attachment }],
-            [...e, { owner: attachment.owner, id: savedObjectID }],
-          ];
-        },
-        [[], []]
-      );
+    decodeWithExcessOrThrow(BulkCreateAttachmentsRequestRt)(attachments);
+    await validateMaxUserActions({
+      caseId,
+      userActionService,
+      userActionsToAdd: attachments.length,
+    });
+
+    attachments.forEach((attachment) => {
+      decodeCommentRequest(attachment, externalReferenceAttachmentTypeRegistry);
+      validateRegisteredAttachments({
+        query: attachment,
+        persistableStateAttachmentTypeRegistry,
+        externalReferenceAttachmentTypeRegistry,
+      });
+    });
+
+    const [attachmentsWithIds, entities]: [
+      Array<{ id: string } & AttachmentRequest>,
+      OwnerEntity[]
+    ] = attachments.reduce<[Array<{ id: string } & AttachmentRequest>, OwnerEntity[]]>(
+      ([a, e], attachment) => {
+        const savedObjectID = SavedObjectsUtils.generateId();
+        return [
+          [...a, { id: savedObjectID, ...attachment }],
+          [...e, { owner: attachment.owner, id: savedObjectID }],
+        ];
+      },
+      [[], []]
+    );
 
     await authorization.ensureAuthorized({
       operation: Operations.bulkCreateAttachments,

@@ -7,12 +7,14 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import {
   NavigationPublicPluginSetup,
   NavigationPublicPluginStart,
   NavigationPluginStartDependencies,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
+import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
 export class NavigationPublicPlugin
   implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart>
@@ -36,10 +38,31 @@ export class NavigationPublicPlugin
   ): NavigationPublicPluginStart {
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
 
+    /*
+     *
+     *  This helps clients of navigation to create
+     *  a TopNav Search Bar which does not uses global unifiedSearch/data/query service
+     *
+     *  Useful in creating multiple stateful SearchBar in the same app without affecting
+     *  global filters
+     *
+     * */
+    const createCustomTopNav = (
+      /*
+       * Custom instance of unified search if it needs to be overridden
+       *
+       * */
+      customUnifiedSearch?: UnifiedSearchPublicPluginStart,
+      customExtensions?: RegisteredTopNavMenuData[]
+    ) => {
+      return createTopNav(customUnifiedSearch ?? unifiedSearch, customExtensions ?? extensions);
+    };
+
     return {
       ui: {
         TopNavMenu: createTopNav(unifiedSearch, extensions),
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
+        createTopNavWithCustomContext: createCustomTopNav,
       },
     };
   }

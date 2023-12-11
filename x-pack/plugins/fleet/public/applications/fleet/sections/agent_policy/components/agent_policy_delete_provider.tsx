@@ -10,8 +10,17 @@ import { EuiConfirmModal, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useHistory } from 'react-router-dom';
+
 import { AGENTS_PREFIX } from '../../../constants';
-import { sendDeleteAgentPolicy, useStartServices, useConfig, sendRequest } from '../../../hooks';
+import {
+  sendDeleteAgentPolicy,
+  useStartServices,
+  useConfig,
+  sendRequest,
+  useLink,
+} from '../../../hooks';
+import { API_VERSIONS } from '../../../../../../common/constants';
 
 interface Props {
   children: (deleteAgentPolicy: DeleteAgentPolicy) => React.ReactElement;
@@ -36,6 +45,8 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const [agentsCount, setAgentsCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
+  const { getPath } = useLink();
+  const history = useHistory();
 
   const deleteAgentPolicyPrompt: DeleteAgentPolicy = (
     agentPolicyToDelete,
@@ -91,6 +102,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
       );
     }
     closeModal();
+    history.push(getPath('policies_list'));
   };
 
   const fetchAgentsCount = async (agentPolicyToCheck: string) => {
@@ -104,6 +116,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
       query: {
         kuery: `${AGENTS_PREFIX}.policy_id : ${agentPolicyToCheck}`,
       },
+      version: API_VERSIONS.public.v1,
     });
     setAgentsCount(data?.total || 0);
     setIsLoadingAgentsCount(false);

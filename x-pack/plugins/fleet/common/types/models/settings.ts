@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObjectAttributes } from '@kbn/core/public';
-
 export interface BaseSettings {
   has_seen_add_data_notice?: boolean;
   fleet_server_hosts?: string[];
@@ -16,6 +14,5 @@ export interface BaseSettings {
 export interface Settings extends BaseSettings {
   id: string;
   preconfigured_fields?: Array<'fleet_server_hosts'>;
+  secret_storage_requirements_met?: boolean;
 }
-
-export interface SettingsSOAttributes extends BaseSettings, SavedObjectAttributes {}

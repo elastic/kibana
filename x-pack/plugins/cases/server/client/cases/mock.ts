@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import type {
-  CommentResponse,
-  CommentResponseAlertsType,
-  ConnectorMappingsAttributes,
-  CaseUserActionsDeprecatedResponse,
-} from '../../../common/api';
+import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
+import type { AlertAttachment, Attachment } from '../../../common/types/domain';
 import {
-  CommentType,
+  AttachmentType,
   ConnectorTypes,
-  Actions,
   ExternalReferenceStorageType,
-} from '../../../common/api';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+  UserActionActions,
+} from '../../../common/types/domain';
+import { SECURITY_SOLUTION_OWNER, FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 
 export const updateUser = {
   updated_at: '2020-03-13T08:34:53.450Z',
@@ -31,10 +27,10 @@ const entity = {
   updatedBy: null,
 };
 
-export const comment: CommentResponse = {
+export const comment: Attachment = {
   id: 'comment-user-1',
   comment: 'Wow, good luck catching that bad meanie!',
-  type: CommentType.user as const,
+  type: AttachmentType.user as const,
   created_at: '2019-11-25T21:55:00.177Z',
   created_by: {
     full_name: 'elastic',
@@ -53,10 +49,10 @@ export const comment: CommentResponse = {
   version: 'WzEsMV0=',
 };
 
-export const isolateCommentActions: CommentResponse = {
+export const isolateCommentActions: Attachment = {
   id: 'mock-action-comment-1',
   comment: 'Isolating this for investigation',
-  type: CommentType.actions as const,
+  type: AttachmentType.actions as const,
   created_at: '2019-11-25T21:55:00.177Z',
   actions: {
     targets: [
@@ -84,10 +80,10 @@ export const isolateCommentActions: CommentResponse = {
   version: 'WzEsMV0=',
 };
 
-export const releaseCommentActions: CommentResponse = {
+export const releaseCommentActions: Attachment = {
   id: 'mock-action-comment-2',
   comment: 'Releasing this for investigation',
-  type: CommentType.actions as const,
+  type: AttachmentType.actions as const,
   created_at: '2019-11-25T21:55:00.177Z',
   actions: {
     targets: [
@@ -115,10 +111,10 @@ export const releaseCommentActions: CommentResponse = {
   version: 'WzEsMV0=',
 };
 
-export const isolateCommentActionsMultipleTargets: CommentResponse = {
+export const isolateCommentActionsMultipleTargets: Attachment = {
   id: 'mock-action-comment-3',
   comment: 'Isolating this for investigation',
-  type: CommentType.actions as const,
+  type: AttachmentType.actions as const,
   created_at: '2019-11-25T21:55:00.177Z',
   actions: {
     targets: [
@@ -150,7 +146,7 @@ export const isolateCommentActionsMultipleTargets: CommentResponse = {
   version: 'WzEsMV0=',
 };
 
-export const commentAlert: CommentResponse = {
+export const commentAlert: Attachment = {
   id: 'comment-alert-1',
   alertId: 'alert-id-1',
   index: 'alert-index-1',
@@ -158,7 +154,7 @@ export const commentAlert: CommentResponse = {
     id: 'rule-id-1',
     name: 'rule-name-1',
   },
-  type: CommentType.alert as const,
+  type: AttachmentType.alert as const,
   created_at: '2019-11-25T21:55:00.177Z',
   created_by: {
     full_name: 'elastic',
@@ -177,18 +173,18 @@ export const commentAlert: CommentResponse = {
   version: 'WzEsMV0=',
 };
 
-export const commentAlertMultipleIds: CommentResponseAlertsType = {
+export const commentAlertMultipleIds: AlertAttachment = {
   ...commentAlert,
   id: 'comment-alert-2',
   alertId: ['alert-id-1', 'alert-id-2'],
   index: 'alert-index-1',
-  type: CommentType.alert as const,
+  type: AttachmentType.alert as const,
   owner: SECURITY_SOLUTION_OWNER,
 };
 
-export const commentExternalReference: CommentResponse = {
+export const commentExternalReference: Attachment = {
   id: 'comment-external-reference-1',
-  type: CommentType.externalReference as const,
+  type: AttachmentType.externalReference as const,
   externalReferenceId: 'my-id',
   externalReferenceStorage: {
     type: ExternalReferenceStorageType.elasticSearchDoc as const,
@@ -213,9 +209,9 @@ export const commentExternalReference: CommentResponse = {
   version: 'WzEsMV0=',
 };
 
-export const commentPersistableState: CommentResponse = {
+export const commentPersistableState: Attachment = {
   id: 'comment-persistable-state-1',
-  type: CommentType.persistableState,
+  type: AttachmentType.persistableState,
   persistableStateAttachmentTypeId: '.test',
   persistableStateAttachmentState: { foo: 'foo', injectedId: 'testRef' },
   created_at: '2019-11-25T21:55:00.177Z',
@@ -236,33 +232,25 @@ export const commentPersistableState: CommentResponse = {
   version: 'WzEsMV0=',
 };
 
+export const commentFileExternalReference: Attachment = {
+  ...commentExternalReference,
+  externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+  externalReferenceMetadata: { files: [{ name: '', extension: '', mimeType: '', created: '' }] },
+  externalReferenceStorage: {
+    type: ExternalReferenceStorageType.savedObject as const,
+    soType: 'file',
+  },
+};
+
 export const basicParams = {
   description: 'a description',
   title: 'a title',
   ...entity,
 };
 
-export const mappings: ConnectorMappingsAttributes[] = [
-  {
-    source: 'title',
-    target: 'short_description',
-    action_type: 'overwrite',
-  },
-  {
-    source: 'description',
-    target: 'description',
-    action_type: 'append',
-  },
-  {
-    source: 'comments',
-    target: 'comments',
-    action_type: 'append',
-  },
-];
-
 export const userActions: CaseUserActionsDeprecatedResponse = [
   {
-    action: Actions.create,
+    action: UserActionActions.create,
     type: 'create_case',
     created_at: '2021-02-03T17:41:03.771Z',
     created_by: {
@@ -301,7 +289,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'pushed',
-    action: Actions.push_to_service,
+    action: UserActionActions.push_to_service,
     created_at: '2021-02-03T17:41:26.108Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -327,7 +315,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:44:21.067Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -350,7 +338,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:44:33.078Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -373,7 +361,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:48:30.616Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -395,7 +383,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:48:30.616Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -417,7 +405,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:48:30.616Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -439,7 +427,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:48:30.616Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -464,7 +452,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:48:30.616Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -486,7 +474,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'pushed',
-    action: Actions.push_to_service,
+    action: UserActionActions.push_to_service,
     created_at: '2021-02-03T17:45:29.400Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -512,7 +500,7 @@ export const userActions: CaseUserActionsDeprecatedResponse = [
   },
   {
     type: 'comment',
-    action: Actions.create,
+    action: UserActionActions.create,
     created_at: '2021-02-03T17:48:30.616Z',
     created_by: {
       email: 'elastic@elastic.co',

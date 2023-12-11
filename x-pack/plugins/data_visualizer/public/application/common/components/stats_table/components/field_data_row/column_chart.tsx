@@ -11,10 +11,11 @@ import classNames from 'classnames';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiDataGridColumn } from '@elastic/eui';
 
+import { isUnsupportedChartData, type ChartData } from '@kbn/ml-data-grid';
+
 import './column_chart.scss';
 
-import { isUnsupportedChartData, ChartData } from './field_histograms';
-
+import { i18n } from '@kbn/i18n';
 import { useColumnChart } from './use_column_chart';
 
 interface Props {
@@ -50,6 +51,7 @@ export const ColumnChart: FC<Props> = ({
               chartPaddings: zeroSize,
               crosshair: { band: { visible: false } },
             }}
+            locale={i18n.getLocale()}
           />
           <Axis
             id="bottom"

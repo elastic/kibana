@@ -24,7 +24,7 @@ export const updateMappingModelVersion: ModelStage<
     controlState: state.aliasActions.length ? 'UPDATE_ALIASES' : 'INDEX_STATE_UPDATE_DONE',
     currentIndexMeta: setMetaMappingMigrationComplete({
       meta: state.currentIndexMeta,
-      versions: context.typeModelVersions,
+      versions: context.typeVirtualVersions,
     }),
   };
 };

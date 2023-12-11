@@ -9,26 +9,13 @@ import { fetchMappings } from './helpers';
 import { mockMappingsResponse } from '../mock/mappings_response/mock_mappings_response';
 
 describe('helpers', () => {
-  let originalFetch: typeof global['fetch'];
-
-  beforeAll(() => {
-    originalFetch = global.fetch;
-  });
-
-  afterAll(() => {
-    global.fetch = originalFetch;
-  });
-
   describe('fetchMappings', () => {
     test('it returns the expected mappings', async () => {
-      const mockFetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockMappingsResponse),
-      });
-      global.fetch = mockFetch;
+      const mockFetch = jest.fn().mockResolvedValue(mockMappingsResponse);
 
       const result = await fetchMappings({
         abortController: new AbortController(),
+        httpFetch: mockFetch,
         patternOrIndexName: 'auditbeat-custom-index-1',
       });
 
@@ -68,16 +55,14 @@ describe('helpers', () => {
 
     test('it throws the expected error when fetch fails', async () => {
       const error = 'simulated error';
-      const mockFetch = jest.fn().mockResolvedValue({
-        ok: false,
-        statusText: error,
+      const mockFetch = jest.fn().mockImplementation(() => {
+        throw new Error(error);
       });
-
-      global.fetch = mockFetch;
 
       await expect(
         fetchMappings({
           abortController: new AbortController(),
+          httpFetch: mockFetch,
           patternOrIndexName: 'auditbeat-custom-index-1',
         })
       ).rejects.toThrowError(

@@ -64,6 +64,11 @@ export interface RouteConfigOptionsBody {
   accepts?: RouteContentType | RouteContentType[] | string | string[];
 
   /**
+   * A mime type string overriding the 'Content-Type' header value received.
+   */
+  override?: string;
+
+  /**
    * Limits the size of incoming payloads to the specified byte count. Allowing very large payloads may cause the server to run out of memory.
    *
    * Default value: The one set in the kibana.yml config file under the parameter `server.maxPayload`.
@@ -126,9 +131,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *           In the future, may require an incomming request to contain a specified header.
    * - internal. The route is internal and intended for internal access only.
    *
-   * If not declared, infers access from route path:
-   * - access =`internal` for '/internal' route path prefix
-   * - access = `public` for everything else
+   * Defaults to 'internal' If not declared,
    */
   access?: 'public' | 'internal';
 

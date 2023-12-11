@@ -87,8 +87,9 @@ describe('checkIndex', () => {
 
   const indexName = 'auditbeat-custom-index-1';
   const pattern = 'auditbeat-*';
+  const httpFetch = jest.fn();
 
-  describe('happy path', () => {
+  describe('when `checkIndex` successfully completes the check', () => {
     const onCheckCompleted = jest.fn();
 
     beforeEach(async () => {
@@ -96,10 +97,14 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController: new AbortController(),
+        batchId: 'batch-id',
+        checkAllStartTime: Date.now(),
         ecsMetadata,
         formatBytes,
         formatNumber,
+        httpFetch,
         indexName,
+        isLastCheck: false,
         onCheckCompleted,
         pattern,
         version: EcsVersion,
@@ -142,10 +147,14 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController,
+        batchId: 'batch-id',
+        checkAllStartTime: Date.now(),
         ecsMetadata,
         formatBytes,
         formatNumber,
+        httpFetch,
         indexName,
+        isLastCheck: false,
         onCheckCompleted,
         pattern,
         version: EcsVersion,
@@ -163,10 +172,14 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController: new AbortController(),
+        batchId: 'batch-id',
+        checkAllStartTime: Date.now(),
         ecsMetadata: null, // <--
         formatBytes,
         formatNumber,
+        httpFetch,
         indexName,
+        isLastCheck: false,
         onCheckCompleted,
         pattern,
         version: EcsVersion,
@@ -215,10 +228,14 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController: new AbortController(),
+        batchId: 'batch-id',
+        checkAllStartTime: Date.now(),
         ecsMetadata,
         formatBytes,
         formatNumber,
+        httpFetch,
         indexName,
+        isLastCheck: false,
         onCheckCompleted,
         pattern,
         version: EcsVersion,
@@ -226,7 +243,7 @@ describe('checkIndex', () => {
     });
 
     test('it invokes onCheckCompleted with the expected `error`', () => {
-      expect(onCheckCompleted.mock.calls[0][0].error).toEqual(`Error: ${error}`);
+      expect(onCheckCompleted.mock.calls[0][0].error).toEqual(error);
     });
 
     test('it invokes onCheckCompleted with the expected `indexName`', () => {
@@ -265,10 +282,14 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController: new AbortController(),
+        batchId: 'batch-id',
+        checkAllStartTime: Date.now(),
         ecsMetadata,
         formatBytes,
         formatNumber,
+        httpFetch,
         indexName,
+        isLastCheck: false,
         onCheckCompleted,
         pattern,
         version: EcsVersion,
@@ -323,10 +344,14 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController,
+        batchId: 'batch-id',
+        checkAllStartTime: Date.now(),
         ecsMetadata,
         formatBytes,
         formatNumber,
+        httpFetch,
         indexName,
+        isLastCheck: false,
         onCheckCompleted,
         pattern,
         version: EcsVersion,

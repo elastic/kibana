@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CaseStatuses } from '@kbn/cases-plugin/common/api';
+import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { postCaseReq } from '../../../../../common/lib/mock';

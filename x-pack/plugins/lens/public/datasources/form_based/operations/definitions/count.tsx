@@ -117,8 +117,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       return { dataType: 'number', isBucketed: IS_BUCKETED, scale: SCALE };
     }
   },
-  getDefaultLabel: (column, indexPattern) => {
-    const field = indexPattern.getFieldByName(column.sourceField);
+  getDefaultLabel: (column, columns, indexPattern) => {
+    const field = indexPattern?.getFieldByName(column.sourceField);
     return ofName(field, column.timeShift, column.timeScale, column.reducedTimeRange);
   },
   buildColumn({ field, previousColumn }, columnParams) {

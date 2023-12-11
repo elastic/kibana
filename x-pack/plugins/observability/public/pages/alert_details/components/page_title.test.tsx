@@ -15,6 +15,7 @@ import { alert } from '../mock/alert';
 describe('Page Title', () => {
   const defaultProps = {
     alert,
+    dataTestSubj: 'ruleTypeId',
   };
 
   const renderComp = (props: PageTitleProps) => {
@@ -28,9 +29,7 @@ describe('Page Title', () => {
   it('should display Log threshold title', () => {
     const { getByTestId } = renderComp(defaultProps);
 
-    expect(getByTestId('page-title-container').children.item(0)?.textContent).toEqual(
-      'Log threshold breached'
-    );
+    expect(getByTestId('ruleTypeId').textContent).toContain('Log threshold breached');
   });
 
   it('should display Anomaly title', () => {
@@ -42,13 +41,12 @@ describe('Page Title', () => {
           [ALERT_RULE_CATEGORY]: 'Anomaly',
         },
       },
+      dataTestSubj: defaultProps.dataTestSubj,
     };
 
     const { getByTestId } = renderComp(props);
 
-    expect(getByTestId('page-title-container').children.item(0)?.textContent).toEqual(
-      'Anomaly detected'
-    );
+    expect(getByTestId('ruleTypeId').textContent).toContain('Anomaly detected');
   });
 
   it('should display Inventory title', () => {
@@ -60,13 +58,12 @@ describe('Page Title', () => {
           [ALERT_RULE_CATEGORY]: 'Inventory',
         },
       },
+      dataTestSubj: defaultProps.dataTestSubj,
     };
 
     const { getByTestId } = renderComp(props);
 
-    expect(getByTestId('page-title-container').children.item(0)?.textContent).toEqual(
-      'Inventory threshold breached'
-    );
+    expect(getByTestId('ruleTypeId').textContent).toContain('Inventory threshold breached');
   });
 
   it('should display an active badge when active is true', async () => {
@@ -75,7 +72,7 @@ describe('Page Title', () => {
   });
 
   it('should display an inactive badge when active is false', async () => {
-    const updatedProps = { alert };
+    const updatedProps = { alert, dataTestSubj: defaultProps.dataTestSubj };
     updatedProps.alert.active = false;
 
     const { getByText } = renderComp({ ...updatedProps });

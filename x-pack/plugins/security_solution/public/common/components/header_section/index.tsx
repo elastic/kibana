@@ -19,8 +19,8 @@ import * as i18n from '../../containers/query_toggle/translations';
 interface HeaderProps {
   border?: boolean;
   height?: number;
-  className?: string;
-  $hideSubtitle?: boolean;
+  className?: string; // eslint-disable-line react/no-unused-prop-types
+  $hideSubtitle?: boolean; // eslint-disable-line react/no-unused-prop-types
 }
 
 const Header = styled.header<HeaderProps>`
@@ -68,9 +68,10 @@ export interface HeaderSectionProps extends HeaderProps {
   toggleQuery?: (status: boolean) => void;
   toggleStatus?: boolean;
   title: string | React.ReactNode;
-  inspectTitle?: string;
+  inspectTitle?: React.ReactNode;
   titleSize?: EuiTitleSize;
   tooltip?: string;
+  tooltipTitle?: string;
 }
 
 export const getHeaderAlignment = ({
@@ -107,10 +108,11 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   stackHeader,
   subtitle,
   title,
-  titleSize = 'm',
+  titleSize = 'l',
   toggleQuery,
   toggleStatus = true,
   tooltip,
+  tooltipTitle,
 }) => {
   const toggle = useCallback(() => {
     if (toggleQuery) {
@@ -171,9 +173,9 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                           <span className="eui-textBreakNormal">{title}</span>
                           {tooltip && (
                             <>
-                              {' '}
                               <EuiIconTip
                                 color="subdued"
+                                title={tooltipTitle}
                                 content={tooltip}
                                 size="l"
                                 type="iInCircle"
@@ -193,7 +195,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                       queryId={id}
                       multiple={inspectMultiple}
                       showInspectButton={showInspectButton}
-                      title={inspectTitle != null ? inspectTitle : title}
+                      title={inspectTitle ?? title}
                     />
                   </EuiFlexItem>
                 )}

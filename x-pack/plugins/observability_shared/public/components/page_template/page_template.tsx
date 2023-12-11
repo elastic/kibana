@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { EuiSideNavItemType, EuiPageSectionProps, EuiErrorBoundary } from '@elastic/eui';
+import { EuiSideNavItemType, EuiPageSectionProps } from '@elastic/eui';
 import { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
+import type { BehaviorSubject, Observable } from 'rxjs';
 import type { ApplicationStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import {
   KibanaPageTemplate,
   KibanaPageTemplateKibanaProvider,
@@ -29,13 +30,7 @@ import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
 
 export type WrappedPageTemplateProps = Pick<
   KibanaPageTemplateProps,
-  | 'children'
-  | 'data-test-subj'
-  | 'paddingSize'
-  | 'pageHeader'
-  | 'restrictWidth'
-  | 'isEmptyState'
-  | 'noDataConfig'
+  'children' | 'data-test-subj' | 'pageHeader' | 'restrictWidth' | 'isEmptyState' | 'noDataConfig'
 > & {
   showSolutionNav?: boolean;
   isPageDataLoaded?: boolean;
@@ -85,9 +80,13 @@ export interface ObservabilityPageTemplateDependencies {
   navigationSections$: Observable<NavigationSection[]>;
   getPageTemplateServices: () => KibanaPageTemplateKibanaDependencies;
   guidedOnboardingApi: GuidedOnboardingPluginStart['guidedOnboardingApi'];
+  isSidebarEnabled$: BehaviorSubject<boolean>;
 }
 
-export type ObservabilityPageTemplateProps = ObservabilityPageTemplateDependencies &
+export type ObservabilityPageTemplateProps = Omit<
+  ObservabilityPageTemplateDependencies,
+  'isSidebarEnabled$'
+> &
   WrappedPageTemplateProps;
 
 export function ObservabilityPageTemplate({
@@ -210,15 +209,17 @@ export function ObservabilityPageTemplate({
                   : undefined
               }
             >
-              <EuiErrorBoundary>
-                <KibanaPageTemplate.Section
-                  component="div"
-                  alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
-                  {...pageSectionProps}
-                >
-                  {children}
-                </KibanaPageTemplate.Section>
-              </EuiErrorBoundary>
+              <KibanaErrorBoundaryProvider analytics={services.analytics}>
+                <KibanaErrorBoundary>
+                  <KibanaPageTemplate.Section
+                    component="div"
+                    alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
+                    {...pageSectionProps}
+                  >
+                    {children}
+                  </KibanaPageTemplate.Section>
+                </KibanaErrorBoundary>
+              </KibanaErrorBoundaryProvider>
               {bottomBar && (
                 <KibanaPageTemplate.BottomBar {...bottomBarProps}>
                   {bottomBar}

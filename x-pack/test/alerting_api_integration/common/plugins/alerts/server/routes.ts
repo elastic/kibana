@@ -24,12 +24,15 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { queryOptionsSchema } from '@kbn/event-log-plugin/server/event_log_client';
+import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
 
 export function defineRoutes(
   core: CoreSetup<FixtureStartDeps>,
   taskManagerStart: Promise<TaskManagerStartContract>,
+  notificationsStart: Promise<NotificationsPluginStart>,
   { logger }: { logger: Logger }
 ) {
   const router = core.http.createRouter();
@@ -304,7 +307,7 @@ export function defineRoutes(
 
   router.post(
     {
-      path: '/api/alerts_fixture/{id}/enqueue_action',
+      path: '/api/alerts_fixture/{id}/bulk_enqueue_actions',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -326,27 +329,30 @@ export function defineRoutes(
         const createAPIKeyResult =
           security &&
           (await security.authc.apiKeys.grantAsInternalUser(req, {
-            name: `alerts_fixture:enqueue_action:${uuidv4()}`,
+            name: `alerts_fixture:bulk_enqueue_actions:${uuidv4()}`,
             role_descriptors: {},
           }));
 
-        await actionsClient.enqueueExecution({
-          id: req.params.id,
-          spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
-          executionId: uuidv4(),
-          apiKey: createAPIKeyResult
-            ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
-                'base64'
-              )
-            : null,
-          params: req.body.params,
-          source: {
-            type: 'HTTP_REQUEST' as any,
-            source: req,
+        await actionsClient.bulkEnqueueExecution([
+          {
+            id: req.params.id,
+            spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
+            executionId: uuidv4(),
+            apiKey: createAPIKeyResult
+              ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
+                  'base64'
+                )
+              : null,
+            params: req.body.params,
+            actionTypeId: req.params.id,
           },
-        });
+        ]);
         return res.noContent();
       } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
         return res.badRequest({ body: err });
       }
     }
@@ -447,6 +453,72 @@ export function defineRoutes(
       } catch (e) {
         return res.badRequest({ body: e });
       }
+    }
+  );
+
+  router.get(
+    {
+      path: '/_test/event_log/{type}/{id}/_find',
+      validate: {
+        params: schema.object({
+          type: schema.string(),
+          id: schema.string(),
+        }),
+        query: queryOptionsSchema,
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const [, { eventLog }] = await core.getStartServices();
+      const eventLogClient = eventLog.getClient(req);
+      const {
+        params: { id, type },
+        query,
+      } = req;
+
+      try {
+        return res.ok({
+          body: await eventLogClient.findEventsBySavedObjectIds(type, [id], query),
+        });
+      } catch (err) {
+        return res.notFound();
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/_test/send_notification',
+      validate: {
+        body: schema.object({
+          to: schema.arrayOf(schema.string()),
+          subject: schema.string(),
+          message: schema.string(),
+          messageHTML: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const notifications = await notificationsStart;
+      const { to, subject, message, messageHTML } = req.body;
+
+      if (!notifications.isEmailServiceAvailable()) {
+        return res.ok({ body: { error: 'notifications are not available' } });
+      }
+
+      const emailService = notifications.getEmailService();
+
+      emailService.sendPlainTextEmail({ to, subject, message });
+      emailService.sendHTMLEmail({ to, subject, message, messageHTML });
+
+      return res.ok({ body: { ok: true } });
     }
   );
 }

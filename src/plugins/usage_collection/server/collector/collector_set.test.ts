@@ -237,6 +237,16 @@ describe('CollectorSet', () => {
           },
           uptime_in_millis: 137844000,
         },
+        process: {
+          heap: {
+            total_in_bytes: 1,
+            used_in_bytes: 2,
+            size_limit: 3,
+          },
+          resident_set_size_in_bytes: 4,
+          array_buffers_in_bytes: 5,
+          external_in_bytes: 6,
+        },
         daysOfTheWeek: ['monday', 'tuesday', 'wednesday'],
       };
 
@@ -246,6 +256,16 @@ describe('CollectorSet', () => {
           load: { '15m': 2.3525390625, '1m': 2.22412109375, '5m': 2.4462890625 },
           memory: { free_bytes: 458280960, total_bytes: 17179869184, used_bytes: 16721588224 },
           uptime_ms: 137844000,
+        },
+        process: {
+          heap: {
+            total_bytes: 1,
+            used_bytes: 2,
+            size_limit: 3,
+          },
+          resident_set_size_bytes: 4,
+          array_buffers_bytes: 5,
+          external_bytes: 6,
         },
         days_of_the_week: ['monday', 'tuesday', 'wednesday'],
       });

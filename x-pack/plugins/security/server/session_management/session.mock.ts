@@ -7,10 +7,10 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import type { Session, SessionValue } from './session';
 import { SessionMissingError } from './session_errors';
 import { sessionIndexMock } from './session_index.mock';
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 
 export const sessionMock = {
   create: (): jest.Mocked<PublicMethodsOf<Session>> => ({

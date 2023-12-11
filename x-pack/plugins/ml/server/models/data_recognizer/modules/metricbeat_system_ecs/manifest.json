@@ -48,5 +48,6 @@
       "file": "datafeed_high_mean_cpu_iowait_ecs.json",
       "job_id": "high_mean_cpu_iowait_ecs"
     }
-  ]
+  ],
+  "tags": ["observability"]
 }

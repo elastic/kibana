@@ -6,67 +6,54 @@
  * Side Public License, v 1.
  */
 
-import { NavigationServices, SolutionProperties } from '../../types';
+import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { BehaviorSubject, of } from 'rxjs';
+import { NavigationServices } from '../../types';
+import { navLinksMock } from './navlinks';
 
-export const getServicesMock = (): NavigationServices => {
+const activeNodes: ChromeProjectNavigationNode[][] = [];
+
+const defaultDeepLinks = {
+  ...navLinksMock.reduce<Record<string, ChromeNavLink>>((acc, navLink) => {
+    acc[navLink.id] = navLink;
+    return acc;
+  }, {}),
+};
+
+export const getServicesMock = ({
+  deepLinks = defaultDeepLinks,
+}: { deepLinks?: Readonly<Record<string, ChromeNavLink>> } = {}): NavigationServices => {
   const navigateToUrl = jest.fn().mockResolvedValue(undefined);
   const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
-  const loadingCount = 0;
+  const recentlyAccessed$ = new BehaviorSubject([]);
+  const deepLinks$ = new BehaviorSubject(deepLinks);
 
   return {
     basePath,
-    loadingCount,
+    recentlyAccessed$,
+    deepLinks$,
     navIsOpen: true,
     navigateToUrl,
+    onProjectNavigationChange: jest.fn(),
+    activeNodes$: of(activeNodes),
+    isSideNavCollapsed: false,
+    cloudLinks: {
+      billingAndSub: {
+        title: 'Mock Billing & Subscriptions',
+        href: 'https://cloud.elastic.co/account/billing/',
+      },
+      performance: {
+        title: 'Mock Performance',
+        href: 'https://cloud.elastic.co/deployments/123456789/performance/',
+      },
+      userAndRoles: {
+        title: 'Mock Users & Roles',
+        href: 'https://cloud.elastic.co/deployments/123456789/security/users/',
+      },
+      deployment: {
+        title: 'Mock Deployment',
+        href: 'https://cloud.elastic.co/deployments/123456789/',
+      },
+    },
   };
 };
-
-export const getSolutionPropertiesMock = (): SolutionProperties => ({
-  id: 'example_project',
-  icon: 'logoObservability',
-  name: 'Example project',
-  items: [
-    {
-      id: 'root',
-      name: '',
-      items: [
-        {
-          id: 'get_started',
-          name: 'Get started',
-          href: '/app/example_project/get_started',
-        },
-        {
-          id: 'alerts',
-          name: 'Alerts',
-          href: '/app/example_project/alerts',
-        },
-        {
-          id: 'cases',
-          name: 'Cases',
-          href: '/app/example_project/cases',
-        },
-      ],
-    },
-    {
-      id: 'example_settings',
-      name: 'Settings',
-      items: [
-        {
-          id: 'logs',
-          name: 'Logs',
-          href: '/app/management/logs',
-        },
-        {
-          id: 'signals',
-          name: 'Signals',
-          href: '/app/management/signals',
-        },
-        {
-          id: 'tracing',
-          name: 'Tracing',
-          href: '/app/management/tracing',
-        },
-      ],
-    },
-  ],
-});

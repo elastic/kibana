@@ -7,8 +7,10 @@ allOf:
       revision:
         type: number
       inputs:
-        type: array
-        items: {}
+        oneOf:
+          - type: array
+            items: {}
+          - type: object
     required:
       - id
       - revision

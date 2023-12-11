@@ -1,0 +1,16 @@
+[[esql-example-queries]]
+
+The following is an example ES|QL query:
+
+```
+FROM logs-*
+| WHERE NOT CIDR_MATCH(destination.ip, "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")
+| STATS destcount = COUNT(destination.ip) by user.name, host.name
+| ENRICH ldap_lookup_new ON user.name
+| WHERE group.name IS NOT NULL
+| EVAL follow_up = CASE(
+    destcount >= 100, "true",
+     "false")
+| SORT destcount desc
+| KEEP destcount, host.name, user.name, group.name, follow_up
+```

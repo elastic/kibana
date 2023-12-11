@@ -1214,150 +1214,6 @@
             "path": "src/plugins/home/server/services/sample_data/sample_data_registry.ts"
           },
           {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/types.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/types.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/types.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/types.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/types.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/types.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/index.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_views/data_views.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_views/data_views.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_views/data_views.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_views/data_views.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_views/data_views.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_views/data_views.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_views/data_views.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_views/data_views.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_views/data_views.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/index.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/index.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/query/route_handler_context.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/query/route_handler_context.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/query/route_handler_context.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/query/route_handler_context.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/query/route_handler_context.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/query/route_handler_context.test.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/server/utils.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/server/utils.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/server/utils.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_views/data_views.test.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_views/data_views.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/api.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/api.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/api.ts"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
           },
@@ -1368,18 +1224,6 @@
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
           },
           {
             "plugin": "canvas",
@@ -1404,46 +1248,6 @@
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/public/components/home/hooks/use_upload_workpad.ts"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/packs/types.ts"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/packs/types.ts"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/routes/saved_queries/list/index.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/routes/saved_queries/list/index.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/assets/use_assets_status.ts"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/assets/use_assets_status.ts"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/assets/use_assets_status.ts"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/assets/use_assets_status.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/overview/overview/monitor_detail_flyout.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/overview/overview/monitor_detail_flyout.tsx"
           },
           {
             "plugin": "savedObjects",
@@ -1574,18 +1378,6 @@
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
           },
           {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
           },
@@ -1602,20 +1394,16 @@
             "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/overview/api.ts"
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/overview/api.ts"
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
           },
           {
             "plugin": "upgradeAssistant",
@@ -1638,14 +1426,6 @@
             "path": "x-pack/plugins/saved_objects_tagging/common/test_utils/index.ts"
           },
           {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_view.stub.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_view.stub.ts"
-          },
-          {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
           },
@@ -1660,122 +1440,6 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/effects.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/effects.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/effects.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/index.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/index.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/hooks/use_params_list.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/hooks/use_params_list.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -1860,14 +1524,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
-          },
-          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
           },
@@ -1890,6 +1546,14 @@
           {
             "plugin": "triggersActionsUi",
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -1961,18 +1625,6 @@
           },
           {
             "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
-          },
-          {
-            "plugin": "embeddable",
             "path": "src/plugins/embeddable/public/lib/embeddables/default_embeddable_factory_provider.ts"
           },
           {
@@ -1989,51 +1641,11 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/find_object_by_title.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/find_object_by_title.ts"
-          },
-          {
-            "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
           },
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "visualizations",
@@ -2044,76 +1656,12 @@
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object.ts"
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/settings.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/settings.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/hooks/use_find_saved_object.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/hooks/use_find_saved_object.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/hooks/use_create_saved_object.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/hooks/use_create_saved_object.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/hooks/use_create_saved_object.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/hooks/use_get_saved_object.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/hooks/use_get_saved_object.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/hooks/use_update_saved_object.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/hooks/use_update_saved_object.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/hooks/use_update_saved_object.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/containers/saved_view/saved_view.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/containers/saved_view/saved_view.tsx"
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
           },
           {
             "plugin": "canvas",
@@ -2194,78 +1742,18 @@
           {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.test.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.test.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.test.ts"
           },
           {
             "plugin": "@kbn/core",
             "path": "src/core/types/index.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/common/types.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/common/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/common/types/modules.ts"
           },
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/common/types/modules.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/save_dashboard_state_to_saved_object.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/save_dashboard_state_to_saved_object.ts"
           }
         ],
         "initialIsOpen": false
@@ -2408,6 +1896,14 @@
           },
           {
             "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
+          },
+          {
+            "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
           },
           {
@@ -2415,36 +1911,52 @@
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable_factory.tsx"
           },
           {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/visualize_app/components/visualize_listing.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/visualize_app/components/visualize_listing.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/visualize_app/components/visualize_listing.tsx"
           },
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
+          },
+          {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
+          },
+          {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
+          },
+          {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
+            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
+            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
+            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
+            "path": "x-pack/plugins/lens/public/state_management/selectors.ts"
           },
           {
             "plugin": "lens",
@@ -2456,7 +1968,31 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/state_management/selectors.ts"
+            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
           },
           {
             "plugin": "lens",
@@ -2509,38 +2045,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/datasources/form_based/form_based.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/types.ts"
           },
           {
             "plugin": "lens",
@@ -2553,6 +2057,22 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/visualizations/xy/state_helpers.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/visualization.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/visualization.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/datasources/text_based/text_based_languages.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/datasources/text_based/text_based_languages.tsx"
           },
           {
             "plugin": "lens",
@@ -2572,31 +2092,47 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
+            "path": "x-pack/plugins/lens/public/types.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
+            "path": "x-pack/plugins/lens/public/types.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
+            "path": "x-pack/plugins/lens/public/types.ts"
           },
           {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
           },
           {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
           },
           {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
           },
           {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
           },
           {
             "plugin": "graph",
@@ -2735,42 +2271,6 @@
             "path": "src/plugins/expressions/common/executor/executor.ts"
           },
           {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/expressions/kibana_context.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/expressions/kibana_context.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/extract_references.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/extract_references.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/extract_references.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/inject_references.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/inject_references.ts"
-          },
-          {
             "plugin": "data",
             "path": "src/plugins/data/common/query/filters/persistable_state.ts"
           },
@@ -2903,30 +2403,6 @@
             "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
           },
@@ -3021,22 +2497,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
           },
           {
             "plugin": "maps",
@@ -3167,14 +2627,6 @@
             "path": "x-pack/plugins/global_search_providers/server/providers/saved_objects/map_object_to_result.test.ts"
           },
           {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_views/persistable_state.test.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_views/persistable_state.test.ts"
-          },
-          {
             "plugin": "expressions",
             "path": "src/plugins/expressions/common/executor/executor.test.ts"
           },
@@ -3185,14 +2637,6 @@
           {
             "plugin": "expressions",
             "path": "src/plugins/expressions/common/executor/executor.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/inject_references.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/inject_references.test.ts"
           },
           {
             "plugin": "lens",
@@ -3213,66 +2657,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/app_plugin/share_action.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/utils.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/utils.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/line_chart.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/line_chart.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/metric_chart.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/metric_chart.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/types.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/types.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.test.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.test.ts"
           }
         ],
         "initialIsOpen": false
@@ -3318,7 +2702,7 @@
           "\nThe namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:\n * single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace.\n * multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces.\n * multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be\n   unique across all namespaces. This is intended to be an intermediate step when objects with a \"single\" namespace type are being\n   converted to a \"multiple\" namespace type. In other words, objects with a \"multiple-isolated\" namespace type will be *share-capable*,\n   but will not actually be shareable until the namespace type is changed to \"multiple\".\n * agnostic: This type of saved object is global.\n"
         ],
         "signature": [
-          "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
+          "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
         ],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
         "deprecated": false,

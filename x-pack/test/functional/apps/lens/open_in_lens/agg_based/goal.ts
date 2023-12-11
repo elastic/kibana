@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert to Lens', async () => {
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
       const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(1);
@@ -61,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectField('machine.ram', 'metrics');
       await visEditor.clickGo();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'Average machine.ram',
           subtitle: undefined,
           extraText: '',
-          value: '131.04M%',
+          value: '131,040,360.81%',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: true,
           showingTrendline: false,
@@ -91,7 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectAggregation('Max Bucket', 'metrics');
       await visEditor.clickGo();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -134,7 +134,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await visEditor.clickGo();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -152,7 +152,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'ios',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '65.05M%',
+          value: '65,047,486.03',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: true,
           showingTrendline: false,
@@ -161,7 +161,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'osx',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '66.14M%',
+          value: '66,144,823.35',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: true,
           showingTrendline: false,
@@ -170,7 +170,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'win 7',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '65.93M%',
+          value: '65,933,477.76',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: true,
           showingTrendline: false,
@@ -179,7 +179,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'win 8',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '65.16M%',
+          value: '65,157,898.23',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: true,
           showingTrendline: false,
@@ -188,7 +188,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'win xp',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '65.37M%',
+          value: '65,365,950.93',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: true,
           showingTrendline: false,

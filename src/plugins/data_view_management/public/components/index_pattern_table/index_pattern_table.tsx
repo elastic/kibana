@@ -164,7 +164,9 @@ export const IndexPatternTable = ({
 
   chrome.docTitle.change(title);
 
-  const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
+  const isRollup =
+    new URLSearchParams(useLocation().search).get('type') === 'rollup' &&
+    dataViews.getRollupsEnabled();
 
   const ContextWrapper = useMemo(
     () => (spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent),
@@ -210,10 +212,13 @@ export const IndexPatternTable = ({
       name: i18n.translate('indexPatternManagement.dataViewTable.nameColumn', {
         defaultMessage: 'Name',
       }),
-      width: '70%',
+      width: spaces ? '70%' : '90%',
       render: (name: string, dataView: IndexPatternTableItem) => (
         <div>
-          <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>
+          <EuiLink
+            {...reactRouterNavigate(history, `patterns/${dataView.id}`)}
+            data-test-subj={`detail-link-${dataView.name}`}
+          >
             {dataView.getName()}
             {dataView.name ? (
               <>
@@ -233,16 +238,19 @@ export const IndexPatternTable = ({
             </>
           )}
           {dataView?.tags?.map(({ key: tagKey, name: tagName }) => (
-            <>
-              &emsp;<EuiBadge key={tagKey}>{tagName}</EuiBadge>
-            </>
+            <span key={tagKey}>
+              &emsp;<EuiBadge>{tagName}</EuiBadge>
+            </span>
           ))}
         </div>
       ),
       dataType: 'string' as const,
       sortable: ({ sort }: { sort: string }) => sort,
     },
-    {
+  ];
+
+  if (spaces) {
+    columns.push({
       field: 'namespaces',
       name: i18n.translate('indexPatternManagement.dataViewTable.spacesColumn', {
         defaultMessage: 'Spaces',
@@ -265,8 +273,8 @@ export const IndexPatternTable = ({
           <></>
         );
       },
-    },
-  ];
+    });
+  }
 
   if (dataViews.getCanSaveSync()) {
     columns.push(alertColumn);

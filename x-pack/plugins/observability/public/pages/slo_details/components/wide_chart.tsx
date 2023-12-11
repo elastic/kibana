@@ -14,13 +14,16 @@ import {
   Position,
   ScaleType,
   Settings,
+  Tooltip,
+  TooltipType,
 } from '@elastic/charts';
-import React, { useRef } from 'react';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import moment from 'moment';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
+import moment from 'moment';
+import React, { useRef } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { ChartData } from '../../../typings';
 import { useKibana } from '../../../utils/kibana_react';
 
@@ -57,11 +60,11 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
 
   return (
     <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
+      <Tooltip type={TooltipType.VerticalCursor} />
       <Settings
         baseTheme={baseTheme}
         showLegend={false}
         theme={[theme]}
-        tooltip="vertical"
         noResults={<EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />}
         onPointerUpdate={handleCursorUpdate}
         externalPointerEvents={{
@@ -69,6 +72,7 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
         }}
         pointerUpdateDebounce={0}
         pointerUpdateTrigger={'x'}
+        locale={i18n.getLocale()}
       />
       <Axis
         id="bottom"
@@ -81,6 +85,11 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
         ticks={4}
         position={Position.Left}
         tickFormat={(d) => numeral(d).format(percentFormat)}
+        domain={{
+          fit: true,
+          min: NaN,
+          max: NaN,
+        }}
       />
       <ChartComponent
         color={color}

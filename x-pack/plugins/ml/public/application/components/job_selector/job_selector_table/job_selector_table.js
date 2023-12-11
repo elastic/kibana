@@ -19,13 +19,16 @@ import {
   EuiCallOut,
   EuiButton,
   EuiText,
+  LEFT_ALIGNMENT,
+  CENTER_ALIGNMENT,
+  SortableProperties,
 } from '@elastic/eui';
 
-import { LEFT_ALIGNMENT, CENTER_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { PLUGIN_ID } from '../../../../../common/constants/app';
+import { MlNodeAvailableWarningShared } from '../../node_available_warning';
 
 const JOB_FILTER_FIELDS = ['job_id', 'groups'];
 const GROUP_FILTER_FIELDS = ['id'];
@@ -41,11 +44,15 @@ export function JobSelectorTable({
   withTimeRangeSelector,
 }) {
   const [sortableProperties, setSortableProperties] = useState();
+  const [mlNodesAvailable, setMlNodesAvailable] = useState(true);
   const [currentTab, setCurrentTab] = useState('Jobs');
 
   const {
     services: {
-      application: { navigateToApp },
+      application: {
+        navigateToApp,
+        capabilities: { ml: mlCapabilities },
+      },
     },
   } = useMlKibana();
 
@@ -256,6 +263,7 @@ export function JobSelectorTable({
 
   return (
     <Fragment>
+      <MlNodeAvailableWarningShared nodeAvailableCallback={setMlNodesAvailable} />
       {jobs.length === 0 && (
         <EuiCallOut
           title={
@@ -267,7 +275,11 @@ export function JobSelectorTable({
           iconType="iInCircle"
         >
           <EuiText textAlign="center">
-            <EuiButton color="primary" onClick={navigateToWizard}>
+            <EuiButton
+              color="primary"
+              onClick={navigateToWizard}
+              disabled={mlCapabilities.canCreateJob === false || mlNodesAvailable === false}
+            >
               <FormattedMessage
                 id="xpack.ml.jobSelector.createJobButtonLabel"
                 defaultMessage="Create job"

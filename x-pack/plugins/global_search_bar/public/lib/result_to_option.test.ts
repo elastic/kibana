@@ -6,6 +6,7 @@
  */
 
 import type { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
+import { Tag } from '@kbn/saved-objects-tagging-plugin/public';
 import { resultToOption } from './result_to_option';
 
 const createSearchResult = (parts: Partial<GlobalSearchResult> = {}): GlobalSearchResult => ({
@@ -88,5 +89,45 @@ describe('resultToOption', () => {
         meta: [{ text: 'Foo' }],
       })
     );
+  });
+
+  it("doesn't crash on unknown tag", () => {
+    const input = createSearchResult({
+      type: 'dashboard',
+      meta: { categoryLabel: 'category', displayName: 'foo', tagIds: ['known', 'unknown'] },
+    });
+
+    const getTag = (tagId: string): Tag | undefined => {
+      if (tagId === 'known') {
+        return {
+          id: 'known',
+          name: 'Known',
+          description: 'Known',
+          color: '#000000',
+        };
+      }
+    };
+
+    const logSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+    const option = resultToOption(input, [], getTag);
+    expect(logSpy).toBeCalledWith(
+      'SearchBar: Tag with id "unknown" not found. Tag "unknown" is referenced by the search result "dashboard:id". Skipping displaying the missing tag.'
+    );
+    expect(option.append).toMatchInlineSnapshot(`
+      <ResultTagList
+        searchTagIds={Array []}
+        tags={
+          Array [
+            Object {
+              "color": "#000000",
+              "description": "Known",
+              "id": "known",
+              "name": "Known",
+            },
+          ]
+        }
+      />
+    `);
   });
 });

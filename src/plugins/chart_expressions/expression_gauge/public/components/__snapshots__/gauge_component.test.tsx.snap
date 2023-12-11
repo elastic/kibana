@@ -8,6 +8,7 @@ exports[`GaugeComponent renders the chart 1`] = `
     ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    locale="en"
     noResults={
       <EmptyPlaceholder
         icon={[Function]}

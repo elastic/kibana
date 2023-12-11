@@ -18,6 +18,7 @@ import {
   SearchRequest,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { getBelongsToRuntimeMapping } from '../../../../common/runtime_mappings/get_belongs_to_runtime_mapping';
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
@@ -36,7 +37,7 @@ const MAX_BUCKETS = 60 * 1000;
 
 export interface FindingsByResourceQuery {
   pageIndex: Pagination['pageIndex'];
-  sortDirection: Sort<unknown>['direction'];
+  sort: Sort<CspFinding>;
 }
 
 type FindingsAggRequest = IKibanaSearchRequest<SearchRequest>;
@@ -75,6 +76,9 @@ interface FindingsAggBucket extends AggregationsStringRareTermsBucketKeys {
   cis_sections: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
 }
 
+/**
+ * @deprecated: This hook is deprecated and will be removed in the next release.
+ */
 export const getFindingsByResourceAggQuery = ({
   query,
   sortDirection,
@@ -167,6 +171,9 @@ const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResour
   },
 });
 
+/**
+ * @deprecated: This hook is deprecated and will be removed in the next release.
+ */
 export const useFindingsByResource = (options: UseFindingsByResourceOptions) => {
   const {
     data,

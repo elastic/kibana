@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosHeaders, AxiosInstance, AxiosResponse } from 'axios';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../actions_config.mock';
@@ -29,7 +29,7 @@ const requestMock = utils.request as jest.Mock;
 const createAxiosError = (): AxiosError => {
   const error = new Error() as AxiosError;
   error.isAxiosError = true;
-  error.config = { method: 'get', url: 'https://example.com' };
+  error.config = { method: 'get', url: 'https://example.com', headers: new AxiosHeaders() };
   error.response = {
     data: { errorMessage: 'An error occurred', errorCode: 500 },
   } as AxiosResponse;

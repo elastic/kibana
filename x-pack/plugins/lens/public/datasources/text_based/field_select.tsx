@@ -9,11 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import {
-  FieldPicker,
-  FieldOptionValue,
-  FieldOption,
-} from '@kbn/visualization-ui-components/public';
+import { FieldPicker, FieldOptionValue, FieldOption } from '@kbn/visualization-ui-components';
 import type { TextBasedLayerColumn } from './types';
 import type { DataType } from '../../types';
 

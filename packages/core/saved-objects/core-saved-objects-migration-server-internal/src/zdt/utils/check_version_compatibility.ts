@@ -8,9 +8,9 @@
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
-  getModelVersionsFromMappings,
-  compareModelVersions,
-  getModelVersionMapForTypes,
+  getVirtualVersionsFromMappings,
+  compareVirtualVersions,
+  getVirtualVersionMap,
   type IndexMapping,
   type CompareModelVersionResult,
 } from '@kbn/core-saved-objects-base-server-internal';
@@ -28,8 +28,8 @@ export const checkVersionCompatibility = ({
   source,
   deletedTypes,
 }: CheckVersionCompatibilityOpts): CompareModelVersionResult => {
-  const appVersions = getModelVersionMapForTypes(types);
-  const indexVersions = getModelVersionsFromMappings({
+  const appVersions = getVirtualVersionMap(types);
+  const indexVersions = getVirtualVersionsFromMappings({
     mappings,
     source,
     knownTypes: types.map((type) => type.name),
@@ -37,5 +37,5 @@ export const checkVersionCompatibility = ({
   if (!indexVersions) {
     throw new Error(`Cannot check version: ${source} not present in the mapping meta`);
   }
-  return compareModelVersions({ appVersions, indexVersions, deletedTypes });
+  return compareVirtualVersions({ appVersions, indexVersions, deletedTypes });
 };

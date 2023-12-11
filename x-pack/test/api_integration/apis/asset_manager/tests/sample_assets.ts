@@ -8,7 +8,7 @@
 import { Asset } from '@kbn/assetManager-plugin/common/types_api';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createSampleAssets, deleteSampleAssets, viewSampleAssetDocs } from '../helpers';
+import { createSampleAssets, deleteSampleAssets, viewSampleAssetDocs } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

@@ -25,3 +25,7 @@ export interface IESAggSource extends IESSource {
   isGeoGridPrecisionAware(): boolean;
   getGeoGridPrecision(zoom: number): number;
 }
+
+export interface ESAggsSourceSyncMeta {
+  metrics: string[];
+}

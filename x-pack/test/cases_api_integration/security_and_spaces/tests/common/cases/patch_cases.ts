@@ -10,18 +10,20 @@ import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  CaseSeverity,
+  AttachmentType,
   Cases,
+  CaseSeverity,
   CaseStatuses,
-  CommentType,
   ConnectorTypes,
-} from '@kbn/cases-plugin/common/api';
+  CustomFieldTypes,
+} from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   getPostCaseRequest,
   postCaseReq,
   postCaseResp,
+  postCommentUserReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -37,10 +39,12 @@ import {
   calculateDuration,
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
+  createConfiguration,
+  getConfigurationRequest,
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   deleteAllRules,
   getRuleForSignalTesting,
   waitForRuleSuccess,
@@ -74,6 +78,21 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('happy path', () => {
       it('should patch a case', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'test_custom_field',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+            },
+          })
+        );
         const postedCase = await createCase(supertest, postCaseReq);
         const patchedCases = await updateCase({
           supertest,
@@ -91,12 +110,19 @@ export default ({ getService }: FtrProviderContext): void => {
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
         expect(data).to.eql({
           ...postCaseResp(),
+          customFields: [
+            {
+              key: 'test_custom_field',
+              type: CustomFieldTypes.TEXT,
+              value: null,
+            },
+          ],
           title: 'new title',
           updated_by: defaultUser,
         });
       });
 
-      it('should closes the case correctly', async () => {
+      it('should close the case correctly', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const patchedCases = await updateCase({
           supertest,
@@ -199,6 +225,62 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('should patch the category of a case correctly', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        // the default category
+        expect(postedCase.category).equal(null);
+
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                category: 'foobar',
+              },
+            ],
+          },
+        });
+
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+
+        expect(data).to.eql({
+          ...postCaseResp(),
+          category: 'foobar',
+          updated_by: defaultUser,
+        });
+      });
+
+      it('should unset the category of a case correctly', async () => {
+        const postedCase = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
+
+        // the default category
+        expect(postedCase.category).equal('foobar');
+
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                category: null,
+              },
+            ],
+          },
+        });
+
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+
+        expect(data).to.eql({
+          ...postCaseResp(),
+          category: null,
+          updated_by: defaultUser,
+        });
+      });
+
       it('should patch a case with new connector', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const patchedCases = await updateCase({
@@ -230,6 +312,136 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           updated_by: defaultUser,
         });
+      });
+
+      it('should patch a case with customFields', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'test_custom_field_1',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+                {
+                  key: 'test_custom_field_2',
+                  label: 'toggle',
+                  type: CustomFieldTypes.TOGGLE,
+                  required: true,
+                },
+              ],
+            },
+          })
+        );
+
+        const postedCase = await createCase(supertest, {
+          ...postCaseReq,
+          customFields: [
+            {
+              key: 'test_custom_field_2',
+              type: CustomFieldTypes.TOGGLE,
+              value: true,
+            },
+          ],
+        });
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                customFields: [
+                  {
+                    key: 'test_custom_field_1',
+                    type: CustomFieldTypes.TEXT,
+                    value: 'this is a text field value',
+                  },
+                  {
+                    key: 'test_custom_field_2',
+                    type: CustomFieldTypes.TOGGLE,
+                    value: true,
+                  },
+                ],
+              },
+            ],
+          },
+        });
+
+        expect(patchedCases[0].customFields).to.eql([
+          {
+            key: 'test_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            value: 'this is a text field value',
+          },
+          {
+            key: 'test_custom_field_2',
+            type: CustomFieldTypes.TOGGLE,
+            value: true,
+          },
+        ]);
+      });
+
+      it('should fill out missing optional custom fields', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'test_custom_field_1',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+                {
+                  key: 'test_custom_field_2',
+                  label: 'toggle',
+                  type: CustomFieldTypes.TOGGLE,
+                  required: true,
+                },
+              ],
+            },
+          })
+        );
+
+        const postedCase = await createCase(supertest, {
+          ...postCaseReq,
+          customFields: [
+            {
+              key: 'test_custom_field_2',
+              type: CustomFieldTypes.TOGGLE,
+              value: true,
+            },
+          ],
+        });
+
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                customFields: [
+                  {
+                    key: 'test_custom_field_2',
+                    type: CustomFieldTypes.TOGGLE,
+                    value: true,
+                  },
+                ],
+              },
+            ],
+          },
+        });
+
+        expect(patchedCases[0].customFields).to.eql([
+          { key: 'test_custom_field_2', type: 'toggle', value: true },
+          { key: 'test_custom_field_1', type: 'text', value: null },
+        ]);
       });
 
       describe('duration', () => {
@@ -289,6 +501,115 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(openCases[0].duration).to.be(null);
           });
         }
+      });
+
+      it('should return the expected total comments and alerts', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          expectedHttpCode: 200,
+        });
+
+        const updatedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            alertId: '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78',
+            index: '.siem-signals-default-000001',
+            rule: { id: 'test-rule-id', name: 'test-index-id' },
+            type: AttachmentType.alert,
+            owner: 'securitySolutionFixture',
+          },
+        });
+
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: updatedCase.version,
+                title: 'new title',
+              },
+            ],
+          },
+        });
+
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+        expect(data).to.eql({
+          ...postCaseResp(),
+          title: 'new title',
+          totalComment: 1,
+          totalAlerts: 1,
+          updated_by: defaultUser,
+        });
+      });
+
+      it('should return the expected total comments and alerts for multiple cases', async () => {
+        const postedCase1 = await createCase(supertest, postCaseReq);
+        const postedCase2 = await createCase(supertest, postCaseReq);
+        const updatedCaseVersions = [];
+
+        for (const postedCaseId of [postedCase1.id, postedCase2.id]) {
+          await createComment({
+            supertest,
+            caseId: postedCaseId,
+            params: postCommentUserReq,
+            expectedHttpCode: 200,
+          });
+
+          const updatedCase = await createComment({
+            supertest,
+            caseId: postedCaseId,
+            params: {
+              alertId: '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78',
+              index: '.siem-signals-default-000001',
+              rule: { id: 'test-rule-id', name: 'test-index-id' },
+              type: AttachmentType.alert,
+              owner: 'securitySolutionFixture',
+            },
+          });
+
+          updatedCaseVersions.push(updatedCase.version);
+        }
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase1.id,
+                version: updatedCaseVersions[0],
+                title: 'new title',
+              },
+              {
+                id: postedCase2.id,
+                version: updatedCaseVersions[1],
+                title: 'new title',
+              },
+            ],
+          },
+        });
+
+        const dataCase1 = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+        expect(dataCase1).to.eql({
+          ...postCaseResp(),
+          title: 'new title',
+          totalComment: 1,
+          totalAlerts: 1,
+          updated_by: defaultUser,
+        });
+
+        const dataCase2 = removeServerGeneratedPropertiesFromCase(patchedCases[1]);
+        expect(dataCase2).to.eql({
+          ...postCaseResp(),
+          title: 'new title',
+          totalComment: 1,
+          totalAlerts: 1,
+          updated_by: defaultUser,
+        });
       });
     });
 
@@ -391,7 +712,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('406s when excess data sent', async () => {
+      it('400s when excess data sent', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         await updateCase({
           supertest,
@@ -405,7 +726,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          expectedHttpCode: 406,
+          expectedHttpCode: 400,
         });
       });
 
@@ -505,22 +826,460 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('400s if the title is too long', async () => {
-        const longTitle = 'a'.repeat(161);
-
-        const postedCase = await createCase(supertest, postCaseReq);
+      it('400s when trying to update too many cases', async () => {
         await updateCase({
           supertest,
           params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                title: longTitle,
-              },
-            ],
+            cases: Array(101).fill({ id: 'foo', version: 'bar', title: 'coolTitle' }),
           },
           expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to update zero cases', async () => {
+        await updateCase({
+          supertest,
+          params: {
+            cases: [],
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      describe('title', async () => {
+        it('400s if the title is too long', async () => {
+          const longTitle = 'a'.repeat(161);
+
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  title: longTitle,
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s if the title an empty string', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  title: '',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s if the title is a string with empty characters', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  title: '  ',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+      });
+
+      describe('description', async () => {
+        it('400s if the description is too long', async () => {
+          const longDescription = 'a'.repeat(30001);
+
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  description: longDescription,
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s if the description an empty string', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  description: '',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s if the description is a string with empty characters', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  description: '  ',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+      });
+
+      describe('categories', async () => {
+        it('400s when a too long category value is passed', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  category: 'A very long category with more than fifty characters!',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when an empty string category value is passed', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  category: '',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when a string with spaces category value is passed', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  category: '  ',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+      });
+
+      describe('tags', async () => {
+        it('400s when tags array is too long', async () => {
+          const tags = Array(201).fill('foo');
+
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  tags,
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when tag string is too long', async () => {
+          const tag = 'a'.repeat(257);
+
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  tags: [tag],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when an empty string is passed in tags', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  tags: ['', 'one'],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when a string with spaces tag value is passed', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  tags: ['  '],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+      });
+
+      describe('customFields', async () => {
+        it('400s when trying to patch with duplicated custom field keys', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  customFields: [
+                    {
+                      key: 'duplicated_key',
+                      type: CustomFieldTypes.TEXT,
+                      value: 'this is a text field value',
+                    },
+                    {
+                      key: 'duplicated_key',
+                      type: CustomFieldTypes.TEXT,
+                      value: 'this is a text field value',
+                    },
+                  ],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when trying to patch with a custom field key that does not exist', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'test_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                  },
+                ],
+              },
+            })
+          );
+          const postedCase = await createCase(supertest, postCaseReq);
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  customFields: [
+                    {
+                      key: 'key_does_not_exist',
+                      type: CustomFieldTypes.TEXT,
+                      value: 'this is a text field value',
+                    },
+                  ],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when trying to patch a case with a missing required custom field', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'test_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: true,
+                  },
+                ],
+              },
+            })
+          );
+
+          const postedCase = await createCase(supertest, {
+            ...postCaseReq,
+            customFields: [
+              {
+                key: 'test_custom_field',
+                type: CustomFieldTypes.TEXT,
+                value: 'hello',
+              },
+            ],
+          });
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  customFields: [],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when trying to patch a case with a required custom field with null value', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'test_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: true,
+                  },
+                ],
+              },
+            })
+          );
+
+          const postedCase = await createCase(supertest, {
+            ...postCaseReq,
+            customFields: [
+              {
+                key: 'test_custom_field',
+                type: CustomFieldTypes.TEXT,
+                value: 'hello',
+              },
+            ],
+          });
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  customFields: [
+                    {
+                      key: 'test_custom_field',
+                      type: CustomFieldTypes.TEXT,
+                      value: null,
+                    },
+                  ],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+        it('400s when trying to patch a case with a custom field with the wrong type', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'test_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                  },
+                ],
+              },
+            })
+          );
+          const postedCase = await createCase(supertest, postCaseReq);
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  customFields: [
+                    {
+                      key: 'test_custom_field',
+                      type: CustomFieldTypes.TOGGLE,
+                      value: false,
+                    },
+                  ],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
         });
       });
     });
@@ -556,7 +1315,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId: signalID,
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -575,7 +1334,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId: signalID2,
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -701,7 +1460,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId: signalIDInFirstIndex,
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -713,7 +1472,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId: signalIDInSecondIndex,
               index: signalsIndex2,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -794,7 +1553,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
@@ -824,7 +1583,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: 'id',
                 name: 'name',
               },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -883,7 +1642,7 @@ export default ({ getService }: FtrProviderContext): void => {
             params: {
               alertId: alert._id,
               index: alert._index,
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               rule: {
                 id: 'id',
                 name: 'name',
@@ -943,7 +1702,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: 'id',
                 name: 'name',
               },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -1011,7 +1770,7 @@ export default ({ getService }: FtrProviderContext): void => {
             params: {
               alertId: alert._id,
               index: alert._index,
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               rule: {
                 id: 'id',
                 name: 'name',

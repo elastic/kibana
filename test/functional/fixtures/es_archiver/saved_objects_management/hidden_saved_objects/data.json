@@ -1,31 +1,11 @@
 {
   "type": "doc",
   "value": {
-    "id": "test-hidden-importable-exportable:ff3733a0-9fty-11e7-ahb3-3dcb94193fab",
-    "index": ".kibana",
-    "source": {
-      "coreMigrationVersion": "7.14.0",
-      "references": [
-      ],
-      "test-hidden-importable-exportable": {
-        "title": "Hidden Saved object type that is importable/exportable."
-      },
-      "type": "test-hidden-importable-exportable",
-      "updated_at": "2021-02-11T18:51:23.794Z"
-    },
-    "type": "_doc"
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
     "id": "test-hidden-non-importable-exportable:op3767a1-9rcg-53u7-jkb3-3dnb74193awc",
     "index": ".kibana",
     "source": {
       "coreMigrationVersion": "7.14.0",
-      "references": [
-      ],
+      "references": [],
       "test-hidden-non-importable-exportable": {
         "title": "Hidden Saved object type that is not importable/exportable."
       },
@@ -35,3 +15,4 @@
     "type": "_doc"
   }
 }
+

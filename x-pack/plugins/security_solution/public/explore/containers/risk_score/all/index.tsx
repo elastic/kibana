@@ -28,6 +28,7 @@ import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
 import type { inputsModel } from '../../../../common/store';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity.user> {
   data:
@@ -40,7 +41,7 @@ export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity
   refetch: inputsModel.Refetch;
   totalCount: number;
   isModuleEnabled: boolean;
-  isLicenseValid: boolean;
+  isAuthorized: boolean;
   isDeprecated: boolean;
   loading: boolean;
 }
@@ -83,10 +84,11 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   includeAlertsCount = false,
 }: UseRiskScore<T>): RiskScoreState<T> => {
   const spaceId = useSpaceId();
+  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
   const defaultIndex = spaceId
     ? riskEntity === RiskScoreEntity.host
-      ? getHostRiskIndex(spaceId, onlyLatest)
-      : getUserRiskIndex(spaceId, onlyLatest)
+      ? getHostRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
+      : getUserRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleInstalled)
     : undefined;
   const factoryQueryType =
     riskEntity === RiskScoreEntity.host ? RiskQueries.hostsRiskScore : RiskQueries.usersRiskScore;
@@ -98,7 +100,7 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   const {
     isDeprecated,
     isEnabled,
-    isLicenseValid,
+    isAuthorized,
     isLoading: isDeprecatedLoading,
     refetch: refetchDeprecated,
   } = useRiskScoreFeatureStatus(riskEntity, defaultIndex);
@@ -123,33 +125,18 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
     }
   }, [defaultIndex, refetch, refetchDeprecated]);
 
-  // since query does not take timerange arg, we need to manually refetch when time range updates
-  // the results can be different if the user has run the ML for the first time since pressing refresh
-  useEffect(() => {
-    refetchAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timerange?.to, timerange?.from]);
-
   const riskScoreResponse = useMemo(
     () => ({
       data: response.data,
       inspect,
       refetch: refetchAll,
       totalCount: response.totalCount,
-      isLicenseValid,
+      isAuthorized,
       isDeprecated,
       isModuleEnabled: isEnabled,
       isInspected: false,
     }),
-    [
-      inspect,
-      isDeprecated,
-      isEnabled,
-      isLicenseValid,
-      refetchAll,
-      response.data,
-      response.totalCount,
-    ]
+    [inspect, isDeprecated, isEnabled, isAuthorized, refetchAll, response.data, response.totalCount]
   );
 
   const requestTimerange = useMemo(
@@ -174,7 +161,8 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
                   }
                 : undefined,
             sort,
-            timerange: onlyLatest ? undefined : requestTimerange,
+            timerange: requestTimerange,
+            alertsTimerange: includeAlertsCount ? requestTimerange : undefined,
           }
         : null,
     [
@@ -185,7 +173,6 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
       querySize,
       sort,
       requestTimerange,
-      onlyLatest,
       riskEntity,
       includeAlertsCount,
     ]
@@ -204,21 +191,15 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
       !skip &&
       !isDeprecatedLoading &&
       riskScoreRequest != null &&
-      isLicenseValid &&
+      isAuthorized &&
       isEnabled &&
       !isDeprecated
     ) {
       search(riskScoreRequest);
     }
-  }, [
-    isEnabled,
-    isDeprecated,
-    isLicenseValid,
-    isDeprecatedLoading,
-    riskScoreRequest,
-    search,
-    skip,
-  ]);
+  }, [isEnabled, isDeprecated, isAuthorized, isDeprecatedLoading, riskScoreRequest, search, skip]);
 
-  return { ...riskScoreResponse, loading: loading || isDeprecatedLoading };
+  const result = { ...riskScoreResponse, loading: loading || isDeprecatedLoading };
+
+  return result;
 };

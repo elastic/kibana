@@ -9,13 +9,9 @@ import { FilterStateStore } from '@kbn/es-query';
 
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import { VIEW_SELECTION } from '../../../common/constants';
-import type { TimelineResult } from '../../../common/types/timeline';
-import {
-  TimelineId,
-  TimelineType,
-  TimelineStatus,
-  TimelineTabs,
-} from '../../../common/types/timeline';
+import type { TimelineResult } from '../../../common/api/timeline';
+import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
 
 import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
@@ -2030,6 +2026,9 @@ export const mockTimelineModel: TimelineModel = {
   templateTimelineId: null,
   templateTimelineVersion: null,
   version: '1',
+  savedSearchId: null,
+  savedSearch: null,
+  isDataProviderVisible: false,
 };
 
 export const mockDataTableModel: DataTableModel = {
@@ -2209,6 +2208,10 @@ export const defaultTimelineProps: CreateTimelineProps = {
     templateTimelineVersion: null,
     templateTimelineId: null,
     version: null,
+    savedSearchId: null,
+    isDiscoverSavedSearchLoaded: false,
+    savedSearch: null,
+    isDataProviderVisible: false,
   },
   to: '2018-11-05T19:03:25.937Z',
   notes: null,

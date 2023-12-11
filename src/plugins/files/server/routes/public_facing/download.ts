@@ -73,6 +73,7 @@ export function register(router: FilesRouter) {
       validate: { ...rt },
       options: {
         authRequired: false,
+        access: 'public',
       },
     },
     handler

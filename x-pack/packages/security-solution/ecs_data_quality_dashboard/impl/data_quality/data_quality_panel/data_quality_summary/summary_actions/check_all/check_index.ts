@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { HttpHandler } from '@kbn/core-http-browser';
 import { getUnallowedValueRequestItems } from '../../../allowed_values/helpers';
 import {
   getMappingsProperties,
@@ -20,29 +21,43 @@ export const EMPTY_PARTITIONED_FIELD_METADATA: PartitionedFieldMetadata = {
   custom: [],
   ecsCompliant: [],
   incompatible: [],
+  sameFamily: [],
 };
 
 export async function checkIndex({
   abortController,
+  batchId,
+  checkAllStartTime,
   ecsMetadata,
   formatBytes,
   formatNumber,
+  httpFetch,
   indexName,
+  isLastCheck,
   onCheckCompleted,
   pattern,
   version,
 }: {
   abortController: AbortController;
+  batchId: string;
+  checkAllStartTime: number;
   ecsMetadata: Record<string, EcsMetadata> | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
+  httpFetch: HttpHandler;
   indexName: string;
+  isLastCheck: boolean;
   onCheckCompleted: OnCheckCompleted;
   pattern: string;
   version: string;
 }) {
   try {
-    const indexes = await fetchMappings({ abortController, patternOrIndexName: indexName });
+    const startTime = Date.now();
+    const indexes = await fetchMappings({
+      abortController,
+      httpFetch,
+      patternOrIndexName: indexName,
+    });
 
     const requestItems = getUnallowedValueRequestItems({
       ecsMetadata,
@@ -51,6 +66,7 @@ export async function checkIndex({
 
     const searchResults = await fetchUnallowedValues({
       abortController,
+      httpFetch,
       indexName,
       requestItems,
     });
@@ -75,25 +91,32 @@ export async function checkIndex({
 
     if (!abortController.signal.aborted) {
       onCheckCompleted({
+        checkAllStartTime,
+        batchId,
         error: null,
         formatBytes,
         formatNumber,
         indexName,
         partitionedFieldMetadata,
         pattern,
+        requestTime: Date.now() - startTime,
         version,
+        isLastCheck,
       });
     }
   } catch (error) {
     if (!abortController.signal.aborted) {
       onCheckCompleted({
-        error: error != null ? error.toString() : i18n.AN_ERROR_OCCURRED_CHECKING_INDEX(indexName),
+        checkAllStartTime,
+        batchId,
+        error: error != null ? error.message : i18n.AN_ERROR_OCCURRED_CHECKING_INDEX(indexName),
         formatBytes,
         formatNumber,
         indexName,
         partitionedFieldMetadata: null,
         pattern,
         version,
+        isLastCheck,
       });
     }
   }

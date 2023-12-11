@@ -17,8 +17,8 @@ describe('updateIndexMeta', () => {
     const index = '.kibana_1';
     const meta: IndexMappingMeta = {
       mappingVersions: {
-        foo: 1,
-        bar: 1,
+        foo: '10.1.0',
+        bar: '10.1.0',
       },
     };
 

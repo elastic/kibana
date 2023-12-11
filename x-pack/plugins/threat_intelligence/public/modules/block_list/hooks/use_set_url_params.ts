@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSecurityContext } from '../../../hooks';
+import { useSecurityContext } from '../../../hooks/use_security_context';
 
 /**
  * Retrieve the useSetUrlParams hook from SecurityContext.

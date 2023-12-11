@@ -18,7 +18,7 @@ import {
 } from '../../hooks/use_metrics_explorer_options';
 import { MetricsExplorerOptions } from '../../hooks/use_metrics_explorer_options';
 jest.mock('uuid', () => ({
-  v1: jest.fn().mockReturnValue('test-id'),
+  v4: jest.fn().mockReturnValue('test-id'),
 }));
 
 const series = { id: 'example-01', rows: [], columns: [] };

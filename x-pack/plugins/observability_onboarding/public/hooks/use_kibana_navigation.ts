@@ -6,22 +6,21 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ApplicationStart, HttpStart } from '@kbn/core/public';
-
-interface ObservabilityOnboardingAppServices {
-  application: ApplicationStart;
-  http: HttpStart;
-}
+import { ObservabilityOnboardingAppServices } from '..';
 
 export function useKibanaNavigation() {
   const {
-    application: { navigateToUrl },
+    application: { navigateToUrl, navigateToApp },
     http: { basePath },
   } = useKibana<ObservabilityOnboardingAppServices>().services;
 
   const navigateToKibanaUrl = (kibanaPath: string) => {
-    navigateToUrl(basePath.prepend(kibanaPath));
+    navigateToUrl(basePath.prepend(kibanaPath), {});
   };
 
-  return navigateToKibanaUrl;
+  const navigateToAppUrl = (path: string) => {
+    navigateToApp('', { path, openInNewTab: true });
+  };
+
+  return { navigateToKibanaUrl, navigateToAppUrl };
 }

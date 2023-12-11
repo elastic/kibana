@@ -19,7 +19,7 @@ import { getThreatMock } from '../../../../../../common/detection_engine/schemas
 import {
   getSampleDetailsAsNdjson,
   getOutputDetailsSampleWithExceptions,
-} from '../../../../../../common/detection_engine/rule_management/mocks';
+} from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
 import { savedObjectsExporterMock } from '@kbn/core-saved-objects-import-export-server-mocks';
@@ -28,7 +28,7 @@ import { mockRouter } from '@kbn/core-http-router-server-mocks';
 const exceptionsClient = getExceptionListClientMock();
 import type { loggingSystemMock } from '@kbn/core/server/mocks';
 import { requestContextMock } from '../../../routes/__mocks__/request_context';
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
 const connectors = [
   {
@@ -38,6 +38,7 @@ const connectors = [
     config: {},
     isPreconfigured: false,
     isDeprecated: false,
+    isSystemAction: false,
     referencedByCount: 1,
   },
   {
@@ -47,6 +48,7 @@ const connectors = [
     config: {},
     isPreconfigured: true,
     isDeprecated: false,
+    isSystemAction: false,
     referencedByCount: 1,
   },
 ];
@@ -58,7 +60,6 @@ describe('get_export_by_object_ids', () => {
   const actionsClient = actionsClientMock.create();
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.restoreAllMocks();
     jest.clearAllMocks();
 
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
@@ -131,6 +132,7 @@ describe('get_export_by_object_ids', () => {
           note: '# Investigative notes',
           version: 1,
           exceptions_list: getListArrayMock(),
+          investigation_fields: undefined,
         },
         exportDetails: {
           exported_exception_list_count: 0,
@@ -326,6 +328,7 @@ describe('get_export_by_object_ids', () => {
         version: 1,
         revision: 0,
         exceptions_list: getListArrayMock(),
+        investigation_fields: undefined,
       });
       expect(detailsJson).toEqual({
         exported_exception_list_count: 0,
@@ -522,6 +525,7 @@ describe('get_export_by_object_ids', () => {
             namespace: undefined,
             data_view_id: undefined,
             alert_suppression: undefined,
+            investigation_fields: undefined,
           },
         ],
       };

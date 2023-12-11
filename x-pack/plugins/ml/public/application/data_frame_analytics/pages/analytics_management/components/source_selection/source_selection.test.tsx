@@ -10,7 +10,10 @@ import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { getDataViewAndSavedSearch, DataViewAndSavedSearch } from '../../../../../util/index_utils';
+import {
+  type DataViewAndSavedSearch,
+  getDataViewAndSavedSearchCallback,
+} from '../../../../../util/index_utils';
 
 import { SourceSelection } from './source_selection';
 
@@ -74,6 +77,9 @@ jest.mock('../../../../../contexts/kibana', () => ({
       uiSettings: {},
       http: {},
       savedObjectsManagement: {},
+      data: { dataViews: jest.fn() },
+      savedSearch: jest.fn(),
+      contentManagement: {},
     },
   }),
   useNavigateToPath: () => mockNavigateToPath,
@@ -86,29 +92,31 @@ jest.mock('../../../../../contexts/kibana', () => ({
 
 jest.mock('../../../../../util/index_utils', () => {
   return {
-    getDataViewAndSavedSearch: jest.fn(async (id: string): Promise<DataViewAndSavedSearch> => {
-      return {
-        dataView: {
-          // @ts-expect-error fields should not be empty
-          fields: [],
-          title:
-            id === 'the-remote-saved-search-id'
-              ? 'my_remote_cluster:index-pattern-title'
-              : 'index-pattern-title',
-        },
-        savedSearch: null,
-      };
-    }),
+    getDataViewAndSavedSearchCallback: jest
+      .fn()
+      .mockReturnValue(async (id: string): Promise<DataViewAndSavedSearch> => {
+        return {
+          dataView: {
+            // @ts-expect-error fields should not be empty
+            fields: [],
+            title:
+              id === 'the-remote-saved-search-id'
+                ? 'my_remote_cluster:index-pattern-title'
+                : 'index-pattern-title',
+          },
+          savedSearch: null,
+        };
+      }),
     isCcsIndexPattern: (a: string) => a.includes(':'),
   };
 });
 
-const mockGetDataViewAndSavedSearch = getDataViewAndSavedSearch as jest.Mock;
+const mockGetDataViewAndSavedSearchCallback = getDataViewAndSavedSearchCallback as jest.Mock;
 
 describe('Data Frame Analytics: <SourceSelection />', () => {
   afterEach(() => {
     mockNavigateToPath.mockClear();
-    mockGetDataViewAndSavedSearch.mockClear();
+    mockGetDataViewAndSavedSearchCallback.mockClear();
   });
 
   it('renders the title text', async () => {
@@ -121,7 +129,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
 
     // assert
     expect(mockNavigateToPath).toHaveBeenCalledTimes(0);
-    expect(mockGetDataViewAndSavedSearch).toHaveBeenCalledTimes(0);
+    expect(mockGetDataViewAndSavedSearchCallback).toHaveBeenCalledTimes(0);
   });
 
   it('shows the error callout when clicking a remote data view', async () => {
@@ -141,7 +149,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
       screen.queryByText('Data views using cross-cluster search are not supported.')
     ).toBeInTheDocument();
     expect(mockNavigateToPath).toHaveBeenCalledTimes(0);
-    expect(mockGetDataViewAndSavedSearch).toHaveBeenCalledTimes(0);
+    expect(mockGetDataViewAndSavedSearchCallback).toHaveBeenCalledTimes(0);
   });
 
   it('calls navigateToPath for a plain data view ', async () => {
@@ -163,7 +171,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
       expect(mockNavigateToPath).toHaveBeenCalledWith(
         '/data_frame_analytics/new_job?index=the-plain-index-pattern-id'
       );
-      expect(mockGetDataViewAndSavedSearch).toHaveBeenCalledTimes(0);
+      expect(mockGetDataViewAndSavedSearchCallback).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -176,6 +184,16 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     );
 
     // act
+
+    mockGetDataViewAndSavedSearchCallback.mockImplementationOnce(() => () => {
+      return {
+        dataView: {
+          fields: [],
+          title: 'my_remote_cluster:index-pattern-title',
+        },
+        savedSearch: null,
+      };
+    });
     fireEvent.click(screen.getByText('RemoteSavedSearch', { selector: 'button' }));
     await waitFor(() => screen.getByTestId('analyticsCreateSourceIndexModalCcsErrorCallOut'));
 
@@ -189,7 +207,6 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
       )
     ).toBeInTheDocument();
     expect(mockNavigateToPath).toHaveBeenCalledTimes(0);
-    expect(mockGetDataViewAndSavedSearch).toHaveBeenCalledWith('the-remote-saved-search-id');
   });
 
   it('calls navigateToPath for a saved search using a plain data view ', async () => {
@@ -211,7 +228,6 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
       expect(mockNavigateToPath).toHaveBeenCalledWith(
         '/data_frame_analytics/new_job?savedSearchId=the-plain-saved-search-id'
       );
-      expect(mockGetDataViewAndSavedSearch).toHaveBeenCalledWith('the-plain-saved-search-id');
     });
   });
 });

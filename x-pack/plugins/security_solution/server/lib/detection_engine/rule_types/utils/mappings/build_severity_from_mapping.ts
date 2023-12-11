@@ -13,7 +13,7 @@ import type {
   SeverityMappingItem,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import type { RuleMetadata } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleMetadata } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type { SearchTypes } from '../../../../../../common/detection_engine/types';
 import type { SignalSource } from '../../types';
 

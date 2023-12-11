@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -33,7 +33,7 @@ const AddNotesContainer = styled.div`
 AddNotesContainer.displayName = 'AddNotesContainer';
 
 const ButtonsContainer = styled(EuiFlexGroup)`
-  margin-top: 5px;
+  margin-top: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 ButtonsContainer.displayName = 'ButtonsContainer';
@@ -56,6 +56,7 @@ export const AddNote = React.memo<{
 }>(({ associateNote, newNote, onCancelAddNote, updateNewNote, autoFocusDisabled = false }) => {
   const dispatch = useDispatch();
   const authenticatedUser = useCurrentUser();
+  const [isMarkdownInvalid, setIsMarkdownInvalid] = useState(false);
   const updateNote = useCallback(
     (note: Note) => dispatch(appActions.updateNote({ note })),
     [dispatch]
@@ -88,8 +89,8 @@ export const AddNote = React.memo<{
   );
 
   const isAddNoteDisabled = useMemo(() => {
-    return newNote.trim().length === 0;
-  }, [newNote]);
+    return newNote.trim().length === 0 || isMarkdownInvalid;
+  }, [newNote, isMarkdownInvalid]);
 
   return (
     <AddNotesContainer onKeyDown={onKeyDown} role="dialog">
@@ -102,6 +103,7 @@ export const AddNote = React.memo<{
           noteInputHeight={200}
           updateNewNote={updateNewNote}
           autoFocusDisabled={autoFocusDisabled}
+          setIsMarkdownInvalid={setIsMarkdownInvalid}
         />
         <ButtonsContainer gutterSize="none">
           {onCancelAddNote != null ? (

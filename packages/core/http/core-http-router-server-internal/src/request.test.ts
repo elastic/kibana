@@ -15,6 +15,10 @@ import { hapiMocks } from '@kbn/hapi-mocks';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from './request';
 import { schema } from '@kbn/config-schema';
+import {
+  ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 
 describe('CoreKibanaRequest', () => {
   describe('using real requests', () => {
@@ -119,7 +123,7 @@ describe('CoreKibanaRequest', () => {
       });
     });
 
-    describe('isSytemApi property', () => {
+    describe('isSystemRequest property', () => {
       it('is false when no kbn-system-request header is set', () => {
         const request = hapiMocks.createRequest({
           headers: { custom: 'one' },
@@ -142,6 +146,58 @@ describe('CoreKibanaRequest', () => {
         });
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.isSystemRequest).toBe(false);
+      });
+    });
+
+    describe('isInternalApiRequest property', () => {
+      it('is true when header is set', () => {
+        const request = hapiMocks.createRequest({
+          headers: { [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'true' },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+        expect(kibanaRequest.isInternalApiRequest).toBe(true);
+      });
+      it('is true when query param is set', () => {
+        const request = hapiMocks.createRequest({
+          query: { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: 'true' },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+        expect(kibanaRequest.isInternalApiRequest).toBe(true);
+      });
+      it('is true when both header and query param is set', () => {
+        const request = hapiMocks.createRequest({
+          headers: { [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'true' },
+          query: { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: 'true' },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+        expect(kibanaRequest.isInternalApiRequest).toBe(true);
+      });
+      it('is false when neither header nor query param is set', () => {
+        const request = hapiMocks.createRequest();
+        const kibanaRequest = CoreKibanaRequest.from(request);
+        expect(kibanaRequest.isInternalApiRequest).toBe(false);
+      });
+    });
+
+    describe('sanitize input', () => {
+      it('does not pass the reserved query parameter to consumers', () => {
+        const request = hapiMocks.createRequest({
+          query: { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: 'true', myCoolValue: 'cool!' },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request, {
+          query: schema.object({ myCoolValue: schema.string() }),
+        });
+        expect(kibanaRequest.query).toEqual({ myCoolValue: 'cool!' });
+      });
+      it('pass nothing if only the reserved query param is present', () => {
+        const request = hapiMocks.createRequest({
+          query: { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: 'true' },
+        });
+        expect(() =>
+          CoreKibanaRequest.from(request, {
+            query: schema.object({}, { unknowns: 'forbid' }), // we require an empty object
+          })
+        ).not.toThrow();
       });
     });
 

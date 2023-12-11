@@ -24,6 +24,7 @@ export const getRiskScoreIndexStatus = async (params: {
     RISK_SCORE_INDEX_STATUS_API_URL,
     {
       method: 'GET',
+      version: '1',
       query: { indexName, entity },
       asSystemRequest: true,
       signal: params.signal,

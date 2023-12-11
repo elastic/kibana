@@ -28,6 +28,7 @@ import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
  * Tests
  */
 describe('Screenshot Observable Pipeline', () => {
+  const originalCreateLayout = Layouts.createLayout;
   let driver: ReturnType<typeof createMockBrowserDriver>;
   let driverFactory: jest.Mocked<HeadlessChromiumDriverFactory>;
   let http: ReturnType<typeof httpServiceMock.createSetupContract>;
@@ -57,6 +58,8 @@ describe('Screenshot Observable Pipeline', () => {
       buildSha: 'screenshot-dfdfed0a',
       dist: false,
       version: '5000.0.0',
+      buildDate: new Date('2023-05-15T23:12:09.000Z'),
+      buildFlavor: 'traditional',
     };
     options = {
       browserTimezone: 'UTC',
@@ -65,6 +68,7 @@ describe('Screenshot Observable Pipeline', () => {
       urls: ['/welcome/home/start/index.htm'],
     };
     config = {
+      enabled: true,
       poolSize: 1,
       capture: {
         timeouts: {
@@ -80,13 +84,18 @@ describe('Screenshot Observable Pipeline', () => {
 
     screenshots = new Screenshots(driverFactory, logger, packageInfo, http, config, cloud);
 
-    jest.spyOn(Layouts, 'createLayout').mockReturnValue(layout);
-
+    // Using this patch instead of using `jest.spyOn`. This way we avoid calling
+    // `jest.restoraAllMocks()` which removes implementations from other mocks not
+    // explicit in this test (like apm mock object)
+    // @ts-expect-error
+    Layouts.createLayout = () => layout;
     driver.isPageOpen.mockReturnValue(true);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    // @ts-expect-error
+    Layouts.createLayout = originalCreateLayout;
+    jest.clearAllMocks();
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {
@@ -214,10 +223,6 @@ describe('Screenshot Observable Pipeline', () => {
   describe('cloud', () => {
     beforeEach(() => {
       cloud.isCloudEnabled = true;
-    });
-
-    afterEach(() => {
-      jest.resetAllMocks();
     });
 
     it('throws an error when OS memory is under 1GB on cloud', async () => {

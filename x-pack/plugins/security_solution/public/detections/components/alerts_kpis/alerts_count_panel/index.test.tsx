@@ -10,7 +10,7 @@ import { waitFor, act } from '@testing-library/react';
 import { mount } from 'enzyme';
 import { AlertsCountPanel } from '.';
 
-import type { Status } from '../../../../../common/detection_engine/schemas/common';
+import type { Status } from '../../../../../common/api/detection_engine';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
 import { TestProviders } from '../../../../common/mock';
@@ -60,7 +60,7 @@ jest.mock('../../../../common/components/visualization_actions/lens_embeddable')
 jest.mock('../../../../common/components/page/use_refetch_by_session');
 jest.mock('../common/hooks', () => ({
   useInspectButton: jest.fn(),
-  useStackByFields: jest.fn(),
+  useStackByFields: jest.fn().mockReturnValue(() => []),
 }));
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 const getMockUseIsExperimentalFeatureEnabled =
@@ -272,14 +272,14 @@ describe('when the isChartEmbeddablesEnabled experimental feature flag is enable
     });
   });
 
-  it('renders LensEmbeddable with 100% height', async () => {
+  it('renders LensEmbeddable with provided height', async () => {
     await act(async () => {
       mount(
         <TestProviders>
           <AlertsCountPanel {...defaultProps} />
         </TestProviders>
       );
-      expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual('100%');
+      expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual(218);
     });
   });
 

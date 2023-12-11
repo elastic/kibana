@@ -45,6 +45,7 @@ import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
 import {
   createRegionMapFn,
@@ -121,6 +122,7 @@ export interface MapsPluginStartDependencies {
   contentManagement: ContentManagementPublicStart;
   screenshotMode?: ScreenshotModePluginSetup;
   usageCollection?: UsageCollectionSetup;
+  serverless?: ServerlessPluginStart;
 }
 
 /**
@@ -185,7 +187,7 @@ export class MapsPlugin
     if (plugins.home) {
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
-    plugins.visualizations.registerAlias(getMapsVisTypeAlias(plugins.visualizations));
+    plugins.visualizations.registerAlias(getMapsVisTypeAlias());
     plugins.embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
 
     core.application.register({

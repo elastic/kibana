@@ -6,7 +6,10 @@
  */
 
 import type { Duration } from 'moment';
-import type { RuleExecutionStatus } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type {
+  RuleExecutionStatus,
+  RuleExecutionStatusEnum,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 /**
  * Used from rule executors to log various information about the rule execution:
@@ -109,7 +112,7 @@ export interface RuleExecutionContext {
 }
 
 export interface RunningStatusChangeArgs {
-  newStatus: RuleExecutionStatus.running;
+  newStatus: RuleExecutionStatusEnum['running'];
 }
 
 /**

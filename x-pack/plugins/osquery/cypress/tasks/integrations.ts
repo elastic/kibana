@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { API_VERSIONS } from '../../common/constants';
 import { DEFAULT_POLICY } from '../screens/fleet';
 import {
   ADD_POLICY_BTN,
@@ -12,6 +13,8 @@ import {
   CONFIRM_MODAL_BTN_SEL,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   DATA_COLLECTION_SETUP_STEP,
+  DATE_PICKER_ABSOLUTE_TAB,
+  DATE_PICKER_ABSOLUTE_TAB_SEL,
   TOAST_CLOSE_BTN,
   TOAST_CLOSE_BTN_SEL,
 } from '../screens/integrations';
@@ -31,8 +34,10 @@ export const addIntegration = (agentPolicy = DEFAULT_POLICY) => {
 export const addCustomIntegration = (integrationName: string, policyName: string) => {
   cy.getBySel(ADD_POLICY_BTN).click();
   cy.getBySel(DATA_COLLECTION_SETUP_STEP).find('.euiLoadingSpinner').should('not.exist');
-  cy.getBySel('packagePolicyNameInput').type(`{selectall}{backspace}${integrationName}`);
-  cy.getBySel('createAgentPolicyNameField').type(`{selectall}{backspace}${policyName}`);
+  cy.getBySel('packagePolicyNameInput').clear();
+  cy.getBySel('packagePolicyNameInput').type(`${integrationName}`);
+  cy.getBySel('createAgentPolicyNameField').clear();
+  cy.getBySel('createAgentPolicyNameField').type(`${policyName}`);
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // No agent is enrolled with this policy, close "Add agent" modal
   cy.getBySel('confirmModalCancelButton').click();
@@ -51,9 +56,20 @@ export const integrationExistsWithinPolicyDetails = (integrationName: string) =>
 };
 
 export const interceptAgentPolicyId = (cb: (policyId: string) => void) => {
-  cy.intercept('POST', '**/api/fleet/agent_policies**', (req) => {
+  // create policy has agent_policies?SOMEPARAMS=true , this ? helps to distinguish it from the delete agent_policies/delete route
+  cy.intercept('POST', '**/api/fleet/agent_policies?**', (req) => {
     req.continue((res) => {
       cb(res.body.item.id);
+
+      return res.send(res.body);
+    });
+  });
+};
+
+export const interceptCaseId = (cb: (caseId: string) => void) => {
+  cy.intercept('POST', '**/api/cases', (req) => {
+    req.continue((res) => {
+      cb(res.body.id);
 
       return res.send(res.body);
     });
@@ -64,7 +80,7 @@ export const interceptPackId = (cb: (packId: string) => void) => {
   cy.intercept('POST', '**/api/osquery/packs', (req) => {
     req.continue((res) => {
       if (res.body.data) {
-        cb(res.body.data.id);
+        cb(res.body.data.saved_object_id);
       }
 
       return res.send(res.body);
@@ -79,6 +95,14 @@ export function closeModalIfVisible() {
   cy.get('body').then(($body) => {
     if ($body.find(CONFIRM_MODAL_BTN_SEL).length) {
       cy.getBySel(CONFIRM_MODAL_BTN).click();
+    }
+  });
+}
+
+export function closeDateTabIfVisible() {
+  cy.get('body').then(($body) => {
+    if ($body.find(DATE_PICKER_ABSOLUTE_TAB_SEL).length) {
+      cy.getBySel(DATE_PICKER_ABSOLUTE_TAB).clickOutside();
     }
   });
 }
@@ -106,7 +130,7 @@ export const deleteIntegrations = async (integrationName: string) => {
     .then(() => {
       cy.request({
         url: `/api/fleet/package_policies/delete`,
-        headers: { 'kbn-xsrf': 'cypress' },
+        headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': API_VERSIONS.public.v1 },
         body: `{ "packagePolicyIds": ${JSON.stringify(ids)} }`,
         method: 'POST',
       });
@@ -116,7 +140,7 @@ export const deleteIntegrations = async (integrationName: string) => {
 export const installPackageWithVersion = (integration: string, version: string) => {
   cy.request({
     url: `/api/fleet/epm/packages/${integration}-${version}`,
-    headers: { 'kbn-xsrf': 'cypress' },
+    headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': API_VERSIONS.public.v1 },
     body: '{ "force": true }',
     method: 'POST',
   });

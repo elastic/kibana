@@ -229,3 +229,31 @@ export const GREATER_THAN_YEAR = i18n.translate(
     defaultMessage: '> 1 Year',
   }
 );
+
+export const ROW_DETAILS_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.fullMessage',
+  {
+    defaultMessage: 'Full message',
+  }
+);
+
+export const EXPAND_ROW = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.expandRow',
+  {
+    defaultMessage: 'Expand rows',
+  }
+);
+
+export const EXPAND = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.expand',
+  {
+    defaultMessage: 'Expand',
+  }
+);
+
+export const COLLAPSE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.collapse',
+  {
+    defaultMessage: 'Collapse',
+  }
+);

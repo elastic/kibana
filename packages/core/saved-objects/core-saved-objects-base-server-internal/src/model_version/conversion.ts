@@ -89,6 +89,14 @@ export const assertValidModelVersion = (modelVersion: string | number): number =
   return modelVersion;
 };
 
+export const assertValidVirtualVersion = (virtualVersion: string): string => {
+  const semver = Semver.parse(virtualVersion);
+  if (!semver) {
+    throw new Error('Virtual versions must be valid semver versions');
+  }
+  return virtualVersion;
+};
+
 const _isVirtualModelVersion = (semver: Semver.SemVer): boolean => {
   return semver.major === modelVersionVirtualMajor && semver.patch === 0;
 };

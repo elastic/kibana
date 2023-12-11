@@ -10,35 +10,36 @@ import type {
   SavedObjectsClientContract,
   Logger,
   ISavedObjectsSerializer,
-  SavedObject,
   SavedObjectsRawDoc,
-  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { AuditLogger } from '@kbn/security-plugin/server';
-import type { CaseAssignees } from '../../../common/api/cases/assignee';
 import type {
-  ActionTypeValues,
-  CaseAttributes,
-  CasePostRequest,
-  CaseSettings,
-  CaseSeverity,
-  CaseStatuses,
-  CaseUserActionAttributesWithoutConnectorId,
-  CaseUserActionInjectedAttributes,
-  CommentRequest,
+  UserActionAction,
+  CaseUserActionWithoutReferenceIds,
   CommentUserAction,
   ConnectorUserAction,
   PushedUserAction,
+  UserActionType,
+  CaseSettings,
+  CaseSeverity,
+  CaseStatuses,
   User,
-  UserAction,
-  UserActionFindRequest,
-  UserActionTypes,
-} from '../../../common/api';
+  CaseAssignees,
+  CaseCustomFields,
+} from '../../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
+import type {
+  UserActionPersistedAttributes,
+  UserActionSavedObjectTransformed,
+} from '../../common/types/user_actions';
 import type { IndexRefresh } from '../types';
-import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import type { PatchCasesArgs } from '../cases/types';
+import type {
+  AttachmentRequest,
+  CasePostRequest,
+  UserActionFindRequest,
+} from '../../../common/types/api';
 
 export interface BuilderParameters {
   title: {
@@ -89,6 +90,12 @@ export interface BuilderParameters {
   delete_case: {
     parameters: { payload: {} };
   };
+  category: {
+    parameters: { payload: { category: string | null } };
+  };
+  customFields: {
+    parameters: { payload: { customFields: CaseCustomFields } };
+  };
 }
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {
@@ -105,7 +112,16 @@ export interface CommonArguments {
   owner: string;
   attachmentId?: string;
   connectorId?: string;
-  action?: UserAction;
+  action?: UserActionAction;
+}
+
+export interface Attributes {
+  action: UserActionAction;
+  created_at: string;
+  created_by: User;
+  owner: string;
+  type: UserActionType;
+  payload: Record<string, unknown>;
 }
 
 export interface SavedObjectParameters {
@@ -115,7 +131,7 @@ export interface SavedObjectParameters {
 
 export interface EventDetails {
   getMessage: (storedUserActionId?: string) => string;
-  action: UserAction;
+  action: UserActionAction;
   descriptiveAction: string;
   savedObjectId: string;
   savedObjectType: string;
@@ -127,8 +143,8 @@ export interface UserActionEvent {
 }
 
 export type CommonBuilderArguments = CommonArguments & {
-  action: UserAction;
-  type: UserActionTypes;
+  action: UserActionAction;
+  type: UserActionType;
   value: unknown;
   valueKey: string;
 };
@@ -146,17 +162,17 @@ export interface ServiceContext {
 }
 
 export interface PushTimeFrameInfo {
-  mostRecent: SavedObject<CaseUserActionInjectedAttributes>;
-  oldest: SavedObject<CaseUserActionInjectedAttributes>;
+  mostRecent: UserActionSavedObjectTransformed;
+  oldest: UserActionSavedObjectTransformed;
 }
 
 export interface CaseConnectorActivity {
   connectorId: string;
-  fields: SavedObject<CaseUserActionInjectedAttributes>;
+  fields: UserActionSavedObjectTransformed;
   push?: PushTimeFrameInfo;
 }
 
-export type CaseConnectorFields = Map<string, SavedObject<CaseUserActionInjectedAttributes>>;
+export type CaseConnectorFields = Map<string, UserActionSavedObjectTransformed>;
 
 export interface PushInfo {
   date: Date;
@@ -164,7 +180,7 @@ export interface PushInfo {
 }
 
 export interface UserActionItem {
-  attributes: CaseUserActionAttributesWithoutConnectorId;
+  attributes: CaseUserActionWithoutReferenceIds;
   references: SavedObjectReference[];
 }
 
@@ -223,6 +239,17 @@ export interface UserActionsStatsAggsResult {
   };
 }
 
+export interface MultipleCasesUserActionsTotalAggsResult {
+  references: {
+    caseUserActions: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+}
+
 export interface ParticipantsAggsResult {
   participants: {
     buckets: Array<{
@@ -264,25 +291,34 @@ export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDiffer
   newValue: T[];
 }
 
-export type CreatePayloadFunction<Item, ActionType extends ActionTypeValues> = (
+export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (
   items: Item[]
 ) => UserActionParameters<ActionType>['payload'];
 
-export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
-  originalCases: CaseSavedObjectTransformed[];
-  updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
+export interface BuildUserActionsDictParams {
+  updatedCases: PatchCasesArgs;
   user: User;
+}
+
+export type UserActionsDict = Record<string, UserActionEvent[]>;
+
+export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
+  builtUserActions: UserActionEvent[];
 }
 
 export interface BulkCreateAttachmentUserAction
   extends Omit<CommonUserActionArgs, 'owner'>,
     IndexRefresh {
-  attachments: Array<{ id: string; owner: string; attachment: CommentRequest }>;
+  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequest }>;
 }
 
-export type CreateUserActionClient<T extends keyof BuilderParameters> = CreateUserAction<T> &
-  CommonUserActionArgs &
-  IndexRefresh;
+export type CreateUserActionArgs<T extends keyof BuilderParameters> = {
+  userAction: CreateUserAction<T> & CommonUserActionArgs;
+} & IndexRefresh;
+
+export type BulkCreateUserActionArgs<T extends keyof BuilderParameters> = {
+  userActions: Array<CreateUserAction<T> & CommonUserActionArgs>;
+} & IndexRefresh;
 
 export interface CreateUserActionES<T> extends IndexRefresh {
   attributes: T;

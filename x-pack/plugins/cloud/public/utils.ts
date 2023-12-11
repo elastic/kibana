@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-export function getFullCloudUrl(baseUrl: string | undefined, dirPath: string | undefined) {
-  if (baseUrl && dirPath) {
-    return `${baseUrl}${dirPath}`;
-  }
+import { ELASTIC_SUPPORT_LINK } from '../common/constants';
+import { CloudConfigType } from './plugin';
 
-  return '';
+export function getSupportUrl(config: CloudConfigType): string {
+  let supportUrl = ELASTIC_SUPPORT_LINK;
+  if (config.serverless?.project_id) {
+    // serverless projects use config.id and config.serverless.project_id
+    supportUrl += '?serverless_project_id=' + config.serverless.project_id;
+  } else if (config.id) {
+    // non-serverless Cloud projects only use config.id
+    supportUrl += '?cloud_deployment_id=' + config.id;
+  }
+  return supportUrl;
 }

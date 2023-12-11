@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CasesMetricsResponse } from '../../../../common/api';
+import type { CasesMetricsResponse } from '../../../../common/types/api';
 import { Operations } from '../../../authorization';
 import { createCaseError } from '../../../common/error';
 import { constructQueryOptions } from '../../utils';

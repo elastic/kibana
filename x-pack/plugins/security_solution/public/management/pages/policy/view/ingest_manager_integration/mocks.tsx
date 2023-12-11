@@ -102,7 +102,12 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
       <I18nProvider>
         <EuiThemeProvider>
           <KibanaContextProvider services={startServices}>
-            <RenderContextProviders store={store} depsStart={depsStart} queryClient={queryClient}>
+            <RenderContextProviders
+              store={store}
+              depsStart={depsStart}
+              queryClient={queryClient}
+              upsellingService={startServices.upselling}
+            >
               {children}
             </RenderContextProviders>
           </KibanaContextProvider>

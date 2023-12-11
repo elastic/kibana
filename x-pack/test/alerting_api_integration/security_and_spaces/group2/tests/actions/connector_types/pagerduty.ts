@@ -61,6 +61,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'A pagerduty action',
         connector_type_id: '.pagerduty',
@@ -79,6 +80,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'A pagerduty action',
         connector_type_id: '.pagerduty',
@@ -158,6 +160,47 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         .send({
           params: {
             summary: 'just a test',
+          },
+        })
+        .expect(200);
+
+      expect(proxyHaveBeenCalled).to.equal(true);
+      expect(result).to.eql({
+        status: 'ok',
+        connector_id: simulatedActionId,
+        data: {
+          message: 'Event processed',
+          status: 'success',
+        },
+      });
+    });
+
+    it('should execute successfully with links and customDetails', async () => {
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            summary: 'just a test',
+            customDetails: {
+              myString: 'foo',
+              myNumber: 10,
+              myArray: ['foo', 'baz'],
+              myBoolean: true,
+              myObject: {
+                myNestedObject: 'foo',
+              },
+            },
+            links: [
+              {
+                href: 'http://example.com',
+                text: 'a link',
+              },
+              {
+                href: 'http://example.com',
+                text: 'a second link',
+              },
+            ],
           },
         })
         .expect(200);

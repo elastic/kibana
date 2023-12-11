@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { closeAllToasts } from './close_all_toasts';
+import type { ConsoleResponseActionCommands } from '../../../../common/endpoint/service/response_actions/constants';
+import { closeAllToasts } from './toasts';
 import { APP_ENDPOINTS_PATH } from '../../../../common/constants';
+import { loadPage } from './common';
+import Chainable = Cypress.Chainable;
 
 export const waitForEndpointListPageToBeLoaded = (endpointHostname: string): void => {
-  cy.visit(APP_ENDPOINTS_PATH);
+  loadPage(APP_ENDPOINTS_PATH);
   closeAllToasts();
   cy.contains(endpointHostname).should('exist');
 };
@@ -19,13 +22,11 @@ export const openResponseConsoleFromEndpointList = (): void => {
 };
 
 export const inputConsoleCommand = (command: string): void => {
-  cy.getByTestSubj('endpointResponseActionsConsole-inputCapture').click().type(command);
+  cy.getByTestSubj('endpointResponseActionsConsole-inputCapture').type(command);
 };
 
 export const clearConsoleCommandInput = (): void => {
-  cy.getByTestSubj('endpointResponseActionsConsole-inputCapture')
-    .click()
-    .type(`{selectall}{backspace}`);
+  cy.getByTestSubj('endpointResponseActionsConsole-inputCapture').type(`{selectall}{backspace}`);
 };
 
 export const selectCommandFromHelpMenu = (command: string): void => {
@@ -45,9 +46,17 @@ export const submitCommand = (): void => {
   cy.getByTestSubj('endpointResponseActionsConsole-inputTextSubmitButton').click();
 };
 
-export const waitForCommandToBeExecuted = (): void => {
-  cy.contains('Action pending.').should('exist');
-  cy.contains('Action completed.', { timeout: 120000 }).should('exist');
+export const waitForCommandToBeExecuted = (command: ConsoleResponseActionCommands): void => {
+  const actionResultMessage =
+    command === 'execute'
+      ? 'Command execution was successful'
+      : command === 'get-file'
+      ? 'File retrieved from the host.'
+      : 'Action completed.';
+  const actionPendingMessage =
+    command === 'get-file' ? 'Retrieving the file from host.' : 'Action pending.';
+  cy.contains(actionPendingMessage).should('exist');
+  cy.contains(actionResultMessage, { timeout: 120000 }).should('exist');
 };
 
 export const performCommandInputChecks = (command: string) => {
@@ -55,4 +64,17 @@ export const performCommandInputChecks = (command: string) => {
   clearConsoleCommandInput();
   selectCommandFromHelpMenu(command);
   checkInputForCommandPresence(command);
+};
+
+export const checkReturnedProcessesTable = (): Chainable<JQuery<HTMLTableRowElement>> => {
+  ['USER', 'PID', 'ENTITY ID', 'COMMAND'].forEach((header) => {
+    cy.contains(header);
+  });
+
+  return cy
+    .get('tbody')
+    .find('tr')
+    .then((rows) => {
+      expect(rows.length).to.be.greaterThan(0);
+    });
 };

@@ -103,11 +103,12 @@ describe('helpers', () => {
         updated_at: '2022-01-01',
         updated_by: 'qwerty',
         download_source_id: 'test-ds-1',
+        is_protected: false,
       };
 
-      expect(await getSourceUriForAgentPolicy(soClientMock, agentPolicy)).toEqual(
-        'http://custom-registry-test'
-      );
+      expect(await getSourceUriForAgentPolicy(soClientMock, agentPolicy)).toEqual({
+        host: 'http://custom-registry-test',
+      });
     });
     it('should return the default source_uri if there is none set on the agent policy ', async () => {
       const agentPolicy: AgentPolicy = {
@@ -120,11 +121,12 @@ describe('helpers', () => {
         name: 'Policy',
         updated_at: '2022-01-01',
         updated_by: 'qwerty',
+        is_protected: false,
       };
 
-      expect(await getSourceUriForAgentPolicy(soClientMock, agentPolicy)).toEqual(
-        'http://default-registry.co'
-      );
+      expect(await getSourceUriForAgentPolicy(soClientMock, agentPolicy)).toEqual({
+        host: 'http://default-registry.co',
+      });
     });
   });
 });

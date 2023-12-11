@@ -8,8 +8,11 @@
 import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import {
+  RuleExecutionStatus,
+  RuleExecutionStatusEnum,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { waitForRuleStatus } from './wait_for_rule_status';
 import { refreshIndex } from './refresh_index';
@@ -20,7 +23,7 @@ export const getOpenSignals = async (
   log: ToolingLog,
   es: Client,
   rule: RuleResponse,
-  status: RuleExecutionStatus = RuleExecutionStatus.succeeded,
+  status: RuleExecutionStatus = RuleExecutionStatusEnum.succeeded,
   size?: number,
   afterDate?: Date
 ) => {

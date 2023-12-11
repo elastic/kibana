@@ -5,24 +5,24 @@
  * 2.0.
  */
 import React from 'react';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import type { Evaluation } from '../../../../common/types';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
+import type { Evaluation } from '../../../../common/types_old';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { usePageSlice } from '../../../common/hooks/use_page_slice';
 import { FindingsByResourceQuery, useFindingsByResource } from './use_findings_by_resource';
 import { FindingsByResourceTable } from './findings_by_resource_table';
-import { getFindingsPageSizeInfo, getFilters } from '../utils/utils';
+import { getFilters } from '../utils/utils';
 import { LimitedResultsBar } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { findingsNavigation } from '../../../common/navigation/constants';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
 import { ErrorCallout } from '../layout/error_callout';
-import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
+import { CurrentPageOfTotal, FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../common/constants';
 import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../../common/types';
 import { useCloudPostureTable } from '../../../common/hooks/use_cloud_posture_table';
@@ -36,11 +36,14 @@ const getDefaultQuery = ({
   query,
   filters,
   pageIndex: 0,
-  sortDirection: 'asc',
+  sort: { field: 'compliance_score' as keyof CspFinding, direction: 'asc' },
 });
 
+/**
+ * @deprecated: This component is deprecated and will be removed in the next release.
+ */
 export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => (
-  <Switch>
+  <Routes>
     <Route
       exact
       path={findingsNavigation.findings_by_resource.path}
@@ -58,9 +61,12 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
         </TrackApplicationView>
       )}
     />
-  </Switch>
+  </Routes>
 );
 
+/**
+ * @deprecated: This component is deprecated and will be removed in the next release.
+ */
 const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   const { queryError, query, pageSize, setTableOptions, urlQuery, setUrlQuery, onResetFilters } =
     useCloudPostureTable({
@@ -73,7 +79,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
    * Page ES query result
    */
   const findingsGroupByResource = useFindingsByResource({
-    sortDirection: urlQuery.sortDirection,
+    sortDirection: urlQuery.sort.direction,
     query,
     enabled: !queryError,
   });
@@ -111,31 +117,42 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
         loading={findingsGroupByResource.isFetching}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false} style={{ width: 400 }}>
-          {!error && <FindingsGroupBySelector type="resource" />}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+
       {error && <ErrorCallout error={error} />}
       {!error && (
         <>
           {findingsGroupByResource.isSuccess && !!findingsGroupByResource.data.page.length && (
-            <FindingsDistributionBar
-              {...{
-                distributionOnClick: handleDistributionClick,
-                type: i18n.translate('xpack.csp.findings.findingsByResource.tableRowTypeLabel', {
-                  defaultMessage: 'Resources',
-                }),
-                total: findingsGroupByResource.data.total,
-                passed: findingsGroupByResource.data.count.passed,
-                failed: findingsGroupByResource.data.count.failed,
-                ...getFindingsPageSizeInfo({
-                  pageIndex: urlQuery.pageIndex,
-                  pageSize,
-                  currentPageSize: slicedPage.length,
-                }),
-              }}
-            />
+            <>
+              <FindingsDistributionBar
+                {...{
+                  distributionOnClick: handleDistributionClick,
+                  type: i18n.translate('xpack.csp.findings.findingsByResource.tableRowTypeLabel', {
+                    defaultMessage: 'Resources',
+                  }),
+                  passed: findingsGroupByResource.data.count.passed,
+                  failed: findingsGroupByResource.data.count.failed,
+                }}
+              />
+              <EuiSpacer size="l" />
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <CurrentPageOfTotal
+                    pageStart={urlQuery.pageIndex * pageSize + 1}
+                    pageEnd={urlQuery.pageIndex * pageSize + slicedPage.length}
+                    total={findingsGroupByResource.data.total}
+                    type={i18n.translate(
+                      'xpack.csp.findings.findingsByResource.tableRowTypeLabel',
+                      {
+                        defaultMessage: 'Resources',
+                      }
+                    )}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} style={{ width: 188, marginLeft: 'auto' }}>
+                  <FindingsGroupBySelector type="resource" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
           )}
           <EuiSpacer />
           <FindingsByResourceTable
@@ -149,7 +166,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
             })}
             setTableOptions={setTableOptions}
             sorting={{
-              sort: { field: 'compliance_score', direction: urlQuery.sortDirection },
+              sort: { field: 'compliance_score', direction: urlQuery.sort.direction },
             }}
             onAddFilter={(field, value, negate) =>
               setUrlQuery({

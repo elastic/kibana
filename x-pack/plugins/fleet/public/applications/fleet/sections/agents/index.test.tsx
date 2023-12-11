@@ -14,9 +14,7 @@ import { useAuthz } from '../../../../hooks/use_authz';
 import { AgentsApp } from '.';
 
 jest.mock('../../../../hooks/use_fleet_status', () => ({
-  FleetStatusProvider: (props: any) => {
-    return props.children;
-  },
+  ...jest.requireActual('../../../../hooks/use_fleet_status'),
   useFleetStatus: jest.fn().mockReturnValue({}),
 }));
 jest.mock('../../../../hooks/use_request/settings');

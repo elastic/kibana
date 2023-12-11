@@ -49,7 +49,10 @@ describe('createAlertFactory()', () => {
   test('reuses existing alerts', () => {
     const alert = new Alert('1', {
       state: { foo: true },
-      meta: { lastScheduledActions: { group: 'default', date: new Date() }, uuid: 'uuid-previous' },
+      meta: {
+        lastScheduledActions: { group: 'default', date: new Date().toISOString() },
+        uuid: 'uuid-previous',
+      },
     });
     const alertFactory = createAlertFactory({
       alerts: {
@@ -65,7 +68,7 @@ describe('createAlertFactory()', () => {
         uuid: 'uuid-previous',
         flappingHistory: [],
         lastScheduledActions: {
-          date: expect.any(Date),
+          date: expect.any(String),
           group: 'default',
         },
       },
@@ -94,6 +97,45 @@ describe('createAlertFactory()', () => {
         context: {},
         id: '1',
       },
+    });
+  });
+
+  test('gets alert if it exists, returns null if it does not', () => {
+    const alert = new Alert('1', {
+      state: { foo: true },
+      meta: {
+        lastScheduledActions: { group: 'default', date: new Date().toISOString() },
+        uuid: 'uuid-previous',
+      },
+    });
+    const alertFactory = createAlertFactory({
+      alerts: {
+        '1': alert,
+      },
+      logger,
+      maxAlerts: 1000,
+      autoRecoverAlerts: true,
+    });
+    expect(alertFactory.get('1')).toMatchObject({
+      meta: {
+        uuid: expect.any(String),
+        flappingHistory: [],
+      },
+      state: {},
+      context: {},
+      id: '1',
+    });
+    expect(alertFactory.get('2')).toBe(null);
+    alertFactory.create('2');
+    expect(alertFactory.get('2')).not.toBe(null);
+    expect(alertFactory.get('2')).toMatchObject({
+      meta: {
+        uuid: expect.any(String),
+        flappingHistory: [],
+      },
+      state: {},
+      context: {},
+      id: '2',
     });
   });
 
@@ -329,6 +371,7 @@ describe('createAlertFactory()', () => {
     expect(result).toEqual({
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
         uuid: expect.any(String),
       },
       state: {},
@@ -357,6 +400,7 @@ describe('getPublicAlertFactory', () => {
     });
 
     expect(alertFactory.create).toBeDefined();
+    expect(alertFactory.get).toBeDefined();
     expect(alertFactory.alertLimit.getValue).toBeDefined();
     expect(alertFactory.alertLimit.setLimitReached).toBeDefined();
     expect(alertFactory.alertLimit.checkLimitUsage).toBeDefined();
@@ -370,6 +414,8 @@ describe('getPublicAlertFactory', () => {
     expect(publicAlertFactory.alertLimit.getValue).toBeDefined();
     expect(publicAlertFactory.alertLimit.setLimitReached).toBeDefined();
 
+    // @ts-expect-error
+    expect(publicAlertFactory.get).not.toBeDefined();
     // @ts-expect-error
     expect(publicAlertFactory.alertLimit.checkLimitUsage).not.toBeDefined();
     // @ts-expect-error

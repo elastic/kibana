@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
+
+type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useDeleteSlo() {
   const {
@@ -17,11 +21,11 @@ export function useDeleteSlo() {
   } = useKibana().services;
   const queryClient = useQueryClient();
 
-  const deleteSlo = useMutation<
+  return useMutation<
     string,
-    string,
+    ServerError,
     { id: string; name: string },
-    { previousSloList: FindSLOResponse | undefined }
+    { previousData?: FindSLOResponse; queryKey?: QueryKey }
   >(
     ['deleteSlo'],
     ({ id }) => {
@@ -33,54 +37,52 @@ export function useDeleteSlo() {
     },
     {
       onMutate: async (slo) => {
-        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries(['fetchSloList']);
+        await queryClient.cancelQueries({ queryKey: sloKeys.lists(), exact: false });
 
-        const latestFetchSloListRequest = (
-          queryClient.getQueriesData<FindSLOResponse>(['fetchSloList']) || []
-        ).at(0);
+        const queriesData = queryClient.getQueriesData<FindSLOResponse>({
+          queryKey: sloKeys.lists(),
+          exact: false,
+        });
+        const [queryKey, previousData] = queriesData?.at(0) ?? [];
 
-        const [queryKey, data] = latestFetchSloListRequest || [];
+        // taking into account partitioned slo
+        const matchingSloCount =
+          previousData?.results?.filter((result) => result.id === slo.id)?.length ?? 0;
 
         const optimisticUpdate = {
-          ...data,
-          results: data?.results.filter((result) => result.id !== slo.id),
-          total: data?.total && data.total - 1,
+          page: previousData?.page ?? 1,
+          perPage: previousData?.perPage ?? 25,
+          total: previousData?.total ? previousData.total - matchingSloCount : 0,
+          results: previousData?.results?.filter((result) => result.id !== slo.id) ?? [],
         };
 
-        // Optimistically update to the new value
         if (queryKey) {
           queryClient.setQueryData(queryKey, optimisticUpdate);
         }
 
+        return { previousData, queryKey };
+      },
+      // If the mutation fails, use the context returned from onMutate to roll back
+      onError: (error, { name }, context) => {
+        if (context?.previousData && context?.queryKey) {
+          queryClient.setQueryData(context.queryKey, context.previousData);
+        }
+
+        toasts.addError(new Error(error.body?.message ?? error.message), {
+          title: i18n.translate('xpack.observability.slo.slo.delete.errorNotification', {
+            defaultMessage: 'Failed to delete {name}',
+            values: { name },
+          }),
+        });
+      },
+      onSuccess: (_data, { name }) => {
         toasts.addSuccess(
           i18n.translate('xpack.observability.slo.slo.delete.successNotification', {
             defaultMessage: 'Deleted {name}',
-            values: { name: slo.name },
+            values: { name },
           })
         );
-
-        // Return a context object with the snapshotted value
-        return { previousSloList: data };
-      },
-      // If the mutation fails, use the context returned from onMutate to roll back
-      onError: (_err, slo, context) => {
-        if (context?.previousSloList) {
-          queryClient.setQueryData(['fetchSloList'], context.previousSloList);
-        }
-
-        toasts.addDanger(
-          i18n.translate('xpack.observability.slo.slo.delete.errorNotification', {
-            defaultMessage: 'Failed to delete {name}',
-            values: { name: slo.name },
-          })
-        );
-      },
-      onSuccess: (_success, slo) => {
-        queryClient.invalidateQueries(['fetchSloList']);
       },
     }
   );
-
-  return deleteSlo;
 }

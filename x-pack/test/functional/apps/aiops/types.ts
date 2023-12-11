@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import type { LogRateAnalysisType } from '@kbn/aiops-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
+import type { LogRateAnalysisDataGenerator } from '../../services/aiops/log_rate_analysis_data_generator';
 
 interface TestDataTableActionLogPatternAnalysis {
   type: 'LogPatternAnalysis';
   tableRowId: string;
   expected: {
     queryBar: string;
-    totalDocCount: string;
+    totalDocCount: number;
   };
 }
 
@@ -44,7 +47,8 @@ interface TestDataExpectedWithoutSampleProbability {
 
 export interface TestData {
   suiteTitle: string;
-  dataGenerator: string;
+  analysisType: LogRateAnalysisType;
+  dataGenerator: LogRateAnalysisDataGenerator;
   isSavedSearch?: boolean;
   sourceIndexOrSavedSearch: string;
   rowsPerPage?: 10 | 25 | 50;

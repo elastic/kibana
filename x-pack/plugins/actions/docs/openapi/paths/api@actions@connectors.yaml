@@ -1,0 +1,19 @@
+get:
+  summary: Retrieves all connectors.
+  operationId: getConnectors
+  tags:
+    - connectors
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/connector_response_properties.yaml'
+          examples:
+            getConnectorsResponse:
+              $ref: '../components/examples/get_connectors_response.yaml'
+    '401':
+      $ref: '../components/responses/401.yaml'

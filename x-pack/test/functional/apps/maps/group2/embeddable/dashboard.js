@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }) {
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
         [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: true,
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
       await PageObjects.dashboard.waitForRenderComplete();
     });
@@ -77,7 +77,7 @@ export default function ({ getPageObjects, getService }) {
       await retry.try(async () => {
         const joinExampleRequestNames = await inspector.getRequestNames();
         expect(joinExampleRequestNames).to.equal(
-          'geo_shapes*,meta_for_geo_shapes*.runtime_shape_name'
+          'load layer features (geo_shapes*),load join metrics (geo_shapes*)'
         );
       });
       await inspector.close();
@@ -88,7 +88,7 @@ export default function ({ getPageObjects, getService }) {
       await inspector.close();
 
       expect(singleExampleRequest).to.be(true);
-      expect(selectedExampleRequest).to.equal('logstash-*');
+      expect(selectedExampleRequest).to.equal('load layer features (logstash-*)');
     });
 
     it('should apply container state (time, query, filters) to embeddable when loaded', async () => {
@@ -120,7 +120,7 @@ export default function ({ getPageObjects, getService }) {
 
       const { rawResponse: joinResponse } = await PageObjects.maps.getResponseFromDashboardPanel(
         'join example',
-        'meta_for_geo_shapes*.runtime_shape_name'
+        'load join metrics (geo_shapes*)'
       );
       expect(joinResponse.aggregations.join.buckets.length).to.equal(1);
     });
@@ -164,7 +164,7 @@ export default function ({ getPageObjects, getService }) {
 
     // see https://github.com/elastic/kibana/issues/61596 on why it is specific to maps
     it("dashboard's back button should navigate to previous page", async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
       await PageObjects.dashboard.waitForRenderComplete();

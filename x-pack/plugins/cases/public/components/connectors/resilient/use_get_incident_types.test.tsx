@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { connector } from '../mock';
-import type { UseGetIncidentTypes } from './use_get_incident_types';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import * as api from './api';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./api');
@@ -19,54 +20,90 @@ jest.mock('./api');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('useGetIncidentTypes', () => {
-  const { http, notifications } = useKibanaMock().services;
+  const { http } = useKibanaMock().services;
+  let appMockRender: AppMockRenderer;
 
-  test('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetIncidentTypes>(() =>
-        useGetIncidentTypes({ http, toastNotifications: notifications.toasts })
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({ isLoading: true, incidentTypes: [] });
-    });
+  beforeEach(() => {
+    appMockRender = createAppMockRenderer();
+    jest.clearAllMocks();
   });
 
-  test('fetch incident types', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetIncidentTypes>(() =>
+  it('calls the api when invoked with the correct parameters', async () => {
+    const spy = jest.spyOn(api, 'getIncidentTypes');
+    const { waitForNextUpdate } = renderHook(
+      () =>
         useGetIncidentTypes({
           http,
-          toastNotifications: notifications.toasts,
           connector,
-        })
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        incidentTypes: [
-          { id: 17, name: 'Communication error (fax; email)' },
-          { id: 1001, name: 'Custom type' },
-        ],
-      });
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    await waitForNextUpdate();
+
+    expect(spy).toHaveBeenCalledWith({
+      http,
+      signal: expect.anything(),
+      connectorId: connector.id,
     });
   });
 
-  test('unhappy path', async () => {
-    const spyOnGetCaseConfigure = jest.spyOn(api, 'getIncidentTypes');
-    spyOnGetCaseConfigure.mockImplementation(() => {
+  it('does not call the api when the connector is missing', async () => {
+    const spy = jest.spyOn(api, 'getIncidentTypes');
+    renderHook(
+      () =>
+        useGetIncidentTypes({
+          http,
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    expect(spy).not.toHaveBeenCalledWith();
+  });
+
+  it('calls addError when the getIncidentTypes api throws an error', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getIncidentTypes');
+    spyOnGetCases.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetIncidentTypes>(() =>
-        useGetIncidentTypes({ http, toastNotifications: notifications.toasts, connector })
-      );
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { waitForNextUpdate } = renderHook(
+      () =>
+        useGetIncidentTypes({
+          http,
+          connector,
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
 
-      expect(result.current).toEqual({ isLoading: false, incidentTypes: [] });
+    await waitForNextUpdate();
+    expect(addError).toHaveBeenCalled();
+  });
+
+  it('calls addError when the getIncidentTypes api returns successfully but contains an error', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getIncidentTypes');
+    spyOnGetCases.mockResolvedValue({
+      status: 'error',
+      message: 'Error message',
+      actionId: 'test',
     });
+
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
+
+    const { waitForNextUpdate } = renderHook(
+      () =>
+        useGetIncidentTypes({
+          http,
+          connector,
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    await waitForNextUpdate();
+    expect(addError).toHaveBeenCalled();
   });
 });

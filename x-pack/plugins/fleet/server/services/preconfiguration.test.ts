@@ -122,10 +122,18 @@ function getPutPreconfiguredPackagesMock() {
 
 jest.mock('./epm/registry', () => ({
   ...jest.requireActual('./epm/registry'),
-  async fetchFindLatestPackageOrThrow(packageName: string): Promise<RegistrySearchResult> {
+  async fetchFindLatestPackageOrThrow(
+    packageName: string,
+    options?: { prerelease?: boolean }
+  ): Promise<RegistrySearchResult> {
+    let latestVersion = '1.0.0';
+    if (options?.prerelease && packageName === 'test_package') {
+      latestVersion = '3.0.1-beta.1';
+    }
+
     return {
       name: packageName,
-      version: '1.0.0',
+      version: latestVersion,
       description: '',
       release: 'experimental',
       title: '',
@@ -270,6 +278,9 @@ jest.mock('./app_context', () => ({
           },
         }
       ),
+    getUninstallTokenService: () => ({
+      generateTokenForPolicyId: jest.fn(),
+    }),
   },
 }));
 
@@ -362,6 +373,25 @@ describe('policy preconfiguration', () => {
       expect(policies.length).toEqual(1);
       expect(policies[0].id).toBe('test-id');
       expect(packages).toEqual(expect.arrayContaining(['test_package-3.0.0']));
+      expect(nonFatalErrors.length).toBe(0);
+    });
+
+    it('should install prelease packages if needed', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        [] as PreconfiguredAgentPolicy[],
+        [{ name: 'test_package', version: 'latest', prerelease: true }],
+        mockDefaultOutput,
+        mockDefaultDownloadService,
+        DEFAULT_SPACE_ID
+      );
+
+      expect(policies.length).toEqual(0);
+      expect(packages).toEqual(expect.arrayContaining(['test_package-3.0.1-beta.1']));
       expect(nonFatalErrors.length).toBe(0);
     });
 
@@ -760,13 +790,13 @@ describe('policy preconfiguration', () => {
         {
           name: 'test_package',
           version: '1.0.0',
-          buffer: Buffer.from('test_package'),
+          getBuffer: () => Promise.resolve(Buffer.from('test_package')),
         },
 
         {
           name: 'test_package_2',
           version: '1.0.0',
-          buffer: Buffer.from('test_package_2'),
+          getBuffer: () => Promise.resolve(Buffer.from('test_package_2')),
         },
       ]);
 
@@ -804,7 +834,7 @@ describe('policy preconfiguration', () => {
             {
               name: 'test_package',
               version: '1.0.0',
-              buffer: Buffer.from('test_package'),
+              getBuffer: () => Promise.resolve(Buffer.from('test_package')),
             },
           ]);
 
@@ -845,7 +875,7 @@ describe('policy preconfiguration', () => {
             {
               name: 'test_package',
               version: '1.0.0',
-              buffer: Buffer.from('test_package'),
+              getBuffer: () => Promise.resolve(Buffer.from('test_package')),
             },
           ]);
 
@@ -933,6 +963,7 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
         policy_id: 'abc123',
       },
     ],
+    is_protected: false,
   };
 
   it('should return hasChanged when a top-level policy field changes', () => {

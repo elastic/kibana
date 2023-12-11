@@ -24,13 +24,20 @@ export { eventAnnotationGroup } from './event_annotation_group';
 export type { EventAnnotationGroupArgs } from './event_annotation_group';
 
 export type { FetchEventAnnotationsArgs } from './fetch_event_annotations/types';
+export type { EventAnnotationOutput } from './types';
+
 export type {
-  EventAnnotationConfig,
-  EventAnnotationGroupConfig,
-  EventAnnotationArgs,
-  RangeEventAnnotationConfig,
-  PointInTimeEventAnnotationConfig,
-  QueryPointEventAnnotationConfig,
-  AvailableAnnotationIcon,
-  EventAnnotationOutput,
-} from './types';
+  EventAnnotationGroupGetIn,
+  EventAnnotationGroupGetOut,
+  EventAnnotationGroupSavedObjectAttributes,
+  EventAnnotationGroupCreateIn,
+  EventAnnotationGroupCreateOut,
+  EventAnnotationGroupUpdateIn,
+  EventAnnotationGroupSearchIn,
+  EventAnnotationGroupSearchOut,
+  EventAnnotationGroupDeleteIn,
+  EventAnnotationGroupDeleteOut,
+  EventAnnotationGroupCrudTypes,
+} from './content_management';
+export { CONTENT_ID } from './content_management';
+export { ANNOTATIONS_LISTING_VIEW_ID } from './constants';

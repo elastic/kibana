@@ -24,6 +24,9 @@ export const transformElasticToList = ({
       _version: encodeHitVersion(hit),
       id: hit._id,
       ...hit._source,
+      // meta can be null if deleted (empty in PUT payload), since update_by_query set deleted values as null
+      // return it as undefined to keep it consistent with payload
+      meta: hit._source?.meta ?? undefined,
     };
   });
 };

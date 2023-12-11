@@ -7,12 +7,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
+import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
-import {
-  GLOBAL_RESOURCE,
-  RESERVED_PRIVILEGES_APPLICATION_WILDCARD,
-} from '../../../common/constants';
-import type { Role, RoleKibanaPrivilege } from '../../../common/model';
+import type { Role, RoleKibanaPrivilege } from '../../../common';
+import { RESERVED_PRIVILEGES_APPLICATION_WILDCARD } from '../../../common/constants';
 import { getDetailedErrorMessage } from '../../errors';
 import { PrivilegeSerializer } from '../privilege_serializer';
 import { ResourceSerializer } from '../resource_serializer';
@@ -261,13 +259,11 @@ function transformRoleApplicationsToKibanaPrivileges(
           ),
           feature: featurePrivileges.reduce((acc, privilege) => {
             const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
-            return {
-              ...acc,
-              [featurePrivilege.featureId]: getUniqueList([
-                ...(acc[featurePrivilege.featureId] || []),
-                featurePrivilege.privilege,
-              ]),
-            };
+            acc[featurePrivilege.featureId] = getUniqueList([
+              ...(acc[featurePrivilege.featureId] || []),
+              featurePrivilege.privilege,
+            ]);
+            return acc;
           }, {} as RoleKibanaPrivilege['feature']),
           spaces: ['*'],
         };
@@ -285,13 +281,11 @@ function transformRoleApplicationsToKibanaPrivileges(
         ),
         feature: featurePrivileges.reduce((acc, privilege) => {
           const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
-          return {
-            ...acc,
-            [featurePrivilege.featureId]: getUniqueList([
-              ...(acc[featurePrivilege.featureId] || []),
-              featurePrivilege.privilege,
-            ]),
-          };
+          acc[featurePrivilege.featureId] = getUniqueList([
+            ...(acc[featurePrivilege.featureId] || []),
+            featurePrivilege.privilege,
+          ]);
+          return acc;
         }, {} as RoleKibanaPrivilege['feature']),
         spaces: resources.map((resource) => ResourceSerializer.deserializeSpaceResource(resource)),
       };

@@ -11,12 +11,16 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-plugin/common';
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
+import type {
+  TimelineEqlRequestOptionsInput,
+  TimelineEventsAllOptionsInput,
+} from '@kbn/timelines-plugin/common/api/search_strategy';
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';
+import type { RunTimeMappings } from '../../common/store/sourcerer/model';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../store/timeline';
@@ -25,24 +29,20 @@ import { getInspectResponse } from '../../helpers';
 import type {
   PaginationInputPaginated,
   TimelineEventsAllStrategyResponse,
-  TimelineEventsAllRequestOptions,
   TimelineEdges,
   TimelineItem,
   TimelineRequestSortField,
 } from '../../../common/search_strategy';
 import { Direction, TimelineEventsQueries } from '../../../common/search_strategy';
 import type { InspectResponse } from '../../types';
-import * as i18n from './translations';
 import type { KueryFilterQueryKind } from '../../../common/types/timeline';
 import { TimelineId } from '../../../common/types/timeline';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { activeTimeline } from './active_timeline_context';
 import type {
   EqlOptionsSelected,
-  TimelineEqlRequestOptions,
   TimelineEqlResponse,
 } from '../../../common/search_strategy/timeline/events/eql';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../common/constants';
 
@@ -54,7 +54,7 @@ export interface TimelineArgs {
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
   refetch: inputsModel.Refetch;
   totalCount: number;
-  updatedAt: number;
+  refreshedAt: number;
 }
 
 type OnNextResponseHandler = (response: TimelineArgs) => Promise<void> | void;
@@ -64,12 +64,12 @@ type TimelineEventsSearchHandler = (onNextResponse?: OnNextResponseHandler) => v
 type LoadPage = (newActivePage: number) => void;
 
 type TimelineRequest<T extends KueryFilterQueryKind> = T extends 'kuery'
-  ? TimelineEventsAllRequestOptions
+  ? TimelineEventsAllOptionsInput
   : T extends 'lucene'
-  ? TimelineEventsAllRequestOptions
+  ? TimelineEventsAllOptionsInput
   : T extends 'eql'
-  ? TimelineEqlRequestOptions
-  : TimelineEventsAllRequestOptions;
+  ? TimelineEqlRequestOptionsInput
+  : TimelineEventsAllOptionsInput;
 
 type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
   ? TimelineEventsAllStrategyResponse
@@ -89,7 +89,7 @@ export interface UseTimelineEventsProps {
   indexNames: string[];
   language?: KueryFilterQueryKind;
   limit: number;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   skip?: boolean;
   sort?: TimelineRequestSortField[];
   startDate?: string;
@@ -191,13 +191,6 @@ export const useTimelineEventsHandler = ({
     wrappedLoadPage(0);
   }, [wrappedLoadPage]);
 
-  const setUpdated = useCallback(
-    (updatedAt: number) => {
-      dispatch(timelineActions.setTimelineUpdatedAt({ id, updated: updatedAt }));
-    },
-    [dispatch, id]
-  );
-
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
     id,
     inspect: {
@@ -212,9 +205,8 @@ export const useTimelineEventsHandler = ({
     },
     events: [],
     loadPage: wrappedLoadPage,
-    updatedAt: 0,
+    refreshedAt: 0,
   });
-  const { addWarning } = useAppToasts();
 
   const timelineSearch = useCallback(
     async (
@@ -240,7 +232,7 @@ export const useTimelineEventsHandler = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
+              if (!isRunningResponse(response)) {
                 endTracking('success');
                 setLoading(false);
                 setTimelineResponse((prevResponse) => {
@@ -250,17 +242,15 @@ export const useTimelineEventsHandler = ({
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     totalCount: response.totalCount,
-                    updatedAt: Date.now(),
+                    refreshedAt: Date.now(),
                   };
-                  setUpdated(newTimelineResponse.updatedAt);
                   if (id === TimelineId.active) {
                     activeTimeline.setExpandedDetail({});
                     activeTimeline.setPageName(pageName);
                     if (request.language === 'eql') {
-                      activeTimeline.setEqlRequest(request as TimelineEqlRequestOptions);
+                      activeTimeline.setEqlRequest(request as TimelineEqlRequestOptionsInput);
                       activeTimeline.setEqlResponse(newTimelineResponse);
                     } else {
-                      // @ts-expect-error EqlSearchRequest.query is not compatible with QueryDslQueryContainer
                       activeTimeline.setRequest(request);
                       activeTimeline.setResponse(newTimelineResponse);
                     }
@@ -269,11 +259,6 @@ export const useTimelineEventsHandler = ({
                   return newTimelineResponse;
                 });
 
-                searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                endTracking('invalid');
-                setLoading(false);
-                addWarning(i18n.ERROR_TIMELINE_EVENTS);
                 searchSubscription$.current.unsubscribe();
               }
             },
@@ -329,18 +314,7 @@ export const useTimelineEventsHandler = ({
       await asyncSearch();
       refetch.current = asyncSearch;
     },
-    [
-      pageName,
-      skip,
-      id,
-      startTracking,
-      data.search,
-      dataViewId,
-      setUpdated,
-      addWarning,
-      refetchGrid,
-      wrappedLoadPage,
-    ]
+    [pageName, skip, id, startTracking, data.search, dataViewId, refetchGrid, wrappedLoadPage]
   );
 
   useEffect(() => {
@@ -349,14 +323,14 @@ export const useTimelineEventsHandler = ({
     }
 
     setTimelineRequest((prevRequest) => {
-      const prevEqlRequest = prevRequest as TimelineEqlRequestOptions;
+      const prevEqlRequest = prevRequest as TimelineEqlRequestOptionsInput;
       const prevSearchParameters = {
         defaultIndex: prevRequest?.defaultIndex ?? [],
         filterQuery: prevRequest?.filterQuery ?? '',
-        querySize: prevRequest?.pagination.querySize ?? 0,
+        querySize: prevRequest?.pagination?.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
-        runtimeMappings: prevRequest?.runtimeMappings ?? {},
+        runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as unknown as RunTimeMappings,
         ...deStructureEqlOptions(prevEqlRequest),
       };
 
@@ -393,7 +367,7 @@ export const useTimelineEventsHandler = ({
         sort,
         ...timerange,
         ...(eqlOptions ? eqlOptions : {}),
-      };
+      } as const;
 
       if (activePage !== newActivePage) {
         setActivePage(newActivePage);
@@ -455,7 +429,7 @@ export const useTimelineEventsHandler = ({
         },
         events: [],
         loadPage: wrappedLoadPage,
-        updatedAt: 0,
+        refreshedAt: 0,
       });
     }
   }, [filterQuery, id, refetchGrid, wrappedLoadPage]);

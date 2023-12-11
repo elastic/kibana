@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CommentRequestAlertType } from '../../../common/api';
+import type { AlertAttachmentPayload } from '../../../common/types/domain';
 import type { Ecs } from '../../../common';
-import { CommentType } from '../../../common';
+import { AttachmentType } from '../../../common/types/domain';
 import { getRuleIdFromEvent } from './get_rule_id_from_event';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 
@@ -21,7 +21,7 @@ interface EventNonEcsData {
   value?: Maybe<string[]>;
 }
 
-type CommentRequestAlertTypeWithoutOwner = Omit<CommentRequestAlertType, 'owner'>;
+type CommentRequestAlertTypeWithoutOwner = Omit<AlertAttachmentPayload, 'owner'>;
 
 export type GroupAlertsByRule = (items: Event[]) => CaseAttachmentsWithoutOwner;
 
@@ -33,7 +33,7 @@ export const groupAlertsByRule: GroupAlertsByRule = (items) => {
         acc[rule.id] = {
           alertId: [],
           index: [],
-          type: CommentType.alert as const,
+          type: AttachmentType.alert as const,
           rule,
         };
       }

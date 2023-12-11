@@ -9,7 +9,6 @@ import { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import * as t from 'io-ts';
 
-import { BrowserFields } from '../../common';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
@@ -36,12 +35,13 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
         const { featureIds = [] } = request.query;
-
-        const indices = await alertsClient.getAuthorizedAlertsIndices(
-          Array.isArray(featureIds) ? featureIds : [featureIds]
+        const onlyO11yFeatureIds = (Array.isArray(featureIds) ? featureIds : [featureIds]).filter(
+          (fId) => fId !== 'siem'
         );
         const o11yIndices =
-          indices?.filter((index) => index.startsWith('.alerts-observability')) ?? [];
+          (onlyO11yFeatureIds
+            ? await alertsClient.getAuthorizedAlertsIndices(onlyO11yFeatureIds)
+            : []) ?? [];
         if (o11yIndices.length === 0) {
           return response.notFound({
             body: {
@@ -51,14 +51,14 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
           });
         }
 
-        const browserFields: BrowserFields = await alertsClient.getBrowserFields({
+        const fields = await alertsClient.getBrowserFields({
           indices: o11yIndices,
+          featureIds: onlyO11yFeatureIds,
           metaFields: ['_id', '_index'],
           allowNoIndex: true,
         });
-
         return response.ok({
-          body: browserFields,
+          body: fields,
         });
       } catch (error) {
         const formatedError = transformError(error);

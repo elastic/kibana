@@ -1,0 +1,47 @@
+{
+  "journeyName": "GET /api/status no-auth",
+  "scalabilitySetup": {
+    "responseTimeThreshold": {
+      "threshold1": 1000,
+      "threshold2": 3000,
+      "threshold3": 5000
+    },
+    "warmup": [
+      {
+        "action": "constantUsersPerSec",
+        "userCount": 10,
+        "duration": "30s"
+      }
+    ],
+    "test": [
+      {
+        "action": "rampUsersPerSec",
+        "minUsersCount": 10,
+        "maxUsersCount": 1210,
+        "duration": "80s"
+      }
+    ],
+    "maxDuration": "4m"
+  },
+  "testData": {
+    "esArchives": [],
+    "kbnArchives": []
+  },
+  "streams": [
+    {
+      "requests": [
+        {
+          "http": {
+            "method": "GET",
+            "path": "/api/status",
+            "headers": {
+              "Accept-Encoding": "gzip",
+              "Content-Type": "application/json; charset=utf-8"
+            },
+            "statusCode": 200
+          }
+        }
+      ]
+    }
+  ]
+}

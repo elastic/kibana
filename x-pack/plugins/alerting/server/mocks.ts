@@ -22,6 +22,7 @@ import {
   PublicRuleResultService,
   PublicRuleMonitoringService,
 } from './types';
+import { publicAlertsClientMock } from './alerts_client/alerts_client.mock';
 
 export { rulesClientMock };
 
@@ -34,6 +35,7 @@ const createSetupMock = () => {
       enabled: jest.fn(),
       getContextInitializationPromise: jest.fn(),
     },
+    getDataStreamAdapter: jest.fn(),
   };
   return mock;
 };
@@ -56,7 +58,9 @@ const createShareStartMock = () => {
 const createStartMock = () => {
   const mock: jest.Mocked<PluginStartContract> = {
     listTypes: jest.fn(),
+    getType: jest.fn(),
     getAllTypes: jest.fn(),
+    getAlertIndicesAlias: jest.fn(),
     getAlertingAuthorizationWithRequest: jest.fn(),
     getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClientMock.create()),
     getFrameworkHealth: jest.fn(),
@@ -162,6 +166,7 @@ const createRuleExecutorServicesMock = <
       },
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
+    alertsClient: publicAlertsClientMock.create(),
     savedObjectsClient: savedObjectsClientMock.create(),
     uiSettingsClient: uiSettingsServiceMock.createClient(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
@@ -186,3 +191,5 @@ export const alertsMock = {
 export const ruleMonitoringServiceMock = { create: createRuleMonitoringServiceMock };
 
 export const ruleLastRunServiceMock = { create: createRuleLastRunServiceMock };
+
+export { createDataStreamAdapterMock } from './alerts_service/lib/data_stream_adapter.mock';

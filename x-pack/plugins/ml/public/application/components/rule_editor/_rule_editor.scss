@@ -11,13 +11,10 @@
 
     // SASSTODO: Dangerous EUI overwrite
     .euiDescriptionList {
-      .euiDescriptionList__title {
-        flex-basis: 15%;
-        padding: 0 $euiSize;
-      }
+      row-gap: $euiSizeXS;
 
-      .euiDescriptionList__description {
-        flex-basis: 85%;
+      .euiDescriptionList__title {
+        padding: 0 $euiSize;
       }
 
       .euiDescriptionList__title:nth-child(1),
@@ -32,11 +29,6 @@
       .euiDescriptionList__description:nth-child(4) {
         padding-top: $euiSizeS;
       }
-    }
-
-    // SASSTODO: Dangerous EUI overwrite
-    .euiDescriptionList.euiDescriptionList--column > * {
-      margin-top: $euiSizeXS;
     }
   }
 

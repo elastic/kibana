@@ -38,7 +38,8 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly options: VisTypeOptions;
   public readonly visConfig;
   public readonly editorConfig;
-  public hidden;
+  public readonly disableCreate;
+  public readonly disableEdit;
   public readonly requiresSearch;
   public readonly suppressWarnings;
   public readonly hasPartialRows;
@@ -74,7 +75,8 @@ export class BaseVisType<TVisParams = VisParams> {
     this.isDeprecated = opts.isDeprecated ?? false;
     this.group = opts.group ?? VisGroups.AGGBASED;
     this.titleInWizard = opts.titleInWizard ?? '';
-    this.hidden = opts.hidden ?? false;
+    this.disableCreate = opts.disableCreate ?? false;
+    this.disableEdit = opts.disableEdit ?? false;
     this.requiresSearch = opts.requiresSearch ?? false;
     this.setup = opts.setup;
     this.hasPartialRows = opts.hasPartialRows ?? false;

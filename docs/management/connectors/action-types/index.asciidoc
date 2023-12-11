@@ -3,13 +3,13 @@
 ++++
 <titleabbrev>Index</titleabbrev>
 ++++
+:frontmatter-description: Add a connector that can add documents to {es} indices.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [configure]
+
 
 An index connector indexes a document into {es}.
-
-You can create index connectors in {kib} or by using the
-<<create-connector-api,create connector API>>. Alternatively, you can use the <<preconfigured-connector-alert-history,preconfigured alert history {es} index connector>>.
-If you are running {kib} on-prem, you can also create more preconfigured index
-connectors.
 
 [float]
 [[define-index-ui]]
@@ -26,75 +26,14 @@ image::management/connectors/images/index-connector.png[Index connector]
 [[index-connector-configuration]]
 ==== Connector configuration
 
-Index connectors must have a name and an {es} index. You can optionally set the
-{ref}/docs-refresh.html[refresh] policy and the time field, which contains the
-details about when each alert condition was detected.
-
-[float]
-[[preconfigured-index-configuration]]
-=== Create preconfigured connectors
-
-If you are running {kib} on-prem, you can define connectors by
-adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
-For example:
-
-[source,text]
---
-xpack.actions.preconfigured:
-  my-index:
-    name: preconfigured-index-connector-type
-    actionTypeId: .index
-    config:
-      index: .kibana
-      refresh: true <1>
-      executionTimeField: my-field
---
-<1> By default, the {ref}/docs-refresh.html[refresh] policy is `false`.
-
-For more information, go to <<pre-configured-connectors>>.
-
-[float]
-[[preconfigured-connector-alert-history]]
-==== Preconfigured alert history {es} index connector
-
-preview::[]
-
-{kib} offers a preconfigured index connector to facilitate indexing active alert
-data into {es}.
-
-To use this connector, set
-<<action-settings,`xpack.actions.preconfiguredAlertHistoryEsIndex`>> to `true`.
-
-When you subsequently create rules, you can use the
-`Alert history Elasticsearch index (preconfigured)` connector.
-
-[role="screenshot"]
-image::images/pre-configured-alert-history-connector.png[Select pre-configured alert history connectors]
-
-Documents are indexed using a preconfigured schema that captures the 
-<<defining-rules-actions-variables,action variables>> available for the rule. 
-By default, these documents are indexed into the `kibana-alert-history-default` 
-index, but you can specify a different index. Index names must start with 
-`kibana-alert-history-` to take advantage of the preconfigured alert history 
-index template.
-
-[IMPORTANT]
-====
-* To write documents to the preconfigured index, you must have `all` or `write` 
-privileges to the `kibana-alert-history-*` indices. Refer to 
-<<kibana-role-management>> for more information.
-* The `kibana-alert-history-*` indices are not configured to use ILM so they must 
-be maintained manually. If the index size grows large, consider using the 
-{ref}/docs-delete-by-query.html[delete by query] API to clean up older documents 
-in the index.
-====
+Index connectors must have a name and an {es} index.
+You can optionally choose a field that indicates when the document was indexed.
 
 [float]
 [[index-action-configuration]]
 === Test connectors
 
-You can test connectors with the <<execute-connector-api,run connector API>> or
-as you're creating or editing the connector in {kib}. For example:
+You can test connectors as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/index-params-test.png[Index params test]

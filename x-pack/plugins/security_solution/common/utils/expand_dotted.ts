@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setWith } from 'lodash';
+import { merge, setWith } from 'lodash';
 
 /*
  * Expands an object with "dotted" fields to a nested object with unflattened fields.
@@ -35,13 +35,19 @@ import { setWith } from 'lodash';
  *     },
  *   }
  */
-export const expandDottedObject = (dottedObj: object) => {
+export const expandDottedObject = (
+  dottedObj: object,
+  changeArrayOfLengthOneToString = false
+): object => {
   if (Array.isArray(dottedObj)) {
     return dottedObj;
   }
   const returnObj = {};
   Object.entries(dottedObj).forEach(([key, value]) => {
-    setWith(returnObj, key, value, Object);
+    const isOneElementArray =
+      changeArrayOfLengthOneToString && Array.isArray(value) && value.length === 1;
+
+    merge(returnObj, setWith({}, key, isOneElementArray ? value[0] : value, Object));
   });
   return returnObj;
 };

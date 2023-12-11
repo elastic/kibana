@@ -65,7 +65,6 @@ describe('buildDefaultSettings', () => {
     expect(settings).toMatchInlineSnapshot(`
       Object {
         "index": Object {
-          "codec": "best_compression",
           "lifecycle": Object {
             "name": "logs",
           },

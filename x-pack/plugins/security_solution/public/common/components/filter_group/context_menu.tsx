@@ -7,7 +7,7 @@
 
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { TEST_IDS } from './constants';
+import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS } from './constants';
 import { useFilterGroupInternalContext } from './hooks/use_filters';
 import {
   CONTEXT_MENU_RESET,
@@ -48,7 +48,7 @@ export const FilterGroupContextMenu = () => {
     [toggleContextMenu]
   );
 
-  const resetSelection = useCallback(() => {
+  const resetSelection = useCallback(async () => {
     if (!controlGroupInputUpdates) return;
 
     // remove existing embeddables
@@ -56,21 +56,18 @@ export const FilterGroupContextMenu = () => {
       panels: {},
     });
 
-    initialControls.forEach((control, idx) => {
-      controlGroup?.addOptionsListControl({
-        controlId: String(idx),
-        hideExclude: true,
-        hideSort: true,
-        hidePanelTitles: true,
-        placeholder: '',
+    for (let counter = 0; counter < initialControls.length; counter++) {
+      const control = initialControls[counter];
+      await controlGroup?.addOptionsListControl({
+        controlId: String(counter),
+        ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
         // option List controls will handle an invalid dataview
         // & display an appropriate message
         dataViewId: dataViewId ?? '',
         ...control,
       });
-    });
+    }
 
-    controlGroup?.reload();
     switchToViewMode();
     setShowFiltersChangedBanner(false);
   }, [
@@ -139,6 +136,9 @@ export const FilterGroupContextMenu = () => {
       closePopover={toggleContextMenu}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      panelProps={{
+        'data-test-subj': TEST_IDS.CONTEXT_MENU.MENU,
+      }}
     >
       <EuiContextMenuPanel items={contextMenuItems} />
     </EuiPopover>

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import { useUrlParams } from '../../../hooks';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 export const MonitorFailedTests = ({
@@ -26,19 +26,20 @@ export const MonitorFailedTests = ({
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
-  const monitorId = useMonitorQueryId();
+  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
   const { errorStateId } = useParams<{ errorStateId: string }>();
 
   const [, updateUrl] = useUrlParams();
 
-  if (!monitorId && !errorStateId) {
+  if (!queryIdFilter && !errorStateId) {
     return null;
   }
 
   return (
     <>
       <ExploratoryViewEmbeddable
+        id={'failedTestsLineSeries'}
         customHeight={'120px'}
         reportType="heatmap"
         axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
@@ -47,9 +48,10 @@ export const MonitorFailedTests = ({
           {
             time,
             reportDefinitions: {
-              ...(monitorId ? { 'monitor.id': [monitorId] } : {}),
+              ...queryIdFilter,
               ...(errorStateId ? { 'state.id': [errorStateId] } : {}),
             },
+            filters: locationFilter,
             dataType: 'synthetics',
             selectedMetricField: 'failed_tests',
             name: FAILED_TESTS_LABEL,

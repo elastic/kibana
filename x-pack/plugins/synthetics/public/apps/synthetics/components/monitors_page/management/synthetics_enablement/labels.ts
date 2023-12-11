@@ -7,39 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SYNTHETICS_ENABLE_SUCCESS = i18n.translate(
-  'xpack.synthetics.monitorManagement.syntheticsEnableSuccess',
+export const SYNTHETICS_APP_ENABLEMENT_TITLE = i18n.translate(
+  'xpack.synthetics.emptyState.enablement.title',
   {
-    defaultMessage: 'Monitor Management enabled successfully.',
-  }
-);
-
-export const SYNTHETICS_DISABLE_SUCCESS = i18n.translate(
-  'xpack.synthetics.monitorManagement.syntheticsDisabledSuccess',
-  {
-    defaultMessage: 'Monitor Management disabled successfully.',
-  }
-);
-
-export const MONITOR_MANAGEMENT_ENABLEMENT_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.emptyState.enablement.enabled.title',
-  {
-    defaultMessage: 'Enable Monitor Management',
-  }
-);
-
-export const SYNTHETICS_APP_DISABLED_LABEL = i18n.translate(
-  'xpack.synthetics.emptyState.enablement.disabled.title',
-  {
-    defaultMessage: 'Synthetics App is disabled',
-  }
-);
-
-export const MONITOR_MANAGEMENT_ENABLEMENT_MESSAGE = i18n.translate(
-  'xpack.synthetics.monitorManagement.emptyState.enablement',
-  {
-    defaultMessage:
-      'Enable Monitor Management to run lightweight and real-browser monitors from hosted testing locations around the world. Enabling Monitor Management will generate an API key to allow the Synthetics Service to write back to your Elasticsearch cluster.',
+    defaultMessage: 'Monitor the status of your services and applications with Synthetics',
   }
 );
 
@@ -47,7 +18,14 @@ export const MONITOR_MANAGEMENT_DISABLED_MESSAGE = i18n.translate(
   'xpack.synthetics.emptyState.enablement.disabledDescription',
   {
     defaultMessage:
-      'Synthetics App is currently disabled. Synthetics App allows you to run lightweight and real-browser monitors from hosted testing locations around the world. To enable Synthetics App, please contact an administrator.',
+      'Run automated checks based on real-browser simulations and lightweight endpoint pings to measure the experience of your users from any location worldwide.',
+  }
+);
+
+export const MONITOR_MANAGEMENT_CONTACT_ADMINISTRATOR = i18n.translate(
+  'xpack.synthetics.emptyState.enablement.contactAdministrator',
+  {
+    defaultMessage: 'Only administrators can enable this feature.',
   }
 );
 

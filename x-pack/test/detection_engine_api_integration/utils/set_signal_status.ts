@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type {
-  Status,
-  SignalIds,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
+import type { Status, SignalIds } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 export const setSignalStatus = ({
   signalIds,
+  query,
   status,
 }: {
-  signalIds: SignalIds;
+  signalIds?: SignalIds;
+  query?: object;
   status: Status;
 }) => ({
   signal_ids: signalIds,
+  query,
   status,
 });

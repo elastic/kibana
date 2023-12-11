@@ -16,6 +16,8 @@ export const getDocLinksMeta = ({ kibanaBranch }: GetDocLinksMetaOptions): DocLi
   return {
     version: kibanaBranch === 'main' ? 'master' : kibanaBranch,
     elasticWebsiteUrl: 'https://www.elastic.co/',
+    elasticGithubUrl: 'https://github.com/elastic/',
     docsWebsiteUrl: 'https://docs.elastic.co/',
+    searchLabsUrl: 'https://search-labs.elastic.co/',
   };
 };

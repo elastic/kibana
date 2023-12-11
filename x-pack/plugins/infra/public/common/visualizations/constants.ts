@@ -5,32 +5,8 @@
  * 2.0.
  */
 
-import {
-  cpu,
-  diskIORead,
-  diskIOWrite,
-  load,
-  memory,
-  memoryAvailable,
-  rx,
-  tx,
-  hostCount,
-} from './lens/formulas/host';
-import { LineChart, MetricChart } from './lens/visualization_types';
+export const HOST_METRICS_DOC_HREF = 'https://ela.st/docs-infra-host-metrics';
+export const HOST_METRICS_DOTTED_LINES_DOC_HREF = 'https://ela.st/docs-infra-why-dotted';
 
-export const hostLensFormulas = {
-  cpu,
-  diskIORead,
-  diskIOWrite,
-  hostCount,
-  load,
-  memory,
-  memoryAvailable,
-  rx,
-  tx,
-};
-
-export const visualizationTypes = {
-  lineChart: LineChart,
-  metricChart: MetricChart,
-};
+export const KPI_CHART_HEIGHT = 150;
+export const METRIC_CHART_HEIGHT = 300;

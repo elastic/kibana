@@ -8,17 +8,20 @@
 import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
 
+import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
+import { INTERNAL_API_VERSION } from '../helpers';
 import * as i18n from '../translations';
 
 const ILM_EXPLAIN_ENDPOINT = '/internal/ecs_data_quality_dashboard/ilm_explain';
 
-interface UseIlmExplain {
+export interface UseIlmExplain {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   error: string | null;
   loading: boolean;
 }
 
 export const useIlmExplain = (pattern: string): UseIlmExplain => {
+  const { httpFetch, isILMAvailable } = useDataQualityContext();
   const [ilmExplain, setIlmExplain] = useState<Record<
     string,
     IlmExplainLifecycleLifecycleExplain
@@ -32,29 +35,28 @@ export const useIlmExplain = (pattern: string): UseIlmExplain => {
     async function fetchData() {
       try {
         const encodedIndexName = encodeURIComponent(`${pattern}`);
+        if (!isILMAvailable) {
+          abortController.abort();
+        }
 
-        const response = await fetch(`${ILM_EXPLAIN_ENDPOINT}/${encodedIndexName}`, {
-          method: 'GET',
-          signal: abortController.signal,
-        });
-
-        if (response.ok) {
-          const json = await response.json();
-
-          if (!abortController.signal.aborted) {
-            setIlmExplain(json);
+        const response = await httpFetch<Record<string, IlmExplainLifecycleLifecycleExplain>>(
+          `${ILM_EXPLAIN_ENDPOINT}/${encodedIndexName}`,
+          {
+            method: 'GET',
+            signal: abortController.signal,
+            version: INTERNAL_API_VERSION,
           }
-        } else {
-          throw new Error(response.statusText);
+        );
+
+        if (!abortController.signal.aborted) {
+          setIlmExplain(response);
         }
       } catch (e) {
         if (!abortController.signal.aborted) {
-          setError(i18n.ERROR_LOADING_ILM_EXPLAIN(e));
+          setError(i18n.ERROR_LOADING_ILM_EXPLAIN(e.message));
         }
       } finally {
-        if (!abortController.signal.aborted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     }
 
@@ -63,7 +65,7 @@ export const useIlmExplain = (pattern: string): UseIlmExplain => {
     return () => {
       abortController.abort();
     };
-  }, [pattern, setError]);
+  }, [httpFetch, isILMAvailable, pattern, setError]);
 
   return { ilmExplain, error, loading };
 };

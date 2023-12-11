@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ApmIndicesConfig } from '@kbn/observability-shared-plugin/public';
 import { uniq } from 'lodash';
-import { ApmIndicesConfig } from '../../../../../common/typings';
 
 export function getApmDataViewTitle(apmIndicesConfig?: ApmIndicesConfig) {
   if (!apmIndicesConfig) {

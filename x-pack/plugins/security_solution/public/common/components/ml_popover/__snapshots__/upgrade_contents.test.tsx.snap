@@ -38,11 +38,9 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
         href="https://www.elastic.co/subscriptions"
         iconSide="right"
         iconType="popout"
-        size="m"
         target="_blank"
       >
         Subscription plans
@@ -52,10 +50,8 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
         href="/test/base/path/app/management/stack/license_management"
         iconType="gear"
-        size="m"
         target="_blank"
       >
         Manage license

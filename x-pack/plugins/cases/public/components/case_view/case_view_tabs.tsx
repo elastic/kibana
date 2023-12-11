@@ -46,7 +46,38 @@ const FilesTab = ({
   </>
 );
 
+const AlertsTab = ({
+  activeTab,
+  totalAlerts,
+  isExperimental,
+}: {
+  activeTab: string;
+  totalAlerts: number | undefined;
+  isExperimental: boolean;
+}) => (
+  <>
+    {ALERTS_TAB}
+    <StyledNotificationBadge
+      data-test-subj="case-view-alerts-stats-badge"
+      color={activeTab === CASE_VIEW_PAGE_TABS.ALERTS ? 'accent' : 'subdued'}
+    >
+      {totalAlerts || 0}
+    </StyledNotificationBadge>
+    {isExperimental && (
+      <ExperimentalBadge
+        label={EXPERIMENTAL_LABEL}
+        size="s"
+        iconType="beaker"
+        tooltipContent={EXPERIMENTAL_DESC}
+        tooltipPosition="bottom"
+        data-test-subj="case-view-alerts-table-experimental-badge"
+      />
+    )}
+  </>
+);
+
 FilesTab.displayName = 'FilesTab';
+AlertsTab.displayName = 'AlertsTab';
 
 export interface CaseViewTabsProps {
   caseData: CaseUI;
@@ -56,7 +87,9 @@ export interface CaseViewTabsProps {
 export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab }) => {
   const { features } = useCasesContext();
   const { navigateToCaseView } = useCaseViewNavigation();
-  const { data: fileStatsData, isLoading } = useGetCaseFileStats({ caseId: caseData.id });
+  const { data: fileStatsData, isLoading } = useGetCaseFileStats({
+    caseId: caseData.id,
+  });
 
   const tabs = useMemo(
     () => [
@@ -69,19 +102,11 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
             {
               id: CASE_VIEW_PAGE_TABS.ALERTS,
               name: (
-                <>
-                  {ALERTS_TAB}
-                  {features.alerts.isExperimental ? (
-                    <ExperimentalBadge
-                      label={EXPERIMENTAL_LABEL}
-                      size="s"
-                      iconType="beaker"
-                      tooltipContent={EXPERIMENTAL_DESC}
-                      tooltipPosition="bottom"
-                      data-test-subj="case-view-alerts-table-experimental-badge"
-                    />
-                  ) : null}
-                </>
+                <AlertsTab
+                  isExperimental={features.alerts.isExperimental}
+                  totalAlerts={caseData.totalAlerts}
+                  activeTab={activeTab}
+                />
               ),
             },
           ]
@@ -93,7 +118,14 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         ),
       },
     ],
-    [activeTab, features.alerts.enabled, features.alerts.isExperimental, fileStatsData, isLoading]
+    [
+      features.alerts.enabled,
+      features.alerts.isExperimental,
+      caseData.totalAlerts,
+      activeTab,
+      isLoading,
+      fileStatsData,
+    ]
   );
 
   const renderTabs = useCallback(() => {

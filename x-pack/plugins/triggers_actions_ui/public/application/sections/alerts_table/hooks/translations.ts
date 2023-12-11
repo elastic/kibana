@@ -35,13 +35,6 @@ export const ADD_TO_NEW_CASE = i18n.translate(
   }
 );
 
-export const ADD_TO_CASE_DISABLED = i18n.translate(
-  'xpack.triggersActionsUI.alerts.table.actions.addToCaseDisabled',
-  {
-    defaultMessage: 'Add to case is not supported for this selection',
-  }
-);
-
 export const NO_ALERTS_ADDED_TO_CASE = i18n.translate(
   'xpack.triggersActionsUI.alerts.table.actions.noAlertsAddedToCaseTitle',
   {
@@ -55,3 +48,18 @@ export const ALERTS_ALREADY_ATTACHED_TO_CASE = i18n.translate(
     defaultMessage: 'All selected alerts are already attached to the case',
   }
 );
+
+export const MARK_AS_UNTRACKED = i18n.translate(
+  'xpack.triggersActionsUI.alerts.table.actions.markAsUntracked',
+  {
+    defaultMessage: 'Mark as untracked',
+  }
+);
+
+export const MUTE = i18n.translate('xpack.triggersActionsUI.alerts.table.actions.mute', {
+  defaultMessage: 'Mute',
+});
+
+export const UNMUTE = i18n.translate('xpack.triggersActionsUI.alerts.table.actions.unmute', {
+  defaultMessage: 'Unmute',
+});

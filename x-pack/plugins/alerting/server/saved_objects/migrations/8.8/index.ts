@@ -73,9 +73,30 @@ function addSecuritySolutionActionsFrequency(
   return doc;
 }
 
+function unmuteSecuritySolutionCustomRules(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  if (!isDetectionEngineAADRuleType(doc)) {
+    return doc;
+  }
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      muteAll: false,
+    },
+  };
+}
+
 export const getMigrations880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(addActionUuid, addRevision, addSecuritySolutionActionsFrequency)
+    pipeMigrations(
+      addActionUuid,
+      addRevision,
+      addSecuritySolutionActionsFrequency,
+      unmuteSecuritySolutionCustomRules
+    )
   );

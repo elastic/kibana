@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
-import { ChartsGrid } from './charts_grid';
+import { ChartsGridContainer } from './charts_grid';
 import { FieldsConfig } from './fields_config';
 import { useDataSource } from '../../hooks/use_data_source';
 import { ChangePointTypeFilter } from './change_point_type_filter';
@@ -121,6 +121,7 @@ export const ChangePointDetectionPage: FC = () => {
                   onClick={() => setFlyoutVisible(!isFlyoutVisible)}
                   size={'s'}
                   disabled={!hasSelectedChangePoints}
+                  data-test-subj={'aiopsChangePointDetectionViewSelected'}
                 >
                   <FormattedMessage
                     id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
@@ -149,6 +150,7 @@ export const ChangePointDetectionPage: FC = () => {
           onClose={setFlyoutVisible.bind(null, false)}
           aria-labelledby={'change_point_charts'}
           size={'l'}
+          data-test-subj={'aiopsChangePointDetectionSelectedCharts'}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
@@ -161,7 +163,7 @@ export const ChangePointDetectionPage: FC = () => {
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <ChartsGrid changePoints={selectedChangePoints} />
+            <ChartsGridContainer changePoints={selectedChangePoints} />
           </EuiFlyoutBody>
         </EuiFlyout>
       ) : null}

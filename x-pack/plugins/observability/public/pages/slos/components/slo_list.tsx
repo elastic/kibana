@@ -5,39 +5,42 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
-import { debounce } from 'lodash';
 import { useIsMutating } from '@tanstack/react-query';
-
+import React, { useState } from 'react';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
-import {
-  FilterType,
-  SloListSearchFilterSortBar,
-  SortType,
-} from './slo_list_search_filter_sort_bar';
-import { SloListItems } from './slo_list_items';
+import { useUrlSearchState } from '../hooks/use_url_search_state';
+import { SlosView } from './slos_view';
+import { SloListSearchBar, SortDirection, SortField } from './slo_list_search_bar';
+import { SLOView, ToggleSLOView } from './toggle_slo_view';
 
 export interface Props {
   autoRefresh: boolean;
 }
 
 export function SloList({ autoRefresh }: Props) {
-  const [activePage, setActivePage] = useState(0);
+  const { state, store: storeState } = useUrlSearchState();
+  const [page, setPage] = useState(state.page);
+  const [query, setQuery] = useState(state.kqlQuery);
+  const [sort, setSort] = useState<SortField>(state.sort.by);
+  const [direction] = useState<SortDirection>(state.sort.direction);
+  const [view, setView] = useState<SLOView>(state.view);
+  const [isCompact, setCompact] = useState<boolean>(state.compact);
 
-  const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<SortType>('creationTime');
-  const [indicatorTypeFilter, setIndicatorTypeFilter] = useState<FilterType[]>([]);
-
-  const { isInitialLoading, isLoading, isRefetching, isError, sloList, refetch } = useFetchSloList({
-    page: activePage + 1,
-    name: query,
+  const {
+    isLoading,
+    isRefetching,
+    isError,
+    data: sloList,
+  } = useFetchSloList({
+    page: page + 1,
+    kqlQuery: query,
     sortBy: sort,
-    indicatorTypes: indicatorTypeFilter,
+    sortDirection: direction,
     shouldRefetch: autoRefresh,
   });
 
-  const { results = [], total = 0, perPage = 0 } = sloList || {};
+  const { results = [], total = 0, perPage = 0 } = sloList ?? {};
 
   const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
   const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
@@ -45,56 +48,66 @@ export function SloList({ autoRefresh }: Props) {
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
 
   const handlePageClick = (pageNumber: number) => {
-    setActivePage(pageNumber);
-    refetch();
+    setPage(pageNumber);
+    storeState({ page: pageNumber });
   };
 
-  const handleChangeQuery = useMemo(
-    () =>
-      debounce((e: React.ChangeEvent<HTMLInputElement>) => {
-        setQuery(e.target.value);
-      }, 300),
-    []
-  );
+  const handleChangeQuery = (newQuery: string) => {
+    setPage(0);
+    setQuery(newQuery);
+    storeState({ page: 0, kqlQuery: newQuery });
+  };
 
-  const handleChangeSort = (newSort: SortType) => {
+  const handleChangeSort = (newSort: SortField) => {
+    setPage(0);
     setSort(newSort);
+    storeState({ page: 0, sort: { by: newSort, direction: state.sort.direction } });
   };
 
-  const handleChangeIndicatorTypeFilter = (newFilter: FilterType[]) => {
-    setIndicatorTypeFilter(newFilter);
+  const handleChangeView = (newView: SLOView) => {
+    setView(newView);
+    storeState({ view: newView });
+  };
+
+  const handleToggleCompactView = () => {
+    const newCompact = !isCompact;
+    setCompact(newCompact);
+    storeState({ compact: newCompact });
   };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
-        <SloListSearchFilterSortBar
-          loading={
-            isInitialLoading ||
-            isLoading ||
-            isRefetching ||
-            isCreatingSlo ||
-            isCloningSlo ||
-            isUpdatingSlo ||
-            isDeletingSlo
-          }
+        <SloListSearchBar
+          loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}
-          onChangeIndicatorTypeFilter={handleChangeIndicatorTypeFilter}
+          initialState={state}
         />
       </EuiFlexItem>
-
-      <EuiFlexItem>
-        <SloListItems sloList={results} loading={isLoading || isRefetching} error={isError} />
+      <EuiFlexItem grow={false}>
+        <ToggleSLOView
+          sloView={view}
+          onChangeView={handleChangeView}
+          onToggleCompactView={handleToggleCompactView}
+          isCompact={isCompact}
+        />
       </EuiFlexItem>
+      <SlosView
+        sloList={results}
+        loading={isLoading || isRefetching}
+        error={isError}
+        isCompact={isCompact}
+        sloView={view}
+      />
 
-      {results.length ? (
+      {total > 0 ? (
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexEnd">
             <EuiFlexItem>
               <EuiPagination
                 pageCount={Math.ceil(total / perPage)}
-                activePage={activePage}
+                activePage={page}
                 onPageClick={handlePageClick}
               />
             </EuiFlexItem>

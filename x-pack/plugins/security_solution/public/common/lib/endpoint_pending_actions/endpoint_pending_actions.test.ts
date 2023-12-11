@@ -29,6 +29,7 @@ describe('when using endpoint pending actions api service', () => {
 
     expect(response).toEqual(pendingActionsResponseMock());
     expect(coreHttp.get).toHaveBeenCalledWith(ACTION_STATUS_ROUTE, {
+      version: '2023-10-31',
       query: {
         agent_ids: agentIdList,
       },

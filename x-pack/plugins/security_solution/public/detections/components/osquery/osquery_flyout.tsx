@@ -52,12 +52,7 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
 
   if (osquery?.OsqueryAction) {
     return (
-      <EuiFlyout
-        ownFocus
-        maskProps={{ style: 'z-index: 5000' }} // For an edge case to display above the timeline flyout
-        size="m"
-        onClose={onClose}
-      >
+      <EuiFlyout size="m" onClose={onClose}>
         <EuiFlyoutHeader hasBorder data-test-subj="flyout-header-osquery">
           <EuiTitle>
             <h2>{ACTION_OSQUERY}</h2>

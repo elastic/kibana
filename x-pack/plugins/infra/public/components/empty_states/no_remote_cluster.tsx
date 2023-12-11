@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useLinkProps } from '@kbn/observability-plugin/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { NoIndices } from './no_indices';
 
 export const NoRemoteCluster = () => {
@@ -27,6 +27,7 @@ export const NoRemoteCluster = () => {
       color="danger"
       iconType="error"
       titleSize="m"
+      data-test-subj="infraHostsNoRemoteCluster"
       title={i18n.translate('xpack.infra.sourceConfiguration.noRemoteClusterTitle', {
         defaultMessage: "Couldn't connect to the remote cluster",
       })}

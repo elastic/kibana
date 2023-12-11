@@ -29,8 +29,9 @@ export const getMlCapabilities = async ({
   http: HttpSetup;
   signal: AbortSignal;
 }): Promise<MlCapabilitiesResponse> =>
-  http.fetch<MlCapabilitiesResponse>('/api/ml/ml_capabilities', {
+  http.fetch<MlCapabilitiesResponse>('/internal/ml/ml_capabilities', {
     method: 'GET',
+    version: '1',
     asSystemRequest: true,
     signal,
   });

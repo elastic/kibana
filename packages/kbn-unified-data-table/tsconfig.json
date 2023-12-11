@@ -1,0 +1,38 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["*.ts", "**/*.tsx", "src/**/*", "__mocks__/**/*.ts"],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/data-views-plugin",
+    "@kbn/unified-doc-viewer",
+    "@kbn/discover-utils",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/ui-theme",
+    "@kbn/field-types",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/cell-actions",
+    "@kbn/utility-types",
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/react-kibana-context-common",
+    "@kbn/data-plugin",
+    "@kbn/core",
+    "@kbn/ui-actions-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/monaco",
+    "@kbn/code-editor",
+    "@kbn/config",
+    "@kbn/monaco",
+    "@kbn/field-utils",
+  ]
+}

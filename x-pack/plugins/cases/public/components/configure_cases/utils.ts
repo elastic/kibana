@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { ConnectorTypeFields } from '../../../common/api';
-import { ConnectorTypes } from '../../../common/api';
+import type { ConnectorTypeFields } from '../../../common/types/domain';
+import { ConnectorTypes } from '../../../common/types/domain';
 import type {
-  CaseField,
-  ActionType,
-  ThirdPartyField,
+  ConnectorMappingSource,
+  ConnectorMappingActionType,
+  ConnectorMappingTarget,
   CaseConnector,
   CaseConnectorMapping,
 } from '../../containers/configure/types';
 import type { CaseActionConnector } from '../types';
 
 export const setActionTypeToMapping = (
-  caseField: CaseField,
-  newActionType: ActionType,
+  caseField: ConnectorMappingSource,
+  newActionType: ConnectorMappingActionType,
   mapping: CaseConnectorMapping[]
 ): CaseConnectorMapping[] => {
   const findItemIndex = mapping.findIndex((item) => item.source === caseField);
@@ -35,8 +35,8 @@ export const setActionTypeToMapping = (
 };
 
 export const setThirdPartyToMapping = (
-  caseField: CaseField,
-  newThirdPartyField: ThirdPartyField,
+  caseField: ConnectorMappingSource,
+  newThirdPartyField: ConnectorMappingTarget,
   mapping: CaseConnectorMapping[]
 ): CaseConnectorMapping[] =>
   mapping.map((item) => {

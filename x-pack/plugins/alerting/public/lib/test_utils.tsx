@@ -11,7 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { CoreStart } from '@kbn/core/public';
+import { Capabilities, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { euiDarkVars } from '@kbn/ui-theme';
 import type { ILicense } from '@kbn/licensing-plugin/public';
@@ -22,6 +22,7 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 interface AppMockRendererArgs {
+  capabilities?: Capabilities;
   license?: ILicense | null;
 }
 
@@ -30,9 +31,15 @@ export interface AppMockRenderer {
   coreStart: CoreStart;
   queryClient: QueryClient;
   AppWrapper: React.FC<{ children: React.ReactElement }>;
+  mocked: {
+    setBadge: jest.Mock;
+  };
 }
 
-export const createAppMockRenderer = ({ license }: AppMockRendererArgs = {}): AppMockRenderer => {
+export const createAppMockRenderer = ({
+  capabilities,
+  license,
+}: AppMockRendererArgs = {}): AppMockRenderer => {
   const theme$ = of({ eui: euiDarkVars, darkMode: true });
 
   const licensingPluginMock = licensingMock.createStart();
@@ -53,13 +60,26 @@ export const createAppMockRenderer = ({ license }: AppMockRendererArgs = {}): Ap
       error: () => {},
     },
   });
+
+  const mockedSetBadge = jest.fn();
   const core = coreMock.createStart();
   const services = {
     ...core,
+    application: {
+      ...core.application,
+      capabilities: {
+        ...core.application.capabilities,
+        ...capabilities,
+      },
+    },
     licensing:
       license != null
         ? { ...licensingPluginMock, license$: new BehaviorSubject(license) }
         : licensingPluginMock,
+    chrome: {
+      ...core.chrome,
+      setBadge: mockedSetBadge,
+    },
   };
   const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
     <I18nProvider>
@@ -85,5 +105,8 @@ export const createAppMockRenderer = ({ license }: AppMockRendererArgs = {}): Ap
     render,
     queryClient,
     AppWrapper,
+    mocked: {
+      setBadge: mockedSetBadge,
+    },
   };
 };

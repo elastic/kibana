@@ -29,7 +29,14 @@ export function RemoteClustersPageProvider({ getService }: FtrProviderContext) {
       });
       await testSubjects.setValue('remoteClusterFormNameInput', name);
       await comboBox.setCustom('comboBoxInput', seedNode);
+
+      // Submit config form
       await testSubjects.click('remoteClusterFormSaveButton');
+
+      // Complete trust setup
+      await testSubjects.click('setupTrustDoneButton');
+      await testSubjects.setCheckbox('remoteClusterTrustCheckboxLabel', 'check');
+      await testSubjects.click('remoteClusterTrustSubmitButton');
     },
     async getRemoteClustersList() {
       const table = await testSubjects.find('remoteClusterListTable');

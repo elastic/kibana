@@ -41,7 +41,7 @@ export class ObjectRemover {
             `${getUrlPrefix(spaceId)}/${isInternal ? 'internal' : 'api'}/${plugin}/${type}/${id}`
           )
           .set('kbn-xsrf', 'foo')
-          .expect(204);
+          .expect(plugin === 'saved_objects' ? 200 : 204);
       })
     );
     this.objectsToRemove = [];

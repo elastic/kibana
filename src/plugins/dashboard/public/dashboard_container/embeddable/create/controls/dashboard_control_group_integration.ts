@@ -10,11 +10,10 @@ import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
-import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged, skip } from 'rxjs/operators';
+import { distinctUntilChanged, skip } from 'rxjs/operators';
 
 import {
   ControlGroupInput,
-  getDefaultControlGroupInput,
   persistableControlGroupInputIsEqual,
 } from '@kbn/controls-plugin/common';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
@@ -51,7 +50,7 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
     chainingSystem: deepEqual,
     ignoreParentSettings: deepEqual,
   };
-  this.subscriptions.add(
+  this.integrationSubscriptions.add(
     this.controlGroup
       .getInput$()
       .pipe(
@@ -84,7 +83,7 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
   };
 
   // pass down any pieces of input needed to refetch or force refetch data for the controls
-  this.subscriptions.add(
+  this.integrationSubscriptions.add(
     (this.getInput$() as Readonly<Observable<DashboardContainerInput>>)
       .pipe(
         distinctUntilChanged((a, b) =>
@@ -106,25 +105,8 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
       })
   );
 
-  // dashboard may reset the control group input when discarding changes. Subscribe to these changes and update accordingly
-  this.subscriptions.add(
-    (this.getInput$() as Readonly<Observable<DashboardContainerInput>>)
-      .pipe(debounceTime(10), distinctUntilKeyChanged('controlGroupInput'))
-      .subscribe(() => {
-        if (!isControlGroupInputEqual()) {
-          if (!this.getInput().controlGroupInput) {
-            this.controlGroup!.updateInput(getDefaultControlGroupInput());
-            return;
-          }
-          this.controlGroup!.updateInput({
-            ...this.getInput().controlGroupInput,
-          });
-        }
-      })
-  );
-
   // when control group outputs filters, force a refresh!
-  this.subscriptions.add(
+  this.integrationSubscriptions.add(
     this.controlGroup
       .getOutput$()
       .pipe(
@@ -136,7 +118,7 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
       .subscribe(() => this.forceRefresh(false)) // we should not reload the control group when the control group output changes - otherwise, performance is severely impacted
   );
 
-  this.subscriptions.add(
+  this.integrationSubscriptions.add(
     this.controlGroup
       .getOutput$()
       .pipe(
@@ -152,7 +134,7 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
   );
 
   // the Control Group needs to know when any dashboard children are loading in order to know when to move on to the next time slice when playing.
-  this.subscriptions.add(
+  this.integrationSubscriptions.add(
     this.getAnyChildOutputChange$().subscribe(() => {
       if (!this.controlGroup) {
         return;

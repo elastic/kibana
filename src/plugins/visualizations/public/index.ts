@@ -24,7 +24,15 @@ export { getVisSchemas } from './vis_schemas';
 /** @public types */
 export type { VisualizationsSetup, VisualizationsStart };
 export { VisGroups } from './vis_types/vis_groups_enum';
-export type { BaseVisType, VisTypeAlias, VisTypeDefinition, Schema, ISchemas } from './vis_types';
+export type {
+  BaseVisType,
+  VisTypeAlias,
+  VisTypeDefinition,
+  Schema,
+  ISchemas,
+  VisualizationClient,
+  SerializableAttributes,
+} from './vis_types';
 export type { Vis, SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
@@ -46,7 +54,6 @@ export type {
   VisualizationStage,
 } from './vis_types/vis_type_alias_registry';
 export {
-  VISUALIZE_ENABLE_LABS_SETTING,
   SAVED_OBJECTS_LIMIT_SETTING,
   SAVED_OBJECTS_PER_PAGE_SETTING,
   LegendSize,
@@ -54,7 +61,7 @@ export {
   DEFAULT_LEGEND_SIZE,
 } from '../common/constants';
 export type { SavedVisState, VisParams, Dimension } from '../common';
-export { prepareLogTable } from '../common';
+export { prepareLogTable, XYCurveTypes } from '../common';
 export type { ExpressionValueVisDimension } from '../common/expression_functions/vis_dimension';
 export type {
   ExpressionValueXYDimension,

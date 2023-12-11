@@ -7,15 +7,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPanel,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaTemplate } from './kibana_template';
@@ -43,7 +35,7 @@ const KibanaOverview = ({ data }: { data: any }) => {
           <ClusterStatus stats={data.clusterStatus} />
         </EuiPanel>
         <EuiSpacer size="m" />
-        <EuiPageContent>
+        <EuiPanel>
           <EuiFlexGroup>
             <EuiFlexItem grow={true}>
               <MonitoringTimeseriesContainer
@@ -96,7 +88,7 @@ const KibanaOverview = ({ data }: { data: any }) => {
               </EuiFlexGroup>
             </>
           )}
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

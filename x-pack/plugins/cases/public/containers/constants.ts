@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SingleCaseMetricsFeature } from './types';
+import type { FilterOptions, QueryParams, SingleCaseMetricsFeature } from './types';
+import { SortFieldCase } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
 export const DEFAULT_TABLE_LIMIT = 10;
@@ -44,14 +45,43 @@ export const casesQueriesKeys = {
   connectorTypes: () => [...casesQueriesKeys.connectors, 'types'] as const,
   license: () => [...casesQueriesKeys.connectors, 'license'] as const,
   tags: () => [...casesQueriesKeys.all, 'tags'] as const,
+  categories: () => [...casesQueriesKeys.all, 'categories'] as const,
   alertFeatureIds: (alertRegistrationContexts: string[]) =>
     [...casesQueriesKeys.alerts, 'features', alertRegistrationContexts] as const,
+  configuration: (params: unknown) => [...casesQueriesKeys.all, 'configuration', params] as const,
 };
 
 export const casesMutationsKeys = {
   createCase: ['create-case'] as const,
   deleteCases: ['delete-cases'] as const,
+  updateCase: ['update-case'] as const,
   updateCases: ['update-cases'] as const,
+  pushCase: ['push-case'] as const,
+  updateComment: ['update-comment'] as const,
   deleteComment: ['delete-comment'] as const,
   deleteFileAttachment: ['delete-file-attachment'] as const,
+  bulkCreateAttachments: ['bulk-create-attachments'] as const,
+  persistCaseConfiguration: ['persist-case-configuration'] as const,
+};
+
+const DEFAULT_SEARCH_FIELDS = ['title', 'description'];
+
+export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
+  search: '',
+  searchFields: DEFAULT_SEARCH_FIELDS,
+  severity: [],
+  assignees: [],
+  reporters: [],
+  status: [],
+  tags: [],
+  owner: [],
+  category: [],
+  customFields: {},
+};
+
+export const DEFAULT_QUERY_PARAMS: QueryParams = {
+  page: DEFAULT_TABLE_ACTIVE_PAGE,
+  perPage: DEFAULT_TABLE_LIMIT,
+  sortField: SortFieldCase.createdAt,
+  sortOrder: 'desc',
 };

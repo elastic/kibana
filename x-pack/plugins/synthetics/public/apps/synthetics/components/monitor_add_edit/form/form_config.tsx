@@ -198,7 +198,9 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[ConfigKey.MAX_REDIRECTS],
       FIELD(readOnly)[ConfigKey.TIMEOUT],
       FIELD(readOnly)[ConfigKey.ENABLED],
+      FIELD(readOnly)[ConfigKey.MAX_ATTEMPTS],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
+      FIELD(readOnly)[AlertConfigKey.TLS_ENABLED],
     ],
     advanced: [
       DEFAULT_DATA_OPTIONS(readOnly),
@@ -217,7 +219,9 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[`${ConfigKey.SCHEDULE}.number`],
       FIELD(readOnly)[ConfigKey.TIMEOUT],
       FIELD(readOnly)[ConfigKey.ENABLED],
+      FIELD(readOnly)[ConfigKey.MAX_ATTEMPTS],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
+      FIELD(readOnly)[AlertConfigKey.TLS_ENABLED],
     ],
     advanced: [
       DEFAULT_DATA_OPTIONS(readOnly),
@@ -233,6 +237,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[ConfigKey.LOCATIONS],
       FIELD(readOnly)[`${ConfigKey.SCHEDULE}.number`],
       FIELD(readOnly)[ConfigKey.ENABLED],
+      FIELD(readOnly)[ConfigKey.MAX_ATTEMPTS],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
     ],
     step3: [FIELD(readOnly)['source.inline'], FIELD(readOnly)[ConfigKey.PARAMS]],
@@ -259,6 +264,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[ConfigKey.LOCATIONS],
       FIELD(readOnly)[`${ConfigKey.SCHEDULE}.number`],
       FIELD(readOnly)[ConfigKey.ENABLED],
+      FIELD(readOnly)[ConfigKey.MAX_ATTEMPTS],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
     ],
     advanced: [
@@ -284,6 +290,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[ConfigKey.WAIT],
       FIELD(readOnly)[ConfigKey.TIMEOUT],
       FIELD(readOnly)[ConfigKey.ENABLED],
+      FIELD(readOnly)[ConfigKey.MAX_ATTEMPTS],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
     ],
     advanced: [DEFAULT_DATA_OPTIONS(readOnly), ICMP_ADVANCED(readOnly).requestConfig],

@@ -7,7 +7,7 @@
 
 import { DARK_THEME } from '@elastic/charts';
 import numeral from '@elastic/numeral';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { EMPTY_STAT } from '../../../../helpers';
@@ -55,19 +55,20 @@ const defaultProps: Props = {
   formatNumber,
   getGroupByFieldsOnClick: jest.fn(),
   ilmPhases,
+  isAssistantEnabled: true,
   openCreateCaseFlyout: jest.fn(),
   patternIndexNames,
   patternRollups,
   patterns,
   selectedIndex: null,
   setSelectedIndex: jest.fn(),
-  theme: DARK_THEME,
+  baseTheme: DARK_THEME,
   updatePatternIndexNames: jest.fn(),
   updatePatternRollup: jest.fn(),
 };
 
 describe('IndicesDetails', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
 
     render(
@@ -75,6 +76,8 @@ describe('IndicesDetails', () => {
         <IndicesDetails {...defaultProps} />
       </TestProviders>
     );
+
+    await waitFor(() => {});
   });
 
   describe('rendering patterns', () => {

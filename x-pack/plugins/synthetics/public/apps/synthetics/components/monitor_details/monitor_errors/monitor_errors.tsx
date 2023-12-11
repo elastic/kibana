@@ -22,8 +22,7 @@ import { ErrorsTabContent } from './errors_tab_content';
 import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
 
 export const MonitorErrors = () => {
-  const { errorStates, loading, data } = useMonitorErrors();
-
+  const { errorStates, upStates, loading, data } = useMonitorErrors();
   const initialLoading = !data;
 
   const emptyState = !loading && errorStates && errorStates?.length === 0;
@@ -40,7 +39,7 @@ export const MonitorErrors = () => {
       {initialLoading && <LoadingErrors />}
       {emptyState && <EmptyErrors />}
       <div style={{ visibility: initialLoading || emptyState ? 'collapse' : 'initial' }}>
-        <ErrorsTabContent errorStates={errorStates ?? []} loading={loading} />
+        <ErrorsTabContent errorStates={errorStates} upStates={upStates} loading={loading} />
       </div>
     </MonitorPendingWrapper>
   );

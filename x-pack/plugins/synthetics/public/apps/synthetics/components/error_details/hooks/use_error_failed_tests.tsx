@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
+import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { Ping } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
@@ -24,7 +24,7 @@ export function useErrorFailedTests() {
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
-  const { data, loading } = useEsSearch(
+  const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
       body: {

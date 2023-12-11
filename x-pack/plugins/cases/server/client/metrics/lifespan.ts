@@ -6,14 +6,14 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
+import type { StatusUserAction, UserActionAttributes } from '../../../common/types/domain';
 import type {
-  CaseUserActionInjectedAttributes,
+  UserActionWithResponse,
   SingleCaseMetricsResponse,
   StatusInfo,
-  StatusUserAction,
-  UserActionWithResponse,
-} from '../../../common/api';
-import { CaseStatuses, StatusUserActionRt } from '../../../common/api';
+} from '../../../common/types/api';
+import { StatusUserActionRt, CaseStatuses } from '../../../common/types/domain';
+import { CaseMetricsFeature } from '../../../common/types/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { SingleCaseBaseHandler } from './single_case_base_handler';
@@ -21,7 +21,7 @@ import type { SingleCaseBaseHandlerCommonOptions } from './types';
 
 export class Lifespan extends SingleCaseBaseHandler {
   constructor(options: SingleCaseBaseHandlerCommonOptions) {
-    super(options, ['lifespan']);
+    super(options, [CaseMetricsFeature.LIFESPAN]);
   }
 
   public async compute(): Promise<SingleCaseMetricsResponse> {
@@ -83,7 +83,7 @@ interface StatusCalculations {
 }
 
 export function getStatusInfo(
-  statusUserActions: Array<SavedObject<CaseUserActionInjectedAttributes>>,
+  statusUserActions: Array<SavedObject<UserActionAttributes>>,
   caseOpenTimestamp: Date
 ): StatusInfo {
   const accStatusInfo = statusUserActions.reduce<StatusCalculations>(
@@ -138,7 +138,7 @@ export function getStatusInfo(
 }
 
 function isValidStatusChangeUserAction(
-  attributes: CaseUserActionInjectedAttributes,
+  attributes: UserActionAttributes,
   newStatusChangeTimestamp: Date
 ): attributes is UserActionWithResponse<StatusUserAction> {
   return StatusUserActionRt.is(attributes) && isDateValid(newStatusChangeTimestamp);

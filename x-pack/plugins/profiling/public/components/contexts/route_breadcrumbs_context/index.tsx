@@ -8,7 +8,7 @@ import { Route, RouteMatch, useMatchRoutes } from '@kbn/typed-react-router-confi
 import { ChromeBreadcrumb } from '@kbn/core/public';
 import { compact, isEqual } from 'lodash';
 import React, { createContext, useMemo, useState } from 'react';
-import { useBreadcrumbs } from '@kbn/observability-plugin/public';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 export interface Breadcrumb {
   title: string;

@@ -6,6 +6,12 @@
 
 experimental[] Create sets of {kib} saved objects from a file created by the export API.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
+====
+
 ==== Compatibility across versions
 Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of {kib}. See the table below for compatibility examples:
 
@@ -101,7 +107,7 @@ to resolve errors, refer to the <<saved-objects-api-import-example,examples>>.
 [[saved-objects-api-import-example-1]]
 ===== Successful import with `createNewCopies` enabled
 
-Import {a-data-source} and dashboard:
+Import a {data-source} and dashboard:
 
 [source,sh]
 --------------------------------------------------
@@ -153,7 +159,7 @@ The result indicates a successful import, and both objects are created. Since th
 [[saved-objects-api-import-example-2]]
 ===== Successful import with `createNewCopies` disabled
 
-Import {a-data-source} and dashboard:
+Import a {data-source} and dashboard:
 
 [source,sh]
 --------------------------------------------------
@@ -202,7 +208,7 @@ The result indicates a successful import, and both objects are created.
 [[saved-objects-api-import-example-3]]
 ===== Failed import with conflict errors
 
-Import {a-data-source}, visualization, *Canvas* workpad, and dashboard that include saved objects:
+Import a {data-source}, visualization, *Canvas* workpad, and dashboard that include saved objects:
 
 [source,sh]
 --------------------------------------------------

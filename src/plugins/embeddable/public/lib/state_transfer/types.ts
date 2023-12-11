@@ -42,6 +42,10 @@ export interface EmbeddablePackageState {
   type: string;
   input: Optional<EmbeddableInput, 'id'> | Optional<SavedObjectEmbeddableInput, 'id'>;
   embeddableId?: string;
+  size?: {
+    width?: number;
+    height?: number;
+  };
 
   /**
    * Pass current search session id when navigating to an editor,

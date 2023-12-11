@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ErrorStatePrompt } from './error_state_prompt';
+export { ErrorStatePrompt, ErrorStateCallout } from './error_state_prompt';

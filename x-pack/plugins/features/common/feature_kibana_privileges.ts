@@ -22,8 +22,6 @@ export interface FeatureKibanaPrivileges {
 
   /**
    * Whether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`.
-   * @deprecated
-   * @removeBy 8.8.0
    */
   disabled?: boolean;
 
@@ -206,6 +204,16 @@ export interface FeatureKibanaPrivileges {
      * ```
      */
     delete?: readonly string[];
+    /**
+     * List of case owners which users should have settings access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    settings: ['securitySolution']
+     *  }
+     * ```
+     */
+    settings?: readonly string[];
   };
 
   /**

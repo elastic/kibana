@@ -16,8 +16,6 @@ delete:
       description: Indicates a successful call.
     '401':
       $ref: '../components/responses/401.yaml'
-  servers:
-    - url: https://localhost:5601
 
 get:
   summary: Retrieves a connector by ID.
@@ -34,8 +32,6 @@ get:
       $ref: '../components/responses/200_actions.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
-  servers:
-    - url: https://localhost:5601
 
 put:
   summary: Updates the attributes for a connector.
@@ -71,8 +67,3 @@ put:
       $ref: '../components/responses/200_actions.yaml'
     '404':
       $ref: '../components/responses/404.yaml'
-  servers:
-    - url: https://localhost:5601
-
-servers:
-  - url: https://localhost:5601

@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { switchMap } from 'rxjs';
 import type {
   VisualizeServices,
   VisualizeAppState,
@@ -234,19 +235,23 @@ const TopNav = ({
 
   /** Synchronizing dataView with state **/
   useEffect(() => {
-    const stateContainerSubscription = stateContainer.state$.subscribe(async ({ dataView }) => {
-      if (
-        dataView &&
-        visInstance.vis.data.indexPattern &&
-        dataView !== visInstance.vis.data.indexPattern.id
-      ) {
-        const dataViewFromState = await services.dataViews.get(dataView);
+    const stateContainerSubscription = stateContainer.state$
+      .pipe(
+        switchMap(async ({ dataView }) => {
+          if (
+            dataView &&
+            visInstance.vis.data.indexPattern &&
+            dataView !== visInstance.vis.data.indexPattern.id
+          ) {
+            const dataViewFromState = await services.dataViews.get(dataView);
 
-        if (dataViewFromState) {
-          setIndexPatterns([dataViewFromState]);
-        }
-      }
-    });
+            if (dataViewFromState) {
+              setIndexPatterns([dataViewFromState]);
+            }
+          }
+        })
+      )
+      .subscribe();
     return () => {
       stateContainerSubscription.unsubscribe();
     };
@@ -255,13 +260,16 @@ const TopNav = ({
   useEffect(() => {
     const autoRefreshFetchSub = services.data.query.timefilter.timefilter
       .getAutoRefreshFetch$()
-      .subscribe(async (done) => {
-        try {
-          await doReload();
-        } finally {
-          done();
-        }
-      });
+      .pipe(
+        switchMap(async (done) => {
+          try {
+            await doReload();
+          } finally {
+            done();
+          }
+        })
+      )
+      .subscribe();
     return () => {
       autoRefreshFetchSub.unsubscribe();
     };
@@ -307,7 +315,9 @@ const TopNav = ({
       showDatePicker={showDatePicker()}
       showFilterBar={showFilterBar}
       showQueryInput={showQueryInput}
-      showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
+      saveQueryMenuVisibility={
+        services.visualizeCapabilities.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
+      }
       dataViewPickerComponentProps={
         shouldShowDataViewPicker && vis.data.indexPattern
           ? {
@@ -346,7 +356,7 @@ const TopNav = ({
       setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={indexPatterns}
       showSearchBar
-      showSaveQuery={false}
+      saveQueryMenuVisibility="hidden"
       showDatePicker={false}
       showQueryInput={false}
     />

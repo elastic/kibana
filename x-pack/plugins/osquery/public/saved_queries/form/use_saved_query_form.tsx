@@ -11,6 +11,7 @@ import type { Draft } from 'immer';
 import produce from 'immer';
 import { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { QUERY_TIMEOUT } from '../../../common/constants';
 import { useSavedQueries } from '../use_saved_queries';
 
 export interface SavedQuerySOFormData {
@@ -18,6 +19,7 @@ export interface SavedQuerySOFormData {
   description?: string;
   query?: string;
   interval?: string;
+  timeout?: number;
   snapshot?: boolean;
   removed?: boolean;
   platform?: string;
@@ -30,6 +32,7 @@ export interface SavedQueryFormData {
   description?: string;
   query?: string;
   interval?: number;
+  timeout?: number;
   snapshot?: boolean;
   removed?: boolean;
   platform?: string;
@@ -46,6 +49,7 @@ const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
   description: payload.description,
   query: payload.query,
   interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
+  timeout: payload.timeout ?? QUERY_TIMEOUT.DEFAULT,
   snapshot: payload.snapshot ?? true,
   removed: payload.removed ?? false,
   platform: payload.platform,
@@ -77,7 +81,7 @@ export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuer
 
 export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
   const { data } = useSavedQueries({});
-  const ids: string[] = useMemo<string[]>(() => map(data?.data, 'attributes.id') ?? [], [data]);
+  const ids: string[] = useMemo<string[]>(() => map(data?.data, 'id') ?? [], [data]);
   const idSet = useMemo<Set<string>>(() => {
     const res = new Set<string>(ids);
     if (defaultValue && defaultValue.id) res.delete(defaultValue.id);
@@ -95,6 +99,7 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
             id: '',
             query: '',
             interval: 3600,
+            timeout: QUERY_TIMEOUT.DEFAULT,
             ecs_mapping: {},
             snapshot: true,
           },

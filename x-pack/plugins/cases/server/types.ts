@@ -21,16 +21,10 @@ export interface CaseRequestContext {
   getCasesClient: () => Promise<CasesClient>;
 }
 
-/**
- * @internal
- */
 export type CasesRequestHandlerContext = CustomRequestHandlerContext<{
   cases: CaseRequestContext;
 }>;
 
-/**
- * @internal
- */
 export type CasesRouter = IRouter<CasesRequestHandlerContext>;
 
 export type RegisterActionType = <

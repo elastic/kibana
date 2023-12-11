@@ -7,18 +7,21 @@
 
 import React from 'react';
 import { render, forNearestButton } from '../rtl_helpers';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent } from '@testing-library/react';
 import { AddToCaseAction } from './add_to_case_action';
 import * as useCaseHook from '../hooks/use_add_to_case';
 import * as datePicker from '../components/date_range_picker';
 import moment from 'moment';
-import { noCasesPermissions as mockUseGetCasesPermissions } from '../../../../utils/cases_permissions';
-
-jest.mock('../../../../hooks/use_get_user_cases_permissions', () => ({
-  useGetUserCasesPermissions: jest.fn(() => mockUseGetCasesPermissions()),
-}));
+import { noCasesPermissions as mockUseGetCasesPermissions } from '@kbn/observability-shared-plugin/public';
 
 describe('AddToCaseAction', function () {
+  const coreRenderProps = {
+    cases: {
+      ui: { getAllCasesSelectorModal: jest.fn() },
+      helpers: { canUseCases: () => mockUseGetCasesPermissions() },
+    },
+  };
+
   beforeEach(() => {
     jest.spyOn(datePicker, 'parseRelativeDate').mockRestore();
   });
@@ -28,7 +31,8 @@ describe('AddToCaseAction', function () {
       <AddToCaseAction
         lensAttributes={{ title: 'Performance distribution' } as any}
         timeRange={{ to: 'now', from: 'now-5m' }}
-      />
+      />,
+      { core: coreRenderProps }
     );
     expect(await findByText('Add to case')).toBeInTheDocument();
   });
@@ -41,7 +45,8 @@ describe('AddToCaseAction', function () {
       <AddToCaseAction
         lensAttributes={{ title: 'Performance distribution' } as any}
         timeRange={{ to: 'now', from: 'now-5m' }}
-      />
+      />,
+      { core: coreRenderProps }
     );
     expect(await findByText('Add to case')).toBeInTheDocument();
 
@@ -62,12 +67,8 @@ describe('AddToCaseAction', function () {
     const useAddToCaseHook = jest.spyOn(useCaseHook, 'useAddToCase');
 
     const { getByText } = render(
-      <AddToCaseAction
-        lensAttributes={null}
-        timeRange={{ to: '', from: '' }}
-        appId="securitySolutionUI"
-        owner="security"
-      />
+      <AddToCaseAction lensAttributes={null} timeRange={{ to: '', from: '' }} owner="security" />,
+      { core: coreRenderProps }
     );
 
     expect(await forNearestButton(getByText)('Add to case')).toBeDisabled();
@@ -79,7 +80,6 @@ describe('AddToCaseAction', function () {
           from: '',
           to: '',
         },
-        appId: 'securitySolutionUI',
         owner: 'security',
       })
     );
@@ -103,7 +103,7 @@ describe('AddToCaseAction', function () {
         lensAttributes={{ title: 'Performance distribution' } as any}
         timeRange={{ to: 'now', from: 'now-5m' }}
       />,
-      { initSeries }
+      { initSeries, core: coreRenderProps }
     );
     fireEvent.click(await findByText('Add to case'));
 
@@ -118,6 +118,8 @@ describe('AddToCaseAction', function () {
           update: false,
           delete: false,
           push: false,
+          connectors: false,
+          settings: false,
         },
       })
     );

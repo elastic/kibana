@@ -42,6 +42,25 @@
       }
     }
   },
+  "url": {
+    "dynamic": false,
+    "properties": {
+      "slug": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "accessDate": {
+        "type": "date"
+      },
+      "createDate": {
+        "type": "date"
+      }
+    }
+  },
   "usage-counters": {
     "dynamic": false,
     "properties": {
@@ -127,25 +146,6 @@
     "dynamic": false,
     "properties": {
       "lastUpdatedAt": {
-        "type": "date"
-      }
-    }
-  },
-  "url": {
-    "dynamic": false,
-    "properties": {
-      "slug": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        }
-      },
-      "accessDate": {
-        "type": "date"
-      },
-      "createDate": {
         "type": "date"
       }
     }
@@ -511,6 +511,10 @@
       },
       "FileKind": {
         "type": "keyword"
+      },
+      "hash": {
+        "dynamic": false,
+        "properties": {}
       }
     }
   },
@@ -609,6 +613,23 @@
             "type": "long"
           }
         }
+      }
+    }
+  },
+  "apm-indices": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "tag": {
+    "properties": {
+      "name": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "color": {
+        "type": "text"
       }
     }
   },
@@ -870,30 +891,6 @@
       }
     }
   },
-  "search": {
-    "dynamic": false,
-    "properties": {
-      "title": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      }
-    }
-  },
-  "tag": {
-    "properties": {
-      "name": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "color": {
-        "type": "text"
-      }
-    }
-  },
   "graph-workspace": {
     "properties": {
       "description": {
@@ -927,20 +924,42 @@
       }
     }
   },
+  "search": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      }
+    }
+  },
   "visualization": {
     "dynamic": false,
     "properties": {
       "description": {
         "type": "text"
       },
-      "kibanaSavedObjectMeta": {
-        "properties": {}
-      },
       "title": {
         "type": "text"
       },
       "version": {
         "type": "integer"
+      },
+      "kibanaSavedObjectMeta": {
+        "properties": {}
+      }
+    }
+  },
+  "event-annotation-group": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
       }
     }
   },
@@ -1036,6 +1055,21 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "links": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "links": {
+        "dynamic": false,
+        "properties": {}
       }
     }
   },
@@ -1326,6 +1360,44 @@
       },
       "total_comments": {
         "type": "integer"
+      },
+      "category": {
+        "type": "keyword"
+      },
+      "customFields": {
+        "type": "nested",
+        "properties": {
+          "key": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword",
+            "fields": {
+              "number": {
+                "type": "long",
+                "ignore_malformed": true
+              },
+              "boolean": {
+                "type": "boolean",
+                "ignore_malformed": true
+              },
+              "string": {
+                "type": "text"
+              },
+              "date": {
+                "type": "date",
+                "ignore_malformed": true
+              },
+              "ip": {
+                "type": "ip",
+                "ignore_malformed": true
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -1386,6 +1458,18 @@
     }
   },
   "cases-telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "infrastructure-monitoring-log-view": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "type": "text"
+      }
+    }
+  },
+  "metrics-data-source": {
     "dynamic": false,
     "properties": {}
   },
@@ -1479,6 +1563,9 @@
       },
       "prerelease_integrations_enabled": {
         "type": "boolean"
+      },
+      "secret_storage_requirements_met": {
+        "type": "boolean"
       }
     }
   },
@@ -1551,6 +1638,16 @@
             "type": "boolean"
           }
         }
+      },
+      "is_protected": {
+        "type": "boolean"
+      },
+      "overrides": {
+        "type": "flattened",
+        "index": false
+      },
+      "keep_monitoring_alive": {
+        "type": "boolean"
       }
     }
   },
@@ -1583,6 +1680,10 @@
         "type": "keyword",
         "index": false
       },
+      "service_token": {
+        "type": "keyword",
+        "index": false
+      },
       "config": {
         "type": "flattened"
       },
@@ -1602,6 +1703,161 @@
       "shipper": {
         "dynamic": false,
         "properties": {}
+      },
+      "allow_edit": {
+        "enabled": false
+      },
+      "version": {
+        "type": "keyword"
+      },
+      "key": {
+        "type": "keyword"
+      },
+      "compression": {
+        "type": "keyword"
+      },
+      "compression_level": {
+        "type": "integer"
+      },
+      "client_id": {
+        "type": "keyword"
+      },
+      "auth_type": {
+        "type": "keyword"
+      },
+      "connection_type": {
+        "type": "keyword"
+      },
+      "username": {
+        "type": "keyword"
+      },
+      "password": {
+        "type": "text",
+        "index": false
+      },
+      "sasl": {
+        "dynamic": false,
+        "properties": {
+          "mechanism": {
+            "type": "text"
+          }
+        }
+      },
+      "partition": {
+        "type": "keyword"
+      },
+      "random": {
+        "dynamic": false,
+        "properties": {
+          "group_events": {
+            "type": "integer"
+          }
+        }
+      },
+      "round_robin": {
+        "dynamic": false,
+        "properties": {
+          "group_events": {
+            "type": "integer"
+          }
+        }
+      },
+      "hash": {
+        "dynamic": false,
+        "properties": {
+          "hash": {
+            "type": "text"
+          },
+          "random": {
+            "type": "boolean"
+          }
+        }
+      },
+      "topics": {
+        "dynamic": false,
+        "properties": {
+          "topic": {
+            "type": "keyword"
+          },
+          "when": {
+            "dynamic": false,
+            "properties": {
+              "type": {
+                "type": "text"
+              },
+              "condition": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
+      "headers": {
+        "dynamic": false,
+        "properties": {
+          "key": {
+            "type": "text"
+          },
+          "value": {
+            "type": "text"
+          }
+        }
+      },
+      "timeout": {
+        "type": "integer"
+      },
+      "broker_timeout": {
+        "type": "integer"
+      },
+      "broker_ack_reliability": {
+        "type": "text"
+      },
+      "broker_buffer_size": {
+        "type": "integer"
+      },
+      "required_acks": {
+        "type": "integer"
+      },
+      "channel_buffer_size": {
+        "type": "integer"
+      },
+      "secrets": {
+        "dynamic": false,
+        "properties": {
+          "password": {
+            "dynamic": false,
+            "properties": {
+              "id": {
+                "type": "keyword"
+              }
+            }
+          },
+          "ssl": {
+            "dynamic": false,
+            "properties": {
+              "key": {
+                "dynamic": false,
+                "properties": {
+                  "id": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
+          "service_token": {
+            "dynamic": false,
+            "properties": {
+              "id": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      },
+      "preset": {
+        "type": "keyword",
+        "index": false
       }
     }
   },
@@ -1648,6 +1904,13 @@
       "inputs": {
         "dynamic": false,
         "properties": {}
+      },
+      "secret_references": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          }
+        }
       },
       "revision": {
         "type": "integer"
@@ -1707,6 +1970,10 @@
             "type": "boolean"
           }
         }
+      },
+      "latest_install_failed_attempts": {
+        "type": "object",
+        "enabled": false
       },
       "installed_kibana": {
         "dynamic": false,
@@ -1803,6 +2070,9 @@
       },
       "host": {
         "type": "keyword"
+      },
+      "proxy_id": {
+        "type": "keyword"
       }
     }
   },
@@ -1860,6 +2130,17 @@
     "dynamic": false,
     "properties": {}
   },
+  "fleet-uninstall-tokens": {
+    "dynamic": false,
+    "properties": {
+      "policy_id": {
+        "type": "keyword"
+      },
+      "token_plain": {
+        "type": "keyword"
+      }
+    }
+  },
   "osquery-manager-usage-metric": {
     "properties": {
       "count": {
@@ -1902,6 +2183,9 @@
       },
       "interval": {
         "type": "keyword"
+      },
+      "timeout": {
+        "type": "short"
       },
       "ecs_mapping": {
         "dynamic": false,
@@ -1951,6 +2235,9 @@
           "interval": {
             "type": "text"
           },
+          "timeout": {
+            "type": "short"
+          },
           "platform": {
             "type": "keyword"
           },
@@ -1993,6 +2280,9 @@
           "interval": {
             "type": "text"
           },
+          "timeout": {
+            "type": "short"
+          },
           "platform": {
             "type": "keyword"
           },
@@ -2021,10 +2311,36 @@
               }
             }
           },
+          "id": {
+            "type": "keyword"
+          },
+          "section": {
+            "type": "keyword",
+            "fields": {
+              "text": {
+                "type": "text"
+              }
+            }
+          },
+          "version": {
+            "type": "keyword"
+          },
           "benchmark": {
             "type": "object",
             "properties": {
               "id": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "posture_type": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              },
+              "rule_number": {
                 "type": "keyword"
               }
             }
@@ -2063,6 +2379,25 @@
       },
       "tags": {
         "type": "keyword"
+      }
+    }
+  },
+  "threshold-explorer-view": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "observability-onboarding-state": {
+    "properties": {
+      "type": {
+        "type": "keyword"
+      },
+      "state": {
+        "type": "object",
+        "dynamic": false
+      },
+      "progress": {
+        "type": "object",
+        "dynamic": false
       }
     }
   },
@@ -2170,6 +2505,14 @@
       },
       "datafeeds": {
         "type": "object"
+      },
+      "tags": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },
@@ -2286,6 +2629,13 @@
                 "type": "boolean"
               }
             }
+          },
+          "tls": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            }
           }
         }
       },
@@ -2307,6 +2657,62 @@
     }
   },
   "synthetics-param": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "infrastructure-ui-source": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "inventory-view": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "metrics-explorer-view": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "upgrade-assistant-reindex-operation": {
+    "dynamic": false,
+    "properties": {
+      "indexName": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "integer"
+      }
+    }
+  },
+  "upgrade-assistant-ml-upgrade-operation": {
+    "dynamic": false,
+    "properties": {
+      "snapshotId": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      }
+    }
+  },
+  "monitoring-telemetry": {
+    "properties": {
+      "reportedClusterUuids": {
+        "type": "keyword"
+      }
+    }
+  },
+  "enterprise_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "app_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "workplace_search_telemetry": {
     "dynamic": false,
     "properties": {}
   },
@@ -2596,6 +3002,9 @@
               },
               "value": {
                 "type": "text"
+              },
+              "relation": {
+                "type": "keyword"
               }
             }
           },
@@ -2696,6 +3105,9 @@
       },
       "updatedBy": {
         "type": "text"
+      },
+      "savedSearchId": {
+        "type": "text"
       }
     }
   },
@@ -2724,73 +3136,47 @@
       }
     }
   },
-  "infrastructure-ui-source": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "metrics-explorer-view": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "inventory-view": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "infrastructure-monitoring-log-view": {
+  "risk-engine-configuration": {
     "dynamic": false,
     "properties": {
-      "name": {
-        "type": "text"
-      }
-    }
-  },
-  "upgrade-assistant-reindex-operation": {
-    "dynamic": false,
-    "properties": {
-      "indexName": {
+      "dataViewId": {
         "type": "keyword"
       },
-      "status": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "filter": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "identifierType": {
+        "type": "keyword"
+      },
+      "interval": {
+        "type": "keyword"
+      },
+      "pageSize": {
         "type": "integer"
-      }
-    }
-  },
-  "upgrade-assistant-ml-upgrade-operation": {
-    "dynamic": false,
-    "properties": {
-      "snapshotId": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
+      },
+      "range": {
+        "properties": {
+          "start": {
+            "type": "keyword"
+          },
+          "end": {
+            "type": "keyword"
           }
         }
       }
     }
   },
-  "monitoring-telemetry": {
+  "policy-settings-protection-updates-note": {
     "properties": {
-      "reportedClusterUuids": {
-        "type": "keyword"
+      "note": {
+        "type": "text",
+        "index": false
       }
     }
-  },
-  "enterprise_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "app_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "workplace_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "apm-indices": {
-    "dynamic": false,
-    "properties": {}
   },
   "apm-telemetry": {
     "dynamic": false,
@@ -2817,6 +3203,22 @@
       },
       "color": {
         "type": "text"
+      }
+    }
+  },
+  "apm-custom-dashboards": {
+    "properties": {
+      "dashboardSavedObjectId": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "serviceEnvironmentFilterEnabled": {
+        "type": "boolean"
+      },
+      "serviceNameFilterEnabled": {
+        "type": "boolean"
       }
     }
   }

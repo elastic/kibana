@@ -15,22 +15,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const browser = getService('browser');
+  const spacesService = getService('spaces');
+
+  const idSpace1 = 'space1';
 
   const configs = [
     { jobId: 'fq_001', spaceId: undefined },
-    { jobId: 'fq_002', spaceId: 'space1' },
+    { jobId: 'fq_002', spaceId: idSpace1 },
   ];
 
   const failConfig = { jobId: 'fq_fail', spaceId: undefined };
 
-  // Failing: See https://github.com/elastic/kibana/issues/154578
-  describe.skip('Notifications list', function () {
+  describe('Notifications list', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
+      await ml.securityUI.loginAsMlPowerUser();
 
       // Prepare jobs to generate notifications
+      await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       for (const config of configs) {
         await ml.api.createAnomalyDetectionJob(
           ml.commonConfig.getADFqSingleMetricJobConfig(config.jobId),
@@ -38,7 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       }
 
-      await ml.securityUI.loginAsMlPowerUser();
       await PageObjects.common.navigateToApp('ml', {
         basePath: '',
       });
@@ -48,9 +51,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       for (const { jobId } of [...configs, failConfig]) {
         await ml.api.deleteAnomalyDetectionJobES(jobId);
       }
-      await ml.testResources.cleanMLSavedObjects();
+      await spacesService.delete(idSpace1);
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.cleanMLSavedObjects();
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
     it('displays a generic notification indicator', async () => {

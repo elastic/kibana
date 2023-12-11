@@ -5,50 +5,74 @@
  * 2.0.
  */
 
-import type { PrebuiltRuleVersionInfo } from './prebuilt_rule_version_info';
-
-export interface GetVersionBucketsArgs {
-  latestVersions: PrebuiltRuleVersionInfo[];
-  installedVersions: PrebuiltRuleVersionInfo[];
-}
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleVersions } from '../../logic/diff/calculate_rule_diff';
+import type { PrebuiltRuleAsset } from '../rule_assets/prebuilt_rule_asset';
 
 export interface VersionBuckets {
-  latestVersions: PrebuiltRuleVersionInfo[];
-  installedVersions: PrebuiltRuleVersionInfo[];
-  latestVersionsToInstall: PrebuiltRuleVersionInfo[];
-  latestVersionsToUpgrade: PrebuiltRuleVersionInfo[];
-  installedVersionsToUpgrade: PrebuiltRuleVersionInfo[];
+  /**
+   * Rules that are currently installed in Kibana
+   */
+  currentRules: RuleResponse[];
+  /**
+   * Rules that are ready to be installed
+   */
+  installableRules: PrebuiltRuleAsset[];
+  /**
+   * Rules that are installed but outdated
+   */
+  upgradeableRules: Array<{
+    /**
+     * The currently installed version
+     */
+    current: RuleResponse;
+    /**
+     * The latest available version
+     */
+    target: PrebuiltRuleAsset;
+  }>;
+  /**
+   * All available rules
+   * (installed and not installed)
+   */
+  totalAvailableRules: PrebuiltRuleAsset[];
 }
 
-export const getVersionBuckets = (args: GetVersionBucketsArgs): VersionBuckets => {
-  const { latestVersions, installedVersions } = args;
+export const getVersionBuckets = (ruleVersionsMap: Map<string, RuleVersions>): VersionBuckets => {
+  const currentRules: RuleResponse[] = [];
+  const installableRules: PrebuiltRuleAsset[] = [];
+  const totalAvailableRules: PrebuiltRuleAsset[] = [];
+  const upgradeableRules: VersionBuckets['upgradeableRules'] = [];
 
-  const installedVersionsMap = new Map(installedVersions.map((item) => [item.rule_id, item]));
-
-  const latestVersionsToInstall: PrebuiltRuleVersionInfo[] = [];
-  const latestVersionsToUpgrade: PrebuiltRuleVersionInfo[] = [];
-  const installedVersionsToUpgrade: PrebuiltRuleVersionInfo[] = [];
-
-  latestVersions.forEach((latestVersion) => {
-    const installedVersion = installedVersionsMap.get(latestVersion.rule_id);
-
-    if (installedVersion == null) {
-      // If this rule is not installed
-      latestVersionsToInstall.push(latestVersion);
+  ruleVersionsMap.forEach(({ current, target }) => {
+    if (target != null) {
+      // If this rule is available in the package
+      totalAvailableRules.push(target);
     }
 
-    if (installedVersion != null && installedVersion.version < latestVersion.version) {
+    if (current != null) {
+      // If this rule is installed
+      currentRules.push(current);
+    }
+
+    if (current == null && target != null) {
+      // If this rule is not installed
+      installableRules.push(target);
+    }
+
+    if (current != null && target != null && current.version < target.version) {
       // If this rule is installed but outdated
-      latestVersionsToUpgrade.push(latestVersion);
-      installedVersionsToUpgrade.push(installedVersion);
+      upgradeableRules.push({
+        current,
+        target,
+      });
     }
   });
 
   return {
-    latestVersions,
-    installedVersions,
-    latestVersionsToInstall,
-    latestVersionsToUpgrade,
-    installedVersionsToUpgrade,
+    currentRules,
+    installableRules,
+    upgradeableRules,
+    totalAvailableRules,
   };
 };

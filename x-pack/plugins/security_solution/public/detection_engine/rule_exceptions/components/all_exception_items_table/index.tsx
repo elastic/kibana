@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import styled from 'styled-components';
 
 import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   ExceptionListItemSchema,
-  UseExceptionListItemsSuccess,
-  Pagination,
   ExceptionListSchema,
+  Pagination,
+  UseExceptionListItemsSuccess,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { transformInput } from '@kbn/securitysolution-list-hooks';
 
 import {
@@ -29,6 +29,7 @@ import {
   buildShowExpiredExceptionsFilter,
   getSavedObjectTypes,
 } from '@kbn/securitysolution-list-utils';
+import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { ExceptionsViewerSearchBar } from './search_bar';
@@ -119,6 +120,8 @@ const ExceptionsViewerComponent = ({
     () => listTypes.length === 1 && listTypes[0] === ExceptionListTypeEnum.ENDPOINT,
     [listTypes]
   );
+
+  const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
   // Reducer state
   const [
@@ -499,7 +502,6 @@ const ExceptionsViewerComponent = ({
           onConfirm={handleConfirmExceptionFlyout}
           data-test-subj="addExceptionItemFlyout"
           showAlertCloseOptions
-          isNonTimeline={true}
         />
       )}
 
@@ -532,7 +534,7 @@ const ExceptionsViewerComponent = ({
 
           <ExceptionsViewerItems
             isReadOnly={isReadOnly}
-            disableActions={isReadOnly || viewerState === 'deleting'}
+            disableActions={isReadOnly || viewerState === 'deleting' || !canWriteEndpointExceptions}
             exceptions={exceptions}
             isEndpoint={isEndpointSpecified}
             ruleReferences={allReferences}

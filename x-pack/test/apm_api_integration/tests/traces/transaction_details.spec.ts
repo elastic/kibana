@@ -27,7 +27,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return await apmApiClient.readUser({
       endpoint: `GET /internal/apm/traces/{traceId}/transactions/{transactionId}`,
       params: {
-        path: { traceId, transactionId },
+        path: {
+          traceId,
+          transactionId,
+        },
+        query: {
+          start: new Date(start).toISOString(),
+          end: new Date(end).toISOString(),
+        },
       },
     });
   }

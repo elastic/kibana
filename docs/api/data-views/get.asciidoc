@@ -6,6 +6,11 @@
 
 experimental[] Retrieve a single data view by ID.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/src/plugins/data_views/docs/openapi[open API specification].
+====
 
 [[data-views-api-get-request]]
 ==== Request

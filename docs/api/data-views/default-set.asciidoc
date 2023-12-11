@@ -7,6 +7,11 @@
 experimental[] Set a default data view ID. Kibana UI will use the default data view unless user picks a different one. 
 The API doesn't validate if given `data_view_id` is a valid id. 
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/src/plugins/data_views/docs/openapi[open API specification].
+====
 
 [[data-views-api-default-set-request]]
 ==== Request

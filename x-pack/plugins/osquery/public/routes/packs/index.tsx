@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { useRouteMatch } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { PacksPage } from './list';
 import { AddPackPage } from './add';
@@ -27,7 +27,7 @@ const PacksComponent = () => {
   }
 
   return (
-    <Switch>
+    <Routes>
       <Route path={`${match.url}/add`}>
         {permissions.writePacks ? <AddPackPage /> : <MissingPrivileges />}
       </Route>
@@ -40,7 +40,7 @@ const PacksComponent = () => {
       <Route path={`${match.url}`}>
         <PacksPage />
       </Route>
-    </Switch>
+    </Routes>
   );
 };
 

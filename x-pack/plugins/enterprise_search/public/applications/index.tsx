@@ -8,7 +8,6 @@
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
 
 import { getContext, resetContext } from 'kea';
 import { Store } from 'redux';
@@ -17,6 +16,8 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { AuthenticatedUser } from '@kbn/security-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
 import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/types';
@@ -50,12 +51,23 @@ export const renderApp = (
   },
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
-  const { access, features, publicUrl, errorConnectingMessage, readOnlyMode, ...initialData } =
-    data;
+  const {
+    access,
+    appSearch,
+    configuredLimits,
+    enterpriseSearchVersion,
+    errorConnectingMessage,
+    features,
+    kibanaVersion,
+    publicUrl,
+    readOnlyMode,
+    searchOAuth,
+    workplaceSearch,
+  } = data;
   const { history } = params;
   const { application, chrome, http, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
-  const { charts, cloud, guidedOnboarding, lens, security } = plugins;
+  const { charts, cloud, guidedOnboarding, lens, security, share, ml } = plugins;
 
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
   externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
@@ -73,6 +85,19 @@ export const renderApp = (
 
   resetContext({ createStore: true });
   const store = getContext().store;
+  let user: AuthenticatedUser | null = null;
+  try {
+    security.authc
+      .getCurrentUser()
+      .then((newUser) => {
+        user = newUser;
+      })
+      .catch(() => {
+        user = null;
+      });
+  } catch {
+    user = null;
+  }
 
   const unmountKibanaLogic = mountKibanaLogic({
     application,
@@ -85,16 +110,21 @@ export const renderApp = (
     history,
     isSidebarEnabled,
     lens,
+    ml,
     navigateToUrl,
     productAccess,
     productFeatures,
     renderHeaderActions: (HeaderActions) =>
-      params.setHeaderActionMenu((el) => renderHeaderActions(HeaderActions, store, el)),
+      params.setHeaderActionMenu(
+        HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store) : undefined
+      ),
     security,
     setBreadcrumbs: chrome.setBreadcrumbs,
     setChromeIsVisible: chrome.setIsVisible,
     setDocTitle: chrome.docTitle.change,
+    share,
     uiSettings,
+    user,
   });
   const unmountLicensingLogic = mountLicensingLogic({
     canManageLicense: core.application.capabilities.management?.stack?.license_management,
@@ -114,7 +144,17 @@ export const renderApp = (
           <CloudContext>
             <Provider store={store}>
               <Router history={params.history}>
-                <App {...initialData} />
+                <App
+                  access={productAccess}
+                  appSearch={appSearch}
+                  configuredLimits={configuredLimits}
+                  enterpriseSearchVersion={enterpriseSearchVersion}
+                  features={features}
+                  kibanaVersion={kibanaVersion}
+                  readOnlyMode={readOnlyMode}
+                  searchOAuth={searchOAuth}
+                  workplaceSearch={workplaceSearch}
+                />
                 <Toasts />
               </Router>
             </Provider>

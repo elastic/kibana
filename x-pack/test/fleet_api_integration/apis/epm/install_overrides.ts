@@ -57,6 +57,7 @@ export default function (providerContext: FtrProviderContext) {
       // the index template composed_of has the correct component templates in the correct order
       const indexTemplate = indexTemplateResponse.index_templates[0].index_template;
       expect(indexTemplate.composed_of).to.eql([
+        `logs@settings`,
         `${templateName}@package`,
         `${templateName}@custom`,
         '.fleet_globals-1',
@@ -131,7 +132,6 @@ export default function (providerContext: FtrProviderContext) {
         template: {
           settings: {
             index: {
-              codec: 'best_compression',
               default_pipeline: 'logs-overrides.test-0.1.0',
               lifecycle: {
                 name: 'overridden by user',

@@ -82,6 +82,8 @@ Array [
 
 exports[`Error ERROR_GROUP_ID 1`] = `"grouping key"`;
 
+exports[`Error ERROR_GROUP_NAME 1`] = `undefined`;
+
 exports[`Error ERROR_ID 1`] = `"error id"`;
 
 exports[`Error ERROR_LOG_LEVEL 1`] = `undefined`;
@@ -155,6 +157,8 @@ exports[`Error KUBERNETES_REPLICASET 1`] = `undefined`;
 exports[`Error KUBERNETES_REPLICASET_NAME 1`] = `undefined`;
 
 exports[`Error LABEL_GC 1`] = `undefined`;
+
+exports[`Error LABEL_LIFECYCLE_STATE 1`] = `undefined`;
 
 exports[`Error LABEL_NAME 1`] = `undefined`;
 
@@ -411,6 +415,8 @@ exports[`Span ERROR_EXCEPTION 1`] = `undefined`;
 
 exports[`Span ERROR_GROUP_ID 1`] = `undefined`;
 
+exports[`Span ERROR_GROUP_NAME 1`] = `undefined`;
+
 exports[`Span ERROR_ID 1`] = `undefined`;
 
 exports[`Span ERROR_LOG_LEVEL 1`] = `undefined`;
@@ -480,6 +486,8 @@ exports[`Span KUBERNETES_REPLICASET 1`] = `undefined`;
 exports[`Span KUBERNETES_REPLICASET_NAME 1`] = `undefined`;
 
 exports[`Span LABEL_GC 1`] = `undefined`;
+
+exports[`Span LABEL_LIFECYCLE_STATE 1`] = `undefined`;
 
 exports[`Span LABEL_NAME 1`] = `undefined`;
 
@@ -736,6 +744,8 @@ exports[`Transaction ERROR_EXCEPTION 1`] = `undefined`;
 
 exports[`Transaction ERROR_GROUP_ID 1`] = `undefined`;
 
+exports[`Transaction ERROR_GROUP_NAME 1`] = `undefined`;
+
 exports[`Transaction ERROR_ID 1`] = `undefined`;
 
 exports[`Transaction ERROR_LOG_LEVEL 1`] = `undefined`;
@@ -815,6 +825,8 @@ exports[`Transaction KUBERNETES_REPLICASET 1`] = `undefined`;
 exports[`Transaction KUBERNETES_REPLICASET_NAME 1`] = `undefined`;
 
 exports[`Transaction LABEL_GC 1`] = `undefined`;
+
+exports[`Transaction LABEL_LIFECYCLE_STATE 1`] = `undefined`;
 
 exports[`Transaction LABEL_NAME 1`] = `undefined`;
 

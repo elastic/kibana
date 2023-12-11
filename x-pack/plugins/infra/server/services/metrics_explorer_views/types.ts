@@ -11,11 +11,12 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type {
-  CreateMetricsExplorerViewAttributesRequestPayload,
+  FindMetricsExplorerViewResponsePayload,
+  GetMetricsExplorerViewResponsePayload,
   MetricsExplorerViewRequestQuery,
   UpdateMetricsExplorerViewAttributesRequestPayload,
+  UpdateMetricsExplorerViewResponsePayload,
 } from '../../../common/http_api/latest';
-import type { MetricsExplorerView } from '../../../common/metrics_explorer_views';
 import type { InfraSources } from '../../lib/sources';
 
 export interface MetricsExplorerViewsServiceStartDeps {
@@ -32,17 +33,16 @@ export interface MetricsExplorerViewsServiceStart {
 
 export interface IMetricsExplorerViewsClient {
   delete(metricsExplorerViewId: string): Promise<{}>;
-  find(query: MetricsExplorerViewRequestQuery): Promise<MetricsExplorerView[]>;
+  find(
+    query: MetricsExplorerViewRequestQuery
+  ): Promise<FindMetricsExplorerViewResponsePayload['data']>;
   get(
     metricsExplorerViewId: string,
     query: MetricsExplorerViewRequestQuery
-  ): Promise<MetricsExplorerView>;
-  create(
-    metricsExplorerViewAttributes: CreateMetricsExplorerViewAttributesRequestPayload
-  ): Promise<MetricsExplorerView>;
+  ): Promise<GetMetricsExplorerViewResponsePayload>;
   update(
-    metricsExplorerViewId: string,
+    metricsExplorerViewId: string | null,
     metricsExplorerViewAttributes: UpdateMetricsExplorerViewAttributesRequestPayload,
     query: MetricsExplorerViewRequestQuery
-  ): Promise<MetricsExplorerView>;
+  ): Promise<UpdateMetricsExplorerViewResponsePayload>;
 }

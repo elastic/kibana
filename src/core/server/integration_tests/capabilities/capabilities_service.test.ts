@@ -82,7 +82,7 @@ describe('CapabilitiesService', () => {
       serviceSetup.registerProvider(() => getInitialCapabilities());
 
       const switcher = jest.fn((_, capabilities) => capabilities);
-      serviceSetup.registerSwitcher(switcher);
+      serviceSetup.registerSwitcher(switcher, { capabilityPath: '*' });
 
       const result = await supertest(httpSetup.server.listener)
         .post('/api/core/capabilities')
@@ -113,7 +113,7 @@ describe('CapabilitiesService', () => {
       serviceSetup.registerProvider(() => getInitialCapabilities());
 
       const switcher = jest.fn((_, capabilities) => capabilities);
-      serviceSetup.registerSwitcher(switcher);
+      serviceSetup.registerSwitcher(switcher, { capabilityPath: '*' });
 
       const result = await supertest(httpSetup.server.listener)
         .post('/api/core/capabilities?useDefaultCapabilities=true')

@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isEqual } from 'lodash';
-import { merge, Subject, Subscription } from 'rxjs';
+import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
 import React, { createContext, useContext } from 'react';
 import { debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
@@ -25,7 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
 import {
@@ -35,10 +35,11 @@ import {
   OptionsListEmbeddableInput,
 } from '../..';
 import { pluginServices } from '../../services';
-import { MIN_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
+import { IClearableControl } from '../../types';
 import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
+import { MIN_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
 import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
 
 const diffDataFetchProps = (
@@ -76,7 +77,10 @@ type OptionsListReduxEmbeddableTools = ReduxEmbeddableTools<
   typeof optionsListReducers
 >;
 
-export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput, ControlOutput> {
+export class OptionsListEmbeddable
+  extends Embeddable<OptionsListEmbeddableInput, ControlOutput>
+  implements IClearableControl
+{
   public readonly type = OPTIONS_LIST_CONTROL;
   public deferEmbeddableLoad = true;
 
@@ -159,6 +163,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
         existsSelected: newInput.existsSelected,
+        searchTechnique: newInput.searchTechnique,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
         timeRange: newInput.timeRange,
@@ -183,6 +188,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           this.runOptionsListQuery();
         })
     );
+
     // fetch more options when reaching the bottom of the available options
     this.subscriptions.add(
       loadMorePipe.subscribe((size) => {
@@ -201,30 +207,33 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               a.exclude === b.exclude &&
               a.existsSelected === b.existsSelected &&
               isEqual(a.selectedOptions, b.selectedOptions)
-          )
-        )
-        .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
-          if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
-            this.dispatch.clearValidAndInvalidSelections({});
-          } else {
-            const { invalidSelections } = this.getState().componentState ?? {};
-            const newValidSelections: string[] = [];
-            const newInvalidSelections: string[] = [];
-            for (const selectedOption of newSelectedOptions) {
-              if (invalidSelections?.includes(selectedOption)) {
-                newInvalidSelections.push(selectedOption);
-                continue;
+          ),
+          tap(({ selectedOptions: newSelectedOptions }) => {
+            if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
+              this.dispatch.clearValidAndInvalidSelections({});
+            } else {
+              const { invalidSelections } = this.getState().componentState ?? {};
+              const newValidSelections: string[] = [];
+              const newInvalidSelections: string[] = [];
+              for (const selectedOption of newSelectedOptions) {
+                if (invalidSelections?.includes(selectedOption)) {
+                  newInvalidSelections.push(selectedOption);
+                  continue;
+                }
+                newValidSelections.push(selectedOption);
               }
-              newValidSelections.push(selectedOption);
+              this.dispatch.setValidAndInvalidSelections({
+                validSelections: newValidSelections,
+                invalidSelections: newInvalidSelections,
+              });
             }
-            this.dispatch.setValidAndInvalidSelections({
-              validSelections: newValidSelections,
-              invalidSelections: newInvalidSelections,
-            });
-          }
-          const newFilters = await this.buildFilter();
-          this.dispatch.publishFilters(newFilters);
-        })
+          }),
+          switchMap(async () => {
+            const newFilters = await this.buildFilter();
+            this.dispatch.publishFilters(newFilters);
+          })
+        )
+        .subscribe()
     );
   };
 
@@ -239,40 +248,29 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     if (!this.dataView || this.dataView.id !== dataViewId) {
       try {
         this.dataView = await this.dataViewsService.get(dataViewId);
-        if (!this.dataView)
-          throw new Error(
-            i18n.translate('controls.optionsList.errors.dataViewNotFound', {
-              defaultMessage: 'Could not locate data view: {dataViewId}',
-              values: { dataViewId },
-            })
-          );
       } catch (e) {
-        this.onFatalError(e);
+        this.dispatch.setErrorMessage(e.message);
       }
 
       this.dispatch.setDataViewId(this.dataView?.id);
     }
 
     if (this.dataView && (!this.field || this.field.name !== fieldName)) {
-      try {
-        const originalField = this.dataView.getFieldByName(fieldName);
-        if (!originalField) {
-          throw new Error(
-            i18n.translate('controls.optionsList.errors.fieldNotFound', {
-              defaultMessage: 'Could not locate field: {fieldName}',
-              values: { fieldName },
-            })
-          );
-        }
-
-        this.field = originalField.toSpec();
-      } catch (e) {
-        this.onFatalError(e);
+      const field = this.dataView.getFieldByName(fieldName);
+      if (field) {
+        this.field = field.toSpec();
+        this.dispatch.setField(this.field);
+      } else {
+        this.dispatch.setErrorMessage(
+          i18n.translate('controls.optionsList.errors.fieldNotFound', {
+            defaultMessage: 'Could not locate field: {fieldName}',
+            values: { fieldName },
+          })
+        );
       }
-      this.dispatch.setField(this.field);
     }
 
-    return { dataView: this.dataView, field: this.field! };
+    return { dataView: this.dataView, field: this.field };
   };
 
   private runOptionsListQuery = async (size: number = MIN_OPTIONS_LIST_REQUEST_SIZE) => {
@@ -286,7 +284,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     const {
       componentState: { searchString, allowExpensiveQueries },
-      explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort },
+      explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort, searchTechnique },
     } = this.getState();
     this.dispatch.setLoading(true);
     if (searchString.valid) {
@@ -318,6 +316,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           filters,
           dataView,
           timeRange,
+          searchTechnique,
           runPastTimeout,
           selectedOptions,
           allowExpensiveQueries,
@@ -331,11 +330,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           // from prematurely setting loading to `false` and updating the suggestions to show "No results"
           return;
         }
-        this.onFatalError(response.error);
+        this.dispatch.setErrorMessage(response.error.message);
         return;
       }
 
       const { suggestions, invalidSelections, totalCardinality } = response;
+
       if (
         (!selectedOptions && !existsSelected) ||
         isEmpty(invalidSelections) ||
@@ -351,7 +351,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         const valid: string[] = [];
         const invalid: string[] = [];
         for (const selectedOption of selectedOptions ?? []) {
-          if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
+          if (invalidSelections?.includes(String(selectedOption))) invalid.push(selectedOption);
           else valid.push(selectedOption);
         }
         this.dispatch.updateQueryResults({
@@ -365,11 +365,13 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       // publish filter
       const newFilters = await this.buildFilter();
       batch(() => {
+        this.dispatch.setErrorMessage(undefined);
         this.dispatch.setLoading(false);
         this.dispatch.publishFilters(newFilters);
       });
     } else {
       batch(() => {
+        this.dispatch.setErrorMessage(undefined);
         this.dispatch.updateQueryResults({
           availableOptions: [],
         });
@@ -399,6 +401,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         newFilter = buildPhrasesFilter(field, validSelections, dataView);
       }
     }
+
     if (!newFilter) return [];
 
     newFilter.meta.key = field?.name;
@@ -406,18 +409,14 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     return [newFilter];
   };
 
+  public clearSelections() {
+    this.dispatch.clearSelections({});
+  }
+
   reload = () => {
     // clear cache when reload is requested
     this.optionsListService.clearOptionsListCache();
     this.runOptionsListQuery();
-  };
-
-  public onFatalError = (e: Error) => {
-    batch(() => {
-      this.dispatch.setLoading(false);
-      this.dispatch.setPopoverOpen(false);
-    });
-    super.onFatalError(e);
   };
 
   public destroy = () => {
@@ -433,8 +432,9 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
+
     ReactDOM.render(
-      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+      <KibanaThemeProvider theme={pluginServices.getServices().core.theme}>
         <OptionsListEmbeddableContext.Provider value={this}>
           <OptionsListControl
             typeaheadSubject={this.typeaheadSubject}

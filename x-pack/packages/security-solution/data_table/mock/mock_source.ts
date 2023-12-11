@@ -7,7 +7,18 @@
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BrowserFields } from '@kbn/timelines-plugin/common';
-import { DEFAULT_INDEX_PATTERN } from '../common/constants';
+
+const DEFAULT_INDEX_PATTERN = [
+  'apm-*-transaction*',
+  'auditbeat-*',
+  'endgame-*',
+  'filebeat-*',
+  'logs-*',
+  'packetbeat-*',
+  'traces-apm*',
+  'winlogbeat-*',
+  '-*elastic-cloud-logs-*',
+];
 
 export const mockBrowserFields: BrowserFields = {
   agent: {

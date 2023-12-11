@@ -6,11 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type {
-  ControlInputTransform,
-  ControlPanelState,
-  OptionsListEmbeddableInput,
-} from '@kbn/controls-plugin/common';
+import type { ControlInputTransform } from '@kbn/controls-plugin/common';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import type {
   ControlGroupInput,
@@ -18,6 +14,7 @@ import type {
   ControlGroupOutput,
   ControlGroupContainer,
   ControlGroupRendererProps,
+  DataControlInput,
 } from '@kbn/controls-plugin/public';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { PropsWithChildren } from 'react';
@@ -26,8 +23,11 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
 import styled from 'styled-components';
-import { cloneDeep, debounce, isEqual } from 'lodash';
-import type { ControlGroupCreationOptions } from '@kbn/controls-plugin/public/control_group/types';
+import { debounce, isEqual, isEqualWith } from 'lodash';
+import type {
+  ControlGroupCreationOptions,
+  FieldFilterPredicate,
+} from '@kbn/controls-plugin/public/control_group/types';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import type { FilterGroupProps, FilterItemObj } from './types';
@@ -40,12 +40,18 @@ import { useControlGroupSyncToLocalStorage } from './hooks/use_control_group_syn
 import { useViewEditMode } from './hooks/use_view_edit_mode';
 import { FilterGroupContextMenu } from './context_menu';
 import { AddControl, SaveControls } from './buttons';
-import { getFilterItemObjListFromControlInput } from './utils';
+import {
+  getFilterControlsComparator,
+  getFilterItemObjListFromControlInput,
+  mergeControls,
+  reorderControlsWithDefaultControls,
+} from './utils';
 import { FiltersChangedBanner } from './filters_changed_banner';
 import { FilterGroupContext } from './filter_group_context';
 import { NUM_OF_CONTROLS } from './config';
-import { TEST_IDS } from './constants';
+import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS, TIMEOUTS } from './constants';
 import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
+import { convertToBuildEsQuery } from '../../lib/kuery';
 
 const FilterWrapper = styled.div.attrs((props) => ({
   className: props.className,
@@ -74,6 +80,15 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const filterChangedSubscription = useRef<Subscription>();
   const inputChangedSubscription = useRef<Subscription>();
+
+  const initialControlsObj = useMemo(
+    () =>
+      initialControls.reduce<Record<string, typeof initialControls[0]>>((prev, current) => {
+        prev[current.fieldName] = current;
+        return prev;
+      }, {}),
+    [initialControls]
+  );
 
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
 
@@ -124,7 +139,9 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       const storedControlGroupInput = getStoredControlInput();
       if (storedControlGroupInput) {
         const panelsFormatted = getFilterItemObjListFromControlInput(storedControlGroupInput);
-        if (!isEqual(panelsFormatted, param)) {
+        if (
+          !isEqualWith(panelsFormatted, param, getFilterControlsComparator('fieldName', 'title'))
+        ) {
           setShowFiltersChangedBanner(true);
           switchToEditMode();
         }
@@ -149,14 +166,41 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     return cleanup;
   }, []);
 
-  useEffect(() => {
-    controlGroup?.updateInput({
-      timeRange,
+  const { filters: validatedFilters, query: validatedQuery } = useMemo(() => {
+    const [_, kqlError] = convertToBuildEsQuery({
+      config: {},
+      queries: query ? [query] : [],
+      filters: filters ?? [],
+      indexPattern: { fields: [], title: '' },
+    });
+
+    // we only need to handle kqlError because control group can handle Lucene error
+    if (kqlError) {
+      /*
+       * Based on the behaviour from other components,
+       * ignore all filters and queries if there is some error
+       * in the input filters and queries
+       *
+       * */
+      return {
+        filters: [],
+        query: undefined,
+      };
+    }
+    return {
       filters,
       query,
+    };
+  }, [filters, query]);
+
+  useEffect(() => {
+    controlGroup?.updateInput({
+      filters: validatedFilters,
+      query: validatedQuery,
+      timeRange,
       chainingSystem,
     });
-  }, [timeRange, filters, query, chainingSystem, controlGroup]);
+  }, [timeRange, chainingSystem, controlGroup, validatedQuery, validatedFilters]);
 
   const handleInputUpdates = useCallback(
     (newInput: ControlGroupInput) => {
@@ -171,9 +215,13 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     [setControlGroupInputUpdates, getStoredControlInput, isViewMode, setHasPendingChanges]
   );
 
-  const handleFilterUpdates = useCallback(
-    ({ filters: newFilters }: ControlGroupOutput) => {
+  const handleOutputFilterUpdates = useCallback(
+    ({ filters: newFilters, embeddableLoaded }: ControlGroupOutput) => {
+      const haveAllEmbeddablesLoaded = Object.values(embeddableLoaded).every((v) =>
+        Boolean(v ?? true)
+      );
       if (isEqual(currentFiltersRef.current, newFilters)) return;
+      if (!haveAllEmbeddablesLoaded) return;
       if (onFilterChange) onFilterChange(newFilters ?? []);
       currentFiltersRef.current = newFilters ?? [];
     },
@@ -181,8 +229,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   );
 
   const debouncedFilterUpdates = useMemo(
-    () => debounce(handleFilterUpdates, 500),
-    [handleFilterUpdates]
+    () => debounce(handleOutputFilterUpdates, TIMEOUTS.FILTER_UPDATES_DEBOUNCE_TIME),
+    [handleOutputFilterUpdates]
   );
 
   useEffect(() => {
@@ -222,53 +270,37 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
      *
      * */
 
-    const localInitialControls = cloneDeep(initialControls).filter(
-      (control) => control.persist === true
-    );
-    let resultControls = [] as FilterItemObj[];
-
-    let overridingControls = initialUrlParam;
-    if (!initialUrlParam || initialUrlParam.length === 0) {
-      // if nothing is found in URL Param.. read from local storage
-      const storedControlGroupInput = getStoredControlInput();
-      if (storedControlGroupInput) {
-        const urlParamsFromLocalStorage: FilterItemObj[] =
-          getFilterItemObjListFromControlInput(storedControlGroupInput);
-
-        overridingControls = urlParamsFromLocalStorage;
-      }
+    const controlsFromURL = initialUrlParam ?? [];
+    let controlsFromLocalStorage: FilterItemObj[] = [];
+    const storedControlGroupInput = getStoredControlInput();
+    if (storedControlGroupInput) {
+      controlsFromLocalStorage = getFilterItemObjListFromControlInput(storedControlGroupInput);
     }
+    let overridingControls = mergeControls({
+      controlsWithPriority: [controlsFromURL, controlsFromLocalStorage],
+      defaultControlsObj: initialControlsObj,
+    });
 
     if (!overridingControls || overridingControls.length === 0) return initialControls;
 
-    // if initialUrlParam Exists... replace localInitialControls with what was provided in the Url
-    if (overridingControls && !urlDataApplied.current) {
-      if (localInitialControls.length > 0) {
-        localInitialControls.forEach((persistControl) => {
-          const doesPersistControlAlreadyExist = overridingControls?.some(
-            (control) => control.fieldName === persistControl.fieldName
-          );
+    overridingControls = overridingControls.map((item) => {
+      return {
+        // give default value to params which are coming from the URL
+        fieldName: item.fieldName,
+        title: item.title,
+        selectedOptions: item.selectedOptions ?? [],
+        existsSelected: item.existsSelected ?? false,
+        exclude: item.exclude,
+      };
+    });
 
-          if (!doesPersistControlAlreadyExist) {
-            resultControls.push(persistControl);
-          }
-        });
-      }
+    return reorderControlsWithDefaultControls({
+      controls: overridingControls,
+      defaultControls: initialControls,
+    });
+  }, [initialUrlParam, initialControls, getStoredControlInput, initialControlsObj]);
 
-      resultControls = [
-        ...resultControls,
-        ...overridingControls.map((item) => ({
-          fieldName: item.fieldName,
-          title: item.title,
-          selectedOptions: item.selectedOptions ?? [],
-          existsSelected: item.existsSelected ?? false,
-          exclude: item.exclude,
-        })),
-      ];
-    }
-
-    return resultControls;
-  }, [initialUrlParam, initialControls, getStoredControlInput]);
+  const fieldFilterPredicate: FieldFilterPredicate = useCallback((f) => f.type !== 'number', []);
 
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
     async (
@@ -292,10 +324,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       finalControls.forEach((control, idx) => {
         addOptionsListControl(initialInput, {
           controlId: String(idx),
-          hideExclude: true,
-          hideSort: true,
-          hidePanelTitles: true,
-          placeholder: '',
+          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
           // option List controls will handle an invalid dataview
           // & display an appropriate message
           dataViewId: dataViewId ?? '',
@@ -306,7 +335,6 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       return {
         initialInput,
         settings: {
-          fieldFilterPredicate: (f) => f.type !== 'number',
           showAddButton: false,
           staticDataViewId: dataViewId ?? '',
           editorConfig: {
@@ -315,9 +343,18 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             hideAdditionalSettings: true,
           },
         },
+        fieldFilterPredicate,
       } as ControlGroupCreationOptions;
     },
-    [dataViewId, timeRange, filters, chainingSystem, query, selectControlsWithPriority]
+    [
+      dataViewId,
+      timeRange,
+      filters,
+      chainingSystem,
+      query,
+      selectControlsWithPriority,
+      fieldFilterPredicate,
+    ]
   );
 
   useFilterUpdatesToUrlSync({
@@ -334,75 +371,70 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     setShowFiltersChangedBanner(false);
   }, [controlGroup, switchToViewMode, getStoredControlInput, hasPendingChanges]);
 
-  const upsertPersistableControls = useCallback(() => {
-    const persistableControls = initialControls.filter((control) => control.persist === true);
-    if (persistableControls.length > 0) {
-      const currentPanels = Object.values(controlGroup?.getInput().panels ?? []) as Array<
-        ControlPanelState<OptionsListEmbeddableInput>
-      >;
-      const orderedPanels = currentPanels.sort((a, b) => a.order - b.order);
-      let filterControlsDeleted = false;
-      persistableControls.forEach((control) => {
-        const controlExists = currentPanels.some(
-          (currControl) => control.fieldName === currControl.explicitInput.fieldName
-        );
-        if (!controlExists) {
-          // delete current controls
-          if (!filterControlsDeleted) {
-            controlGroup?.updateInput({ panels: {} });
-            filterControlsDeleted = true;
-          }
+  const upsertPersistableControls = useCallback(async () => {
+    if (!controlGroup) return;
+    const currentPanels = getFilterItemObjListFromControlInput(controlGroup.getInput());
 
-          // add persitable controls
-          controlGroup?.addOptionsListControl({
-            title: control.title,
-            hideExclude: true,
-            hideSort: true,
-            hidePanelTitles: true,
-            placeholder: '',
-            // option List controls will handle an invalid dataview
-            // & display an appropriate message
-            dataViewId: dataViewId ?? '',
-            selectedOptions: control.selectedOptions,
-            ...control,
-          });
-        }
-      });
-      orderedPanels.forEach((panel) => {
-        if (panel.explicitInput.fieldName)
-          controlGroup?.addOptionsListControl({
-            selectedOptions: [],
-            fieldName: panel.explicitInput.fieldName,
-            dataViewId: dataViewId ?? '',
-            ...panel.explicitInput,
-          });
-      });
+    const reorderedControls = reorderControlsWithDefaultControls({
+      controls: currentPanels,
+      defaultControls: initialControls,
+    });
+
+    if (!isEqualWith(reorderedControls, currentPanels, getFilterControlsComparator('fieldName'))) {
+      // reorder only if fields are in different order
+      // or not same.
+      controlGroup?.updateInput({ panels: {} });
+
+      for (const control of reorderedControls) {
+        await controlGroup?.addOptionsListControl({
+          title: control.title,
+          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+          // option List controls will handle an invalid dataview
+          // & display an appropriate message
+          dataViewId: dataViewId ?? '',
+          selectedOptions: control.selectedOptions,
+          ...control,
+        });
+      }
     }
   }, [controlGroup, dataViewId, initialControls]);
 
-  const saveChangesHandler = useCallback(() => {
-    upsertPersistableControls();
+  const saveChangesHandler = useCallback(async () => {
+    await upsertPersistableControls();
     switchToViewMode();
     setShowFiltersChangedBanner(false);
   }, [switchToViewMode, upsertPersistableControls]);
 
-  const newControlInputTranform: ControlInputTransform = (newInput, controlType) => {
-    // for any new controls, we want to avoid
-    // default placeholder
-    if (controlType === OPTIONS_LIST_CONTROL) {
-      return {
-        ...newInput,
-        placeholder: '',
-      };
-    }
-    return newInput;
-  };
+  const newControlInputTranform: ControlInputTransform = useCallback(
+    (newInput, controlType) => {
+      // for any new controls, we want to avoid
+      // default placeholder
+      let result = newInput;
+      if (controlType === OPTIONS_LIST_CONTROL) {
+        result = {
+          ...newInput,
+          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+        };
+
+        if ((newInput as DataControlInput).fieldName in initialControlsObj) {
+          result = {
+            ...result,
+            ...initialControlsObj[(newInput as DataControlInput).fieldName],
+            //  title should not be overridden by the initial controls, hence the hardcoding
+            title: newInput.title ?? result.title,
+          };
+        }
+      }
+      return result;
+    },
+    [initialControlsObj]
+  );
 
   const addControlsHandler = useCallback(() => {
     controlGroup?.openAddDataControlFlyout({
       controlInputTransform: newControlInputTranform,
     });
-  }, [controlGroup]);
+  }, [controlGroup, newControlInputTranform]);
 
   return (
     <FilterGroupContext.Provider

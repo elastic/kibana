@@ -7,15 +7,22 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
-import type { SortOrder } from '../../../../../../common/detection_engine/schemas/common';
+import type { SortOrder } from '../../../../../../common/api/detection_engine';
 
 type TableItem = Record<string, unknown>;
+
+interface SortingState<T extends TableItem> {
+  sort: {
+    field: keyof T;
+    direction: SortOrder;
+  };
+}
 
 export const useSorting = <T extends TableItem>(defaultField: keyof T, defaultOrder: SortOrder) => {
   const [sortField, setSortField] = useState<keyof T>(defaultField);
   const [sortOrder, setSortOrder] = useState<SortOrder>(defaultOrder);
 
-  const state = useMemo(() => {
+  const state = useMemo<SortingState<T>>(() => {
     return {
       sort: {
         field: sortField,

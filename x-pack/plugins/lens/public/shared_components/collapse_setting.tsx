@@ -28,6 +28,7 @@ export function CollapseSetting({
   return (
     <>
       <EuiFormRow
+        id="lns-indexPattern-collapse-by"
         label={
           <EuiToolTip
             delay="long"

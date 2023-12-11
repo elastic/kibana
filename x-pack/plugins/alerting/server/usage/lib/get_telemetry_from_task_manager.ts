@@ -175,18 +175,15 @@ export function parseBucket(
       const status: string = bucket.key;
       const taskTypeBuckets = bucket?.by_task_type?.buckets as AggregationsStringTermsBucketKeys[];
 
-      const byTaskType = (taskTypeBuckets ?? []).reduce(
-        (acc: Record<string, number>, taskTypeBucket: AggregationsStringTermsBucketKeys) => {
+      const byTaskType = (taskTypeBuckets ?? []).reduce<Record<string, number>>(
+        (acc, taskTypeBucket: AggregationsStringTermsBucketKeys) => {
           const taskType: string = replaceDotSymbols(taskTypeBucket.key.replace('alerting:', ''));
-          return {
-            ...acc,
-            [taskType]: taskTypeBucket.doc_count ?? 0,
-          };
+          acc[taskType] = taskTypeBucket.doc_count ?? 0;
+          return acc;
         },
         {}
       );
-      return {
-        ...summary,
+      return Object.assign(summary, {
         countFailedAndUnrecognizedTasksByStatus: {
           ...summary.countFailedAndUnrecognizedTasksByStatus,
           [status]: bucket?.doc_count ?? 0,
@@ -195,7 +192,7 @@ export function parseBucket(
           summary.countFailedAndUnrecognizedTasksByStatusByType,
           isEmpty(byTaskType) ? {} : { [status]: byTaskType }
         ),
-      };
+      });
     },
     {
       countFailedAndUnrecognizedTasksByStatus: {},

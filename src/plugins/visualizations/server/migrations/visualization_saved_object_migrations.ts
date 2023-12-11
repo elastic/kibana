@@ -31,7 +31,7 @@ import {
   commonPreserveOldLegendSizeDefault,
   commonRemoveExclamationCircleIcon,
 } from './visualization_common_migrations';
-import { VisualizationSavedObjectAttributes } from '../../common';
+import { VisualizationSavedObjectAttributes } from '../../common/content_management';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -1281,7 +1281,7 @@ const getVisualizationSearchSourceMigrations = (
         const _state = state as { attributes: VisualizationSavedObjectAttributes };
 
         const parsedSearchSourceJSON = JSON.parse(
-          _state.attributes.kibanaSavedObjectMeta.searchSourceJSON
+          _state.attributes.kibanaSavedObjectMeta?.searchSourceJSON || '{}'
         );
         if (isSerializedSearchSource(parsedSearchSourceJSON)) {
           return {

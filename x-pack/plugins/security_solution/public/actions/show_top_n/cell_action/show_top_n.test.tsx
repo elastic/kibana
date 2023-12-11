@@ -6,41 +6,40 @@
  */
 
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-} from '../../../common/mock';
-import { mockHistory } from '../../../common/mock/router';
-import { createStore } from '../../../common/store';
+
 import { createShowTopNCellActionFactory } from './show_top_n';
-import React from 'react';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { StartServices } from '../../../types';
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../show_top_n_component', () => ({
-  TopNAction: () => <span>{'TEST COMPONENT'}</span>,
-}));
-
-const mockServices = createStartServicesMock();
-const { storage } = createSecuritySolutionStorageMock();
-const mockStore = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const mockServices = {
+  ...createStartServicesMock(),
+  topValuesPopover: { showPopover: jest.fn() },
+} as unknown as StartServices;
 
 const element = document.createElement('div');
 document.body.appendChild(element);
 
 describe('createShowTopNCellActionFactory', () => {
   const showTopNActionFactory = createShowTopNCellActionFactory({
-    store: mockStore,
-    history: mockHistory,
     services: mockServices,
   });
   const showTopNAction = showTopNActionFactory({ id: 'testAction' });
 
   const context = {
-    field: { name: 'user.name', value: 'the-value', type: 'keyword', aggregatable: true },
+    data: [
+      {
+        value: 'the-value',
+        field: {
+          name: 'user.name',
+          type: KBN_FIELD_TYPES.STRING,
+          aggregatable: true,
+          searchable: true,
+        },
+      },
+    ],
     trigger: { id: 'trigger' },
     nodeRef: {
       current: element,
@@ -61,30 +60,61 @@ describe('createShowTopNCellActionFactory', () => {
   });
 
   describe('isCompatible', () => {
-    it('should return true if everything is okay', async () => {
-      expect(await showTopNAction.isCompatible(context)).toEqual(true);
-    });
-
-    it('should return false if field type does not support aggregations', async () => {
-      expect(
-        await showTopNAction.isCompatible({ ...context, field: { ...context.field, type: 'text' } })
-      ).toEqual(false);
-    });
-
     it('should return false if field is not aggregatable', async () => {
       expect(
         await showTopNAction.isCompatible({
           ...context,
-          field: { ...context.field, aggregatable: false },
+          data: [
+            {
+              field: { ...context.data[0].field, aggregatable: false },
+            },
+          ],
         })
       ).toEqual(false);
+    });
+
+    it('should return false if field is nested', async () => {
+      expect(
+        await showTopNAction.isCompatible({
+          ...context,
+          data: [
+            {
+              field: { ...context.data[0].field, subType: { nested: { path: 'test_path' } } },
+            },
+          ],
+        })
+      ).toEqual(false);
+    });
+
+    describe.each([
+      { type: KBN_FIELD_TYPES.STRING, expectedValue: true },
+      { type: KBN_FIELD_TYPES.BOOLEAN, expectedValue: true },
+      { type: KBN_FIELD_TYPES.NUMBER, expectedValue: true },
+      { type: KBN_FIELD_TYPES.IP, expectedValue: true },
+      { type: KBN_FIELD_TYPES.DATE, expectedValue: false },
+      { type: KBN_FIELD_TYPES.GEO_SHAPE, expectedValue: false },
+      { type: KBN_FIELD_TYPES.IP_RANGE, expectedValue: false },
+    ])('lens supported KBN types', ({ type, expectedValue }) => {
+      it(`should return ${expectedValue} when type is ${type}`, async () => {
+        expect(
+          await showTopNAction.isCompatible({
+            ...context,
+            data: [
+              {
+                field: { ...context.data[0].field, type },
+              },
+            ],
+          })
+        ).toEqual(expectedValue);
+      });
     });
   });
 
   describe('execute', () => {
     it('should execute normally', async () => {
       await showTopNAction.execute(context);
-      expect(document.body.textContent).toContain('TEST COMPONENT');
+
+      expect(mockServices.topValuesPopover.showPopover).toHaveBeenCalled();
     });
   });
 });

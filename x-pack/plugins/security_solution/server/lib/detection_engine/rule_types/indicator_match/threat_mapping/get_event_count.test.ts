@@ -25,6 +25,7 @@ describe('getEventCount', () => {
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
       primaryTimestamp: '@timestamp',
       exceptionFilter: undefined,
+      indexFields: [],
     });
 
     expect(esClient.count).toHaveBeenCalledWith({
@@ -62,6 +63,7 @@ describe('getEventCount', () => {
       primaryTimestamp: 'event.ingested',
       secondaryTimestamp: '@timestamp',
       exceptionFilter: undefined,
+      indexFields: [],
     });
 
     expect(esClient.count).toHaveBeenCalledWith({
@@ -121,6 +123,7 @@ describe('getEventCount', () => {
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
       primaryTimestamp: 'event.ingested',
       exceptionFilter: undefined,
+      indexFields: [],
     });
 
     expect(esClient.count).toHaveBeenCalledWith({

@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiSpacer,
-  EuiEmptyPrompt,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
+import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { Error } from '../types';
@@ -41,35 +37,34 @@ export const PageError: React.FunctionComponent<Props> = ({
   const message = error?.message;
 
   const errorContent = (
-    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-      <EuiEmptyPrompt
-        title={<h2>{title}</h2>}
-        body={
-          error && (
-            <>
-              {cause ? (
-                message || errorString
-              ) : (
-                <p className="eui-textBreakWord">{message || errorString}</p>
-              )}
-              {cause && (
-                <>
-                  <EuiSpacer size="s" />
-                  <ul>
-                    {cause.map((causeMsg, i) => (
-                      <li key={i}>{causeMsg}</li>
-                    ))}
-                  </ul>
-                </>
-              )}
-            </>
-          )
-        }
-        iconType="warning"
-        actions={actions}
-        {...rest}
-      />
-    </EuiPageContent>
+    <EuiPageTemplate.EmptyPrompt
+      title={<h2>{title}</h2>}
+      body={
+        error && (
+          <>
+            {cause ? (
+              message || errorString
+            ) : (
+              <p className="eui-textBreakWord">{message || errorString}</p>
+            )}
+            {cause && (
+              <>
+                <EuiSpacer size="s" />
+                <ul>
+                  {cause.map((causeMsg, i) => (
+                    <li key={i}>{causeMsg}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </>
+        )
+      }
+      iconType="warning"
+      color="danger"
+      actions={actions}
+      {...rest}
+    />
   );
 
   if (isCentered) {

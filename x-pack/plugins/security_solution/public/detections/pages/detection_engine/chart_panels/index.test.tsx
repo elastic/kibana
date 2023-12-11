@@ -9,7 +9,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { useAlertsLocalStorage } from './alerts_local_storage';
-import type { Status } from '../../../../../common/detection_engine/schemas/common';
+import type { Status } from '../../../../../common/api/detection_engine';
 import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
 import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from '../../../../common/components/chart_settings_popover/translations';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
@@ -253,7 +253,8 @@ describe('ChartPanels', () => {
           fireEvent.change(searchInput, { target: { value: invalidValue } });
 
           const afterInvalidInput = screen.getAllByTestId('comboBoxInput')[0];
-          expect(afterInvalidInput).toHaveTextContent(invalidValue); // the 'Group by' EuiComboBox is now in the "error state"
+          expect(searchInput).toHaveValue(invalidValue); // the 'Group by' EuiComboBox is now in the "error state"
+          expect(afterInvalidInput).not.toHaveTextContent(invalidValue); // Value should not have been applied
 
           resetGroupByFields(); // invoke the `Reset group by fields` context menu action
 
@@ -292,7 +293,8 @@ describe('ChartPanels', () => {
           fireEvent.change(searchInput, { target: { value: invalidValue } });
 
           const afterInvalidInput = screen.getAllByTestId('comboBoxInput')[1];
-          expect(afterInvalidInput).toHaveTextContent(invalidValue); // the 'Group by top' EuiComboBox is now in the "error state"
+          expect(searchInput).toHaveValue(invalidValue); // the 'Group by top' EuiComboBox is now in the "error state"
+          expect(afterInvalidInput).not.toHaveTextContent(invalidValue); // Value should not have been applied
 
           resetGroupByFields(); // invoke the `Reset group by fields` context menu action
 

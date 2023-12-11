@@ -5,27 +5,17 @@
  * 2.0.
  */
 
-import * as Rx from 'rxjs';
-import type { CoreSetup, HttpServerInfo, Logger, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, HttpServerInfo, Logger } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { createMockConfigSchema } from '../test_helpers';
-import type { ReportingConfigType } from '.';
-import { createConfig$ } from './create_config';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import { createConfig } from './create_config';
 
-const createMockConfig = (
-  mockInitContext: PluginInitializerContext<unknown>
-): Rx.Observable<ReportingConfigType> => mockInitContext.config.create();
-
-describe('Reporting server createConfig$', () => {
+describe('Reporting server createConfig', () => {
   let mockCoreSetup: CoreSetup;
-  let mockInitContext: PluginInitializerContext;
   let mockLogger: jest.Mocked<Logger>;
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
-    mockInitContext = coreMock.createPluginInitializerContext(
-      createMockConfigSchema({ kibanaServer: {} })
-    );
     mockLogger = loggingSystemMock.createLogger();
   });
 
@@ -33,13 +23,9 @@ describe('Reporting server createConfig$', () => {
     jest.resetAllMocks();
   });
 
-  it('creates random encryption key and default config using host, protocol, and port from server info', async () => {
-    mockInitContext = coreMock.createPluginInitializerContext({
-      ...createMockConfigSchema({ kibanaServer: {} }),
-      encryptionKey: undefined,
-    });
-    const mockConfig$ = createMockConfig(mockInitContext);
-    const result = await Rx.lastValueFrom(createConfig$(mockCoreSetup, mockConfig$, mockLogger));
+  it('creates random encryption key and default config using host, protocol, and port from server info', () => {
+    const mockConfig = createMockConfigSchema({ encryptionKey: undefined, kibanaServer: {} });
+    const result = createConfig(mockCoreSetup, mockConfig, mockLogger);
 
     expect(result.encryptionKey).toMatch(/\S{32,}/); // random 32 characters
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
@@ -48,31 +34,28 @@ describe('Reporting server createConfig$', () => {
     );
   });
 
-  it('uses the user-provided encryption key', async () => {
-    mockInitContext = coreMock.createPluginInitializerContext(
-      createMockConfigSchema({
-        encryptionKey: 'iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii',
-      })
-    );
-    const mockConfig$ = createMockConfig(mockInitContext);
-    const result = await Rx.lastValueFrom(createConfig$(mockCoreSetup, mockConfig$, mockLogger));
+  it('uses the user-provided encryption key', () => {
+    const mockConfig = createMockConfigSchema({
+      encryptionKey: 'iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii',
+    });
+    const result = createConfig(mockCoreSetup, mockConfig, mockLogger);
     expect(result.encryptionKey).toMatch('iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii');
     expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
-  it('uses the user-provided encryption key, reporting kibanaServer settings to override server info', async () => {
-    mockInitContext = coreMock.createPluginInitializerContext(
-      createMockConfigSchema({
-        encryptionKey: 'iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii',
-        kibanaServer: {
-          hostname: 'reportingHost',
-          port: 5677,
-          protocol: 'httpsa',
-        },
-      })
-    );
-    const mockConfig$ = createMockConfig(mockInitContext);
-    const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
+  it('uses the user-provided encryption key, reporting kibanaServer settings to override server info', () => {
+    const mockConfig = createMockConfigSchema({
+      encryptionKey: 'iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii',
+      kibanaServer: {
+        hostname: 'reportingHost',
+        port: 5677,
+        protocol: 'httpsa',
+      },
+      statefulSettings: {
+        enabled: true,
+      },
+    });
+    const result = createConfig(mockCoreSetup, mockConfig, mockLogger);
 
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -86,6 +69,17 @@ describe('Reporting server createConfig$', () => {
           },
         },
         "encryptionKey": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
+        "export_types": Object {
+          "csv": Object {
+            "enabled": true,
+          },
+          "pdf": Object {
+            "enabled": true,
+          },
+          "png": Object {
+            "enabled": true,
+          },
+        },
         "index": ".reporting",
         "kibanaServer": Object {
           "hostname": "reportingHost",
@@ -101,6 +95,9 @@ describe('Reporting server createConfig$', () => {
         "roles": Object {
           "enabled": false,
         },
+        "statefulSettings": Object {
+          "enabled": true,
+        },
       }
     `);
     expect(mockLogger.warn).not.toHaveBeenCalled();
@@ -108,18 +105,7 @@ describe('Reporting server createConfig$', () => {
 
   it.each(['0', '0.0', '0.0.0', '0.0.0.0', '0000:0000:0000:0000:0000:0000:0000:0000', '::'])(
     `apply failover logic when hostname is given as "%s"`,
-    async (hostname) => {
-      mockInitContext = coreMock.createPluginInitializerContext(
-        createMockConfigSchema({
-          encryptionKey: 'aaaaaaaaaaaaabbbbbbbbbbbbaaaaaaaaa',
-          // overwrite settings added by createMockConfigSchema and apply the default settings
-          // TODO make createMockConfigSchema _not_ default xpack.reporting.kibanaServer.hostname to 'localhost'
-          kibanaServer: {
-            hostname: undefined,
-            port: undefined,
-          },
-        })
-      );
+    (hostname) => {
       mockCoreSetup.http.getServerInfo = jest.fn(
         (): HttpServerInfo => ({
           name: 'cool server',
@@ -129,10 +115,14 @@ describe('Reporting server createConfig$', () => {
         })
       );
 
-      const mockConfig$ = createMockConfig(mockInitContext);
-      await expect(
-        createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise()
-      ).resolves.toHaveProperty(
+      const mockConfig = createMockConfigSchema({
+        encryptionKey: 'aaaaaaaaaaaaabbbbbbbbbbbbaaaaaaaaa',
+        kibanaServer: {
+          hostname: undefined,
+          port: undefined,
+        },
+      });
+      expect(createConfig(mockCoreSetup, mockConfig, mockLogger)).toHaveProperty(
         'kibanaServer',
         expect.objectContaining({
           hostname: 'localhost',

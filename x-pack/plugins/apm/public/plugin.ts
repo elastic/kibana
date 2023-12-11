@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { from } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type {
+  PluginSetupContract as AlertingPluginPublicSetup,
+  PluginStartContract as AlertingPluginPublicStart,
+} from '@kbn/alerting-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import {
   AppMountParameters,
+  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -18,46 +20,59 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import type {
-  DataPublicPluginStart,
   DataPublicPluginSetup,
+  DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import {
+  DiscoverSetup,
+  DiscoverStart,
+} from '@kbn/discover-plugin/public/plugin';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import type {
-  PluginSetupContract as AlertingPluginPublicSetup,
-  PluginStartContract as AlertingPluginPublicStart,
-} from '@kbn/alerting-plugin/public';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { MetricsDataPluginStart } from '@kbn/metrics-data-access-plugin/public';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
-import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  FetchDataParams,
+  ObservabilityPublicSetup,
+  ObservabilityPublicStart,
+} from '@kbn/observability-plugin/public';
+import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import { METRIC_TYPE } from '@kbn/observability-shared-plugin/public';
 import {
-  FetchDataParams,
-  METRIC_TYPE,
-  ObservabilityPublicSetup,
-  ObservabilityPublicStart,
-} from '@kbn/observability-plugin/public';
+  ProfilingPluginSetup,
+  ProfilingPluginStart,
+} from '@kbn/profiling-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { SecurityPluginStart } from '@kbn/security-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { InfraClientStartExports } from '@kbn/infra-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { from } from 'rxjs';
+import { map } from 'rxjs/operators';
+import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
@@ -67,32 +82,39 @@ import { getLazyApmAgentsTabExtension } from './components/fleet_integration/laz
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
-import type { ConfigSchema } from '.';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
-
+import { ITelemetryClient, TelemetryService } from './services/telemetry';
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
-
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
+  discover?: DiscoverSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   share: SharePluginSetup;
+  uiActions: UiActionsSetup;
+  profiling?: ProfilingPluginSetup;
+}
+
+export interface ApmServices {
+  telemetry: ITelemetryClient;
 }
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
   charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
+  discover?: DiscoverStart;
   embeddable: EmbeddableStart;
   home: void;
   inspector: InspectorPluginStart;
@@ -106,11 +128,15 @@ export interface ApmPluginStartDeps {
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  infra?: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;
   lens: LensPublicStart;
+  uiActions: UiActionsStart;
+  profiling?: ProfilingPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  dashboard: DashboardStart;
+  metricsDataAccess: MetricsDataPluginStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
@@ -152,15 +178,26 @@ const apmStorageExplorerTitle = i18n.translate(
   }
 );
 
+const apmTutorialTitle = i18n.translate(
+  'xpack.apm.navigation.apmTutorialTitle',
+  {
+    defaultMessage: 'Tutorial',
+  }
+);
+
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
+  private telemetry: TelemetryService;
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
   ) {
     this.initializerContext = initializerContext;
+    this.telemetry = new TelemetryService();
   }
+
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
+    const { featureFlags } = config;
 
     if (pluginSetupDeps.home) {
       pluginSetupDeps.home.environment.update({ apmUi: true });
@@ -242,6 +279,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       };
     };
 
+    this.telemetry.setup({ analytics: core.analytics });
+
     // Registers a status check callback for the tutorial to call and verify if the APM integration is installed on fleet.
     pluginSetupDeps.home?.tutorials.registerCustomStatusCheck(
       'apm_fleet_server_status_check',
@@ -266,6 +305,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       'TutorialConfigAgentRumScript',
       () => import('./tutorial/config_agent/rum_script')
     );
+
+    pluginSetupDeps.uiActions.registerTrigger({
+      id: ObservabilityTriggerId.ApmTransactionContextMenu,
+    });
+
+    pluginSetupDeps.uiActions.registerTrigger({
+      id: ObservabilityTriggerId.ApmErrorContextMenu,
+    });
 
     plugins.observability.dashboard.register({
       appName: 'apm',
@@ -293,6 +340,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     const { observabilityRuleTypeRegistry } = plugins.observability;
 
+    // Register APM telemetry based events
+    const telemetry = this.telemetry.start();
+
     core.application.register({
       id: 'apm',
       title: 'APM',
@@ -301,6 +351,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
+      navLinkStatus: AppNavLinkStatus.visible,
       deepLinks: [
         {
           id: 'service-groups-list',
@@ -311,20 +362,35 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           id: 'services',
           title: servicesTitle,
           path: '/services',
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
         },
-        { id: 'traces', title: tracesTitle, path: '/traces' },
+        {
+          id: 'traces',
+          title: tracesTitle,
+          path: '/traces',
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
+        },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
         {
           id: 'dependencies',
           title: dependenciesTitle,
           path: '/dependencies/inventory',
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
         },
         { id: 'settings', title: apmSettingsTitle, path: '/settings' },
         {
           id: 'storage-explorer',
           title: apmStorageExplorerTitle,
           path: '/storage-explorer',
+          searchable: featureFlags.storageExplorerAvailable,
         },
+        { id: 'tutorial', title: apmTutorialTitle, path: '/tutorial' },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
@@ -333,7 +399,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           import('./application'),
           core.getStartServices(),
         ]);
-
         return renderApp({
           coreStart,
           pluginsSetup: pluginSetupDeps,
@@ -341,6 +406,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           config,
           pluginsStart: pluginsStart as ApmPluginStartDeps,
           observabilityRuleTypeRegistry,
+          apmServices: {
+            telemetry,
+          },
         });
       },
     });
@@ -355,8 +423,20 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       locator,
     };
   }
+
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;
+
+    plugins.observabilityAIAssistant.service.register(
+      async ({ registerRenderFunction }) => {
+        const mod = await import('./assistant_functions');
+
+        mod.registerAssistantFunctions({
+          registerRenderFunction,
+        });
+      }
+    );
+
     if (fleet) {
       const agentEnrollmentExtensionData = getApmEnrollmentFlyoutData();
 

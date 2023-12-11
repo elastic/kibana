@@ -59,6 +59,7 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
         validate: { ...rt },
         options: {
           tags: fileKind.http.download.tags,
+          access: 'public', // the endpoint is used by <img src=""/> and should work without any special headers
         },
       },
       handler

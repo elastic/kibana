@@ -7,15 +7,18 @@
 
 import { EuiDataGridColumn, EuiDataGridColumnCellAction } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { severitySchemaConfig } from './utils/custom_sort_script';
 
 export const vulnerabilitiesColumns = {
   actions: 'actions',
   vulnerability: 'vulnerability.id',
   cvss: 'vulnerability.score.base',
-  resource: 'resource.name',
+  resourceName: 'resource.name',
+  resourceId: 'resource.id',
   severity: 'vulnerability.severity',
-  package_version: 'vulnerability.package.name',
-  fix_version: 'vulnerability.package.fixed_version',
+  package: 'package.name',
+  version: 'package.version',
+  fixedVersion: 'package.fixed_version',
 };
 
 const defaultColumnProps = () => ({
@@ -59,9 +62,17 @@ export const getVulnerabilitiesColumnsGrid = (
   },
   {
     ...defaultColumnProps(),
-    id: vulnerabilitiesColumns.resource,
-    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.resource', {
-      defaultMessage: 'Resource',
+    id: vulnerabilitiesColumns.resourceId,
+    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.resourceId', {
+      defaultMessage: 'Resource ID',
+    }),
+    cellActions,
+  },
+  {
+    ...defaultColumnProps(),
+    id: vulnerabilitiesColumns.resourceName,
+    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.resourceName', {
+      defaultMessage: 'Resource Name',
     }),
     cellActions,
   },
@@ -73,18 +84,27 @@ export const getVulnerabilitiesColumnsGrid = (
     }),
     initialWidth: 100,
     cellActions,
+    schema: severitySchemaConfig.type,
   },
   {
     ...defaultColumnProps(),
-    id: vulnerabilitiesColumns.package_version,
-    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.packageAndVersion', {
-      defaultMessage: 'Package and Version',
+    id: vulnerabilitiesColumns.package,
+    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.package', {
+      defaultMessage: 'Package',
     }),
     cellActions,
   },
   {
     ...defaultColumnProps(),
-    id: vulnerabilitiesColumns.fix_version,
+    id: vulnerabilitiesColumns.version,
+    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.version', {
+      defaultMessage: 'Version',
+    }),
+    cellActions,
+  },
+  {
+    ...defaultColumnProps(),
+    id: vulnerabilitiesColumns.fixedVersion,
     displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.fixVersion', {
       defaultMessage: 'Fix Version',
     }),

@@ -23,7 +23,7 @@ import { performBulkActionRoute } from './route';
 import {
   getPerformBulkActionEditSchemaMock,
   getPerformBulkActionSchemaMock,
-} from '../../../../../../../common/detection_engine/rule_management/mocks';
+} from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { readRules } from '../../../logic/crud/read_rules';
 
@@ -486,7 +486,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "action",Invalid value "undefined" supplied to "edit"'
+        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 2 more'
       );
     });
 
@@ -498,7 +498,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown" supplied to "action",Invalid value "undefined" supplied to "edit"'
+        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 2 more'
       );
     });
 
@@ -531,7 +531,9 @@ describe('Perform bulk action route', () => {
         body: { ...getPerformBulkActionSchemaMock(), ids: 'test fake' },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "test fake" supplied to "ids"');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'ids: Expected array, received string, action: Invalid literal value, expected "delete", ids: Expected array, received string, ids: Expected array, received string, action: Invalid literal value, expected "enable", and 7 more'
+      );
     });
 
     it('rejects payload if there is more than 100 ids in payload', async () => {
@@ -577,7 +579,9 @@ describe('Perform bulk action route', () => {
         body: { ...getPerformBulkActionSchemaMock(), ids: [] },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "[]" supplied to "ids"');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'ids: Array must contain at least 1 element(s)'
+      );
     });
 
     it('rejects payloads if property "edit" actions is empty', async () => {
@@ -588,7 +592,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid value "[]" supplied to "edit"')
+        expect.stringContaining('edit: Array must contain at least 1 element(s)')
       );
     });
 
@@ -601,7 +605,9 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid value "invalid" supplied to "dry_run"')
+        expect.stringContaining(
+          "dry_run: Invalid enum value. Expected 'true' | 'false', received 'invalid', dry_run: Expected boolean, received string"
+        )
       );
     });
   });

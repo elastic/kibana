@@ -21,13 +21,13 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IndicatorsFlyoutContext } from './context';
-import { TakeAction } from './take_action/take_action';
-import { DateFormatter } from '../../../../components/date_formatter/date_formatter';
+import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
+import { TakeAction } from './take_action';
+import { DateFormatter } from '../../../../components/date_formatter';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { IndicatorsFlyoutJson } from './json_tab';
 import { IndicatorsFlyoutTable } from './table_tab';
-import { unwrapValue } from '../../utils';
+import { unwrapValue } from '../../utils/unwrap_value';
 import { IndicatorsFlyoutOverview } from './overview_tab';
 import {
   INDICATORS_FLYOUT_TABS_TEST_ID,

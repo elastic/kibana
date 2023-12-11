@@ -93,7 +93,7 @@ export const AlertDefaultsForm = () => {
         description={
           <FormattedMessage
             id="xpack.synthetics.settings.defaultConnectors.description"
-            defaultMessage="Selector one or more connectors to be used for alerts. These settings will be applied to all synthetics based alerts."
+            defaultMessage="Select one or more connectors to be used for alerts. These settings apply to all synthetics-based alerts."
           />
         }
       >

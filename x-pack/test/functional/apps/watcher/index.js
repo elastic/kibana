@@ -6,9 +6,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('watcher app', function () {
-    this.tags('includeFirefox');
-
+  describe('watcher app', () => {
     loadTestFile(require.resolve('./watcher_test'));
   });
 }

@@ -13,6 +13,7 @@ import {
 } from '@tanstack/react-query';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 type SloId = string;
 
@@ -20,8 +21,10 @@ interface Params {
   sloIds?: SloId[];
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type SloRule = { sloId: string; name: string };
+export interface SloRule extends Record<string, unknown> {
+  sloId: string;
+  name: string;
+}
 
 interface RuleApiResponse {
   page: number;
@@ -42,20 +45,16 @@ export interface UseFetchRulesForSloResponse {
   ) => Promise<QueryObserverResult<Record<string, Array<Rule<SloRule>>> | undefined, unknown>>;
 }
 
-export function useFetchRulesForSlo({ sloIds }: Params): UseFetchRulesForSloResponse {
+export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSloResponse {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: ['fetchRulesForSlo', sloIds],
+      queryKey: sloKeys.rule(sloIds),
       queryFn: async () => {
         try {
           const body = JSON.stringify({
-            filter: `${sloIds?.reduce((acc, sloId, index, array) => {
-              return `${acc}alert.attributes.params.sloId:${sloId}${
-                index < array.length - 1 ? ' or ' : ''
-              }`;
-            }, '')}`,
+            filter: sloIds.map((sloId) => `alert.attributes.params.sloId:${sloId}`).join(' or '),
             fields: ['params.sloId', 'name'],
             per_page: 1000,
           });
@@ -64,7 +63,7 @@ export function useFetchRulesForSlo({ sloIds }: Params): UseFetchRulesForSloResp
             body,
           });
 
-          const init = sloIds?.reduce((acc, sloId) => ({ ...acc, [sloId]: [] }), {});
+          const init = sloIds.reduce((acc, sloId) => ({ ...acc, [sloId]: [] }), {});
 
           return response.data.reduce(
             (acc, rule) => ({
@@ -77,7 +76,7 @@ export function useFetchRulesForSlo({ sloIds }: Params): UseFetchRulesForSloResp
           // ignore error for retrieving slos
         }
       },
-      enabled: Boolean(sloIds?.length),
+      enabled: Boolean(sloIds.length),
       refetchOnWindowFocus: false,
       keepPreviousData: true,
     }

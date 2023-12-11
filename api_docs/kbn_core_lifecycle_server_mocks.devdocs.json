@@ -68,7 +68,7 @@
                 "section": "def-common.HttpResources",
                 "text": "HttpResources"
               },
-              ">, []>; }; uiSettings: jest.Mocked<",
+              ">, [], any>; }; uiSettings: jest.Mocked<",
               "InternalUiSettingsServicePreboot",
               ">; logging: jest.Mocked<",
               "InternalLoggingServicePreboot",
@@ -152,7 +152,7 @@
                 "section": "def-common.HttpResources",
                 "text": "HttpResources"
               },
-              ">, []>; }; rendering: jest.Mocked<",
+              ">, [], any>; }; rendering: jest.Mocked<",
               "InternalRenderingServiceSetup",
               ">; uiSettings: jest.Mocked<",
               {
@@ -184,7 +184,7 @@
               "IExecutionContext",
               ">; coreUsageData: jest.Mocked<",
               "InternalCoreUsageDataSetup",
-              ">; customBranding: { register: jest.Mock<any, any>; getBrandingFor: jest.Mock<any, any>; }; userSettings: { setUserProfileSettings: jest.Mock<any, any>; getUserSettingDarkMode: jest.Mock<any, any>; }; }"
+              ">; customBranding: { register: jest.Mock<any, any, any>; getBrandingFor: jest.Mock<any, any, any>; }; userSettings: { setUserProfileSettings: jest.Mock<any, any, any>; getUserSettingDarkMode: jest.Mock<any, any, any>; }; }"
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
             "deprecated": false,

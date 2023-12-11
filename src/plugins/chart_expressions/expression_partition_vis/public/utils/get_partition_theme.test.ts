@@ -144,9 +144,16 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
     });
   });
 
-  it('should return adjusted padding settings if dimensions are specified', () => {
+  it('should return adjusted padding settings if dimensions are specified and is on aggBased editor', () => {
     const specifiedDimensions = { width: 2000, height: 2000 };
-    const theme = getPartitionTheme(chartType, visParams, chartTheme, specifiedDimensions);
+    const theme = getPartitionTheme(
+      chartType,
+      visParams,
+      chartTheme,
+      specifiedDimensions,
+      undefined,
+      true
+    );
 
     expect(theme).toEqual({
       ...getStaticThemeOptions(chartTheme, visParams),
@@ -233,7 +240,6 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
 
       expect(theme).toEqual({
         ...getStaticThemeOptions(chartTheme, visParams),
-        chartPaddings: { top: 500, bottom: 500, left: 500, right: 500 },
         partition: {
           ...getStaticThemePartition(chartTheme, visParams),
           outerSizeRatio: rescaleFactor,
@@ -263,7 +269,6 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
 
       expect(theme).toEqual({
         ...getStaticThemeOptions(chartTheme, vParams),
-        chartPaddings: { top: 500, bottom: 500, left: 500, right: 500 },
         partition: {
           ...getStaticThemePartition(chartTheme, vParams),
           outerSizeRatio: 0.5,
@@ -285,7 +290,6 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
 
       expect(theme).toEqual({
         ...getStaticThemeOptions(chartTheme, vParams),
-        chartPaddings: { top: 500, bottom: 500, left: 500, right: 500 },
         partition: {
           ...getStaticThemePartition(chartTheme, vParams),
           linkLabel: linkLabelWithEnoughSpace(vParams),
@@ -420,7 +424,14 @@ const runTreemapMosaicTestSuites = (chartType: ChartTypes, visParams: PartitionV
 
   it('should return fullfilled padding settings if dimensions are specified', () => {
     const specifiedDimensions = { width: 2000, height: 2000 };
-    const theme = getPartitionTheme(chartType, visParams, chartTheme, specifiedDimensions);
+    const theme = getPartitionTheme(
+      chartType,
+      visParams,
+      chartTheme,
+      specifiedDimensions,
+      undefined,
+      true
+    );
 
     expect(theme).toEqual({
       ...getStaticThemeOptions(chartTheme, visParams),

@@ -22,8 +22,7 @@ import type { ActionDetails } from '../../../../../common/endpoint/types';
 import { act, waitFor } from '@testing-library/react';
 import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
 
-// FLAKY: https://github.com/elastic/kibana/issues/142584
-describe.skip('When using `useConsoleActionSubmitter()` hook', () => {
+describe('When using `useConsoleActionSubmitter()` hook', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let renderArgs: UseConsoleActionSubmitterOptions;
@@ -200,6 +199,7 @@ describe.skip('When using `useConsoleActionSubmitter()` hook', () => {
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledWith({
         path: '/api/endpoint/action/123',
+        version: '2023-10-31',
       });
     });
   });
@@ -219,6 +219,7 @@ describe.skip('When using `useConsoleActionSubmitter()` hook', () => {
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledWith({
         path: '/api/endpoint/action/123',
+        version: '2023-10-31',
       });
     });
 
@@ -242,10 +243,13 @@ describe.skip('When using `useConsoleActionSubmitter()` hook', () => {
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledWith({
         path: '/api/endpoint/action/123',
+        version: '2023-10-31',
       });
     });
 
-    expect(renderArgs.store.actionApiState?.actionDetailsError).toBe(error);
+    await waitFor(() => {
+      expect(renderArgs.store.actionApiState?.actionDetailsError).toBe(error);
+    });
 
     expect(renderResult.getByTestId('test-apiFailure').textContent).toEqual(
       'The following error was encountered:on oh. getting action details failed'
@@ -262,6 +266,7 @@ describe.skip('When using `useConsoleActionSubmitter()` hook', () => {
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledWith({
         path: '/api/endpoint/action/123',
+        version: '2023-10-31',
       });
     });
 

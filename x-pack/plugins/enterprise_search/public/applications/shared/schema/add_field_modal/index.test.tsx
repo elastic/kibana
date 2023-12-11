@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { EuiForm, EuiFieldText, EuiModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -45,7 +45,7 @@ describe('SchemaAddFieldModal', () => {
 
   it('sets loading state in useEffect', () => {
     setState(true);
-    const wrapper = mount(<SchemaAddFieldModal {...props} />);
+    const wrapper = shallow(<SchemaAddFieldModal {...props} />);
     wrapper.setProps({ ...errors });
     const input = wrapper.find(EuiFieldText);
 

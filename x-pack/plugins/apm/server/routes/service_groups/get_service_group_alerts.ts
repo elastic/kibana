@@ -7,11 +7,7 @@
 
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PRODUCER, ALERT_STATUS } from '@kbn/rule-data-utils';
-import {
-  AggregationsCardinalityAggregate,
-  AggregationsFilterAggregate,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Logger } from '@kbn/core/server';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import { SavedServiceGroup } from '../../../common/service_groups';
@@ -33,15 +29,15 @@ export async function getServiceGroupAlerts({
   if (!spaceId || serviceGroups.length === 0) {
     return {};
   }
-  const serviceGroupsKueryMap: Record<string, QueryDslQueryContainer> =
-    serviceGroups.reduce((acc, sg) => {
-      return {
-        ...acc,
-        [sg.id]: kqlQuery(sg.kuery)[0],
-      };
-    }, {});
+  const serviceGroupsKueryMap = serviceGroups.reduce<
+    Record<string, QueryDslQueryContainer>
+  >((acc, sg) => {
+    acc[sg.id] = kqlQuery(sg.kuery)[0];
+    return acc;
+  }, {});
   const params = {
     size: 0,
+    track_total_hits: false,
     query: {
       bool: {
         filter: [
@@ -67,25 +63,13 @@ export async function getServiceGroupAlerts({
   };
   const result = await apmAlertsClient.search(params);
 
-  interface ServiceGroupsAggResponse {
-    buckets: Record<
-      string,
-      AggregationsFilterAggregate & {
-        alerts_count: AggregationsCardinalityAggregate;
-      }
-    >;
-  }
+  const filterAggBuckets = result.aggregations?.service_groups.buckets ?? {};
 
-  const { buckets: filterAggBuckets } = (result.aggregations
-    ?.service_groups ?? { buckets: {} }) as ServiceGroupsAggResponse;
-
-  const serviceGroupAlertsCount: Record<string, number> = Object.keys(
-    filterAggBuckets
-  ).reduce((acc, serviceGroupId) => {
-    return {
-      ...acc,
-      [serviceGroupId]: filterAggBuckets[serviceGroupId].alerts_count.value,
-    };
+  const serviceGroupAlertsCount = Object.keys(filterAggBuckets).reduce<
+    Record<string, number>
+  >((acc, serviceGroupId) => {
+    acc[serviceGroupId] = filterAggBuckets[serviceGroupId].alerts_count.value;
+    return acc;
   }, {});
 
   return serviceGroupAlertsCount;

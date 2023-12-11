@@ -18,3 +18,5 @@ export function registerRoutes(router: InternalUiSettingsRouter) {
   registerSetRoute(router);
   registerSetManyRoute(router);
 }
+
+export { registerInternalRoutes } from './internal';

@@ -7,20 +7,21 @@
 
 import { upperCase } from 'lodash';
 import type { IconColor } from '@elastic/eui';
-import { LogLevel } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { LogLevel } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { LogLevelEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 export const getBadgeColor = (logLevel: LogLevel): IconColor => {
   switch (logLevel) {
-    case LogLevel.trace:
+    case LogLevelEnum.trace:
       return 'hollow';
-    case LogLevel.debug:
+    case LogLevelEnum.debug:
       return 'hollow';
-    case LogLevel.info:
+    case LogLevelEnum.info:
       return 'default';
-    case LogLevel.warn:
+    case LogLevelEnum.warn:
       return 'warning';
-    case LogLevel.error:
+    case LogLevelEnum.error:
       return 'danger';
     default:
       return assertUnreachable(logLevel, 'Unknown log level');

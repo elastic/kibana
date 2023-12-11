@@ -21,3 +21,5 @@
     - "x-pack/plugins/synthetics/**/*.*"
     - "x-pack/plugins/ux/**/*.*"
     - "x-pack/plugins/observability/public/components/shared/exploratory_view/**/*.*"
+  - "Team:obs-ux-management":
+    - "x-pack/plugins/observability/**/*.*"

@@ -1,44 +1,45 @@
 {
   "cat.recovery": {
     "url_params": {
-      "format": "",
+      "format": [
+        "text"
+      ],
+      "h": [],
+      "help": "__flag__",
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "s": [],
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "active_only": "__flag__",
       "bytes": [
         "b",
-        "k",
         "kb",
-        "m",
         "mb",
-        "g",
         "gb",
-        "t",
         "tb",
-        "p",
         "pb"
       ],
-      "detailed": "__flag__",
-      "h": [],
-      "help": "__flag__",
-      "index": [],
-      "s": [],
-      "time": [
-        "d",
-        "h",
-        "m",
-        "s",
-        "ms",
-        "micros",
-        "nanos"
-      ],
-      "v": "__flag__"
+      "detailed": "__flag__"
     },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_cat/recovery",
-      "_cat/recovery/{indices}"
+      "_cat/recovery/{index}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-recovery.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-recovery.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

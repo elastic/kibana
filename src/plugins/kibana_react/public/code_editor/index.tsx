@@ -7,12 +7,11 @@
  */
 
 import React from 'react';
-import { EuiDelayRender, EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
+import { EuiDelayRender, EuiErrorBoundary, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
 
-import { useUiSetting } from '../ui_settings';
 import type { Props } from './code_editor';
 
-export * from './languages/constants';
+export * from '@kbn/code-editor/languages/constants';
 
 const LazyBaseEditor = React.lazy(() => import('./code_editor'));
 const LazyCodeEditorField = React.lazy(() =>
@@ -25,7 +24,7 @@ const Fallback: React.FunctionComponent<{ height: Props['height'] }> = ({ height
       {/* when height is known, set minHeight to avoid layout shift */}
       <div style={height ? { minHeight: height } : {}}>
         <EuiDelayRender>
-          <EuiLoadingContent lines={3} />
+          <EuiSkeletonText lines={3} />
         </EuiDelayRender>
       </div>
     </>
@@ -40,11 +39,12 @@ export type CodeEditorProps = Props;
  * @see CodeEditorField to render a code editor in the same style as other EUI form fields.
  */
 export const CodeEditor: React.FunctionComponent<Props> = (props) => {
-  const darkMode = useUiSetting<boolean>('theme:darkMode');
+  const { colorMode } = useEuiTheme();
+
   return (
     <EuiErrorBoundary>
       <React.Suspense fallback={<Fallback height={props.height} />}>
-        <LazyBaseEditor {...props} useDarkTheme={darkMode} />
+        <LazyBaseEditor {...props} useDarkTheme={colorMode === 'DARK'} />
       </React.Suspense>
     </EuiErrorBoundary>
   );
@@ -54,11 +54,12 @@ export const CodeEditor: React.FunctionComponent<Props> = (props) => {
  * Renders a Monaco code editor in the same style as other EUI form fields.
  */
 export const CodeEditorField: React.FunctionComponent<Props> = (props) => {
-  const darkMode = useUiSetting<boolean>('theme:darkMode');
+  const { colorMode } = useEuiTheme();
+
   return (
     <EuiErrorBoundary>
       <React.Suspense fallback={<Fallback height={props.height} />}>
-        <LazyCodeEditorField {...props} useDarkTheme={darkMode} />
+        <LazyCodeEditorField {...props} useDarkTheme={colorMode === 'DARK'} />
       </React.Suspense>
     </EuiErrorBoundary>
   );

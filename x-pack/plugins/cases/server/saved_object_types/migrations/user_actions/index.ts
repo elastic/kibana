@@ -11,15 +11,9 @@ import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationMap,
-  SavedObjectMigrationFn,
 } from '@kbn/core/server';
-import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 
-import type { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
-import { mapValues } from 'lodash';
-import type { PersistableStateAttachmentState } from '../../../attachment_framework/types';
-import type { CaseUserActionAttributesWithoutConnectorId } from '../../../../common/api';
-import { ActionTypes, CommentType, ConnectorTypes } from '../../../../common/api';
+import { ConnectorTypes } from '../../../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import type { SanitizedCaseOwner } from '..';
 import { addOwnerToSO } from '..';
@@ -28,7 +22,6 @@ import { userActionsConnectorIdMigration } from './connector_id';
 import { payloadMigration } from './payload';
 import { addSeverityToCreateUserAction } from './severity';
 import type { UserActions } from './types';
-import { getAllPersistableAttachmentMigrations } from '../get_all_persistable_attachment_migrations';
 import { addAssigneesToCreateUserAction } from './assignees';
 
 export interface UserActionsMigrationsDeps {
@@ -38,14 +31,6 @@ export interface UserActionsMigrationsDeps {
 export const createUserActionsMigrations = (
   deps: UserActionsMigrationsDeps
 ): SavedObjectMigrationMap => {
-  const persistableStateAttachmentMigrations = mapValues<
-    MigrateFunctionsObject,
-    SavedObjectMigrationFn<CaseUserActionAttributesWithoutConnectorId>
-  >(
-    getAllPersistableAttachmentMigrations(deps.persistableStateAttachmentTypeRegistry),
-    migratePersistableStateAttachments
-  ) as MigrateFunctionsObject;
-
   const userActionsMigrations = {
     '7.10.0': (
       doc: SavedObjectUnsanitizedDoc<UserActions>
@@ -99,44 +84,5 @@ export const createUserActionsMigrations = (
     '8.5.0': addAssigneesToCreateUserAction,
   };
 
-  return mergeSavedObjectMigrationMaps(persistableStateAttachmentMigrations, userActionsMigrations);
+  return userActionsMigrations;
 };
-
-export const migratePersistableStateAttachments =
-  (
-    migrate: MigrateFunction
-  ): SavedObjectMigrationFn<
-    CaseUserActionAttributesWithoutConnectorId,
-    CaseUserActionAttributesWithoutConnectorId
-  > =>
-  (doc: SavedObjectUnsanitizedDoc<CaseUserActionAttributesWithoutConnectorId>) => {
-    if (
-      doc.attributes.type !== ActionTypes.comment ||
-      doc.attributes.payload.comment.type !== CommentType.persistableState
-    ) {
-      return doc;
-    }
-
-    const { persistableStateAttachmentState, persistableStateAttachmentTypeId } =
-      doc.attributes.payload.comment;
-
-    const migratedState = migrate({
-      persistableStateAttachmentState,
-      persistableStateAttachmentTypeId,
-    }) as PersistableStateAttachmentState;
-
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        payload: {
-          ...doc.attributes.payload,
-          comment: {
-            ...doc.attributes.payload.comment,
-            persistableStateAttachmentState: migratedState.persistableStateAttachmentState,
-          },
-        },
-      },
-      references: doc.references ?? [],
-    };
-  };

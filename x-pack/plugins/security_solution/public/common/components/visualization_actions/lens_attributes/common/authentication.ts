@@ -6,8 +6,8 @@
  */
 
 import {
-  AUTHENCICATION_FAILURE_CHART_LABEL,
-  AUTHENCICATION_SUCCESS_CHART_LABEL,
+  AUTHENTICATION_FAILURE_CHART_LABEL,
+  AUTHENTICATION_SUCCESS_CHART_LABEL,
 } from '../../translations';
 import type { LensAttributes } from '../../types';
 
@@ -20,7 +20,8 @@ export const authenticationLensAttributes: LensAttributes = {
       title: 'Empty XY chart',
       legend: {
         isVisible: true,
-        position: 'left',
+        position: 'right',
+        legendSize: 'xlarge',
       },
       valueLabels: 'hide',
       preferredSeriesType: 'bar_stacked',
@@ -114,7 +115,7 @@ export const authenticationLensAttributes: LensAttributes = {
                 },
               },
               '5417777d-d9d9-4268-9cdc-eb29b873bd65': {
-                label: AUTHENCICATION_SUCCESS_CHART_LABEL,
+                label: AUTHENTICATION_SUCCESS_CHART_LABEL,
                 dataType: 'number',
                 operationType: 'count',
                 isBucketed: false,
@@ -147,7 +148,7 @@ export const authenticationLensAttributes: LensAttributes = {
                 },
               },
               'a3bf9dc1-c8d2-42d6-9e60-31892a4c509e': {
-                label: AUTHENCICATION_FAILURE_CHART_LABEL,
+                label: AUTHENTICATION_FAILURE_CHART_LABEL,
                 dataType: 'number',
                 operationType: 'count',
                 isBucketed: false,

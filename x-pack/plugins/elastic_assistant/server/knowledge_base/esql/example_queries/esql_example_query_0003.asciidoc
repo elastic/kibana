@@ -1,0 +1,14 @@
+[[esql-example-queries]]
+
+The following is an example ES|QL query:
+
+```
+from logs-*
+| where event.code is not null
+| stats event_code_count = count(event.code) by event.code,host.name
+| enrich win_events on event.code with EVENT_DESCRIPTION
+| where EVENT_DESCRIPTION is not null and host.name is not null
+| rename EVENT_DESCRIPTION as event.description
+| sort event_code_count desc
+| keep event_code_count,event.code,host.name,event.description
+```

@@ -13,7 +13,11 @@
     "requiredPlugins": [
       "actions",
       "esUiShared",
+      "kibanaReact",
       "triggersActionsUi"
+    ],
+    "extraPublicDirs": [
+      "public/common"
     ]
   }
 }

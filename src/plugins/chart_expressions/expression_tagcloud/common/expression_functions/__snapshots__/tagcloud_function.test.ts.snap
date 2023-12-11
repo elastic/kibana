@@ -66,6 +66,8 @@ Object {
       "bucket": Object {
         "accessor": 1,
       },
+      "colorMapping": undefined,
+      "isPreview": false,
       "maxFontSize": 72,
       "metric": Object {
         "accessor": 0,
@@ -125,6 +127,8 @@ Object {
         },
         "type": "vis_dimension",
       },
+      "colorMapping": undefined,
+      "isPreview": false,
       "maxFontSize": 72,
       "metric": Object {
         "accessor": Object {

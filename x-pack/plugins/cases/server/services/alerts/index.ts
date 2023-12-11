@@ -14,7 +14,7 @@ import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technica
 import type { MgetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common/types/domain';
 import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import type { AlertInfo } from '../../common/types';
@@ -43,7 +43,7 @@ export class AlertService {
       const { ids, indices } = AlertService.getUniqueIdsIndices(alerts);
 
       const builtAggs = aggregationBuilders.reduce((acc, agg) => {
-        return { ...acc, ...agg.build() };
+        return Object.assign(acc, agg.build());
       }, {});
 
       const res = await this.scopedClusterClient.search({

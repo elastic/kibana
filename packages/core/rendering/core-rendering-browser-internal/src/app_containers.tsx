@@ -17,7 +17,10 @@ export const AppWrapper: React.FunctionComponent<{
 }> = ({ chromeVisible$, children }) => {
   const visible = useObservable(chromeVisible$);
   return (
-    <div className={classNames(APP_WRAPPER_CLASS, { 'kbnAppWrapper--hiddenChrome': !visible })}>
+    <div
+      className={classNames(APP_WRAPPER_CLASS, { 'kbnAppWrapper--hiddenChrome': !visible })}
+      data-test-subj={`kbnAppWrapper ${visible ? 'visible' : 'hidden'}Chrome`}
+    >
       {children}
     </div>
   );

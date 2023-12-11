@@ -26,8 +26,33 @@ Object {
 }
 `;
 
+exports[`IndexPattern toMinimalSpec can exclude fields 1`] = `
+Object {
+  "allowHidden": false,
+  "allowNoIndex": false,
+  "fieldAttrs": undefined,
+  "fieldFormats": Object {},
+  "id": "test-pattern",
+  "name": "Name",
+  "runtimeFieldMap": Object {
+    "runtime_field": Object {
+      "script": Object {
+        "source": "emit('hello world')",
+      },
+      "type": "keyword",
+    },
+  },
+  "sourceFilters": Array [],
+  "timeFieldName": "time",
+  "title": "title",
+  "type": "index-pattern",
+  "version": "2",
+}
+`;
+
 exports[`IndexPattern toSpec can optionally exclude fields 1`] = `
 Object {
+  "allowHidden": false,
   "allowNoIndex": false,
   "fieldAttrs": Object {},
   "fieldFormats": Object {},
@@ -51,8 +76,22 @@ Object {
 
 exports[`IndexPattern toSpec should match snapshot 1`] = `
 Object {
+  "allowHidden": false,
   "allowNoIndex": false,
-  "fieldAttrs": Object {},
+  "fieldAttrs": Object {
+    "@timestamp": Object {
+      "count": 30,
+    },
+    "bytes": Object {
+      "count": 10,
+    },
+    "ssl": Object {
+      "count": 20,
+    },
+    "time": Object {
+      "count": 30,
+    },
+  },
   "fieldFormats": Object {},
   "fields": Object {
     "@tags": Object {
@@ -197,6 +236,14 @@ Object {
     },
     "custom_user_field": Object {
       "aggregatable": true,
+      "conflictDescriptions": Object {
+        "keyword": Array [
+          "index_a",
+        ],
+        "long": Array [
+          "index_b",
+        ],
+      },
       "count": 0,
       "esTypes": Array [
         "conflict",

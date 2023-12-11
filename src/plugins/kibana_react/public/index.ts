@@ -13,15 +13,13 @@ export {
   YamlLang,
   HandlebarsLang,
   HJsonLang,
+  GrokLang,
   CodeEditor,
   CodeEditorField,
 } from './code_editor';
 
 export type { UrlTemplateEditorVariable, UrlTemplateEditorProps } from './url_template_editor';
 export { UrlTemplateEditor } from './url_template_editor';
-
-export type { ExitFullScreenButtonProps } from './exit_full_screen_button';
-export { ExitFullScreenButton } from './exit_full_screen_button';
 
 export type { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './context';
 export {
@@ -46,26 +44,16 @@ export {
 
 export { useExecutionContext } from './use_execution_context';
 
-export type { ToolbarButtonProps } from './toolbar_button';
-/** @deprecated ToolbarButton - use `ToolbarButton` from `@kbn/shared-ux-button-toolbar` */
-export { POSITIONS, WEIGHTS, TOOLBAR_BUTTON_SIZES, ToolbarButton } from './toolbar_button';
-
-export { Route } from './router';
-
 export { reactRouterNavigate, reactRouterOnClickHandler } from './react_router_navigate';
 
 export type {
-  KibanaPageTemplateProps,
   NoDataPageActions,
   NoDataPageActionsProps,
   NoDataPageProps,
   ElasticAgentCardProps,
 } from './page_template';
 export {
-  KibanaPageTemplate,
   KibanaPageTemplateSolutionNavAvatar,
-  NO_DATA_PAGE_MAX_WIDTH,
-  NO_DATA_PAGE_TEMPLATE_PROPS,
   NO_DATA_RECOMMENDED,
   NoDataPage,
   ElasticAgentCard,
@@ -81,13 +69,11 @@ export { createNotifications } from './notifications';
 /** @deprecated use `Markdown` from `@kbn/shared-ux-markdown` */
 export { Markdown, MarkdownSimple } from './markdown';
 
-export { toMountPoint, MountPointPortal } from './util';
+export { toMountPoint } from './util';
 export type { ToMountPointOptions } from './util';
 
-/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-link-redirect-app` */
-export { RedirectAppLinks } from './app_links';
-
-export { wrapWithTheme, KibanaThemeProvider } from './theme';
+/** @deprecated Use `KibanaThemeProvider`, `wrapWithTheme` from `@kbn/react-kibana-context-theme`  */
+export { KibanaThemeProvider, wrapWithTheme, type KibanaThemeProviderProps } from './theme';
 
 /** dummy plugin, we just want kibanaReact to have its own bundle */
 export function plugin() {

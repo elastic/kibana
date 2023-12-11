@@ -9,10 +9,10 @@ import React from 'react';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 import { FieldRuleEditor } from './field_rule_editor';
 import { RuleGroupEditor } from './rule_group_editor';
 import { VisualRuleEditor } from './visual_rule_editor';
+import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 
 describe('VisualRuleEditor', () => {
   it('renders an add rule prompt when no rules are defined', () => {

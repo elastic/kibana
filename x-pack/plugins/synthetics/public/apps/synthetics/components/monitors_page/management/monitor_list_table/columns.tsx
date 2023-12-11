@@ -9,7 +9,8 @@ import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import {
   isStatusEnabled,
@@ -32,7 +33,6 @@ import {
   SyntheticsMonitorSchedule,
 } from '../../../../../../../common/runtime_types';
 
-import { canUpdatePrivateMonitor, useFleetPermissions } from '../../../../hooks';
 import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
 import { getFrequencyLabel } from './labels';
 import { MonitorEnabled } from './monitor_enabled';
@@ -51,10 +51,18 @@ export function useMonitorListColumns({
   const canEditSynthetics = useCanEditSynthetics();
 
   const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
-  const { canSaveIntegrations } = useFleetPermissions();
 
   const isActionLoading = (fields: EncryptedSyntheticsSavedMonitor) => {
     return alertStatus(fields[ConfigKey.CONFIG_ID]) === FETCH_STATUS.LOADING;
+  };
+
+  const canUsePublicLocations =
+    useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
+
+  const isPublicLocationsAllowed = (fields: EncryptedSyntheticsSavedMonitor) => {
+    const publicLocations = fields.locations.some((loc) => loc.isServiceManaged);
+
+    return publicLocations ? Boolean(canUsePublicLocations) : true;
   };
 
   const columns: Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> = [
@@ -123,7 +131,7 @@ export function useMonitorListColumns({
           <MonitorLocations
             monitorId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
             locations={locations}
-            status={overviewStatus}
+            overviewStatus={overviewStatus}
           />
         ) : null,
     },
@@ -170,7 +178,7 @@ export function useMonitorListColumns({
           name: (fields) => (
             <NoPermissionsTooltip
               canEditSynthetics={canEditSynthetics}
-              canUpdatePrivateMonitor={canUpdatePrivateMonitor(fields, canSaveIntegrations)}
+              canUsePublicLocations={isPublicLocationsAllowed(fields)}
             >
               {labels.EDIT_LABEL}
             </NoPermissionsTooltip>
@@ -179,9 +187,7 @@ export function useMonitorListColumns({
           icon: 'pencil' as const,
           type: 'icon' as const,
           enabled: (fields) =>
-            canEditSynthetics &&
-            !isActionLoading(fields) &&
-            canUpdatePrivateMonitor(fields, canSaveIntegrations),
+            canEditSynthetics && !isActionLoading(fields) && isPublicLocationsAllowed(fields),
           onClick: (fields) => {
             history.push({
               pathname: `/edit-monitor/${fields[ConfigKey.CONFIG_ID]}`,
@@ -194,7 +200,7 @@ export function useMonitorListColumns({
           name: (fields) => (
             <NoPermissionsTooltip
               canEditSynthetics={canEditSynthetics}
-              canUpdatePrivateMonitor={canUpdatePrivateMonitor(fields, canSaveIntegrations)}
+              canUsePublicLocations={isPublicLocationsAllowed(fields)}
             >
               {labels.DELETE_LABEL}
             </NoPermissionsTooltip>
@@ -204,9 +210,7 @@ export function useMonitorListColumns({
           type: 'icon' as const,
           color: 'danger' as const,
           enabled: (fields) =>
-            canEditSynthetics &&
-            !isActionLoading(fields) &&
-            canUpdatePrivateMonitor(fields, canSaveIntegrations),
+            canEditSynthetics && !isActionLoading(fields) && isPublicLocationsAllowed(fields),
           onClick: (fields) => {
             setMonitorPendingDeletion(fields);
           },
@@ -221,7 +225,8 @@ export function useMonitorListColumns({
             isStatusEnabled(fields[ConfigKey.ALERT_CONFIG]) ? 'bellSlash' : 'bell',
           type: 'icon' as const,
           color: 'danger' as const,
-          enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
+          enabled: (fields) =>
+            canEditSynthetics && !isActionLoading(fields) && isPublicLocationsAllowed(fields),
           onClick: (fields) => {
             updateAlertEnabledState({
               monitor: {
@@ -252,8 +257,9 @@ export function useMonitorListColumns({
         defaultMessage: 'Actions',
       }),
       render: () => (
-        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics} canUpdatePrivateMonitor={true}>
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
           <EuiButtonIcon
+            data-test-subj="syntheticsUseMonitorListColumnsButton"
             iconType="boxesHorizontal"
             isDisabled={true}
             aria-label={CANNOT_PERFORM_ACTION_SYNTHETICS}

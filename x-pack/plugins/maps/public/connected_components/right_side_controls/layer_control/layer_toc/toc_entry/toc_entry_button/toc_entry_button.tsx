@@ -6,10 +6,10 @@
  */
 
 import React, { Component, Fragment, ReactNode } from 'react';
-
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { EuiButtonEmpty, EuiIcon, EuiToolTip, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ILayer } from '../../../../../../classes/layers/layer';
+import { type ILayer, INCOMPLETE_RESULTS_WARNING } from '../../../../../../classes/layers/layer';
 import { IVectorSource } from '../../../../../../classes/sources/vector_source';
 import { isLayerGroup } from '../../../../../../classes/layers/layer_group';
 
@@ -18,13 +18,8 @@ interface Footnote {
   message?: string | null;
 }
 
-interface IconAndTooltipContent {
-  icon?: ReactNode;
-  tooltipContent?: string | null;
-  footnotes: Footnote[];
-}
-
 export interface ReduxStateProps {
+  inspectorAdapters: Adapters;
   isUsingSearch: boolean;
   zoom: number;
 }
@@ -69,22 +64,35 @@ export class TOCEntryButton extends Component<Props, State> {
     }
   }
 
-  getIconAndTooltipContent(): IconAndTooltipContent {
-    if (this.props.layer.hasErrors()) {
-      return {
-        icon: (
-          <EuiIcon
-            aria-label={i18n.translate('xpack.maps.layer.loadWarningAriaLabel', {
-              defaultMessage: 'Load warning',
-            })}
-            size="m"
-            type="warning"
-            color="warning"
-          />
-        ),
-        tooltipContent: this.props.layer.getErrors(),
-        footnotes: [],
-      };
+  getIconAndTooltipContent(): {
+    icon?: ReactNode;
+    tooltipContent?: ReactNode;
+    footnotes: Footnote[];
+    postScript?: string;
+  } {
+    const errors = this.props.layer.getErrors(this.props.inspectorAdapters);
+    if (errors.length) {
+      const errorIcon = (
+        <EuiIcon
+          size="m"
+          type="error"
+          color="danger"
+          data-test-subj={`layerTocErrorIcon${this.props.escapedDisplayName}`}
+        />
+      );
+      return isLayerGroup(this.props.layer)
+        ? {
+            icon: errorIcon,
+            footnotes: [],
+            postScript: errors[0].title,
+          }
+        : {
+            icon: errorIcon,
+            tooltipContent: this.props.layer
+              .getErrors(this.props.inspectorAdapters)
+              .map(({ title }) => <div key={title}>{title}</div>),
+            footnotes: [],
+          };
     }
 
     if (!this.props.layer.isVisible()) {
@@ -110,7 +118,7 @@ export class TOCEntryButton extends Component<Props, State> {
       };
     }
 
-    if (this.props.layer.isLayerLoading()) {
+    if (this.props.layer.isLayerLoading(this.props.zoom)) {
       return {
         icon: <EuiLoadingSpinner size="m" />,
         tooltipContent: '',
@@ -118,10 +126,26 @@ export class TOCEntryButton extends Component<Props, State> {
       };
     }
 
-    const { icon, tooltipContent } = this.props.layer.getLayerIcon(true);
+    const { icon: layerIcon, tooltipContent } = this.props.layer.getLayerIcon(true);
+    const warnings = this.props.layer.getWarnings();
+    const icon = warnings.length ? (
+      <EuiIcon
+        size="m"
+        type="warning"
+        color="warning"
+        data-test-subj={`layerTocWarningIcon${this.props.escapedDisplayName}`}
+      />
+    ) : (
+      layerIcon
+    );
 
     if (isLayerGroup(this.props.layer)) {
-      return { icon, tooltipContent, footnotes: [] };
+      return {
+        icon,
+        tooltipContent,
+        footnotes: [],
+        postScript: warnings.length ? warnings[0].title : undefined,
+      };
     }
 
     const footnotes = [];
@@ -158,11 +182,12 @@ export class TOCEntryButton extends Component<Props, State> {
       icon,
       tooltipContent,
       footnotes,
+      postScript: warnings.length ? INCOMPLETE_RESULTS_WARNING : undefined,
     };
   }
 
   render() {
-    const { icon, tooltipContent, footnotes } = this.getIconAndTooltipContent();
+    const { icon, tooltipContent, footnotes, postScript } = this.getIconAndTooltipContent();
 
     const footnoteIcons = footnotes.map((footnote, index) => {
       return (
@@ -189,6 +214,9 @@ export class TOCEntryButton extends Component<Props, State> {
           <Fragment>
             {tooltipContent}
             {footnoteTooltipContent}
+            {postScript ? (
+              <p style={{ fontStyle: 'italic', marginTop: '16px' }}>{postScript}</p>
+            ) : null}
           </Fragment>
         }
         data-test-subj="layerTocTooltip"

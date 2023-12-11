@@ -1,11 +1,11 @@
 post:
   summary: Enables an SLO
-  operationId: enableSlo
+  operationId: enableSloOp
   description: >
     You must have the `write` privileges for the **SLOs** feature in the
     **Observability** section of the Kibana feature privileges.
   tags:
-    - slos
+    - slo
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: ../components/parameters/space_id.yaml
@@ -15,13 +15,25 @@ post:
       description: Successful request
     '400':
       description: Bad request
-      content: 
+      content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/400_response.yaml'
     '401':
       description: Unauthorized response
-      content: 
+      content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
+    '404':
+      description: Not found response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'

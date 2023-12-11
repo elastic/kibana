@@ -18,6 +18,9 @@ import {
 } from '@kbn/maps-plugin/common';
 import { AbstractSourceDescriptor, MapExtent } from '@kbn/maps-plugin/common/descriptor_types';
 import { ITooltipProperty, GEOJSON_FEATURE_ID_PROPERTY_NAME } from '@kbn/maps-plugin/public';
+import { DataFilters } from '@kbn/maps-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { GeoJsonWithMeta } from '@kbn/maps-plugin/public';
 import type { IField } from '@kbn/maps-plugin/public';
@@ -30,6 +33,7 @@ import {
   AnomalySourceTooltipProperty,
   ANOMALY_SOURCE_FIELDS,
 } from './anomaly_source_field';
+import { ML_PAGES } from '../../common/constants/locator';
 import { getResultsForJobId, ML_ANOMALY_LAYERS, MlAnomalyLayersType } from './util';
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
 import type { MlApiServices } from '../application/services/ml_api_service';
@@ -43,7 +47,7 @@ export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
 
 export class AnomalySource implements IVectorSource {
   static mlResultsService: MlApiServices['results'];
-  static canGetJobs: boolean;
+  static mlLocator?: LocatorPublic<SerializableRecord>;
 
   static createDescriptor(descriptor: Partial<AnomalySourceDescriptor>) {
     if (typeof descriptor.jobId !== 'string') {
@@ -177,17 +181,14 @@ export class AnomalySource implements IVectorSource {
     return false;
   }
 
-  showJoinEditor(): boolean {
-    // Ignore, only show if joins are enabled for current configuration
+  supportsJoins(): boolean {
     return false;
   }
 
-  getFieldNames(): string[] {
-    return Object.keys(ANOMALY_SOURCE_FIELDS);
-  }
-
   async getFields(): Promise<IField[]> {
-    return this.getFieldNames().map((field) => new AnomalySourceField({ source: this, field }));
+    return Object.keys(ANOMALY_SOURCE_FIELDS).map(
+      (field) => new AnomalySourceField({ source: this, field })
+    );
   }
 
   getGeoGridPrecision(zoom: number): number {
@@ -198,13 +199,28 @@ export class AnomalySource implements IVectorSource {
     return false;
   }
 
-  async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
+  async getImmutableProperties(dataFilters: DataFilters): Promise<ImmutableSourceProperty[]> {
+    let explorerLink: string | undefined;
+
+    try {
+      explorerLink = await AnomalySource.mlLocator?.getUrl({
+        page: ML_PAGES.ANOMALY_EXPLORER,
+        pageState: {
+          jobIds: [this._descriptor.jobId],
+          timeRange: dataFilters.timeFilters,
+        },
+      });
+    } catch (error) {
+      // ignore error if unable to get link
+    }
+
     return [
       {
         label: i18n.translate('xpack.ml.maps.anomalySourcePropLabel', {
           defaultMessage: 'Job Id',
         }),
         value: this._descriptor.jobId,
+        ...(explorerLink ? { link: explorerLink } : {}),
       },
     ];
   }

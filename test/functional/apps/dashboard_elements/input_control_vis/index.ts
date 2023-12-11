@@ -8,8 +8,26 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
+  const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+
   describe('input controls', function () {
+    before(async () => {
+      await browser.setWindowSize(1280, 800);
+      await kibanaServer.savedObjects.cleanStandardList();
+
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/long_window_logstash');
+    });
+
     loadTestFile(require.resolve('./input_control_options'));
     loadTestFile(require.resolve('./dynamic_options'));
     loadTestFile(require.resolve('./chained_controls'));

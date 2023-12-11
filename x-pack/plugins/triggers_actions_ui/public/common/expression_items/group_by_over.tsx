@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -17,6 +17,8 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiFieldNumber,
+  EuiComboBoxOptionOption,
+  EuiComboBox,
 } from '@elastic/eui';
 import { builtInGroupByTypes } from '../constants';
 import { FieldOption, GroupByType } from '../types';
@@ -24,18 +26,17 @@ import { ClosablePopoverTitle } from './components';
 import { IErrorObject } from '../../types';
 
 interface GroupByOverFieldOption {
-  text: string;
-  value: string;
+  label: string;
 }
 export interface GroupByExpressionProps {
   groupBy: string;
   errors: IErrorObject;
   onChangeSelectedTermSize: (selectedTermSize?: number) => void;
-  onChangeSelectedTermField: (selectedTermField?: string) => void;
+  onChangeSelectedTermField: (selectedTermField?: string | string[]) => void;
   onChangeSelectedGroupBy: (selectedGroupBy?: string) => void;
   fields: FieldOption[];
   termSize?: number;
-  termField?: string;
+  termField?: string | string[];
   customGroupByTypes?: {
     [key: string]: GroupByType;
   };
@@ -53,6 +54,7 @@ export interface GroupByExpressionProps {
     | 'rightUp'
     | 'rightDown';
   display?: 'fullWidth' | 'inline';
+  canSelectMultiTerms?: boolean;
 }
 
 export const GroupByExpression = ({
@@ -67,45 +69,55 @@ export const GroupByExpression = ({
   termField,
   customGroupByTypes,
   popupPosition,
+  canSelectMultiTerms,
 }: GroupByExpressionProps) => {
   const groupByTypes = customGroupByTypes ?? builtInGroupByTypes;
   const [groupByPopoverOpen, setGroupByPopoverOpen] = useState(false);
   const MIN_TERM_SIZE = 1;
   const MAX_TERM_SIZE = 1000;
-  const firstFieldOption: GroupByOverFieldOption = {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.common.expressionItems.groupByType.timeFieldOptionLabel',
-      {
-        defaultMessage: 'Select a field',
-      }
-    ),
-    value: '',
-  };
 
-  const availableFieldOptions: GroupByOverFieldOption[] = fields.reduce(
-    (options: GroupByOverFieldOption[], field: FieldOption) => {
-      if (groupByTypes[groupBy].validNormalizedTypes.includes(field.normalizedType)) {
-        options.push({
-          text: field.name,
-          value: field.name,
-        });
-      }
-      return options;
-    },
-    [firstFieldOption]
+  const availableFieldOptions: GroupByOverFieldOption[] = useMemo(
+    () =>
+      fields.reduce((options: GroupByOverFieldOption[], field: FieldOption) => {
+        if (groupByTypes[groupBy].validNormalizedTypes.includes(field.normalizedType)) {
+          options.push({ label: field.name });
+        }
+        return options;
+      }, []),
+    [groupByTypes, fields, groupBy]
   );
+
+  const initialTermFieldOptions = useMemo(() => {
+    let initialFields: string[] = [];
+
+    if (!!termField) {
+      initialFields = Array.isArray(termField) ? termField : [termField];
+    }
+    return initialFields.map((field: string) => ({
+      label: field,
+    }));
+  }, [termField]);
+
+  const [selectedTermsFieldsOptions, setSelectedTermsFieldsOptions] =
+    useState<GroupByOverFieldOption[]>(initialTermFieldOptions);
+
+  useEffect(() => {
+    if (groupBy === builtInGroupByTypes.all.value && selectedTermsFieldsOptions.length > 0) {
+      setSelectedTermsFieldsOptions([]);
+      onChangeSelectedTermField(undefined);
+    }
+  }, [selectedTermsFieldsOptions, groupBy, onChangeSelectedTermField]);
 
   useEffect(() => {
     // if current field set doesn't contain selected field, clear selection
-    if (
-      termField &&
-      termField.length > 0 &&
-      fields.length > 0 &&
-      !fields.find((field: FieldOption) => field.name === termField)
-    ) {
-      onChangeSelectedTermField('');
+    const hasUnknownField = selectedTermsFieldsOptions.some(
+      (fieldOption) => !fields.some((field) => field.name === fieldOption.label)
+    );
+    if (hasUnknownField) {
+      setSelectedTermsFieldsOptions([]);
+      onChangeSelectedTermField(undefined);
     }
-  }, [termField, fields, onChangeSelectedTermField]);
+  }, [selectedTermsFieldsOptions, fields, onChangeSelectedTermField]);
 
   return (
     <EuiPopover
@@ -137,7 +149,7 @@ export const GroupByExpression = ({
             setGroupByPopoverOpen(true);
           }}
           display={display === 'inline' ? 'inline' : 'columns'}
-          isInvalid={!(groupBy === 'all' || (termSize && termField))}
+          isInvalid={!(groupBy === 'all' || (termSize && termField && termField.length > 0))}
         />
       }
       isOpen={groupByPopoverOpen}
@@ -157,7 +169,7 @@ export const GroupByExpression = ({
           />
         </ClosablePopoverTitle>
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={1}>
             <EuiSelect
               data-test-subj="overExpressionSelect"
               value={groupBy}
@@ -182,7 +194,7 @@ export const GroupByExpression = ({
 
           {groupByTypes[groupBy].sizeRequired ? (
             <>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={1}>
                 <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
                   <EuiFieldNumber
                     data-test-subj="fieldsNumberSelect"
@@ -201,24 +213,33 @@ export const GroupByExpression = ({
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  isInvalid={errors.termField.length > 0 && termField !== undefined}
-                  error={errors.termField}
-                >
-                  <EuiSelect
+              <EuiFlexItem grow={2}>
+                <EuiFormRow isInvalid={errors.termField.length > 0} error={errors.termField}>
+                  <EuiComboBox
+                    singleSelection={canSelectMultiTerms ? false : { asPlainText: true }}
+                    placeholder={i18n.translate(
+                      'xpack.triggersActionsUI.common.expressionItems.groupByType.timeFieldOptionLabel',
+                      {
+                        defaultMessage: 'Select a field',
+                      }
+                    )}
                     data-test-subj="fieldsExpressionSelect"
-                    value={termField}
-                    isInvalid={errors.termField.length > 0 && termField !== undefined}
-                    onChange={(e) => {
-                      onChangeSelectedTermField(e.target.value);
+                    isInvalid={errors.termField.length > 0}
+                    selectedOptions={selectedTermsFieldsOptions}
+                    onChange={(
+                      selectedOptions: Array<EuiComboBoxOptionOption<GroupByOverFieldOption>>
+                    ) => {
+                      const selectedTermFields = selectedOptions.map((option) => option.label);
+
+                      const termsToSave =
+                        Array.isArray(selectedTermFields) && selectedTermFields.length > 1
+                          ? selectedTermFields
+                          : selectedTermFields[0];
+
+                      onChangeSelectedTermField(termsToSave);
+                      setSelectedTermsFieldsOptions(selectedOptions);
                     }}
                     options={availableFieldOptions}
-                    onBlur={() => {
-                      if (termField === undefined) {
-                        onChangeSelectedTermField('');
-                      }
-                    }}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

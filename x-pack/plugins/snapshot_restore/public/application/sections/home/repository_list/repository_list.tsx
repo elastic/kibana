@@ -8,11 +8,7 @@
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
-import {
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiButton,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -102,48 +98,41 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     );
   } else if (repositories && repositories.length === 0) {
     content = (
-      <EuiPageContent
-        hasShadow={false}
-        paddingSize="none"
-        verticalPosition="center"
-        horizontalPosition="center"
-      >
-        <EuiEmptyPrompt
-          iconType="managementApp"
-          title={
-            <h1>
+      <EuiPageTemplate.EmptyPrompt
+        iconType="managementApp"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryList.emptyPromptTitle"
+              defaultMessage="Register your first repository"
+            />
+          </h1>
+        }
+        body={
+          <Fragment>
+            <p>
               <FormattedMessage
-                id="xpack.snapshotRestore.repositoryList.emptyPromptTitle"
-                defaultMessage="Register your first repository"
+                id="xpack.snapshotRestore.repositoryList.emptyPromptDescription"
+                defaultMessage="Create a place where your snapshots will live."
               />
-            </h1>
-          }
-          body={
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryList.emptyPromptDescription"
-                  defaultMessage="Create a place where your snapshots will live."
-                />
-              </p>
-            </Fragment>
-          }
-          actions={
-            <EuiButton
-              {...reactRouterNavigate(history, linkToAddRepository())}
-              fill
-              iconType="plusInCircle"
-              data-test-subj="registerRepositoryButton"
-            >
-              <FormattedMessage
-                id="xpack.snapshotRestore.addRepositoryButtonLabel"
-                defaultMessage="Register a repository"
-              />
-            </EuiButton>
-          }
-          data-test-subj="emptyPrompt"
-        />
-      </EuiPageContent>
+            </p>
+          </Fragment>
+        }
+        actions={
+          <EuiButton
+            {...reactRouterNavigate(history, linkToAddRepository())}
+            fill
+            iconType="plusInCircle"
+            data-test-subj="registerRepositoryButton"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.addRepositoryButtonLabel"
+              defaultMessage="Register a repository"
+            />
+          </EuiButton>
+        }
+        data-test-subj="emptyPrompt"
+      />
     );
   } else {
     content = (

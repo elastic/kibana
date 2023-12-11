@@ -22,46 +22,46 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
-import { mlJobService } from '../../services/job_service';
-import { getDataViewIdFromName } from '../../util/index_utils';
-import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
 import {
-  formatHumanReadableDateTimeSeconds,
-  timeFormatter,
-} from '../../../../common/util/date_utils';
+  isCategorizationAnomaly,
+  isRuleSupported,
+  type MlCustomUrlAnomalyRecordDoc,
+  type MlKibanaUrlConfig,
+  type MlAnomaliesTableRecord,
+  MLCATEGORY,
+} from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions';
+import { PLUGIN_ID } from '../../../../common/constants/app';
+import { mlJobService } from '../../services/job_service';
+import { findMessageField, getDataViewIdFromName } from '../../util/index_utils';
+import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { ml } from '../../services/ml_api_service';
 import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
-// @ts-ignore
 import {
   escapeDoubleQuotes,
   getDateFormatTz,
   SourceIndicesWithGeoFields,
 } from '../../explorer/explorer_utils';
-import { isCategorizationAnomaly, isRuleSupported } from '../../../../common/util/anomaly_utils';
-import { checkPermission } from '../../capabilities/check_capabilities';
-import type {
-  CustomUrlAnomalyRecordDoc,
-  KibanaUrlConfig,
-} from '../../../../common/types/custom_urls';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useMlKibana } from '../../contexts/kibana';
-// @ts-ignore
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
-import type { AnomaliesTableRecord } from '../../../../common/types/anomalies';
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
 import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
 interface LinksMenuProps {
-  anomaly: AnomaliesTableRecord;
+  anomaly: MlAnomaliesTableRecord;
   bounds: TimeRangeBounds;
   showMapsLink: boolean;
   showViewSeriesLink: boolean;
   isAggregatedData: boolean;
   interval: 'day' | 'hour' | 'second';
-  showRuleEditorFlyout: (anomaly: AnomaliesTableRecord) => void;
+  showRuleEditorFlyout: (anomaly: MlAnomaliesTableRecord) => void;
   onItemClick: () => void;
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
 }
@@ -70,20 +70,25 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   const [openInDiscoverUrl, setOpenInDiscoverUrl] = useState<string | undefined>();
   const [discoverUrlError, setDiscoverUrlError] = useState<string | undefined>();
 
+  const [messageField, setMessageField] = useState<{
+    dataView: DataView;
+    field: DataViewField;
+  } | null>(null);
+
   const isCategorizationAnomalyRecord = isCategorizationAnomaly(props.anomaly);
 
   const closePopover = props.onItemClick;
 
   const kibana = useMlKibana();
   const {
-    services: { data, share, application },
+    services: { data, share, application, uiActions },
   } = kibana;
 
   const job = useMemo(() => {
     return mlJobService.getJob(props.anomaly.jobId);
   }, [props.anomaly.jobId]);
 
-  const getAnomaliesMapsLink = async (anomaly: AnomaliesTableRecord) => {
+  const getAnomaliesMapsLink = async (anomaly: MlAnomaliesTableRecord) => {
     const index = job.datafeed_config.indices[0];
     const dataViewId = await getDataViewIdFromName(index);
 
@@ -121,7 +126,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   };
 
   const getAnomalySourceMapsLink = async (
-    anomaly: AnomaliesTableRecord,
+    anomaly: MlAnomaliesTableRecord,
     sourceIndicesWithGeoFields: SourceIndicesWithGeoFields
   ) => {
     const index = job.datafeed_config.indices[0];
@@ -199,7 +204,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     const getDataViewId = async () => {
       const index = job.datafeed_config.indices[0];
 
-      const dataViewId = await getDataViewIdFromName(index);
+      const dataViewId = await getDataViewIdFromName(index, job);
 
       // If data view doesn't exist for some reasons
       if (!dataViewId && !unmounted) {
@@ -215,6 +220,22 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       }
       return dataViewId;
     };
+
+    (async () => {
+      const index = job.datafeed_config.indices[0];
+      const dataView = (await data.dataViews.find(index)).find(
+        (dv) => dv.getIndexPattern() === index
+      );
+
+      if (dataView === undefined) {
+        return;
+      }
+
+      const field = findMessageField(dataView);
+      if (field !== null) {
+        setMessageField(field);
+      }
+    })();
 
     const generateDiscoverUrl = async () => {
       const interval = props.interval;
@@ -287,7 +308,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(props.anomaly)]);
 
-  const openCustomUrl = (customUrl: KibanaUrlConfig) => {
+  const openCustomUrl = (customUrl: MlKibanaUrlConfig) => {
     const { anomaly, interval, isAggregatedData } = props;
 
     // eslint-disable-next-line no-console
@@ -295,7 +316,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
     // If url_value contains $earliest$ and $latest$ tokens, add in times to the source record.
     // Create a copy of the record as we are adding properties into it.
-    const record = cloneDeep(anomaly.source) as CustomUrlAnomalyRecordDoc;
+    const record = cloneDeep(anomaly.source) as MlCustomUrlAnomalyRecordDoc;
     const timestamp = record.timestamp;
     const configuredUrlValue = customUrl.url_value;
     const timeRangeInterval =
@@ -376,7 +397,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     } else {
       // Replace any tokens in the configured url_value with values from the source record,
       // and then open link in a new tab/window.
-      const urlPath = getUrlForRecord(customUrl, record as CustomUrlAnomalyRecordDoc);
+      const urlPath = getUrlForRecord(customUrl, record as MlCustomUrlAnomalyRecordDoc);
       openCustomUrlWindow(urlPath, customUrl, basePath);
     }
   };
@@ -619,7 +640,8 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   };
 
   const { anomaly, showViewSeriesLink } = props;
-  const canConfigureRules = isRuleSupported(anomaly.source) && checkPermission('canUpdateJob');
+  const canUpdateJob = usePermissionCheck('canUpdateJob');
+  const canConfigureRules = isRuleSupported(anomaly.source) && canUpdateJob;
 
   const contextMenuItems = useMemo(() => {
     const items = [];
@@ -781,6 +803,43 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         </EuiContextMenuItem>
       );
     }
+
+    if (messageField !== null) {
+      items.push(
+        <EuiContextMenuItem
+          key="create_rule"
+          icon="machineLearningApp"
+          onClick={() => {
+            closePopover();
+            const additionalField = getAdditionalField(anomaly);
+            uiActions.getTrigger(CATEGORIZE_FIELD_TRIGGER).exec({
+              dataView: messageField.dataView,
+              field: messageField.field,
+              originatingApp: PLUGIN_ID,
+              additionalFilter: {
+                from: anomaly.source.timestamp,
+                to: anomaly.source.timestamp + anomaly.source.bucket_span * 1000,
+                ...(additionalField !== null
+                  ? {
+                      field: {
+                        name: additionalField.name,
+                        value: additionalField.value,
+                      },
+                    }
+                  : {}),
+              },
+            });
+          }}
+          data-test-subj="mlAnomaliesListRowActionPatternAnalysisButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.patternAnalysisLabel"
+            defaultMessage="Run pattern analysis"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
     return items;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -831,3 +890,23 @@ export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
     </div>
   );
 };
+
+function getAdditionalField(anomaly: MlAnomaliesTableRecord) {
+  if (anomaly.entityName === undefined || anomaly.entityValue === undefined) {
+    return null;
+  }
+
+  if (anomaly.entityName === MLCATEGORY) {
+    if (
+      anomaly.source.partition_field_name === undefined ||
+      anomaly.source.partition_field_value === undefined
+    ) {
+      return null;
+    }
+    return {
+      name: anomaly.source.partition_field_name,
+      value: anomaly.source.partition_field_value,
+    };
+  }
+  return { name: anomaly.entityName, value: anomaly.entityValue };
+}

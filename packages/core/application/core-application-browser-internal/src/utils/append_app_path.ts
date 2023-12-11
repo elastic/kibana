@@ -8,7 +8,7 @@
 
 import { removeSlashes } from './remove_slashes';
 
-export const appendAppPath = (appBasePath: string, path: string = '') => {
+export const appendAppPath = (appBasePath = '', path: string = '') => {
   // Only prepend slash if not a hash or query path
   path = path === '' || path.startsWith('#') || path.startsWith('?') ? path : `/${path}`;
   // Do not remove trailing slash when in hashbang or basePath

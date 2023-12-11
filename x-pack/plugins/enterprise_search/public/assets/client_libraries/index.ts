@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import curl from './curl.svg';
 import dotnet from './dotnet.svg';
 import go from './go.svg';
 import java from './java.svg';
@@ -16,6 +17,7 @@ import ruby from './ruby.svg';
 import rust from './rust.svg';
 
 export const icons = {
+  curl,
   dotnet,
   go,
   java,

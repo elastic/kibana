@@ -33,7 +33,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
 import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
@@ -44,6 +44,7 @@ import {
   withCloseFilterEditorConfirmModal,
   WithCloseFilterEditorConfirmModalProps,
 } from '../filter_editor';
+import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps {
   id: string;
@@ -54,10 +55,13 @@ export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps 
   onRemove: () => void;
   intl: InjectedIntl;
   uiSettings: IUiSettingsClient;
+  docLinks: DocLinksStart;
   hiddenPanelOptions?: FilterPanelOption[];
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
   readOnly?: boolean;
+  suggestionsAbstraction?: SuggestionsAbstraction;
+  filtersCount?: number;
 }
 
 type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
@@ -77,14 +81,14 @@ export type FilterLabelStatus =
   | typeof FILTER_ITEM_WARNING
   | typeof FILTER_ITEM_ERROR;
 
-export const FILTER_EDITOR_WIDTH = 960;
+export const FILTER_EDITOR_WIDTH = 1200;
 
 function FilterItemComponent(props: FilterItemProps) {
   const { onCloseFilterPopover, onLocalFilterCreate, onLocalFilterUpdate } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const [renderedComponent, setRenderedComponent] = useState('menu');
-  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false } = props;
+  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false, docLinks } = props;
 
   const closePopover = useCallback(() => {
     onCloseFilterPopover([() => setIsPopoverOpen(false)]);
@@ -393,6 +397,9 @@ function FilterItemComponent(props: FilterItemProps) {
                 onCancel={() => setIsPopoverOpen(false)}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
                 filtersForSuggestions={props.filtersForSuggestions}
+                suggestionsAbstraction={props.suggestionsAbstraction}
+                docLinks={docLinks}
+                filtersCount={props.filtersCount}
               />
             </div>,
           ]}

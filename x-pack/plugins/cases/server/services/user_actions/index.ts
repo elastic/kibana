@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsFindResponse, SavedObjectsRawDoc } from '@kbn/core/server';
+import type {
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+  SavedObjectsRawDoc,
+} from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
-import type {
-  CaseUserActionDeprecatedResponse,
-  CaseUserActionInjectedAttributes,
-} from '../../../common/api';
-import { ActionTypes } from '../../../common/api';
+import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
+import { UserActionTypes } from '../../../common/types/domain';
+import { decodeOrThrow } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -26,6 +28,7 @@ import type {
   ConnectorActivityAggsResult,
   ConnectorFieldsBeforePushAggsResult,
   GetUsersResponse,
+  MultipleCasesUserActionsTotalAggsResult,
   ParticipantsAggsResult,
   PushInfo,
   PushTimeFrameInfo,
@@ -38,7 +41,12 @@ import { defaultSortField } from '../../common/utils';
 import { UserActionPersister } from './operations/create';
 import { UserActionFinder } from './operations/find';
 import { transformToExternalModel, legacyTransformFindResponseToExternalModel } from './transform';
-import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
+import type {
+  UserActionPersistedAttributes,
+  UserActionSavedObjectTransformed,
+} from '../../common/types/user_actions';
+import { UserActionTransformedAttributesRt } from '../../common/types/user_actions';
+import { CaseUserActionDeprecatedResponseRt } from '../../../common/types/api';
 
 export class CaseUserActionService {
   private readonly _creator: UserActionPersister;
@@ -71,7 +79,7 @@ export class CaseUserActionService {
       }
 
       const connectorsFilter = buildFilter({
-        filters: [ActionTypes.connector, ActionTypes.create_case],
+        filters: [UserActionTypes.connector, UserActionTypes.create_case],
         field: 'type',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -208,10 +216,16 @@ export class CaseUserActionService {
             rawFieldsDoc
           );
 
-        const fieldsDoc = transformToExternalModel(
+        const res = transformToExternalModel(
           doc,
           this.context.persistableStateAttachmentTypeRegistry
         );
+
+        const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
+
+        const fieldsDoc = Object.assign(res, {
+          attributes: decodeRes,
+        });
 
         connectorFields.set(connectorId, fieldsDoc);
       }
@@ -221,8 +235,9 @@ export class CaseUserActionService {
   }
 
   public async getMostRecentUserAction(
-    caseId: string
-  ): Promise<SavedObject<CaseUserActionInjectedAttributes> | undefined> {
+    caseId: string,
+    isCasesWebhook = false
+  ): Promise<UserActionSavedObjectTransformed | undefined> {
     try {
       this.context.log.debug(
         `Attempting to retrieve the most recent user action for case id: ${caseId}`
@@ -233,10 +248,16 @@ export class CaseUserActionService {
 
       const connectorsFilter = buildFilter({
         filters: [
-          ActionTypes.comment,
-          ActionTypes.description,
-          ActionTypes.tags,
-          ActionTypes.title,
+          UserActionTypes.comment,
+          UserActionTypes.description,
+          UserActionTypes.tags,
+          UserActionTypes.title,
+          /**
+           * TODO: Remove when all connectors support the status and
+           * the severity user actions or if there is a mechanism to
+           * define supported user actions per connector type
+           */
+          ...(isCasesWebhook ? [UserActionTypes.severity, UserActionTypes.status] : []),
         ],
         field: 'type',
         operator: 'or',
@@ -258,10 +279,17 @@ export class CaseUserActionService {
         return;
       }
 
-      return transformToExternalModel(
+      const res = transformToExternalModel(
         userActions.saved_objects[0],
         this.context.persistableStateAttachmentTypeRegistry
       );
+
+      const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
+
+      return {
+        ...res,
+        attributes: decodeRes,
+      };
     } catch (error) {
       this.context.log.error(
         `Error while retrieving the most recent user action for case id: ${caseId}: ${error}`
@@ -275,7 +303,7 @@ export class CaseUserActionService {
       this.context.log.debug(`Attempting to find connector information for case id: ${caseId}`);
 
       const connectorsFilter = buildFilter({
-        filters: [ActionTypes.connector, ActionTypes.create_case, ActionTypes.pushed],
+        filters: [UserActionTypes.connector, UserActionTypes.create_case, UserActionTypes.pushed],
         field: 'type',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -327,17 +355,21 @@ export class CaseUserActionService {
         rawFieldsDoc = createCase.mostRecent.hits.hits[0];
       }
 
-      let fieldsDoc: SavedObject<CaseUserActionInjectedAttributes> | undefined;
+      let fieldsDoc: UserActionSavedObjectTransformed | undefined;
       if (rawFieldsDoc != null) {
         const doc =
           this.context.savedObjectsSerializer.rawToSavedObject<UserActionPersistedAttributes>(
             rawFieldsDoc
           );
 
-        fieldsDoc = transformToExternalModel(
+        const res = transformToExternalModel(
           doc,
           this.context.persistableStateAttachmentTypeRegistry
         );
+
+        const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
+
+        fieldsDoc = { ...res, attributes: decodeRes };
       }
 
       const pushDocs = this.getPushDocs(connectorInfo.reverse.connectorActivity.buckets.pushInfo);
@@ -368,9 +400,7 @@ export class CaseUserActionService {
     }
   }
 
-  private getTopHitsDoc(
-    topHits: TopHits
-  ): SavedObject<CaseUserActionInjectedAttributes> | undefined {
+  private getTopHitsDoc(topHits: TopHits): UserActionSavedObjectTransformed | undefined {
     if (topHits.hits.hits.length > 0) {
       const rawPushDoc = topHits.hits.hits[0];
 
@@ -379,7 +409,13 @@ export class CaseUserActionService {
           rawPushDoc
         );
 
-      return transformToExternalModel(doc, this.context.persistableStateAttachmentTypeRegistry);
+      const res = transformToExternalModel(
+        doc,
+        this.context.persistableStateAttachmentTypeRegistry
+      );
+
+      const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
+      return { ...res, attributes: decodeRes };
     }
   }
 
@@ -418,7 +454,7 @@ export class CaseUserActionService {
                             changeConnector: {
                               term: {
                                 [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
-                                  ActionTypes.connector,
+                                  UserActionTypes.connector,
                               },
                             },
                             // If the case was initialized with a connector, the fields could exist in the create_case
@@ -426,14 +462,14 @@ export class CaseUserActionService {
                             createCase: {
                               term: {
                                 [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
-                                  ActionTypes.create_case,
+                                  UserActionTypes.create_case,
                               },
                             },
                             // Also grab the most recent push occurrence for the connector
                             pushInfo: {
                               term: {
                                 [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
-                                  ActionTypes.pushed,
+                                  UserActionTypes.pushed,
                               },
                             },
                           },
@@ -493,10 +529,22 @@ export class CaseUserActionService {
           sortOrder: 'asc',
         });
 
-      return legacyTransformFindResponseToExternalModel(
+      const transformedUserActions = legacyTransformFindResponseToExternalModel(
         userActions,
         this.context.persistableStateAttachmentTypeRegistry
       );
+
+      const validatedUserActions: Array<SavedObjectsFindResult<CaseUserActionDeprecatedResponse>> =
+        [];
+      for (const so of transformedUserActions.saved_objects) {
+        const validatedAttributes = decodeOrThrow(CaseUserActionDeprecatedResponseRt)(
+          so.attributes
+        );
+
+        validatedUserActions.push(Object.assign(so, { attributes: validatedAttributes }));
+      }
+
+      return Object.assign(transformedUserActions, { saved_objects: validatedUserActions });
     } catch (error) {
       this.context.log.error(`Error on GET case user action case id: ${caseId}: ${error}`);
       throw error;
@@ -547,7 +595,7 @@ export class CaseUserActionService {
     try {
       this.context.log.debug(`Attempting to count connectors for case id ${caseId}`);
       const connectorsFilter = buildFilter({
-        filters: [ActionTypes.connector, ActionTypes.create_case],
+        filters: [UserActionTypes.connector, UserActionTypes.create_case],
         field: 'type',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -612,9 +660,58 @@ export class CaseUserActionService {
     };
   }
 
+  public async getMultipleCasesUserActionsTotal({
+    caseIds,
+  }: {
+    caseIds: string[];
+  }): Promise<Record<string, number>> {
+    const response = await this.context.unsecuredSavedObjectsClient.find<
+      unknown,
+      MultipleCasesUserActionsTotalAggsResult
+    >({
+      type: CASE_USER_ACTION_SAVED_OBJECT,
+      hasReference: caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id })),
+      hasReferenceOperator: 'OR',
+      page: 1,
+      perPage: 1,
+      sortField: defaultSortField,
+      aggs: CaseUserActionService.buildMultipleCasesUserActionsTotalAgg(caseIds.length),
+    });
+
+    const result: Record<string, number> = {};
+
+    response?.aggregations?.references.caseUserActions.buckets.forEach(
+      ({ key, doc_count: totalUserActions }: { key: string; doc_count: number }) => {
+        result[key] = totalUserActions;
+      }
+    );
+
+    return result;
+  }
+
+  private static buildMultipleCasesUserActionsTotalAgg(
+    idsLength: number
+  ): Record<string, estypes.AggregationsAggregationContainer> {
+    return {
+      references: {
+        nested: {
+          path: `${CASE_USER_ACTION_SAVED_OBJECT}.references`,
+        },
+        aggregations: {
+          caseUserActions: {
+            terms: {
+              field: `${CASE_USER_ACTION_SAVED_OBJECT}.references.id`,
+              size: idsLength,
+            },
+          },
+        },
+      },
+    };
+  }
+
   public async getCaseUserActionStats({ caseId }: { caseId: string }) {
     const response = await this.context.unsecuredSavedObjectsClient.find<
-      UserActionPersistedAttributes,
+      unknown,
       UserActionsStatsAggsResult
     >({
       type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -658,7 +755,7 @@ export class CaseUserActionService {
 
   public async getUsers({ caseId }: { caseId: string }): Promise<GetUsersResponse> {
     const response = await this.context.unsecuredSavedObjectsClient.find<
-      UserActionPersistedAttributes,
+      unknown,
       ParticipantsAggsResult
     >({
       type: CASE_USER_ACTION_SAVED_OBJECT,

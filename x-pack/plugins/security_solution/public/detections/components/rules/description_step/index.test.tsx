@@ -262,7 +262,7 @@ describe('description_step', () => {
         mockLicenseService
       );
 
-      expect(result.length).toEqual(11);
+      expect(result.length).toEqual(12);
     });
   });
 

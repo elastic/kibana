@@ -39,4 +39,10 @@ export const i18nTexts = {
         'File is too large. Maximum size is {expectedSize, plural, one {# byte} other {# bytes} }.',
       values: { expectedSize },
     }),
+  mimeTypeNotSupported: (mimeType: string, supportedMimeTypes: string) =>
+    i18n.translate('sharedUXPackages.fileUpload.mimeTypeNotSupportedErrorMessage', {
+      defaultMessage:
+        'File mime type "{mimeType}" is not supported. Supported mime types are: {supportedMimeTypes}.',
+      values: { mimeType, supportedMimeTypes },
+    }),
 };

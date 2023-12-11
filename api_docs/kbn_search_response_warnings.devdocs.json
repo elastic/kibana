@@ -1,0 +1,380 @@
+{
+  "id": "@kbn/search-response-warnings",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/search-response-warnings",
+        "id": "def-common.getWarningsDescription",
+        "type": "Function",
+        "tags": [],
+        "label": "getWarningsDescription",
+        "description": [],
+        "signature": [
+          "(warnings: ",
+          "SearchResponseIncompleteWarning",
+          "[]) => string"
+        ],
+        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-response-warnings",
+            "id": "def-common.getWarningsDescription.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "warnings",
+            "description": [],
+            "signature": [
+              "SearchResponseIncompleteWarning",
+              "[]"
+            ],
+            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-response-warnings",
+        "id": "def-common.getWarningsTitle",
+        "type": "Function",
+        "tags": [],
+        "label": "getWarningsTitle",
+        "description": [],
+        "signature": [
+          "(warnings: ",
+          "SearchResponseIncompleteWarning",
+          "[]) => string"
+        ],
+        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-response-warnings",
+            "id": "def-common.getWarningsTitle.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "warnings",
+            "description": [],
+            "signature": [
+              "SearchResponseIncompleteWarning",
+              "[]"
+            ],
+            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-response-warnings",
+        "id": "def-common.hasUnsupportedDownsampledAggregationFailure",
+        "type": "Function",
+        "tags": [],
+        "label": "hasUnsupportedDownsampledAggregationFailure",
+        "description": [],
+        "signature": [
+          "(warning: ",
+          "SearchResponseIncompleteWarning",
+          ") => boolean"
+        ],
+        "path": "packages/kbn-search-response-warnings/src/has_unsupported_downsampled_aggregation_failure.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-response-warnings",
+            "id": "def-common.hasUnsupportedDownsampledAggregationFailure.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "warning",
+            "description": [],
+            "signature": [
+              "SearchResponseIncompleteWarning"
+            ],
+            "path": "packages/kbn-search-response-warnings/src/has_unsupported_downsampled_aggregation_failure.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-response-warnings",
+        "id": "def-common.SearchResponseWarningsBadge",
+        "type": "Function",
+        "tags": [],
+        "label": "SearchResponseWarningsBadge",
+        "description": [],
+        "signature": [
+          "(props: Props) => JSX.Element | null"
+        ],
+        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-response-warnings",
+            "id": "def-common.SearchResponseWarningsBadge.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-response-warnings",
+        "id": "def-common.SearchResponseWarningsBadgePopoverContent",
+        "type": "Function",
+        "tags": [],
+        "label": "SearchResponseWarningsBadgePopoverContent",
+        "description": [],
+        "signature": [
+          "(props: Props) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge_popover_content.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-response-warnings",
+            "id": "def-common.SearchResponseWarningsBadgePopoverContent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/badge_popover_content.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-response-warnings",
+        "id": "def-common.SearchResponseWarningsCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "SearchResponseWarningsCallout",
+        "description": [],
+        "signature": [
+          "(props: Props) => JSX.Element | null"
+        ],
+        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-response-warnings",
+            "id": "def-common.SearchResponseWarningsCallout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-response-warnings",
+        "id": "def-common.SearchResponseWarningsEmptyPrompt",
+        "type": "Function",
+        "tags": [],
+        "label": "SearchResponseWarningsEmptyPrompt",
+        "description": [],
+        "signature": [
+          "(props: Props) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/empty_prompt.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-response-warnings",
+            "id": "def-common.SearchResponseWarningsEmptyPrompt.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/empty_prompt.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-response-warnings",
+        "id": "def-common.ViewDetailsPopover",
+        "type": "Function",
+        "tags": [],
+        "label": "ViewDetailsPopover",
+        "description": [],
+        "signature": [
+          "(props: Props) => JSX.Element | null"
+        ],
+        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-response-warnings",
+            "id": "def-common.ViewDetailsPopover.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/search-response-warnings",
+        "id": "def-common.SearchResponseWarning",
+        "type": "Type",
+        "tags": [],
+        "label": "SearchResponseWarning",
+        "description": [
+          "\nA warning object for a search response with warnings"
+        ],
+        "signature": [
+          "SearchResponseIncompleteWarning"
+        ],
+        "path": "packages/kbn-search-response-warnings/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-response-warnings",
+        "id": "def-common.WarningHandlerCallback",
+        "type": "Type",
+        "tags": [],
+        "label": "WarningHandlerCallback",
+        "description": [
+          "\nA callback function which can intercept warnings when passed to {@link showWarnings}. Pass `true` from the\nfunction to prevent the search service from showing warning notifications by default."
+        ],
+        "signature": [
+          "(warning: ",
+          "SearchResponseIncompleteWarning",
+          ", meta: { request: ",
+          "SearchRequest",
+          "; response: ",
+          "SearchResponse",
+          "<unknown, Record<string, ",
+          "AggregationsAggregate",
+          ">>; requestId: string | undefined; }) => boolean | undefined"
+        ],
+        "path": "packages/kbn-search-response-warnings/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-response-warnings",
+            "id": "def-common.WarningHandlerCallback.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "warning",
+            "description": [],
+            "signature": [
+              "SearchResponseIncompleteWarning"
+            ],
+            "path": "packages/kbn-search-response-warnings/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-response-warnings",
+            "id": "def-common.WarningHandlerCallback.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "{ request: ",
+              "SearchRequest",
+              "; response: ",
+              "SearchResponse",
+              "<unknown, Record<string, ",
+              "AggregationsAggregate",
+              ">>; requestId: string | undefined; }"
+            ],
+            "path": "packages/kbn-search-response-warnings/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

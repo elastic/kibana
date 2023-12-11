@@ -14,7 +14,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...xpackFunctionalConfig.getAll(),
-    testFiles: [require.resolve('./telemetry/telemetry.ts')],
+    testFiles: [
+      require.resolve('./telemetry/telemetry.ts'),
+      require.resolve('./routes/vulnerabilities_dashboard.ts'),
+      require.resolve('./routes/stats.ts'),
+    ],
     junit: {
       reportName: 'X-Pack Cloud Security Posture API Tests',
     },
@@ -36,7 +40,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
          *   2. merge the updated version number change to kibana
          */
         `--xpack.fleet.packages.0.name=cloud_security_posture`,
-        `--xpack.fleet.packages.0.version=1.2.8`,
+        `--xpack.fleet.packages.0.version=1.5.0`,
         // `--xpack.fleet.registryUrl=https://localhost:8080`,
       ],
     },

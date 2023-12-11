@@ -39,7 +39,8 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .option('grep-files', {
     alias: 'files',
-    type: 'string',
+    type: 'array',
+    string: true,
     description: 'Specify the files to run',
   })
   .option('inspect', {
@@ -56,6 +57,11 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'boolean',
     description: 'Update snapshots',
   })
+  .option('bail', {
+    default: false,
+    type: 'boolean',
+    description: 'Stop the test run at the first failure',
+  })
   .check((argv) => {
     const { inspect, runner } = argv;
     if (inspect && !runner) {
@@ -67,6 +73,7 @@ const { argv } = yargs(process.argv.slice(2))
   .help();
 
 const {
+  bail,
   basic,
   trial,
   server,
@@ -98,6 +105,7 @@ const cmd = [
   `../../../../../scripts/${ftrScript}`,
   ...(grep ? [`--grep "${grep}"`] : []),
   ...(updateSnapshots ? [`--updateSnapshots`] : []),
+  ...(bail ? [`--bail`] : []),
   `--config ../../../../test/apm_api_integration/${license}/config.ts`,
 ].join(' ');
 
@@ -107,7 +115,7 @@ function runTests() {
   childProcess.execSync(cmd, {
     cwd: path.join(__dirname),
     stdio: 'inherit',
-    env: { ...process.env, APM_TEST_GREP_FILES: grepFiles },
+    env: { ...process.env, APM_TEST_GREP_FILES: JSON.stringify(grepFiles) },
   });
 }
 
@@ -119,6 +127,10 @@ if (argv.times) {
       runTests();
       runCounter.succeeded++;
     } catch (e) {
+      if (bail) {
+        throw e;
+      }
+
       exitStatus = 1;
       runCounter.failed++;
     }

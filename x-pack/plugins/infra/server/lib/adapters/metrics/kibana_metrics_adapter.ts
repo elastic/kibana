@@ -9,17 +9,17 @@ import { i18n } from '@kbn/i18n';
 import { KibanaRequest } from '@kbn/core/server';
 import { flatten, get } from 'lodash';
 import { isVisSeriesData } from '@kbn/vis-type-timeseries-plugin/server';
+import { metrics, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import {
+  TSVBMetricModelCreator,
+  InventoryMetric,
+  InventoryMetricRT,
+} from '@kbn/metrics-data-access-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
-import { metrics, findInventoryFields } from '../../../../common/inventory_models';
-import {
-  TSVBMetricModelCreator,
-  InventoryMetric,
-  InventoryMetricRT,
-} from '../../../../common/inventory_models/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { CallWithRequestParams, InfraDatabaseSearchResponse } from '../framework';
 import type { InfraPluginRequestHandlerContext } from '../../../types';

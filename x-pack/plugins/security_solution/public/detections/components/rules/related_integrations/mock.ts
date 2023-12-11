@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RelatedIntegrationArray } from '../../../../../common/detection_engine/rule_schema';
+import type { RelatedIntegrationArray } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 export const relatedIntegrations: RelatedIntegrationArray = [
   {

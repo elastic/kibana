@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldNumber } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { shallow, mount } from 'enzyme';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -40,7 +40,6 @@ const dateRange = {
 const defaultProps = {
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
-  savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
@@ -124,8 +123,8 @@ describe('static_value', () => {
               value: '23',
             },
           },
-          createMockedIndexPattern(),
-          layer.columns
+          layer.columns,
+          createMockedIndexPattern()
         )
       ).toBe('Static value: 23');
     });
@@ -143,8 +142,8 @@ describe('static_value', () => {
               value: '',
             },
           },
-          createMockedIndexPattern(),
-          layer.columns
+          layer.columns,
+          createMockedIndexPattern()
         )
       ).toBe('Static value');
     });

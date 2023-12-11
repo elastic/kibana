@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { match as RouteMatch, Redirect, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { match as RouteMatch, Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
+import { inventoryModels } from '@kbn/metrics-data-access-plugin/common';
 import { RedirectToLogs } from './redirect_to_logs';
 import { RedirectToNodeLogs } from './redirect_to_node_logs';
-import { inventoryModels } from '../../../common/inventory_models';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;
@@ -22,9 +22,14 @@ interface LinkToPageProps {
 
 const ITEM_TYPES = inventoryModels.map((m) => m.id).join('|');
 
+/**
+ * @deprecated Link-to routes shouldn't be used anymore
+ * Instead please use locators registered for the infra plugin
+ * LogsLocator & NodeLogsLocator
+ */
 export const LinkToLogsPage: React.FC<LinkToPageProps> = (props) => {
   return (
-    <Switch>
+    <Routes>
       <Route
         path={`${props.match.url}/:logViewId?/:nodeType(${ITEM_TYPES})-logs/:nodeId`}
         component={RedirectToNodeLogs}
@@ -32,6 +37,6 @@ export const LinkToLogsPage: React.FC<LinkToPageProps> = (props) => {
       <Route path={`${props.match.url}/:logViewId?/logs`} component={RedirectToLogs} />
       <Route path={`${props.match.url}/:logViewId?`} component={RedirectToLogs} />
       <Redirect to="/" />
-    </Switch>
+    </Routes>
   );
 };

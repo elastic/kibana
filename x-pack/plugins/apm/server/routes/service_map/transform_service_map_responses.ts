@@ -35,7 +35,7 @@ function getConnectionNodeId(node: ConnectionNode): string {
   return node[SERVICE_NAME];
 }
 
-function getConnectionId(connection: Connection) {
+export function getConnectionId(connection: Connection) {
   return `${getConnectionNodeId(connection.source)}~${getConnectionNodeId(
     connection.destination
   )}`;
@@ -245,10 +245,8 @@ export function transformServiceMapResponses({
 
   const connectionsById = mappedConnections.reduce(
     (connectionMap, connection) => {
-      return {
-        ...connectionMap,
-        [connection.id]: connection,
-      };
+      connectionMap[connection.id] = connection;
+      return connectionMap;
     },
     {} as Record<string, ConnectionWithId>
   );

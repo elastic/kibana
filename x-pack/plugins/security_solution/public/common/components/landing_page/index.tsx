@@ -6,15 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import { LandingCards } from '../landing_cards';
-import { SecuritySolutionPageWrapper } from '../page_wrapper';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import { useContractComponents } from '../../hooks/use_contract_component';
 
 export const LandingPageComponent = memo(() => {
-  return (
-    <SecuritySolutionPageWrapper>
-      <LandingCards />
-    </SecuritySolutionPageWrapper>
-  );
+  const { GetStarted } = useContractComponents();
+  const { indicesExist } = useSourcererDataView();
+  return GetStarted ? <GetStarted indicesExist={indicesExist} /> : null;
 });
 
 LandingPageComponent.displayName = 'LandingPageComponent';

@@ -12,12 +12,12 @@ import React from 'react';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import type { Role } from '../../../../../../../common/model';
+import { SubFeatureForm } from './sub_feature_form';
+import type { Role } from '../../../../../../../common';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { SecuredSubFeature } from '../../../../model';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { SubFeatureForm } from './sub_feature_form';
 
 // Note: these tests are not concerned with the proper display of privileges,
 // as that is verified by the feature_table and privilege_space_form tests.

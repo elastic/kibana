@@ -18,13 +18,12 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import { Layer } from './layer';
 import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
 import { VisualizationExtractor } from '../../../../application/jobs/new_job/job_from_lens';
-import { useMlFromLensKibanaContext } from '../context';
+import { useMlFromLensKibanaContext } from '../../common/context';
 
 interface Props {
   embeddable: Embeddable;
@@ -32,7 +31,6 @@ interface Props {
 }
 
 export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => {
-  const { euiTheme } = useEuiTheme();
   const {
     services: { data, lens },
   } = useMlFromLensKibanaContext();
@@ -72,7 +70,7 @@ export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => 
           />
         </EuiText>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody css={{ backgroundColor: euiTheme.colors.lightestShade }}>
+      <EuiFlyoutBody>
         {layerResults.map((layer, i) => (
           <Layer layer={layer} layerIndex={i} key={layer.id} embeddable={embeddable} />
         ))}

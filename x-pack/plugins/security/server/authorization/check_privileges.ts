@@ -9,9 +9,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { pick, transform, uniq } from 'lodash';
 
 import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
-
-import { GLOBAL_RESOURCE } from '../../common/constants';
-import { ResourceSerializer } from './resource_serializer';
 import type {
   CheckPrivileges,
   CheckPrivilegesOptions,
@@ -22,12 +19,14 @@ import type {
   CheckUserProfilesPrivilegesResponse,
   HasPrivilegesResponse,
   HasPrivilegesResponseApplication,
-} from './types';
+} from '@kbn/security-plugin-types-server';
+import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
+
+import { ResourceSerializer } from './resource_serializer';
 import { validateEsPrivilegeResponse } from './validate_es_response';
 
 interface CheckPrivilegesActions {
   login: string;
-  version: string;
 }
 
 export function checkPrivilegesFactory(
@@ -35,14 +34,6 @@ export function checkPrivilegesFactory(
   getClusterClient: () => Promise<IClusterClient>,
   applicationName: string
 ) {
-  const hasIncompatibleVersion = (
-    applicationPrivilegesResponse: HasPrivilegesResponseApplication
-  ) => {
-    return Object.values(applicationPrivilegesResponse).some(
-      (resource) => !resource[actions.version] && resource[actions.login]
-    );
-  };
-
   const createApplicationPrivilegesCheck = (
     resources: string[],
     kibanaPrivileges: string | string[],
@@ -56,7 +47,6 @@ export function checkPrivilegesFactory(
       application: applicationName,
       resources,
       privileges: uniq([
-        actions.version,
         ...(requireLoginAction ? [actions.login] : []),
         ...normalizedKibanaPrivileges,
       ]),
@@ -154,20 +144,12 @@ export function checkPrivilegesFactory(
       const indexPrivileges = Object.entries(hasPrivilegesResponse.index ?? {}).reduce<
         CheckPrivilegesResponse['privileges']['elasticsearch']['index']
       >((acc, [index, indexResponse]) => {
-        return {
-          ...acc,
-          [index]: Object.entries(indexResponse).map(([privilege, authorized]) => ({
-            privilege,
-            authorized,
-          })),
-        };
+        acc[index] = Object.entries(indexResponse).map(([privilege, authorized]) => ({
+          privilege,
+          authorized,
+        }));
+        return acc;
       }, {});
-
-      if (hasIncompatibleVersion(applicationPrivilegesResponse)) {
-        throw new Error(
-          'Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.'
-        );
-      }
 
       // we need to filter out the non requested privileges from the response
       const resourcePrivileges = transform(applicationPrivilegesResponse, (result, value, key) => {

@@ -108,8 +108,6 @@ export type {
   PackageListItem,
   PackagesGroupedByStatus,
   RequirementsByServiceName,
-  RequirementVersion,
-  ScreenshotItem,
   ServiceName,
   GetCategoriesRequest,
   GetCategoriesResponse,
@@ -120,7 +118,6 @@ export type {
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
-  DetailViewPanelName,
   InstallationStatus,
   Installable,
   RegistryRelease,
@@ -135,12 +132,19 @@ export type {
   PostHealthCheckResponse,
   PostRetrieveAgentsByActionsRequest,
   PostRetrieveAgentsByActionsResponse,
+  GetBulkAssetsRequest,
+  GetBulkAssetsResponse,
+  KibanaSavedObjectType,
+  GetInputsTemplatesRequest,
+  GetInputsTemplatesResponse,
+  BulkGetAgentPoliciesResponse,
 } from '../../common/types';
 export {
   entries,
   ElasticsearchAssetType,
   KibanaAssetType,
   InstallStatus,
+  SetupTechnology,
 } from '../../common/types';
 
 export * from './intra_app_route_state';

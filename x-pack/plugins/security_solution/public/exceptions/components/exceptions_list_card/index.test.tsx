@@ -83,8 +83,7 @@ describe('ExceptionsListCard', () => {
     (useListDetailsView as jest.Mock).mockReturnValue(getMockUseListDetailsView());
   });
   afterEach(() => {
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should display expired exception confirmation modal when "showIncludeExpiredExceptionsModal" is "true"', () => {

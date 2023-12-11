@@ -14,7 +14,7 @@ import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 
@@ -64,7 +64,7 @@ import {
 import type { ShardError } from '../../../types';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { GenericBulkCreateResponse } from '../factories';
-import type { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
+import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -83,7 +83,6 @@ describe('utils', () => {
     clock.restore();
     jest.clearAllMocks();
     jest.resetAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('generateId', () => {
@@ -656,7 +655,7 @@ describe('utils', () => {
       expect(wroteWarningStatus).toBeTruthy();
       expect(foundNoIndices).toBeFalsy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatus['partial failure'],
+        newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
           'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"]',
       });
@@ -700,7 +699,7 @@ describe('utils', () => {
       expect(wroteWarningStatus).toBeTruthy();
       expect(foundNoIndices).toBeFalsy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatus['partial failure'],
+        newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
           'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"]',
       });
@@ -733,9 +732,9 @@ describe('utils', () => {
       expect(wroteWarningStatus).toBeTruthy();
       expect(foundNoIndices).toBeTruthy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatus['partial failure'],
+        newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.',
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.',
       });
     });
 
@@ -767,9 +766,9 @@ describe('utils', () => {
       expect(wroteWarningStatus).toBeTruthy();
       expect(foundNoIndices).toBeTruthy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatus['partial failure'],
+        newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
       });
     });
   });

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { connector } from '../mock';
-import type { UseGetSeverity } from './use_get_severity';
 import { useGetSeverity } from './use_get_severity';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 import * as api from './api';
 
 jest.mock('../../../common/lib/kibana');
@@ -19,60 +20,90 @@ jest.mock('./api');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('useGetSeverity', () => {
-  const { http, notifications } = useKibanaMock().services;
+  const { http } = useKibanaMock().services;
+  let appMockRender: AppMockRenderer;
 
-  test('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetSeverity>(() =>
-        useGetSeverity({ http, toastNotifications: notifications.toasts })
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({ isLoading: true, severity: [] });
+  beforeEach(() => {
+    appMockRender = createAppMockRenderer();
+    jest.clearAllMocks();
+  });
+
+  it('calls the api when invoked with the correct parameters', async () => {
+    const spy = jest.spyOn(api, 'getSeverity');
+    const { waitForNextUpdate } = renderHook(
+      () =>
+        useGetSeverity({
+          http,
+          connector,
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    await waitForNextUpdate();
+
+    expect(spy).toHaveBeenCalledWith({
+      http,
+      signal: expect.anything(),
+      connectorId: connector.id,
     });
   });
 
-  test('fetch severity', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetSeverity>(() =>
-        useGetSeverity({ http, toastNotifications: notifications.toasts, connector })
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        severity: [
-          {
-            id: 4,
-            name: 'Low',
-          },
-          {
-            id: 5,
-            name: 'Medium',
-          },
-          {
-            id: 6,
-            name: 'High',
-          },
-        ],
-      });
-    });
+  it('does not call the api when the connector is missing', async () => {
+    const spy = jest.spyOn(api, 'getSeverity');
+    renderHook(
+      () =>
+        useGetSeverity({
+          http,
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    expect(spy).not.toHaveBeenCalledWith();
   });
 
-  test('unhappy path', async () => {
-    const spyOnGetCaseConfigure = jest.spyOn(api, 'getSeverity');
-    spyOnGetCaseConfigure.mockImplementation(() => {
+  it('calls addError when the getSeverity api throws an error', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getSeverity');
+    spyOnGetCases.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetSeverity>(() =>
-        useGetSeverity({ http, toastNotifications: notifications.toasts, connector })
-      );
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { waitForNextUpdate } = renderHook(
+      () =>
+        useGetSeverity({
+          http,
+          connector,
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
 
-      expect(result.current).toEqual({ isLoading: false, severity: [] });
+    await waitForNextUpdate();
+    expect(addError).toHaveBeenCalled();
+  });
+
+  it('calls addError when the getSeverity api returns successfully but contains an error', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getSeverity');
+    spyOnGetCases.mockResolvedValue({
+      status: 'error',
+      message: 'Error message',
+      actionId: 'test',
     });
+
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
+
+    const { waitForNextUpdate } = renderHook(
+      () =>
+        useGetSeverity({
+          http,
+          connector,
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    await waitForNextUpdate();
+    expect(addError).toHaveBeenCalled();
   });
 });

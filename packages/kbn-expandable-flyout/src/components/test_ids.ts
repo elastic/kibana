@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-export const RIGHT_SECTION = 'rightSection';
+export const RIGHT_SECTION_TEST_ID = 'rightSection';
 
-export const LEFT_SECTION = 'leftSection';
+export const LEFT_SECTION_TEST_ID = 'leftSection';
 
-export const PREVIEW_SECTION = 'previewSection';
+export const PREVIEW_SECTION_TEST_ID = 'previewSection';
 
-export const PREVIEW_SECTION_CLOSE_BUTTON = 'previewSectionCloseButton';
+export const PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID = 'previewSectionCloseButton';
 
-export const PREVIEW_SECTION_BACK_BUTTON = 'previewSectionBackButton';
+export const PREVIEW_SECTION_BACK_BUTTON_TEST_ID = 'previewSectionBackButton';
+
+export const PREVIEW_SECTION_HEADER_TEST_ID = 'previewSectionHeader';

@@ -21,7 +21,9 @@ import {
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { MlPluginStart } from '@kbn/ml-plugin/public';
+import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
 
@@ -31,26 +33,29 @@ import { createHref, CreateHrefOptions } from '../react_router_helpers';
 type RequiredFieldsOnly<T> = {
   [K in keyof T as T[K] extends Required<T>[K] ? K : never]: T[K];
 };
-interface KibanaLogicProps {
+export interface KibanaLogicProps {
   application: ApplicationStart;
   capabilities: Capabilities;
   charts: ChartsPluginStart;
   cloud?: CloudSetup;
   config: ClientConfigType;
   data: DataPublicPluginStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
   isSidebarEnabled: boolean;
   lens: LensPublicStart;
+  ml: MlPluginStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
-  renderHeaderActions(HeaderActions: FC): void;
+  renderHeaderActions(HeaderActions?: FC): void;
   security: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
+  share: SharePluginStart;
   uiSettings: IUiSettingsClient;
+  user: AuthenticatedUser | null;
 }
 
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
@@ -74,6 +79,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     history: [props.history, {}],
     isSidebarEnabled: [props.isSidebarEnabled, {}],
     lens: [props.lens, {}],
+    ml: [props.ml, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {
         const deps = { history: props.history, http: HttpLogic.values.http };
@@ -89,7 +95,9 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
+    share: [props.share, {}],
     uiSettings: [props.uiSettings, {}],
+    user: [props.user, {}],
   }),
   selectors: ({ selectors }) => ({
     isCloud: [() => [selectors.cloud], (cloud?: Partial<CloudSetup>) => !!cloud?.isCloudEnabled],

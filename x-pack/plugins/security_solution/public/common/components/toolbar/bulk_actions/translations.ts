@@ -141,3 +141,101 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
     defaultMessage: 'Mark as closed',
   }
 );
+
+export const UPDATE_ALERT_TAGS_FAILED = (conflicts: number) =>
+  i18n.translate('xpack.securitySolution.bulkActions.updateAlertTagsFailed', {
+    values: { conflicts },
+    defaultMessage:
+      'Failed to update tags for { conflicts } {conflicts, plural, =1 {alert} other {alerts}}.',
+  });
+
+export const UPDATE_ALERT_TAGS_FAILED_DETAILED = (updated: number, conflicts: number) =>
+  i18n.translate('xpack.securitySolution.bulkActions.updateAlertTagsFailedDetailed', {
+    values: { updated, conflicts },
+    defaultMessage: `{ updated } {updated, plural, =1 {alert was} other {alerts were}} updated successfully, but { conflicts } failed to update
+         because { conflicts, plural, =1 {it was} other {they were}} already being modified.`,
+  });
+
+export const UPDATE_ALERT_TAGS_SUCCESS_TOAST = (totalAlerts: number) =>
+  i18n.translate('xpack.securitySolution.bulkActions.updateAlertTagsSuccessToastMessage', {
+    values: { totalAlerts },
+    defaultMessage:
+      'Successfully updated tags for {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
+  });
+
+export const UPDATE_ALERT_TAGS_FAILURE = i18n.translate(
+  'xpack.securitySolution.bulkActions.updateAlertTagsFailedToastMessage',
+  {
+    defaultMessage: 'Failed to update alert tags.',
+  }
+);
+
+export const ALERT_TAGS_MENU_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertTagsMenuSearchPlaceholderMessage',
+  {
+    defaultMessage: 'Search tags',
+  }
+);
+
+export const ALERT_TAGS_MENU_SEARCH_NO_TAGS_FOUND = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertTagsMenuSearchNoTagsFoundMessage',
+  {
+    defaultMessage: 'No tags match current search',
+  }
+);
+
+export const ALERT_TAGS_MENU_EMPTY = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertTagsMenuEmptyMessage',
+  {
+    defaultMessage: 'No alert tag options exist, add tag options in Kibana Advanced Settings.',
+  }
+);
+
+export const ALERT_TAGS_APPLY_BUTTON_MESSAGE = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertTagsApplyButtonMessage',
+  {
+    defaultMessage: 'Apply tags',
+  }
+);
+
+export const ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertTagsContextMenuItemTitle',
+  {
+    defaultMessage: 'Apply alert tags',
+  }
+);
+
+export const ALERT_TAGS_CONTEXT_MENU_ITEM_TOOLTIP_INFO = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertTagsContextMenuItemTooltip',
+  {
+    defaultMessage: 'Change alert tag options in Kibana Advanced Settings.',
+  }
+);
+
+export const UPDATE_ALERT_ASSIGNEES_SUCCESS_TOAST = (totalAlerts: number) =>
+  i18n.translate('xpack.securitySolution.bulkActions.updateAlertAssigneesSuccessToastMessage', {
+    values: { totalAlerts },
+    defaultMessage:
+      'Successfully updated assignees for {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
+  });
+
+export const UPDATE_ALERT_ASSIGNEES_FAILURE = i18n.translate(
+  'xpack.securitySolution.bulkActions.updateAlertAssigneesFailedToastMessage',
+  {
+    defaultMessage: 'Failed to update alert assignees.',
+  }
+);
+
+export const ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertAssigneesContextMenuItemTitle',
+  {
+    defaultMessage: 'Assign alert',
+  }
+);
+
+export const REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE = i18n.translate(
+  'xpack.securitySolution.bulkActions.removeAlertAssignessContextMenuTitle',
+  {
+    defaultMessage: 'Unassign alert',
+  }
+);

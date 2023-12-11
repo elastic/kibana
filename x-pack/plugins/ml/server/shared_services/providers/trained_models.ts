@@ -6,11 +6,20 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
+  GetModelDownloadConfigOptions,
+  ModelDefinitionResponse,
+} from '@kbn/ml-trained-models-utils';
+import type {
+  MlInferTrainedModelRequest,
+  MlStopTrainedModelDeploymentRequest,
   UpdateTrainedModelDeploymentRequest,
   UpdateTrainedModelDeploymentResponse,
 } from '../../lib/ml_client/types';
+import { modelsProvider } from '../../models/model_management';
+import type { GetCuratedModelConfigParams } from '../../models/model_management/models_provider';
 import type { GetGuards } from '../shared_services';
 
 export interface TrainedModelsProvider {
@@ -28,10 +37,10 @@ export interface TrainedModelsProvider {
       params: estypes.MlStartTrainedModelDeploymentRequest
     ): Promise<estypes.MlStartTrainedModelDeploymentResponse>;
     stopTrainedModelDeployment(
-      params: estypes.MlStopTrainedModelDeploymentRequest
+      params: MlStopTrainedModelDeploymentRequest
     ): Promise<estypes.MlStopTrainedModelDeploymentResponse>;
     inferTrainedModel(
-      params: estypes.MlInferTrainedModelRequest
+      params: MlInferTrainedModelRequest
     ): Promise<estypes.MlInferTrainedModelResponse>;
     deleteTrainedModel(
       params: estypes.MlDeleteTrainedModelRequest
@@ -42,10 +51,15 @@ export interface TrainedModelsProvider {
     putTrainedModel(
       params: estypes.MlPutTrainedModelRequest
     ): Promise<estypes.MlPutTrainedModelResponse>;
+    getELSER(params?: GetModelDownloadConfigOptions): Promise<ModelDefinitionResponse>;
+    getCuratedModelConfig(...params: GetCuratedModelConfigParams): Promise<ModelDefinitionResponse>;
   };
 }
 
-export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsProvider {
+export function getTrainedModelsProvider(
+  getGuards: GetGuards,
+  cloud: CloudSetup
+): TrainedModelsProvider {
   return {
     trainedModelsProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
       const guards = getGuards(request, savedObjectsClient);
@@ -74,7 +88,7 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
               return mlClient.startTrainedModelDeployment(params);
             });
         },
-        async stopTrainedModelDeployment(params: estypes.MlStopTrainedModelDeploymentRequest) {
+        async stopTrainedModelDeployment(params: MlStopTrainedModelDeploymentRequest) {
           return await guards
             .isFullLicense()
             .hasMlCapabilities(['canStartStopTrainedModels'])
@@ -82,7 +96,7 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
               return mlClient.stopTrainedModelDeployment(params);
             });
         },
-        async inferTrainedModel(params: estypes.MlInferTrainedModelRequest) {
+        async inferTrainedModel(params: MlInferTrainedModelRequest) {
           return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetTrainedModels'])
@@ -112,6 +126,22 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
             .hasMlCapabilities(['canCreateTrainedModels'])
             .ok(async ({ mlClient }) => {
               return mlClient.putTrainedModel(params);
+            });
+        },
+        async getELSER(params?: GetModelDownloadConfigOptions) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canGetTrainedModels'])
+            .ok(async ({ scopedClient, mlClient }) => {
+              return modelsProvider(scopedClient, mlClient, cloud).getELSER(params);
+            });
+        },
+        async getCuratedModelConfig(...params: GetCuratedModelConfigParams) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canGetTrainedModels'])
+            .ok(async ({ scopedClient, mlClient }) => {
+              return modelsProvider(scopedClient, mlClient, cloud).getCuratedModelConfig(...params);
             });
         },
       };

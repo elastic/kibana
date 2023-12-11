@@ -44,7 +44,7 @@ function page({
   };
 }
 
-export const settings = {
+export const settingsRoute = {
   '/settings': {
     element: (
       <Breadcrumb

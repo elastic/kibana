@@ -107,7 +107,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     });
 
-    it('should open a flyout and paginate through the flyout', async () => {
+    // TODO unskip once Security Solution uses the correct useInternalFlyout hook
+    //  see https://github.com/elastic/security-team/issues/7872
+    it.skip('should open a flyout and paginate through the flyout', async () => {
       await testSubjects.click('expandColumnCellOpenFlyoutButton-0');
       await waitFlyoutOpen();
       await waitFlyoutIsLoaded();
@@ -169,18 +171,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const $ = await euiDataGridRow.parseDomContent();
         rows.push({
           status: $.findTestSubjects('dataGridRowCell')
-            .find('[data-gridcell-column-id="event.action"] .euiDataGridRowCell__truncate')
+            .find('[data-gridcell-column-id="event.action"] .euiDataGridRowCell__content')
             .text(),
           lastUpdated: $.findTestSubjects('dataGridRowCell')
-            .find('[data-gridcell-column-id="@timestamp"] .euiDataGridRowCell__truncate')
+            .find('[data-gridcell-column-id="@timestamp"] .euiDataGridRowCell__content')
             .text(),
           duration: $.findTestSubjects('dataGridRowCell')
             .find(
-              '[data-gridcell-column-id="kibana.alert.duration.us"] .euiDataGridRowCell__truncate'
+              '[data-gridcell-column-id="kibana.alert.duration.us"] [data-datagrid-cellcontent]'
             )
             .text(),
           reason: $.findTestSubjects('dataGridRowCell')
-            .find('[data-gridcell-column-id="kibana.alert.reason"] .euiDataGridRowCell__truncate')
+            .find('[data-gridcell-column-id="kibana.alert.reason"] [data-datagrid-cellcontent]')
             .text(),
         });
       }

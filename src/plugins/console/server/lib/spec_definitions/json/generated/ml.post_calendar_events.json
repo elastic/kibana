@@ -1,11 +1,21 @@
 {
   "ml.post_calendar_events": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "_ml/calendars/{calendar_id}/events"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-post-calendar-event.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-post-calendar-event.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

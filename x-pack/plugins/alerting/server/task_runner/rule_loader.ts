@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { CoreKibanaRequest, FakeRawRequest, Headers } from '@kbn/core/server';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import {
+  LoadedIndirectParams,
+  LoadIndirectParamsResult,
+} from '@kbn/task-manager-plugin/server/task';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -21,34 +25,48 @@ import {
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 
-export interface LoadRuleParams<Params extends RuleTypeParams> {
+export interface RuleData<Params extends RuleTypeParams> extends LoadedIndirectParams<RawRule> {
+  indirectParams: RawRule;
+  rule: SanitizedRule<Params>;
+  version: string | undefined;
+  fakeRequest: CoreKibanaRequest;
+  rulesClient: RulesClientApi;
+}
+
+export type RuleDataResult<T extends LoadedIndirectParams> = LoadIndirectParamsResult<T>;
+
+export interface ValidatedRuleData<Params extends RuleTypeParams> extends RuleData<Params> {
+  validatedParams: Params;
+  apiKey: string | null;
+}
+
+interface ValidateRuleParams<Params extends RuleTypeParams> {
+  alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
   paramValidator?: RuleTypeParamsValidator<Params>;
   ruleId: string;
   spaceId: string;
   context: TaskRunnerContext;
   ruleTypeRegistry: RuleTypeRegistry;
-  alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
+  ruleData: RuleDataResult<RuleData<Params>>;
 }
 
-export async function loadRule<Params extends RuleTypeParams>(params: LoadRuleParams<Params>) {
-  const { paramValidator, ruleId, spaceId, context, ruleTypeRegistry, alertingEventLogger } =
-    params;
-  let enabled: boolean;
-  let apiKey: string | null;
-  let rule: SanitizedRule<Params>;
-  let fakeRequest: CoreKibanaRequest;
-  let rulesClient: RulesClientApi;
-
-  try {
-    const attributes = await getRuleAttributes<Params>(context, ruleId, spaceId);
-    apiKey = attributes.apiKey;
-    enabled = attributes.enabled;
-    rule = attributes.rule;
-    fakeRequest = attributes.fakeRequest;
-    rulesClient = attributes.rulesClient;
-  } catch (err) {
-    throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
+export function validateRule<Params extends RuleTypeParams>(
+  params: ValidateRuleParams<Params>
+): ValidatedRuleData<Params> {
+  if (params.ruleData.error) {
+    throw params.ruleData.error;
   }
+
+  const {
+    ruleData: {
+      data: { indirectParams, rule, fakeRequest, rulesClient, version },
+    },
+    ruleTypeRegistry,
+    paramValidator,
+    alertingEventLogger,
+  } = params;
+
+  const { enabled, apiKey } = indirectParams;
 
   if (!enabled) {
     throw new ErrorWithReason(
@@ -56,9 +74,7 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
       new Error(`Rule failed to execute because rule ran after it was disabled.`)
     );
   }
-
   alertingEventLogger.setRuleName(rule.name);
-
   try {
     ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
   } catch (err) {
@@ -81,10 +97,12 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
 
   return {
     rule,
+    indirectParams,
     fakeRequest,
     apiKey,
     rulesClient,
     validatedParams,
+    version,
   };
 }
 
@@ -92,14 +110,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
   context: TaskRunnerContext,
   ruleId: string,
   spaceId: string
-): Promise<{
-  apiKey: string | null;
-  enabled: boolean;
-  consumer: string;
-  rule: SanitizedRule<Params>;
-  fakeRequest: CoreKibanaRequest;
-  rulesClient: RulesClientApi;
-}> {
+): Promise<RuleData<Params>> {
   const namespace = context.spaceIdToNamespace(spaceId);
 
   const rawRule = await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
@@ -121,9 +132,8 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
 
   return {
     rule,
-    apiKey: rawRule.attributes.apiKey,
-    enabled: rawRule.attributes.enabled,
-    consumer: rawRule.attributes.consumer,
+    version: rawRule.version,
+    indirectParams: rawRule.attributes,
     fakeRequest,
     rulesClient,
   };

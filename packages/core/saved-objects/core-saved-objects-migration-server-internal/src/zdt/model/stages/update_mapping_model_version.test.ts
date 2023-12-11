@@ -42,7 +42,7 @@ describe('Stage: updateMappingModelVersion', () => {
     expect(newState.currentIndexMeta).toEqual(
       setMetaMappingMigrationComplete({
         meta: state.currentIndexMeta,
-        versions: context.typeModelVersions,
+        versions: context.typeVirtualVersions,
       })
     );
   });

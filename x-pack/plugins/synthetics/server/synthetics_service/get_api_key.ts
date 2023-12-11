@@ -6,14 +6,15 @@
  */
 import type {
   SecurityClusterPrivilege,
+  SecurityCreateApiKeyResponse,
   SecurityIndexPrivilege,
 } from '@elastic/elasticsearch/lib/api/types';
 import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
-import { syntheticsServiceAPIKeySavedObject } from '../legacy_uptime/lib/saved_objects/service_api_key';
+import { SyntheticsServerSetup } from '../types';
+import { syntheticsServiceAPIKeySavedObject } from '../saved_objects/service_api_key';
 import { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
-import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { checkHasPrivileges } from './authentication/check_has_privilege';
 
 export const syntheticsIndex = 'synthetics-*';
@@ -37,7 +38,7 @@ export const serviceApiKeyPrivileges = {
 export const getAPIKeyForSyntheticsService = async ({
   server,
 }: {
-  server: UptimeServerSetup;
+  server: SyntheticsServerSetup;
 }): Promise<{ apiKey?: SyntheticsServiceApiKey; isValid: boolean }> => {
   try {
     const apiKey = await syntheticsServiceAPIKeySavedObject.get(server);
@@ -79,44 +80,15 @@ export const getAPIKeyForSyntheticsService = async ({
 export const generateAPIKey = async ({
   server,
   request,
-  uptimePrivileges = false,
 }: {
-  server: UptimeServerSetup;
+  server: SyntheticsServerSetup;
   request: KibanaRequest;
-  uptimePrivileges?: boolean;
 }) => {
   const { security } = server;
   const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
 
   if (!isApiKeysEnabled) {
     throw new Error('Please enable API keys in kibana to use synthetics service.');
-  }
-
-  if (uptimePrivileges) {
-    /* Exposed to the user. Must create directly with the user */
-    return security.authc.apiKeys?.create(request, {
-      name: 'synthetics-api-key (required for project monitors)',
-      kibana_role_descriptors: {
-        uptime_save: {
-          elasticsearch: {},
-          kibana: [
-            {
-              base: [],
-              spaces: [ALL_SPACES_ID],
-              feature: {
-                uptime: ['all'],
-                fleet: ['all'],
-                fleetv2: ['all'],
-              },
-            },
-          ],
-        },
-      },
-      metadata: {
-        description:
-          'Created for the Synthetics Agent to be able to communicate with Kibana for generating monitors for projects',
-      },
-    });
   }
 
   const { canEnable } = await hasEnablePermissions(server);
@@ -126,7 +98,7 @@ export const generateAPIKey = async ({
 
   /* Not exposed to the user. May grant as internal user */
   return security.authc.apiKeys?.grantAsInternalUser(request, {
-    name: 'synthetics-api-key (required for monitor management)',
+    name: 'synthetics-api-key (required for Synthetics App)',
     role_descriptors: {
       synthetics_writer: serviceApiKeyPrivileges,
     },
@@ -137,12 +109,52 @@ export const generateAPIKey = async ({
   });
 };
 
+export const generateProjectAPIKey = async ({
+  server,
+  request,
+  accessToElasticManagedLocations = true,
+}: {
+  server: SyntheticsServerSetup;
+  request: KibanaRequest;
+  accessToElasticManagedLocations?: boolean;
+}): Promise<SecurityCreateApiKeyResponse | null> => {
+  const { security } = server;
+  const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
+
+  if (!isApiKeysEnabled) {
+    throw new Error('Please enable API keys in kibana to use synthetics service.');
+  }
+
+  /* Exposed to the user. Must create directly with the user */
+  return security.authc.apiKeys?.create(request, {
+    name: 'synthetics-api-key (required for project monitors)',
+    kibana_role_descriptors: {
+      uptime_save: {
+        elasticsearch: {},
+        kibana: [
+          {
+            base: [],
+            spaces: [ALL_SPACES_ID],
+            feature: {
+              uptime: [accessToElasticManagedLocations ? 'all' : 'minimal_all'],
+            },
+          },
+        ],
+      },
+    },
+    metadata: {
+      description:
+        'Created for the Synthetics Agent to be able to communicate with Kibana for generating monitors for projects',
+    },
+  });
+};
+
 export const generateAndSaveServiceAPIKey = async ({
   server,
   request,
   authSavedObjectsClient,
 }: {
-  server: UptimeServerSetup;
+  server: SyntheticsServerSetup;
   request: KibanaRequest;
   // authSavedObject is needed for write operations
   authSavedObjectsClient?: SavedObjectsClientContract;
@@ -160,7 +172,7 @@ export const generateAndSaveServiceAPIKey = async ({
   }
 };
 
-export const getSyntheticsEnablement = async ({ server }: { server: UptimeServerSetup }) => {
+export const getSyntheticsEnablement = async ({ server }: { server: SyntheticsServerSetup }) => {
   const { security, config } = server;
 
   const [apiKey, hasPrivileges, areApiKeysEnabled] = await Promise.all([
@@ -171,7 +183,7 @@ export const getSyntheticsEnablement = async ({ server }: { server: UptimeServer
 
   const { canEnable, canManageApiKeys } = hasPrivileges;
 
-  if (!config.service?.manifestUrl) {
+  if (!config.service?.manifestUrl && !config.service?.devUrl) {
     return {
       canEnable: true,
       canManageApiKeys,
@@ -190,7 +202,7 @@ export const getSyntheticsEnablement = async ({ server }: { server: UptimeServer
   };
 };
 
-const hasEnablePermissions = async ({ uptimeEsClient }: UptimeServerSetup) => {
+const hasEnablePermissions = async ({ uptimeEsClient }: SyntheticsServerSetup) => {
   const hasPrivileges = await uptimeEsClient.baseESClient.security.hasPrivileges({
     body: {
       cluster: [

@@ -1,24 +1,37 @@
 {
   "watcher.stats": {
     "url_params": {
-      "metric": [],
-      "emit_stacktraces": "__flag__"
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "emit_stacktraces": "__flag__",
+      "metric": [
+        "_all",
+        "queued_watches",
+        "current_watches",
+        "pending_watches"
+      ]
+    },
+    "url_components": {
+      "metric": [
+        "_all",
+        "queued_watches",
+        "current_watches",
+        "pending_watches"
+      ]
     },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_watcher/stats",
-      "_watcher/stats/{metrics}"
+      "_watcher/stats/{metric}"
     ],
-    "url_components": {
-      "metrics": [
-        "_all",
-        "current_watches",
-        "pending_watches",
-        "queued_watches"
-      ]
-    },
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-stats.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-stats.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

@@ -5,8 +5,9 @@
 ++++
 <titleabbrev>Security</titleabbrev>
 ++++
-:keywords: administrator, analyst, concept, setup, security
-:description: Consider the production components for {kib} security.
+
+:frontmatter-description: Consider the production components for {kib} security.
+:frontmatter-tags-products: [kibana]
 
 To secure your {kib} installation in production, consider these high-priority topics to ensure
 that only authorized users can access {kib}.

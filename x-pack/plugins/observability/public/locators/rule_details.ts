@@ -9,13 +9,14 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { ruleDetailsLocatorID } from '../../common';
-import { ALL_ALERTS } from '../components/shared/alert_search_bar/constants';
+import { RULES_PATH } from '../../common/locators/paths';
+import { ALL_ALERTS } from '../components/alert_search_bar/constants';
 import {
-  ALERTS_TAB,
-  EXECUTION_TAB,
-  SEARCH_BAR_URL_STORAGE_KEY,
+  RULE_DETAILS_ALERTS_TAB,
+  RULE_DETAILS_EXECUTION_TAB,
+  RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY,
 } from '../pages/rule_details/constants';
-import type { TabId } from '../pages/rule_details/types';
+import type { TabId } from '../pages/rule_details/rule_details';
 import type { AlertStatus } from '../../common/typings';
 
 export interface RuleDetailsLocatorParams extends SerializableRecord {
@@ -28,7 +29,7 @@ export interface RuleDetailsLocatorParams extends SerializableRecord {
 }
 
 export const getRuleDetailsPath = (ruleId: string) => {
-  return `/alerts/rules/${encodeURI(ruleId)}`;
+  return `${RULES_PATH}/${encodeURI(ruleId)}`;
 };
 
 export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetailsLocatorParams> {
@@ -51,15 +52,15 @@ export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetai
 
     let path = getRuleDetailsPath(ruleId);
 
-    if (tabId === ALERTS_TAB) {
+    if (tabId === RULE_DETAILS_ALERTS_TAB) {
       path = `${path}?tabId=${tabId}`;
       path = setStateToKbnUrl(
-        SEARCH_BAR_URL_STORAGE_KEY,
+        RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY,
         appState,
         { useHash: false, storeInHashQuery: false },
         path
       );
-    } else if (tabId === EXECUTION_TAB) {
+    } else if (tabId === RULE_DETAILS_EXECUTION_TAB) {
       path = `${path}?tabId=${tabId}`;
     }
 

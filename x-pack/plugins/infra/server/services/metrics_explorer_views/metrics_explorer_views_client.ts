@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import type {
+import {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
+  SavedObjectsUtils,
 } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import {
+  metricsExplorerViewAttributesRT,
   staticMetricsExplorerViewAttributes,
   staticMetricsExplorerViewId,
 } from '../../../common/metrics_explorer_views';
 import type {
   CreateMetricsExplorerViewAttributesRequestPayload,
+  FindMetricsExplorerViewResponsePayload,
+  GetMetricsExplorerViewResponsePayload,
   MetricsExplorerViewRequestQuery,
+  UpdateMetricsExplorerViewResponsePayload,
 } from '../../../common/http_api/latest';
 import type {
   MetricsExplorerView,
@@ -40,7 +45,9 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
   static STATIC_VIEW_ID = '0';
   static DEFAULT_SOURCE_ID = 'default';
 
-  public async find(query: MetricsExplorerViewRequestQuery): Promise<MetricsExplorerView[]> {
+  public async find(
+    query: MetricsExplorerViewRequestQuery
+  ): Promise<FindMetricsExplorerViewResponsePayload['data']> {
     this.logger.debug('Trying to load metrics explorer views ...');
 
     const sourceId = query.sourceId ?? MetricsExplorerViewsClient.DEFAULT_SOURCE_ID;
@@ -70,7 +77,7 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
   public async get(
     metricsExplorerViewId: string,
     query: MetricsExplorerViewRequestQuery
-  ): Promise<MetricsExplorerView> {
+  ): Promise<GetMetricsExplorerViewResponsePayload> {
     this.logger.debug(`Trying to load metrics explorer view with id ${metricsExplorerViewId} ...`);
 
     const sourceId = query.sourceId ?? MetricsExplorerViewsClient.DEFAULT_SOURCE_ID;
@@ -98,43 +105,28 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
     );
   }
 
-  public async create(
-    attributes: CreateMetricsExplorerViewAttributesRequestPayload
-  ): Promise<MetricsExplorerView> {
-    this.logger.debug(`Trying to create metrics explorer view ...`);
-
-    // Validate there is not a view with the same name
-    await this.assertNameConflict(attributes.name);
-
-    const metricsExplorerViewSavedObject = await this.savedObjectsClient.create(
-      metricsExplorerViewSavedObjectName,
-      attributes
-    );
-
-    return this.mapSavedObjectToMetricsExplorerView(metricsExplorerViewSavedObject);
-  }
-
   public async update(
-    metricsExplorerViewId: string,
+    metricsExplorerViewId: string | null,
     attributes: CreateMetricsExplorerViewAttributesRequestPayload,
     query: MetricsExplorerViewRequestQuery
-  ): Promise<MetricsExplorerView> {
+  ): Promise<UpdateMetricsExplorerViewResponsePayload> {
     this.logger.debug(
       `Trying to update metrics explorer view with id "${metricsExplorerViewId}"...`
     );
 
+    const viewId = metricsExplorerViewId ?? SavedObjectsUtils.generateId();
+
     // Validate there is not a view with the same name
-    await this.assertNameConflict(attributes.name, [metricsExplorerViewId]);
+    await this.assertNameConflict(attributes.name, [viewId]);
 
     const sourceId = query.sourceId ?? MetricsExplorerViewsClient.DEFAULT_SOURCE_ID;
 
     const [sourceConfiguration, metricsExplorerViewSavedObject] = await Promise.all([
       this.infraSources.getSourceConfiguration(this.savedObjectsClient, sourceId),
-      this.savedObjectsClient.update(
-        metricsExplorerViewSavedObjectName,
-        metricsExplorerViewId,
-        attributes
-      ),
+      this.savedObjectsClient.create(metricsExplorerViewSavedObjectName, attributes, {
+        id: viewId,
+        overwrite: true,
+      }),
     ]);
 
     return this.mapSavedObjectToMetricsExplorerView(
@@ -161,10 +153,10 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
     });
   }
 
-  private mapSavedObjectToMetricsExplorerView(
-    savedObject: SavedObject | SavedObjectsUpdateResponse,
+  private mapSavedObjectToMetricsExplorerView<T>(
+    savedObject: SavedObject<T> | SavedObjectsUpdateResponse<T>,
     defaultViewId?: string
-  ) {
+  ): MetricsExplorerView {
     const metricsExplorerViewSavedObject = decodeOrThrow(metricsExplorerViewSavedObjectRT)(
       savedObject
     );
@@ -174,7 +166,9 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
       version: metricsExplorerViewSavedObject.version,
       updatedAt: metricsExplorerViewSavedObject.updated_at,
       attributes: {
-        ...metricsExplorerViewSavedObject.attributes,
+        ...decodeOrThrow(metricsExplorerViewAttributesRT)(
+          metricsExplorerViewSavedObject.attributes
+        ),
         isDefault: metricsExplorerViewSavedObject.id === defaultViewId,
         isStatic: false,
       },

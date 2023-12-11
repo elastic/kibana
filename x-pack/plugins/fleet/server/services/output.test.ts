@@ -9,8 +9,11 @@ import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/serv
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
-import type { OutputSOAttributes } from '../types';
+import type { Logger } from '@kbn/logging';
 
+import { RESERVED_CONFIG_YML_KEYS } from '../../common/constants';
+
+import type { OutputSOAttributes } from '../types';
 import { OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 
 import { outputService, outputIdToUuid } from './output';
@@ -27,6 +30,17 @@ const mockedAppContextService = appContextService as jest.Mocked<typeof appConte
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
+
+mockedAppContextService.getLogger.mockImplementation(() => {
+  return {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  } as unknown as Logger;
+});
+
+mockedAppContextService.getExperimentalFeatures.mockReturnValue({});
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
@@ -82,6 +96,12 @@ function getMockedSoClient(
           type: 'elasticsearch',
         });
       }
+      case outputIdToUuid('existing-default-and-default-monitoring-output'): {
+        return mockOutputSO('existing-default-and-default-monitoring-output', {
+          is_default: true,
+          is_default_monitoring: true,
+        });
+      }
       case outputIdToUuid('existing-preconfigured-default-output'): {
         return mockOutputSO('existing-preconfigured-default-output', {
           is_default: true,
@@ -89,9 +109,23 @@ function getMockedSoClient(
         });
       }
 
+      case outputIdToUuid('existing-preconfigured-default-output-allow-edit-name'): {
+        return mockOutputSO('existing-preconfigured-default-output-allow-edit-name', {
+          name: 'test',
+          allow_edit: ['name'],
+        });
+      }
+
       case outputIdToUuid('existing-logstash-output'): {
         return mockOutputSO('existing-logstash-output', {
           type: 'logstash',
+          is_default: false,
+        });
+      }
+
+      case outputIdToUuid('existing-kafka-output'): {
+        return mockOutputSO('existing-kafka-output', {
+          type: 'kafka',
           is_default: false,
         });
       }
@@ -181,18 +215,81 @@ function getMockedSoClient(
 describe('Output Service', () => {
   const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
 
+  const mockedAgentPolicyWithFleetServerResolvedValue = {
+    items: [
+      {
+        name: 'fleet server policy',
+        id: 'fleet_server_policy',
+        is_default_fleet_server: true,
+        package_policies: [
+          {
+            name: 'fleet-server-123',
+            package: {
+              name: 'fleet_server',
+            },
+          },
+        ],
+      },
+      {
+        name: 'agent policy 1',
+        id: 'agent_policy_1',
+        is_managed: false,
+        package_policies: [
+          {
+            name: 'nginx',
+            package: {
+              name: 'nginx',
+            },
+          },
+        ],
+      },
+    ],
+  } as unknown as ReturnType<typeof mockedAgentPolicyService.list>;
+
+  const mockedAgentPolicyWithSyntheticsResolvedValue = {
+    items: [
+      {
+        name: 'synthetics policy',
+        id: 'synthetics_policy',
+        package_policies: [
+          {
+            name: 'synthetics-123',
+            package: {
+              name: 'synthetics',
+            },
+          },
+        ],
+      },
+      {
+        name: 'agent policy 1',
+        id: 'agent_policy_1',
+        is_managed: false,
+        package_policies: [
+          {
+            name: 'nginx',
+            package: {
+              name: 'nginx',
+            },
+          },
+        ],
+      },
+    ],
+  } as unknown as ReturnType<typeof mockedAgentPolicyService.list>;
+
   beforeEach(() => {
     mockedAgentPolicyService.list.mockClear();
     mockedAgentPolicyService.hasAPMIntegration.mockClear();
     mockedAgentPolicyService.hasFleetServerIntegration.mockClear();
+    mockedAgentPolicyService.hasSyntheticsIntegration.mockClear();
     mockedAgentPolicyService.removeOutputFromAll.mockReset();
     mockedAppContextService.getInternalUserSOClient.mockReset();
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReset();
     mockedAuditLoggingService.writeCustomSoAuditLog.mockReset();
     mockedAgentPolicyService.update.mockReset();
   });
+
   describe('create', () => {
-    it('work with a predefined id', async () => {
+    it('works with a predefined id', async () => {
       const soClient = getMockedSoClient();
 
       await outputService.create(
@@ -321,7 +418,7 @@ describe('Output Service', () => {
           { id: 'output-test' }
         )
       ).rejects.toThrow(
-        `Preconfigured output existing-preconfigured-default-output cannot be updated outside of kibana config file.`
+        `Preconfigured output existing-preconfigured-default-output is_default cannot be updated outside of kibana config file.`
       );
     });
 
@@ -366,7 +463,26 @@ describe('Output Service', () => {
           },
           { id: 'output-test' }
         )
-      ).rejects.toThrow(`Logstash output needs encrypted saved object api key to be set`);
+      ).rejects.toThrow(`logstash output needs encrypted saved object api key to be set`);
+    });
+
+    it('should throw if encryptedSavedObject is not configured, kafka', async () => {
+      const soClient = getMockedSoClient({});
+
+      await expect(
+        outputService.create(
+          soClient,
+          esClientMock,
+          {
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'Test',
+            type: 'kafka',
+            topics: [{ topic: 'test' }],
+          },
+          { id: 'output-test' }
+        )
+      ).rejects.toThrow(`kafka output needs encrypted saved object api key to be set`);
     });
 
     it('should work if encryptedSavedObject is configured', async () => {
@@ -395,36 +511,9 @@ describe('Output Service', () => {
       mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
         canEncrypt: true,
       } as any);
-      mockedAgentPolicyService.list.mockResolvedValue({
-        items: [
-          {
-            name: 'fleet server policy',
-            id: 'fleet_server_policy',
-            is_default_fleet_server: true,
-            package_policies: [
-              {
-                name: 'fleet-server-123',
-                package: {
-                  name: 'fleet_server',
-                },
-              },
-            ],
-          },
-          {
-            name: 'agent policy 1',
-            id: 'agent_policy_1',
-            is_managed: false,
-            package_policies: [
-              {
-                name: 'nginx',
-                package: {
-                  name: 'nginx',
-                },
-              },
-            ],
-          },
-        ],
-      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await outputService.create(
@@ -448,6 +537,37 @@ describe('Output Service', () => {
       );
     });
 
+    it('should update synthetics policies with data_output_id=default_output_id if a new default logstash output is created', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+      mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+        canEncrypt: true,
+      } as any);
+      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithSyntheticsResolvedValue);
+      mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(true);
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: true,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'logstash',
+        },
+        { id: 'output-1' }
+      );
+
+      expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'synthetics_policy',
+        { data_output_id: 'output-test' },
+        { force: false }
+      );
+    });
+
     it('Should allow to create a new logstash output with no errors if is not set as default', async () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'output-test',
@@ -455,36 +575,9 @@ describe('Output Service', () => {
       mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
         canEncrypt: true,
       } as any);
-      mockedAgentPolicyService.list.mockResolvedValue({
-        items: [
-          {
-            name: 'fleet server policy',
-            id: 'fleet_server_policy',
-            is_default_fleet_server: true,
-            package_policies: [
-              {
-                name: 'fleet-server-123',
-                package: {
-                  name: 'fleet_server',
-                },
-              },
-            ],
-          },
-          {
-            name: 'agent policy 1',
-            id: 'agent_policy_1',
-            is_managed: false,
-            package_policies: [
-              {
-                name: 'nginx',
-                package: {
-                  name: 'nginx',
-                },
-              },
-            ],
-          },
-        ],
-      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await outputService.create(
@@ -520,6 +613,234 @@ describe('Output Service', () => {
         id: outputIdToUuid('output-test'),
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
+    });
+
+    // With kafka output
+    it('Should update fleet server policies with data_output_id=default_output_id if a new default kafka output is created', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+      mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+        canEncrypt: true,
+      } as any);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: true,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'kafka',
+        },
+        { id: 'output-1' }
+      );
+
+      expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'fleet_server_policy',
+        { data_output_id: 'output-test' },
+        { force: false }
+      );
+    });
+
+    it('Should update synthetics policies with data_output_id=default_output_id if a new default kafka output is created', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+      mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+        canEncrypt: true,
+      } as any);
+      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithSyntheticsResolvedValue);
+      mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(true);
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: true,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'kafka',
+        },
+        { id: 'output-1' }
+      );
+
+      expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'synthetics_policy',
+        { data_output_id: 'output-test' },
+        { force: false }
+      );
+    });
+
+    it('Should allow to create a new kafka output with no errors if is not set as default', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+      mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+        canEncrypt: true,
+      } as any);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'kafka',
+        },
+        { id: 'output-1' }
+      );
+    });
+
+    it('should throw when a remote es output is attempted to be created as default data output', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+
+      await expect(
+        outputService.create(
+          soClient,
+          esClientMock,
+          {
+            is_default: true,
+            is_default_monitoring: false,
+            name: 'Test',
+            type: 'remote_elasticsearch',
+          },
+          { id: 'output-1' }
+        )
+      ).rejects.toThrow(
+        `Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.`
+      );
+    });
+
+    it('should set preset: balanced by default when creating a new ES output', async () => {
+      const soClient = getMockedSoClient({});
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'elasticsearch',
+        },
+        {
+          id: 'output-1',
+        }
+      );
+
+      expect(soClient.create).toBeCalledWith(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        // Preset should be inferred as balanced if not provided
+        expect.objectContaining({
+          preset: 'balanced',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should set preset: custom when config_yaml contains a reserved key', async () => {
+      const soClient = getMockedSoClient({});
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'elasticsearch',
+          config_yaml: `
+            bulk_max_size: 1000
+          `,
+        },
+        {
+          id: 'output-1',
+        }
+      );
+
+      expect(soClient.create).toBeCalledWith(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          preset: 'custom',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should honor preset: custom in attributes', async () => {
+      const soClient = getMockedSoClient({});
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'elasticsearch',
+          config_yaml: `
+            some_non_reserved_key: foo
+          `,
+          preset: 'custom',
+        },
+        {
+          id: 'output-1',
+        }
+      );
+
+      expect(soClient.create).toBeCalledWith(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          preset: 'custom',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should throw an error when preset: balanced is provided but config_yaml contains a reserved key', async () => {
+      const soClient = getMockedSoClient({});
+
+      expect(
+        outputService.create(
+          soClient,
+          esClientMock,
+          {
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'Test',
+            type: 'elasticsearch',
+            config_yaml: `
+            bulk_max_size: 1000
+          `,
+            preset: 'balanced',
+          },
+          {
+            id: 'output-1',
+          }
+        )
+      ).rejects.toThrow(
+        `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
+          ', '
+        )}`
+      );
+
+      expect(soClient.create).not.toBeCalled();
     });
   });
 
@@ -562,6 +883,46 @@ describe('Output Service', () => {
       );
     });
 
+    it('should not set default output to false when the output is already the default one', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-and-default-monitoring-output',
+      });
+
+      await expect(
+        outputService.update(
+          soClient,
+          esClientMock,
+          'existing-default-and-default-monitoring-output',
+          {
+            is_default: false,
+            name: 'Test',
+          }
+        )
+      ).rejects.toThrow(
+        `Default output existing-default-and-default-monitoring-output cannot be set to is_default=false or is_default_monitoring=false manually. Make another output the default first.`
+      );
+    });
+
+    it('should not set default monitoring output to false when the output is already the default one', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-and-default-monitoring-output',
+      });
+
+      await expect(
+        outputService.update(
+          soClient,
+          esClientMock,
+          'existing-default-and-default-monitoring-output',
+          {
+            is_default_monitoring: false,
+            name: 'Test',
+          }
+        )
+      ).rejects.toThrow(
+        `Default output existing-default-and-default-monitoring-output cannot be set to is_default=false or is_default_monitoring=false manually. Make another output the default first.`
+      );
+    });
+
     it('should update existing default monitoring output when updating an output to become the default monitoring output', async () => {
       const soClient = getMockedSoClient({
         defaultOutputMonitoringId: 'existing-default-monitoring-output',
@@ -587,10 +948,10 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient();
       await expect(
         outputService.update(soClient, esClientMock, 'existing-preconfigured-default-output', {
-          config_yaml: '',
+          config_yaml: 'test: 123',
         })
       ).rejects.toThrow(
-        'Preconfigured output existing-preconfigured-default-output cannot be updated outside of kibana config file.'
+        'Preconfigured output existing-preconfigured-default-output config_yaml cannot be updated outside of kibana config file.'
       );
     });
 
@@ -611,6 +972,23 @@ describe('Output Service', () => {
       expect(soClient.update).toBeCalled();
     });
 
+    it('Allow to update preconfigured output allowed to edit field from preconfiguration', async () => {
+      const soClient = getMockedSoClient();
+      await outputService.update(
+        soClient,
+        esClientMock,
+        'existing-preconfigured-default-output-allow-edit-name',
+        {
+          name: 'test 123',
+        },
+        {
+          fromPreconfiguration: false,
+        }
+      );
+
+      expect(soClient.update).toBeCalled();
+    });
+
     it('Should throw when an existing preconfigured default output and updating an output to become the default one outside of preconfiguration', async () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'existing-preconfigured-default-output',
@@ -624,7 +1002,7 @@ describe('Output Service', () => {
           type: 'elasticsearch',
         })
       ).rejects.toThrow(
-        `Preconfigured output existing-preconfigured-default-output cannot be updated outside of kibana config file.`
+        `Preconfigured output existing-preconfigured-default-output is_default cannot be updated outside of kibana config file.`
       );
     });
 
@@ -671,6 +1049,46 @@ describe('Output Service', () => {
         type: 'elasticsearch',
         hosts: ['http://test:4343'],
         ssl: null,
+        preset: 'balanced',
+      });
+    });
+
+    it('Should delete Kafka specific fields if the output type change to ES', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+
+      await outputService.update(soClient, esClientMock, 'existing-kafka-output', {
+        type: 'elasticsearch',
+        hosts: ['http://test:4343'],
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'elasticsearch',
+        hosts: ['http://test:4343'],
+        auth_type: null,
+        connection_type: null,
+        broker_timeout: null,
+        required_acks: null,
+        client_id: null,
+        compression: null,
+        compression_level: null,
+        hash: null,
+        key: null,
+        partition: null,
+        password: null,
+        random: null,
+        round_robin: null,
+        sasl: null,
+        ssl: null,
+        timeout: null,
+        topics: null,
+        headers: null,
+        username: null,
+        version: null,
+        preset: 'balanced',
       });
     });
 
@@ -714,7 +1132,7 @@ describe('Output Service', () => {
       });
     });
 
-    it('Should throw if you try to make that output the default output and somne policies using default output has APM integration', async () => {
+    it('Should throw if you try to make that output the default output and some policies using default output has APM integration', async () => {
       const soClient = getMockedSoClient({});
       mockedAgentPolicyService.list.mockResolvedValue({
         items: [{}],
@@ -735,6 +1153,7 @@ describe('Output Service', () => {
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(false);
 
       await outputService.update(soClient, esClientMock, 'existing-es-output', {
         type: 'logstash',
@@ -749,40 +1168,54 @@ describe('Output Service', () => {
       });
     });
 
+    it('Should delete Kafka specific fields if the output type changes to logstash', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+
+      await outputService.update(soClient, esClientMock, 'existing-kafka-output', {
+        type: 'logstash',
+        hosts: ['test:4343'],
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'logstash',
+        hosts: ['test:4343'],
+        ca_sha256: null,
+        ca_trusted_fingerprint: null,
+        auth_type: null,
+        connection_type: null,
+        broker_timeout: null,
+        required_acks: null,
+        client_id: null,
+        compression: null,
+        compression_level: null,
+        hash: null,
+        ssl: null,
+        key: null,
+        partition: null,
+        password: null,
+        random: null,
+        round_robin: null,
+        sasl: null,
+        timeout: null,
+        topics: null,
+        headers: null,
+        username: null,
+        version: null,
+      });
+    });
+
     it('Should update fleet server policies with data_output_id=default_output_id if a default ES output is changed to logstash', async () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'output-test',
       });
-      mockedAgentPolicyService.list.mockResolvedValue({
-        items: [
-          {
-            name: 'fleet server policy',
-            id: 'fleet_server_policy',
-            is_default_fleet_server: true,
-            package_policies: [
-              {
-                name: 'fleet-server-123',
-                package: {
-                  name: 'fleet_server',
-                },
-              },
-            ],
-          },
-          {
-            name: 'agent policy 1',
-            id: 'agent_policy_1',
-            is_managed: false,
-            package_policies: [
-              {
-                name: 'nginx',
-                package: {
-                  name: 'nginx',
-                },
-              },
-            ],
-          },
-        ],
-      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await outputService.update(soClient, esClientMock, 'output-test', {
@@ -811,36 +1244,9 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'output-test',
       });
-      mockedAgentPolicyService.list.mockResolvedValue({
-        items: [
-          {
-            name: 'fleet server policy',
-            id: 'fleet_server_policy',
-            is_default_fleet_server: true,
-            package_policies: [
-              {
-                name: 'fleet-server-123',
-                package: {
-                  name: 'fleet_server',
-                },
-              },
-            ],
-          },
-          {
-            name: 'agent policy 1',
-            id: 'agent_policy_1',
-            is_managed: false,
-            package_policies: [
-              {
-                name: 'nginx',
-                package: {
-                  name: 'nginx',
-                },
-              },
-            ],
-          },
-        ],
-      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await outputService.update(
@@ -873,38 +1279,77 @@ describe('Output Service', () => {
       );
     });
 
+    it('should update synthetics policies with data_output_id=default_output_id if a default ES output is changed to logstash', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithSyntheticsResolvedValue);
+      mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(true);
+
+      await outputService.update(soClient, esClientMock, 'output-test', {
+        type: 'logstash',
+        hosts: ['test:4343'],
+        is_default: true,
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'logstash',
+        hosts: ['test:4343'],
+        is_default: true,
+        ca_sha256: null,
+        ca_trusted_fingerprint: null,
+      });
+      expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'synthetics_policy',
+        { data_output_id: 'output-test' },
+        { force: false }
+      );
+    });
+
+    it('should update synthetics policies with data_output_id=default_output_id and force=true if a default ES output is changed to logstash, from preconfiguration', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithSyntheticsResolvedValue);
+      mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(true);
+
+      await outputService.update(
+        soClient,
+        esClientMock,
+        'output-test',
+        {
+          type: 'logstash',
+          hosts: ['test:4343'],
+          is_default: true,
+        },
+        {
+          fromPreconfiguration: true,
+        }
+      );
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'logstash',
+        hosts: ['test:4343'],
+        is_default: true,
+        ca_sha256: null,
+        ca_trusted_fingerprint: null,
+      });
+      expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'synthetics_policy',
+        { data_output_id: 'output-test' },
+        { force: true }
+      );
+    });
+
     it('Should return an error if trying to change the output to logstash for fleet server policy', async () => {
       const soClient = getMockedSoClient({});
-      mockedAgentPolicyService.list.mockResolvedValue({
-        items: [
-          {
-            name: 'fleet server policy',
-            id: 'fleet_server_policy',
-            is_default_fleet_server: true,
-            package_policies: [
-              {
-                name: 'fleet-server-123',
-                package: {
-                  name: 'fleet_server',
-                },
-              },
-            ],
-          },
-          {
-            name: 'agent policy 1',
-            id: 'agent_policy_1',
-            is_managed: false,
-            package_policies: [
-              {
-                name: 'nginx',
-                package: {
-                  name: 'nginx',
-                },
-              },
-            ],
-          },
-        ],
-      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await expect(
@@ -914,6 +1359,22 @@ describe('Output Service', () => {
         })
       ).rejects.toThrowError(
         'Logstash output cannot be used with Fleet Server integration in fleet server policy. Please create a new ElasticSearch output.'
+      );
+    });
+
+    it('Should return an error if trying to change the output to logstash for synthetics policy', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithSyntheticsResolvedValue);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(true);
+
+      await expect(
+        outputService.update(soClient, esClientMock, 'existing-es-output', {
+          type: 'logstash',
+          hosts: ['test:4343'],
+        })
+      ).rejects.toThrowError(
+        'Logstash output cannot be used with Synthetics integration in synthetics policy. Please create a new ElasticSearch output.'
       );
     });
 
@@ -929,6 +1390,275 @@ describe('Output Service', () => {
         id: outputIdToUuid('existing-es-output'),
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
+    });
+
+    // With Kafka output
+    it('Should delete ES specific fields if the output type changes to kafka', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(false);
+
+      await outputService.update(soClient, esClientMock, 'existing-es-output', {
+        type: 'kafka',
+        hosts: ['test:4343'],
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'kafka',
+        hosts: ['test:4343'],
+        ca_sha256: null,
+        ca_trusted_fingerprint: null,
+        password: null,
+        username: null,
+        ssl: null,
+        sasl: null,
+        broker_timeout: 10,
+        required_acks: 1,
+        client_id: 'Elastic',
+        compression: 'gzip',
+        compression_level: 4,
+        partition: 'hash',
+        timeout: 30,
+        version: '1.0.0',
+      });
+    });
+
+    it('Should delete Logstash specific fields if the output type changes to kafka', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+
+      await outputService.update(soClient, esClientMock, 'existing-logstash-output', {
+        type: 'kafka',
+        hosts: ['test:4343'],
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        hosts: ['test:4343'],
+        broker_timeout: 10,
+        required_acks: 1,
+        ca_sha256: null,
+        ca_trusted_fingerprint: null,
+        password: null,
+        username: null,
+        ssl: null,
+        sasl: null,
+        client_id: 'Elastic',
+        compression: 'gzip',
+        compression_level: 4,
+        partition: 'hash',
+        timeout: 30,
+        type: 'kafka',
+        version: '1.0.0',
+      });
+    });
+
+    it('Should update fleet server policies with data_output_id=default_output_id if a default ES output is changed to kafka', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+
+      await outputService.update(soClient, esClientMock, 'output-test', {
+        type: 'kafka',
+        hosts: ['test:4343'],
+        is_default: true,
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'kafka',
+        hosts: ['test:4343'],
+        is_default: true,
+        ca_sha256: null,
+        ca_trusted_fingerprint: null,
+        password: null,
+        username: null,
+        ssl: null,
+        sasl: null,
+        client_id: 'Elastic',
+        compression: 'gzip',
+        compression_level: 4,
+        partition: 'hash',
+        timeout: 30,
+        version: '1.0.0',
+        broker_timeout: 10,
+        required_acks: 1,
+      });
+      expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'fleet_server_policy',
+        { data_output_id: 'output-test' },
+        { force: false }
+      );
+    });
+
+    it('Should update fleet server policies with data_output_id=default_output_id and force=true if a default ES output is changed to kafka, from preconfiguration', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+
+      await outputService.update(
+        soClient,
+        esClientMock,
+        'output-test',
+        {
+          type: 'kafka',
+          hosts: ['test:4343'],
+          is_default: true,
+        },
+        {
+          fromPreconfiguration: true,
+        }
+      );
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'kafka',
+        hosts: ['test:4343'],
+        is_default: true,
+        ca_sha256: null,
+        ca_trusted_fingerprint: null,
+        password: null,
+        username: null,
+        ssl: null,
+        sasl: null,
+        client_id: 'Elastic',
+        compression: 'gzip',
+        compression_level: 4,
+        partition: 'hash',
+        timeout: 30,
+        version: '1.0.0',
+        broker_timeout: 10,
+        required_acks: 1,
+      });
+      expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'fleet_server_policy',
+        { data_output_id: 'output-test' },
+        { force: true }
+      );
+    });
+
+    it('should update synthetics policies with data_output_id=default_output_id if a default ES output is changed to kafka', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithSyntheticsResolvedValue);
+      mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(true);
+
+      await outputService.update(soClient, esClientMock, 'output-test', {
+        type: 'kafka',
+        hosts: ['test:4343'],
+        is_default: true,
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'kafka',
+        hosts: ['test:4343'],
+        is_default: true,
+        ca_sha256: null,
+        ca_trusted_fingerprint: null,
+        password: null,
+        username: null,
+        ssl: null,
+        sasl: null,
+        client_id: 'Elastic',
+        compression: 'gzip',
+        compression_level: 4,
+        partition: 'hash',
+        timeout: 30,
+        version: '1.0.0',
+        broker_timeout: 10,
+        required_acks: 1,
+      });
+      expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'synthetics_policy',
+        { data_output_id: 'output-test' },
+        { force: false }
+      );
+    });
+
+    it('should update synthetics policies with data_output_id=default_output_id and force=true if a default ES output is changed to kafka, from preconfiguration', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithSyntheticsResolvedValue);
+      mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(true);
+
+      await outputService.update(
+        soClient,
+        esClientMock,
+        'output-test',
+        {
+          type: 'kafka',
+          hosts: ['test:4343'],
+          is_default: true,
+        },
+        {
+          fromPreconfiguration: true,
+        }
+      );
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'kafka',
+        hosts: ['test:4343'],
+        is_default: true,
+        ca_sha256: null,
+        ca_trusted_fingerprint: null,
+        password: null,
+        username: null,
+        ssl: null,
+        sasl: null,
+        client_id: 'Elastic',
+        compression: 'gzip',
+        compression_level: 4,
+        partition: 'hash',
+        timeout: 30,
+        version: '1.0.0',
+        broker_timeout: 10,
+        required_acks: 1,
+      });
+      expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'synthetics_policy',
+        { data_output_id: 'output-test' },
+        { force: true }
+      );
+    });
+
+    it('should throw when a remote es output is attempted to be updated as default data output', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+
+      await expect(
+        outputService.update(soClient, esClientMock, 'output-test', {
+          is_default: true,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'remote_elasticsearch',
+        })
+      ).rejects.toThrow(
+        `Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.`
+      );
     });
   });
 
@@ -1026,11 +1756,12 @@ describe('Output Service', () => {
       mockedAppContextService.getConfig.mockReset();
       mockedAppContextService.getConfig.mockReset();
     });
-    it('Should use cloud ID as the source of truth for ES hosts', () => {
+    it('Should use cloud plugin as the source of truth for ES hosts', () => {
       // @ts-expect-error
       mockedAppContextService.getCloud.mockReturnValue({
         isCloudEnabled: true,
         cloudId: CLOUD_ID,
+        elasticsearchUrl: 'https://cec6f261a74bf24ce33bb8811b84294f.us-east-1.aws.found.io:443',
       });
 
       mockedAppContextService.getConfig.mockReturnValue(CONFIG_WITH_ES_HOSTS);
@@ -1066,6 +1797,48 @@ describe('Output Service', () => {
       const hosts = outputService.getDefaultESHosts();
 
       expect(hosts).toEqual(['http://localhost:9200']);
+    });
+  });
+
+  describe('getLatestOutputHealth', () => {
+    it('should return unknown state if no hits', async () => {
+      esClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [],
+        },
+      } as any);
+
+      const response = await outputService.getLatestOutputHealth(esClientMock, 'id');
+
+      expect(response).toEqual({
+        state: 'UNKNOWN',
+        message: '',
+        timestamp: '',
+      });
+    });
+
+    it('should return state from hits', async () => {
+      esClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                state: 'DEGRADED',
+                message: 'connection error',
+                '@timestamp': '2023-11-30T14:25:31Z',
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const response = await outputService.getLatestOutputHealth(esClientMock, 'id');
+
+      expect(response).toEqual({
+        state: 'DEGRADED',
+        message: 'connection error',
+        timestamp: '2023-11-30T14:25:31Z',
+      });
     });
   });
 });

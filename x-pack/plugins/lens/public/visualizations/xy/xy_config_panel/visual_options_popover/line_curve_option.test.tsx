@@ -6,36 +6,26 @@
  */
 
 import React from 'react';
-import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
-import { EuiSwitch } from '@elastic/eui';
 import { LineCurveOption } from './line_curve_option';
+import { lineCurveDefinitions } from './line_curve_definitions';
+import { render, screen } from '@testing-library/react';
 
 describe('Line curve option', () => {
-  it('should show currently selected line curve option', () => {
-    const component = shallow(<LineCurveOption onChange={jest.fn()} value={'CURVE_MONOTONE_X'} />);
+  it.each(lineCurveDefinitions.map((v) => ({ type: v.type, title: v.title })))(
+    `should show currently line curve option - %s`,
+    ({ type, title }) => {
+      render(<LineCurveOption onChange={jest.fn()} value={type} />);
+      expect(screen.getByRole('button')).toHaveTextContent(title);
+    }
+  );
 
-    expect(component.find(EuiSwitch).prop('checked')).toEqual(true);
+  it('should show line curve option when enabled', () => {
+    render(<LineCurveOption onChange={jest.fn()} value={'LINEAR'} enabled={true} />);
+    expect(screen.getByTestId('lnsCurveStyleSelect')).toBeInTheDocument();
   });
 
-  it('should show currently curving disabled', () => {
-    const component = shallow(<LineCurveOption onChange={jest.fn()} value={'LINEAR'} />);
-
-    expect(component.find(EuiSwitch).prop('checked')).toEqual(false);
-  });
-
-  it('should show curving option when enabled', () => {
-    const component = mount(
-      <LineCurveOption onChange={jest.fn()} value={'LINEAR'} isCurveTypeEnabled={true} />
-    );
-
-    expect(component.exists('[data-test-subj="lnsCurveStyleToggle"]')).toEqual(true);
-  });
-
-  it('should hide curve option when disabled', () => {
-    const component = mount(
-      <LineCurveOption onChange={jest.fn()} value={'LINEAR'} isCurveTypeEnabled={false} />
-    );
-
-    expect(component.exists('[data-test-subj="lnsCurveStyleToggle"]')).toEqual(false);
+  it('should hide line curve option when disabled', () => {
+    render(<LineCurveOption onChange={jest.fn()} value={'LINEAR'} enabled={false} />);
+    expect(screen.queryByTestId('lnsCurveStyleSelect')).not.toBeInTheDocument();
   });
 });

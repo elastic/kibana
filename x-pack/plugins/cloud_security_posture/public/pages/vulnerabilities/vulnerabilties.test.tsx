@@ -6,16 +6,14 @@
  */
 import React from 'react';
 import Chance from 'chance';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { Vulnerabilities } from './vulnerabilities';
 import {
+  CSP_LATEST_FINDINGS_DATA_VIEW,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
@@ -26,13 +24,13 @@ import {
 } from '../../components/test_subjects';
 import { render } from '@testing-library/react';
 import { expectIdsInDoc } from '../../test/utils';
-import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT } from '../../components/cloud_posture_page';
 import { TestProvider } from '../../test/test_provider';
+import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
+import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_csp_integration_link');
@@ -48,20 +46,27 @@ beforeEach(() => {
       data: true,
     })
   );
+
+  (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
+    createReactQueryResponse({
+      status: 'success',
+      data: true,
+    })
+  );
+
+  (useLatestFindingsDataView as jest.Mock).mockReturnValue({
+    status: 'success',
+    data: createStubDataView({
+      spec: {
+        id: CSP_LATEST_FINDINGS_DATA_VIEW,
+      },
+    }),
+  });
 });
 
 const renderVulnerabilitiesPage = () => {
   render(
-    <TestProvider
-      deps={{
-        data: dataPluginMock.createStartContract(),
-        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-        charts: chartPluginMock.createStartContract(),
-        discover: discoverPluginMock.createStartContract(),
-        fleet: fleetMock.createStartMock(),
-        licensing: licensingMock.createStart(),
-      }}
-    >
+    <TestProvider>
       <Vulnerabilities />
     </TestProvider>
   );
@@ -84,11 +89,11 @@ describe('<Vulnerabilities />', () => {
     renderVulnerabilitiesPage();
 
     expectIdsInDoc({
-      be: [VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
+      be: [NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_DEPLOYED],
       notToBe: [
         VULNERABILITIES_CONTAINER_TEST_SUBJ,
+        NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED,
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.SCANNING_VULNERABILITIES,
-        NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
@@ -112,7 +117,7 @@ describe('<Vulnerabilities />', () => {
       be: [NO_VULNERABILITIES_STATUS_TEST_SUBJ.SCANNING_VULNERABILITIES],
       notToBe: [
         VULNERABILITIES_CONTAINER_TEST_SUBJ,
-        NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED,
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
@@ -129,7 +134,6 @@ describe('<Vulnerabilities />', () => {
       })
     );
     (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
-
     renderVulnerabilitiesPage();
 
     expectIdsInDoc({
@@ -160,8 +164,8 @@ describe('<Vulnerabilities />', () => {
       be: [NO_VULNERABILITIES_STATUS_TEST_SUBJ.UNPRIVILEGED],
       notToBe: [
         VULNERABILITIES_CONTAINER_TEST_SUBJ,
+        NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED,
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.SCANNING_VULNERABILITIES,
-        NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
       ],
     });
   });
@@ -191,11 +195,10 @@ describe('<Vulnerabilities />', () => {
     renderVulnerabilitiesPage();
 
     expectIdsInDoc({
-      be: [VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
+      be: [NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED],
       notToBe: [
         VULNERABILITIES_CONTAINER_TEST_SUBJ,
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.SCANNING_VULNERABILITIES,
-        NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });

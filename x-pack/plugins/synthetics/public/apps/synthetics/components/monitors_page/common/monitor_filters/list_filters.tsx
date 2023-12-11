@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FilterGroup } from './filter_group';
 import { SearchField } from '../search_field';
-import { SyntheticsMonitorFilterChangeHandler } from './filter_fields';
+import { SyntheticsMonitorFilterChangeHandler } from '../../../../utils/filters/filter_fields';
 
 export const ListFilters = function ({
   handleFilterChange,

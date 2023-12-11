@@ -22,29 +22,15 @@ import numeral from '@elastic/numeral';
 import { ReactNode } from 'react';
 import React from 'react';
 
-import { euiStyled, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { isEmpty } from 'lodash';
 import { GetInspectQuery } from '../../../../../../types';
 import * as i18n from './translations';
 
-const DescriptionListStyled = euiStyled(EuiDescriptionList)`
-  @media only screen and (min-width: ${({ theme }: { theme: EuiTheme }) =>
-    theme.eui.euiBreakpoints.s}) {
-    .euiDescriptionList__title {
-      width: 30% !important;
-    }
-
-    .euiDescriptionList__description {
-      width: 70% !important;
-    }
-  }
-`;
-
-DescriptionListStyled.displayName = 'DescriptionListStyled';
-
 export interface ModalInspectProps {
   closeModal: () => void;
   getInspectQuery: GetInspectQuery;
+  title: string;
 }
 
 interface Request {
@@ -91,7 +77,7 @@ const stringify = (object: Request | Response): string => {
   }
 };
 
-const ModalInspectQueryComponent = ({ closeModal, getInspectQuery }: ModalInspectProps) => {
+const ModalInspectQueryComponent = ({ closeModal, getInspectQuery, title }: ModalInspectProps) => {
   const { request, response } = getInspectQuery();
   // using index 0 as there will be only one request and response for now
   const parsedRequest: Request = parse(request[0]);
@@ -153,7 +139,11 @@ const ModalInspectQueryComponent = ({ closeModal, getInspectQuery }: ModalInspec
       content: (
         <>
           <EuiSpacer />
-          <DescriptionListStyled listItems={statistics} type="column" />
+          <EuiDescriptionList
+            listItems={statistics}
+            type="responsiveColumn"
+            columnWidths={[3, 7]}
+          />
         </>
       ),
     },
@@ -200,7 +190,9 @@ const ModalInspectQueryComponent = ({ closeModal, getInspectQuery }: ModalInspec
   return (
     <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{i18n.INSPECT}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {i18n.INSPECT} {title}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>

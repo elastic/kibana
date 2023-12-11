@@ -33,7 +33,7 @@ export const histogramDateTimeFormatter = (domain: [string, string] | null, fixe
 };
 
 export const useThrottledResizeObserver = (wait = 100) => {
-  const [size, setSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
+  const [size, setSize] = useState<{ width?: number; height?: number }>({ width: 0, height: 0 });
   const onResize = useMemo(() => throttle(wait, setSize), [wait]);
   const { ref } = useResizeObserver<HTMLDivElement>({ onResize });
 

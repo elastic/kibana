@@ -11,9 +11,18 @@ import { Redirect, useLocation, useParams } from 'react-router-dom';
 
 import moment from 'moment';
 import { encode } from '@kbn/rison';
-import { ALERTS_PATH, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import type { FilterItemObj } from '../../../common/components/filter_group/types';
+import {
+  ALERTS_PATH,
+  DEFAULT_ALERTS_INDEX,
+  ENABLE_EXPANDABLE_FLYOUT_SETTING,
+} from '../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { inputsSelectors } from '../../../common/store';
+import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
+import { resolveFlyoutParams } from './utils';
 
 export const AlertDetailsRedirect = () => {
   const { alertId } = useParams<{ alertId: string }>();
@@ -51,17 +60,32 @@ export const AlertDetailsRedirect = () => {
     },
   });
 
-  const flyoutString = encode({
-    panelView: 'eventDetail',
-    params: {
-      eventId: alertId,
-      indexName: index,
-    },
-  });
-
   const kqlAppQuery = encode({ language: 'kuery', query: `_id: ${alertId}` });
 
-  const url = `${ALERTS_PATH}?${URL_PARAM_KEY.appQuery}=${kqlAppQuery}&${URL_PARAM_KEY.timerange}=${timerange}&${URL_PARAM_KEY.eventFlyout}=${flyoutString}`;
+  const statusPageFilter: FilterItemObj = {
+    fieldName: ALERT_WORKFLOW_STATUS,
+    title: 'Status',
+    selectedOptions: [],
+    existsSelected: false,
+  };
+
+  const pageFiltersQuery = encode(formatPageFilterSearchParam([statusPageFilter]));
+
+  const currentFlyoutParams = searchParams.get(URL_PARAM_KEY.eventFlyout);
+
+  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
+
+  const urlParams = new URLSearchParams({
+    [URL_PARAM_KEY.appQuery]: kqlAppQuery,
+    [URL_PARAM_KEY.timerange]: timerange,
+    [URL_PARAM_KEY.pageFilter]: pageFiltersQuery,
+    [URL_PARAM_KEY.eventFlyout]: resolveFlyoutParams(
+      { index, alertId, isSecurityFlyoutEnabled },
+      currentFlyoutParams
+    ),
+  });
+
+  const url = `${ALERTS_PATH}?${urlParams.toString()}`;
 
   return <Redirect to={url} />;
 };

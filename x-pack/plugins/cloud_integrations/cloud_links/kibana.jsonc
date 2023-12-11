@@ -10,7 +10,13 @@
     "optionalPlugins": [
       "cloud",
       "security",
-      "guided_onboarding"
+      "guidedOnboarding"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "requiredPlugins": [
+      "share"
     ]
   }
 }

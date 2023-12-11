@@ -23,7 +23,8 @@ import {
   SavedObjectsExportResultDetails,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
+import { EXPORT_ALL_TYPES_TOKEN } from '@kbn/core-saved-objects-import-export-server-internal';
 
 export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
   const savedObjects = await createPromiseFromStreams([
@@ -43,7 +44,9 @@ export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable)
 }
 
 export function validateTypes(types: string[], supportedTypes: string[]): string | undefined {
-  const invalidTypes = types.filter((t) => !supportedTypes.includes(t));
+  const invalidTypes = types.filter(
+    (t) => t !== EXPORT_ALL_TYPES_TOKEN && !supportedTypes.includes(t)
+  );
   if (invalidTypes.length) {
     return `Trying to export non-exportable type(s): ${invalidTypes.join(', ')}`;
   }
@@ -109,6 +112,7 @@ export function throwOnGloballyHiddenTypes(
     );
   }
 }
+
 /**
  * @param {string[]} unsupportedTypes saved object types registered with hidden=false and hiddenFromHttpApis=true
  */
@@ -120,6 +124,7 @@ export function throwOnHttpHiddenTypes(unsupportedTypes: string[]) {
     );
   }
 }
+
 /**
  * @param {string[]} type saved object type
  * @param {ISavedObjectTypeRegistry} registry the saved object type registry
@@ -147,6 +152,7 @@ export function throwIfAnyTypeNotVisibleByAPI(
     throwOnHttpHiddenTypes(unsupportedTypes);
   }
 }
+
 export interface BulkGetItem {
   type: string;
   id: string;
@@ -157,7 +163,9 @@ export interface BulkGetItem {
 export function isKibanaRequest({ headers }: KibanaRequest) {
   // The presence of these two request headers gives us a good indication that this is a first-party request from the Kibana client.
   // We can't be 100% certain, but this is a reasonable attempt.
-  return headers && headers['kbn-version'] && headers.referer;
+  return (
+    headers && headers['kbn-version'] && headers.referer && headers['x-elastic-internal-origin']
+  );
 }
 
 export interface LogWarnOnExternalRequest {
@@ -166,6 +174,7 @@ export interface LogWarnOnExternalRequest {
   req: KibanaRequest;
   logger: Logger;
 }
+
 /**
  * Only log a warning when the request is internal
  * Allows us to silence the logs for development

@@ -7,7 +7,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Filter } from '@kbn/es-query';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ObservabilityAppServices } from '../../../../application/types';
 import { SeriesConfig, SeriesUrl } from '../types';
 import { useAppDataViewContext } from './use_app_data_view';
 import { buildExistsFilter, urlFilterToPersistedFilter } from '../configurations/utils';
@@ -20,7 +21,7 @@ interface UseDiscoverLink {
 }
 
 export const useDiscoverLink = ({ series, seriesConfig }: UseDiscoverLink) => {
-  const kServices = useKibana().services;
+  const kServices = useKibana<ObservabilityAppServices>().services;
   const {
     application: { navigateToUrl },
   } = kServices;

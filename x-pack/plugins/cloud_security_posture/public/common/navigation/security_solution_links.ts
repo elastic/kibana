@@ -14,13 +14,6 @@ interface CloudSecurityPostureLinkItem<TId extends string = CloudSecurityPosture
   path: string;
 }
 
-interface CloudSecurityPostureNavTab<TId extends string = CloudSecurityPosturePageId> {
-  id: TId;
-  name: string;
-  href: string;
-  disabled: boolean;
-}
-
 /**
  * Gets the cloud security posture link properties of a CSP page for navigation in the security solution.
  * @param cloudSecurityPosturePage the name of the cloud posture page.
@@ -31,19 +24,4 @@ export const getSecuritySolutionLink = <TId extends string = CloudSecurityPostur
   id: cloudPosturePages[cloudSecurityPosturePage].id as TId,
   title: cloudPosturePages[cloudSecurityPosturePage].name,
   path: cloudPosturePages[cloudSecurityPosturePage].path,
-});
-
-/**
- * Gets the cloud security posture link properties of a CSP page for navigation in the old security solution navigation.
- * @param cloudSecurityPosturePage the name of the cloud posture page.
- * @param basePath the base path for links.
- */
-export const getSecuritySolutionNavTab = <TId extends string = CloudSecurityPosturePageId>(
-  cloudSecurityPosturePage: CspPage,
-  basePath: string
-): CloudSecurityPostureNavTab<TId> => ({
-  id: cloudPosturePages[cloudSecurityPosturePage].id as TId,
-  name: cloudPosturePages[cloudSecurityPosturePage].name,
-  href: `${basePath}${cloudPosturePages[cloudSecurityPosturePage].path}`,
-  disabled: !!cloudPosturePages[cloudSecurityPosturePage].disabled,
 });

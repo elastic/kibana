@@ -34,10 +34,7 @@ import type {
   ManualRangeEventAnnotationRow,
 } from '@kbn/event-annotation-plugin/common';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import {
-  defaultAnnotationColor,
-  defaultAnnotationRangeColor,
-} from '@kbn/event-annotation-plugin/public';
+import { defaultAnnotationColor, defaultAnnotationRangeColor } from '@kbn/event-annotation-common';
 import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common/manual_event_annotation/types';
 import { FormattedMessage } from '@kbn/i18n-react';

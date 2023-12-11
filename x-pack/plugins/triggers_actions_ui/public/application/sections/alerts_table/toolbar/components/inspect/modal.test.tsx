@@ -34,6 +34,7 @@ describe('Modal Inspect', () => {
   const closeModal = jest.fn();
   const defaultProps: ModalInspectProps = {
     closeModal,
+    title: 'Inspect',
     getInspectQuery: () => ({
       request: [getRequest()],
       response: [response],

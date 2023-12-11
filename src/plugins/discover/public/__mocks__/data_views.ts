@@ -7,9 +7,11 @@
  */
 
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { dataViewMock } from './data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewComplexMock } from './data_view_complex';
 import { dataViewWithTimefieldMock } from './data_view_with_timefield';
+
+export const dataViewMockList = [dataViewMock, dataViewComplexMock, dataViewWithTimefieldMock];
 
 export function createDiscoverDataViewsMock() {
   return {
@@ -17,21 +19,27 @@ export function createDiscoverDataViewsMock() {
       return [dataViewMock];
     },
     get: async (id: string) => {
-      if (id === 'the-data-view-id') {
-        return Promise.resolve(dataViewMock);
-      } else if (id === 'invalid-data-view-id') {
-        return Promise.reject('Invald');
+      if (id === 'invalid-data-view-id') {
+        return Promise.reject('Invalid');
+      }
+      const dataView = dataViewMockList.find((dv) => dv.id === id);
+      if (dataView) {
+        return Promise.resolve(dataView);
+      } else {
+        return Promise.reject(`DataView ${id} not found`);
       }
     },
+    defaultDataViewExists: jest.fn(() => Promise.resolve(true)),
     getDefaultDataView: jest.fn(() => dataViewMock),
     updateSavedObject: jest.fn(),
     getIdsWithTitle: jest.fn(() => {
-      return Promise.resolve([dataViewMock, dataViewComplexMock, dataViewWithTimefieldMock]);
+      return Promise.resolve(dataViewMockList);
     }),
     createFilter: jest.fn(),
     create: jest.fn(),
     clearInstanceCache: jest.fn(),
     getFieldsForIndexPattern: jest.fn((dataView) => dataView.fields),
+    refreshFields: jest.fn(),
   } as unknown as jest.Mocked<DataViewsContract>;
 }
 

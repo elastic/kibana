@@ -10,8 +10,10 @@ import { EcsFlat, EcsVersion } from '@kbn/ecs';
 import { EuiButton } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { v4 as uuidv4 } from 'uuid';
 
 import { checkIndex } from './check_index';
+import { useDataQualityContext } from '../../../data_quality_context';
 import { getAllIndicesToCheck } from './helpers';
 import * as i18n from '../../../../translations';
 import type { EcsMetadata, IndexToCheck, OnCheckCompleted } from '../../../../types';
@@ -58,6 +60,7 @@ const CheckAllComponent: React.FC<Props> = ({
   setCheckAllTotalIndiciesToCheck,
   setIndexToCheck,
 }) => {
+  const { httpFetch, isILMAvailable } = useDataQualityContext();
   const abortController = useRef(new AbortController());
   const [isRunning, setIsRunning] = useState<boolean>(false);
 
@@ -76,6 +79,10 @@ const CheckAllComponent: React.FC<Props> = ({
   const onClick = useCallback(() => {
     async function beginCheck() {
       const allIndicesToCheck = getAllIndicesToCheck(patternIndexNames);
+      const startTime = Date.now();
+      const batchId = uuidv4();
+      let checked = 0;
+
       setCheckAllIndiciesChecked(0);
       setCheckAllTotalIndiciesToCheck(allIndicesToCheck.length);
 
@@ -88,10 +95,15 @@ const CheckAllComponent: React.FC<Props> = ({
 
           await checkIndex({
             abortController: abortController.current,
+            batchId,
+            checkAllStartTime: startTime,
             ecsMetadata: EcsFlat as unknown as Record<string, EcsMetadata>,
             formatBytes,
             formatNumber,
+            httpFetch,
             indexName,
+            isLastCheck:
+              allIndicesToCheck.length > 0 ? checked === allIndicesToCheck.length - 1 : true,
             onCheckCompleted,
             pattern,
             version: EcsVersion,
@@ -100,6 +112,7 @@ const CheckAllComponent: React.FC<Props> = ({
           if (!abortController.current.signal.aborted) {
             await wait(DELAY_AFTER_EVERY_CHECK_COMPLETES);
             incrementCheckAllIndiciesChecked();
+            checked++;
           }
         }
       }
@@ -121,6 +134,7 @@ const CheckAllComponent: React.FC<Props> = ({
     cancelIfRunning,
     formatBytes,
     formatNumber,
+    httpFetch,
     incrementCheckAllIndiciesChecked,
     isRunning,
     onCheckCompleted,
@@ -143,7 +157,7 @@ const CheckAllComponent: React.FC<Props> = ({
     };
   }, [abortController]);
 
-  const disabled = ilmPhases.length === 0;
+  const disabled = isILMAvailable && ilmPhases.length === 0;
 
   return (
     <CheckAllButton

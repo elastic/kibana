@@ -11,7 +11,7 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { FooterComponent, PagingControlComponent } from '.';
-import { TimelineId } from '../../../../../common/types';
+import { TimelineId } from '../../../../../common/types/timeline';
 
 jest.mock('../../../../common/lib/kibana');
 

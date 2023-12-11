@@ -9,6 +9,7 @@
 import React from 'react';
 import { UseEuiTheme, EuiThemeComputed } from '@elastic/eui';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { FilterEditorProps } from '.';
 import { FilterEditor } from '.';
 
@@ -48,6 +49,7 @@ describe('<FilterEditor />', () => {
         indexPatterns: [],
         onCancel: jest.fn(),
         onSubmit: jest.fn(),
+        docLinks: coreMock.createStart().docLinks,
       };
       testBed = await registerTestBed(FilterEditor, { defaultProps })();
     });

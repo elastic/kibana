@@ -129,6 +129,7 @@ export const EntityAnalyticsAnomalies = () => {
         subtitle={<LastUpdatedAt isUpdating={isSearchLoading} updatedAt={updatedAt} />}
         toggleStatus={toggleStatus}
         toggleQuery={setToggleStatus}
+        tooltip={i18n.ANOMALIES_TOOLTIP}
       >
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>

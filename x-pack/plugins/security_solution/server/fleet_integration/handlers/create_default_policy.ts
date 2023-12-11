@@ -6,6 +6,8 @@
  */
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import {
   policyFactory as policyConfigFactory,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
@@ -19,7 +21,11 @@ import {
   ENDPOINT_CONFIG_PRESET_NGAV,
   ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
 } from '../constants';
-import { disableProtections } from '../../../common/endpoint/models/policy_config_helpers';
+import {
+  disableProtections,
+  ensureOnlyEventCollectionIsAllowed,
+} from '../../../common/endpoint/models/policy_config_helpers';
+import type { AppFeaturesService } from '../../lib/app_features_service/app_features_service';
 
 /**
  * Create the default endpoint policy based on the current license and configuration type
@@ -27,32 +33,45 @@ import { disableProtections } from '../../../common/endpoint/models/policy_confi
 export const createDefaultPolicy = (
   licenseService: LicenseService,
   config: AnyPolicyCreateConfig | undefined,
-  cloud: CloudSetup
+  cloud: CloudSetup,
+  esClientInfo: InfoResponse,
+  appFeatures: AppFeaturesService
 ): PolicyConfig => {
-  const factoryPolicy = policyConfigFactory();
+  // Pass license and cloud information to use in Policy creation
+  const factoryPolicy = policyConfigFactory(
+    licenseService.getLicenseType(),
+    cloud?.isCloudEnabled,
+    licenseService.getLicenseUID(),
+    esClientInfo?.cluster_uuid,
+    esClientInfo?.cluster_name,
+    cloud?.isServerlessEnabled
+  );
 
-  // Add license and cloud information after policy creation
-  factoryPolicy.meta.license = licenseService.getLicenseType();
-  factoryPolicy.meta.cloud = cloud?.isCloudEnabled;
-
-  const defaultPolicyPerType =
+  let defaultPolicyPerType: PolicyConfig =
     config?.type === 'cloud'
       ? getCloudPolicyConfig(factoryPolicy)
       : getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
 
-  // Apply license limitations in the final step, so it's not overriden (see malware popup)
-  return licenseService.isPlatinumPlus()
-    ? defaultPolicyPerType
-    : policyConfigFactoryWithoutPaidFeatures(defaultPolicyPerType);
+  if (!licenseService.isPlatinumPlus()) {
+    defaultPolicyPerType = policyConfigFactoryWithoutPaidFeatures(defaultPolicyPerType);
+  }
+
+  // If no Policy Protection allowed (ex. serverless)
+  if (!appFeatures.isEnabled(AppFeatureSecurityKey.endpointPolicyProtections)) {
+    defaultPolicyPerType = ensureOnlyEventCollectionIsAllowed(defaultPolicyPerType);
+  }
+
+  return defaultPolicyPerType;
 };
 
 /**
  * Create a copy of an object with all keys set to false
  */
-const falsyObjectKeys = <T extends Record<string, boolean>>(obj: T): T => {
+const falsyObjectKeys = <T extends Record<string, unknown>>(obj: T): Record<keyof T, boolean> => {
   return Object.keys(obj).reduce((accumulator, key) => {
-    return { ...accumulator, [key]: false };
-  }, {} as T);
+    accumulator[key as keyof T] = false;
+    return accumulator;
+  }, {} as Record<keyof T, boolean>);
 };
 
 const getEndpointPolicyConfigPreset = (config: PolicyCreateEndpointConfig | undefined) => {

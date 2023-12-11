@@ -8,6 +8,7 @@
 jest.mock('../security');
 jest.mock('./crud');
 jest.mock('./status');
+jest.mock('./versions');
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {
@@ -25,12 +26,14 @@ import type { AgentClient } from './agent_service';
 import { AgentServiceImpl } from './agent_service';
 import { getAgentsByKuery, getAgentById } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
+import { getLatestAvailableVersion } from './versions';
 
 const mockGetAuthzFromRequest = getAuthzFromRequest as jest.Mock<Promise<FleetAuthz>>;
 const mockGetAgentsByKuery = getAgentsByKuery as jest.Mock;
 const mockGetAgentById = getAgentById as jest.Mock;
 const mockGetAgentStatusById = getAgentStatusById as jest.Mock;
 const mockGetAgentStatusForAgentPolicy = getAgentStatusForAgentPolicy as jest.Mock;
+const mockGetLatestAvailableVersion = getLatestAvailableVersion as jest.Mock;
 
 describe('AgentService', () => {
   beforeEach(() => {
@@ -95,6 +98,14 @@ describe('AgentService', () => {
 
       it('rejects on getAgentStatusForAgentPolicy', async () => {
         await expect(agentClient.getAgentStatusForAgentPolicy()).rejects.toThrowError(
+          new FleetUnauthorizedError(
+            `User does not have adequate permissions to access Fleet agents.`
+          )
+        );
+      });
+
+      it('rejects on getLatestAgentAvailableVersion', async () => {
+        await expect(agentClient.getLatestAgentAvailableVersion()).rejects.toThrowError(
           new FleetUnauthorizedError(
             `User does not have adequate permissions to access Fleet agents.`
           )
@@ -187,5 +198,13 @@ function expectApisToCallServicesSuccessfully(
       'foo-id',
       'foo-filter'
     );
+  });
+
+  test('client.getLatestAgentAvailableVersion calls getLatestAvailableVersion and returns results', async () => {
+    mockGetLatestAvailableVersion.mockResolvedValue('getLatestAvailableVersion success');
+    await expect(agentClient.getLatestAgentAvailableVersion()).resolves.toEqual(
+      'getLatestAvailableVersion success'
+    );
+    expect(mockGetLatestAvailableVersion).toHaveBeenCalledTimes(1);
   });
 }

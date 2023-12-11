@@ -1,1 +1,0 @@
-This user contains all the possible privileges listed in our detections privileges docs https://www.elastic.co/guide/en/security/current/detections-permissions-section.html This user has higher privileges than the Platform Engineer user

@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiFormRowProps,
   EuiIcon,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -23,6 +24,7 @@ import {
   EuiBadge,
   withEuiTheme,
   EuiTextColor,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -45,6 +47,7 @@ import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { cx } from '@emotion/css';
 import { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -53,12 +56,17 @@ import {
 } from './lib/filter_editor_utils';
 import { FiltersBuilder } from '../../filters_builder';
 import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
-import { flattenFilters } from './lib/helpers';
+import {
+  MIDDLE_TRUNCATION_PROPS,
+  SINGLE_SELECTION_AS_TEXT_PROPS,
+  flattenFilters,
+} from './lib/helpers';
 import {
   filterBadgeStyle,
   filterPreviewLabelStyle,
   filtersBuilderMaxHeightCss,
 } from './filter_editor.styles';
+import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 export const strings = {
   getPanelTitleAdd: () =>
@@ -102,6 +110,10 @@ export const strings = {
     i18n.translate('unifiedSearch.filter.filterEditor.queryDslLabel', {
       defaultMessage: 'Elasticsearch Query DSL',
     }),
+  getQueryDslDocsLinkLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.queryDslDocsLinkLabel', {
+      defaultMessage: 'Learn about Query DSL syntax',
+    }),
   getQueryDslAriaLabel: () =>
     i18n.translate('unifiedSearch.filter.filterEditor.queryDslAriaLabel', {
       defaultMessage: 'Elasticsearch Query DSL editor',
@@ -128,6 +140,9 @@ export interface FilterEditorComponentProps {
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
   mode?: 'edit' | 'add';
+  suggestionsAbstraction?: SuggestionsAbstraction;
+  docLinks: DocLinksStart;
+  filtersCount?: number;
 }
 
 export type FilterEditorProps = WithEuiThemeProps & FilterEditorComponentProps;
@@ -291,9 +306,10 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             selectedOptions={selectedDataView ? [selectedDataView] : []}
             getLabel={(indexPattern) => indexPattern.getName()}
             onChange={this.onIndexPatternChange}
-            singleSelection={{ asPlainText: true }}
             isClearable={false}
             data-test-subj="filterIndexPatternsSelect"
+            singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
+            truncationProps={MIDDLE_TRUNCATION_PROPS}
           />
         </EuiFormRow>
         <EuiSpacer size="s" />
@@ -339,6 +355,8 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
               dataView={selectedDataView!}
               onChange={this.onLocalFilterChange}
               disabled={!selectedDataView}
+              suggestionsAbstraction={this.props.suggestionsAbstraction}
+              filtersCount={this.props.filtersCount}
             />
           </EuiToolTip>
         </div>
@@ -360,7 +378,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
               </strong>
             }
           >
-            <EuiText size="xs" data-test-subj="filter-preview">
+            <EuiText size="xs" data-test-subj="filter-preview" css={{ overflowWrap: 'break-word' }}>
               <FilterBadgeGroup
                 filters={[localFilter]}
                 dataViews={this.props.indexPatterns}
@@ -375,12 +393,22 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   }
 
   private renderCustomEditor() {
-    const helpText =
-      this.props.filter?.meta.type === FILTERS.SPATIAL_FILTER ? (
-        <EuiTextColor color="warning">{strings.getSpatialFilterQueryDslHelpText()}</EuiTextColor>
-      ) : (
-        ''
+    let helpText: EuiFormRowProps['helpText'] = '';
+
+    if (this.props.docLinks) {
+      helpText = (
+        <EuiLink href={this.props.docLinks.links.query.queryDsl} target="_blank">
+          {strings.getQueryDslDocsLinkLabel()}
+        </EuiLink>
       );
+    }
+
+    if (this.props.filter?.meta.type === FILTERS.SPATIAL_FILTER) {
+      helpText = (
+        <EuiTextColor color="warning">{strings.getSpatialFilterQueryDslHelpText()}</EuiTextColor>
+      );
+    }
+
     return (
       <EuiFormRow fullWidth label={strings.getQueryDslLabel()} helpText={helpText}>
         <CodeEditor

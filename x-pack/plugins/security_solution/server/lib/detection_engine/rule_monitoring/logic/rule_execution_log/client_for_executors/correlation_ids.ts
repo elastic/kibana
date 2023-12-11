@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ExtMeta } from '../utils/console_logging';
-import type { RuleExecutionStatus } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { ExtMeta } from '../../utils/console_logging';
+import type { RuleExecutionStatus } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RuleExecutionContext } from './client_interface';
 
 export interface ICorrelationIds {
@@ -75,7 +75,7 @@ const createBuilder = (state: BuilderState): ICorrelationIds => {
         },
       };
 
-      if (status != null && logMeta.rule.execution != null) {
+      if (status != null && logMeta.rule?.execution != null) {
         logMeta.rule.execution.status = status;
       }
 

@@ -91,6 +91,9 @@ describe('TelemetryEventsSender', () => {
             ruleset: 'Z',
             version: '100',
           },
+          destination: {
+            bytes: 1530,
+          },
           dll: {
             Ext: {
               device: {
@@ -172,6 +175,9 @@ describe('TelemetryEventsSender', () => {
             something_else: 'nope',
           },
           message: 'Malicious Behavior Detection Alert: Regsvr32 with Unusual Arguments',
+          network: {
+            transport: 'tcp',
+          },
           process: {
             name: 'foo.exe',
             nope: 'nope',
@@ -181,6 +187,7 @@ describe('TelemetryEventsSender', () => {
             env_vars: [{ name: 'foo', value: 'bar' }],
             Ext: {
               protection: 'PsProtectedSignerAntimalware-Light',
+              services: ['SepScanService'],
               relative_file_creation_time: 48628704.4029488,
               relative_file_name_modify_time: 48628704.4029488,
               device: {
@@ -210,6 +217,13 @@ describe('TelemetryEventsSender', () => {
             },
           },
           Responses: '{ "result": 0 }', // >= 7.15
+          source: {
+            geo: {
+              continent_name: 'Europe',
+              country_iso_code: 'EE',
+              country_name: 'Estonia',
+            },
+          },
           Target: {
             process: {
               name: 'bar.exe',
@@ -221,6 +235,12 @@ describe('TelemetryEventsSender', () => {
           },
           threat: {
             ignored_object: true, // this field is not allowlisted
+          },
+          url: {
+            domain: 'elastic.co',
+            full: 'https://elastic.co',
+            path: '/',
+            scheme: 'http',
           },
           Persistence: {
             name: 'foo',
@@ -292,6 +312,9 @@ describe('TelemetryEventsSender', () => {
             ruleset: 'Z',
             version: '100',
           },
+          destination: {
+            bytes: 1530,
+          },
           file: {
             extension: '.exe',
             size: 3,
@@ -352,6 +375,9 @@ describe('TelemetryEventsSender', () => {
             },
           },
           message: 'Malicious Behavior Detection Alert: Regsvr32 with Unusual Arguments',
+          network: {
+            transport: 'tcp',
+          },
           process: {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',
@@ -359,6 +385,7 @@ describe('TelemetryEventsSender', () => {
             env_vars: [{ name: 'foo', value: 'bar' }],
             Ext: {
               protection: 'PsProtectedSignerAntimalware-Light',
+              services: ['SepScanService'],
               relative_file_creation_time: 48628704.4029488,
               relative_file_name_modify_time: 48628704.4029488,
               device: {
@@ -388,6 +415,13 @@ describe('TelemetryEventsSender', () => {
             },
           },
           Responses: '{ "result": 0 }',
+          source: {
+            geo: {
+              continent_name: 'Europe',
+              country_iso_code: 'EE',
+              country_name: 'Estonia',
+            },
+          },
           Target: {
             process: {
               name: 'bar.exe',
@@ -395,6 +429,12 @@ describe('TelemetryEventsSender', () => {
                 id: 1234,
               },
             },
+          },
+          url: {
+            domain: 'elastic.co',
+            full: 'https://elastic.co',
+            path: '/',
+            scheme: 'http',
           },
           Persistence: {
             name: 'foo',
@@ -517,6 +557,13 @@ describe('getV3UrlFromV2', () => {
     const sender = new TelemetryEventsSender(logger);
     expect(
       sender.getV3UrlFromV2('https://telemetry.elastic.co/xpack/v2/send', 'alerts-endpoint')
+    ).toBe('https://telemetry.elastic.co/v3/send/alerts-endpoint');
+  });
+
+  it('should work when receiving a V3 URL', () => {
+    const sender = new TelemetryEventsSender(logger);
+    expect(
+      sender.getV3UrlFromV2('https://telemetry.elastic.co/v3/send/channel', 'alerts-endpoint')
     ).toBe('https://telemetry.elastic.co/v3/send/alerts-endpoint');
   });
 

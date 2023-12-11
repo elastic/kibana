@@ -50,6 +50,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./date_nanos_job'));
       loadTestFile(require.resolve('./custom_urls'));
       loadTestFile(require.resolve('./delete_job_and_delete_annotations'));
+      loadTestFile(require.resolve('./convert_single_metric_job_to_multi_metric'));
+      loadTestFile(require.resolve('./convert_jobs_to_advanced_job'));
     }
   });
 }

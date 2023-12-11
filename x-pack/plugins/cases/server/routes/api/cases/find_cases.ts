@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CasesFindRequest } from '../../../../common/api';
 import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { caseApiV1 } from '../../../../common/types/api';
 
 export const findCaseRoute = createCasesRoute({
   method: 'get',
@@ -17,10 +17,13 @@ export const findCaseRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
-      const options = request.query as CasesFindRequest;
+
+      const options = request.query as caseApiV1.CasesFindRequest;
+
+      const res: caseApiV1.CasesFindResponse = await casesClient.cases.search({ ...options });
 
       return response.ok({
-        body: await casesClient.cases.find({ ...options }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

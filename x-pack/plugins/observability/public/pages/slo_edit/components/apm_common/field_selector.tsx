@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { ReactNode, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { Controller, FieldPath, useFormContext } from 'react-hook-form';
-import { CreateSLOInput } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
-
+import { ALL_VALUE } from '@kbn/slo-schema';
+import { debounce } from 'lodash';
+import React, { ReactNode, useState } from 'react';
+import { Controller, FieldPath, useFormContext } from 'react-hook-form';
 import {
   Suggestion,
   useFetchApmSuggestions,
 } from '../../../../hooks/slo/use_fetch_apm_suggestions';
+import { CreateSLOForm } from '../../types';
 
 interface Option {
   label: string;
@@ -26,7 +27,7 @@ export interface Props {
   dataTestSubj: string;
   fieldName: string;
   label: string;
-  name: FieldPath<CreateSLOInput>;
+  name: FieldPath<CreateSLOForm>;
   placeholder: string;
   tooltip?: ReactNode;
 }
@@ -40,7 +41,7 @@ export function FieldSelector({
   placeholder,
   tooltip,
 }: Props) {
-  const { control, watch, getFieldState } = useFormContext<CreateSLOInput>();
+  const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
   const serviceName = watch('indicator.params.service');
   const [search, setSearch] = useState<string>('');
   const { suggestions, isLoading } = useFetchApmSuggestions({
@@ -49,11 +50,13 @@ export function FieldSelector({
     serviceName,
   });
 
+  const debouncedSearch = debounce((value) => setSearch(value), 200);
+
   const options = (
     allowAllOption
       ? [
           {
-            value: '*',
+            value: ALL_VALUE,
             label: i18n.translate('xpack.observability.slo.sloEdit.fieldSelector.all', {
               defaultMessage: 'All',
             }),
@@ -61,6 +64,8 @@ export function FieldSelector({
         ]
       : []
   ).concat(createOptions(suggestions));
+
+  const isDisabled = name !== 'indicator.params.service' && !serviceName;
 
   return (
     <EuiFlexItem>
@@ -77,11 +82,10 @@ export function FieldSelector({
         isInvalid={getFieldState(name).invalid}
       >
         <Controller
-          shouldUnregister
           defaultValue=""
           name={name}
           control={control}
-          rules={{ required: true }}
+          rules={{ required: !isDisabled }}
           render={({ field, fieldState }) => (
             <EuiComboBox
               {...field}
@@ -89,7 +93,7 @@ export function FieldSelector({
               async
               data-test-subj={dataTestSubj}
               isClearable
-              isDisabled={name !== 'indicator.params.service' && !serviceName}
+              isDisabled={isDisabled}
               isInvalid={fieldState.invalid}
               isLoading={isLoading}
               onChange={(selected: EuiComboBoxOptionOption[]) => {
@@ -99,9 +103,7 @@ export function FieldSelector({
 
                 field.onChange('');
               }}
-              onSearchChange={(value: string) => {
-                setSearch(value);
-              }}
+              onSearchChange={(value: string) => debouncedSearch(value)}
               options={options}
               placeholder={placeholder}
               selectedOptions={

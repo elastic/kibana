@@ -20,12 +20,12 @@ import {
   isOperator,
   matchesOperator,
 } from '@kbn/securitysolution-list-utils';
-import { validateFilePathInput } from '@kbn/securitysolution-utils';
+import { validatePotentialWildcardInput } from '@kbn/securitysolution-utils';
 import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { ReactWrapper, mount } from 'enzyme';
 
 import { getFoundListsBySizeSchemaMock } from '../../../../common/schemas/response/found_lists_by_size_schema.mock';
@@ -197,14 +197,15 @@ describe('BuilderEntryItem', () => {
     );
   });
 
-  test('it render mapping issues warning text when field has mapping conflicts', () => {
+  test('it render mapping issues warning text when field has mapping conflicts', async () => {
+    const field = getField('mapping issues');
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
         entry={{
           correspondingKeywordField: undefined,
           entryIndex: 0,
-          field: getField('mapping issues'),
+          field,
           id: '123',
           nested: undefined,
           operator: isOperator,
@@ -223,12 +224,16 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel
         allowCustomOptions
+        getExtendedFields={(): Promise<FieldSpec[]> => Promise.resolve([field])}
       />
     );
 
-    expect(wrapper.find('.euiFormHelpText.euiFormRow__text').text()).toMatch(
-      /This field is defined as different types across the following indices or is unmapped. This can cause unexpected query results./
-    );
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('.euiFormHelpText.euiFormRow__text').text()).toMatch(
+        /This field is defined as different types across the following indices or is unmapped. This can cause unexpected query results./
+      );
+    });
   });
 
   test('it renders field values correctly when operator is "isOperator"', () => {
@@ -1045,7 +1050,7 @@ describe('BuilderEntryItem', () => {
   test('it invokes "setWarningsExist" when invalid value in field value input', async () => {
     const mockSetWarningsExists = jest.fn();
 
-    (validateFilePathInput as jest.Mock).mockReturnValue('some warning message');
+    (validatePotentialWildcardInput as jest.Mock).mockReturnValue('some warning message');
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -1094,7 +1099,7 @@ describe('BuilderEntryItem', () => {
   test('it does not invoke "setWarningsExist" when valid value in field value input', async () => {
     const mockSetWarningsExists = jest.fn();
 
-    (validateFilePathInput as jest.Mock).mockReturnValue(undefined);
+    (validatePotentialWildcardInput as jest.Mock).mockReturnValue(undefined);
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}

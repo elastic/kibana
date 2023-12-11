@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { API_VERSIONS } from '../../../../../../../common/constants';
+
 import type { UseRequestConfig } from '../../../../hooks';
 import { useRequest } from '../../../../hooks';
 import type { GetAgentStatusResponse } from '../../../../types';
@@ -21,6 +23,7 @@ export function useGetAgentStatus(policyId?: string, options?: RequestOptions) {
       policyId,
     },
     method: 'get',
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 

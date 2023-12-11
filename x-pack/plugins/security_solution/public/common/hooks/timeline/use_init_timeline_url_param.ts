@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
+import { safeDecode } from '@kbn/rison';
 
 import { useDispatch } from 'react-redux';
 
@@ -23,7 +24,7 @@ export const useInitTimelineFromUrlParam = () => {
 
   const onInitialize = useCallback(
     (initialState: TimelineUrl | null) => {
-      if (initialState != null && initialState.id !== '') {
+      if (initialState != null) {
         queryTimelineById({
           activeTimelineTab: initialState.activeTab,
           duplicate: false,
@@ -33,11 +34,30 @@ export const useInitTimelineFromUrlParam = () => {
           updateIsLoading: (status: { id: string; isLoading: boolean }) =>
             dispatch(timelineActions.updateIsLoading(status)),
           updateTimeline: dispatchUpdateTimeline(dispatch),
+          savedSearchId: initialState.savedSearchId,
         });
       }
     },
     [dispatch]
   );
+
+  useEffect(() => {
+    const listener = () => {
+      const timelineState = new URLSearchParams(window.location.search).get(URL_PARAM_KEY.timeline);
+
+      if (!timelineState) {
+        return;
+      }
+
+      const parsedState = safeDecode(timelineState) as TimelineUrl | null;
+
+      onInitialize(parsedState);
+    };
+
+    // This is needed to initialize the timeline from the URL when the user clicks the back / forward buttons
+    window.addEventListener('popstate', listener);
+    return () => window.removeEventListener('popstate', listener);
+  }, [onInitialize]);
 
   useInitializeUrlParam(URL_PARAM_KEY.timeline, onInitialize);
 };

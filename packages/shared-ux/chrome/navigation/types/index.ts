@@ -6,20 +6,31 @@
  * Side Public License, v 1.
  */
 
-import type { EuiSideNavItemType, IconType } from '@elastic/eui';
-import { Observable } from 'rxjs';
-import { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
+import type { Observable } from 'rxjs';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+
+import type {
+  ChromeNavLink,
+  ChromeProjectNavigation,
+  ChromeProjectNavigationNode,
+} from '@kbn/core-chrome-browser';
+import type { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
+import type { CloudLinks } from '../src/cloud_links';
 
 /**
  * A list of services that are consumed by this component.
  * @public
  */
 export interface NavigationServices {
-  activeNavItemId?: string;
   basePath: BasePathService;
-  loadingCount: number;
+  recentlyAccessed$: Observable<RecentItem[]>;
+  deepLinks$: Observable<Readonly<Record<string, ChromeNavLink>>>;
   navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
+  onProjectNavigationChange: (chromeProjectNavigation: ChromeProjectNavigation) => void;
+  activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
+  cloudLinks: CloudLinks;
+  isSideNavCollapsed: boolean;
 }
 
 /**
@@ -32,101 +43,22 @@ export interface NavigationKibanaDependencies {
     application: { navigateToUrl: NavigateToUrlFn };
     chrome: {
       recentlyAccessed: { get$: () => Observable<RecentItem[]> };
+      navLinks: {
+        getNavLinks$: () => Observable<Readonly<ChromeNavLink[]>>;
+      };
+      getIsSideNavCollapsed$: () => Observable<boolean>;
     };
     http: {
       basePath: BasePathService;
       getLoadingCount$(): Observable<number>;
     };
   };
+  serverless: {
+    setNavigation: (
+      projectNavigation: ChromeProjectNavigation,
+      navigationTreeFlattened?: Record<string, ChromeProjectNavigationNode>
+    ) => void;
+    getActiveNavigationNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
+  };
+  cloud: CloudStart;
 }
-
-/**
- * Props for the `NavItem` component representing the content of a navigational item with optional children.
- * @public
- */
-export type NavItemProps<T = unknown> = Pick<EuiSideNavItemType<T>, 'id' | 'name'> & {
-  /**
-   * Nav Items
-   */
-  items?: Array<NavItemProps<T>>;
-  /**
-   * Href for a link destination
-   * Example: /app/fleet
-   */
-  href?: string;
-};
-
-/**
- * @public
- */
-export interface PlatformSectionConfig {
-  enabled?: boolean;
-  properties?: Record<string, PlatformSectionConfig>;
-}
-
-/**
- * @public
- */
-export interface SolutionProperties {
-  /**
-   * Solutions' navigation items
-   */
-  items?: NavItemProps[];
-  /**
-   * Solutions' navigation collapsible nav ID
-   */
-  id: string;
-  /**
-   * Name to show as title for Solutions' collapsible nav "bucket"
-   */
-  name: React.ReactNode;
-  /**
-   * Solution logo, i.e. "logoObservability"
-   */
-  icon: IconType;
-}
-
-/**
- * @public
- */
-export type PlatformId = 'analytics' | 'ml' | 'devTools' | 'management';
-
-/**
- * Object that will allow parts of the platform-controlled nav to be hidden
- * @public
- */
-export type PlatformConfigSet = Record<PlatformId, PlatformSectionConfig>;
-
-/**
- * Props for the `Navigation` component.
- * @public
- */
-export interface NavigationProps {
-  /**
-   * ID of sections to initially open
-   * Path to the nav item is given with hierarchy expressed in dotted notation.
-   * Example: `my_project.settings.index_management`
-   */
-  activeNavItemId?: string;
-  /**
-   * Configuration for Solutions' section(s)
-   */
-  solutions: SolutionProperties[];
-  /**
-   * Controls over how Platform nav sections appear
-   */
-  platformConfig?: Partial<PlatformConfigSet>;
-  /**
-   * Target for the logo icon
-   */
-  homeHref: string;
-  /**
-   * Control of the link that takes the user to their projects or deployments
-   */
-  linkToCloud?: 'projects' | 'deployments';
-}
-
-export type NavigationBucketProps = (SolutionProperties &
-  Pick<NavigationProps, 'activeNavItemId'>) & {
-  platformConfig?: PlatformSectionConfig;
-};

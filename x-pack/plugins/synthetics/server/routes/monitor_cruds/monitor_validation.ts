@@ -9,35 +9,35 @@ import { i18n } from '@kbn/i18n';
 import { isLeft } from 'fp-ts/lib/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import {
   BrowserFieldsCodec,
   ProjectMonitorCodec,
   ProjectMonitor,
   ConfigKey,
-  DataStream,
-  DataStreamCodec,
+  MonitorTypeEnum,
+  MonitorTypeCodec,
   HTTPFieldsCodec,
-  ICMPSimpleFieldsCodec,
   MonitorFields,
   TCPFieldsCodec,
   SyntheticsMonitor,
   Locations,
-  PrivateLocation,
+  ICMPFieldsCodec,
 } from '../../../common/runtime_types';
 
 import { ALLOWED_SCHEDULES_IN_MINUTES } from '../../../common/constants/monitor_defaults';
 
 type MonitorCodecType =
-  | typeof ICMPSimpleFieldsCodec
+  | typeof ICMPFieldsCodec
   | typeof TCPFieldsCodec
   | typeof HTTPFieldsCodec
   | typeof BrowserFieldsCodec;
 
-const monitorTypeToCodecMap: Record<DataStream, MonitorCodecType> = {
-  [DataStream.ICMP]: ICMPSimpleFieldsCodec,
-  [DataStream.TCP]: TCPFieldsCodec,
-  [DataStream.HTTP]: HTTPFieldsCodec,
-  [DataStream.BROWSER]: BrowserFieldsCodec,
+const monitorTypeToCodecMap: Record<MonitorTypeEnum, MonitorCodecType> = {
+  [MonitorTypeEnum.ICMP]: ICMPFieldsCodec,
+  [MonitorTypeEnum.TCP]: TCPFieldsCodec,
+  [MonitorTypeEnum.HTTP]: HTTPFieldsCodec,
+  [MonitorTypeEnum.BROWSER]: BrowserFieldsCodec,
 };
 
 export interface ValidationResult {
@@ -55,24 +55,24 @@ export interface ValidationResult {
 export function validateMonitor(monitorFields: MonitorFields): ValidationResult {
   const { [ConfigKey.MONITOR_TYPE]: monitorType } = monitorFields;
 
-  const decodedType = DataStreamCodec.decode(monitorType);
+  const decodedType = MonitorTypeCodec.decode(monitorType);
 
   if (isLeft(decodedType)) {
     return {
       valid: false,
-      reason: `Monitor type is invalid`,
+      reason: INVALID_TYPE_ERROR,
       details: formatErrors(decodedType.left).join(' | '),
       payload: monitorFields,
     };
   }
 
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
-  const SyntheticsMonitorCodec = monitorTypeToCodecMap[monitorType] as typeof ICMPSimpleFieldsCodec;
+  const SyntheticsMonitorCodec = monitorTypeToCodecMap[monitorType] as typeof ICMPFieldsCodec;
 
   if (!SyntheticsMonitorCodec) {
     return {
       valid: false,
-      reason: `Payload is not a valid monitor object`,
+      reason: INVALID_PAYLOAD_ERROR,
       details: '',
       payload: monitorFields,
     };
@@ -81,10 +81,8 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
   if (!ALLOWED_SCHEDULES_IN_MINUTES.includes(monitorFields[ConfigKey.SCHEDULE].number)) {
     return {
       valid: false,
-      reason: `Monitor schedule is invalid`,
-      details: `Invalid schedule ${
-        monitorFields[ConfigKey.SCHEDULE].number
-      } minutes supplied to monitor configuration. Please use a supported monitor schedule.`,
+      reason: INVALID_SCHEDULE_ERROR,
+      details: INVALID_SCHEDULE_DETAILS(monitorFields[ConfigKey.SCHEDULE].number),
       payload: monitorFields,
     };
   }
@@ -95,7 +93,7 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
   if (isLeft(decodedMonitor)) {
     return {
       valid: false,
-      reason: `Monitor is not a valid monitor of type ${monitorType}`,
+      reason: INVALID_SCHEMA_ERROR(monitorType),
       details: formatErrors(decodedMonitor.left).join(' | '),
       payload: monitorFields,
     };
@@ -113,7 +111,7 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
 export function validateProjectMonitor(
   monitorFields: ProjectMonitor,
   publicLocations: Locations,
-  privateLocations: PrivateLocation[]
+  privateLocations: PrivateLocationAttributes[]
 ): ValidationResult {
   const locationsError = validateLocation(monitorFields, publicLocations, privateLocations);
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
@@ -122,7 +120,7 @@ export function validateProjectMonitor(
   if (isLeft(decodedMonitor)) {
     return {
       valid: false,
-      reason: "Couldn't save or update monitor because of an invalid configuration.",
+      reason: INVALID_CONFIGURATION_ERROR,
       details: [...formatErrors(decodedMonitor.left), locationsError]
         .filter((error) => error !== '' && error !== undefined)
         .join(' | '),
@@ -133,7 +131,7 @@ export function validateProjectMonitor(
   if (locationsError) {
     return {
       valid: false,
-      reason: "Couldn't save or update monitor because of an invalid configuration.",
+      reason: INVALID_CONFIGURATION_ERROR,
       details: locationsError,
       payload: monitorFields,
     };
@@ -145,7 +143,7 @@ export function validateProjectMonitor(
 export function validateLocation(
   monitorFields: ProjectMonitor,
   publicLocations: Locations,
-  privateLocations: PrivateLocation[]
+  privateLocations: PrivateLocationAttributes[]
 ) {
   const hasPublicLocationsConfigured = (monitorFields.locations || []).length > 0;
   const hasPrivateLocationsConfigured = (monitorFields.privateLocations || []).length > 0;
@@ -201,6 +199,48 @@ export function validateLocation(
     return EMPTY_LOCATION_ERROR;
   }
 }
+
+const INVALID_CONFIGURATION_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidConfigurationError',
+  {
+    defaultMessage: "Couldn't save or update monitor because of an invalid configuration.",
+  }
+);
+
+const INVALID_PAYLOAD_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidPayloadError',
+  {
+    defaultMessage: 'Payload is not a valid monitor object',
+  }
+);
+
+const INVALID_TYPE_ERROR = i18n.translate('xpack.synthetics.server.monitors.invalidTypeError', {
+  defaultMessage: 'Monitor type is invalid',
+});
+
+const INVALID_SCHEDULE_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidScheduleError',
+  {
+    defaultMessage: 'Monitor schedule is invalid',
+  }
+);
+
+const INVALID_SCHEDULE_DETAILS = (schedule: string) =>
+  i18n.translate('xpack.synthetics.server.monitors.invalidScheduleDetails', {
+    defaultMessage:
+      'Invalid schedule {schedule} minutes supplied to monitor configuration. Please use a supported monitor schedule.',
+    values: {
+      schedule,
+    },
+  });
+
+const INVALID_SCHEMA_ERROR = (type: string) =>
+  i18n.translate('xpack.synthetics.server.monitors.invalidSchemaError', {
+    defaultMessage: 'Monitor is not a valid monitor of type {type}',
+    values: {
+      type,
+    },
+  });
 
 const EMPTY_LOCATION_ERROR = i18n.translate(
   'xpack.synthetics.server.projectMonitors.locationEmptyError',

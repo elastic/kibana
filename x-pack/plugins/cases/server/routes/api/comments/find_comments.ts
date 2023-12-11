@@ -6,13 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import Boom from '@hapi/boom';
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
-import { FindQueryParamsRt, throwErrors, excess } from '../../../../common/api';
+import type { attachmentApiV1 } from '../../../../common/types/api';
 import { CASE_FIND_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
@@ -27,18 +22,17 @@ export const findCommentsRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }) => {
     try {
-      const query = pipe(
-        excess(FindQueryParamsRt).decode(request.query),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
-
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
+      const query = request.query as attachmentApiV1.FindAttachmentsQueryParams;
+
+      const res: attachmentApiV1.AttachmentsFindResponse = await client.attachments.find({
+        caseID: request.params.case_id,
+        findQueryParams: query,
+      });
+
       return response.ok({
-        body: await client.attachments.find({
-          caseID: request.params.case_id,
-          queryParams: query,
-        }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

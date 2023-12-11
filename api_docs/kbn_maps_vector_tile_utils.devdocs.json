@@ -1,0 +1,61 @@
+{
+  "id": "@kbn/maps-vector-tile-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/maps-vector-tile-utils",
+        "id": "def-common.getTileUrlParams",
+        "type": "Function",
+        "tags": [],
+        "label": "getTileUrlParams",
+        "description": [],
+        "signature": [
+          "(params: Record<string, string | number | boolean | object | null | undefined>) => string"
+        ],
+        "path": "x-pack/packages/maps/vector_tile_utils/src/get_tile_url_params.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/maps-vector-tile-utils",
+            "id": "def-common.getTileUrlParams.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Record<string, string | number | boolean | object | null | undefined>"
+            ],
+            "path": "x-pack/packages/maps/vector_tile_utils/src/get_tile_url_params.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

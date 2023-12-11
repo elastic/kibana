@@ -61,6 +61,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       triggersActionsConnectors: {
         pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors',
       },
+      maintenanceWindows: {
+        pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
+      },
     },
     esTestCluster: {
       ...xpackFunctionalConfig.get('esTestCluster'),
@@ -140,6 +143,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               feature: {
                 actions: ['all'],
                 stackAlerts: ['all'],
+                logs: ['all'],
                 discover: ['all'],
                 advancedSettings: ['all'],
                 indexPatterns: ['all'],

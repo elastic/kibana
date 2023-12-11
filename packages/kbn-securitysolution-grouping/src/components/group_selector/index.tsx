@@ -10,7 +10,7 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { CustomFieldPanel } from './custom_field_panel';
@@ -43,30 +43,21 @@ const GroupSelectorComponent = ({
     [groupsSelected]
   );
 
-  const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () => [
+  const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
+    const isOptionDisabled = (key?: string) => {
+      // Do not disable when maxGroupingLevels is 1 to allow toggling between groups
+      if (maxGroupingLevels === 1) {
+        return false;
+      }
+      // Disable all non selected options when the maxGroupingLevels is reached
+      return groupsSelected.length === maxGroupingLevels && (key ? !isGroupSelected(key) : true);
+    };
+
+    return [
       {
         id: 'firstPanel',
-        title: (
-          <EuiFlexGroup
-            component="span"
-            justifyContent="spaceBetween"
-            gutterSize="none"
-            style={{ lineHeight: 1 }}
-          >
-            <EuiFlexItem grow={false} component="p" style={{ lineHeight: 1.5 }}>
-              {i18n.SELECT_FIELD(maxGroupingLevels)}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} component="span">
-              <EuiBetaBadge
-                label={i18n.BETA}
-                size="s"
-                tooltipContent={i18n.BETA_TOOL_TIP}
-                tooltipPosition="left"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
+        title:
+          maxGroupingLevels === 1 ? i18n.SELECT_SINGLE_FIELD : i18n.SELECT_FIELD(maxGroupingLevels),
         items: [
           {
             'data-test-subj': 'panel-none',
@@ -76,7 +67,7 @@ const GroupSelectorComponent = ({
           },
           ...options.map<EuiContextMenuPanelItemDescriptor>((o) => ({
             'data-test-subj': `panel-${o.key}`,
-            disabled: groupsSelected.length === maxGroupingLevels && !isGroupSelected(o.key),
+            disabled: isOptionDisabled(o.key),
             name: o.label,
             onClick: () => onGroupChange(o.key),
             icon: isGroupSelected(o.key) ? 'check' : 'empty',
@@ -85,7 +76,7 @@ const GroupSelectorComponent = ({
             'data-test-subj': `panel-custom`,
             name: i18n.CUSTOM_FIELD,
             icon: 'empty',
-            disabled: groupsSelected.length === maxGroupingLevels,
+            disabled: isOptionDisabled(),
             panel: 'customPanel',
             hasPanel: true,
           },
@@ -106,9 +97,8 @@ const GroupSelectorComponent = ({
           />
         ),
       },
-    ],
-    [fields, groupsSelected.length, isGroupSelected, maxGroupingLevels, onGroupChange, options]
-  );
+    ];
+  }, [fields, groupsSelected.length, isGroupSelected, maxGroupingLevels, onGroupChange, options]);
   const selectedOptions = useMemo(
     () => options.filter((groupOption) => isGroupSelected(groupOption.key)),
     [isGroupSelected, options]

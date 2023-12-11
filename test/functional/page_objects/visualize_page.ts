@@ -16,6 +16,7 @@ interface VisualizeSaveModalArgs {
   redirectToOrigin?: boolean;
   addToDashboard?: boolean;
   dashboardId?: string;
+  description?: string;
 }
 
 type DashboardPickerOption =
@@ -66,6 +67,14 @@ export class VisualizePageObject extends FtrService {
 
   public async gotoVisualizationLandingPage() {
     await this.common.navigateToApp('visualize');
+  }
+
+  public async selectVisualizationsTab() {
+    await this.listingTable.selectTab(1);
+  }
+
+  public async selectAnnotationsTab() {
+    await this.listingTable.selectTab(2);
   }
 
   public async clickNewVisualization() {
@@ -147,7 +156,7 @@ export class VisualizePageObject extends FtrService {
     await this.waitForVisualizationSelectPage();
   }
 
-  public async navigateToLensFromAnotherVisulization() {
+  public async navigateToLensFromAnotherVisualization() {
     const button = await this.testSubjects.find('visualizeEditInLensButton');
     await button.click();
   }
@@ -161,6 +170,11 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickVisType(type: string) {
+    // checking for the existence of the control gives the UI more time to bind a click handler
+    // see https://github.com/elastic/kibana/issues/89958
+    if (!(await this.hasVisType(type))) {
+      throw new Error(`The '${type}' visualization type does not exist (visType-${type})`);
+    }
     await this.testSubjects.click(`visType-${type}`);
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -393,9 +407,19 @@ export class VisualizePageObject extends FtrService {
 
   public async setSaveModalValues(
     vizName: string,
-    { saveAsNew, redirectToOrigin, addToDashboard, dashboardId }: VisualizeSaveModalArgs = {}
+    {
+      saveAsNew,
+      redirectToOrigin,
+      addToDashboard,
+      dashboardId,
+      description,
+    }: VisualizeSaveModalArgs = {}
   ) {
     await this.testSubjects.setValue('savedObjectTitle', vizName);
+
+    if (description) {
+      await this.testSubjects.setValue('viewDescription', description);
+    }
 
     const saveAsNewCheckboxExists = await this.testSubjects.exists('saveAsNewCheckbox');
     if (saveAsNewCheckboxExists) {

@@ -68,7 +68,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('is available if new', async () => {
-        await PageObjects.common.navigateToUrl('visualize', 'new', { useActualUrl: true });
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await PageObjects.visualize.clickNewVisualization();
         await PageObjects.visualize.clickAggBasedVisualizations();
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch('ecommerce');

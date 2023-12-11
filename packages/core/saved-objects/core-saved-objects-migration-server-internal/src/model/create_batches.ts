@@ -56,7 +56,7 @@ export function buildTempIndexMap(
 ): Record<string, string> {
   return Object.entries(indexTypesMap || {}).reduce<Record<string, string>>(
     (acc, [indexAlias, types]) => {
-      const tempIndex = getTempIndexName(indexAlias, kibanaVersion!);
+      const tempIndex = getTempIndexName(indexAlias, kibanaVersion!) + '_alias';
 
       types.forEach((type) => {
         acc[type] = tempIndex;

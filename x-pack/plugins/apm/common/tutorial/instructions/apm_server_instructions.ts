@@ -54,6 +54,16 @@ export function createStartServerUnix() {
   };
 }
 
+export function createStartServerUnixBinari() {
+  const START_SERVER = createStartServer();
+
+  return {
+    title: START_SERVER.title,
+    textPre: START_SERVER.textPre,
+    commands: ['./apm-server'],
+  };
+}
+
 const createDownloadServerTitle = () =>
   i18n.translate('xpack.apm.tutorial.downloadServer.title', {
     defaultMessage: 'Download and unpack APM Server',
@@ -76,7 +86,7 @@ export const createDownloadServerDeb = () => ({
   ],
   textPost: i18n.translate('xpack.apm.tutorial.downloadServerTitle', {
     defaultMessage:
-      'Looking for the 32-bit packages? See the [Download page]({downloadPageLink}).',
+      'Looking for the aarch64 packages? See the [Download page]({downloadPageLink}).',
     values: {
       downloadPageLink: '{config.docs.base_url}downloads/apm/apm-server',
     },
@@ -91,11 +101,19 @@ export const createDownloadServerRpm = () => ({
   ],
   textPost: i18n.translate('xpack.apm.tutorial.downloadServerRpm', {
     defaultMessage:
-      'Looking for the 32-bit packages? See the [Download page]({downloadPageLink}).',
+      'Looking for the aarch64 packages? See the [Download page]({downloadPageLink}).',
     values: {
       downloadPageLink: '{config.docs.base_url}downloads/apm/apm-server',
     },
   }),
+});
+
+export const createDownloadServerOtherLinux = () => ({
+  title: createDownloadServerTitle(),
+  commands: [
+    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-linux-x86_64.tar.gz',
+    'tar xzvf apm-server-{config.kibana.version}-darwin-x86_64.tar.gz',
+  ],
 });
 
 export function createWindowsServerInstructions() {

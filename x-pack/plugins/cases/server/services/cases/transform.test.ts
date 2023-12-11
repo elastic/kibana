@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+
 import {
   createCaseSavedObjectResponse,
   createESJiraConnector,
@@ -17,13 +19,13 @@ import {
   transformUpdateResponseToExternalModel,
 } from './transform';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
+import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
 
 describe('case transforms', () => {
   describe('transformUpdateResponseToExternalModel', () => {
@@ -553,6 +555,32 @@ describe('case transforms', () => {
       expect(transformAttributesToESModel({ status: undefined }).attributes).not.toHaveProperty(
         'status'
       );
+    });
+
+    it('returns the default value for category when it is undefined', () => {
+      const CaseSOResponseWithoutCategory = omit(createCaseSavedObjectResponse(), 'category');
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithoutCategory).attributes.category
+      ).toBe(null);
+    });
+
+    it('returns the correct value for category when it is null', () => {
+      const CaseSOResponseWithoutCategory = createCaseSavedObjectResponse();
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithoutCategory).attributes.category
+      ).toBe(null);
+    });
+
+    it('returns the correct value for category when it is defined', () => {
+      const CaseSOResponseWithoutCategory = createCaseSavedObjectResponse({
+        overrides: { category: 'foobar' },
+      });
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithoutCategory).attributes.category
+      ).toBe('foobar');
     });
   });
 });

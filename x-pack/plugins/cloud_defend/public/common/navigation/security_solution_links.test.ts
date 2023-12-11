@@ -6,7 +6,7 @@
  */
 
 import { cloudDefendPages } from './constants';
-import { getSecuritySolutionLink, getSecuritySolutionNavTab } from './security_solution_links';
+import { getSecuritySolutionLink } from './security_solution_links';
 import { Chance } from 'chance';
 import type { CloudDefendPage } from './types';
 
@@ -21,19 +21,5 @@ describe('getSecuritySolutionLink', () => {
     expect(link.id).toEqual(cloudDefendPages[cloudDefendPage].id);
     expect(link.path).toEqual(cloudDefendPages[cloudDefendPage].path);
     expect(link.title).toEqual(cloudDefendPages[cloudDefendPage].name);
-  });
-});
-
-describe('getSecuritySolutionNavTab', () => {
-  it('gets the correct nav tab properties', () => {
-    const cloudDefendPage = chance.pickone<CloudDefendPage>(['policies']);
-    const basePath = chance.word();
-
-    const navTab = getSecuritySolutionNavTab(cloudDefendPage, basePath);
-
-    expect(navTab.id).toEqual(cloudDefendPages[cloudDefendPage].id);
-    expect(navTab.name).toEqual(cloudDefendPages[cloudDefendPage].name);
-    expect(navTab.href).toEqual(`${basePath}${cloudDefendPages[cloudDefendPage].path}`);
-    expect(navTab.disabled).toEqual(!!cloudDefendPages[cloudDefendPage].disabled);
   });
 });

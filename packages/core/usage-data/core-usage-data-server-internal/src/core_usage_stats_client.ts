@@ -245,7 +245,9 @@ function getFieldsForCounter(prefix: string) {
 }
 
 function getIsKibanaRequest({ headers }: KibanaRequest) {
-  // The presence of these two request headers gives us a good indication that this is a first-party request from the Kibana client.
+  // The presence of these request headers gives us a good indication that this is a first-party request from the Kibana client.
   // We can't be 100% certain, but this is a reasonable attempt.
-  return headers && headers['kbn-version'] && headers.referer;
+  return (
+    headers && headers['kbn-version'] && headers.referer && headers['x-elastic-internal-origin']
+  );
 }

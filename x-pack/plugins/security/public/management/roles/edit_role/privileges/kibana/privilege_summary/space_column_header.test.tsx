@@ -14,9 +14,9 @@ import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mock
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import type { RoleKibanaPrivilege } from '../../../../../../../common/model';
-import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { SpaceColumnHeader } from './space_column_header';
+import type { RoleKibanaPrivilege } from '../../../../../../../common';
+import { SpacesPopoverList } from '../../../spaces_popover_list';
 
 const spaces = [
   {

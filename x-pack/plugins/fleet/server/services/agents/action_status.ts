@@ -13,8 +13,8 @@ import type {
   FleetServerAgentAction,
   ActionStatus,
   ActionErrorResult,
-  ListWithKuery,
   AgentActionType,
+  ActionStatusOptions,
 } from '../../types';
 import {
   AGENT_ACTIONS_INDEX,
@@ -24,14 +24,12 @@ import {
 } from '../../../common';
 import { appContextService } from '..';
 
-const PRECISION_THRESHOLD = 40000;
-
 /**
  * Return current bulk actions
  */
 export async function getActionStatuses(
   esClient: ElasticsearchClient,
-  options: ListWithKuery & { errorSize: number }
+  options: ActionStatusOptions
 ): Promise<ActionStatus[]> {
   const actions = await _getActions(esClient, options);
   const cancelledActions = await getCancelledActions(esClient);
@@ -53,12 +51,6 @@ export async function getActionStatuses(
           terms: { field: 'action_id', size: actions.length || 10 },
           aggs: {
             max_timestamp: { max: { field: '@timestamp' } },
-            agent_count: {
-              cardinality: {
-                field: 'agent_id',
-                precision_threshold: PRECISION_THRESHOLD, // max value
-              },
-            },
           },
         },
       },
@@ -79,17 +71,8 @@ export async function getActionStatuses(
       (bucket: any) => bucket.key === action.actionId
     );
     const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
-    const cardinalityCount = (matchingBucket?.agent_count as any)?.value ?? 0;
     const docCount = matchingBucket?.doc_count ?? 0;
-    const nbAgentsAck =
-      action.type === 'UPDATE_TAGS'
-        ? Math.min(docCount, nbAgentsActioned)
-        : Math.min(
-            docCount,
-            // only using cardinality count when count lower than precision threshold
-            docCount > PRECISION_THRESHOLD ? docCount : cardinalityCount,
-            nbAgentsActioned
-          );
+    const nbAgentsAck = Math.min(docCount, nbAgentsActioned);
     const completionTime = (matchingBucket?.max_timestamp as any)?.value_as_string;
     const complete = nbAgentsAck >= nbAgentsActioned;
     const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
@@ -235,7 +218,7 @@ export async function getCancelledActions(
 
 async function _getActions(
   esClient: ElasticsearchClient,
-  options: ListWithKuery
+  options: ActionStatusOptions
 ): Promise<ActionStatus[]> {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,

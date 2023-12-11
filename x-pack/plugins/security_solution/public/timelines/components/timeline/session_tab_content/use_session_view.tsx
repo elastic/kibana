@@ -24,10 +24,7 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDetailPanel } from '../../side_panel/hooks/use_detail_panel';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { isFullScreen } from '../body/column_headers';
-import {
-  SCROLLING_DISABLED_CLASS_NAME,
-  FULL_SCREEN_TOGGLED_CLASS_NAME,
-} from '../../../../../common/constants';
+import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../../common/constants';
 import { FULL_SCREEN } from '../body/column_headers/translations';
 import { EXIT_FULL_SCREEN } from '../../../../common/components/exit_full_screen/translations';
 import {
@@ -75,7 +72,12 @@ const NavigationComponent: React.FC<NavigationProps> = ({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
+        <EuiButtonEmpty
+          iconType="cross"
+          onClick={onCloseOverlay}
+          size="xs"
+          data-test-subj="close-overlay"
+        >
           {title()}
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -92,8 +94,8 @@ const NavigationComponent: React.FC<NavigationProps> = ({
                   ? EXIT_FULL_SCREEN
                   : FULL_SCREEN
               }
-              className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
-              color={fullScreen ? 'ghost' : 'primary'}
+              display={fullScreen ? 'fill' : 'empty'}
+              color="primary"
               data-test-subj="full-screen"
               iconType="fullScreen"
               onClick={toggleFullScreen}
@@ -259,7 +261,7 @@ export const useSessionView = ({
   }, [scopeId]);
   const { globalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen } = useTimelineFullScreen();
-  const { canAccessEndpointManagement } = useUserPrivileges().endpointPrivileges;
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
   const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
   const { sessionViewConfig, activeTab } = useDeepEqualSelector((state) => ({
@@ -304,7 +306,7 @@ export const useSessionView = ({
           loadAlertDetails: openEventDetailsPanel,
           isFullScreen: fullScreen,
           height: heightMinusSearchBar,
-          canAccessEndpointManagement,
+          canReadPolicyManagement,
         })
       : null;
   }, [
@@ -313,7 +315,7 @@ export const useSessionView = ({
     sessionView,
     openEventDetailsPanel,
     fullScreen,
-    canAccessEndpointManagement,
+    canReadPolicyManagement,
   ]);
 
   return {

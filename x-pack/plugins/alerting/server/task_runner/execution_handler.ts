@@ -7,35 +7,40 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
-import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
+import { ALERT_UUID, getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
-import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
+import {
+  ExecuteOptions as EnqueueExecutionOptions,
+  ExecutionResponseItem,
+  ExecutionResponseType,
+} from '@kbn/actions-plugin/server/create_execute_function';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
+import { GetSummarizedAlertsParams, IAlertsClient } from '../alerts_client/types';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import {
-  GetSummarizedAlertsFnOpts,
-  parseDuration,
-  RawRule,
-  CombinedSummarizedAlerts,
-  ThrottledActions,
-} from '../types';
+import { AlertHit, parseDuration, CombinedSummarizedAlerts, ThrottledActions } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
 import { Executable, ExecutionHandlerOptions, RuleTaskInstance } from './types';
 import { TaskRunnerContext } from './task_runner_factory';
-import { transformActionParams, transformSummaryActionParams } from './transform_action_params';
+import {
+  transformActionParams,
+  TransformActionParamsOptions,
+  transformSummaryActionParams,
+} from './transform_action_params';
 import { Alert } from '../alert';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
-  ActionsCompletion,
   AlertInstanceContext,
   AlertInstanceState,
   RuleAction,
   RuleTypeParams,
   RuleTypeState,
   SanitizedRule,
+  RuleAlertData,
+  RuleNotifyWhen,
 } from '../../common';
 import {
   generateActionHash,
@@ -44,7 +49,6 @@ import {
   isActionOnInterval,
   isSummaryAction,
   isSummaryActionOnInterval,
-  isSummaryActionPerRuleRun,
   isSummaryActionThrottled,
 } from './rule_action_helper';
 
@@ -54,8 +58,28 @@ enum Reasons {
   ACTION_GROUP_NOT_CHANGED = 'actionGroupHasNotChanged',
 }
 
+interface LogAction {
+  id: string;
+  typeId: string;
+  alertId?: string;
+  alertGroup?: string;
+  alertSummary?: {
+    new: number;
+    ongoing: number;
+    recovered: number;
+  };
+}
+
 export interface RunResult {
   throttledSummaryActions: ThrottledActions;
+}
+
+export interface RuleUrl {
+  absoluteUrl?: string;
+  kibanaBaseUrl?: string;
+  basePathname?: string;
+  spaceIdSegment?: string;
+  relativePath?: string;
 }
 
 export class ExecutionHandler<
@@ -65,7 +89,8 @@ export class ExecutionHandler<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
 > {
   private logger: Logger;
   private alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
@@ -77,12 +102,13 @@ export class ExecutionHandler<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >;
   private taskRunnerContext: TaskRunnerContext;
   private taskInstance: RuleTaskInstance;
   private ruleRunMetricsStore: RuleRunMetricsStore;
-  private apiKey: RawRule['apiKey'];
+  private apiKey: string | null;
   private ruleConsumer: string;
   private executionId: string;
   private ruleLabel: string;
@@ -93,6 +119,13 @@ export class ExecutionHandler<
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private mutedAlertIdsSet: Set<string> = new Set();
   private previousStartedAt: Date | null;
+  private alertsClient: IAlertsClient<
+    AlertData,
+    State,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >;
 
   constructor({
     rule,
@@ -108,6 +141,7 @@ export class ExecutionHandler<
     ruleLabel,
     previousStartedAt,
     actionsClient,
+    alertsClient,
   }: ExecutionHandlerOptions<
     Params,
     ExtractedParams,
@@ -115,7 +149,8 @@ export class ExecutionHandler<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >) {
     this.logger = logger;
     this.alertingEventLogger = alertingEventLogger;
@@ -135,6 +170,7 @@ export class ExecutionHandler<
     );
     this.previousStartedAt = previousStartedAt;
     this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
+    this.alertsClient = alertsClient;
   }
 
   public async run(
@@ -158,8 +194,9 @@ export class ExecutionHandler<
         },
       } = this;
 
-      const logActions = [];
+      const logActions: Record<string, LogAction> = {};
       const bulkActions: EnqueueExecutionOptions[] = [];
+      let bulkActionsResponse: ExecutionResponseItem[] = [];
 
       this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
 
@@ -208,18 +245,19 @@ export class ExecutionHandler<
         ruleRunMetricsStore.incrementNumberOfTriggeredActions();
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
-        if (isSummaryAction(action) && summarizedAlerts) {
+        if (summarizedAlerts) {
           const { start, end } = getSummaryActionTimeBounds(
             action,
             this.rule.schedule,
             this.previousStartedAt
           );
+          const ruleUrl = this.buildRuleUrl(spaceId, start, end);
           const actionToRun = {
             ...action,
             params: injectActionParams({
-              ruleId,
-              spaceId,
               actionTypeId,
+              ruleUrl,
+              ruleName: this.rule.name,
               actionParams: transformSummaryActionParams({
                 alerts: summarizedAlerts,
                 rule: this.rule,
@@ -230,7 +268,7 @@ export class ExecutionHandler<
                 actionsPlugin,
                 actionTypeId,
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                ruleUrl: this.buildRuleUrl(spaceId, start, end),
+                ruleUrl: ruleUrl?.absoluteUrl,
               }),
             }),
           };
@@ -241,10 +279,10 @@ export class ExecutionHandler<
           });
 
           if (isActionOnInterval(action)) {
-            throttledSummaryActions[action.uuid!] = { date: new Date() };
+            throttledSummaryActions[action.uuid!] = { date: new Date().toISOString() };
           }
 
-          logActions.push({
+          logActions[action.id] = {
             id: action.id,
             typeId: action.actionTypeId,
             alertSummary: {
@@ -252,36 +290,43 @@ export class ExecutionHandler<
               ongoing: summarizedAlerts.ongoing.count,
               recovered: summarizedAlerts.recovered.count,
             },
-          });
+          };
         } else {
+          const ruleUrl = this.buildRuleUrl(spaceId);
           const executableAlert = alert!;
+          const transformActionParamsOptions: TransformActionParamsOptions = {
+            actionsPlugin,
+            alertId: ruleId,
+            alertType: this.ruleType.id,
+            actionTypeId,
+            alertName: this.rule.name,
+            spaceId,
+            tags: this.rule.tags,
+            alertInstanceId: executableAlert.getId(),
+            alertUuid: executableAlert.getUuid(),
+            alertActionGroup: actionGroup,
+            alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
+            context: executableAlert.getContext(),
+            actionId: action.id,
+            state: executableAlert.getState(),
+            kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+            alertParams: this.rule.params,
+            actionParams: action.params,
+            flapping: executableAlert.getFlapping(),
+            ruleUrl: ruleUrl?.absoluteUrl,
+          };
+
+          if (executableAlert.isAlertAsData()) {
+            transformActionParamsOptions.aadAlert = executableAlert.getAlertAsData();
+          }
+
           const actionToRun = {
             ...action,
             params: injectActionParams({
-              ruleId,
-              spaceId,
               actionTypeId,
-              actionParams: transformActionParams({
-                actionsPlugin,
-                alertId: ruleId,
-                alertType: this.ruleType.id,
-                actionTypeId,
-                alertName: this.rule.name,
-                spaceId,
-                tags: this.rule.tags,
-                alertInstanceId: executableAlert.getId(),
-                alertUuid: executableAlert.getUuid(),
-                alertActionGroup: actionGroup,
-                alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
-                context: executableAlert.getContext(),
-                actionId: action.id,
-                state: executableAlert.getScheduledActionOptions()?.state || {},
-                kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                alertParams: this.rule.params,
-                actionParams: action.params,
-                flapping: executableAlert.getFlapping(),
-                ruleUrl: this.buildRuleUrl(spaceId),
-              }),
+              ruleUrl,
+              ruleName: this.rule.name,
+              actionParams: transformActionParams(transformActionParamsOptions),
             }),
           };
 
@@ -290,36 +335,64 @@ export class ExecutionHandler<
             bulkActions,
           });
 
-          logActions.push({
+          logActions[action.id] = {
             id: action.id,
             typeId: action.actionTypeId,
-            alertId: executableAlert.getId(),
+            alertId: alert.getId(),
             alertGroup: action.group,
-          });
+          };
 
           if (!this.isRecoveredAlert(actionGroup)) {
             if (isActionOnInterval(action)) {
-              executableAlert.updateLastScheduledActions(
+              alert.updateLastScheduledActions(
                 action.group as ActionGroupIds,
                 generateActionHash(action),
                 action.uuid
               );
             } else {
-              executableAlert.updateLastScheduledActions(action.group as ActionGroupIds);
+              alert.updateLastScheduledActions(action.group as ActionGroupIds);
             }
-            executableAlert.unscheduleActions();
+            alert.unscheduleActions();
           }
         }
       }
 
       if (!!bulkActions.length) {
         for (const c of chunk(bulkActions, CHUNK_SIZE)) {
-          await this.actionsClient!.bulkEnqueueExecution(c);
+          const response = await this.actionsClient!.bulkEnqueueExecution(c);
+          if (response.errors) {
+            bulkActionsResponse = bulkActionsResponse.concat(
+              response.items.filter(
+                (i) => i.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR
+              )
+            );
+          }
         }
       }
 
-      if (!!logActions.length) {
-        for (const action of logActions) {
+      if (!!bulkActionsResponse.length) {
+        for (const r of bulkActionsResponse) {
+          if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
+            ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
+            ruleRunMetricsStore.decrementNumberOfTriggeredActions();
+            ruleRunMetricsStore.decrementNumberOfTriggeredActionsByConnectorType(r.actionTypeId);
+            ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+              actionTypeId: r.actionTypeId,
+              status: ActionsCompletion.PARTIAL,
+            });
+
+            logger.debug(
+              `Rule "${this.rule.id}" skipped scheduling action "${r.id}" because the maximum number of queued actions has been reached.`
+            );
+
+            delete logActions[r.id];
+          }
+        }
+      }
+
+      const logActionsValues = Object.values(logActions);
+      if (!!logActionsValues.length) {
+        for (const action of logActionsValues) {
           alertingEventLogger.logAction(action);
         }
       }
@@ -428,7 +501,7 @@ export class ExecutionHandler<
     return alert.getScheduledActionOptions()?.actionGroup || this.ruleType.recoveryActionGroup.id;
   }
 
-  private buildRuleUrl(spaceId: string, start?: number, end?: number): string | undefined {
+  private buildRuleUrl(spaceId: string, start?: number, end?: number): RuleUrl | undefined {
     if (!this.taskRunnerContext.kibanaBaseUrl) {
       return;
     }
@@ -438,12 +511,22 @@ export class ExecutionHandler<
       : `${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`;
 
     try {
+      const basePathname = new URL(this.taskRunnerContext.kibanaBaseUrl).pathname;
+      const basePathnamePrefix = basePathname !== '/' ? `${basePathname}` : '';
+      const spaceIdSegment = spaceId !== 'default' ? `/s/${spaceId}` : '';
+
       const ruleUrl = new URL(
-        `${spaceId !== 'default' ? `/s/${spaceId}` : ''}${relativePath}`,
+        [basePathnamePrefix, spaceIdSegment, relativePath].join(''),
         this.taskRunnerContext.kibanaBaseUrl
       );
 
-      return ruleUrl.toString();
+      return {
+        absoluteUrl: ruleUrl.toString(),
+        kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+        basePathname: basePathnamePrefix,
+        spaceIdSegment,
+        relativePath,
+      };
     } catch (error) {
       this.logger.debug(
         `Rule "${this.rule.id}" encountered an error while constructing the rule.url variable: ${error.message}`
@@ -482,6 +565,7 @@ export class ExecutionHandler<
           typeId: this.ruleType.id,
         },
       ],
+      actionTypeId: action.actionTypeId,
     };
   }
 
@@ -490,11 +574,10 @@ export class ExecutionHandler<
     throttledSummaryActions: ThrottledActions
   ): Promise<Array<Executable<State, Context, ActionGroupIds, RecoveryActionGroupId>>> {
     const executables = [];
-
     for (const action of this.rule.actions) {
       const alertsArray = Object.entries(alerts);
-      let summarizedAlerts = null;
 
+      let summarizedAlerts = null;
       if (this.shouldGetSummarizedAlerts({ action, throttledSummaryActions })) {
         summarizedAlerts = await this.getSummarizedAlerts({
           action,
@@ -511,19 +594,27 @@ export class ExecutionHandler<
       }
 
       if (isSummaryAction(action)) {
-        if (summarizedAlerts) {
-          if (isSummaryActionPerRuleRun(action) && summarizedAlerts.all.count === 0) {
-            continue;
-          }
+        if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
           executables.push({ action, summarizedAlerts });
         }
         continue;
       }
 
       for (const [alertId, alert] of alertsArray) {
+        const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
+        if (alertMaintenanceWindowIds.length !== 0) {
+          this.logger.debug(
+            `no scheduling of summary actions "${action.id}" for rule "${
+              this.taskInstance.params.alertId
+            }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
+          );
+          continue;
+        }
+
         if (alert.isFilteredOut(summarizedAlerts)) {
           continue;
         }
+
         const actionGroup = this.getActionGroup(alert);
 
         if (!this.ruleTypeActionGroups!.has(actionGroup)) {
@@ -532,6 +623,25 @@ export class ExecutionHandler<
           );
           continue;
         }
+
+        // only actions with notifyWhen set to "on status change" should return
+        // notifications for flapping pending recovered alerts
+        if (
+          alert.getPendingRecoveredCount() > 0 &&
+          action.frequency?.notifyWhen !== RuleNotifyWhen.CHANGE
+        ) {
+          continue;
+        }
+
+        if (summarizedAlerts) {
+          const alertAsData = summarizedAlerts.all.data.find(
+            (alertHit: AlertHit) => alertHit._id === alert.getUuid()
+          );
+          if (alertAsData) {
+            alert.setAlertAsData(alertAsData);
+          }
+        }
+
         if (action.group === actionGroup && !this.isAlertMuted(alertId)) {
           if (
             this.isRecoveredAlert(action.group) ||
@@ -546,15 +656,8 @@ export class ExecutionHandler<
     return executables;
   }
 
-  private canFetchSummarizedAlerts(action: RuleAction) {
-    const hasGetSummarizedAlerts = this.ruleType.getSummarizedAlerts !== undefined;
-
-    if (action.frequency?.summary && !hasGetSummarizedAlerts) {
-      this.logger.error(
-        `Skipping action "${action.id}" for rule "${this.rule.id}" because the rule type "${this.ruleType.name}" does not support alert-as-data.`
-      );
-    }
-    return hasGetSummarizedAlerts;
+  private canGetSummarizedAlerts() {
+    return !!this.ruleType.alerts && !!this.alertsClient.getSummarizedAlerts;
   }
 
   private shouldGetSummarizedAlerts({
@@ -564,15 +667,21 @@ export class ExecutionHandler<
     action: RuleAction;
     throttledSummaryActions: ThrottledActions;
   }) {
-    if (!this.canFetchSummarizedAlerts(action)) {
+    if (!this.canGetSummarizedAlerts()) {
+      if (action.frequency?.summary) {
+        this.logger.error(
+          `Skipping action "${action.id}" for rule "${this.rule.id}" because the rule type "${this.ruleType.name}" does not support alert-as-data.`
+        );
+      }
       return false;
     }
-
+    if (action.useAlertDataForTemplate) {
+      return true;
+    }
     // we fetch summarizedAlerts to filter alerts in memory as well
     if (!isSummaryAction(action) && !action.alertsFilter) {
       return false;
     }
-
     if (
       isSummaryAction(action) &&
       isSummaryActionThrottled({
@@ -596,37 +705,66 @@ export class ExecutionHandler<
     ruleId: string;
     spaceId: string;
   }): Promise<CombinedSummarizedAlerts> {
-    let options: GetSummarizedAlertsFnOpts = {
+    const optionsBase = {
       ruleId,
       spaceId,
       excludedAlertInstanceIds: this.rule.mutedInstanceIds,
       alertsFilter: action.alertsFilter,
     };
 
+    let options: GetSummarizedAlertsParams;
+
     if (isActionOnInterval(action)) {
       const throttleMills = parseDuration(action.frequency!.throttle!);
       const start = new Date(Date.now() - throttleMills);
 
       options = {
+        ...optionsBase,
         start,
         end: new Date(),
-        ...options,
       };
     } else {
       options = {
+        ...optionsBase,
         executionUuid: this.executionId,
-        ...options,
       };
     }
+    const alerts = await this.alertsClient.getSummarizedAlerts!(options);
 
-    const alerts = await this.ruleType.getSummarizedAlerts!(options);
+    /**
+     * We need to remove all new alerts with maintenance windows retrieved from
+     * getSummarizedAlerts because they might not have maintenance window IDs
+     * associated with them from maintenance windows with scoped query updated
+     * yet (the update call uses refresh: false). So we need to rely on the in
+     * memory alerts to do this.
+     */
+    const newAlertsInMemory =
+      Object.values(this.alertsClient.getProcessedAlerts('new') || {}) || [];
 
-    const total = alerts.new.count + alerts.ongoing.count + alerts.recovered.count;
+    const newAlertsWithMaintenanceWindowIds = newAlertsInMemory.reduce<string[]>(
+      (result, alert) => {
+        if (alert.getMaintenanceWindowIds().length > 0) {
+          result.push(alert.getUuid());
+        }
+        return result;
+      },
+      []
+    );
+
+    const newAlerts = alerts.new.data.filter((alert) => {
+      return !newAlertsWithMaintenanceWindowIds.includes(alert[ALERT_UUID]);
+    });
+
+    const total = newAlerts.length + alerts.ongoing.count + alerts.recovered.count;
     return {
       ...alerts,
+      new: {
+        count: newAlerts.length,
+        data: newAlerts,
+      },
       all: {
         count: total,
-        data: [...alerts.new.data, ...alerts.ongoing.data, ...alerts.recovered.data],
+        data: [...newAlerts, ...alerts.ongoing.data, ...alerts.recovered.data],
       },
     };
   }

@@ -6,7 +6,7 @@ Object {
   "references": Array [
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
+      "name": "indexpattern-datasource-layer-mockLayerId",
       "type": "index-pattern",
     },
   ],
@@ -15,39 +15,25 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b": Object {
+          "mockLayerId": Object {
             "columnOrder": Array [
-              "2881fedd-54b7-42ba-8c97-5175dec86166",
-              "75ce269b-ee9c-4c7d-a14e-9226ba0fe059",
-              "f04a71a3-399f-4d32-9efc-8a005e989991",
+              "mockTopValuesOfStackByFieldColumnId",
+              "mockTopValuesOfBreakdownFieldColumnId",
+              "mockCountColumnId",
             ],
             "columns": Object {
-              "2881fedd-54b7-42ba-8c97-5175dec86166": Object {
-                "dataType": "string",
-                "isBucketed": true,
-                "label": "Top values of event.category",
-                "operationType": "terms",
+              "mockCountColumnId": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of agent.type",
+                "operationType": "count",
                 "params": Object {
-                  "exclude": Array [],
-                  "excludeIsRegex": false,
-                  "include": Array [],
-                  "includeIsRegex": false,
-                  "missingBucket": false,
-                  "orderBy": Object {
-                    "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
-                    "type": "column",
-                  },
-                  "orderDirection": "desc",
-                  "otherBucket": true,
-                  "parentFormat": Object {
-                    "id": "terms",
-                  },
-                  "size": 1000,
+                  "emptyAsNull": true,
                 },
-                "scale": "ordinal",
-                "sourceField": "event.category",
+                "scale": "ratio",
+                "sourceField": "agent.type",
               },
-              "75ce269b-ee9c-4c7d-a14e-9226ba0fe059": Object {
+              "mockTopValuesOfBreakdownFieldColumnId": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Top values of agent.type",
@@ -59,7 +45,7 @@ Object {
                   "includeIsRegex": false,
                   "missingBucket": false,
                   "orderBy": Object {
-                    "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
+                    "columnId": "mockCountColumnId",
                     "type": "column",
                   },
                   "orderDirection": "desc",
@@ -72,16 +58,30 @@ Object {
                 "scale": "ordinal",
                 "sourceField": "agent.type",
               },
-              "f04a71a3-399f-4d32-9efc-8a005e989991": Object {
-                "dataType": "number",
-                "isBucketed": false,
-                "label": "Count of agent.type",
-                "operationType": "count",
+              "mockTopValuesOfStackByFieldColumnId": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of event.category",
+                "operationType": "terms",
                 "params": Object {
-                  "emptyAsNull": true,
+                  "exclude": Array [],
+                  "excludeIsRegex": false,
+                  "include": Array [],
+                  "includeIsRegex": false,
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "mockCountColumnId",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "size": 1000,
                 },
-                "scale": "ratio",
-                "sourceField": "agent.type",
+                "scale": "ordinal",
+                "sourceField": "event.category",
               },
             },
             "incompleteColumns": Object {},
@@ -144,20 +144,20 @@ Object {
     "visualization": Object {
       "columns": Array [
         Object {
-          "columnId": "2881fedd-54b7-42ba-8c97-5175dec86166",
+          "columnId": "mockTopValuesOfStackByFieldColumnId",
           "isTransposed": false,
           "width": 362,
         },
         Object {
-          "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
+          "columnId": "mockCountColumnId",
           "isTransposed": false,
         },
         Object {
-          "columnId": "75ce269b-ee9c-4c7d-a14e-9226ba0fe059",
+          "columnId": "mockTopValuesOfBreakdownFieldColumnId",
           "isTransposed": false,
         },
       ],
-      "layerId": "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
+      "layerId": "mockLayerId",
       "layerType": "data",
     },
   },
@@ -172,7 +172,7 @@ Object {
   "references": Array [
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
+      "name": "indexpattern-datasource-layer-mockLayerId",
       "type": "index-pattern",
     },
   ],
@@ -181,14 +181,24 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b": Object {
+          "mockLayerId": Object {
             "columnOrder": Array [
-              "2881fedd-54b7-42ba-8c97-5175dec86166",
-              "75ce269b-ee9c-4c7d-a14e-9226ba0fe059",
-              "f04a71a3-399f-4d32-9efc-8a005e989991",
+              "mockTopValuesOfStackByFieldColumnId",
+              "mockCountColumnId",
             ],
             "columns": Object {
-              "2881fedd-54b7-42ba-8c97-5175dec86166": Object {
+              "mockCountColumnId": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of event.category",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "event.category",
+              },
+              "mockTopValuesOfStackByFieldColumnId": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Top values of event.category",
@@ -200,7 +210,7 @@ Object {
                   "includeIsRegex": false,
                   "missingBucket": false,
                   "orderBy": Object {
-                    "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
+                    "columnId": "mockCountColumnId",
                     "type": "column",
                   },
                   "orderDirection": "desc",
@@ -212,42 +222,6 @@ Object {
                 },
                 "scale": "ordinal",
                 "sourceField": "event.category",
-              },
-              "75ce269b-ee9c-4c7d-a14e-9226ba0fe059": Object {
-                "dataType": "string",
-                "isBucketed": true,
-                "label": "Top values of undefined",
-                "operationType": "terms",
-                "params": Object {
-                  "exclude": Array [],
-                  "excludeIsRegex": false,
-                  "include": Array [],
-                  "includeIsRegex": false,
-                  "missingBucket": false,
-                  "orderBy": Object {
-                    "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
-                    "type": "column",
-                  },
-                  "orderDirection": "desc",
-                  "otherBucket": true,
-                  "parentFormat": Object {
-                    "id": "terms",
-                  },
-                  "size": 1000,
-                },
-                "scale": "ordinal",
-                "sourceField": undefined,
-              },
-              "f04a71a3-399f-4d32-9efc-8a005e989991": Object {
-                "dataType": "number",
-                "isBucketed": false,
-                "label": "Count of undefined",
-                "operationType": "count",
-                "params": Object {
-                  "emptyAsNull": true,
-                },
-                "scale": "ratio",
-                "sourceField": undefined,
               },
             },
             "incompleteColumns": Object {},
@@ -334,20 +308,16 @@ Object {
     "visualization": Object {
       "columns": Array [
         Object {
-          "columnId": "2881fedd-54b7-42ba-8c97-5175dec86166",
+          "columnId": "mockTopValuesOfStackByFieldColumnId",
           "isTransposed": false,
           "width": 362,
         },
         Object {
-          "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
-          "isTransposed": false,
-        },
-        Object {
-          "columnId": "75ce269b-ee9c-4c7d-a14e-9226ba0fe059",
+          "columnId": "mockCountColumnId",
           "isTransposed": false,
         },
       ],
-      "layerId": "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
+      "layerId": "mockLayerId",
       "layerType": "data",
     },
   },
@@ -362,7 +332,7 @@ Object {
   "references": Array [
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
+      "name": "indexpattern-datasource-layer-mockLayerId",
       "type": "index-pattern",
     },
   ],
@@ -371,14 +341,24 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b": Object {
+          "mockLayerId": Object {
             "columnOrder": Array [
-              "2881fedd-54b7-42ba-8c97-5175dec86166",
-              "75ce269b-ee9c-4c7d-a14e-9226ba0fe059",
-              "f04a71a3-399f-4d32-9efc-8a005e989991",
+              "mockTopValuesOfStackByFieldColumnId",
+              "mockCountColumnId",
             ],
             "columns": Object {
-              "2881fedd-54b7-42ba-8c97-5175dec86166": Object {
+              "mockCountColumnId": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of event.category",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "event.category",
+              },
+              "mockTopValuesOfStackByFieldColumnId": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Top values of event.category",
@@ -390,7 +370,7 @@ Object {
                   "includeIsRegex": false,
                   "missingBucket": false,
                   "orderBy": Object {
-                    "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
+                    "columnId": "mockCountColumnId",
                     "type": "column",
                   },
                   "orderDirection": "desc",
@@ -402,42 +382,6 @@ Object {
                 },
                 "scale": "ordinal",
                 "sourceField": "event.category",
-              },
-              "75ce269b-ee9c-4c7d-a14e-9226ba0fe059": Object {
-                "dataType": "string",
-                "isBucketed": true,
-                "label": "Top values of undefined",
-                "operationType": "terms",
-                "params": Object {
-                  "exclude": Array [],
-                  "excludeIsRegex": false,
-                  "include": Array [],
-                  "includeIsRegex": false,
-                  "missingBucket": false,
-                  "orderBy": Object {
-                    "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
-                    "type": "column",
-                  },
-                  "orderDirection": "desc",
-                  "otherBucket": true,
-                  "parentFormat": Object {
-                    "id": "terms",
-                  },
-                  "size": 1000,
-                },
-                "scale": "ordinal",
-                "sourceField": undefined,
-              },
-              "f04a71a3-399f-4d32-9efc-8a005e989991": Object {
-                "dataType": "number",
-                "isBucketed": false,
-                "label": "Count of undefined",
-                "operationType": "count",
-                "params": Object {
-                  "emptyAsNull": true,
-                },
-                "scale": "ratio",
-                "sourceField": undefined,
               },
             },
             "incompleteColumns": Object {},
@@ -500,20 +444,16 @@ Object {
     "visualization": Object {
       "columns": Array [
         Object {
-          "columnId": "2881fedd-54b7-42ba-8c97-5175dec86166",
+          "columnId": "mockTopValuesOfStackByFieldColumnId",
           "isTransposed": false,
           "width": 362,
         },
         Object {
-          "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
-          "isTransposed": false,
-        },
-        Object {
-          "columnId": "75ce269b-ee9c-4c7d-a14e-9226ba0fe059",
+          "columnId": "mockCountColumnId",
           "isTransposed": false,
         },
       ],
-      "layerId": "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
+      "layerId": "mockLayerId",
       "layerType": "data",
     },
   },

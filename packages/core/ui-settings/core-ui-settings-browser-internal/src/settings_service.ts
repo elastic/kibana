@@ -9,14 +9,14 @@
 import { Subject } from 'rxjs';
 
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { SettingsStart, SettingsSetup } from '@kbn/core-ui-settings-browser';
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
 import { UiSettingsGlobalClient } from './ui_settings_global_client';
 
 export interface SettingsServiceDeps {
-  http: HttpSetup;
+  http: InternalHttpSetup;
   injectedMetadata: InternalInjectedMetadataSetup;
 }
 

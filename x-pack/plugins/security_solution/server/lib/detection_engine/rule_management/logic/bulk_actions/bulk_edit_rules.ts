@@ -7,7 +7,7 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
-import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
 
 import type { MlAuthz } from '../../../../machine_learning/authz';
 

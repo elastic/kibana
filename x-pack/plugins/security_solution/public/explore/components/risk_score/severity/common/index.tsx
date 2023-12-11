@@ -12,16 +12,9 @@ import { EuiHealth, transparentize } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
 
+import { RISK_SEVERITY_COLOUR } from '../../../../../entity_analytics/common/utils';
 import { WithHoverActions } from '../../../../../common/components/with_hover_actions';
-import { RiskSeverity } from '../../../../../../common/search_strategy';
-
-export const RISK_SEVERITY_COLOUR: { [k in RiskSeverity]: string } = {
-  [RiskSeverity.unknown]: euiLightVars.euiColorMediumShade,
-  [RiskSeverity.low]: euiLightVars.euiColorVis0,
-  [RiskSeverity.moderate]: euiLightVars.euiColorWarning,
-  [RiskSeverity.high]: euiLightVars.euiColorVis9_behindText,
-  [RiskSeverity.critical]: euiLightVars.euiColorDanger,
-};
+import type { RiskSeverity } from '../../../../../../common/search_strategy';
 
 const RiskBadge = styled.div<{ $severity: RiskSeverity; $hideBackgroundColor: boolean }>`
   ${({ theme, $severity, $hideBackgroundColor }) => css`
@@ -40,7 +33,8 @@ const RiskBadge = styled.div<{ $severity: RiskSeverity; $hideBackgroundColor: bo
 const TooltipContainer = styled.div`
   padding: ${({ theme }) => theme.eui.euiSizeS};
 `;
-export const RiskScore: React.FC<{
+
+export const RiskScoreLevel: React.FC<{
   severity: RiskSeverity;
   hideBackgroundColor?: boolean;
   toolTipContent?: JSX.Element;

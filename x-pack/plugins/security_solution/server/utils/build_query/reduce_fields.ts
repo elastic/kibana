@@ -9,7 +9,9 @@ export const reduceFields = (
   fields: readonly string[],
   fieldMap: Readonly<Record<string, string>>
 ): readonly string[] =>
-  fields.reduce(
-    (res, field) => (fieldMap[field] != null ? [...res, fieldMap[field]] : res),
-    [] as readonly string[]
-  );
+  fields.reduce((res, field) => {
+    if (fieldMap[field] != null) {
+      res.push(fieldMap[field]);
+    }
+    return res;
+  }, [] as string[]);

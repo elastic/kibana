@@ -99,6 +99,7 @@ export const GroupGridItem = ({
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem>
             <EuiButtonIcon
+              data-test-subj="syntheticsGroupGridItemButton"
               isDisabled={groupMonitors.length === 0}
               className="fullScreenButton"
               iconType="fullScreen"

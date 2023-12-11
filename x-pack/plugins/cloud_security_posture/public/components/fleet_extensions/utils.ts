@@ -13,6 +13,9 @@ import type {
   RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
 import merge from 'lodash/merge';
+import semverValid from 'semver/functions/valid';
+import semverCoerce from 'semver/functions/coerce';
+import semverLt from 'semver/functions/lt';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_EKS,
@@ -26,9 +29,10 @@ import {
   KSPM_POLICY_TEMPLATE,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import { DEFAULT_AWS_VARS_GROUP } from './aws_credentials_form';
-import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
+import { getDefaultAwsVarsGroup } from './aws_credentials_form/aws_credentials_form';
+import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types_old';
 import { cloudPostureIntegrations } from '../../common/constants';
+import { DEFAULT_EKS_VARS_GROUP } from './eks_credentials_form';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
@@ -99,9 +103,11 @@ const getPostureInput = (
       enabled: isInputEnabled,
       // Merge new vars with existing vars
       ...(isInputEnabled &&
-        stream.vars &&
         inputVars && {
-          vars: merge({}, stream.vars, inputVars),
+          vars: {
+            ...stream.vars,
+            ...inputVars,
+          },
         }),
     })),
   };
@@ -160,14 +166,54 @@ export const getVulnMgmtCloudFormationDefaultValue = (packageInfo: PackageInfo):
   return cloudFormationTemplate;
 };
 
+export const getCspmCloudFormationDefaultValue = (packageInfo: PackageInfo): string => {
+  if (!packageInfo.policy_templates) return '';
+
+  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === CSPM_POLICY_TEMPLATE);
+  if (!policyTemplate) return '';
+
+  const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
+
+  if (!policyTemplateInputs) return '';
+
+  const cloudFormationTemplate = policyTemplateInputs.reduce((acc, input): string => {
+    if (!input.vars) return acc;
+    const template = input.vars.find((v) => v.name === 'cloud_formation_template')?.default;
+    return template ? String(template) : acc;
+  }, '');
+
+  return cloudFormationTemplate;
+};
+
+export const getArmTemplateUrlFromCspmPackage = (packageInfo: PackageInfo): string => {
+  if (!packageInfo.policy_templates) return '';
+
+  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === CSPM_POLICY_TEMPLATE);
+  if (!policyTemplate) return '';
+
+  const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
+  if (!policyTemplateInputs) return '';
+
+  const armTemplateUrl = policyTemplateInputs.reduce((acc, input): string => {
+    if (!input.vars) return acc;
+    const template = input.vars.find((v) => v.name === 'arm_template_url')?.default;
+    return template ? String(template) : acc;
+  }, '');
+
+  return armTemplateUrl;
+};
+
 /**
  * Input vars that are hidden from the user
  */
-export const getPostureInputHiddenVars = (inputType: PostureInput) => {
+export const getPostureInputHiddenVars = (inputType: PostureInput, packageInfo: PackageInfo) => {
   switch (inputType) {
     case 'cloudbeat/cis_aws':
+      return {
+        'aws.credentials.type': { value: getDefaultAwsVarsGroup(packageInfo), type: 'text' },
+      };
     case 'cloudbeat/cis_eks':
-      return { 'aws.credentials.type': { value: DEFAULT_AWS_VARS_GROUP } };
+      return { 'aws.credentials.type': { value: DEFAULT_EKS_VARS_GROUP, type: 'text' } };
     default:
       return undefined;
   }
@@ -181,4 +227,48 @@ export const getPolicyTemplateInputOptions = (policyTemplate: CloudSecurityPolic
     label: o.name,
     icon: o.icon,
     disabled: o.disabled,
+    isBeta: o.isBeta,
+    testId: o.testId,
   }));
+
+export const getMaxPackageName = (
+  packageName: string,
+  packagePolicies?: Array<{ name: string }>
+) => {
+  // Retrieve the highest number appended to package policy name and increment it by one
+  const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
+
+  const maxPkgPolicyName = Math.max(
+    ...(packagePolicies ?? [])
+      .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+      .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10)),
+    0
+  );
+
+  return `${packageName}-${maxPkgPolicyName + 1}`;
+};
+
+export const getCspmCloudShellDefaultValue = (packageInfo: PackageInfo): string => {
+  if (!packageInfo.policy_templates) return '';
+
+  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === CSPM_POLICY_TEMPLATE);
+  if (!policyTemplate) return '';
+
+  const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
+
+  if (!policyTemplateInputs) return '';
+
+  const cloudShellUrl = policyTemplateInputs.reduce((acc, input): string => {
+    if (!input.vars) return acc;
+    const template = input.vars.find((v) => v.name === 'cloud_shell_url')?.default;
+    return template ? String(template) : acc;
+  }, '');
+
+  return cloudShellUrl;
+};
+
+export const isBelowMinVersion = (version: string, minVersion: string) => {
+  const semanticVersion = semverValid(version);
+  const versionNumberOnly = semverCoerce(semanticVersion) || '';
+  return semverLt(versionNumberOnly, minVersion);
+};

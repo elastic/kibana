@@ -6,9 +6,10 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import type { CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import { PanelLoader } from '@kbn/panel-loader';
 import { EuiLoadingChart } from '@elastic/eui';
 import {
   EmbeddableFactory,
@@ -23,6 +24,7 @@ import {
 import type { LensByReferenceInput, LensByValueInput } from './embeddable';
 import type { Document } from '../persistence';
 import type { FormBasedPersistedState } from '../datasources/form_based/types';
+import type { TextBasedPersistedState } from '../datasources/text_based/types';
 import type { XYState } from '../visualizations/xy/types';
 import type {
   PieVisualizationState,
@@ -45,6 +47,7 @@ type LensAttributes<TVisType, TVisState> = Omit<
   state: Omit<Document['state'], 'datasourceStates' | 'visualization'> & {
     datasourceStates: {
       formBased: FormBasedPersistedState;
+      textBased?: TextBasedPersistedState;
     };
     visualization: TVisState;
   };
@@ -84,6 +87,8 @@ export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceI
   showInspector?: boolean;
 };
 
+export type EmbeddableComponent = React.ComponentType<EmbeddableComponentProps>;
+
 interface PluginsStartDependencies {
   uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
@@ -91,9 +96,8 @@ interface PluginsStartDependencies {
 }
 
 export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDependencies) {
-  const { embeddable: embeddableStart, uiActions, inspector } = plugins;
+  const { embeddable: embeddableStart, uiActions } = plugins;
   const factory = embeddableStart.getEmbeddableFactory('lens')!;
-  const theme = core.theme;
   return (props: EmbeddableComponentProps) => {
     const input = { ...props };
     const hasActions =
@@ -104,10 +108,8 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
         <EmbeddablePanelWrapper
           factory={factory}
           uiActions={uiActions}
-          inspector={inspector}
           actionPredicate={() => hasActions}
           input={input}
-          theme={theme}
           extraActions={input.extraActions}
           showInspector={input.showInspector}
           withDefaultActions={input.withDefaultActions}
@@ -135,10 +137,8 @@ function EmbeddableRootWrapper({
 interface EmbeddablePanelWrapperProps {
   factory: EmbeddableFactory<EmbeddableInput, EmbeddableOutput>;
   uiActions: PluginsStartDependencies['uiActions'];
-  inspector: PluginsStartDependencies['inspector'];
   actionPredicate: (id: string) => boolean;
   input: EmbeddableComponentProps;
-  theme: ThemeServiceStart;
   extraActions?: Action[];
   showInspector?: boolean;
   withDefaultActions?: boolean;
@@ -148,9 +148,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
   factory,
   uiActions,
   actionPredicate,
-  inspector,
   input,
-  theme,
   extraActions,
   showInspector = true,
   withDefaultActions,
@@ -163,7 +161,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
   }, [embeddable, input]);
 
   if (loading || !embeddable) {
-    return <EuiLoadingChart />;
+    return <PanelLoader />;
   }
 
   return (
@@ -177,12 +175,11 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
 
         return [...(extraActions ?? []), ...actions];
       }}
-      inspector={showInspector ? inspector : undefined}
+      hideInspector={!showInspector}
       actionPredicate={actionPredicate}
+      showNotifications={false}
       showShadow={false}
       showBadges={false}
-      showNotifications={false}
-      theme={theme}
     />
   );
 };

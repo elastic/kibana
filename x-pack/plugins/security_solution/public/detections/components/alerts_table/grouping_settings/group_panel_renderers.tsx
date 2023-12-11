@@ -95,12 +95,7 @@ RuleNameGroupContent.displayName = 'RuleNameGroup';
 
 const HostNameGroupContent = React.memo<{ hostName: string | string[]; nullGroupMessage?: string }>(
   ({ hostName, nullGroupMessage }) => (
-    <EuiFlexGroup
-      data-test-subj="host-name-group-renderer"
-      gutterSize="s"
-      alignItems="center"
-      justifyContent="center"
-    >
+    <EuiFlexGroup data-test-subj="host-name-group-renderer" gutterSize="s" alignItems="center">
       <EuiFlexItem
         grow={false}
         style={{

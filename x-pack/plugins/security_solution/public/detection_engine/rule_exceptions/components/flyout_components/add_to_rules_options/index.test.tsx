@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ExceptionsAddToRulesOptions } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
-import { getRulesSchemaMock } from '../../../../../../common/detection_engine/rule_schema/mocks';
+import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import type { Rule } from '../../../../rule_management/logic/types';
 
 jest.mock('../../../../rule_management/logic/use_find_rules');

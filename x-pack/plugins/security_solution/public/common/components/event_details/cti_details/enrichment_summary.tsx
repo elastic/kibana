@@ -27,6 +27,7 @@ import type {
 } from '../../../../../common/search_strategy';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
+import { getSourcererScopeId } from '../../../../helpers';
 
 export interface ThreatSummaryDescription {
   browserField: BrowserField;
@@ -73,20 +74,8 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
   isReadOnly,
 }) => {
   const metadata = useMemo(() => ({ scopeId }), [scopeId]);
-  const field = useMemo(
-    () =>
-      !data
-        ? null
-        : {
-            name: data.field,
-            value,
-            type: data.type,
-            aggregatable: browserField?.aggregatable,
-          },
-    [browserField, data, value]
-  );
 
-  if (!data || !value || !field) return null;
+  if (!data || !value) return null;
   const key = `alert-details-value-formatted-field-value-${scopeId}-${eventId}-${data.field}-${value}-${index}-${feedName}`;
 
   return (
@@ -115,9 +104,13 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
       <EuiFlexItem>
         {value && !isReadOnly && (
           <SecurityCellActions
-            field={field}
+            data={{
+              field: data.field,
+              value,
+            }}
             triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
             mode={CellActionsMode.INLINE}
+            sourcererScopeId={getSourcererScopeId(scopeId)}
             metadata={metadata}
             visibleCellActions={3}
           />

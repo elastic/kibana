@@ -56,6 +56,15 @@ export interface Module {
   jobs: ModuleJob[];
   datafeeds: ModuleDatafeed[];
   kibana: KibanaObjects;
+  tags?: string[];
+}
+
+export interface RecognizeResult {
+  id: string;
+  title: string;
+  query: any;
+  description: string;
+  logo: Logo;
 }
 
 export interface FileBasedModule extends Omit<Module, 'jobs' | 'datafeeds' | 'kibana'> {

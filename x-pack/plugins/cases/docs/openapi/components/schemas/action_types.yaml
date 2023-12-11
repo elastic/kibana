@@ -13,4 +13,5 @@ enum:
   - status
   - settings
   - severity
-example: create_case
+examples:
+  - create_case

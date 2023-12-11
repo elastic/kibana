@@ -31,6 +31,9 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { isEqual } from 'lodash';
+import { FilterByAssigneesPopover } from '../../../common/components/filter_group/filter_by_assignees';
+import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -62,6 +65,7 @@ import {
   showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
 import {
+  buildAlertAssigneesFilter,
   buildAlertStatusFilter,
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
@@ -77,13 +81,13 @@ import { useKibana } from '../../../common/lib/kibana';
 import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-import { DetectionPageFilterSet } from '../../components/detection_page_filters';
 import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
 import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
 import { AlertsTableComponent } from '../../components/alerts_table';
 import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
+import { DetectionPageFilterSet } from '../../components/detection_page_filters';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -135,6 +139,16 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
+  const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
+  const handleSelectedAssignees = useCallback(
+    (newAssignees: AssigneesIdsSelection[]) => {
+      if (!isEqual(newAssignees, assignees)) {
+        setAssignees(newAssignees);
+      }
+    },
+    [assignees]
+  );
+
   const arePageFiltersEnabled = useIsExperimentalFeatureEnabled('alertsPageFiltersEnabled');
 
   // when arePageFiltersEnabled === false
@@ -151,9 +165,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   >();
 
   const {
-    indexPattern,
+    sourcererDataView,
     runtimeMappings,
-    dataViewId,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
 
@@ -171,6 +184,15 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   } = useKibana().services;
 
   const { filterManager } = data.query;
+
+  const topLevelFilters = useMemo(() => {
+    return [
+      ...filters,
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+      ...buildAlertAssigneesFilter(assignees),
+    ];
+  }, [assignees, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filters]);
 
   const alertPageFilters = useMemo(() => {
     if (arePageFiltersEnabled) {
@@ -230,13 +252,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   );
 
   const alertsDefaultFilters = useMemo(
-    () => [
-      ...filters,
-      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
-      ...(alertPageFilters ?? []),
-    ],
-    [filters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, alertPageFilters]
+    () => [...topLevelFilters, ...(alertPageFilters ?? [])],
+    [topLevelFilters, alertPageFilters]
   );
 
   // AlertsTable manages global filters itself, so not including `filters`
@@ -245,8 +262,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
       ...(alertPageFilters ?? []),
+      ...buildAlertAssigneesFilter(assignees),
     ],
-    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, alertPageFilters]
+    [assignees, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, alertPageFilters]
   );
 
   const { signalIndexNeedsInit, pollForSignalIndex } = useSignalHelpers();
@@ -348,9 +366,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         </EuiFlexGroup>
       ) : (
         <DetectionPageFilterSet
-          dataViewId={dataViewId}
           onFilterChange={pageFiltersUpdateHandler}
-          filters={filters}
+          filters={topLevelFilters}
           query={query}
           timeRange={{
             from,
@@ -363,16 +380,15 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       ),
     [
       arePageFiltersEnabled,
-      dataViewId,
-      statusFilter,
-      filters,
+      from,
       onFilterGroupChangedCallback,
       pageFiltersUpdateHandler,
-      showUpdating,
-      from,
       query,
+      showUpdating,
+      statusFilter,
       timelinesUi,
       to,
+      topLevelFilters,
       updatedAt,
     ]
   );
@@ -382,7 +398,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       return (
         <AlertsTableComponent
           configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}
-          flyoutSize="m"
           inputFilters={[...alertsTableDefaultFilters, ...groupingFilters]}
           tableId={TableId.alertsOnAlertsPage}
           isLoading={isAlertTableLoading}
@@ -440,7 +455,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             <SiemSearchBar
               id={InputsModelId.global}
               pollForSignalIndex={pollForSignalIndex}
-              indexPattern={indexPattern}
+              sourcererDataView={sourcererDataView}
             />
           </FiltersGlobal>
           <SecuritySolutionPageWrapper
@@ -449,14 +464,24 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           >
             <Display show={!globalFullScreen}>
               <HeaderPage title={i18n.PAGE_TITLE}>
-                <SecuritySolutionLinkButton
-                  onClick={goToRules}
-                  deepLinkId={SecurityPageName.rules}
-                  data-test-subj="manage-alert-detection-rules"
-                  fill
-                >
-                  {i18n.BUTTON_MANAGE_RULES}
-                </SecuritySolutionLinkButton>
+                <EuiFlexGroup gutterSize="m">
+                  <EuiFlexItem>
+                    <FilterByAssigneesPopover
+                      assignedUserIds={assignees}
+                      onSelectionChange={handleSelectedAssignees}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <SecuritySolutionLinkButton
+                      onClick={goToRules}
+                      deepLinkId={SecurityPageName.rules}
+                      data-test-subj="manage-alert-detection-rules"
+                      fill
+                    >
+                      {i18n.BUTTON_MANAGE_RULES}
+                    </SecuritySolutionLinkButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </HeaderPage>
               <EuiHorizontalRule margin="none" />
               <EuiSpacer size="l" />

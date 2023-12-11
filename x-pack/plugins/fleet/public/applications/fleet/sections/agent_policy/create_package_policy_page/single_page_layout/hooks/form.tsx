@@ -9,6 +9,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
+import { getAzureArmPropsFromPackagePolicy } from '../../../../../../../services/get_azure_arm_props_from_package_policy';
+
 import type {
   AgentPolicy,
   NewPackagePolicy,
@@ -24,7 +26,11 @@ import {
   sendBulkInstallPackages,
   sendGetPackagePolicies,
 } from '../../../../../hooks';
-import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
+import {
+  getCloudShellUrlFromPackagePolicy,
+  isVerificationError,
+  packageToPackagePolicy,
+} from '../../../../../services';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -39,6 +45,7 @@ import type { PackagePolicyFormState } from '../../types';
 import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
 import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
+import { getCloudFormationPropsFromPackagePolicy } from '../../../../../services';
 
 async function createAgentPolicy({
   packagePolicy,
@@ -233,10 +240,10 @@ export function useOnSubmit({
     queryParamsPolicyId,
   });
 
-  const navigateAddAgent = (policy?: PackagePolicy) =>
+  const navigateAddAgent = (policy: PackagePolicy) =>
     onSaveNavigate(policy, ['openEnrollmentFlyout']);
 
-  const navigateAddAgentHelp = (policy?: PackagePolicy) =>
+  const navigateAddAgentHelp = (policy: PackagePolicy) =>
     onSaveNavigate(policy, ['showAddAgentHelp']);
 
   const onSubmit = useCallback(
@@ -257,9 +264,9 @@ export function useOnSubmit({
         try {
           setFormState('LOADING');
           if ((withSysMonitoring || newAgentPolicy.monitoring_enabled?.length) ?? 0 > 0) {
-            const packagesToPreinstall: string[] = [];
+            const packagesToPreinstall: Array<string | { name: string; version: string }> = [];
             if (packageInfo) {
-              packagesToPreinstall.push(packageInfo.name);
+              packagesToPreinstall.push({ name: packageInfo.name, version: packageInfo.version });
             }
             if (withSysMonitoring) {
               packagesToPreinstall.push(FLEET_SYSTEM_PACKAGE);
@@ -298,11 +305,48 @@ export function useOnSubmit({
         policy_id: createdPolicy?.id ?? packagePolicy.policy_id,
         force,
       });
-      setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+
+      const hasAzureArmTemplate = data?.item
+        ? getAzureArmPropsFromPackagePolicy(data.item).templateUrl
+        : false;
+
+      const hasCloudFormation = data?.item
+        ? getCloudFormationPropsFromPackagePolicy(data.item).templateUrl
+        : false;
+
+      const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;
+
+      if (hasAzureArmTemplate) {
+        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
+      } else {
+        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+      }
+      if (hasCloudFormation) {
+        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
+      } else {
+        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+      }
+      if (hasGoogleCloudShell) {
+        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
+      } else {
+        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+      }
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
         const hasAgentsAssigned = agentCount && agentPolicy;
+        if (!hasAgentsAssigned && hasAzureArmTemplate) {
+          setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
+          return;
+        }
+        if (!hasAgentsAssigned && hasCloudFormation) {
+          setFormState('SUBMITTED_CLOUD_FORMATION');
+          return;
+        }
+        if (!hasAgentsAssigned && hasGoogleCloudShell) {
+          setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
+          return;
+        }
         if (!hasAgentsAssigned) {
           setFormState('SUBMITTED_NO_AGENTS');
           return;

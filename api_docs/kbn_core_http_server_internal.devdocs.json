@@ -411,6 +411,20 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.HttpConfig.cdn",
+            "type": "Object",
+            "tags": [],
+            "label": "cdn",
+            "description": [],
+            "signature": [
+              "CdnConfig"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
             "id": "def-common.HttpConfig.ssl",
             "type": "Object",
             "tags": [],
@@ -513,6 +527,22 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.HttpConfig.versioned",
+            "type": "Object",
+            "tags": [],
+            "label": "versioned",
+            "description": [],
+            "signature": [
+              "{ versionResolution: ",
+              "HandlerResolutionStrategy",
+              "; strictClientVersionCheck: boolean; }"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
             "id": "def-common.HttpConfig.shutdownTimeout",
             "type": "Object",
             "tags": [],
@@ -520,6 +550,37 @@
             "description": [],
             "signature": [
               "moment.Duration"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.HttpConfig.restrictInternalApis",
+            "type": "boolean",
+            "tags": [],
+            "label": "restrictInternalApis",
+            "description": [],
+            "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.HttpConfig.eluMonitor",
+            "type": "Object",
+            "tags": [],
+            "label": "eluMonitor",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IHttpEluMonitorConfig",
+                "text": "IHttpEluMonitorConfig"
+              }
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
             "deprecated": false,
@@ -632,17 +693,9 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "(config: ",
-              {
-                "pluginId": "@kbn/core-http-server-internal",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerInternalPluginApi",
-                "section": "def-common.HttpConfig",
-                "text": "HttpConfig"
-              },
-              ", executionContext?: ",
-              "IExecutionContext",
-              " | undefined) => Promise<",
+              "({ config$, executionContext, }: ",
+              "HttpServerSetupOptions",
+              ") => Promise<",
               "HttpServerSetup",
               ">"
             ],
@@ -655,37 +708,15 @@
                 "id": "def-common.HttpServer.setup.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "config",
+                "label": "{\n    config$,\n    executionContext,\n  }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server-internal",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpServerInternalPluginApi",
-                    "section": "def-common.HttpConfig",
-                    "text": "HttpConfig"
-                  }
+                  "HttpServerSetupOptions"
                 ],
                 "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/core-http-server-internal",
-                "id": "def-common.HttpServer.setup.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "executionContext",
-                "description": [],
-                "signature": [
-                  "IExecutionContext",
-                  " | undefined"
-                ],
-                "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
@@ -862,7 +893,7 @@
         "label": "HttpConfigType",
         "description": [],
         "signature": [
-          "{ readonly uuid?: string | undefined; readonly basePath?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly name: string; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }>; readonly host: string; readonly compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; readonly port: number; readonly cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; readonly autoListen: boolean; readonly shutdownTimeout: moment.Duration; readonly securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; readonly customResponseHeaders: Record<string, any>; readonly maxPayload: ",
+          "{ readonly uuid?: string | undefined; readonly basePath?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly name: string; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }>; readonly host: string; readonly compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; readonly port: number; readonly cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; readonly versioned: Readonly<{} & { versionResolution: \"none\" | \"newest\" | \"oldest\"; strictClientVersionCheck: boolean; }>; readonly autoListen: boolean; readonly shutdownTimeout: moment.Duration; readonly cdn: Readonly<{ url?: string | undefined; } & {}>; readonly securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; readonly customResponseHeaders: Record<string, any>; readonly maxPayload: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -870,7 +901,7 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          "; readonly rewriteBasePath: boolean; readonly keepaliveTimeout: number; readonly socketTimeout: number; readonly xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; readonly requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; }"
+          "; readonly rewriteBasePath: boolean; readonly keepaliveTimeout: number; readonly socketTimeout: number; readonly xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; readonly eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; readonly requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; readonly restrictInternalApis: boolean; }"
         ],
         "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
         "deprecated": false,

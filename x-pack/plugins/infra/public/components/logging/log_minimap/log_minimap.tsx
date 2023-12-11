@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { scaleLinear } from 'd3-scale';
-import * as React from 'react';
-
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { LogEntryTime } from '../../../../common/log_entry';
+import {
+  LogEntriesSummaryBucket,
+  LogEntriesSummaryHighlightsBucket,
+  LogEntryTime,
+} from '@kbn/logs-shared-plugin/common';
+import { scaleLinear } from 'd3-scale';
+import moment from 'moment';
+import * as React from 'react';
 import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';
 import { SearchMarkers } from './search_markers';
 import { TimeRuler } from './time_ruler';
-import {
-  LogEntriesSummaryBucket,
-  LogEntriesSummaryHighlightsBucket,
-} from '../../../../common/http_api';
 
 interface Interval {
   end: number;
@@ -68,7 +68,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
 
     this.props.jumpToTarget({
       tiebreaker: 0,
-      time: clickedTime,
+      time: moment(clickedTime).toISOString(),
     });
   };
 
@@ -143,9 +143,9 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
 
         {highlightedInterval ? (
           <HighlightedInterval
-            end={highlightedInterval.end}
+            end={moment(highlightedInterval.end).valueOf()}
             getPositionOfTime={this.getPositionOfTime}
-            start={highlightedInterval.start}
+            start={moment(highlightedInterval.start).valueOf()}
             targetWidth={TIMERULER_WIDTH}
             width={width}
             target={target}

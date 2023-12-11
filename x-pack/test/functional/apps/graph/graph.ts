@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.createIndexPattern('secrepo', '@timestamp');
       log.debug('navigateTo graph');
       await PageObjects.common.navigateToApp('graph');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.graph.createWorkspace();
     });
 
@@ -85,6 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
 
     it('should show correct node labels', async function () {
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.graph.selectIndexPattern('secrepo');
       await buildGraph();
       const { nodes } = await PageObjects.graph.getGraphObjects();

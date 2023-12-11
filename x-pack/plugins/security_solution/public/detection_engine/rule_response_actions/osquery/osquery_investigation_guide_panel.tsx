@@ -34,7 +34,7 @@ export const OsqueryInvestigationGuidePanel = React.memo<OsqueryInvestigationGui
     return (
       <EuiPanel color={'primary'} paddingSize={'xs'} css={panelCss}>
         <EuiFlexGroup direction={'row'} alignItems={'center'} css={flexGroupCss}>
-          <EuiFlexItem grow={true}>
+          <EuiFlexItem grow={true} data-test-subj={'osquery-investigation-guide-text'}>
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.securitySolution.responseActionsList.investigationGuideSuggestion"
