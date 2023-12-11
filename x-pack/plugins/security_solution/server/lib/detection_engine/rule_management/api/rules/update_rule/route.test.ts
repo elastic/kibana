@@ -23,7 +23,7 @@ import {
   getUpdateRulesSchemaMock,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine/model/rule_response_actions';
+import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine';
 
 jest.mock('../../../../../machine_learning/authz');
 
@@ -287,7 +287,6 @@ describe('Update rule route', () => {
       expect(result.badRequest).toHaveBeenCalledWith(
         `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\"`
       );
-
     });
   });
 });
