@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, type FC } from 'react';
-import {
-  ExpandableFlyout,
-  type ExpandableFlyoutProps,
-  ExpandableFlyoutProvider,
-} from '@kbn/expandable-flyout';
+import React, { memo } from 'react';
+import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import {
   IsolateHostPanel,
@@ -30,6 +26,12 @@ import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right
 import { UserPanel, UserPanelKey } from './entity_details/user_right';
 import type { RiskInputsExpandableFlyoutProps } from './entity_details/risk_inputs_left';
 import { RiskInputsPanel, RiskInputsPanelKey } from './entity_details/risk_inputs_left';
+import type { AssetDocumentLeftPanelProps } from './entity_details/asset_document_left';
+import {
+  AssetDocumentLeftPanel,
+  AssetDocumentLeftPanelKey,
+} from './entity_details/asset_document_left';
+
 /**
  * List of all panels that will be used within the document details expandable flyout.
  * This needs to be passed to the expandable flyout registeredPanels property.
@@ -40,6 +42,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => (
       <RightPanelProvider {...(props as RightPanelProps).params}>
         <RightPanel path={props.path as RightPanelProps['path']} />
+      </RightPanelProvider>
+    ),
+  },
+  {
+    key: AssetDocumentLeftPanelKey,
+    component: (props) => (
+      <RightPanelProvider {...(props as RightPanelProps).params}>
+        <AssetDocumentLeftPanel {...(props as AssetDocumentLeftPanelProps)} />
       </RightPanelProvider>
     ),
   },
@@ -78,13 +88,6 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
 ];
-
-// NOTE: provider below accepts "storage" prop, please take a look into component's JSDoc.
-export const SecuritySolutionFlyoutContextProvider: FC = ({ children }) => (
-  <ExpandableFlyoutProvider storage="url">{children}</ExpandableFlyoutProvider>
-);
-
-SecuritySolutionFlyoutContextProvider.displayName = 'SecuritySolutionFlyoutContextProvider';
 
 export const SecuritySolutionFlyout = memo(() => (
   <ExpandableFlyout registeredPanels={expandableFlyoutDocumentsPanels} paddingSize="none" />

@@ -18,8 +18,9 @@ import {
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
+import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { RuleDefinitionProps } from '../../../../types';
-import { RuleType, useLoadRuleTypes } from '../../../..';
+import { RuleType } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   hasAllPrivilege,
@@ -35,7 +36,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   ruleTypeRegistry,
   onEditRule,
   hideEditButton = false,
-  filteredRuleTypes,
+  filteredRuleTypes = [],
 }) => {
   const {
     application: { capabilities },
@@ -43,9 +44,12 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [ruleType, setRuleType] = useState<RuleType>();
-  const { ruleTypes, ruleTypeIndex, ruleTypesIsLoading } = useLoadRuleTypes({
+  const {
+    ruleTypesState: { data: ruleTypeIndex, isLoading: ruleTypesIsLoading },
+  } = useLoadRuleTypesQuery({
     filteredRuleTypes,
   });
+  const ruleTypes = useMemo(() => [...ruleTypeIndex.values()], [ruleTypeIndex]);
 
   const getRuleType = useMemo(() => {
     if (ruleTypes.length && rule) {

@@ -1854,6 +1854,10 @@
             }
           }
         }
+      },
+      "preset": {
+        "type": "keyword",
+        "index": false
       }
     }
   },
