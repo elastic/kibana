@@ -478,7 +478,7 @@ export function getUiSettings(
               to: schema.string(),
               display: schema.string(),
             }),
-            { maxSize: 10 }
+            { maxSize: 12 }
           )
         : schema.arrayOf(
             schema.object({
