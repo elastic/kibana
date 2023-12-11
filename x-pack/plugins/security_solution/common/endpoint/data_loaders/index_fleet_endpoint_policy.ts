@@ -131,7 +131,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     const startedPackageInstallation = new Date();
     const packageInstallationHasTimedOut = (): boolean => {
       const elapsedTime = Date.now() - startedPackageInstallation.getTime();
-      return elapsedTime > 2 * 60 * 1000;
+      return elapsedTime > 5 * 60 * 1000;
     };
 
     let installedPackage: InstallPackageResponse | undefined;
@@ -139,7 +139,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     while (!installedPackage && !packageInstallationHasTimedOut()) {
       installedPackage = await retryOnError(
         async () => installEndpointPackage(),
-        RETRYABLE_TRANSIENT_ERRORS,
+        [...RETRYABLE_TRANSIENT_ERRORS, 'resource_not_found_exception'],
         log
       );
 
@@ -170,7 +170,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     const started = new Date();
     const hasTimedOut = (): boolean => {
       const elapsedTime = Date.now() - started.getTime();
-      return elapsedTime > 2 * 60 * 1000;
+      return elapsedTime > 5 * 60 * 1000;
     };
 
     let packagePolicy: CreatePackagePolicyResponse | undefined;
@@ -179,12 +179,12 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     while (!packagePolicy && !hasTimedOut()) {
       packagePolicy = await retryOnError(
         async () => fetchPackagePolicy(),
-        RETRYABLE_TRANSIENT_ERRORS,
+        [...RETRYABLE_TRANSIENT_ERRORS, 'resource_not_found_exception'],
         log
       );
 
       if (!packagePolicy) {
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
       }
     }
 
