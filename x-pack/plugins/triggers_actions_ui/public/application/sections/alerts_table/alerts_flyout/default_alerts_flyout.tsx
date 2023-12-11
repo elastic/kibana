@@ -9,19 +9,18 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   type EuiDataGridColumn,
   EuiDescriptionList,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiPanel,
   EuiTabbedContent,
   EuiTabbedContentProps,
   EuiTabbedContentTab,
   EuiTitle,
+  useEuiOverflowScroll,
 } from '@elastic/eui';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 import { RegisterFormatter } from '../cells/render_cell_value';
 import { AlertsTableFlyoutBaseProps, AlertTableFlyoutComponent } from '../../../..';
 
@@ -47,49 +46,21 @@ export const search = {
   },
 };
 
-const StyledFlexGroup = styled(EuiFlexGroup)`
-  height: 100%;
-`;
-
-const StyledEuiFlexItem = styled(EuiFlexItem)`
-  &.euiFlexItem {
-    flex: 1 0 0;
-    overflow: hidden;
-  }
-`;
-
-const StyledEuiTabbedContent = styled(EuiTabbedContent as React.FC)`
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  overflow: hidden;
-
-  > [role='tabpanel'] {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    overflow: hidden;
-    overflow-y: auto;
-
-    ::-webkit-scrollbar {
-      -webkit-appearance: none;
-      width: 7px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      border-radius: 4px;
-      background-color: rgba(0, 0, 0, 0.5);
-      -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
-    }
-  }
-`;
-
 const ScrollableFlyoutTabbedContent = (props: EuiTabbedContentProps) => (
-  <StyledFlexGroup direction="column" gutterSize="none">
-    <StyledEuiFlexItem grow={true}>
-      <StyledEuiTabbedContent {...props} />
-    </StyledEuiFlexItem>
-  </StyledFlexGroup>
+  <EuiTabbedContent
+    css={css`
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+
+      & [role='tabpanel'] {
+        display: flex;
+        flex: 1 0 0;
+        ${useEuiOverflowScroll('y', true)}
+      }
+    `}
+    {...props}
+  />
 );
 
 type TabId = 'overview';
@@ -158,7 +129,7 @@ export const getDefaultAlertFlyout =
             }
           ),
           content: (
-            <EuiPanel>
+            <EuiPanel hasShadow={false}>
               <EuiDescriptionList
                 listItems={columns.map((column) => {
                   const value = get(alert, column.id)?.[0];
