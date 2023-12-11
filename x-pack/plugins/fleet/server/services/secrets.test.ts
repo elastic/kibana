@@ -208,6 +208,131 @@ describe('secrets', () => {
           },
         ]);
       });
+
+      it('variables with dot notated names', () => {
+        const mockPackageWithDotNotatedVariables = {
+          name: 'mock-dot-package',
+          title: 'Mock dot package',
+          version: '0.0.0',
+          description: 'description',
+          type: 'integration',
+          status: 'not_installed',
+          vars: [
+            { name: 'dot-notation.pkg-secret-1', type: 'text', secret: true },
+            { name: 'dot-notation.pkg-secret-2', type: 'text', secret: true },
+          ],
+          data_streams: [
+            {
+              dataset: 'somedataset',
+              streams: [
+                {
+                  input: 'foo',
+                  title: 'Foo',
+                  vars: [
+                    { name: 'dot-notation.stream-secret-1', type: 'text', secret: true },
+                    { name: 'dot-notation.stream-secret-2', type: 'text', secret: true },
+                  ],
+                },
+              ],
+            },
+          ],
+          policy_templates: [
+            {
+              name: 'pkgPolicy1',
+              title: 'Package policy 1',
+              description: 'test package policy',
+              inputs: [
+                {
+                  type: 'foo',
+                  title: 'Foo',
+                  vars: [
+                    {
+                      default: 'foo-input-var-value',
+                      name: 'dot-notation.foo-input-var-name',
+                      type: 'text',
+                    },
+                    {
+                      name: 'dot-notation.input-secret-1',
+                      type: 'text',
+                      secret: true,
+                    },
+                    {
+                      name: 'dot-notation.input-secret-2',
+                      type: 'text',
+                      secret: true,
+                    },
+                    { name: 'dot-notation.foo-input3-var-name', type: 'text', multi: true },
+                  ],
+                },
+              ],
+            },
+          ],
+        } as unknown as PackageInfo;
+        const policy = {
+          vars: {
+            'dot-notation.pkg-secret-1': {
+              value: 'Package level secret 1',
+            },
+            'dot-notation.pkg-secret-2': {
+              value: 'Package level secret 2',
+            },
+          },
+          inputs: [
+            {
+              type: 'foo',
+              policy_template: 'pkgPolicy1',
+              enabled: false,
+              vars: {
+                'dot-notation.foo-input-var-name': { value: 'foo' },
+                'dot-notation.input-secret-1': { value: 'Input level secret 1' },
+                'dot-notation.input-secret-2': { value: 'Input level secret 2' },
+                'dot-notation.input3-var-name': { value: 'bar' },
+              },
+              streams: [
+                {
+                  data_stream: { type: 'foo', dataset: 'somedataset' },
+                  vars: {
+                    'dot-notation.stream-secret-1': { value: 'Stream secret 1' },
+                    'dot-notation.stream-secret-2': { value: 'Stream secret 2' },
+                  },
+                },
+              ],
+            },
+          ],
+        };
+
+        expect(
+          getPolicySecretPaths(
+            policy as unknown as NewPackagePolicy,
+            mockPackageWithDotNotatedVariables as unknown as PackageInfo
+          )
+        ).toEqual([
+          {
+            path: 'vars.dot-notation.pkg-secret-1',
+            value: { value: 'Package level secret 1' },
+          },
+          {
+            path: 'vars.dot-notation.pkg-secret-2',
+            value: { value: 'Package level secret 2' },
+          },
+          {
+            path: 'inputs[0].vars.dot-notation.input-secret-1',
+            value: { value: 'Input level secret 1' },
+          },
+          {
+            path: 'inputs[0].vars.dot-notation.input-secret-2',
+            value: { value: 'Input level secret 2' },
+          },
+          {
+            path: 'inputs[0].streams[0].vars.dot-notation.stream-secret-1',
+            value: { value: 'Stream secret 1' },
+          },
+          {
+            path: 'inputs[0].streams[0].vars.dot-notation.stream-secret-2',
+            value: { value: 'Stream secret 2' },
+          },
+        ]);
+      });
     });
 
     describe('integration package with multiple policy templates (e.g AWS)', () => {
@@ -845,6 +970,7 @@ describe('secrets', () => {
       vars: [
         { name: 'pkg-secret-1', type: 'text', secret: true, required: true },
         { name: 'pkg-secret-2', type: 'text', secret: true, required: false },
+        { name: 'dot-notation.pkg-secret-3', type: 'text', secret: true, required: false },
       ],
       data_streams: [
         {
@@ -853,6 +979,14 @@ describe('secrets', () => {
             {
               input: 'foo',
               title: 'Foo',
+              vars: [
+                {
+                  name: 'dot-notation.stream-secret-1',
+                  type: 'text',
+                  secret: true,
+                  required: false,
+                },
+              ],
             },
           ],
         },
@@ -866,7 +1000,14 @@ describe('secrets', () => {
             {
               type: 'foo',
               title: 'Foo',
-              vars: [],
+              vars: [
+                {
+                  name: 'dot-notation.input-secret-1',
+                  type: 'text',
+                  secret: true,
+                  required: false,
+                },
+              ],
             },
           ],
         },
@@ -917,6 +1058,71 @@ describe('secrets', () => {
 
         expect(esClientMock.transport.request).toHaveBeenCalledTimes(2);
         expect(result.secretReferences).toHaveLength(2);
+      });
+    });
+
+    describe('when variable name uses dot notation', () => {
+      it('places variable at the right path', async () => {
+        const mockPackagePolicy = {
+          vars: {
+            'dot-notation.pkg-secret-3': {
+              value: 'pkg-secret-3-val',
+            },
+          },
+          inputs: [
+            {
+              type: 'foo',
+              vars: {
+                'dot-notation.input-secret-1': {
+                  value: 'dot-notation-input-secret-1-val',
+                },
+              },
+              streams: [
+                {
+                  data_stream: { type: 'foo', dataset: 'somedataset' },
+                  vars: {
+                    'dot-notation.stream-secret-1': {
+                      value: 'dot-notation-stream-var-1-val',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        } as unknown as NewPackagePolicy;
+
+        const result = await extractAndWriteSecrets({
+          packagePolicy: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        console.log(JSON.stringify({ result }, null, 2));
+
+        expect(esClientMock.transport.request).toHaveBeenCalledTimes(3);
+        expect(result.secretReferences).toHaveLength(3);
+
+        expect(result.packagePolicy.vars!['dot-notation.pkg-secret-3'].value.id).toBe(
+          expect.any(String)
+        );
+        expect(result.packagePolicy.vars!['dot-notation.pkg-secret-3'].value.isSecretRef).toBe(
+          true
+        );
+
+        expect(result.packagePolicy.inputs[0].vars!['dot-notation.input-secret-1'].value.id).toBe(
+          expect.any(String)
+        );
+        expect(
+          result.packagePolicy.inputs[0].vars!['dot-notation.input-secret-1'].value.isSecretRef
+        ).toBe(true);
+
+        expect(
+          result.packagePolicy.inputs[0].streams[0].vars!['dot-notation.stream-secret-1'].value.id
+        ).toBe(expect.any(String));
+        expect(
+          result.packagePolicy.inputs[0].streams[0].vars!['dot-notation.stream-secret-1'].value
+            .isSecretRef
+        ).toBe(true);
       });
     });
   });
