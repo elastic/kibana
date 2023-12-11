@@ -99,9 +99,10 @@ export const useUrlState = <T = unknown>(urlNamespace: string, key: string) => {
           if (!Object.prototype.hasOwnProperty.call(cache.namespaces, ns)) {
             continue;
           }
-          searchParams[ns] = encode(cache.namespaces[ns]);
+          searchParams[ns] = encodeURIComponent(encode(cache.namespaces[ns]));
         }
 
+        // NOTE: don't re-encode the entire url params string
         const newSearch = stringify(searchParams, { encode: false });
 
         if (window.location.search === newSearch) {
