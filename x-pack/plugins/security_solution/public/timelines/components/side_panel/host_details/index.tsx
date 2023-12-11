@@ -80,11 +80,11 @@ export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
         </EuiFlyoutHeader>
         <StyledEuiFlyoutBody>
           <EuiSpacer size="m" />
-          <AssetCriticalitySelector entity={{ type: 'host', name: hostName }} />
-          <EuiSpacer size="m" />
           <ExpandableHostDetailsPageLink hostName={hostName} />
           <EuiSpacer size="m" />
           <ExpandableHostDetails contextID={contextID} scopeId={scopeId} hostName={hostName} />
+          <EuiSpacer size="m" />
+          <AssetCriticalitySelector entity={{ type: 'host', name: hostName }} />
         </StyledEuiFlyoutBody>
       </>
     ) : (

@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
   EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSelect,
+  EuiSuperSelect,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -28,6 +30,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import React, { useState } from 'react';
 import { useToggle } from 'react-use';
+import { euiLightVars } from '@kbn/ui-theme';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics/common';
 import type { AssetCriticalityRecord } from '../../../common/api/entity_analytics/asset_criticality';
 
@@ -60,11 +63,15 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
           <EuiFlexGroup direction="row" alignItems="center" wrap={false}>
             <EuiFlexItem>
               <EuiText size="s">
-                <p>
-                  {criticality.status === 'update' && criticality.query.data?.criticality_level
-                    ? criticalityDisplayText[criticality.query.data.criticality_level]
-                    : CREATE_ASSET_CRITICALITY}
-                </p>
+                {criticality.status === 'update' && criticality.query.data?.criticality_level ? (
+                  <EuiHealth
+                    color={CRITICALITY_LEVEL_COLOR[criticality.query.data.criticality_level]}
+                  >
+                    {criticalityDisplayText[criticality.query.data.criticality_level]}
+                  </EuiHealth>
+                ) : (
+                  <EuiHealth color="subdued">{CREATE_ASSET_CRITICALITY}</EuiHealth>
+                )}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -106,13 +113,11 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, entity }) =>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiSelect
+        <EuiSuperSelect
           id={basicSelectId}
           options={options}
-          value={value}
-          onChange={(e) =>
-            setNewValue(e.target.value as AssetCriticalityRecord['criticality_level'])
-          }
+          valueOfSelected={value}
+          onChange={setNewValue}
           aria-label={PICK_ASSET_CRITICALITY}
           data-test-subj="asset-criticality-modal-select-dropdown"
         />
@@ -197,16 +202,13 @@ const criticalityDisplayText: Record<AssetCriticalityRecord['criticality_level']
   important: 'Important',
   very_important: 'Very important',
 };
-interface KeyVal {
-  value: AssetCriticalityRecord['criticality_level'];
-  text: string;
-}
-const options: KeyVal[] = [
-  { value: 'normal', text: criticalityDisplayText.normal },
-  { value: 'not_important', text: criticalityDisplayText.not_important },
-  { value: 'important', text: criticalityDisplayText.important },
-  { value: 'very_important', text: criticalityDisplayText.very_important },
-];
+export const CRITICALITY_LEVEL_COLOR: Record<AssetCriticalityRecord['criticality_level'], string> =
+  {
+    very_important: '#E7664C',
+    important: '#D6BF57',
+    normal: '#54B399',
+    not_important: euiLightVars.euiColorMediumShade,
+  };
 
 const PICK_ASSET_CRITICALITY = i18n.translate(
   'xpack.securitySolution.timeline.sidePanel.hostDetails.assetCriticality.pick',
@@ -221,3 +223,55 @@ const CREATE_ASSET_CRITICALITY = i18n.translate(
     defaultMessage: 'No criticality assigned yet',
   }
 );
+
+const ASSET_CRITICALITY_OPTION_TEXT: Record<AssetCriticalityRecord['criticality_level'], string> = {
+  normal: i18n.translate(
+    'xpack.securitySolution.timeline.sidePanel.hostDetails.assetCriticality.pickerOption.normal',
+    {
+      defaultMessage: 'Entity risk score rises at normal speed',
+    }
+  ),
+  not_important: i18n.translate(
+    'xpack.securitySolution.timeline.sidePanel.hostDetails.assetCriticality.pickerOption.notImportant',
+    {
+      defaultMessage: 'Entity risk score rises slower',
+    }
+  ),
+  important: i18n.translate(
+    'xpack.securitySolution.timeline.sidePanel.hostDetails.assetCriticality.pickerOption.important',
+    {
+      defaultMessage: 'Entity risk score rises faster',
+    }
+  ),
+  very_important: i18n.translate(
+    'xpack.securitySolution.timeline.sidePanel.hostDetails.assetCriticality.pickerOption.veryImportant',
+    {
+      defaultMessage: 'Entity risk score rises much faster',
+    }
+  ),
+};
+
+const option = (
+  level: AssetCriticalityRecord['criticality_level']
+): EuiSuperSelectOption<AssetCriticalityRecord['criticality_level']> => ({
+  value: level,
+  dropdownDisplay: (
+    <EuiHealth color={CRITICALITY_LEVEL_COLOR[level]} style={{ lineHeight: 'inherit' }}>
+      <strong>{criticalityDisplayText[level]}</strong>
+      <EuiText size="s" color="subdued">
+        <p>{ASSET_CRITICALITY_OPTION_TEXT[level]}</p>
+      </EuiText>
+    </EuiHealth>
+  ),
+  inputDisplay: (
+    <EuiHealth color={CRITICALITY_LEVEL_COLOR[level]} style={{ lineHeight: 'inherit' }}>
+      {criticalityDisplayText[level]}
+    </EuiHealth>
+  ),
+});
+const options: Array<EuiSuperSelectOption<AssetCriticalityRecord['criticality_level']>> = [
+  option('normal'),
+  option('not_important'),
+  option('important'),
+  option('very_important'),
+];
