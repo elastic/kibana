@@ -14,12 +14,8 @@ import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE } from '../../common/constants'
 export const cspSettings: SavedObjectsType = {
   name: INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
-  hidden: false,
+  hidden: true,
   namespaceType: 'agnostic',
-  management: {
-    importableAndExportable: true,
-    visibleInManagement: true,
-  },
   schemas: {
     '8.12.0': cspSettingsSchema,
   },

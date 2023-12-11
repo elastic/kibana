@@ -42,7 +42,7 @@ export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
           const benchmarkRulesToUpdate = requestBody.rules;
 
           const handlerResponse = await bulkActionBenchmarkRulesHandler(
-            cspContext.soClient,
+            cspContext.encryptedSavedObjects,
             benchmarkRulesToUpdate,
             requestBody.action,
             cspContext.logger
