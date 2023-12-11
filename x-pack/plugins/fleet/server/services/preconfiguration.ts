@@ -84,7 +84,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       ? { name: pkg.name, prerelease: pkg.prerelease }
       : pkg
   );
-  logger.debug(`Installing preconfigured packages ${packagesToInstall}`);
 
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({

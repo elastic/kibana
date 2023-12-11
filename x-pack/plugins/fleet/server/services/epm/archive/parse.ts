@@ -202,7 +202,6 @@ export function parseAndVerifyArchive(
   // The top-level directory must match pkgName-pkgVersion, and no other top-level files or directories may be present
   const logger = appContextService.getLogger();
   const toplevelDir = topLevelDirOverride || paths[0].split('/')[0];
-  logger.debug(`Verifying archive - checking file paths: ${paths}`);
 
   paths.forEach((filePath) => {
     if (!filePath.startsWith(toplevelDir)) {
@@ -215,9 +214,7 @@ export function parseAndVerifyArchive(
   // The package must contain a manifest file ...
   const manifestFile = path.posix.join(toplevelDir, MANIFEST_NAME);
   const manifestBuffer = assetsMap[manifestFile];
-  logger.debug(
-    `Verifying archive - checking manifest file: ${manifestFile} and manifest buffer: ${manifestBuffer}`
-  );
+  logger.debug(`Verifying archive - checking manifest file and manifest buffer`);
   if (!paths.includes(manifestFile) || !manifestBuffer) {
     throw new PackageInvalidArchiveError(
       `Package at top-level directory ${toplevelDir} must contain a top-level ${MANIFEST_NAME} file.`
