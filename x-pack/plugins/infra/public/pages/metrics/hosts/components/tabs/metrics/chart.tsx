@@ -5,24 +5,21 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
-import type { AssetXYChartProps } from '../../../../../../common/visualizations';
+import type { ChartModel, XYVisualOptions } from '@kbn/lens-embeddable-utils';
+import { METRIC_CHART_HEIGHT } from '../../../../../../common/visualizations/constants';
 import { LensChart } from '../../../../../../components/lens';
-import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
-import { METRIC_CHART_HEIGHT } from '../../../constants';
 
-export interface ChartProps extends AssetXYChartProps {
+export interface ChartProps extends Omit<ChartModel, 'visualOptions'> {
   visualOptions?: XYVisualOptions;
 }
 
-export const Chart = ({ id, title, layers, visualOptions, overrides }: ChartProps) => {
+export const Chart = ({ dataView, ...chartProps }: ChartProps) => {
   const { searchCriteria } = useUnifiedSearchContext();
-  const { dataView } = useMetricsDataViewContext();
   const { loading, searchSessionId } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
 
@@ -51,20 +48,16 @@ export const Chart = ({ id, title, layers, visualOptions, overrides }: ChartProp
 
   return (
     <LensChart
-      id={`hostsView-metricChart-${id}`}
+      {...chartProps}
+      id={`hostsView-metricChart-${chartProps.id}`}
       borderRadius="m"
       dataView={dataView}
       dateRange={afterLoadedState.dateRange}
       height={METRIC_CHART_HEIGHT}
-      layers={layers}
-      visualOptions={visualOptions}
       loading={loading}
       filters={filters}
       query={afterLoadedState.query}
       searchSessionId={afterLoadedState.searchSessionId}
-      title={title}
-      overrides={overrides}
-      visualizationType="lnsXY"
     />
   );
 };

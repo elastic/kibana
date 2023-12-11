@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { ReactNode, useCallback, useState } from 'react';
+
 import {
   TableListViewTable,
   type TableListViewTableProps,
-  type UserContentCommonSchema,
 } from '@kbn/content-management-table-list-view-table';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 export type TableListViewProps<T extends UserContentCommonSchema = UserContentCommonSchema> = Pick<
   TableListViewTableProps<T>,

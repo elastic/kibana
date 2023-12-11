@@ -91,6 +91,8 @@ export type ModelItem = TrainedModelConfigResponse & {
   modelName?: string;
   os?: string;
   arch?: string;
+  softwareLicense?: string;
+  licenseUrl?: string;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -262,17 +264,17 @@ export const ModelsList: FC<Props> = ({
         );
         const forDownload = await trainedModelsApiService.getTrainedModelDownloads();
         const notDownloaded: ModelItem[] = forDownload
-          .filter(({ name, hidden, recommended }) => {
-            if (recommended && idMap.has(name)) {
-              idMap.get(name)!.recommended = true;
+          .filter(({ model_id: modelId, hidden, recommended }) => {
+            if (recommended && idMap.has(modelId)) {
+              idMap.get(modelId)!.recommended = true;
             }
-            return !idMap.has(name) && !hidden;
+            return !idMap.has(modelId) && !hidden;
           })
           .map<ModelItem>((modelDefinition) => {
             return {
-              model_id: modelDefinition.name,
-              type: [ELASTIC_MODEL_TYPE],
-              tags: [ELASTIC_MODEL_TAG],
+              model_id: modelDefinition.model_id,
+              type: modelDefinition.type,
+              tags: modelDefinition.type?.includes(ELASTIC_MODEL_TAG) ? [ELASTIC_MODEL_TAG] : [],
               putModelConfig: modelDefinition.config,
               description: modelDefinition.description,
               state: MODEL_STATE.NOT_DOWNLOADED,
@@ -280,6 +282,8 @@ export const ModelsList: FC<Props> = ({
               modelName: modelDefinition.modelName,
               os: modelDefinition.os,
               arch: modelDefinition.arch,
+              softwareLicense: modelDefinition.license,
+              licenseUrl: modelDefinition.licenseUrl,
             } as ModelItem;
           });
         resultItems = [...resultItems, ...notDownloaded];
@@ -534,7 +538,7 @@ export const ModelsList: FC<Props> = ({
             content={
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
-                defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
+                defaultMessage="Recommended model version for your cluster's hardware configuration"
               />
             }
           >

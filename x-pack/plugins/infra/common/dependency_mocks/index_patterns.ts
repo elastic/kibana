@@ -49,7 +49,6 @@ export const createIndexPatternMock = ({
     getComputedFields: () => ({
       runtimeFields: runtimeFields ?? {},
       scriptFields: {},
-      storedFields: [],
       docvalueFields: [],
     }),
     getRuntimeMappings: () => runtimeFields ?? {},

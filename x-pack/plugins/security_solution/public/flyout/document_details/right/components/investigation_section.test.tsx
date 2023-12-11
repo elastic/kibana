@@ -14,13 +14,14 @@ import {
 } from './test_ids';
 import { RightPanelContext } from '../context';
 import { InvestigationSection } from './investigation_section';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 
-const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
+const flyoutContextValue = {} as unknown as ExpandableFlyoutContextValue;
 const panelContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser.filter(
     (d) => d.field !== 'kibana.alert.rule.type'

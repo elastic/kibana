@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import Chance from 'chance';
-import type { Benchmark } from '../../../common/types';
+import type { Benchmark } from '../../../common/types_old';
 
 type CreateCspBenchmarkIntegrationFixtureInput = {
   chance?: Chance.Chance;

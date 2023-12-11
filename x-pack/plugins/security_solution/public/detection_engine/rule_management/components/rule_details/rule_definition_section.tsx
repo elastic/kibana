@@ -40,7 +40,6 @@ import * as descriptionStepI18n from '../../../../detections/components/rules/de
 import { RelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
 import { AlertSuppressionTechnicalPreviewBadge } from '../../../../detections/components/rules/description_step/alert_suppression_technical_preview_badge';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
-import { useLicense } from '../../../../common/hooks/use_license';
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
 import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
 import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
@@ -53,8 +52,10 @@ import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { TechnicalPreviewBadge } from '../../../../detections/components/rules/technical_preview_badge';
 import { BadgeList } from './badge_list';
-import { DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
+import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -355,9 +356,7 @@ interface AlertSuppressionTitleProps {
 }
 
 const AlertSuppressionTitle = ({ title }: AlertSuppressionTitleProps) => {
-  const license = useLicense();
-
-  return <AlertSuppressionTechnicalPreviewBadge label={title} license={license} />;
+  return <AlertSuppressionTechnicalPreviewBadge label={title} />;
 };
 
 interface SuppressAlertsByFieldProps {
@@ -427,7 +426,8 @@ const HistoryWindowSize = ({ historyWindowStart }: HistoryWindowSizeProps) => {
 const prepareDefinitionSectionListItems = (
   rule: Partial<RuleResponse>,
   isInteractive: boolean,
-  savedQuery?: SavedQuery
+  savedQuery: SavedQuery | undefined,
+  { alertSuppressionForThresholdRuleEnabled }: Partial<ExperimentalFeatures>
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -658,36 +658,42 @@ const prepareDefinitionSectionListItems = (
   }
 
   if ('alert_suppression' in rule && rule.alert_suppression) {
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="alertSuppressionGroupByPropertyTitle">
-          <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL} />
-        </span>
-      ),
-      description: <SuppressAlertsByField fields={rule.alert_suppression.group_by} />,
-    });
+    if ('group_by' in rule.alert_suppression) {
+      definitionSectionListItems.push({
+        title: (
+          <span data-test-subj="alertSuppressionGroupByPropertyTitle">
+            <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL} />
+          </span>
+        ),
+        description: <SuppressAlertsByField fields={rule.alert_suppression.group_by} />,
+      });
+    }
 
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="alertSuppressionDurationPropertyTitle">
-          <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />
-        </span>
-      ),
-      description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
-    });
+    if (rule.type !== 'threshold' || alertSuppressionForThresholdRuleEnabled) {
+      definitionSectionListItems.push({
+        title: (
+          <span data-test-subj="alertSuppressionDurationPropertyTitle">
+            <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />
+          </span>
+        ),
+        description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
+      });
+    }
 
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="alertSuppressionSuppressionFieldPropertyTitle">
-          <AlertSuppressionTitle title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL} />
-        </span>
-      ),
-      description: (
-        <MissingFieldsStrategy
-          missingFieldsStrategy={rule.alert_suppression.missing_fields_strategy}
-        />
-      ),
-    });
+    if ('missing_fields_strategy' in rule.alert_suppression) {
+      definitionSectionListItems.push({
+        title: (
+          <span data-test-subj="alertSuppressionSuppressionFieldPropertyTitle">
+            <AlertSuppressionTitle title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL} />
+          </span>
+        ),
+        description: (
+          <MissingFieldsStrategy
+            missingFieldsStrategy={rule.alert_suppression.missing_fields_strategy}
+          />
+        ),
+      });
+    }
   }
 
   if ('new_terms_fields' in rule && rule.new_terms_fields && rule.new_terms_fields.length > 0) {
@@ -718,6 +724,7 @@ const prepareDefinitionSectionListItems = (
 export interface RuleDefinitionSectionProps
   extends React.ComponentProps<typeof EuiDescriptionList> {
   rule: Partial<RuleResponse>;
+  columnWidths?: EuiDescriptionListProps['columnWidths'];
   isInteractive?: boolean;
   dataTestSubj?: string;
 }
@@ -725,6 +732,7 @@ export interface RuleDefinitionSectionProps
 export const RuleDefinitionSection = ({
   rule,
   isInteractive = false,
+  columnWidths = DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
   dataTestSubj,
   ...descriptionListProps
 }: RuleDefinitionSectionProps) => {
@@ -733,10 +741,15 @@ export const RuleDefinitionSection = ({
     ruleType: rule.type,
   });
 
+  const alertSuppressionForThresholdRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForThresholdRuleEnabled'
+  );
+
   const definitionSectionListItems = prepareDefinitionSectionListItems(
     rule,
     isInteractive,
-    savedQuery
+    savedQuery,
+    { alertSuppressionForThresholdRuleEnabled }
   );
 
   return (
@@ -745,7 +758,7 @@ export const RuleDefinitionSection = ({
         type={descriptionListProps.type ?? 'column'}
         rowGutterSize={descriptionListProps.rowGutterSize ?? 'm'}
         listItems={definitionSectionListItems}
-        columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
+        columnWidths={columnWidths}
         data-test-subj="listItemColumnStepRuleDescription"
         {...descriptionListProps}
       />
