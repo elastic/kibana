@@ -7,7 +7,13 @@
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
 import { CspBenchmarkRules } from '../../../../common/types/rules/v3';
-import { buildRuleKey, getCspSettings, setRulesStates, updateRulesStates } from './utils';
+import {
+  buildRuleKey,
+  createCspSettingObject,
+  getCspSettings,
+  setRulesStates,
+  updateRulesStates,
+} from './utils';
 
 const muteStatesMap = {
   mute: true,
@@ -20,12 +26,13 @@ export const bulkActionBenchmarkRulesHandler = async (
   action: 'mute' | 'unmute',
   logger: Logger
 ) => {
-  const cspSettings = await getCspSettings(soClient, logger);
+  let cspSettings = await getCspSettings(soClient, logger);
   if (!cspSettings) {
-    throw logger.error(`Failed to read csp settings`);
+    logger.error(`Failed to read csp settings, creating new csp settings object`);
   }
+  cspSettings = (await createCspSettingObject(soClient)).attributes;
   const currentRulesStates = cspSettings.rules_states;
-  const ruleKeys = rulesToUpdate.rules.map((rule) =>
+  const ruleKeys = rulesToUpdate.map((rule) =>
     buildRuleKey(rule.benchmark_id, rule.benchmark_version, rule.rule_number)
   );
   const newRulesStates = setRulesStates(currentRulesStates, ruleKeys, muteStatesMap[action]);
