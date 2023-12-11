@@ -29,8 +29,8 @@ new schemas to the union of all alert schemas, and re-export the new schemas as 
 export type { Ancestor8120 as Ancestor8130 };
 
 export interface BaseFields8130 extends BaseFields8120 {
-  [ALERT_HOST_CRITICALITY]?: string[] | undefined;
-  [ALERT_USER_CRITICALITY]?: string[] | undefined;
+  [ALERT_HOST_CRITICALITY]: string | undefined;
+  [ALERT_USER_CRITICALITY]: string | undefined;
 }
 
 export interface WrappedFields8130<T extends BaseFields8130> {
