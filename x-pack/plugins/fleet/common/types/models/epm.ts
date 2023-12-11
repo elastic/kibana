@@ -132,7 +132,7 @@ export type ArchivePackage = PackageSpecManifest &
 export interface BundledPackage {
   name: string;
   version: string;
-  buffer: Buffer;
+  getBuffer: () => Promise<Buffer>;
 }
 
 export type RegistryPackage = PackageSpecManifest &
