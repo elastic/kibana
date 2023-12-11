@@ -65,10 +65,11 @@ export const getThemeSettings = (
       },
       requiresPageReload: true,
       schema: schema.oneOf([
-        schema.boolean(),
         schema.literal('enabled'),
         schema.literal('disabled'),
         schema.literal('system'),
+        // backward-compatibility by still supporting boolean format
+        schema.boolean(),
       ]),
     },
     /**

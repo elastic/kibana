@@ -16,7 +16,7 @@ interface Props {
 export const Styles: FC<Props> = ({ darkMode, stylesheetPaths }) => {
   return (
     <>
-      <InlineStyles darkMode={toBoolean(darkMode)} />
+      <InlineStyles darkMode={darkMode} />
       {stylesheetPaths.map((path) => (
         <link key={path} rel="stylesheet" type="text/css" href={path} />
       ))}
@@ -160,15 +160,4 @@ const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
     />
   );
   /* eslint-enable react/no-danger */
-};
-
-
-const toBoolean = (val: string | boolean): boolean => {
-  if (val === true || val === 'true') {
-    return true;
-  }
-  if (val === false || val === 'false') {
-    return false;
-  }
-  return Boolean(val);
 };

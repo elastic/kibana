@@ -60,6 +60,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -124,6 +134,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -192,6 +212,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -256,6 +286,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -320,6 +360,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -388,6 +438,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -452,6 +512,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -516,6 +586,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -589,6 +669,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -653,6 +743,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -726,6 +826,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -795,6 +905,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -859,6 +979,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -932,6 +1062,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -1001,6 +1141,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],
@@ -1070,6 +1220,16 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
     "version": "v8",
   },
   "uiPlugins": Array [],

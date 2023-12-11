@@ -33,11 +33,7 @@ import {
   RenderingMetadata,
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
-import {
-  getSettingValue,
-  getCommonStylesheetPaths,
-  getDarkModeStylesheetPaths,
-} from './render_utils';
+import { getSettingValue, getCommonStylesheetPaths, getThemeStylesheetPaths } from './render_utils';
 import { filterUiPlugins } from './filter_ui_plugins';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
@@ -184,11 +180,13 @@ export class RenderingService {
       darkMode = getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
     }
 
-    const themeStylesheetPaths = getDarkModeStylesheetPaths({
-      themeVersion,
-      baseHref: staticAssetsHrefBase,
-      buildNum,
-    });
+    const themeStylesheetPaths = (mode: boolean) =>
+      getThemeStylesheetPaths({
+        darkMode: mode,
+        themeVersion,
+        baseHref: staticAssetsHrefBase,
+        buildNum,
+      });
 
     const commonStylesheetPaths = getCommonStylesheetPaths({
       baseHref: staticAssetsHrefBase,
@@ -231,8 +229,8 @@ export class RenderingService {
           darkMode,
           version: themeVersion,
           stylesheetPaths: {
-            default: themeStylesheetPaths({ darkMode: false }),
-            dark: themeStylesheetPaths({ darkMode: true }),
+            default: themeStylesheetPaths(false),
+            dark: themeStylesheetPaths(true),
           },
         },
         customBranding: {

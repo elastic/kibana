@@ -10,7 +10,8 @@ import {
   registerBootstrapRouteMock,
   bootstrapRendererMock,
   getSettingValueMock,
-  getStylesheetPathsMock,
+  getCommonStylesheetPathsMock,
+  getThemeStylesheetPathsMock,
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
@@ -165,7 +166,7 @@ function renderTestCases(
       expect(data.legacyMetadata.globalUiSettings.user).toEqual({}); // user settings are not injected
     });
 
-    it('calls `getStylesheetPaths` with the correct parameters', async () => {
+    it('calls `getCommonStylesheetPaths` with the correct parameters', async () => {
       getSettingValueMock.mockImplementation((settingName: string) => {
         if (settingName === 'theme:darkMode') {
           return true;
@@ -176,9 +177,33 @@ function renderTestCases(
       const [render] = await getRender();
       await render(createKibanaRequest(), uiSettings);
 
-      expect(getStylesheetPathsMock).toHaveBeenCalledTimes(1);
-      expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+      expect(getCommonStylesheetPathsMock).toHaveBeenCalledTimes(1);
+      expect(getCommonStylesheetPathsMock).toHaveBeenCalledWith({
+        baseHref: '/mock-server-basepath',
+        buildNum: expect.any(Number),
+      });
+    });
+
+    it('calls `getThemeStylesheetPaths` with the correct parameters', async () => {
+      getSettingValueMock.mockImplementation((settingName: string) => {
+        if (settingName === 'theme:darkMode') {
+          return true;
+        }
+        return settingName;
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings);
+
+      expect(getThemeStylesheetPathsMock).toHaveBeenCalledTimes(2);
+      expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
         darkMode: true,
+        themeVersion: 'v8',
+        baseHref: '/mock-server-basepath',
+        buildNum: expect.any(Number),
+      });
+      expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
+        darkMode: false,
         themeVersion: 'v8',
         baseHref: '/mock-server-basepath',
         buildNum: expect.any(Number),
@@ -245,7 +270,7 @@ function renderDarkModeTestCases(
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
           themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
@@ -271,7 +296,7 @@ function renderDarkModeTestCases(
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
@@ -295,7 +320,7 @@ function renderDarkModeTestCases(
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
@@ -319,7 +344,7 @@ function renderDarkModeTestCases(
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
           themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
@@ -343,7 +368,7 @@ function renderDarkModeTestCases(
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
@@ -367,7 +392,7 @@ function renderDarkModeTestCases(
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
@@ -391,7 +416,7 @@ function renderDarkModeTestCases(
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
           themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
@@ -419,7 +444,8 @@ describe('RenderingService', () => {
     service = new RenderingService(mockRenderingServiceParams);
 
     getSettingValueMock.mockImplementation((settingName: string) => settingName);
-    getStylesheetPathsMock.mockReturnValue(['/style-1.css', '/style-2.css']);
+    getCommonStylesheetPathsMock.mockReturnValue(['/common-1.css']);
+    getThemeStylesheetPathsMock.mockReturnValue(['/style-1.css', '/style-2.css']);
   });
 
   describe('preboot()', () => {
