@@ -12,7 +12,7 @@ import type { ESBoolQuery } from '../../../../../common/typed_json';
 import type {
   IndexPatternArray,
   RuleQuery,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 
 export const getQueryFilter = ({
   query,
@@ -20,18 +20,27 @@ export const getQueryFilter = ({
   filters,
   index,
   exceptionFilter,
-  fields = [],
-}: {
-  query: RuleQuery;
-  language: Language;
-  filters: unknown;
-  index: IndexPatternArray;
-  exceptionFilter: Filter | undefined;
-  fields?: DataViewFieldBase[];
-}): ESBoolQuery => {
+  fields,
+}:
+  | {
+      query: RuleQuery;
+      language: Language;
+      filters: unknown;
+      index: IndexPatternArray;
+      exceptionFilter: Filter | undefined;
+      fields?: DataViewFieldBase[];
+    }
+  | {
+      index: undefined;
+      query: RuleQuery;
+      language: 'esql';
+      filters: unknown;
+      exceptionFilter: Filter | undefined;
+      fields?: DataViewFieldBase[];
+    }): ESBoolQuery => {
   const indexPattern: DataViewBase = {
-    fields,
-    title: index.join(),
+    fields: fields ?? [],
+    title: (index ?? []).join(),
   };
 
   const config: EsQueryConfig = {

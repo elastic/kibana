@@ -10,7 +10,6 @@ import type Boom from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 /**
  * Short hand type of estypes.ErrorCause.
@@ -144,53 +143,49 @@ export type ErrorType = MLHttpFetchError | EsErrorBody | Boom.Boom | string | un
 /**
  * Type guard to check if error is of type EsErrorBody
  * @export
- * @param {unknown} error
+ * @param {any} error
  * @returns {error is EsErrorBody}
  */
-export function isEsErrorBody(error: unknown): error is EsErrorBody {
-  return isPopulatedObject(error, ['error']) && isPopulatedObject(error.error, ['reason']);
+export function isEsErrorBody(error: any): error is EsErrorBody {
+  return error && error.error?.reason !== undefined;
 }
 
 /**
  * Type guard to check if error is a string.
  * @export
- * @param {unknown} error
+ * @param {any} error
  * @returns {error is string}
  */
-export function isErrorString(error: unknown): error is string {
+export function isErrorString(error: any): error is string {
   return typeof error === 'string';
 }
 
 /**
  * Type guard to check if error is of type ErrorMessage.
  * @export
- * @param {unknown} error
+ * @param {any} error
  * @returns {error is ErrorMessage}
  */
-export function isErrorMessage(error: unknown): error is ErrorMessage {
-  return isPopulatedObject(error, ['message']) && typeof error.message === 'string';
+export function isErrorMessage(error: any): error is ErrorMessage {
+  return error && error.message !== undefined && typeof error.message === 'string';
 }
 
 /**
  * Type guard to check if error is of type MLResponseError.
  * @export
- * @param {unknown} error
+ * @param {any} error
  * @returns {error is MLResponseError}
  */
-export function isMLResponseError(error: unknown): error is MLResponseError {
-  return (
-    isPopulatedObject(error, ['body']) &&
-    isPopulatedObject(error.body, ['message']) &&
-    'message' in error.body
-  );
+export function isMLResponseError(error: any): error is MLResponseError {
+  return typeof error.body === 'object' && 'message' in error.body;
 }
 
 /**
  * Type guard to check if error is of type Boom.
  * @export
- * @param {unknown} error
+ * @param {any} error
  * @returns {error is Boom.Boom}
  */
-export function isBoomError(error: unknown): error is Boom.Boom {
-  return isPopulatedObject(error, ['isBoom']) && error.isBoom === true;
+export function isBoomError(error: any): error is Boom.Boom {
+  return error?.isBoom === true;
 }

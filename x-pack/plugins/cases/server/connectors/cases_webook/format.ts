@@ -7,10 +7,11 @@
 
 import type { Format } from './types';
 
-export const format: Format = (theCase) => {
-  return {
-    title: theCase.title,
-    description: theCase.description,
-    tags: theCase.tags,
-  };
-};
+export const format: Format = (theCase) => ({
+  title: theCase.title,
+  description: theCase.description,
+  tags: theCase.tags,
+  id: theCase.id,
+  severity: theCase.severity,
+  status: theCase.status,
+});

@@ -8,4 +8,4 @@
 import { createLicenseServiceMock } from '../../../../common/license/mocks';
 
 export const licenseService = createLicenseServiceMock();
-export const useLicense = () => licenseService;
+export const useLicense = jest.fn(() => licenseService);

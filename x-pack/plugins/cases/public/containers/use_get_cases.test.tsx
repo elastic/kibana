@@ -6,7 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS, useGetCases } from './use_get_cases';
+import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
+import { useGetCases } from './use_get_cases';
 import * as api from './api';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';

@@ -15,7 +15,7 @@ export async function registerMapExtension(
   core: MlCoreSetup,
   { canGetJobs, canCreateJobs }: { canGetJobs: boolean; canCreateJobs: boolean }
 ) {
-  const anomalySourceFactory = new AnomalySourceFactory(core.getStartServices, canGetJobs);
+  const anomalySourceFactory = new AnomalySourceFactory(core.getStartServices);
   const anomalyLayerWizardFactory = new AnomalyLayerWizardFactory(
     core.getStartServices,
     canGetJobs,

@@ -9,7 +9,7 @@
 import {
   euiCanAnimate,
   euiFlyoutSlideInRight,
-  euiYScrollWithShadows,
+  euiYScroll,
   logicalCSS,
   logicalCSSWithFallback,
 } from '@elastic/eui';
@@ -47,6 +47,9 @@ export const getGuidePanelStyles = ({
       animation: ${euiFlyoutSlideInRight} ${euiTheme.animation.normal}
         ${euiTheme.animation.resistance};
     }
+    @media (max-width: ${euiTheme.breakpoint.m}px) {
+      max-height: 85vh;
+    })
     @media (min-width: ${euiTheme.breakpoint.m}px) {
       right: calc(${euiTheme.size.s} + 128px); // Accounting for margin on button
     })
@@ -95,9 +98,7 @@ export const getGuidePanelStyles = ({
       flex-grow: 1;
       `,
       flyoutBody: css`
-        ${euiYScrollWithShadows(euiThemeContext, {
-          side: 'end',
-        })}
+        ${euiYScroll(euiThemeContext)}
         padding: 16px 10px 0 16px;
       `,
       flyoutBodyError: css`

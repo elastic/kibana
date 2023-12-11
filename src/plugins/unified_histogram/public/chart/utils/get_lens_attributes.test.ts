@@ -172,8 +172,11 @@ describe('getLensAttributes', () => {
               ],
               "legend": Object {
                 "isVisible": true,
+                "legendSize": "xlarge",
                 "position": "right",
+                "shouldTruncate": false,
               },
+              "minBarHeight": 2,
               "preferredSeriesType": "bar_stacked",
               "showCurrentTimeMarker": true,
               "tickLabelsVisibilitySettings": Object {
@@ -346,8 +349,11 @@ describe('getLensAttributes', () => {
               ],
               "legend": Object {
                 "isVisible": true,
+                "legendSize": "xlarge",
                 "position": "right",
+                "shouldTruncate": false,
               },
+              "minBarHeight": 2,
               "preferredSeriesType": "bar_stacked",
               "showCurrentTimeMarker": true,
               "tickLabelsVisibilitySettings": Object {
@@ -502,8 +508,11 @@ describe('getLensAttributes', () => {
               ],
               "legend": Object {
                 "isVisible": true,
+                "legendSize": "xlarge",
                 "position": "right",
+                "shouldTruncate": false,
               },
+              "minBarHeight": 2,
               "preferredSeriesType": "bar_stacked",
               "showCurrentTimeMarker": true,
               "tickLabelsVisibilitySettings": Object {
@@ -630,7 +639,7 @@ describe('getLensAttributes', () => {
                   },
                   "fieldName": "",
                   "query": Object {
-                    "sql": "SELECT Dest, AvgTicketPrice FROM \\"kibana_sample_data_flights\\"",
+                    "esql": "FROM \\"kibana_sample_data_flights\\"",
                   },
                 },
                 "layers": Object {
@@ -669,7 +678,7 @@ describe('getLensAttributes', () => {
                     ],
                     "index": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
                     "query": Object {
-                      "sql": "SELECT Dest, AvgTicketPrice FROM \\"kibana_sample_data_flights\\"",
+                      "esql": "FROM kibana_sample_data_flights | keep Dest, AvgTicketPrice",
                     },
                     "timeField": "timestamp",
                   },
@@ -738,5 +747,56 @@ describe('getLensAttributes', () => {
         },
       }
     `);
+  });
+
+  it('should return correct attributes for text based languages with adhoc dataview', () => {
+    const adHocDataview = {
+      ...dataView,
+      isPersisted: () => false,
+    } as DataView;
+    const lensAttrs = getLensAttributes({
+      title: 'test',
+      filters,
+      query,
+      dataView: adHocDataview,
+      timeInterval,
+      breakdownField: undefined,
+      suggestion: currentSuggestionMock,
+    });
+    expect(lensAttrs.attributes).toEqual({
+      state: expect.objectContaining({
+        adHocDataViews: {
+          'index-pattern-with-timefield-id': {},
+        },
+      }),
+      references: [
+        {
+          id: 'index-pattern-with-timefield-id',
+          name: 'indexpattern-datasource-current-indexpattern',
+          type: 'index-pattern',
+        },
+        {
+          id: 'index-pattern-with-timefield-id',
+          name: 'indexpattern-datasource-layer-unifiedHistogram',
+          type: 'index-pattern',
+        },
+      ],
+      title: 'test',
+      visualizationType: 'lnsHeatmap',
+    });
+  });
+
+  it('should return suggestion title if no title is given', () => {
+    expect(
+      getLensAttributes({
+        title: undefined,
+        filters,
+        query,
+        dataView,
+        timeInterval,
+        breakdownField: undefined,
+        suggestion: currentSuggestionMock,
+      }).attributes.title
+    ).toBe(currentSuggestionMock.title);
   });
 });

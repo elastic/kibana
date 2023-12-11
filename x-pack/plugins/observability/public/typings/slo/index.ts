@@ -7,19 +7,25 @@
 
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 
-type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M' | 'Y';
+type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 
 interface Duration {
   value: number;
   unit: DurationUnit;
 }
 
-interface BurnRateRuleParams extends RuleTypeParams {
-  sloId: string;
+interface WindowSchema {
+  id: string;
   burnRateThreshold: number;
   maxBurnRateThreshold: number;
   longWindow: Duration;
   shortWindow: Duration;
+  actionGroup: string;
+}
+
+interface BurnRateRuleParams extends RuleTypeParams {
+  sloId: string;
+  windows: WindowSchema[];
 }
 
 interface ChartData {
@@ -27,4 +33,4 @@ interface ChartData {
   value: number | undefined;
 }
 
-export type { BurnRateRuleParams, ChartData, Duration, DurationUnit };
+export type { BurnRateRuleParams, ChartData, Duration, DurationUnit, WindowSchema };

@@ -5,46 +5,79 @@
  * 2.0.
  */
 
-import '../../../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
-/**
- * Mocking necessary due to console warnings from react d-n-d, which EUI uses
- * https://stackoverflow.com/a/56674119/1949235
- */
-jest.mock('react-beautiful-dnd', () => ({
-  Droppable: ({ children }: { children: any }) =>
-    children(
-      {
-        draggableProps: {
-          style: {},
-        },
-        innerRef: jest.fn(),
-      },
-      {}
-    ),
-  Draggable: ({ children }: { children: any }) =>
-    children(
-      {
-        draggableProps: {
-          style: {},
-        },
-        innerRef: jest.fn(),
-      },
-      {}
-    ),
-  DragDropContext: ({ children }: { children: any }) => children,
-}));
-
 import React from 'react';
 
+import type {
+  DraggableProvided,
+  DraggableStateSnapshot,
+  DroppableProvided,
+  DroppableStateSnapshot,
+} from '@hello-pangea/dnd';
 import { shallow, mount } from 'enzyme';
 
 import { EuiTextColor } from '@elastic/eui';
 
 import { ExampleResultDetailCard } from './example_result_detail_card';
 import { ResultDetail } from './result_detail';
+
+import '../../../../../__mocks__/shallow_useeffect.mock';
+
+/**
+ * Mocking necessary due to console warnings from @hello-pangea/dnd, which EUI uses
+ * https://stackoverflow.com/a/56674119/1949235
+ */
+jest.mock('@hello-pangea/dnd', () => ({
+  Droppable: ({
+    children,
+  }: {
+    children: (a: DroppableProvided, b: DroppableStateSnapshot) => void;
+  }) =>
+    children(
+      {
+        droppableProps: {
+          'data-rfd-droppable-context-id': '123',
+          'data-rfd-droppable-id': '123',
+        },
+        innerRef: jest.fn(),
+        placeholder: null,
+      },
+      {
+        isDraggingOver: false,
+        draggingOverWith: null,
+        draggingFromThisWith: null,
+        isUsingPlaceholder: false,
+      }
+    ),
+  Draggable: ({
+    children,
+  }: {
+    children: (a: DraggableProvided, b: DraggableStateSnapshot) => void;
+  }) =>
+    children(
+      {
+        draggableProps: {
+          'data-rfd-draggable-context-id': '123',
+          'data-rfd-draggable-id': '123',
+        },
+        innerRef: jest.fn(),
+        dragHandleProps: null,
+      },
+      {
+        isDragging: false,
+        isDropAnimating: false,
+        isClone: false,
+        dropAnimation: null,
+        draggingOver: null,
+        combineWith: null,
+        combineTargetFor: null,
+        mode: null,
+      }
+    ),
+  DragDropContext: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 describe('ResultDetail', () => {
   const { searchResultConfig, exampleDocuments } = exampleResult;

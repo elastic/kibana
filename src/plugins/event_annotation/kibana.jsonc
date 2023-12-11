@@ -9,7 +9,21 @@
     "browser": true,
     "requiredPlugins": [
       "expressions",
-      "data"
+      "data",
+      "presentationUtil",
+      "visualizations",
+      "dataViews",
+      "unifiedSearch",
+      "kibanaUtils",
+      "contentManagement"
+    ],
+    "optionalPlugins": [
+      "savedObjectsTagging",
+    ],
+    "requiredBundles": [
+      "data",
+      "savedObjectsFinder",
+      "dataViews",
     ],
     "extraPublicDirs": [
       "common"

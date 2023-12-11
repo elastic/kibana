@@ -7,7 +7,11 @@
 
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import { AlertingAuthorization } from '@kbn/alerting-plugin/server';
+import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
+import {
+  AlertingAuthorization,
+  PluginStartContract as AlertingStart,
+} from '@kbn/alerting-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { IRuleDataService } from '../rule_data_plugin_service';
 import { AlertsClient } from './alerts_client';
@@ -18,6 +22,9 @@ export interface AlertsClientFactoryProps {
   getAlertingAuthorization: (request: KibanaRequest) => PublicMethodsOf<AlertingAuthorization>;
   securityPluginSetup: SecurityPluginSetup | undefined;
   ruleDataService: IRuleDataService | null;
+  getRuleType: RuleTypeRegistry['get'];
+  getRuleList: RuleTypeRegistry['list'];
+  getAlertIndicesAlias: AlertingStart['getAlertIndicesAlias'];
 }
 
 export class AlertsClientFactory {
@@ -29,6 +36,9 @@ export class AlertsClientFactory {
   ) => PublicMethodsOf<AlertingAuthorization>;
   private securityPluginSetup!: SecurityPluginSetup | undefined;
   private ruleDataService!: IRuleDataService | null;
+  private getRuleType!: RuleTypeRegistry['get'];
+  private getRuleList!: RuleTypeRegistry['list'];
+  private getAlertIndicesAlias!: AlertingStart['getAlertIndicesAlias'];
 
   public initialize(options: AlertsClientFactoryProps) {
     /**
@@ -44,6 +54,9 @@ export class AlertsClientFactory {
     this.esClient = options.esClient;
     this.securityPluginSetup = options.securityPluginSetup;
     this.ruleDataService = options.ruleDataService;
+    this.getRuleType = options.getRuleType;
+    this.getRuleList = options.getRuleList;
+    this.getAlertIndicesAlias = options.getAlertIndicesAlias;
   }
 
   public async create(request: KibanaRequest): Promise<AlertsClient> {
@@ -55,6 +68,9 @@ export class AlertsClientFactory {
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       esClient: this.esClient,
       ruleDataService: this.ruleDataService!,
+      getRuleType: this.getRuleType,
+      getRuleList: this.getRuleList,
+      getAlertIndicesAlias: this.getAlertIndicesAlias,
     });
   }
 }

@@ -12,13 +12,16 @@ import { PageTemplateProps } from '../../shared/layout';
 import { NotFoundPrompt } from '../../shared/not_found';
 import { SendEnterpriseSearchTelemetry } from '../../shared/telemetry';
 
-import { EnterpriseSearchEnginesPageTemplate } from './layout/engines_page_template';
+import { EnterpriseSearchApplicationsPageTemplate } from './layout/page_template';
 
 export const NotFound: React.FC<PageTemplateProps> = ({ pageChrome = [] }) => {
   return (
-    <EnterpriseSearchEnginesPageTemplate pageChrome={[...pageChrome, '404']} customPageSections>
+    <EnterpriseSearchApplicationsPageTemplate
+      pageChrome={[...pageChrome, '404']}
+      customPageSections
+    >
       <SendEnterpriseSearchTelemetry action="error" metric="not_found" />
       <NotFoundPrompt productSupportUrl={APPLICATIONS_PLUGIN.SUPPORT_URL} />
-    </EnterpriseSearchEnginesPageTemplate>
+    </EnterpriseSearchApplicationsPageTemplate>
   );
 };

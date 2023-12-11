@@ -6,8 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { HostsTabsProps } from './types';
@@ -41,7 +40,7 @@ export const HostsTabs = React.memo<HostsTabsProps>(
     const hostNameExistsFilter = useMemo(() => fieldNameExistsFilter(SecurityPageName.hosts), []);
 
     return (
-      <Switch>
+      <Routes>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.hosts})`}>
           <HostsQueryTabBody {...tabProps} />
         </Route>
@@ -64,7 +63,7 @@ export const HostsTabs = React.memo<HostsTabsProps>(
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.sessions})`}>
           <SessionsTabBody {...tabProps} />
         </Route>
-      </Switch>
+      </Routes>
     );
   }
 );

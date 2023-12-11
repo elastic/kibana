@@ -32,9 +32,9 @@ export const data = dataPluginMock.createStartContract();
 const defaultConfig: ConfigSchema = {
   unsafe: {
     alertDetails: {
-      logs: { enabled: false },
       metrics: { enabled: false },
       uptime: { enabled: false },
+      observability: { enabled: false },
     },
   },
 };

@@ -8,29 +8,28 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-import { CoreStart } from '@kbn/core/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { IndexPatternSavedObject } from '../types';
 
 export interface SourcePickerProps {
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
-  http: CoreStart['http'];
-  uiSettings: CoreStart['uiSettings'];
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  contentManagement: ContentManagementPublicStart;
+  uiSettings: IUiSettingsClient;
 }
 
 const fixedPageSize = 8;
 
 export function SourcePicker({
-  http,
-  uiSettings,
-  savedObjectsManagement,
+  contentManagement,
   onIndexPatternSelected,
+  uiSettings,
 }: SourcePickerProps) {
   return (
     <SavedObjectFinder
-      services={{ http, uiSettings, savedObjectsManagement }}
+      services={{ contentClient: contentManagement.client, uiSettings }}
       onChoose={(_id, _type, _name, indexPattern) => {
         onIndexPatternSelected(indexPattern as IndexPatternSavedObject);
       }}
@@ -45,9 +44,9 @@ export function SourcePicker({
           name: i18n.translate('xpack.graph.sourceModal.savedObjectType.dataView', {
             defaultMessage: 'Data view',
           }),
-          showSavedObject: (indexPattern) => !indexPattern.attributes.type,
+          showSavedObject: (indexPattern: SavedObjectCommon<{ type?: string; title: string }>) =>
+            !indexPattern.attributes.type,
           includeFields: ['type'],
-          defaultSearchField: 'name',
         },
       ]}
       fixedPageSize={fixedPageSize}

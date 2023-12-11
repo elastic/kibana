@@ -23,14 +23,19 @@ import type {
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeBuilder } from '@kbn/es-query';
 
+import type { Case, CaseStatuses, User } from '../../../common/types/domain';
+import { caseStatuses } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import type { Case, User, CaseStatuses } from '../../../common/api';
-import { decodeOrThrow, caseStatuses } from '../../../common/api';
-import type { SavedObjectFindOptionsKueryNode, SOWithErrors } from '../../common/types';
+import { decodeOrThrow } from '../../../common/api';
+import type {
+  SavedObjectFindOptionsKueryNode,
+  SavedObjectsBulkResponseWithErrors,
+  SOWithErrors,
+} from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject, isSOError } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { combineFilters } from '../../client/utils';
@@ -53,6 +58,7 @@ import {
   CaseTransformedAttributesRt,
   CasePersistedStatus,
   getPartialCaseTransformedAttributesRt,
+  OwnerRt,
 } from '../../common/types/case';
 import type {
   GetCaseIdsByAlertIdArgs,
@@ -65,12 +71,16 @@ import type {
   FindCaseCommentsArgs,
   GetReportersArgs,
   GetTagsArgs,
-  PostCaseArgs,
+  CreateCaseArgs,
   PatchCaseArgs,
   PatchCasesArgs,
+  GetCategoryArgs,
+  BulkCreateCasesArgs,
 } from './types';
 import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
 import { bulkDecodeSOAttributes } from '../utils';
+
+const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
 
 export class CasesService {
   private readonly log: Logger;
@@ -134,7 +144,15 @@ export class CasesService {
         aggs: this.buildCaseIdsAggs(MAX_DOCS_PER_PAGE),
         filter: combinedFilter,
       });
-      return response;
+
+      const owners: Array<SavedObjectsFindResult<{ owner: string }>> = [];
+      for (const so of response.saved_objects) {
+        const validatedAttributes = decodeOrThrow(OwnerRt)(so.attributes);
+
+        owners.push(Object.assign(so, { attributes: validatedAttributes }));
+      }
+
+      return Object.assign(response, { saved_objects: owners });
     } catch (error) {
       this.log.error(`Error on GET all cases for alert id ${alertId}: ${error}`);
       throw error;
@@ -199,7 +217,7 @@ export class CasesService {
     [status in CaseStatuses]: number;
   }> {
     const cases = await this.unsecuredSavedObjectsClient.find<
-      CasePersistedAttributes,
+      unknown,
       {
         statuses: {
           buckets: Array<{
@@ -459,7 +477,7 @@ export class CasesService {
       this.log.debug(`Attempting to GET all reporters`);
 
       const results = await this.unsecuredSavedObjectsClient.find<
-        CasePersistedAttributes,
+        unknown,
         {
           reporters: {
             buckets: Array<{
@@ -521,7 +539,7 @@ export class CasesService {
       this.log.debug(`Attempting to GET all cases`);
 
       const results = await this.unsecuredSavedObjectsClient.find<
-        CasePersistedAttributes,
+        unknown,
         { tags: { buckets: Array<{ key: string }> } }
       >({
         type: CASE_SAVED_OBJECT,
@@ -546,14 +564,46 @@ export class CasesService {
     }
   }
 
-  public async postNewCase({
+  public async getCategories({ filter }: GetCategoryArgs): Promise<string[]> {
+    try {
+      this.log.debug(`Attempting to GET all categories`);
+
+      const results = await this.unsecuredSavedObjectsClient.find<
+        unknown,
+        { categories: { buckets: Array<{ key: string }> } }
+      >({
+        type: CASE_SAVED_OBJECT,
+        page: 1,
+        perPage: 1,
+        filter,
+        aggs: {
+          categories: {
+            terms: {
+              field: `${CASE_SAVED_OBJECT}.attributes.category`,
+              size: MAX_DOCS_PER_PAGE,
+              order: { _key: 'asc' },
+            },
+          },
+        },
+      });
+
+      return results?.aggregations?.categories?.buckets.map(({ key }) => key) ?? [];
+    } catch (error) {
+      this.log.error(`Error on GET categories: ${error}`);
+      throw error;
+    }
+  }
+
+  public async createCase({
     attributes,
     id,
     refresh,
-  }: PostCaseArgs): Promise<CaseSavedObjectTransformed> {
+  }: CreateCaseArgs): Promise<CaseSavedObjectTransformed> {
     try {
-      this.log.debug(`Attempting to POST a new case`);
-      const transformedAttributes = transformAttributesToESModel(attributes);
+      this.log.debug(`Attempting to create a new case`);
+
+      const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
+      const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
       transformedAttributes.attributes.total_alerts = -1;
       transformedAttributes.attributes.total_comments = -1;
@@ -569,7 +619,57 @@ export class CasesService {
 
       return { ...res, attributes: decodedRes };
     } catch (error) {
-      this.log.error(`Error on POST a new case: ${error}`);
+      this.log.error(`Error on creating a new case: ${error}`);
+      throw error;
+    }
+  }
+
+  public async bulkCreateCases({
+    cases,
+    refresh,
+  }: BulkCreateCasesArgs): Promise<SavedObjectsBulkResponseWithErrors<CaseTransformedAttributes>> {
+    try {
+      this.log.debug(`Attempting to bulk create cases`);
+
+      const bulkCreateRequest = cases.map(({ id, ...attributes }) => {
+        const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
+
+        const { attributes: transformedAttributes, referenceHandler } =
+          transformAttributesToESModel(decodedAttributes);
+
+        transformedAttributes.total_alerts = -1;
+        transformedAttributes.total_comments = -1;
+
+        return {
+          type: CASE_SAVED_OBJECT,
+          id,
+          attributes: transformedAttributes,
+          references: referenceHandler.build(),
+        };
+      });
+
+      const bulkCreateResponse =
+        await this.unsecuredSavedObjectsClient.bulkCreate<CasePersistedAttributes>(
+          bulkCreateRequest,
+          {
+            refresh,
+          }
+        );
+
+      const res = bulkCreateResponse.saved_objects.map((theCase) => {
+        if (isSOError<CasePersistedAttributes>(theCase)) {
+          return theCase;
+        }
+
+        const transformedCase = transformSavedObjectToExternalModel(theCase);
+        const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(transformedCase.attributes);
+
+        return { ...transformedCase, attributes: decodedRes };
+      });
+
+      return { saved_objects: res };
+    } catch (error) {
+      this.log.error(`Case Service: Error on bulk creating cases: ${error}`);
       throw error;
     }
   }
@@ -583,7 +683,11 @@ export class CasesService {
   }: PatchCaseArgs): Promise<SavedObjectsUpdateResponse<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
-      const transformedAttributes = transformAttributesToESModel(updatedAttributes);
+
+      const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
+        updatedAttributes
+      );
+      const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
       const updatedCase = await this.unsecuredSavedObjectsClient.update<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
@@ -597,7 +701,7 @@ export class CasesService {
       );
 
       const res = transformUpdateResponseToExternalModel(updatedCase);
-      const decodeRes = decodeOrThrow(getPartialCaseTransformedAttributesRt())(res.attributes);
+      const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(res.attributes);
 
       return {
         ...res,
@@ -617,7 +721,11 @@ export class CasesService {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
 
       const bulkUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
-        const { attributes, referenceHandler } = transformAttributesToESModel(updatedAttributes);
+        const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
+          updatedAttributes
+        );
+
+        const { attributes, referenceHandler } = transformAttributesToESModel(decodedAttributes);
         return {
           type: CASE_SAVED_OBJECT,
           id: caseId,
@@ -639,7 +747,7 @@ export class CasesService {
         }
 
         const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
-        const decodeRes = decodeOrThrow(getPartialCaseTransformedAttributesRt())(so.attributes);
+        const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(so.attributes);
         const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
 
         acc.push(soWithDecodedRes);

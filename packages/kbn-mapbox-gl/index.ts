@@ -7,12 +7,14 @@
  */
 
 import type {
+  AJAXError,
   Map,
   LayerSpecification,
   Source,
   GeoJSONSource,
   VectorTileSource,
   RasterTileSource,
+  SourceSpecification,
   StyleSpecification,
   MapEvent,
   MapOptions,
@@ -43,8 +45,10 @@ maplibregl.setRTLTextPlugin(mbRtlPlugin);
 export { maplibregl };
 
 export type {
+  AJAXError,
   Map,
   LayerSpecification,
+  SourceSpecification,
   StyleSpecification,
   Source,
   GeoJSONSource,

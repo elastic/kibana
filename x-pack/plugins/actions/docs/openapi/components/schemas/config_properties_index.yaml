@@ -5,10 +5,11 @@ description: Defines properties for connectors when type is `.index`.
 type: object
 properties:
   executionTimeField:
-    description: Specifies a field that will contain the time the alert condition was detected.
+    description: A field that indicates when the document was indexed.
     default: null
-    type: string
-    nullable: true
+    type:
+      - "string"
+      - "null"
   index:
     description: The Elasticsearch index to be written to.
     type: string

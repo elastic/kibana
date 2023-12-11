@@ -14,7 +14,7 @@ import {
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 
-const DEFAULT_BATCH_SIZE = 100;
+const DEFAULT_BATCH_SIZE = 2;
 function getOutdatedAgentPoliciesBatch(soClient: SavedObjectsClientContract, batchSize: number) {
   return agentPolicyService.list(soClient, {
     perPage: batchSize,

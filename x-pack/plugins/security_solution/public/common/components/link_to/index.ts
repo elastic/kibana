@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import { useCallback } from 'react';
+import { useGetLinkUrl } from '@kbn/security-solution-navigation/links';
 import {
   useUrlStateQueryParams,
   useGetUrlStateQueryParams,
@@ -14,7 +15,6 @@ import {
 import { useAppUrl } from '../../lib/kibana/hooks';
 import type { SecurityPageName } from '../../../app/types';
 
-export { getAlertDetailsUrl, getAlertDetailsTabUrl } from './redirect_to_alerts';
 export { getDetectionEngineUrl, getRuleDetailsUrl } from './redirect_to_detection_engine';
 export { getHostDetailsUrl, getTabsOnHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
 export { getKubernetesUrl, getKubernetesDetailsUrl } from './redirect_to_kubernetes';
@@ -66,17 +66,15 @@ export type GetSecuritySolutionUrl = (param: {
 }) => string;
 
 export const useGetSecuritySolutionUrl = () => {
-  const { getAppUrl } = useAppUrl();
+  const getLinkUrl = useGetLinkUrl();
   const getUrlStateQueryParams = useGetUrlStateQueryParams();
 
   const getSecuritySolutionUrl = useCallback<GetSecuritySolutionUrl>(
     ({ deepLinkId, path = '', absolute = false, skipSearch = false }) => {
-      const search = getUrlStateQueryParams(deepLinkId);
-      const formattedPath = formatPath(path, search, skipSearch);
-
-      return getAppUrl({ deepLinkId, path: formattedPath, absolute });
+      const urlState: string = skipSearch ? '' : getUrlStateQueryParams(deepLinkId);
+      return getLinkUrl({ id: deepLinkId, path, urlState, absolute });
     },
-    [getAppUrl, getUrlStateQueryParams]
+    [getLinkUrl, getUrlStateQueryParams]
   );
 
   return getSecuritySolutionUrl;

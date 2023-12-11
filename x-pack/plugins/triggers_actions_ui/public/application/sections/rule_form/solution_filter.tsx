@@ -7,7 +7,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFilterGroup, EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
+import {
+  EuiFilterGroup,
+  EuiPopover,
+  EuiFilterButton,
+  EuiFilterSelectItem,
+  useEuiTheme,
+} from '@elastic/eui';
 
 interface SolutionFilterProps {
   solutions: Map<string, string>;
@@ -18,6 +24,7 @@ export const SolutionFilter: React.FunctionComponent<SolutionFilterProps> = ({
   solutions,
   onChange,
 }: SolutionFilterProps) => {
+  const { euiTheme } = useEuiTheme();
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -49,7 +56,10 @@ export const SolutionFilter: React.FunctionComponent<SolutionFilterProps> = ({
           </EuiFilterButton>
         }
       >
-        <div className="euiFilterSelect__items">
+        {/* EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
+            instead of EuiFilterSelectItem (which is pending deprecation).
+            @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
+        <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
           {[...solutions.entries()].map(([id, title]) => (
             <EuiFilterSelectItem
               key={id}

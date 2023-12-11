@@ -6,11 +6,16 @@
  */
 
 import apm from 'elastic-apm-node';
-import { omit } from 'lodash';
+import { omit, some } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
-import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  throwUnrecoverableError,
+  createTaskRunError,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ExecutionHandler, RunResult } from './execution_handler';
@@ -35,7 +40,7 @@ import {
   RuleTypeRegistry,
   RawRuleLastRun,
 } from '../types';
-import { asErr, asOk, isOk, map, resolveErr, Result } from '../lib/result_type';
+import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
 import { partiallyUpdateAlert } from '../saved_objects';
@@ -47,9 +52,9 @@ import {
   parseDuration,
   RawAlertInstance,
   RuleLastRunOutcomeOrderMap,
-  MaintenanceWindow,
   RuleAlertData,
   SanitizedRule,
+  RuleNotifyWhen,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -65,13 +70,22 @@ import { IExecutionStatusAndMetrics } from '../lib/rule_execution_status';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { loadRule } from './rule_loader';
+import {
+  getRuleAttributes,
+  RuleData,
+  RuleDataResult,
+  ValidatedRuleData,
+  validateRule,
+} from './rule_loader';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
 import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { LegacyAlertsClient } from '../alerts_client';
+import { IAlertsClient } from '../alerts_client/types';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { getTimeRange } from '../lib/get_time_range';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -81,11 +95,36 @@ interface StackTraceLog {
   stackTrace?: string;
 }
 
+interface TaskRunnerConstructorParams<
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  RuleState extends RuleTypeState,
+  AlertState extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
+> {
+  ruleType: NormalizedRuleType<
+    Params,
+    ExtractedParams,
+    RuleState,
+    AlertState,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId,
+    AlertData
+  >;
+  taskInstance: ConcreteTaskInstance;
+  context: TaskRunnerContext;
+  inMemoryMetrics: InMemoryMetrics;
+}
+
 export class TaskRunner<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
   RuleState extends RuleTypeState,
-  State extends AlertInstanceState,
+  AlertState extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
@@ -99,7 +138,7 @@ export class TaskRunner<
     Params,
     ExtractedParams,
     RuleState,
-    State,
+    AlertState,
     Context,
     ActionGroupIds,
     RecoveryActionGroupId,
@@ -118,22 +157,24 @@ export class TaskRunner<
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RunningHandler;
   private ruleResult: RuleResultService;
+  private ruleData?: RuleDataResult<RuleData<Params>>;
+  private runDate = new Date();
 
-  constructor(
-    ruleType: NormalizedRuleType<
-      Params,
-      ExtractedParams,
-      RuleState,
-      State,
-      Context,
-      ActionGroupIds,
-      RecoveryActionGroupId,
-      AlertData
-    >,
-    taskInstance: ConcreteTaskInstance,
-    context: TaskRunnerContext,
-    inMemoryMetrics: InMemoryMetrics
-  ) {
+  constructor({
+    ruleType,
+    taskInstance,
+    context,
+    inMemoryMetrics,
+  }: TaskRunnerConstructorParams<
+    Params,
+    ExtractedParams,
+    RuleState,
+    AlertState,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId,
+    AlertData
+  >) {
     this.context = context;
     const loggerId = ruleType.id.startsWith('.') ? ruleType.id.substring(1) : ruleType.id;
     this.logger = context.logger.get(loggerId);
@@ -237,7 +278,6 @@ export class TaskRunner<
 
   private async runRule({
     fakeRequest,
-    rulesClient,
     rule,
     apiKey,
     validatedParams: params,
@@ -290,6 +330,7 @@ export class TaskRunner<
 
     const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
     const flappingSettings = await rulesSettingsClient.flapping().get();
+    const queryDelaySettings = await rulesSettingsClient.queryDelay().get();
 
     const alertsClientParams = {
       logger: this.logger,
@@ -301,26 +342,51 @@ export class TaskRunner<
     // writing from alerts-as-data indices and eventually
     // we will want to migrate all the processing of alerts out
     // of the LegacyAlertsClient and into the AlertsClient.
-    const alertsClient =
-      (await this.context.alertsService?.createAlertsClient<
-        AlertData,
-        State,
+    let alertsClient: IAlertsClient<
+      AlertData,
+      AlertState,
+      Context,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >;
+
+    try {
+      const client =
+        (await this.context.alertsService?.createAlertsClient<
+          AlertData,
+          AlertState,
+          Context,
+          ActionGroupIds,
+          RecoveryActionGroupId
+        >({
+          ...alertsClientParams,
+          namespace: namespace ?? DEFAULT_NAMESPACE_STRING,
+          rule: this.getAADRuleData(rule, spaceId),
+        })) ?? null;
+
+      alertsClient = client
+        ? client
+        : new LegacyAlertsClient<AlertState, Context, ActionGroupIds, RecoveryActionGroupId>(
+            alertsClientParams
+          );
+    } catch (err) {
+      this.logger.error(
+        `Error initializing AlertsClient for context ${this.ruleType.alerts?.context}. Using legacy alerts client instead. - ${err.message}`
+      );
+
+      alertsClient = new LegacyAlertsClient<
+        AlertState,
         Context,
         ActionGroupIds,
         RecoveryActionGroupId
-      >({
-        ...alertsClientParams,
-        namespace: namespace ?? DEFAULT_NAMESPACE_STRING,
-        rule: this.getAADRuleData(rule, spaceId),
-      })) ??
-      new LegacyAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-        alertsClientParams
-      );
+      >(alertsClientParams);
+    }
 
     await alertsClient.initializeExecution({
       maxAlerts: this.maxAlerts,
       ruleLabel,
       flappingSettings,
+      startedAt: this.taskInstance.startedAt!,
       activeAlertsFromState: alertRawInstances,
       recoveredAlertsFromState: alertRecoveredRawInstances,
     });
@@ -356,11 +422,29 @@ export class TaskRunner<
       );
     }
 
-    const maintenanceWindowIds = activeMaintenanceWindows.map(
-      (maintenanceWindow) => maintenanceWindow.id
+    const maintenanceWindows = activeMaintenanceWindows.filter(({ categoryIds }) => {
+      // If category IDs array doesn't exist: allow all
+      if (!Array.isArray(categoryIds)) {
+        return true;
+      }
+      // If category IDs array exist: check category
+      if ((categoryIds as string[]).includes(ruleType.category)) {
+        return true;
+      }
+      return false;
+    });
+
+    const maintenanceWindowsWithoutScopedQuery = maintenanceWindows.filter(
+      ({ scopedQuery }) => !scopedQuery
     );
-    if (maintenanceWindowIds.length) {
-      this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowIds);
+
+    const maintenanceWindowsWithoutScopedQueryIds = maintenanceWindowsWithoutScopedQuery.map(
+      ({ id }) => id
+    );
+
+    // Set the event log MW Id field the first time with MWs without scoped queries
+    if (maintenanceWindowsWithoutScopedQuery.length) {
+      this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
     }
 
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
@@ -405,7 +489,8 @@ export class TaskRunner<
                 searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
                 uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
                 scopedClusterClient: wrappedScopedClusterClient.client(),
-                alertFactory: alertsClient.getExecutorServices(),
+                alertFactory: alertsClient.factory(),
+                alertsClient: alertsClient.client(),
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
@@ -442,7 +527,11 @@ export class TaskRunner<
               },
               logger: this.logger,
               flappingSettings,
-              ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
+              ...(maintenanceWindowsWithoutScopedQueryIds.length
+                ? { maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds }
+                : {}),
+              getTimeRange: (timeWindow) =>
+                getTimeRange(this.logger, queryDelaySettings, timeWindow),
             })
           );
 
@@ -483,14 +572,47 @@ export class TaskRunner<
     );
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-      alertsClient.processAndLogAlerts({
-        eventLogger: this.alertingEventLogger,
-        ruleRunMetricsStore,
-        shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+      alertsClient.processAlerts({
         flappingSettings,
-        notifyWhen,
-        maintenanceWindowIds,
+        notifyOnActionGroupChange:
+          notifyWhen === RuleNotifyWhen.CHANGE ||
+          some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
+        maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
       });
+    });
+
+    await this.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
+      await alertsClient.persistAlerts();
+    });
+
+    let updateAlertsMaintenanceWindowResult = null;
+
+    try {
+      updateAlertsMaintenanceWindowResult =
+        await alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery?.({
+          ruleId: rule.id,
+          spaceId,
+          executionUuid: this.executionId,
+          maintenanceWindows,
+        });
+    } catch (e) {
+      this.logger.debug(
+        `Failed to update alert matched by maintenance window scoped query for rule  ${ruleLabel}.`
+      );
+    }
+
+    // Set the event log MW ids again, this time including the ids that matched alerts with
+    // scoped query
+    if (updateAlertsMaintenanceWindowResult?.maintenanceWindowIds) {
+      this.alertingEventLogger.setMaintenanceWindowIds(
+        updateAlertsMaintenanceWindowResult.maintenanceWindowIds
+      );
+    }
+
+    alertsClient.logAlerts({
+      eventLogger: this.alertingEventLogger,
+      ruleRunMetricsStore,
+      shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
     });
 
     const executionHandler = new ExecutionHandler({
@@ -507,14 +629,12 @@ export class TaskRunner<
       previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       alertingEventLogger: this.alertingEventLogger,
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
-      maintenanceWindowIds,
+      alertsClient,
     });
 
     let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
-      await rulesClient.clearExpiredSnoozes({ id: rule.id });
-
       if (isRuleSnoozed(rule)) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
       } else if (!this.shouldLogAndScheduleActionsForAlerts()) {
@@ -532,12 +652,12 @@ export class TaskRunner<
 
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
-    const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
-      await alertsClient.getAlertsToSerialize();
 
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
+      const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
+        alertsClient.getAlertsToSerialize();
       alertsToReturn = alerts;
       recoveredAlertsToReturn = recovered;
     }
@@ -554,7 +674,11 @@ export class TaskRunner<
   /**
    * Initialize event logger, load and validate the rule
    */
-  private async prepareToRun() {
+  private async prepareToRun(): Promise<ValidatedRuleData<Params>> {
+    if (!this.ruleData) {
+      this.ruleData = await this.loadIndirectParams();
+    }
+
     const {
       params: { alertId: ruleId, spaceId, consumer },
     } = this.taskInstance;
@@ -591,25 +715,24 @@ export class TaskRunner<
       ...(namespace ? { namespace } : {}),
     });
 
-    this.alertingEventLogger.start();
+    this.alertingEventLogger.start(this.runDate);
 
-    return await loadRule<Params>({
+    return validateRule({
+      alertingEventLogger: this.alertingEventLogger,
+      ruleData: this.ruleData,
       paramValidator: this.ruleType.validate.params,
       ruleId,
       spaceId,
       context: this.context,
       ruleTypeRegistry: this.ruleTypeRegistry,
-      alertingEventLogger: this.alertingEventLogger,
     });
   }
 
   private async processRunResults({
     nextRun,
-    runDate,
     stateWithMetrics,
   }: {
     nextRun: string | null;
-    runDate: Date;
     stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
   }) {
     const {
@@ -625,8 +748,8 @@ export class TaskRunner<
       IExecutionStatusAndMetrics
     >(
       stateWithMetrics,
-      (ruleRunStateWithMetrics) => executionStatusFromState(ruleRunStateWithMetrics, runDate),
-      (err: ElasticsearchError) => executionStatusFromError(err, runDate)
+      (ruleRunStateWithMetrics) => executionStatusFromState(ruleRunStateWithMetrics, this.runDate),
+      (err: ElasticsearchError) => executionStatusFromError(err, this.runDate)
     );
 
     // New consolidated statuses for lastRun
@@ -679,7 +802,7 @@ export class TaskRunner<
     this.ruleMonitoring.addHistory({
       duration: executionStatus.lastDuration,
       hasError: executionStatus.error != null,
-      runDate,
+      runDate: this.runDate,
     });
 
     if (!this.cancelled) {
@@ -705,6 +828,23 @@ export class TaskRunner<
     return { executionStatus, executionMetrics };
   }
 
+  async loadIndirectParams(): Promise<RuleDataResult<RuleData<Params>>> {
+    this.runDate = new Date();
+    return await this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareRule, async () => {
+      try {
+        const {
+          params: { alertId: ruleId, spaceId },
+        } = this.taskInstance;
+        const data = await getRuleAttributes<Params>(this.context, ruleId, spaceId);
+        this.ruleData = { data };
+      } catch (err) {
+        const error = new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
+        this.ruleData = { error };
+      }
+      return this.ruleData;
+    });
+  }
+
   async run(): Promise<RuleTaskRunResult> {
     const {
       params: { alertId: ruleId, spaceId },
@@ -714,8 +854,10 @@ export class TaskRunner<
     } = this.taskInstance;
 
     this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
-    const runDate = new Date();
-    this.logger.debug(`executing rule ${this.ruleType.id}:${ruleId} at ${runDate.toISOString()}`);
+
+    this.logger.debug(
+      `executing rule ${this.ruleType.id}:${ruleId} at ${this.runDate.toISOString()}`
+    );
 
     if (startedAt) {
       // Capture how long it took for the rule to start running after being claimed
@@ -725,28 +867,28 @@ export class TaskRunner<
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
     let schedule: Result<IntervalSchedule, Error>;
     try {
-      const preparedResult = await this.timer.runWithTimer(
-        TaskRunnerTimerSpan.PrepareRule,
-        async () => this.prepareToRun()
-      );
+      const preparedResult = await this.prepareToRun();
+
       this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
+
+      (async () => {
+        try {
+          await preparedResult.rulesClient.clearExpiredSnoozes({
+            rule: preparedResult.rule,
+            version: preparedResult.version,
+          });
+        } catch (e) {
+          // Most likely a 409 conflict error, which is ok, we'll try again at the next rule run
+          this.logger.debug(`Failed to clear expired snoozes: ${e.message}`);
+        }
+      })();
 
       stateWithMetrics = asOk(await this.runRule(preparedResult));
 
       // fetch the rule again to ensure we return the correct schedule as it may have
       // changed during the task execution
-      schedule = asOk(
-        (
-          await loadRule<Params>({
-            paramValidator: this.ruleType.validate.params,
-            ruleId,
-            spaceId,
-            context: this.context,
-            ruleTypeRegistry: this.ruleTypeRegistry,
-            alertingEventLogger: this.alertingEventLogger,
-          })
-        ).rule.schedule
-      );
+      const attributes = await getRuleAttributes<Params>(this.context, ruleId, spaceId);
+      schedule = asOk(attributes.rule.schedule);
     } catch (err) {
       stateWithMetrics = asErr(err);
       schedule = asErr(err);
@@ -764,7 +906,6 @@ export class TaskRunner<
       async () =>
         this.processRunResults({
           nextRun,
-          runDate,
           stateWithMetrics,
         })
     );
@@ -774,7 +915,7 @@ export class TaskRunner<
     ): RuleTaskState => {
       return {
         ...omit(runStateWithMetrics, ['metrics']),
-        previousStartedAt: startedAt,
+        previousStartedAt: startedAt?.toISOString(),
       };
     };
 
@@ -836,6 +977,9 @@ export class TaskRunner<
         return { interval: retryInterval };
       }),
       monitoring: this.ruleMonitoring.getMonitoring(),
+      ...(isErr(schedule)
+        ? { taskRunError: createTaskRunError(schedule.error, TaskErrorSource.FRAMEWORK) }
+        : {}),
     };
   }
 

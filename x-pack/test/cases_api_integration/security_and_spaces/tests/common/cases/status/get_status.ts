@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CaseStatuses } from '@kbn/cases-plugin/common/api';
+import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { CASE_STATUS_URL } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 

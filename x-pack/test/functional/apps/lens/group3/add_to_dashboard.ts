@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const createAndSaveDashboard = async (dashboardName: string) => {
-    await PageObjects.common.navigateToApp('dashboard');
+    await PageObjects.dashboard.navigateToApp();
     await PageObjects.dashboard.clickNewDashboard();
     await dashboardAddPanel.clickOpenAddPanel();
     await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');

@@ -10,31 +10,23 @@ import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
 
-import { EncryptedSyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { useCanUpdatePrivateMonitor } from '../../../hooks';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
-import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 
 export const EditMonitorLink = () => {
   const { basePath } = useSyntheticsSettingsContext();
 
   const { monitorId } = useParams<{ monitorId: string }>();
-  const { monitor } = useSelectedMonitor();
 
   const canEditSynthetics = useCanEditSynthetics();
-  const canUpdatePrivateMonitor = useCanUpdatePrivateMonitor(monitor as EncryptedSyntheticsMonitor);
-  const isLinkDisabled = !canEditSynthetics || !canUpdatePrivateMonitor;
+  const isLinkDisabled = !canEditSynthetics;
   const linkProps = isLinkDisabled
     ? { disabled: true }
     : { href: `${basePath}/app/synthetics/edit-monitor/${monitorId}` };
 
   return (
-    <NoPermissionsTooltip
-      canEditSynthetics={canEditSynthetics}
-      canUpdatePrivateMonitor={canUpdatePrivateMonitor}
-    >
+    <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
       <EuiButton
         data-test-subj="syntheticsEditMonitorLinkButton"
         fill

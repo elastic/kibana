@@ -18,6 +18,7 @@ import {
   type Filter,
 } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isTextBasedQuery } from '../../../utils/is_text_based_query';
 import { NoResultsSuggestionDefault } from './no_results_suggestion_default';
 import {
   NoResultsSuggestionWhenFilters,
@@ -76,7 +77,8 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
     }
   };
 
-  const canExtendTimeRange = Boolean(occurrencesRange?.from && occurrencesRange.to);
+  const canExtendTimeRange =
+    !isTextBasedQuery(query) && Boolean(occurrencesRange?.from && occurrencesRange.to);
   const canAdjustSearchCriteria = isTimeBased || hasFilters || hasQuery;
 
   const body = canAdjustSearchCriteria ? (
@@ -117,8 +119,9 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
   return (
     <EuiEmptyPrompt
       layout="horizontal"
-      color="plain"
+      color="transparent"
       icon={<NoResultsIllustration />}
+      hasBorder={false}
       title={
         <h2 data-test-subj="discoverNoResults">
           <FormattedMessage
@@ -135,7 +138,7 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
           `}
         >
           {typeof occurrencesRange === 'undefined' ? (
-            <EuiLoadingSpinner />
+            !isTextBasedQuery(query) && <EuiLoadingSpinner />
           ) : canExtendTimeRange ? (
             <EuiButton
               color="primary"

@@ -21,16 +21,10 @@ import {
   initGetLogEntryExamplesRoute,
   initValidateLogAnalysisDatasetsRoute,
   initValidateLogAnalysisIndicesRoute,
+  initGetLogAnalysisIdFormatsRoute,
 } from './routes/log_analysis';
-import {
-  initLogEntriesHighlightsRoute,
-  initLogEntriesSummaryHighlightsRoute,
-  initLogEntriesSummaryRoute,
-} from './routes/log_entries';
-import { initLogViewRoutes } from './routes/log_views';
 import { initMetadataRoute } from './routes/metadata';
 import { initMetricsAPIRoute } from './routes/metrics_api';
-import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initMetricsSourceConfigurationRoutes } from './routes/metrics_sources';
 import { initNodeDetailsRoute } from './routes/node_details';
 import { initOverviewRoute } from './routes/overview';
@@ -38,6 +32,7 @@ import { initProcessListRoute } from './routes/process_list';
 import { initSnapshotRoute } from './routes/snapshot';
 import { initInfraMetricsRoute } from './routes/infra';
 import { initMetricsExplorerViewRoutes } from './routes/metrics_explorer_views';
+import { initProfilingRoutes } from './routes/profiling';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   initIpToHostName(libs);
@@ -52,14 +47,10 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);
   initMetricsSourceConfigurationRoutes(libs);
+  initGetLogAnalysisIdFormatsRoute(libs);
   initValidateLogAnalysisDatasetsRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
   initGetLogEntryExamplesRoute(libs);
-  initLogEntriesHighlightsRoute(libs);
-  initLogEntriesSummaryRoute(libs);
-  initLogEntriesSummaryHighlightsRoute(libs);
-  initLogViewRoutes(libs);
-  initMetricExplorerRoute(libs);
   initMetricsExplorerViewRoutes(libs);
   initMetricsAPIRoute(libs);
   initMetadataRoute(libs);
@@ -69,4 +60,5 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initProcessListRoute(libs);
   initOverviewRoute(libs);
   initInfraMetricsRoute(libs);
+  initProfilingRoutes(libs);
 };

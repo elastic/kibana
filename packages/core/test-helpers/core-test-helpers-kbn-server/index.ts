@@ -12,7 +12,15 @@ export {
   createRoot,
   createRootWithCorePlugins,
   createTestServers,
+  createTestServerlessInstances,
   request,
 } from './src';
 
-export type { HttpMethod, TestElasticsearchUtils, TestKibanaUtils, TestUtils } from './src';
+export type {
+  HttpMethod,
+  TestElasticsearchUtils,
+  TestKibanaUtils,
+  TestUtils,
+  TestServerlessESUtils,
+  TestServerlessKibanaUtils,
+} from './src';

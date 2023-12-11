@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { FirstLastSeenRequestOptions } from '../../../../../common/search_strategy';
+import { ZodError } from 'zod';
+
 import { Direction } from '../../../../../common/search_strategy';
 import * as buildQuery from './query.first_or_last_seen.dsl';
 import { firstOrLastSeen } from '.';
@@ -16,6 +17,7 @@ import {
   formattedSearchStrategyLastResponse,
   formattedSearchStrategyFirstResponse,
 } from './__mocks__';
+import type { FirstLastSeenRequestOptionsInput } from '../../../../../common/api/search_strategy';
 
 describe('firstLastSeen search strategy', () => {
   describe('first seen search strategy', () => {
@@ -52,7 +54,7 @@ describe('firstLastSeen search strategy', () => {
 
     describe('buildDsl', () => {
       test('should build dsl query', () => {
-        const options: FirstLastSeenRequestOptions = { ...mockOptions, order: Direction.desc };
+        const options: FirstLastSeenRequestOptionsInput = { ...mockOptions, order: Direction.desc };
         firstOrLastSeen.buildDsl(options);
         expect(buildFirstLastSeenQuery).toHaveBeenCalledWith(options);
       });
@@ -65,6 +67,42 @@ describe('firstLastSeen search strategy', () => {
           mockSearchStrategyLastSeenResponse
         );
         expect(result).toMatchObject(formattedSearchStrategyLastResponse);
+      });
+
+      test('should throw an error when parse fails', async () => {
+        try {
+          await firstOrLastSeen.parse(
+            { invalidOption: 'key' } as unknown as FirstLastSeenRequestOptionsInput,
+            mockSearchStrategyLastSeenResponse
+          );
+        } catch (error: unknown) {
+          if (!(error instanceof ZodError)) {
+            throw error;
+          }
+
+          expect(error).not.toBeUndefined();
+          expect(error.flatten()).toMatchInlineSnapshot(`
+            Object {
+              "fieldErrors": Object {
+                "factoryQueryType": Array [
+                  "Invalid literal value, expected \\"firstlastseen\\"",
+                ],
+                "field": Array [
+                  "Required",
+                ],
+                "order": Array [
+                  "Required",
+                ],
+                "value": Array [
+                  "Required",
+                ],
+              },
+              "formErrors": Array [],
+            }
+          `);
+        }
+
+        expect.assertions(2);
       });
     });
   });

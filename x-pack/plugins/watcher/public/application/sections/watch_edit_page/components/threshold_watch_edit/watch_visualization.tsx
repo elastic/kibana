@@ -22,6 +22,7 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { i18n } from '@kbn/i18n';
 import { VisualizeOptions } from '../../../../models/visualize_options';
 import { ThresholdWatch } from '../../../../models/watch/threshold_watch';
 
@@ -220,6 +221,7 @@ export const WatchVisualization = () => {
               showLegend={!!watch.termField}
               showLegendExtra
               legendPosition={Position.Bottom}
+              locale={i18n.getLocale()}
             />
             <Axis
               id="bottom"

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { VisualizeEditorContext } from '../../types';
@@ -13,6 +13,7 @@ export interface TextBasedLayerColumn {
   columnId: string;
   fieldName: string;
   meta?: DatatableColumn['meta'];
+  inMetricDimension?: boolean;
 }
 
 export interface TextBasedField {
@@ -23,6 +24,7 @@ export interface TextBasedField {
 export interface TextBasedLayer {
   index: string;
   query: AggregateQuery | undefined;
+  table?: Datatable;
   columns: TextBasedLayerColumn[];
   allColumns: TextBasedLayerColumn[];
   timeField?: string;
@@ -31,12 +33,12 @@ export interface TextBasedLayer {
 
 export interface TextBasedPersistedState {
   layers: Record<string, TextBasedLayer>;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  fieldList?: DatatableColumn[];
 }
 
 export type TextBasedPrivateState = TextBasedPersistedState & {
   indexPatternRefs: IndexPatternRef[];
-  fieldList: DatatableColumn[];
-  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 };
 
 export interface IndexPatternRef {

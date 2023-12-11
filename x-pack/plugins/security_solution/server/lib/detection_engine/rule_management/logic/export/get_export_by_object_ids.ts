@@ -16,14 +16,14 @@ import type { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/ser
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 
-import { isAlertType } from '../../../rule_schema';
+import { hasValidRuleType } from '../../../rule_schema';
 import { findRules } from '../search/find_rules';
 import { transformRuleToExportableFormat } from '../../utils/utils';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 import { getRuleActionConnectorsForExport } from './get_export_rule_action_connectors';
 
 import { internalRuleToAPIResponse } from '../../normalization/rule_converters';
-import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 interface ExportSuccessRule {
   statusCode: 200;
@@ -126,7 +126,7 @@ export const getRulesFromObjects = async (
     const matchingRule = rules.data.find((rule) => rule.params.ruleId === ruleId);
     if (
       matchingRule != null &&
-      isAlertType(matchingRule) &&
+      hasValidRuleType(matchingRule) &&
       matchingRule.params.immutable !== true
     ) {
       return {

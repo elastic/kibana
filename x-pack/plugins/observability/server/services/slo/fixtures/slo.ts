@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
-import { v1 as uuidv1 } from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-server';
-import { sloSchema, CreateSLOParams } from '@kbn/slo-schema';
-
-import { SO_SLO_TYPE } from '../../../saved_objects';
+import {
+  ALL_VALUE,
+  CreateSLOParams,
+  HistogramIndicator,
+  sloSchema,
+  TimesliceMetricIndicator,
+} from '@kbn/slo-schema';
+import { cloneDeep } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
@@ -22,9 +26,9 @@ import {
   SLO,
   StoredSLO,
 } from '../../../domain/models';
-import { Paginated } from '../slo_repository';
-import { oneWeek, twoMinute } from './duration';
-import { sevenDaysRolling } from './time_window';
+import { SO_SLO_TYPE } from '../../../saved_objects';
+import { twoMinute } from './duration';
+import { sevenDaysRolling, weeklyCalendarAligned } from './time_window';
 
 export const createAPMTransactionErrorRateIndicator = (
   params: Partial<APMTransactionErrorRateIndicator['params']> = {}
@@ -60,7 +64,7 @@ export const createKQLCustomIndicator = (
 ): Indicator => ({
   type: 'sli.kql.custom',
   params: {
-    index: 'my-index*',
+    index: 'my-index*,my-other-index*',
     filter: 'labels.groupId: group-3',
     good: 'latency < 300',
     total: '',
@@ -71,10 +75,10 @@ export const createKQLCustomIndicator = (
 
 export const createMetricCustomIndicator = (
   params: Partial<MetricCustomIndicator['params']> = {}
-): Indicator => ({
+): MetricCustomIndicator => ({
   type: 'sli.metric.custom',
   params: {
-    index: 'my-index*',
+    index: 'my-index*,my-other-index*',
     filter: 'labels.groupId: group-3',
     good: {
       metrics: [
@@ -86,6 +90,49 @@ export const createMetricCustomIndicator = (
     total: {
       metrics: [{ name: 'A', aggregation: 'sum', field: 'total' }],
       equation: 'A',
+    },
+    timestampField: 'log_timestamp',
+    ...params,
+  },
+});
+
+export const createTimesliceMetricIndicator = (
+  metrics: TimesliceMetricIndicator['params']['metric']['metrics'] = [],
+  equation: TimesliceMetricIndicator['params']['metric']['equation'] = '',
+  queryFilter = ''
+): TimesliceMetricIndicator => ({
+  type: 'sli.metric.timeslice',
+  params: {
+    index: 'test-*',
+    timestampField: '@timestamp',
+    filter: queryFilter,
+    metric: {
+      metrics,
+      equation,
+      threshold: 100,
+      comparator: 'GTE',
+    },
+  },
+});
+
+export const createHistogramIndicator = (
+  params: Partial<HistogramIndicator['params']> = {}
+): HistogramIndicator => ({
+  type: 'sli.histogram.custom',
+  params: {
+    index: 'my-index*,my-other-index*',
+    filter: 'labels.groupId: group-3',
+    good: {
+      field: 'latency',
+      aggregation: 'range',
+      from: 0,
+      to: 100,
+      filter: '',
+    },
+    total: {
+      field: 'latency',
+      aggregation: 'value_count',
+      filter: '',
     },
     timestampField: 'log_timestamp',
     ...params,
@@ -107,6 +154,7 @@ const defaultSLO: Omit<SLO, 'id' | 'revision' | 'createdAt' | 'updatedAt'> = {
   },
   tags: ['critical', 'k8s'],
   enabled: true,
+  groupBy: ALL_VALUE,
 };
 
 const defaultCreateSloParams: CreateSLOParams = {
@@ -138,7 +186,7 @@ export const createSLO = (params: Partial<SLO> = {}): SLO => {
   const now = new Date();
   return cloneDeep({
     ...defaultSLO,
-    id: uuidv1(),
+    id: uuidv4(),
     revision: 1,
     createdAt: now,
     updatedAt: now,
@@ -160,23 +208,7 @@ export const createSLOWithTimeslicesBudgetingMethod = (params: Partial<SLO> = {}
 
 export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO => {
   return createSLO({
-    timeWindow: {
-      duration: oneWeek(),
-      isCalendar: true,
-    },
+    timeWindow: weeklyCalendarAligned(),
     ...params,
   });
-};
-
-export const createPaginatedSLO = (
-  slo: SLO,
-  params: Partial<Paginated<SLO>> = {}
-): Paginated<SLO> => {
-  return {
-    page: 1,
-    perPage: 25,
-    total: 1,
-    results: [slo],
-    ...params,
-  };
 };

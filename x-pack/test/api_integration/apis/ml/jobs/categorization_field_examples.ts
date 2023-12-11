@@ -293,7 +293,7 @@ export default ({ getService }: FtrProviderContext) => {
     for (const testData of testDataList) {
       it(testData.title, async () => {
         const { body, status } = await supertest
-          .post('/internal/ml/jobs/categorization_field_examples')
+          .post('/internal/ml/jobs/categorization_field_validation')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(getCommonRequestHeader('1'))
           .send(testData.requestBody);

@@ -164,7 +164,7 @@ export function TipsAndResources() {
       >
         <EuiFlexGroup justifyContent="spaceAround">
           {cards.map(({ icon, title, description, href }) => (
-            <EuiFlexItem>
+            <EuiFlexItem key={icon}>
               <EuiCard
                 icon={<EuiIcon size="xl" type={icon} />}
                 title={title}

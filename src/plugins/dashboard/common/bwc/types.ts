@@ -8,29 +8,28 @@
 
 import type { SavedObjectReference } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
+import { GridData } from '../content_management';
 
-import { GridData } from '..';
-
-interface SavedObjectAttributes {
+interface KibanaAttributes {
   kibanaSavedObjectMeta: {
     searchSourceJSON: string;
   };
 }
 
-interface Doc<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
+interface Doc<Attributes extends KibanaAttributes = KibanaAttributes> {
   references: SavedObjectReference[];
   attributes: Attributes;
   id: string;
   type: string;
 }
 
-interface DocPre700<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
+interface DocPre700<Attributes extends KibanaAttributes = KibanaAttributes> {
   attributes: Attributes;
   id: string;
   type: string;
 }
 
-interface DashboardAttributes extends SavedObjectAttributes {
+interface DashboardAttributes extends KibanaAttributes {
   panelsJSON: string;
   description: string;
   version: number;
@@ -40,7 +39,7 @@ interface DashboardAttributes extends SavedObjectAttributes {
   optionsJSON?: string;
 }
 
-interface DashboardAttributesTo720 extends SavedObjectAttributes {
+interface DashboardAttributesTo720 extends KibanaAttributes {
   panelsJSON: string;
   description: string;
   uiStateJSON?: string;

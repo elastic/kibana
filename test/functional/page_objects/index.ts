@@ -31,15 +31,20 @@ import { SavedObjectsPageObject } from './management/saved_objects_page';
 import { LegacyDataTableVisPageObject } from './legacy/data_table_vis';
 import { IndexPatternFieldEditorPageObject } from './management/indexpattern_field_editor_page';
 import { DashboardPageControls } from './dashboard_page_controls';
+import { DashboardPageLinks } from './dashboard_page_links';
 import { UnifiedSearchPageObject } from './unified_search_page';
+import { UnifiedFieldListPageObject } from './unified_field_list';
 import { FilesManagementPageObject } from './files_management';
+import { AnnotationEditorPageObject } from './annotation_library_editor_page';
 
 export const pageObjects = {
+  annotationEditor: AnnotationEditorPageObject,
   common: CommonPageObject,
   console: ConsolePageObject,
   context: ContextPageObject,
   dashboard: DashboardPageObject,
   dashboardControls: DashboardPageControls,
+  dashboardLinks: DashboardPageLinks,
   discover: DiscoverPageObject,
   error: ErrorPageObject,
   header: HeaderPageObject,
@@ -61,5 +66,6 @@ export const pageObjects = {
   savedObjects: SavedObjectsPageObject,
   indexPatternFieldEditorObjects: IndexPatternFieldEditorPageObject,
   unifiedSearch: UnifiedSearchPageObject,
+  unifiedFieldList: UnifiedFieldListPageObject,
   filesManagement: FilesManagementPageObject,
 };

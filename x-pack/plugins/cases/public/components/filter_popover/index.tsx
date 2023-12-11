@@ -7,10 +7,12 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+  EuiCallOut,
   EuiFilterButton,
   EuiFilterSelectItem,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiPanel,
   EuiPopover,
   EuiText,
@@ -22,6 +24,8 @@ interface FilterPopoverProps {
   onSelectedOptionsChanged: (value: string[]) => void;
   options: string[];
   optionsEmptyLabel?: string;
+  limit?: number;
+  limitReachedMessage?: string;
   selectedOptions: string[];
 }
 
@@ -56,6 +60,8 @@ export const FilterPopoverComponent = ({
   options,
   optionsEmptyLabel,
   selectedOptions,
+  limit,
+  limitReachedMessage,
 }: FilterPopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -87,10 +93,25 @@ export const FilterPopoverComponent = ({
       panelPaddingSize="none"
       repositionOnScroll
     >
+      {limit && limitReachedMessage && selectedOptions.length >= limit ? (
+        <>
+          <EuiHorizontalRule margin="none" />
+          <EuiCallOut
+            title={limitReachedMessage}
+            color="warning"
+            size="s"
+            data-test-subj="maximum-length-warning"
+          />
+          <EuiHorizontalRule margin="none" />
+        </>
+      ) : null}
       <ScrollableDiv>
         {options.map((option, index) => (
           <EuiFilterSelectItem
             checked={selectedOptions.includes(option) ? 'on' : undefined}
+            disabled={Boolean(
+              limit && selectedOptions.length >= limit && !selectedOptions.includes(option)
+            )}
             data-test-subj={`options-filter-popover-item-${option}`}
             key={`${index}-${option}`}
             onClick={toggleSelectedGroupCb.bind(null, option)}

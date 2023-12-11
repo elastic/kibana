@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import {
   IEsSearchRequest,
   IKibanaSearchResponse,
-  isCompleteResponse,
+  isRunningResponse,
 } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSourcererDataView } from './use_sourcerer_data_view';
@@ -24,7 +24,9 @@ export const useIndicatorsTotalCount = () => {
   const [count, setCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const { selectedPatterns, loading: loadingDataView } = useSourcererDataView();
+  const {
+    sourcererDataView: { selectedPatterns, loading: loadingDataView },
+  } = useSourcererDataView();
 
   useEffect(() => {
     const query = {
@@ -61,7 +63,7 @@ export const useIndicatorsTotalCount = () => {
       .search<IEsSearchRequest, IKibanaSearchResponse<RawIndicatorsResponse>>(req)
       .subscribe({
         next: (res) => {
-          if (isCompleteResponse(res)) {
+          if (!isRunningResponse(res)) {
             const returnedCount = res.rawResponse.hits.total || 0;
 
             setCount(returnedCount);

@@ -1,0 +1,34 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "../../typings/**/*",
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/dom-drag-drop",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/charts-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/unified-field-list",
+    "@kbn/core-theme-browser-internal",
+    "@kbn/ui-actions-plugin",
+  ]
+}

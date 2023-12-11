@@ -23,7 +23,7 @@ interface Props {
   incompatible: number | undefined;
   indices: number | undefined;
   indicesChecked: number | undefined;
-  ilmExplainPhaseCounts: IlmExplainPhaseCounts;
+  ilmExplainPhaseCounts: IlmExplainPhaseCounts | undefined;
   pattern: string;
 }
 
@@ -63,7 +63,9 @@ const PatternLabelComponent: React.FC<Props> = ({
     </EuiFlexGroup>
 
     <EuiSpacer size="xs" />
-    <IlmPhaseCounts ilmExplainPhaseCounts={ilmExplainPhaseCounts} pattern={pattern} />
+    {ilmExplainPhaseCounts && (
+      <IlmPhaseCounts ilmExplainPhaseCounts={ilmExplainPhaseCounts} pattern={pattern} />
+    )}
   </>
 );
 

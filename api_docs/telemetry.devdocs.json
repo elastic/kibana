@@ -188,6 +188,19 @@
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "telemetry",
+            "id": "def-public.TelemetryPluginConfig.appendServerlessChannelsSuffix",
+            "type": "boolean",
+            "tags": [],
+            "label": "appendServerlessChannelsSuffix",
+            "description": [
+              "Whether to use Serverless-specific channels when reporting Snapshot Telemetry"
+            ],
+            "path": "src/plugins/telemetry/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -781,7 +794,7 @@
           ],
           "label": "getIsOptedIn",
           "description": [
-            "\nResolves `true` if the user has opted into send Elastic usage data.\nResolves `false` if the user explicitly opted out of sending usage data to Elastic\nor did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).\n"
+            "\nResolves `true` if sending usage to Elastic is enabled.\nResolves `false` if the user explicitly opted out of sending usage data to Elastic\nor did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).\n"
           ],
           "signature": [
             "() => Promise<boolean>"
@@ -800,7 +813,7 @@
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/synthetics/server/legacy_uptime/lib/telemetry/sender.ts"
+              "path": "x-pack/plugins/synthetics/server/telemetry/sender.ts"
             },
             {
               "plugin": "fleet",
@@ -809,18 +822,18 @@
             {
               "plugin": "fleet",
               "path": "x-pack/plugins/fleet/server/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/synthetics/server/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/synthetics/server/telemetry/sender.test.ts"
             },
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.test.ts"
-            },
-            {
-              "plugin": "synthetics",
-              "path": "x-pack/plugins/synthetics/server/legacy_uptime/lib/telemetry/sender.test.ts"
-            },
-            {
-              "plugin": "synthetics",
-              "path": "x-pack/plugins/synthetics/server/legacy_uptime/lib/telemetry/sender.test.ts"
             }
           ],
           "children": [],

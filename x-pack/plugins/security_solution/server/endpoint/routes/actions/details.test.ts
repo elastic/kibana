@@ -18,8 +18,8 @@ import { applyActionsEsSearchMock } from '../../services/actions/mocks';
 import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
 import { getActionDetailsRequestHandler } from './details';
 import { NotFoundError } from '../../errors';
-import type { ActionDetailsRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { ActionDetailsRequestSchema } from '../../../../common/api/endpoint';
 
 describe('when calling the Action Details route handler', () => {
   let mockScopedEsClient: ScopedClusterClientMock;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
@@ -26,8 +26,8 @@ describe('Transform: <AggListSummary />', () => {
       list: { 'the-agg': item },
     };
 
-    const wrapper = shallow(<AggListSummary {...props} />);
+    const { container } = render(<AggListSummary {...props} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toBe('the-agg');
   });
 });

@@ -6,10 +6,11 @@
  */
 
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
+import { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 import { type IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects([
@@ -82,6 +83,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('Response Actions Responder', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     let endpointAgentId: string;
 
@@ -121,8 +124,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/139260
-    describe.skip('from timeline', () => {
+    describe('from timeline', () => {
       let timeline: TimelineResponse;
       let indexedAlerts: IndexedEndpointRuleAlerts;
 
@@ -143,6 +145,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 serializedQuery: getEndpointAlertsQueryForAgentId(endpointAgentId).$stringify(),
               },
             },
+            savedSearchId: null,
           },
           timeline.data.persistTimeline.timeline.version
         );
@@ -178,18 +181,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           timeline.data.persistTimeline.timeline.savedObjectId
         );
         await pageObjects.timeline.setDateRange('Last 1 year');
-        await pageObjects.timeline.waitForEvents(60_000);
+        await pageObjects.timeline.waitForEvents(MAX_WAIT_FOR_ALERTS_TIMEOUT);
 
         // Show event/alert details for the first one in the list
         await pageObjects.timeline.showEventDetails();
 
+        // TODO: The index already exists error toast should not show up
+        // close and dismiss it if it does
+        if (await testSubjects.exists('globalToastList')) {
+          await testSubjects.click('toastCloseButton');
+        }
         // Click responder from the take action button
         await testSubjects.click('take-action-dropdown-btn');
         await testSubjects.clickWhenNotDisabled('endpointResponseActions-action-item');
         await testSubjects.existOrFail('consolePageOverlay');
 
-        await performResponderSanityChecks();
+        // close tour popup
+        if (await testSubjects.exists('timeline-save-tour-close-button')) {
+          await testSubjects.click('timeline-save-tour-close-button');
+        }
 
+        await performResponderSanityChecks();
         await pageObjects.timeline.closeTimeline();
       });
     });
@@ -198,6 +210,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       let indexedAlerts: IndexedEndpointRuleAlerts;
 
       before(async () => {
+        await getService('kibanaServer').request({
+          path: `internal/kibana/settings`,
+          method: 'POST',
+          body: { changes: { 'securitySolution:enableExpandableFlyout': false } },
+        });
+
         indexedAlerts = await detectionsTestService.loadEndpointRuleAlerts(endpointAgentId);
 
         await detectionsTestService.waitForAlerts(
@@ -218,7 +236,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.detections.navigateToAlerts(
           `query=(language:kuery,query:'host.hostname: "${hostname}" ')`
         );
-        await pageObjects.detections.waitForListToHaveAlerts();
+        await pageObjects.detections.waitForListToHaveAlerts(MAX_WAIT_FOR_ALERTS_TIMEOUT);
         await pageObjects.detections.openFirstAlertDetailsForHostName(hostname);
         await pageObjects.detections.openResponseConsoleFromAlertDetails();
         await performResponderSanityChecks();

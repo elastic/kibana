@@ -215,16 +215,18 @@ export function getPossibleFunctions(
   operationDefinitionMap?: Record<string, GenericOperationDefinition>
 ) {
   const available = memoizedGetAvailableOperationsByMetadata(indexPattern, operationDefinitionMap);
-  const possibleOperationNames: string[] = [];
-  available.forEach((a) => {
+  const possibleOperationNames: Set<string> = new Set();
+  for (const a of available) {
     if (a.operationMetaData.dataType === 'number' && !a.operationMetaData.isBucketed) {
-      possibleOperationNames.push(
-        ...a.operations.filter((o) => o.type !== 'managedReference').map((o) => o.operationType)
-      );
+      for (const o of a.operations) {
+        if (o.type !== 'managedReference' || o.usedInMath) {
+          possibleOperationNames.add(o.operationType);
+        }
+      }
     }
-  });
+  }
 
-  return [...uniq(possibleOperationNames), ...Object.keys(tinymathFunctions)];
+  return Array.from(possibleOperationNames.keys()).concat(Object.keys(tinymathFunctions));
 }
 
 function getFunctionSuggestions(
@@ -259,7 +261,7 @@ function getArgumentSuggestions(
   if (tinymathFunction) {
     if (tinymathFunction.positionalArguments[position]) {
       return {
-        list: uniq(getPossibleFunctions(indexPattern, operationDefinitionMap)).map((f) => ({
+        list: getPossibleFunctions(indexPattern, operationDefinitionMap).map((f) => ({
           type: 'math' as const,
           label: f,
         })),
@@ -607,7 +609,7 @@ function getSignaturesForFunction(
         }
       : null;
 
-    const functionLabel = getFunctionSignatureLabel(name, operationDefinitionMap, firstParam);
+    const functionLabel = getFunctionSignatureLabel(name, operationDefinitionMap);
     const documentation = getOperationTypeHelp(name, operationDefinitionMap);
     if ('operationParams' in def && def.operationParams) {
       return [

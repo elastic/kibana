@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGridColumn, EuiDataGridOnColumnResizeData } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty } from 'lodash';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { toggleColumn } from './toggle_column';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
 
-interface UseColumnsArgs {
+export interface UseColumnsArgs {
   featureIds: AlertConsumers[];
   storageAlertsTable: React.MutableRefObject<AlertsTableStorage>;
   storage: React.MutableRefObject<IStorageWrapper>;
@@ -24,7 +24,20 @@ interface UseColumnsArgs {
   initialBrowserFields?: BrowserFields;
 }
 
-const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
+export interface UseColumnsResp {
+  columns: EuiDataGridColumn[];
+  visibleColumns: string[];
+  isBrowserFieldDataLoading: boolean | undefined;
+  browserFields: BrowserFields;
+  onToggleColumn: (columnId: string) => void;
+  onResetColumns: () => void;
+  onChangeVisibleColumns: (columnIds: string[]) => void;
+  onColumnResize: (args: EuiDataGridOnColumnResizeData) => void;
+  fields: Array<{
+    field: string;
+    include_unmapped: boolean;
+  }>;
+}
 
 const fieldTypeToDataGridColumnTypeMapper = (fieldType: string | undefined) => {
   if (fieldType === 'date') return 'datetime';
@@ -114,26 +127,23 @@ const getColumnByColumnId = (columns: EuiDataGridColumn[], columnId: string) => 
   return columns.find(({ id }: { id: string }) => id === columnId);
 };
 
-const getColumnsByColumnIds = (columns: EuiDataGridColumn[], columnIds: string[]) => {
-  return columnIds
-    .map((columnId: string) => columns.find((column: EuiDataGridColumn) => column.id === columnId))
-    .filter(Boolean) as EuiDataGridColumn[];
-};
-
 const persist = ({
   id,
   storageAlertsTable,
   columns,
   storage,
+  visibleColumns,
 }: {
   id: string;
   storageAlertsTable: React.MutableRefObject<AlertsTableStorage>;
   storage: React.MutableRefObject<IStorageWrapper>;
   columns: EuiDataGridColumn[];
+  visibleColumns: string[];
 }) => {
   storageAlertsTable.current = {
     ...storageAlertsTable.current,
     columns,
+    visibleColumns,
   };
   storage.current.set(id, storageAlertsTable.current);
 };
@@ -145,7 +155,7 @@ export const useColumns = ({
   id,
   defaultColumns,
   initialBrowserFields,
-}: UseColumnsArgs) => {
+}: UseColumnsArgs): UseColumnsResp => {
   const [isBrowserFieldDataLoading, browserFields] = useFetchBrowserFieldCapabilities({
     featureIds,
     initialBrowserFields,
@@ -156,29 +166,49 @@ export const useColumns = ({
     // before restoring from storage, enrich the column data
     if (initialBrowserFields && defaultColumns) {
       cols = populateColumns(cols, initialBrowserFields, defaultColumns);
+    } else if (cols && cols.length === 0) {
+      cols = defaultColumns;
     }
     return cols;
   });
+
+  const [visibleColumns, setVisibleColumns] = useState(
+    storageAlertsTable.current.visibleColumns ?? getColumnIds(columns)
+  );
 
   const [isColumnsPopulated, setColumnsPopulated] = useState<boolean>(false);
 
   const defaultColumnsRef = useRef<typeof defaultColumns>(defaultColumns);
 
-  const didDefaultColumnChange = useMemo(
-    () => !isEqual(defaultColumns, defaultColumnsRef.current),
-    [defaultColumns]
+  const didDefaultColumnChange = defaultColumns !== defaultColumnsRef.current;
+
+  const setColumnsByColumnIds = useCallback(
+    (columnIds: string[]) => {
+      setVisibleColumns(columnIds);
+      persist({
+        id,
+        storage,
+        storageAlertsTable,
+        columns,
+        visibleColumns: columnIds,
+      });
+    },
+    [columns, id, storage, storageAlertsTable]
   );
 
   useEffect(() => {
     // if defaultColumns have changed,
     // get the latest columns provided by client and
-    if (didDefaultColumnChange) {
+    if (didDefaultColumnChange && defaultColumnsRef.current) {
       defaultColumnsRef.current = defaultColumns;
       setColumnsPopulated(false);
+      // storageAlertTable already account for the changes in defaultColumns
+      // Technically storageAlertsTable = localStorageData ?? defaultColumns
       setColumns(storageAlertsTable.current.columns);
+      setVisibleColumns(storageAlertsTable.current.visibleColumns ?? visibleColumns);
       return;
     }
-  }, [didDefaultColumnChange, storageAlertsTable, defaultColumns]);
+  }, [didDefaultColumnChange, storageAlertsTable, defaultColumns, visibleColumns]);
 
   useEffect(() => {
     if (isEmpty(browserFields) || isColumnsPopulated) return;
@@ -190,24 +220,17 @@ export const useColumns = ({
   }, [browserFields, defaultColumns, isBrowserFieldDataLoading, isColumnsPopulated, columns]);
 
   const setColumnsAndSave = useCallback(
-    (newColumns: EuiDataGridColumn[]) => {
+    (newColumns: EuiDataGridColumn[], newVisibleColumns: string[]) => {
       setColumns(newColumns);
       persist({
         id,
         storage,
         storageAlertsTable,
         columns: newColumns,
+        visibleColumns: newVisibleColumns,
       });
     },
     [id, storage, storageAlertsTable]
-  );
-
-  const setColumnsByColumnIds = useCallback(
-    (columnIds: string[]) => {
-      const newColumns = getColumnsByColumnIds(columns, columnIds);
-      setColumnsAndSave(newColumns);
-    },
-    [setColumnsAndSave, columns]
   );
 
   const onToggleColumn = useCallback(
@@ -219,43 +242,64 @@ export const useColumns = ({
         columns,
         defaultColumns,
       });
-
-      setColumnsAndSave(newColumns);
+      let newVisibleColumns = visibleColumns;
+      if (visibleColumns.includes(columnId)) {
+        newVisibleColumns = visibleColumns.filter((vc) => vc !== columnId);
+      } else {
+        newVisibleColumns = [visibleColumns[0], columnId, ...visibleColumns.slice(1)];
+      }
+      setVisibleColumns(newVisibleColumns);
+      setColumnsAndSave(newColumns, newVisibleColumns);
     },
-    [browserFields, columns, defaultColumns, setColumnsAndSave]
+    [browserFields, columns, defaultColumns, setColumnsAndSave, visibleColumns]
   );
 
   const onResetColumns = useCallback(() => {
     const populatedDefaultColumns = populateColumns(defaultColumns, browserFields, defaultColumns);
-    setColumnsAndSave(populatedDefaultColumns);
+    setColumnsAndSave(
+      populatedDefaultColumns,
+      populatedDefaultColumns.map((pdc) => pdc.id)
+    );
   }, [browserFields, defaultColumns, setColumnsAndSave]);
 
-  /*
-   * In some case such security, we need some special fields such as threat.enrichments which are
-   * not fetched when passing only EMPTY_FIELDS. Hence, we will fetch all the fields that user has added to the table.
-   *
-   * Additionaly, system such as o11y needs fields which are not even added in the table such as rule_type_id and hence we
-   * additionly pass EMPTY_FIELDS so that it brings all fields apart from special fields
-   *
-   * */
+  const onColumnResize = useCallback(
+    ({ columnId, width }: EuiDataGridOnColumnResizeData) => {
+      const colIndex = columns.findIndex((c) => c.id === columnId);
+      if (colIndex > -1) {
+        columns.splice(colIndex, 1, { ...columns[colIndex], initialWidth: width });
+        setColumnsAndSave(columns, visibleColumns);
+      }
+    },
+    [columns, setColumnsAndSave, visibleColumns]
+  );
+
   const fieldsToFetch = useMemo(
-    () => [...columns.map((col) => ({ field: col.id, include_unmapped: true })), ...EMPTY_FIELDS],
+    () => [...columns.map((col) => ({ field: col.id, include_unmapped: true }))],
     [columns]
   );
 
-  const visibleColumns = useMemo(() => {
-    return getColumnIds(columns);
-  }, [columns]);
-
-  return {
-    columns,
-    visibleColumns,
-    isBrowserFieldDataLoading,
-    browserFields,
-    onColumnsChange: setColumnsAndSave,
-    onToggleColumn,
-    onResetColumns,
-    onChangeVisibleColumns: setColumnsByColumnIds,
-    fields: fieldsToFetch,
-  };
+  return useMemo(
+    () => ({
+      columns,
+      visibleColumns,
+      isBrowserFieldDataLoading,
+      browserFields,
+      onToggleColumn,
+      onResetColumns,
+      onChangeVisibleColumns: setColumnsByColumnIds,
+      onColumnResize,
+      fields: fieldsToFetch,
+    }),
+    [
+      browserFields,
+      columns,
+      fieldsToFetch,
+      isBrowserFieldDataLoading,
+      onColumnResize,
+      onResetColumns,
+      onToggleColumn,
+      setColumnsByColumnIds,
+      visibleColumns,
+    ]
+  );
 };

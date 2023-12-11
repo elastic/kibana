@@ -303,7 +303,11 @@ describe('fetch indices lib functions', () => {
       expect(mockClient.asCurrentUser.indices.get).toHaveBeenCalledWith({
         expand_wildcards: ['open'],
         features: ['aliases', 'settings'],
-        filter_path: ['*.aliases', '*.settings.index.hidden'],
+        filter_path: [
+          '*.aliases',
+          '*.settings.index.hidden',
+          '*.settings.index.verified_before_close',
+        ],
         index: '*search*',
       });
 
@@ -363,7 +367,11 @@ describe('fetch indices lib functions', () => {
       expect(mockClient.asCurrentUser.indices.get).toHaveBeenCalledWith({
         expand_wildcards: ['hidden', 'all'],
         features: ['aliases', 'settings'],
-        filter_path: ['*.aliases', '*.settings.index.hidden'],
+        filter_path: [
+          '*.aliases',
+          '*.settings.index.hidden',
+          '*.settings.index.verified_before_close',
+        ],
         index: '*',
       });
 

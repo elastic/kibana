@@ -18,6 +18,7 @@ import { of } from '@kbn/kibana-utils-plugin/common';
 import { createPoint, rowClickData, TestEmbeddable } from './test/data';
 import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 
 const mockDataPoints = [
   {
@@ -85,6 +86,9 @@ const createDrilldown = (isExternalUrlValid: boolean = true) => {
     getVariablesHelpDocsLink: () => 'http://localhost:5601/docs',
     navigateToUrl: mockNavigateToUrl,
     settings: settingsServiceMock.createSetupContract(),
+    theme: () => {
+      return themeServiceMock.createStartContract();
+    },
   });
   return drilldown;
 };
@@ -103,6 +107,7 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
       const context: ActionContext = {
@@ -120,6 +125,7 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
       const context: ActionContext = {
@@ -139,6 +145,7 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.somethingFake}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
       const context: ActionContext = {
@@ -159,6 +166,7 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
       const context: ActionContext = {
@@ -187,6 +195,7 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
       const context: ActionContext = {
@@ -209,6 +218,7 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.invalid}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
       const context: ActionContext = {
@@ -231,6 +241,7 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
       const context: ActionContext = {
@@ -499,6 +510,7 @@ describe('encoding', () => {
         template: 'https://elastic.co?foo=head%26shoulders',
       },
       openInNewTab: false,
+      encodeUrl: true,
     };
     const url = await urlDrilldown.getHref(config, context);
 

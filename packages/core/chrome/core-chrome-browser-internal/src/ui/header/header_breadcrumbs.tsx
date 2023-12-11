@@ -25,15 +25,23 @@ export function HeaderBreadcrumbs({ breadcrumbs$ }: Props) {
     crumbs = [{ text: 'Kibana' }];
   }
 
-  crumbs = crumbs.map((breadcrumb, i) => ({
-    ...breadcrumb,
-    'data-test-subj': classNames(
-      'breadcrumb',
-      breadcrumb['data-test-subj'],
-      i === 0 && 'first',
-      i === breadcrumbs.length - 1 && 'last'
-    ),
-  }));
+  crumbs = crumbs.map((breadcrumb, i) => {
+    const isLast = i === breadcrumbs.length - 1;
+    const { deepLinkId, ...rest } = breadcrumb;
+
+    return {
+      ...rest,
+      href: isLast ? undefined : breadcrumb.href,
+      onClick: isLast ? undefined : breadcrumb.onClick,
+      'data-test-subj': classNames(
+        'breadcrumb',
+        deepLinkId && `breadcrumb-deepLinkId-${deepLinkId}`,
+        breadcrumb['data-test-subj'],
+        i === 0 && 'first',
+        isLast && 'last'
+      ),
+    };
+  });
 
   return <EuiHeaderBreadcrumbs breadcrumbs={crumbs} max={10} data-test-subj="breadcrumbs" />;
 }

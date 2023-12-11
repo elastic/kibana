@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { CaseStatuses, StatusAll } from '../../../../common';
+import { CaseStatuses } from '../../../../common/types/domain';
 import type { AllCasesSelectorModalProps } from '.';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { CaseUI } from '../../../containers/types';
@@ -64,6 +64,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
       getAttachments?: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner
     ) => {
       const attachments = getAttachments?.({ theCase }) ?? [];
+
       // when the case is undefined in the modal
       // the user clicked "create new case"
       if (theCase === undefined) {
@@ -106,13 +107,13 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
       }
     },
     [
-      props,
-      closeModal,
-      createNewCaseFlyout,
-      startTransaction,
       appId,
-      createAttachments,
       casesToasts,
+      closeModal,
+      createAttachments,
+      createNewCaseFlyout,
+      props,
+      startTransaction,
     ]
   );
 
@@ -126,15 +127,15 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: {
           ...props,
-          hiddenStatuses: [CaseStatuses.closed, StatusAll],
+          hiddenStatuses: [CaseStatuses.closed],
           onRowClick: (theCase?: CaseUI) => {
             handleOnRowClick(theCase, getAttachments);
           },
-          onClose: () => {
+          onClose: (theCase?: CaseUI, isCreateCase?: boolean) => {
             closeModal();
 
             if (props.onClose) {
-              return props.onClose();
+              return props.onClose(theCase, isCreateCase);
             }
           },
         },

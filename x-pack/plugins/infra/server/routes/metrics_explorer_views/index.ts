@@ -15,6 +15,10 @@ import { initUpdateMetricsExplorerViewRoute } from './update_metrics_explorer_vi
 export const initMetricsExplorerViewRoutes = (
   dependencies: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>
 ) => {
+  if (!dependencies.framework.config.featureFlags.metricsExplorerEnabled) {
+    return;
+  }
+
   initCreateMetricsExplorerViewRoute(dependencies);
   initDeleteMetricsExplorerViewRoute(dependencies);
   initFindMetricsExplorerViewRoute(dependencies);

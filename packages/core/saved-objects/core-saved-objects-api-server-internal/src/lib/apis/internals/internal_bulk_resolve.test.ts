@@ -386,8 +386,14 @@ describe('internalBulkResolve', () => {
       ]);
 
       expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
-      expect(migrator.migrateDocument).nthCalledWith(1, 'mock-obj-for-1');
-      expect(migrator.migrateDocument).nthCalledWith(2, 'mock-obj-for-2');
+      expect(migrator.migrateDocument).nthCalledWith(
+        1,
+        'mock-obj-for-1',
+        expect.objectContaining({ allowDowngrade: expect.any(Boolean) })
+      );
+      expect(migrator.migrateDocument).nthCalledWith(2, 'mock-obj-for-2', {
+        allowDowngrade: expect.any(Boolean),
+      });
     });
   });
 

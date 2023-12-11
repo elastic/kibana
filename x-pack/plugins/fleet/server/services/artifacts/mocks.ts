@@ -26,6 +26,7 @@ export const createArtifactsClientMock = (): jest.Mocked<ArtifactsClientInterfac
     createArtifact: jest.fn().mockResolvedValue(generateArtifactMock()),
     bulkCreateArtifacts: jest.fn().mockResolvedValue({ artifacts: generateArtifactMock() }),
     deleteArtifact: jest.fn(),
+    bulkDeleteArtifacts: jest.fn(),
     listArtifacts: jest.fn().mockResolvedValue({
       items: [generateArtifactMock()],
       total: 1,
@@ -46,7 +47,7 @@ export const createArtifactsClientMock = (): jest.Mocked<ArtifactsClientInterfac
   };
 };
 
-export const generateArtifactMock = (): Artifact => {
+export const generateArtifactMock = (overrides?: Partial<Artifact>): Artifact => {
   return {
     id: '123',
     type: 'trustlist',
@@ -61,6 +62,7 @@ export const generateArtifactMock = (): Artifact => {
     encodedSize: 22,
     body: 'eJyrVkrNKynKTC1WsoqOrQUAJxkFKQ==',
     created: '2021-03-08T14:47:13.714Z',
+    ...overrides,
   };
 };
 
@@ -171,7 +173,10 @@ export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
 };
 
 type EsClientMock = ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
-type EsClientMockMethods = keyof Pick<EsClientMock, 'get' | 'create' | 'delete' | 'search'>;
+type EsClientMockMethods = keyof Pick<
+  EsClientMock,
+  'get' | 'create' | 'delete' | 'search' | 'bulk'
+>;
 
 export const setEsClientMethodResponseToError = (
   esClientMock: EsClientMock,

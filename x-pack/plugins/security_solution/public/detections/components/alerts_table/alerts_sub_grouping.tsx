@@ -13,13 +13,13 @@ import type { GroupingAggregation } from '@kbn/securitysolution-grouping';
 import { isNoneGroup } from '@kbn/securitysolution-grouping';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/securitysolution-grouping/src';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { parseGroupingQuery } from '@kbn/securitysolution-grouping/src';
+import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
 import { combineQueries } from '../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
-import type { Status } from '../../../../common/detection_engine/schemas/common';
+import type { Status } from '../../../../common/api/detection_engine';
 import { InspectButton } from '../../../common/components/inspect';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useKibana } from '../../../common/lib/kibana';
@@ -53,7 +53,7 @@ interface OwnProps {
   pageSize: number;
   parentGroupingFilter?: string;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   selectedGroup: string;
   setPageIndex: (newIndex: number) => void;
   setPageSize: (newSize: number) => void;
@@ -235,7 +235,6 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const takeActionItems = useGroupTakeActionsItems({
-    indexName: indexPattern.title,
     currentStatus: currentAlertStatusFilterValue,
     showAlertStatusActions: hasIndexWrite && hasIndexMaintenance,
   });

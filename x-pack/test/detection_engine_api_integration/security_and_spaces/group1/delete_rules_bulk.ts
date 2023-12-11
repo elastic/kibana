@@ -6,9 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
 import { DETECTION_ENGINE_RULES_BULK_DELETE } from '@kbn/security-solution-plugin/common/constants';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createLegacyRuleAction,
@@ -25,6 +27,9 @@ import {
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   getLegacyActionSO,
+  createRuleThroughAlertingEndpoint,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -41,6 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { header } = await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([{ rule_id: 'rule-1' }])
           .expect(200);
 
@@ -67,6 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([{ rule_id: 'rule-1' }])
           .expect(200);
 
@@ -80,8 +87,9 @@ export default ({ getService }: FtrProviderContext): void => {
         // delete that rule by its rule_id
         const { body } = await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ rule_id: bodyWithCreatedRule.rule_id }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ rule_id: bodyWithCreatedRule.rule_id }])
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
@@ -94,8 +102,9 @@ export default ({ getService }: FtrProviderContext): void => {
         // delete that rule by its id
         const { body } = await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ id: bodyWithCreatedRule.id }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ id: bodyWithCreatedRule.id }])
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
@@ -105,8 +114,9 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return an error if the ruled_id does not exist when trying to delete a rule_id', async () => {
         const { body } = await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ rule_id: 'fake_id' }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ rule_id: 'fake_id' }])
           .expect(200);
 
         expect(body).to.eql([
@@ -123,8 +133,9 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return an error if the id does not exist when trying to delete an id', async () => {
         const { body } = await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .expect(200);
 
         expect(body).to.eql([
@@ -143,8 +154,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body } = await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ id: bodyWithCreatedRule.id }, { id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ id: bodyWithCreatedRule.id }, { id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
@@ -179,6 +191,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_DELETE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([{ rule_id: 'rule-1' }])
           .expect(200);
 
@@ -194,6 +207,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(DETECTION_ENGINE_RULES_BULK_DELETE)
           .send([{ rule_id: bodyWithCreatedRule.rule_id }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
@@ -206,8 +220,9 @@ export default ({ getService }: FtrProviderContext): void => {
         // delete that rule by its id
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ id: bodyWithCreatedRule.id }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ id: bodyWithCreatedRule.id }])
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
@@ -217,8 +232,9 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return an error if the ruled_id does not exist when trying to delete a rule_id', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ rule_id: 'fake_id' }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ rule_id: 'fake_id' }])
           .expect(200);
 
         expect(body).to.eql([
@@ -235,8 +251,9 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return an error if the id does not exist when trying to delete an id', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .expect(200);
 
         expect(body).to.eql([
@@ -255,8 +272,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ id: bodyWithCreatedRule.id }, { id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ id: bodyWithCreatedRule.id }, { id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612' }])
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
@@ -292,8 +310,9 @@ export default ({ getService }: FtrProviderContext): void => {
         // delete the rule with the legacy action
         const { body } = await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ id: createRuleBody.id }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ id: createRuleBody.id }])
           .expect(200);
 
         // ensure we only get one body back
@@ -341,8 +360,9 @@ export default ({ getService }: FtrProviderContext): void => {
         // delete 2 rules where both have legacy actions
         const { body } = await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ id: createRuleBody1.id }, { id: createRuleBody2.id }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ id: createRuleBody1.id }, { id: createRuleBody2.id }])
           .expect(200);
 
         // ensure we only get two bodies back
@@ -402,8 +422,9 @@ export default ({ getService }: FtrProviderContext): void => {
         // bulk delete the rule
         await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
-          .send([{ id: createRuleBody.id }])
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([{ id: createRuleBody.id }])
           .expect(200);
 
         // Test to ensure that we have exactly 0 legacy actions by querying the Alerting client REST API directly
@@ -426,6 +447,74 @@ export default ({ getService }: FtrProviderContext): void => {
         // legacy sidecar action should be gone
         const sidecarActionsPostResults = await getLegacyActionSO(es);
         expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
+      });
+    });
+
+    describe('legacy investigation fields', () => {
+      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
+      let ruleWithLegacyInvestigationFieldEmptyArray: Rule<BaseRuleParams>;
+
+      beforeEach(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+        await createSignalsIndex(supertest, log);
+        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFields()
+        );
+        ruleWithLegacyInvestigationFieldEmptyArray = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+        );
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-with-investigation-field'),
+          name: 'Test investigation fields object',
+          investigation_fields: { field_names: ['host.name'] },
+        });
+      });
+
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
+      });
+
+      it('DELETE - should delete a single rule with investigation field', async () => {
+        // delete the rule in bulk
+        const { body } = await supertest
+          .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([
+            { rule_id: 'rule-with-investigation-field' },
+            { rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId },
+            { rule_id: ruleWithLegacyInvestigationField.params.ruleId },
+          ])
+          .expect(200);
+        const investigationFields = body.map((rule: RuleResponse) => rule.investigation_fields);
+        expect(investigationFields).to.eql([
+          { field_names: ['host.name'] },
+          undefined,
+          { field_names: ['client.address', 'agent.name'] },
+        ]);
+      });
+
+      it('POST - should delete a single rule with investigation field', async () => {
+        // delete the rule in bulk
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_BULK_DELETE)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send([
+            { rule_id: 'rule-with-investigation-field' },
+            { rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId },
+            { rule_id: ruleWithLegacyInvestigationField.params.ruleId },
+          ])
+          .expect(200);
+        const investigationFields = body.map((rule: RuleResponse) => rule.investigation_fields);
+        expect(investigationFields).to.eql([
+          { field_names: ['host.name'] },
+          undefined,
+          { field_names: ['client.address', 'agent.name'] },
+        ]);
       });
     });
   });

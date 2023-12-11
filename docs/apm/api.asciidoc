@@ -504,6 +504,16 @@ The following APIs are available:
 * <<rum-sourcemap-delete>>
 
 [float]
+[[limit-sourcemap-api]]
+==== Max payload size
+
+{kib}'s maximum payload size is 1mb.
+If you attempt to upload a source map that exceeds the max payload size, you will get a `413` error.
+
+Before uploading source maps that exceed this default, change the maximum payload size allowed by {kib}
+with the <<server-maxPayload,`server.maxPayload`>> variable.
+
+[float]
 [[use-sourcemap-api]]
 ==== How to use APM APIs
 

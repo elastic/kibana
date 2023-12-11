@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getRuleForSignalTesting } from './get_rule_for_signal_testing';
 
 /**
@@ -28,4 +28,5 @@ export const getThresholdRuleForSignalTesting = (
     field: 'process.name',
     value: 21,
   },
+  alert_suppression: undefined,
 });

@@ -17,7 +17,7 @@ import type { Filter, Query } from '@kbn/es-query';
 
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { SourcererScopeName } from '../../store/sourcerer/model';
-import type { Status } from '../../../../common/detection_engine/schemas/common';
+import type { Status } from '../../../../common/api/detection_engine';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export type GetLensAttributes = (
@@ -79,6 +79,10 @@ export interface LensEmbeddableComponentProps {
   timerange: { from: string; to: string };
   width?: string | number;
   withActions?: boolean;
+  /**
+   * Disable the on click filter for the visualization.
+   */
+  disableOnClickFilter?: boolean;
 }
 
 export enum RequestStatus {

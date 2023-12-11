@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import { useKibana, useGetUserCasesPermissions } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { AddToCaseButton } from '.';
@@ -36,13 +36,6 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../../../../common/lib/kibana');
-const originalKibanaLib = jest.requireActual('../../../../common/lib/kibana');
-
-// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
-// The returned permissions object will indicate that the user does not have permissions by default
-const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
-mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
-
 jest.mock('../../../../common/hooks/use_selector');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;

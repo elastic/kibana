@@ -13,8 +13,7 @@ import type { Agent } from '../../../../types';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import { ExperimentalFeaturesService } from '../../../../services';
-
-import { sendGetAgents, sendGetAgentPolicies } from '../../../../hooks';
+import { AgentReassignAgentPolicyModal } from '../../components/agent_reassign_policy_modal';
 
 import { AgentBulkActions } from './bulk_actions';
 
@@ -23,18 +22,33 @@ const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesServic
 
 jest.mock('../../../../hooks', () => ({
   ...jest.requireActual('../../../../hooks'),
-  sendGetAgents: jest.fn(),
-  sendGetAgentPolicies: jest.fn(),
 }));
 
-const mockedSendGetAgents = sendGetAgents as jest.Mock;
-const mockedSendGetAgentPolicies = sendGetAgentPolicies as jest.Mock;
+jest.mock('../../components/agent_reassign_policy_modal');
+
+const defaultProps = {
+  shownAgents: 10,
+  inactiveShownAgents: 0,
+  totalManagedAgentIds: [],
+  selectionMode: 'manual',
+  currentQuery: '',
+  selectedAgents: [],
+  visibleAgents: [],
+  refreshAgents: () => undefined,
+  allTags: [],
+  agentPolicies: [],
+};
 
 describe('AgentBulkActions', () => {
   beforeAll(() => {
     mockedExperimentalFeaturesService.get.mockReturnValue({
       diagnosticFileUploadEnabled: false,
     } as any);
+  });
+
+  beforeEach(() => {
+    jest.mocked(AgentReassignAgentPolicyModal).mockReset();
+    jest.mocked(AgentReassignAgentPolicyModal).mockReturnValue(null);
   });
 
   function render(props: any) {
@@ -45,23 +59,13 @@ describe('AgentBulkActions', () => {
 
   describe('When in manual mode', () => {
     it('should show only disabled actions if no agents are active', async () => {
-      const selectedAgents: Agent[] = [{ id: 'agent1' }, { id: 'agent2' }] as Agent[];
-
-      const props = {
-        totalAgents: 10,
-        totalInactiveAgents: 10,
-        selectionMode: 'manual',
-        currentQuery: '',
-        selectedAgents,
-        visibleAgents: [],
-        refreshAgents: () => undefined,
-        allTags: [],
-        agentPolicies: [],
-      };
-      const results = render(props);
+      const results = render({
+        ...defaultProps,
+        inactiveShownAgents: 10,
+        selectedAgents: [{ id: 'agent1' }, { id: 'agent2' }] as Agent[],
+      });
 
       const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
-
       await act(async () => {
         fireEvent.click(bulkActionsButton);
       });
@@ -72,29 +76,19 @@ describe('AgentBulkActions', () => {
       expect(results.getByText('Upgrade 2 agents').closest('button')!).toBeDisabled();
       expect(results.getByText('Schedule upgrade for 2 agents').closest('button')!).toBeDisabled();
       expect(results.queryByText('Request diagnostics for 2 agents')).toBeNull();
+      expect(results.getByText('Restart upgrade 2 agents').closest('button')!).toBeDisabled();
     });
 
     it('should show available actions for 2 selected agents if they are active', async () => {
-      const selectedAgents: Agent[] = [
-        { id: 'agent1', tags: ['oldTag'], active: true },
-        { id: 'agent2', active: true },
-      ] as Agent[];
-
-      const props = {
-        totalAgents: 10,
-        totalInactiveAgents: 0,
-        selectionMode: 'manual',
-        currentQuery: '',
-        selectedAgents,
-        visibleAgents: [],
-        refreshAgents: () => undefined,
-        allTags: [],
-        agentPolicies: [],
-      };
-      const results = render(props);
+      const results = render({
+        ...defaultProps,
+        selectedAgents: [
+          { id: 'agent1', tags: ['oldTag'], active: true },
+          { id: 'agent2', active: true },
+        ] as Agent[],
+      });
 
       const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
-
       await act(async () => {
         fireEvent.click(bulkActionsButton);
       });
@@ -104,6 +98,7 @@ describe('AgentBulkActions', () => {
       expect(results.getByText('Unenroll 2 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Upgrade 2 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Schedule upgrade for 2 agents').closest('button')!).toBeDisabled();
+      expect(results.getByText('Restart upgrade 2 agents').closest('button')!).toBeEnabled();
     });
 
     it('should add actions if mockedExperimentalFeaturesService is enabled', async () => {
@@ -111,27 +106,15 @@ describe('AgentBulkActions', () => {
         diagnosticFileUploadEnabled: true,
       } as any);
 
-      const selectedAgents: Agent[] = [
-        { id: 'agent1', tags: ['oldTag'], active: true },
-        { id: 'agent2', active: true },
-      ] as Agent[];
-
-      const props = {
-        totalAgents: 10,
-        totalInactiveAgents: 0,
-        selectionMode: 'manual',
-        currentQuery: '',
-        selectedAgents,
-        visibleAgents: [],
-        refreshAgents: () => undefined,
-        allTags: [],
-        agentPolicies: [],
-        unselectableAgents: [],
-      };
-      const results = render(props);
+      const results = render({
+        ...defaultProps,
+        selectedAgents: [
+          { id: 'agent1', tags: ['oldTag'], active: true },
+          { id: 'agent2', active: true },
+        ] as Agent[],
+      });
 
       const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
-
       await act(async () => {
         fireEvent.click(bulkActionsButton);
       });
@@ -143,45 +126,13 @@ describe('AgentBulkActions', () => {
   });
 
   describe('When in query mode', () => {
-    it('should show correct actions for the active agents', async () => {
-      mockedSendGetAgentPolicies.mockResolvedValue({
-        data: {
-          items: [
-            {
-              name: 'Managed agent policy',
-              namespace: 'default',
-              description: '',
-              monitoring_enabled: ['logs', 'metrics'],
-              is_managed: true,
-              id: 'test-managed-policy',
-            },
-          ],
-        },
-      });
-      mockedSendGetAgents.mockResolvedValueOnce({
-        data: {
-          items: [],
-          total: 0,
-          totalInactive: 0,
-        },
-      });
-      const selectedAgents: Agent[] = [];
-
-      const props = {
-        totalAgents: 10,
-        totalInactiveAgents: 0,
+    it('should show correct actions for active agents when no managed policies exist', async () => {
+      const results = render({
+        ...defaultProps,
         selectionMode: 'query',
-        currentQuery: '(Base query)',
-        selectedAgents,
-        visibleAgents: [],
-        refreshAgents: () => undefined,
-        allTags: [],
-        agentPolicies: [],
-      };
-      const results = render(props);
+      });
 
       const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
-
       await act(async () => {
         fireEvent.click(bulkActionsButton);
       });
@@ -194,47 +145,17 @@ describe('AgentBulkActions', () => {
       expect(
         results.getByText('Request diagnostics for 10 agents').closest('button')!
       ).toBeEnabled();
+      expect(results.getByText('Restart upgrade 10 agents').closest('button')!).toBeEnabled();
     });
 
     it('should show correct actions for the active agents and exclude the managed agents from the count', async () => {
-      const selectedAgents: Agent[] = [];
-      mockedSendGetAgentPolicies.mockResolvedValue({
-        data: {
-          items: [
-            {
-              name: 'Managed agent policy',
-              namespace: 'default',
-              description: '',
-              monitoring_enabled: ['logs', 'metrics'],
-              is_managed: true,
-              id: 'test-managed-policy',
-            },
-          ],
-        },
-      });
-      mockedSendGetAgents.mockResolvedValueOnce({
-        data: {
-          items: ['agentId1', 'agentId2'],
-          total: 2,
-          totalInactive: 0,
-        },
-      });
-
-      const props = {
-        totalAgents: 10,
-        totalInactiveAgents: 0,
+      const results = render({
+        ...defaultProps,
+        totalManagedAgentIds: ['agentId1', 'agentId2'],
         selectionMode: 'query',
-        currentQuery: '(Base query)',
-        selectedAgents,
-        visibleAgents: [],
-        refreshAgents: () => undefined,
-        allTags: [],
-        agentPolicies: [],
-      };
-      const results = render(props);
+      });
 
       const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
-
       await act(async () => {
         fireEvent.click(bulkActionsButton);
       });
@@ -247,6 +168,58 @@ describe('AgentBulkActions', () => {
       expect(
         results.getByText('Request diagnostics for 8 agents').closest('button')!
       ).toBeEnabled();
+      expect(results.getByText('Restart upgrade 8 agents').closest('button')!).toBeEnabled();
+    });
+
+    it('should generate a correct kuery to select agents', async () => {
+      const results = render({
+        ...defaultProps,
+        selectionMode: 'query',
+        currentQuery: '(Base query)',
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      expect(results.getByText('Assign to new policy').closest('button')!).toBeEnabled();
+      await act(async () => {
+        fireEvent.click(results.getByText('Assign to new policy').closest('button')!);
+      });
+
+      expect(jest.mocked(AgentReassignAgentPolicyModal)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agents: '(Base query)',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should generate a correct kuery to select agents with managed agents too', async () => {
+      const results = render({
+        ...defaultProps,
+        totalManagedAgentIds: ['agentId1', 'agentId2'],
+        selectionMode: 'query',
+        currentQuery: '(Base query)',
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      expect(results.getByText('Assign to new policy').closest('button')!).toBeEnabled();
+      await act(async () => {
+        fireEvent.click(results.getByText('Assign to new policy').closest('button')!);
+      });
+
+      expect(jest.mocked(AgentReassignAgentPolicyModal)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agents: '(Base query) AND NOT (fleet-agents.agent.id : ("agentId1" or "agentId2"))',
+        }),
+        expect.anything()
+      );
     });
   });
 });

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { type LDClient, type LDUser, type LDLogLevel } from 'launchdarkly-js-client-sdk';
+import {
+  type LDClient,
+  type LDSingleKindContext,
+  type LDLogLevel,
+} from 'launchdarkly-js-client-sdk';
 
 export interface LaunchDarklyClientConfig {
   client_id: string;
@@ -15,14 +19,6 @@ export interface LaunchDarklyClientConfig {
 export interface LaunchDarklyUserMetadata
   extends Record<string, string | boolean | number | undefined> {
   userId: string;
-  // We are not collecting any of the above, but this is to match the LDUser first-level definition
-  name?: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  avatar?: string;
-  ip?: string;
-  country?: string;
 }
 
 export class LaunchDarklyClient {
@@ -34,19 +30,11 @@ export class LaunchDarklyClient {
   ) {}
 
   public async updateUserMetadata(userMetadata: LaunchDarklyUserMetadata) {
-    const { userId, name, firstName, lastName, email, avatar, ip, country, ...custom } =
-      userMetadata;
-    const launchDarklyUser: LDUser = {
+    const { userId, ...userMetadataWithoutUserId } = userMetadata;
+    const launchDarklyUser: LDSingleKindContext = {
+      ...userMetadataWithoutUserId,
+      kind: 'user',
       key: userId,
-      name,
-      firstName,
-      lastName,
-      email,
-      avatar,
-      ip,
-      country,
-      // This casting is needed because LDUser does not allow `Record<string, undefined>`
-      custom: custom as Record<string, string | boolean | number>,
     };
     if (this.launchDarklyClient) {
       await this.launchDarklyClient.identify(launchDarklyUser);

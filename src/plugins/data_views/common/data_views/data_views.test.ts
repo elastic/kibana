@@ -13,7 +13,7 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import {
   UiSettingsCommon,
-  SavedObjectsClientCommon,
+  PersistenceAPI,
   SavedObject,
   DataViewSpec,
   IDataViewsApiClient,
@@ -60,7 +60,7 @@ const savedObject = {
 describe('IndexPatterns', () => {
   let indexPatterns: DataViewsService;
   let indexPatternsNoAccess: DataViewsService;
-  let savedObjectsClient: SavedObjectsClientCommon;
+  let savedObjectsClient: PersistenceAPI;
   let SOClientGetDelay = 0;
   let apiClient: IDataViewsApiClient;
   const uiSettings = {
@@ -73,7 +73,7 @@ describe('IndexPatterns', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    savedObjectsClient = {} as SavedObjectsClientCommon;
+    savedObjectsClient = {} as PersistenceAPI;
     savedObjectsClient.find = jest.fn(
       () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
     );
@@ -107,7 +107,7 @@ describe('IndexPatterns', () => {
 
     indexPatterns = new DataViewsService({
       uiSettings,
-      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
+      savedObjectsClient: savedObjectsClient as unknown as PersistenceAPI,
       apiClient,
       fieldFormats,
       onNotification: () => {},
@@ -115,11 +115,12 @@ describe('IndexPatterns', () => {
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(true),
       getCanSaveAdvancedSettings: () => Promise.resolve(true),
+      scriptedFieldsEnabled: true,
     });
 
     indexPatternsNoAccess = new DataViewsService({
       uiSettings,
-      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
+      savedObjectsClient: savedObjectsClient as unknown as PersistenceAPI,
       apiClient,
       fieldFormats,
       onNotification: () => {},
@@ -127,6 +128,7 @@ describe('IndexPatterns', () => {
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(false),
       getCanSaveAdvancedSettings: () => Promise.resolve(false),
+      scriptedFieldsEnabled: true,
     });
   });
 
@@ -375,7 +377,7 @@ describe('IndexPatterns', () => {
     expect(savedObjectsClient.find).lastCalledWith({
       fields: ['title'],
       search,
-      searchFields: ['title'],
+      searchFields: ['title', 'name'],
       perPage: size,
     });
   });
@@ -458,6 +460,35 @@ describe('IndexPatterns', () => {
     expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{}"`);
   });
 
+  describe('defaultDataViewExists', () => {
+    beforeEach(() => {
+      indexPatterns.clearCache();
+      jest.clearAllMocks();
+    });
+
+    test('return true if exists', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+
+      expect(await indexPatterns.defaultDataViewExists()).toBe(true);
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(0);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+    });
+
+    test('return false if no default data view found', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+
+      expect(await indexPatterns.defaultDataViewExists()).toBe(false);
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(0);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+    });
+  });
+
   describe('getDefaultDataView', () => {
     beforeEach(() => {
       indexPatterns.clearCache();
@@ -468,8 +499,10 @@ describe('IndexPatterns', () => {
       uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
       savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
       savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+      jest.spyOn(indexPatterns, 'refreshFields');
 
       expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
+      expect(indexPatterns.refreshFields).not.toBeCalled();
       // make sure we're not pulling from cache
       expect(savedObjectsClient.get).toBeCalledTimes(1);
       expect(savedObjectsClient.find).toBeCalledTimes(1);

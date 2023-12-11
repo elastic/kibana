@@ -12,10 +12,11 @@ import { VersionedState, MigrateFunctionsObject } from './types';
 
 export function migrateToLatest<S extends SerializableRecord>(
   migrations: MigrateFunctionsObject,
-  { state, version: oldVersion }: VersionedState
+  { state, version: oldVersion }: VersionedState,
+  loose?: boolean
 ): S {
   const versions = Object.keys(migrations || {})
-    .filter((v) => compare(v, oldVersion) > 0)
+    .filter((v) => compare(v, oldVersion, loose) > 0)
     .sort(compare);
 
   if (!versions.length) return state as S;

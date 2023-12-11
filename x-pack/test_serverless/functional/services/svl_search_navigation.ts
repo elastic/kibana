@@ -12,8 +12,8 @@ export function SvlSearchNavigationServiceProvider({
   getPageObjects,
 }: FtrProviderContext) {
   const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
+  const testSubjects = getService('testSubjects');
 
   return {
     async navigateToLandingPage() {

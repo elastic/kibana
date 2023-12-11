@@ -7,7 +7,6 @@
 
 import React, { Fragment, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import semverGt from 'semver/functions/gt';
 import {
   EuiButtonEmpty,
   EuiDescribedFormGroup,
@@ -61,7 +60,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     indices: unfilteredSnapshotIndices,
     dataStreams: snapshotDataStreams = [],
     includeGlobalState: snapshotIncludeGlobalState,
-    version,
+    versionId,
     featureStates: snapshotIncludeFeatureStates,
   } = snapshotDetails;
 
@@ -647,8 +646,10 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               defaultMessage="Restores the configuration, history, and other data stored in Elasticsearch by a feature such as Elasticsearch security."
             />
 
-            {/* Only display callout if includeFeatureState is enabled and the snapshot was created by ES 7.12+ */}
-            {semverGt(version, '7.12.0') && isFeatureStatesToggleEnabled && (
+            {/* Only display callout if includeFeatureState is enabled and the snapshot was created by ES 7.12+
+            The versionId field represents the build id of the ES version. We check if the current ES version is >7.12
+            by comparing its build id with the build id of ES 7.12, which is 7120099. */}
+            {versionId > 7120099 && isFeatureStatesToggleEnabled && (
               <>
                 <EuiSpacer size="s" />
                 <SystemIndicesOverwrittenCallOut featureStates={restoreSettings?.featureStates} />

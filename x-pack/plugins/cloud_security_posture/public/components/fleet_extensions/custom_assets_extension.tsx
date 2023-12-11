@@ -10,7 +10,7 @@ import { type CustomAssetsAccordionProps, CustomAssetsAccordion } from '@kbn/fle
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
-import { CloudSecurityPolicyTemplate } from '../../../common/types';
+import { CloudSecurityPolicyTemplate } from '../../../common/types_old';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../../common/constants';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { benchmarksNavigation, cloudPosturePages } from '../../common/navigation/constants';
@@ -23,6 +23,16 @@ export const CspCustomAssetsExtension = () => {
     .integration;
 
   const viewsCNVM: CustomAssetsAccordionProps['views'] = [
+    {
+      name: cloudPosturePages.vulnerability_dashboard.name,
+      url: application.getUrlForApp(SECURITY_APP_NAME, {
+        path: cloudPosturePages.vulnerability_dashboard.path,
+      }),
+      description: i18n.translate(
+        'xpack.csp.createPackagePolicy.customAssetsTab.vulnerabilityDashboardViewLabel',
+        { defaultMessage: 'View CNVM Dashboard' }
+      ),
+    },
     {
       name: cloudPosturePages.findings.name,
       url: application.getUrlForApp(SECURITY_APP_NAME, {

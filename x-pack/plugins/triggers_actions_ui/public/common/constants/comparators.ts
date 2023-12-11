@@ -14,6 +14,7 @@ export enum COMPARATORS {
   BETWEEN = 'between',
   LESS_THAN = '<',
   LESS_THAN_OR_EQUALS = '<=',
+  NOT_BETWEEN = 'notBetween',
 }
 
 export const builtInComparators: { [key: string]: Comparator } = {
@@ -56,6 +57,13 @@ export const builtInComparators: { [key: string]: Comparator } = {
       defaultMessage: 'Is between',
     }),
     value: COMPARATORS.BETWEEN,
+    requiredValues: 2,
+  },
+  [COMPARATORS.NOT_BETWEEN]: {
+    text: i18n.translate('xpack.triggersActionsUI.common.constants.comparators.isNotBetweenLabel', {
+      defaultMessage: 'Not between',
+    }),
+    value: COMPARATORS.NOT_BETWEEN,
     requiredValues: 2,
   },
 };

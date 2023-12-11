@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('ensure toolbar popover closes on add', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.switchToEditMode();
       await dashboardAddPanel.clickEditorMenuButton();
@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('add new visualization link', () => {
       before(async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.preserveCrossAppState();
         await PageObjects.dashboard.loadSavedDashboard('few panels');
       });
@@ -93,21 +93,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickTimelion();
         await PageObjects.visualize.saveVisualizationExpectSuccess(
           'timelion visualization from add new link',
-          { redirectToOrigin: true }
-        );
-
-        await retry.try(async () => {
-          const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.eql(originalPanelCount + 1);
-        });
-        await PageObjects.dashboard.waitForRenderComplete();
-      });
-
-      it('adds a markdown visualization via the quick button', async () => {
-        const originalPanelCount = await PageObjects.dashboard.getPanelCount();
-        await dashboardAddPanel.clickMarkdownQuickButton();
-        await PageObjects.visualize.saveVisualizationExpectSuccess(
-          'visualization from markdown quick button',
           { redirectToOrigin: true }
         );
 

@@ -1,0 +1,9 @@
+summary: Set popularity count for field foo.
+value:
+  {
+    "fields": {
+        "foo": {
+            "count": 123
+        }
+    }
+}

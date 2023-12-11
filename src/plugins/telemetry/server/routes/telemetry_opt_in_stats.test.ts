@@ -26,6 +26,7 @@ describe('sendTelemetryOptInStatus', () => {
 
   it('calls fetch with the opt in status returned from the telemetryCollectionManager', async () => {
     const mockConfig = {
+      appendServerlessChannelsSuffix: false,
       sendUsageTo: 'prod' as const,
       newOptInStatus: true,
       currentKibanaVersion: 'mock_kibana_version',
@@ -40,7 +41,7 @@ describe('sendTelemetryOptInStatus', () => {
     expect(fetch).toBeCalledTimes(1);
     expect((fetch as jest.MockedFunction<typeof fetch>).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "https://telemetry.elastic.co/opt_in_status/v2/send",
+        "https://telemetry.elastic.co/v3/send/kibana-opt-in-reports",
         Object {
           "body": "mock_opt_in_hashed_value",
           "headers": Object {
@@ -57,6 +58,7 @@ describe('sendTelemetryOptInStatus', () => {
 
   it('sends to staging endpoint on "sendUsageTo: staging"', async () => {
     const mockConfig = {
+      appendServerlessChannelsSuffix: false,
       sendUsageTo: 'staging' as const,
       newOptInStatus: true,
       currentKibanaVersion: 'mock_kibana_version',
@@ -71,7 +73,7 @@ describe('sendTelemetryOptInStatus', () => {
     expect(fetch).toBeCalledTimes(1);
     expect((fetch as jest.MockedFunction<typeof fetch>).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "https://telemetry-staging.elastic.co/opt_in_status/v2/send",
+        "https://telemetry-staging.elastic.co/v3/send/kibana-opt-in-reports",
         Object {
           "body": "mock_opt_in_hashed_value",
           "headers": Object {

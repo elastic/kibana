@@ -15,10 +15,9 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
-import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
-import { ToolbarPopover } from '../toolbar_popover';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';
 import { ColumnsNumberSetting } from './layout/columns_number_setting';
 import { LegendSizeSettings } from './size/legend_size_settings';
@@ -119,7 +118,7 @@ export interface LegendSettingsPopoverProps {
   /**
    * Button group position
    */
-  groupPosition?: ToolbarButtonProps['groupPosition'];
+  groupPosition?: ToolbarPopoverProps['groupPosition'];
   /**
    * Legend size in pixels
    */

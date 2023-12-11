@@ -1,0 +1,16 @@
+openapi: 3.0.0
+info:
+  title: Osquery Status Schema
+  version: '1'
+paths:
+  /internal/osquery/status:
+    get:
+      summary: Get Osquery installation status
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { }

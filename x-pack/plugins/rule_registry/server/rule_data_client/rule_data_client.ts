@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
+import { errors, TransportResult } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Either, isLeft } from 'fp-ts/lib/Either';
 
@@ -14,6 +14,7 @@ import { Logger } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import { sanitizeBulkErrorResponse } from '@kbn/alerting-plugin/server';
 import {
   RuleDataWriteDisabledError,
   RuleDataWriterInitializationError,
@@ -32,14 +33,15 @@ export interface RuleDataClientConstructorOptions {
   waitUntilReadyForReading: Promise<WaitResult>;
   waitUntilReadyForWriting: Promise<WaitResult>;
   logger: Logger;
+  isUsingDataStreams: boolean;
 }
 
 export type WaitResult = Either<Error, ElasticsearchClient>;
 
 export class RuleDataClient implements IRuleDataClient {
   private _isWriteEnabled: boolean = false;
-  private _writeInitializationError: RuleDataWriterInitializationError | undefined = undefined;
   private _isWriterCacheEnabled: boolean = true;
+  private readonly _isUsingDataStreams: boolean;
 
   // Writers cached by namespace
   private writerCache: Map<string, IRuleDataWriter>;
@@ -49,6 +51,7 @@ export class RuleDataClient implements IRuleDataClient {
   constructor(private readonly options: RuleDataClientConstructorOptions) {
     this.writeEnabled = this.options.isWriteEnabled;
     this.writerCacheEnabled = this.options.isWriterCacheEnabled;
+    this._isUsingDataStreams = this.options.isUsingDataStreams;
     this.writerCache = new Map();
   }
 
@@ -72,14 +75,6 @@ export class RuleDataClient implements IRuleDataClient {
     this._isWriteEnabled = isEnabled;
   }
 
-  private get writeInitializationError(): RuleDataWriterInitializationError | undefined {
-    return this._writeInitializationError;
-  }
-
-  private set writeInitializationError(error: RuleDataWriterInitializationError | undefined) {
-    this._writeInitializationError = error;
-  }
-
   public isWriteEnabled(): boolean {
     return this.writeEnabled;
   }
@@ -90,6 +85,10 @@ export class RuleDataClient implements IRuleDataClient {
 
   private set writerCacheEnabled(isEnabled: boolean) {
     this._isWriterCacheEnabled = isEnabled;
+  }
+
+  public isUsingDataStreams(): boolean {
+    return this._isUsingDataStreams;
   }
 
   public getReader(options: { namespace?: string } = {}): IRuleDataReader {
@@ -118,6 +117,7 @@ export class RuleDataClient implements IRuleDataClient {
             ...request,
             index: indexPattern,
             ignore_unavailable: true,
+            seq_no_primary_term: true,
           })) as unknown as ESSearchResponse<TAlertDoc, TSearchRequest>;
         } catch (err) {
           this.options.logger.error(`Error performing search in RuleDataClient - ${err.message}`);
@@ -173,10 +173,6 @@ export class RuleDataClient implements IRuleDataClient {
 
   private async initializeWriter(namespace: string): Promise<IRuleDataWriter> {
     const isWriteEnabled = () => this.writeEnabled;
-    const turnOffWriteDueToInitializationError = (error: RuleDataWriterInitializationError) => {
-      this.writeEnabled = false;
-      this.writeInitializationError = error;
-    };
 
     const { indexInfo, resourceInstaller } = this.options;
     const alias = indexInfo.getPrimaryAlias(namespace);
@@ -184,18 +180,10 @@ export class RuleDataClient implements IRuleDataClient {
     // Wait until both index and namespace level resources have been installed / updated.
     if (!isWriteEnabled()) {
       this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
-      if (this.writeInitializationError != null) {
-        throw new RuleDataWriteDisabledError({
-          reason: 'error',
-          registrationContext: indexInfo.indexOptions.registrationContext,
-          message: this.writeInitializationError.message,
-        });
-      } else {
-        throw new RuleDataWriteDisabledError({
-          reason: 'config',
-          registrationContext: indexInfo.indexOptions.registrationContext,
-        });
-      }
+      throw new RuleDataWriteDisabledError({
+        reason: 'config',
+        registrationContext: indexInfo.indexOptions.registrationContext,
+      });
     }
 
     try {
@@ -223,9 +211,8 @@ export class RuleDataClient implements IRuleDataClient {
       if (error instanceof RuleDataWriterInitializationError) {
         this.options.logger.error(error);
         this.options.logger.error(
-          `The writer for the Rule Data Client for the ${indexInfo.indexOptions.registrationContext} registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
+          `The writer for the Rule Data Client for the ${indexInfo.indexOptions.registrationContext} registration context was not initialized properly, bulk() cannot continue.`
         );
-        turnOffWriteDueToInitializationError(error);
       }
 
       throw error;
@@ -237,7 +224,7 @@ export class RuleDataClient implements IRuleDataClient {
           if (this.clusterClient) {
             const requestWithDefaultParameters = {
               ...request,
-              require_alias: true,
+              require_alias: !this._isUsingDataStreams,
               index: alias,
             };
 
@@ -245,16 +232,25 @@ export class RuleDataClient implements IRuleDataClient {
               meta: true,
             });
 
-            if (response.body.errors) {
-              const error = new errors.ResponseError(response);
-              this.options.logger.error(error);
+            if (!response.body.errors) {
+              return response;
             }
-            return response;
+
+            // TODO: #160572 - add support for version conflict errors, in case alert was updated
+            // some other way between the time it was fetched and the time it was updated.
+            // Redact part of reason message that echoes back value
+            const sanitizedResponse = sanitizeBulkErrorResponse(response) as TransportResult<
+              estypes.BulkResponse,
+              unknown
+            >;
+            const error = new errors.ResponseError(sanitizedResponse);
+            this.options.logger.error(error);
+            return sanitizedResponse;
           } else {
             this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
           }
         } catch (error) {
-          this.options.logger.error(error);
+          this.options.logger.error(`error writing to index: ${error.message}`, error);
           throw error;
         }
       },

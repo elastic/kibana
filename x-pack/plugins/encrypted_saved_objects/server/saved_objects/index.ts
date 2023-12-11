@@ -21,9 +21,9 @@ import type {
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { EncryptedSavedObjectsService } from '../crypto';
 import { getDescriptorNamespace, normalizeNamespace } from './get_descriptor_namespace';
 import { SavedObjectsEncryptionExtension } from './saved_objects_encryption_extension';
+import type { EncryptedSavedObjectsService } from '../crypto';
 
 export { normalizeNamespace };
 
@@ -118,7 +118,7 @@ export function setupSavedObjects({
             {
               type,
               id,
-              namespace: getDescriptorNamespace(typeRegistry, type, options?.namespace),
+              namespace: getDescriptorNamespace(typeRegistry, type, savedObject.namespaces),
             },
             savedObject.attributes as Record<string, unknown>
           )) as T,
@@ -148,7 +148,7 @@ export function setupSavedObjects({
                   namespace: getDescriptorNamespace(
                     typeRegistry,
                     savedObject.type,
-                    findOptions.namespaces
+                    savedObject.namespaces
                   ),
                 };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosHeaders, AxiosInstance, AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
 import { addTimeZoneToDate, getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
@@ -42,13 +42,21 @@ const createErrorMessage = (errorResponse?: ServiceNowError): string => {
     : 'unknown: no error in error response';
 };
 
-export const createServiceError = (error: ResponseError, message: string) =>
-  new Error(
+export const createServiceError = (error: ResponseError, message: string): AxiosError => {
+  const serviceError = new AxiosError(
     getErrorMessage(
       i18n.SERVICENOW,
       `${message}. Error: ${error.message} Reason: ${createErrorMessage(error.response?.data)}`
     )
   );
+
+  serviceError.code = error.code;
+  serviceError.config = error.config;
+  serviceError.request = error.request;
+  serviceError.response = error.response;
+
+  return serviceError;
+};
 
 export const getPushedDate = (timestamp?: string) => {
   if (timestamp != null) {
@@ -112,7 +120,7 @@ export const getAxiosInstance = ({
   } else {
     axiosInstance = axios.create();
     axiosInstance.interceptors.request.use(
-      async (axiosConfig: AxiosRequestConfig) => {
+      async (axiosConfig) => {
         const accessToken = await getOAuthJwtAccessToken({
           connectorId,
           logger,
@@ -137,7 +145,10 @@ export const getAxiosInstance = ({
         if (!accessToken) {
           throw new Error(`Unable to retrieve access token for connectorId: ${connectorId}`);
         }
-        axiosConfig.headers = { ...axiosConfig.headers, Authorization: accessToken };
+        axiosConfig.headers = new AxiosHeaders({
+          ...axiosConfig.headers,
+          Authorization: accessToken,
+        });
         return axiosConfig;
       },
       (error) => {

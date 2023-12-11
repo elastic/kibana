@@ -11,6 +11,7 @@ import { head } from 'lodash/fp';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { DefaultFieldRenderer } from '../../field_renderers/field_renderers';
 import type {
   ManagedUsersTableColumns,
@@ -27,18 +28,19 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
+import { getSourcererScopeId } from '../../../../helpers';
 
 const fieldColumn: EuiBasicTableColumn<ObservedUserTable | ManagedUserTable> = {
   name: i18n.FIELD_COLUMN_TITLE,
   field: 'label',
-  render: (label: string) => (
+  render: (label: string, { field }) => (
     <span
       css={css`
         font-weight: ${euiLightVars.euiFontWeightMedium};
         color: ${euiLightVars.euiTitleColor};
       `}
     >
-      {label}
+      {label ?? field}
     </span>
   ),
 };
@@ -54,10 +56,11 @@ export const getManagedUserTableColumns = (
     render: (value: ManagedUserTable['value'], { field }) => {
       return field && value ? (
         <DefaultFieldRenderer
-          rowItems={[value]}
+          rowItems={value.map((v) => value.toString())}
           attrName={field}
           idPrefix={contextID ? `managedUser-${contextID}` : 'managedUser'}
           isDraggable={isDraggable}
+          sourcererScopeId={SourcererScopeName.default}
         />
       ) : (
         defaultToEmptyTag(value)
@@ -75,6 +78,7 @@ function isAnomalies(
 
 export const getObservedUserTableColumns = (
   contextID: string,
+  scopeId: string,
   isDraggable: boolean
 ): ObservedUsersTableColumns => [
   fieldColumn,
@@ -96,6 +100,7 @@ export const getObservedUserTableColumns = (
           attrName={field}
           idPrefix={contextID ? `observedUser-${contextID}` : 'observedUser'}
           isDraggable={isDraggable}
+          sourcererScopeId={getSourcererScopeId(scopeId)}
         />
       );
     },

@@ -21,6 +21,7 @@ import {
 
 export const getListItemResponseMock = (): ListItemSchema => ({
   _version: undefined,
+  '@timestamp': DATE_NOW,
   created_at: DATE_NOW,
   created_by: USER,
   deserializer: undefined,

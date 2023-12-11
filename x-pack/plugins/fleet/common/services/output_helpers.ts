@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-import type { AgentPolicy } from '../types';
-import { FLEET_APM_PACKAGE, FLEET_SERVER_PACKAGE, outputType } from '../constants';
+import { isObject } from 'lodash';
+
+import { getFlattenedObject } from '@kbn/std';
+
+import type { AgentPolicy, OutputType, ValueOf } from '../types';
+import {
+  FLEET_APM_PACKAGE,
+  FLEET_SERVER_PACKAGE,
+  FLEET_SYNTHETICS_PACKAGE,
+  outputType,
+  OUTPUT_TYPES_WITH_PRESET_SUPPORT,
+  RESERVED_CONFIG_YML_KEYS,
+} from '../constants';
 
 /**
  * Return allowed output type for a given agent policy,
@@ -16,7 +27,10 @@ export function getAllowedOutputTypeForPolicy(agentPolicy: AgentPolicy) {
   const isRestrictedToSameClusterES =
     agentPolicy.package_policies &&
     agentPolicy.package_policies.some(
-      (p) => p.package?.name === FLEET_APM_PACKAGE || p.package?.name === FLEET_SERVER_PACKAGE
+      (p) =>
+        p.package?.name === FLEET_APM_PACKAGE ||
+        p.package?.name === FLEET_SERVER_PACKAGE ||
+        p.package?.name === FLEET_SYNTHETICS_PACKAGE
     );
 
   if (isRestrictedToSameClusterES) {
@@ -24,4 +38,39 @@ export function getAllowedOutputTypeForPolicy(agentPolicy: AgentPolicy) {
   }
 
   return Object.values(outputType);
+}
+
+export function outputYmlIncludesReservedPerformanceKey(
+  configYml: string,
+  // Dependency injection for `safeLoad` prevents bundle size issues 🤷‍♀️
+  safeLoad: (yml: string) => any
+) {
+  if (!configYml || configYml === '') {
+    return false;
+  }
+
+  const parsedYml = safeLoad(configYml);
+
+  if (!isObject(parsedYml)) {
+    return RESERVED_CONFIG_YML_KEYS.some((key) => parsedYml.includes(key));
+  }
+
+  const flattenedYml = isObject(parsedYml) ? getFlattenedObject(parsedYml) : {};
+
+  return RESERVED_CONFIG_YML_KEYS.some((key) => Object.keys(flattenedYml).includes(key));
+}
+
+export function getDefaultPresetForEsOutput(
+  configYaml: string,
+  safeLoad: (yml: string) => any
+): 'balanced' | 'custom' {
+  if (outputYmlIncludesReservedPerformanceKey(configYaml, safeLoad)) {
+    return 'custom';
+  }
+
+  return 'balanced';
+}
+
+export function outputTypeSupportPresets(type: ValueOf<OutputType>) {
+  return OUTPUT_TYPES_WITH_PRESET_SUPPORT.includes(type);
 }

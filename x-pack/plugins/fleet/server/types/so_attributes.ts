@@ -13,6 +13,10 @@ import type {
   AgentMetadata,
   OutputType,
   ShipperOutput,
+  KafkaAcknowledgeReliabilityLevel,
+  KafkaConnectionTypeType,
+  AgentUpgradeDetails,
+  OutputPreset,
 } from '../../common/types';
 import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
@@ -23,6 +27,12 @@ import type {
   PackagePolicyConfigRecord,
 } from '../../common/types/models/package_policy';
 import type { PolicySecretReference } from '../../common/types/models/secret';
+import type { KafkaAuthType, KafkaCompressionType } from '../../common/types';
+import type {
+  KafkaPartitionType,
+  KafkaSaslMechanism,
+  KafkaTopicWhenType,
+} from '../../common/types';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -52,6 +62,7 @@ export interface AgentPolicySOAttributes {
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
   agents?: number;
+  overrides?: any | null;
 }
 
 export interface AgentSOAttributes {
@@ -64,6 +75,7 @@ export interface AgentSOAttributes {
   unenrollment_started_at?: string;
   upgraded_at?: string | null;
   upgrade_started_at?: string | null;
+  upgrade_details?: AgentUpgradeDetails;
   access_api_key_id?: string;
   default_api_key?: string;
   default_api_key_id?: string;
@@ -119,11 +131,10 @@ export interface PackagePolicySOAttributes {
   agents?: number;
 }
 
-export interface OutputSOAttributes {
+interface OutputSoBaseAttributes {
   is_default: boolean;
   is_default_monitoring: boolean;
   name: string;
-  type: ValueOf<OutputType>;
   hosts?: string[];
   ca_sha256?: string | null;
   ca_trusted_fingerprint?: string | null;
@@ -134,10 +145,99 @@ export interface OutputSOAttributes {
   allow_edit?: string[];
   output_id?: string;
   ssl?: string | null; // encrypted ssl field
+  preset?: OutputPreset;
 }
 
+interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
+  type: OutputType['Elasticsearch'];
+  secrets?: {};
+}
+
+export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttributes {
+  type: OutputType['RemoteElasticsearch'];
+  service_token?: string;
+  secrets?: {
+    service_token?: { id: string };
+  };
+}
+
+interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
+  type: OutputType['Logstash'];
+  secrets?: {
+    ssl?: {
+      key?: { id: string };
+    };
+  };
+}
+
+export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
+  type: OutputType['Kafka'];
+  client_id?: string;
+  version?: string;
+  key?: string;
+  compression?: ValueOf<KafkaCompressionType>;
+  compression_level?: number;
+  auth_type?: ValueOf<KafkaAuthType>;
+  connection_type?: ValueOf<KafkaConnectionTypeType>;
+  username?: string;
+  password?: string;
+  sasl?: {
+    mechanism?: ValueOf<KafkaSaslMechanism>;
+  };
+  partition?: ValueOf<KafkaPartitionType>;
+  random?: {
+    group_events?: number;
+  };
+  round_robin?: {
+    group_events?: number;
+  };
+  hash?: {
+    hash?: string;
+    random?: boolean;
+  };
+  topics?: Array<{
+    topic: string;
+    when?: {
+      type?: ValueOf<KafkaTopicWhenType>;
+      condition?: string;
+    };
+  }>;
+  headers?: Array<{
+    key: string;
+    value: string;
+  }>;
+  timeout?: number;
+  broker_timeout?: number;
+  required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
+  secrets?: {
+    password?: { id: string };
+    ssl?: {
+      key?: { id: string };
+    };
+  };
+}
+
+export type OutputSOAttributes =
+  | OutputSoElasticsearchAttributes
+  | OutputSoRemoteElasticsearchAttributes
+  | OutputSoLogstashAttributes
+  | OutputSoKafkaAttributes;
+
 export interface SettingsSOAttributes {
+  prerelease_integrations_enabled: boolean;
   has_seen_add_data_notice?: boolean;
   fleet_server_hosts?: string[];
-  prerelease_integrations_enabled: boolean;
+  secret_storage_requirements_met?: boolean;
+}
+
+export interface DownloadSourceSOAttributes {
+  name: string;
+  host: string;
+  is_default: boolean;
+  source_id?: string;
+  proxy_id?: string | null;
+}
+export interface SimpleSOAssetAttributes {
+  title?: string;
+  description?: string;
 }

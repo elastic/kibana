@@ -9,6 +9,9 @@
     "configPath": [
       "usageCollection"
     ],
+    "requiredPlugins": [
+      "screenshotMode"
+    ],
     "requiredBundles": [
       "kibanaUtils"
     ]

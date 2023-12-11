@@ -29,6 +29,8 @@ import {
   IAlertsClient,
   InitializeExecutionOpts,
   ProcessAndLogAlertsOpts,
+  ProcessAlertsOpts,
+  LogAlertsOpts,
   TrackedAlerts,
 } from './types';
 import { DEFAULT_MAX_ALERTS } from '../config';
@@ -44,11 +46,12 @@ export class LegacyAlertsClient<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
-> implements IAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>
+> implements IAlertsClient<{}, State, Context, ActionGroupIds, RecoveryActionGroupId>
 {
   private maxAlerts: number = DEFAULT_MAX_ALERTS;
   private flappingSettings: RulesSettingsFlappingProperties = DEFAULT_FLAPPING_SETTINGS;
   private ruleLogPrefix: string = '';
+  private startedAtString: string | null = null;
 
   // Alerts from the previous execution that are deserialized from the task state
   private trackedAlerts: TrackedAlerts<State, Context> = {
@@ -86,6 +89,7 @@ export class LegacyAlertsClient<
   public async initializeExecution({
     maxAlerts,
     ruleLabel,
+    startedAt,
     flappingSettings,
     activeAlertsFromState,
     recoveredAlertsFromState,
@@ -93,6 +97,7 @@ export class LegacyAlertsClient<
     this.maxAlerts = maxAlerts;
     this.flappingSettings = flappingSettings;
     this.ruleLogPrefix = ruleLabel;
+    this.startedAtString = startedAt ? startedAt.toISOString() : null;
 
     for (const id of keys(activeAlertsFromState)) {
       this.trackedAlerts.active[id] = new Alert<State, Context>(id, activeAlertsFromState[id]);
@@ -127,14 +132,15 @@ export class LegacyAlertsClient<
     return this.trackedAlerts;
   }
 
-  public processAndLogAlerts({
-    eventLogger,
-    ruleRunMetricsStore,
-    shouldLogAlerts,
+  public getAlert(id: string) {
+    return this.alertFactory?.get(id);
+  }
+
+  public processAlerts({
+    notifyOnActionGroupChange,
     flappingSettings,
-    notifyWhen,
     maintenanceWindowIds,
-  }: ProcessAndLogAlertsOpts) {
+  }: ProcessAlertsOpts) {
     const {
       newAlerts: processedAlertsNew,
       activeAlerts: processedAlertsActive,
@@ -149,6 +155,7 @@ export class LegacyAlertsClient<
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       flappingSettings,
       maintenanceWindowIds,
+      startedAt: this.startedAtString,
     });
 
     const { trimmedAlertsRecovered, earlyRecoveredAlerts } = trimRecoveredAlerts(
@@ -159,7 +166,7 @@ export class LegacyAlertsClient<
 
     const alerts = getAlertsForNotification<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       flappingSettings,
-      notifyWhen,
+      notifyOnActionGroupChange,
       this.options.ruleType.defaultActionGroupId,
       processedAlertsNew,
       processedAlertsActive,
@@ -173,17 +180,40 @@ export class LegacyAlertsClient<
     this.processedAlerts.activeCurrent = alerts.currentActiveAlerts;
     this.processedAlerts.recovered = alerts.recoveredAlerts;
     this.processedAlerts.recoveredCurrent = alerts.currentRecoveredAlerts;
+  }
 
+  public logAlerts({ eventLogger, ruleRunMetricsStore, shouldLogAlerts }: LogAlertsOpts) {
     logAlerts({
       logger: this.options.logger,
       alertingEventLogger: eventLogger,
-      newAlerts: alerts.newAlerts,
-      activeAlerts: alerts.currentActiveAlerts,
-      recoveredAlerts: alerts.currentRecoveredAlerts,
+      newAlerts: this.processedAlerts.new,
+      activeAlerts: this.processedAlerts.activeCurrent,
+      recoveredAlerts: this.processedAlerts.recoveredCurrent,
       ruleLogPrefix: this.ruleLogPrefix,
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAlerts,
+    });
+  }
+
+  public processAndLogAlerts({
+    eventLogger,
+    ruleRunMetricsStore,
+    shouldLogAlerts,
+    flappingSettings,
+    notifyOnActionGroupChange,
+    maintenanceWindowIds,
+  }: ProcessAndLogAlertsOpts) {
+    this.processAlerts({
+      notifyOnActionGroupChange,
+      flappingSettings,
+      maintenanceWindowIds,
+    });
+
+    this.logAlerts({
+      eventLogger,
+      ruleRunMetricsStore,
+      shouldLogAlerts,
     });
   }
 
@@ -197,9 +227,13 @@ export class LegacyAlertsClient<
     return {};
   }
 
-  public async getAlertsToSerialize(shouldSetFlapping: boolean = true) {
+  public getAlertsToSerialize(shouldSetFlapping: boolean = true) {
     if (shouldSetFlapping) {
-      this.setFlapping();
+      setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+        this.flappingSettings,
+        this.processedAlerts.active,
+        this.processedAlerts.recovered
+      );
     }
     return determineAlertsToReturn<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       this.processedAlerts.active,
@@ -215,15 +249,17 @@ export class LegacyAlertsClient<
     return this.alertFactory!.alertLimit.checkLimitUsage();
   }
 
-  public getExecutorServices() {
+  public factory() {
     return getPublicAlertFactory(this.alertFactory!);
   }
 
-  public setFlapping() {
-    setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-      this.flappingSettings,
-      this.processedAlerts.active,
-      this.processedAlerts.recovered
-    );
+  public client() {
+    return null;
+  }
+
+  public async persistAlerts() {}
+
+  public async setAlertStatusToUntracked() {
+    return;
   }
 }

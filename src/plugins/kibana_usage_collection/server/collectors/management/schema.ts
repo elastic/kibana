@@ -18,6 +18,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:alertTags': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
   'securitySolution:newsFeedUrl': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -103,6 +107,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:enableNewsFeed': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enableExpandableFlyout': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:excludeColdAndFrozenTiersInAnalyzer': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -481,7 +493,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'labs:dashboard:dashboardControls': {
+  'labs:dashboard:linksPanel': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -493,7 +505,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'discover:enableSql': {
+  'discover:enableESQL': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -541,6 +553,26 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmEnableProfilingIntegration': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingPerVCPUWattX86': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingPervCPUWattArm64': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingCo2PerKWH': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingDatacenterPUE': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:apmEnableCriticalPath': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -559,6 +591,22 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'visualization:visualize:legacyGaugeChartsLibrary': {
     type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableLegacyUptimeApp': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingUseLegacyCo2Calculation': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingCostPervCPUPerHour': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingAWSCostDiscountRate': {
+    type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
 };

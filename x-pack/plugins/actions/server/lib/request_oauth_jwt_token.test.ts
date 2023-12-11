@@ -75,6 +75,7 @@ describe('requestOAuthJWTToken', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },
@@ -124,7 +125,7 @@ describe('requestOAuthJWTToken', () => {
 
     expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "error thrown getting the access token from https://test for params: {\\"assertion\\":\\"someJWTvalueishere\\",\\"scope\\":\\"test\\",\\"client_id\\":\\"client-id-1\\",\\"client_secret\\":\\"some-client-secret\\"}: {\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter 'scope' is not valid.\\"}",
+        "error thrown getting the access token from https://test: {\\"error\\":\\"invalid_scope\\",\\"error_description\\":\\"AADSTS70011: The provided value for the input parameter 'scope' is not valid.\\"}",
       ]
     `);
   });

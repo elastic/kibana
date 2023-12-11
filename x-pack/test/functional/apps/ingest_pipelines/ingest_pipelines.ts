@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { IngestDeletePipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import expect from '@kbn/expect';
-import path from 'path';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const TEST_PIPELINE_NAME = 'test_pipeline';
+
 const PIPELINE = {
-  name: 'test_pipeline',
+  name: TEST_PIPELINE_NAME,
   description: 'My pipeline description.',
   version: 1,
 };
 
 const PIPELINE_CSV = {
-  name: 'test_pipeline',
+  name: TEST_PIPELINE_NAME,
 };
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -26,27 +27,66 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
   const security = getService('security');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/157511
-  describe.skip('Ingest Pipelines', function () {
+  describe('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
       await security.testUser.setRoles(['ingest_pipelines_user']);
-      // Delete all existing pipelines
-      await es.ingest.deletePipeline({ id: '*' } as IngestDeletePipelineRequest);
+    });
+    beforeEach(async () => {
       await pageObjects.common.navigateToApp('ingestPipelines');
+    });
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('Loads the app', async () => {
       log.debug('Checking for section heading to say Ingest Pipelines.');
 
-      const headingText = await pageObjects.ingestPipelines.emptyStateHeaderText();
-      expect(headingText).to.be('Start by creating a pipeline');
+      const headingText = await pageObjects.ingestPipelines.sectionHeadingText();
+      expect(headingText).to.be('Ingest Pipelines');
     });
 
-    describe('create pipeline', () => {
+    describe('Pipelines list', () => {
+      before(async () => {
+        // Create a test pipeline
+        await es.ingest.putPipeline({
+          id: TEST_PIPELINE_NAME,
+          body: { processors: [] },
+        } as IngestPutPipelineRequest);
+      });
+
+      after(async () => {
+        // Delete the test pipeline
+        await es.ingest.deletePipeline({ id: TEST_PIPELINE_NAME });
+      });
+
+      it('Displays the test pipeline in the list of pipelines', async () => {
+        log.debug('Checking that the test pipeline is in the pipelines list.');
+        await pageObjects.ingestPipelines.increasePipelineListPageSize();
+        const pipelines = await pageObjects.ingestPipelines.getPipelinesList();
+        expect(pipelines).to.contain(TEST_PIPELINE_NAME);
+      });
+
+      it('Opens the details flyout', async () => {
+        log.debug('Clicking the first pipeline in the list.');
+
+        await pageObjects.ingestPipelines.clickPipelineLink(0);
+        const flyoutExists = await pageObjects.ingestPipelines.detailsFlyoutExists();
+        expect(flyoutExists).to.be(true);
+      });
+    });
+
+    describe('Create pipeline', () => {
+      afterEach(async () => {
+        // Delete the pipeline that was created
+        await es.ingest.deletePipeline({ id: TEST_PIPELINE_NAME });
+      });
+
       it('Creates a pipeline', async () => {
         await pageObjects.ingestPipelines.createNewPipeline(PIPELINE);
 
+        await pageObjects.ingestPipelines.closePipelineDetailsFlyout();
+        await pageObjects.ingestPipelines.increasePipelineListPageSize();
         const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
         const newPipelineExists = Boolean(
           pipelinesList.find((pipelineName) => pipelineName === PIPELINE.name)
@@ -56,28 +96,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Creates a pipeline from CSV', async () => {
-        await pageObjects.ingestPipelines.navigateToCreateFromCsv();
-
-        await pageObjects.common.setFileInputPath(
-          path.join(__dirname, 'exports', 'example_mapping.csv')
-        );
-
         await pageObjects.ingestPipelines.createPipelineFromCsv(PIPELINE_CSV);
 
+        await pageObjects.ingestPipelines.closePipelineDetailsFlyout();
+        await pageObjects.ingestPipelines.increasePipelineListPageSize();
         const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
         const newPipelineExists = Boolean(
           pipelinesList.find((pipelineName) => pipelineName === PIPELINE.name)
         );
 
         expect(newPipelineExists).to.be(true);
-      });
-
-      afterEach(async () => {
-        // Close details flyout
-        await pageObjects.ingestPipelines.closePipelineDetailsFlyout();
-        // Delete the pipeline that was created
-        await es.ingest.deletePipeline({ id: PIPELINE.name });
-        await security.testUser.restoreDefaults();
       });
     });
   });

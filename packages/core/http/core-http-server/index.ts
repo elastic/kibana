@@ -136,8 +136,11 @@ export type {
   VersionedRouteRequestValidation,
   VersionedRouteResponseValidation,
   ApiVersion,
+  FullValidationConfig,
   VersionedRoute,
   VersionedRouteConfig,
   VersionedRouteRegistrar,
   VersionedRouter,
 } from './src/versioning';
+
+export type { IStaticAssets } from './src/static_assets';

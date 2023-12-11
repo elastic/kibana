@@ -11,7 +11,8 @@ import { getCasesWebhookConnectorType } from './cases_webhook';
 import { getEmailConnectorType } from './email';
 import { getIndexConnectorType } from './es_index';
 import { getJiraConnectorType } from './jira';
-import { getGenerativeAiConnectorType } from './gen_ai';
+import { getOpenAIConnectorType } from './openai';
+import { getBedrockConnectorType } from './bedrock';
 import { getOpsgenieConnectorType } from './opsgenie';
 import { getPagerDutyConnectorType } from './pagerduty';
 import { getResilientConnectorType } from './resilient';
@@ -27,6 +28,9 @@ import { getTinesConnectorType } from './tines';
 import { getTorqConnectorType } from './torq';
 import { getWebhookConnectorType } from './webhook';
 import { getXmattersConnectorType } from './xmatters';
+import { getD3SecurityConnectorType } from './d3security';
+import { ExperimentalFeaturesService } from '../common/experimental_features_service';
+import { getSentinelOneConnectorType } from './sentinelone';
 
 export interface RegistrationServices {
   validateEmailAddresses: (
@@ -58,8 +62,14 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getJiraConnectorType());
   connectorTypeRegistry.register(getResilientConnectorType());
   connectorTypeRegistry.register(getOpsgenieConnectorType());
-  connectorTypeRegistry.register(getGenerativeAiConnectorType());
+  connectorTypeRegistry.register(getOpenAIConnectorType());
+  connectorTypeRegistry.register(getBedrockConnectorType());
   connectorTypeRegistry.register(getTeamsConnectorType());
   connectorTypeRegistry.register(getTorqConnectorType());
   connectorTypeRegistry.register(getTinesConnectorType());
+  connectorTypeRegistry.register(getD3SecurityConnectorType());
+
+  if (ExperimentalFeaturesService.get().sentinelOneConnectorOn) {
+    connectorTypeRegistry.register(getSentinelOneConnectorType());
+  }
 }

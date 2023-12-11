@@ -14,10 +14,10 @@ import { BehaviorSubject } from 'rxjs';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import type { SecurityLicenseFeatures } from '../../../common/licensing';
+import { defineSecurityCheckupGetStateRoutes } from './get_state';
+import type { SecurityLicenseFeatures } from '../../../common';
 import { licenseMock } from '../../../common/licensing/index.mock';
 import { routeDefinitionParamsMock, securityRequestHandlerContextMock } from '../index.mock';
-import { defineSecurityCheckupGetStateRoutes } from './get_state';
 
 interface SetupParams {
   showInsecureClusterWarning: boolean;

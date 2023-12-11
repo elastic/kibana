@@ -10,7 +10,7 @@ import { EuiTitle, EuiSpacer, EuiPanel, EuiInMemoryTable, EuiSkeletonText } from
 import styled, { css } from 'styled-components';
 
 import * as i18n from './translations';
-import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/detection_engine/rule_exceptions';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/api/detection_engine/rule_exceptions';
 import { getSharedListsTableColumns } from '../utils';
 
 interface ExceptionsLinkedToListComponentProps {

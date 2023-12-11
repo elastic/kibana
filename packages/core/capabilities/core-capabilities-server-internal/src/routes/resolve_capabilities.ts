@@ -39,7 +39,12 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
     async (ctx, req, res) => {
       const { useDefaultCapabilities } = req.query;
       const { applications } = req.body;
-      const capabilities = await resolver(req, applications, useDefaultCapabilities);
+      const capabilities = await resolver({
+        request: req,
+        applications,
+        useDefaultCapabilities,
+        capabilityPath: ['*'],
+      });
       return res.ok({
         body: capabilities,
       });

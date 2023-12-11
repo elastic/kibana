@@ -40,7 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when('Service map', { config: 'trial', archives: [] }, () => {
+  registry.when('Service Map', { config: 'trial', archives: [] }, () => {
     describe('optional kuery param', () => {
       before(async () => {
         const events = timerange(start, end)

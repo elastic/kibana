@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+
 import { EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { createCapabilityFailureMessage } from '../../../../lib/authorization';
+
+import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 
 interface CreateAlertRuleActionProps {
   disabled: boolean;

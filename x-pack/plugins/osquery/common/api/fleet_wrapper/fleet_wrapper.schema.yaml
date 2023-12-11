@@ -1,0 +1,70 @@
+openapi: 3.0.0
+info:
+  title: Fleet wrapper schema
+  version: '1'
+paths:
+  /internal/osquery/fleet_wrapper/agents:
+    get:
+      summary: Get agents
+      parameters:
+          - $ref: './get_agents.schema.yaml#/components/parameters/GetAgentsRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './get_agents.schema.yaml#/components/schemas/SuccessResponse'
+
+  /internal/osquery/fleet_wrapper/agents/{id}:
+    get:
+      summary: Get Agent details
+      parameters:
+          - $ref: './get_agent_details.schema.yaml#/components/parameters/GetAgentDetailsRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './get_agent_details.schema.yaml#/components/schemas/SuccessResponse'
+
+  /internal/osquery/fleet_wrapper/agent_policies:
+    get:
+      summary: Get Agent policies
+      parameters:
+          - $ref: './get_agent_policies.schema.yaml#/components/parameters/GetAgentPoliciesRequestParameter'
+          - $ref: './get_agent_policies.schema.yaml#/components/parameters/GetAgentPoliciesRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './get_agent_policies.schema.yaml#/components/schemas/SuccessResponse'
+
+  /internal/osquery/fleet_wrapper/agent_policies/{id}:
+    get:
+      summary: Get Agent policy
+      parameters:
+          - $ref: './get_agent_policy.schema.yaml#/components/parameters/GetAgentPolicyRequestParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './get_agent_policy.schema.yaml#/components/schemas/SuccessResponse'
+
+  /internal/osquery/fleet_wrapper/package_policies:
+    get:
+      summary: Get Agent policy
+      parameters:
+          - $ref: './get_package_policies.schema.yaml#/components/parameters/GetPackagePoliciesRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './get_package_policies.schema.yaml#/components/schemas/SuccessResponse'

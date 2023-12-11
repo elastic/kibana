@@ -8,4 +8,4 @@
 
 import { UiSettingsPlugin } from './plugin';
 
-export const plugin = () => new UiSettingsPlugin();
+export const plugin = async () => new UiSettingsPlugin();

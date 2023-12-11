@@ -30,7 +30,6 @@ export const AlertsTableSandbox = ({ triggersActionsUi }: SandboxProps) => {
         filter: [],
       },
     },
-    showExpandToDetails: true,
   };
 
   return <AlertsTable {...alertStateProps} />;

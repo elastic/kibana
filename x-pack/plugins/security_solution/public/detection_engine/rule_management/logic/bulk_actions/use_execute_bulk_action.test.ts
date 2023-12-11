@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useBulkActionMutation } from '../../api/hooks/use_bulk_action_mutation';
@@ -61,7 +61,7 @@ describe('useExecuteBulkAction', () => {
 
   it('executes bulk action', async () => {
     const bulkAction = {
-      type: BulkActionType.enable,
+      type: BulkActionTypeEnum.enable,
       query: 'some query',
     } as const;
 
@@ -73,7 +73,7 @@ describe('useExecuteBulkAction', () => {
   describe('state handlers', () => {
     it('shows success toast upon completion', async () => {
       await executeBulkAction({
-        type: BulkActionType.enable,
+        type: BulkActionTypeEnum.enable,
         ids: ['ruleId1'],
       });
 
@@ -84,7 +84,7 @@ describe('useExecuteBulkAction', () => {
     it('does not shows success toast upon completion if suppressed', async () => {
       await executeBulkAction(
         {
-          type: BulkActionType.enable,
+          type: BulkActionTypeEnum.enable,
           ids: ['ruleId1'],
         },
         { suppressSuccessToast: true }
@@ -100,7 +100,7 @@ describe('useExecuteBulkAction', () => {
       });
 
       await executeBulkAction({
-        type: BulkActionType.enable,
+        type: BulkActionTypeEnum.enable,
         ids: ['ruleId1'],
       });
 
@@ -126,31 +126,31 @@ describe('useExecuteBulkAction', () => {
 
     it('sets the loading state before execution', async () => {
       await executeBulkAction({
-        type: BulkActionType.enable,
+        type: BulkActionTypeEnum.enable,
         ids: ['ruleId1', 'ruleId2'],
       });
 
       expect(setLoadingRules).toHaveBeenCalledWith({
         ids: ['ruleId1', 'ruleId2'],
-        action: BulkActionType.enable,
+        action: BulkActionTypeEnum.enable,
       });
     });
 
     it('sets the empty loading state before execution when query is set', async () => {
       await executeBulkAction({
-        type: BulkActionType.enable,
+        type: BulkActionTypeEnum.enable,
         query: 'some query',
       });
 
       expect(setLoadingRules).toHaveBeenCalledWith({
         ids: [],
-        action: BulkActionType.enable,
+        action: BulkActionTypeEnum.enable,
       });
     });
 
     it('clears loading state for the processing rules after execution', async () => {
       await executeBulkAction({
-        type: BulkActionType.enable,
+        type: BulkActionTypeEnum.enable,
         ids: ['ruleId1', 'ruleId2'],
       });
 
@@ -163,7 +163,7 @@ describe('useExecuteBulkAction', () => {
       });
 
       await executeBulkAction({
-        type: BulkActionType.enable,
+        type: BulkActionTypeEnum.enable,
         ids: ['ruleId1', 'ruleId2'],
       });
 
@@ -174,7 +174,7 @@ describe('useExecuteBulkAction', () => {
   describe('telemetry', () => {
     it('sends for enable action', async () => {
       await executeBulkAction({
-        type: BulkActionType.enable,
+        type: BulkActionTypeEnum.enable,
         query: 'some query',
       });
 
@@ -184,7 +184,7 @@ describe('useExecuteBulkAction', () => {
 
     it('sends for disable action', async () => {
       await executeBulkAction({
-        type: BulkActionType.disable,
+        type: BulkActionTypeEnum.disable,
         query: 'some query',
       });
 

@@ -19,7 +19,7 @@ export function registerSearchRoute({
 }) {
   router.post(
     {
-      path: '/api/graph/searchProxy',
+      path: '/internal/graph/searchProxy',
       validate: {
         body: schema.object({
           index: schema.string(),

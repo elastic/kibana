@@ -53,18 +53,18 @@ interface LoadActionsOptions {
  * Groups getActions calls for an array of contexts in one async bulk operation
  */
 export const useBulkLoadActions = (
-  contexts: CellActionCompatibilityContext[],
+  contexts: CellActionCompatibilityContext[] | undefined,
   options: LoadActionsOptions = {}
 ): AsyncActions<CellAction[][]> => {
   const { getActions } = useCellActionsContext();
   const { error, ...actionsState } = useAsync(
     () =>
       Promise.all(
-        contexts.map((context) =>
+        contexts?.map((context) =>
           getActions(context).then(
             (actions) => filteredActions(actions, options.disabledActionTypes) ?? []
           )
-        )
+        ) ?? []
       ),
     [contexts]
   );

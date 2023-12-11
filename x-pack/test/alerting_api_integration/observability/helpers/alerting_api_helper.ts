@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { InfraRuleType, InfraRuleTypeParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import type { SuperTest, Test } from 'supertest';
+import expect from '@kbn/expect';
+import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 
 export async function createIndexConnector({
   supertest,
@@ -31,34 +32,41 @@ export async function createIndexConnector({
   return body.id as string;
 }
 
-export async function createMetricThresholdRule<T extends InfraRuleType>({
+export async function createRule<Params = ThresholdParams>({
   supertest,
   name,
   ruleTypeId,
   params,
   actions = [],
+  tags = [],
   schedule,
+  consumer,
 }: {
   supertest: SuperTest<Test>;
-  ruleTypeId: T;
+  ruleTypeId: string;
   name: string;
-  params: InfraRuleTypeParams[T];
+  params: Params;
   actions?: any[];
+  tags?: any[];
   schedule?: { interval: string };
+  consumer: string;
 }) {
   const { body } = await supertest
     .post(`/api/alerting/rule`)
     .set('kbn-xsrf', 'foo')
     .send({
       params,
-      consumer: 'infrastructure',
+      consumer,
       schedule: schedule || {
         interval: '5m',
       },
-      tags: ['infrastructure'],
+      tags,
       name,
       rule_type_id: ruleTypeId,
       actions,
     });
+  if (body.statusCode) {
+    expect(body.statusCode).eql(200, body.message);
+  }
   return body;
 }

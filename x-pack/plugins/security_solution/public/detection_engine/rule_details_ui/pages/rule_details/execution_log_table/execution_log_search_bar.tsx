@@ -9,7 +9,8 @@ import React, { useCallback } from 'react';
 import { replace } from 'lodash';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine/rule_monitoring';
 import { ExecutionStatusFilter } from '../../../../rule_monitoring';
 
 import * as i18n from './translations';
@@ -36,10 +37,10 @@ export const replaceQueryTextAliases = (queryText: string): string => {
 };
 
 // This only includes statuses which are or can be final
-const STATUS_FILTERS = [
-  RuleExecutionStatus.succeeded,
-  RuleExecutionStatus.failed,
-  RuleExecutionStatus['partial failure'],
+const STATUS_FILTERS: RuleExecutionStatus[] = [
+  RuleExecutionStatusEnum.succeeded,
+  RuleExecutionStatusEnum.failed,
+  RuleExecutionStatusEnum['partial failure'],
 ];
 
 interface ExecutionLogTableSearchProps {

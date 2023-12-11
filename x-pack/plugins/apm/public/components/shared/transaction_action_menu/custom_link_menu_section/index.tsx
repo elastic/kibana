@@ -30,7 +30,6 @@ import {
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { CreateEditCustomLinkFlyout } from '../../../app/settings/custom_link/create_edit_custom_link_flyout';
 import { convertFiltersToQuery } from '../../../app/settings/custom_link/create_edit_custom_link_flyout/helper';
 import { LoadingStatePrompt } from '../../loading_state_prompt';
 import { CustomLinkToolbar } from './custom_link_toolbar';
@@ -40,11 +39,12 @@ const DEFAULT_LINKS_TO_SHOW = 3;
 
 export function CustomLinkMenuSection({
   transaction,
+  openCreateCustomLinkFlyout,
 }: {
   transaction?: Transaction;
+  openCreateCustomLinkFlyout: () => void;
 }) {
   const [showAllLinks, setShowAllLinks] = useState(false);
-  const [isCreateEditFlyoutOpen, setIsCreateEditFlyoutOpen] = useState(false);
 
   const filters = useMemo(
     () =>
@@ -57,7 +57,7 @@ export function CustomLinkMenuSection({
     [transaction]
   );
 
-  const { data, status, refetch } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) =>
       callApmApi('GET /internal/apm/settings/custom_links', {
         isCachable: false,
@@ -70,23 +70,6 @@ export function CustomLinkMenuSection({
 
   return (
     <>
-      {isCreateEditFlyoutOpen && (
-        <CreateEditCustomLinkFlyout
-          defaults={{ filters }}
-          onClose={() => {
-            setIsCreateEditFlyoutOpen(false);
-          }}
-          onSave={() => {
-            setIsCreateEditFlyoutOpen(false);
-            refetch();
-          }}
-          onDelete={() => {
-            setIsCreateEditFlyoutOpen(false);
-            refetch();
-          }}
-        />
-      )}
-
       <ActionMenuDivider />
 
       <Section>
@@ -103,7 +86,7 @@ export function CustomLinkMenuSection({
           </EuiFlexItem>
           <EuiFlexItem>
             <CustomLinkToolbar
-              onClickCreate={() => setIsCreateEditFlyoutOpen(true)}
+              onClickCreate={openCreateCustomLinkFlyout}
               showCreateButton={customLinks.length > 0}
             />
           </EuiFlexItem>
@@ -131,7 +114,7 @@ export function CustomLinkMenuSection({
           customLinks={customLinks}
           showAllLinks={showAllLinks}
           toggleShowAll={() => setShowAllLinks((show) => !show)}
-          onClickCreate={() => setIsCreateEditFlyoutOpen(true)}
+          onClickCreate={openCreateCustomLinkFlyout}
         />
       </Section>
     </>

@@ -12,6 +12,9 @@ import type { RouteDependencies } from '../../types';
 export const routeDependencies: Omit<RouteDependencies, 'router'> = {
   config: {
     isSecurityEnabled: jest.fn().mockReturnValue(true),
+    isLegacyTemplatesEnabled: true,
+    isIndexStatsEnabled: true,
+    isDataStreamsStorageColumnEnabled: true,
   },
   indexDataEnricher: new IndexDataEnricher(),
   lib: {

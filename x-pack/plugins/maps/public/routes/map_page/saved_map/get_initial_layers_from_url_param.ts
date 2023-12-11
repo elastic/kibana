@@ -7,12 +7,6 @@
 
 import rison from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
-import '../../../classes/sources/wms_source';
-import '../../../classes/sources/ems_file_source';
-import '../../../classes/sources/es_search_source';
-import '../../../classes/sources/es_pew_pew_source';
-import '../../../classes/sources/es_geo_grid_source';
-import '../../../classes/sources/xyz_tms_source';
 import { LayerDescriptor } from '../../../../common';
 import { getToasts } from '../../../kibana_services';
 import { INITIAL_LAYERS_KEY } from '../../../../common/constants';

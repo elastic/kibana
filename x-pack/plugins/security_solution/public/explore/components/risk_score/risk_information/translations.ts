@@ -9,10 +9,10 @@ import { i18n } from '@kbn/i18n';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { getRiskEntityTranslation } from '../translations';
 
-export const INFORMATION_CLASSIFICATION_HEADER = i18n.translate(
-  'xpack.securitySolution.riskInformation.classificationHeader',
+export const INFORMATION_LEVEL_HEADER = i18n.translate(
+  'xpack.securitySolution.riskInformation.levelHeader',
   {
-    defaultMessage: 'Classification',
+    defaultMessage: 'Level',
   }
 );
 
@@ -23,7 +23,7 @@ export const INFORMATION_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const INFORMATION_RISK_HEADER = (riskEntity: RiskScoreEntity) =>
+export const INFORMATION_RISK_HEADER = (riskEntity?: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.riskInformation.riskHeader', {
     defaultMessage: '{riskEntity} risk score range',
     values: {
@@ -44,39 +44,13 @@ export const CRITICAL_RISK_DESCRIPTION = i18n.translate(
     defaultMessage: '90 and above',
   }
 );
-export const TITLE = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.riskInformation.title', {
-    defaultMessage: 'How is {riskEntity} risk calculated?',
-    values: {
-      riskEntity: getRiskEntityTranslation(riskEntity, true),
-    },
-  });
+export const TITLE = i18n.translate('xpack.securitySolution.riskInformation.title', {
+  defaultMessage: 'Entity Risk Analytics',
+});
 
-export const INTRODUCTION = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.riskInformation.introduction', {
-    defaultMessage:
-      'The {riskEntity} Risk Score capability surfaces risky {riskEntityLowerPlural} from within your environment.',
-    values: {
-      riskEntity: getRiskEntityTranslation(riskEntity),
-      riskEntityLowerPlural: getRiskEntityTranslation(riskEntity, true, true),
-    },
-  });
-
-export const EXPLANATION_MESSAGE = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.riskInformation.explanation', {
-    defaultMessage:
-      'This feature utilizes a transform, with a scripted metric aggregation to calculate {riskEntityLower} risk scores based on detection rule alerts with an "open" status, within a 5 day time window. The transform runs hourly to keep the score updated as new detection rule alerts stream in.',
-    values: {
-      riskEntityLower: getRiskEntityTranslation(riskEntity, true),
-    },
-  });
-
-export const CLOSE_BUTTON_LTEXT = i18n.translate(
-  'xpack.securitySolution.riskInformation.closeBtn',
-  {
-    defaultMessage: 'Close',
-  }
-);
+export const CLOSE_BUTTON_TEXT = i18n.translate('xpack.securitySolution.riskInformation.closeBtn', {
+  defaultMessage: 'Close',
+});
 
 export const INFO_BUTTON_TEXT = i18n.translate(
   'xpack.securitySolution.riskInformation.buttonLabel',

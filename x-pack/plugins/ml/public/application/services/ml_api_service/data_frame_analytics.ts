@@ -6,21 +6,23 @@
  */
 
 import { useMemo } from 'react';
+
+import type { NewJobCapsResponse } from '@kbn/ml-anomaly-utils';
+import type {
+  AnalyticsMapReturnType,
+  DataFrameAnalyticsConfig,
+  DataFrameAnalyticsStats,
+  DeleteDataFrameAnalyticsWithIndexStatus,
+  UpdateDataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
+
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 
-import type { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import type { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
-import type { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common';
 import type { DeepPartial } from '../../../../common/types/common';
-import type { NewJobCapsResponse } from '../../../../common/types/fields';
-import type { UpdateDataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 import type { JobMessage } from '../../../../common/types/audit_message';
-import type {
-  DeleteDataFrameAnalyticsWithIndexStatus,
-  AnalyticsMapReturnType,
-} from '../../../../common/types/data_frame_analytics';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {
   node_failures?: object;
@@ -47,7 +49,7 @@ export interface DeleteDataFrameAnalyticsWithIndexResponse {
   acknowledged: boolean;
   analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
   destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
-  destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+  destDataViewDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
 }
 
 export interface JobsExistsResponse {
@@ -81,12 +83,15 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
   },
   createDataFrameAnalytics(
     analyticsId: string,
-    analyticsConfig: DeepPartial<DataFrameAnalyticsConfig>
+    analyticsConfig: DeepPartial<DataFrameAnalyticsConfig>,
+    createDataView: boolean = false,
+    timeFieldName?: string
   ) {
     const body = JSON.stringify(analyticsConfig);
     return httpService.http<any>({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
       method: 'PUT',
+      query: { createDataView, timeFieldName },
       body,
       version: '1',
     });
@@ -150,11 +155,11 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
   deleteDataFrameAnalyticsAndDestIndex(
     analyticsId: string,
     deleteDestIndex: boolean,
-    deleteDestIndexPattern: boolean
+    deleteDestDataView: boolean
   ) {
     return httpService.http<DeleteDataFrameAnalyticsWithIndexResponse>({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
-      query: { deleteDestIndex, deleteDestIndexPattern },
+      query: { deleteDestIndex, deleteDestDataView },
       method: 'DELETE',
       version: '1',
     });

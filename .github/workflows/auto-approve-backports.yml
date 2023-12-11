@@ -1,0 +1,16 @@
+on:
+  pull_request_target:
+    branches-ignore:
+      - main
+
+jobs:
+  approve:
+    name: Auto-approve backport
+    runs-on: ubuntu-latest
+    if: |
+      startsWith(github.event.pull_request.head.ref, 'backport') &&
+      github.event.pull_request.user.login == 'kibanamachine'
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: hmarr/auto-approve-action@v3

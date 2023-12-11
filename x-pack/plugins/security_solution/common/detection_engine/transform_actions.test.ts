@@ -13,9 +13,12 @@ import {
   transformRuleToAlertResponseAction,
   transformAlertToRuleResponseAction,
 } from './transform_actions';
-import type { ResponseAction, RuleResponseAction } from './rule_response_actions/schemas';
-import { RESPONSE_ACTION_TYPES } from './rule_response_actions/schemas';
-import type { NormalizedRuleAction } from './rule_management/api/rules/bulk_actions/request_schema';
+import type {
+  ResponseAction,
+  RuleResponseAction,
+} from '../api/detection_engine/model/rule_response_actions';
+import { ResponseActionTypesEnum } from '../api/detection_engine/model/rule_response_actions';
+import type { NormalizedRuleAction } from '../api/detection_engine/rule_management';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 
 describe('transform_actions', () => {
@@ -90,7 +93,7 @@ describe('transform_actions', () => {
   });
   test('it should transform ResponseAction[] to RuleResponseAction[]', () => {
     const ruleAction: ResponseAction = {
-      action_type_id: RESPONSE_ACTION_TYPES.OSQUERY,
+      action_type_id: ResponseActionTypesEnum['.osquery'],
       params: {
         ecs_mapping: {},
         saved_query_id: undefined,
@@ -114,7 +117,7 @@ describe('transform_actions', () => {
 
   test('it should transform RuleResponseAction[] to ResponseAction[]', () => {
     const alertAction: RuleResponseAction = {
-      actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
+      actionTypeId: ResponseActionTypesEnum['.osquery'],
       params: {
         ecsMapping: {},
         savedQueryId: undefined,

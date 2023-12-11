@@ -9,6 +9,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type { RuleSnooze } from '@kbn/alerting-plugin/common';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import {
   EuiLoadingSpinner,
   EuiPopover,
@@ -20,9 +22,11 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { useKibana } from '../../../../common/lib/kibana';
 import { SnoozePanel } from './rule_snooze';
 import { isRuleSnoozed } from '../../../lib';
-import { Rule, SnoozeSchedule } from '../../../../types';
+import { Rule, SnoozeSchedule, BulkOperationResponse } from '../../../../types';
+import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
 
 export type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const SNOOZE_END_TIME_FORMAT = 'LL @ LT';
@@ -35,8 +39,8 @@ type DropdownRuleRecord = Pick<
 export interface ComponentOpts {
   rule: DropdownRuleRecord;
   onRuleChanged: () => void;
-  enableRule: () => Promise<void>;
-  disableRule: () => Promise<void>;
+  enableRule: () => Promise<BulkOperationResponse>;
+  disableRule: () => Promise<BulkOperationResponse>;
   snoozeRule: (snoozeSchedule: SnoozeSchedule) => Promise<void>;
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
   isEditable: boolean;
@@ -58,6 +62,10 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   const [isEnabled, setIsEnabled] = useState<boolean>(rule.enabled);
   const [isSnoozed, setIsSnoozed] = useState<boolean>(!hideSnoozeOption && isRuleSnoozed(rule));
 
+  const {
+    notifications: { toasts },
+  } = useKibana().services;
+
   useEffect(() => {
     setIsEnabled(rule.enabled);
   }, [rule.enabled]);
@@ -70,6 +78,25 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   const onClickBadge = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), [setIsPopoverOpen]);
   const onClosePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
+  const enableRuleInternal = useCallback(async () => {
+    const { errors } = await enableRule();
+
+    if (!errors.length) {
+      return;
+    }
+
+    const message = parseRuleCircuitBreakerErrorMessage(errors[0].message);
+    toasts.addDanger({
+      title: message.summary,
+      ...(message.details && {
+        text: toMountPoint(
+          <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>
+        ),
+      }),
+    });
+    throw new Error();
+  }, [enableRule, toasts]);
+
   const onChangeEnabledStatus = useCallback(
     async (enable: boolean) => {
       if (rule.enabled === enable) {
@@ -78,7 +105,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       setIsUpdating(true);
       try {
         if (enable) {
-          await enableRule();
+          await enableRuleInternal();
         } else {
           await disableRule();
         }
@@ -88,7 +115,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
         setIsUpdating(false);
       }
     },
-    [rule.enabled, isEnabled, onRuleChanged, enableRule, disableRule]
+    [rule.enabled, isEnabled, onRuleChanged, enableRuleInternal, disableRule]
   );
 
   const onSnoozeRule = useCallback(

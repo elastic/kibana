@@ -6,7 +6,7 @@
  */
 
 import { APMEventESSearchRequest } from '.';
-import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { getRequestBase } from './get_request_base';
 
 describe('getRequestBase', () => {
@@ -26,7 +26,7 @@ describe('getRequestBase', () => {
       error: 'my-apm-*-error-*',
       span: 'my-apm-*-span-*',
       onboarding: 'my-apm-*-onboarding-*',
-    } as ApmIndicesConfig;
+    } as APMIndices;
 
     res = getRequestBase({ ...request, indices });
   });

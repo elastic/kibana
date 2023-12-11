@@ -8,8 +8,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -60,7 +59,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
     wrapWithTheme(
       <I18nProvider>
         <Router history={history}>
-          <Switch>
+          <Routes>
             <Route path={'/:type/:id'} exact={true}>
               <RedirectToHomeIfUnauthorized>
                 <Suspense fallback={<EuiLoadingSpinner />}>
@@ -89,7 +88,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
                 </Suspense>
               </RedirectToHomeIfUnauthorized>
             </Route>
-          </Switch>
+          </Routes>
         </Router>
       </I18nProvider>,
       theme$

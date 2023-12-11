@@ -20,7 +20,7 @@ export const source: Command = {
     return dedent`
       Options:
 
-        --license         Run with a 'oss', 'basic', or 'trial' license [default: ${license}]
+        --license         Run with a 'basic' or 'trial' license [default: ${license}]
         --source-path     Path to ES source [default: ${defaults['source-path']}]
         --base-path       Path containing cache/installations [default: ${basePath}]
         --install-path    Installation path, defaults to 'source' within base-path
@@ -60,13 +60,20 @@ export const source: Command = {
     });
 
     const cluster = new Cluster({ ssl: options.ssl });
-    const { installPath } = await cluster.installSource(options);
+    const { installPath } = await cluster.installSource({
+      sourcePath: options.sourcePath,
+      license: options.license,
+      password: options.password,
+      basePath: options.basePath,
+      installPath: options.installPath,
+      esArgs: options.esArgs,
+    });
 
     if (options.dataArchive) {
       await cluster.extractDataDirectory(installPath, options.dataArchive);
     }
     if (options.plugins) {
-      await cluster.installPlugins(installPath, options.plugins, options);
+      await cluster.installPlugins(installPath, options.plugins, options.esJavaOpts);
     }
     if (typeof options.secureFiles === 'string' && options.secureFiles) {
       const pairs = options.secureFiles.split(',').map((kv) => kv.split('=').map((v) => v.trim()));

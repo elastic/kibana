@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { AssetDetailsProps } from './asset_details';
+import type { AssetDetailsProps } from './types';
 
 const AssetDetails = React.lazy(() => import('./asset_details'));
 

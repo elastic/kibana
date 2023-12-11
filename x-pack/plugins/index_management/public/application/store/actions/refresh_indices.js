@@ -20,14 +20,14 @@ export const refreshIndices =
     try {
       await request(indexNames);
     } catch (error) {
-      notificationService.showDangerToast(error.message);
+      notificationService.showDangerToast(error.body.message);
       return dispatch(clearRowStatus({ indexNames }));
     }
     dispatch(reloadIndices(indexNames));
     notificationService.showSuccessToast(
       i18n.translate('xpack.idxMgmt.refreshIndicesAction.successfullyRefreshedIndicesMessage', {
-        defaultMessage: 'Successfully refreshed: [{indexNames}]',
-        values: { indexNames: indexNames.join(', ') },
+        defaultMessage: 'Successfully refreshed {count, plural, one {# index} other {# indices} }',
+        values: { count: indexNames.length },
       })
     );
   };

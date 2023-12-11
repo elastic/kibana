@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { v1 as uuidv1 } from 'uuid';
-
-import { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
-
+import { ElasticsearchClient } from '@kbn/core/server';
+import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+import { v4 as uuidv4 } from 'uuid';
+import { SLO_SUMMARY_TEMP_INDEX_NAME } from '../../../common/slo/constants';
 import { Duration, DurationUnit, SLO } from '../../domain/models';
-import { ResourceInstaller } from './resource_installer';
-import { SLORepository } from './slo_repository';
-import { TransformManager } from './transform_manager';
 import { validateSLO } from '../../domain/services';
+import { SLORepository } from './slo_repository';
+import { createTempSummaryDocument } from './summary_transform/helpers/create_temp_summary';
+import { TransformManager } from './transform_manager';
 
 export class CreateSLO {
   constructor(
-    private resourceInstaller: ResourceInstaller,
+    private esClient: ElasticsearchClient,
     private repository: SLORepository,
     private transformManager: TransformManager
   ) {}
@@ -26,9 +26,7 @@ export class CreateSLO {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
-    await this.resourceInstaller.ensureCommonResourcesInstalled();
     await this.repository.save(slo, { throwOnConflict: true });
-
     let sloTransformId;
     try {
       sloTransformId = await this.transformManager.install(slo);
@@ -38,6 +36,7 @@ export class CreateSLO {
     }
 
     try {
+      await this.transformManager.preview(sloTransformId);
       await this.transformManager.start(sloTransformId);
     } catch (err) {
       await Promise.all([
@@ -48,6 +47,13 @@ export class CreateSLO {
       throw err;
     }
 
+    await this.esClient.index({
+      index: SLO_SUMMARY_TEMP_INDEX_NAME,
+      id: `slo-${slo.id}`,
+      document: createTempSummaryDocument(slo),
+      refresh: true,
+    });
+
     return this.toResponse(slo);
   }
 
@@ -55,7 +61,7 @@ export class CreateSLO {
     const now = new Date();
     return {
       ...params,
-      id: params.id ?? uuidv1(),
+      id: params.id ?? uuidv4(),
       settings: {
         syncDelay: params.settings?.syncDelay ?? new Duration(1, DurationUnit.Minute),
         frequency: params.settings?.frequency ?? new Duration(1, DurationUnit.Minute),
@@ -65,6 +71,7 @@ export class CreateSLO {
       tags: params.tags ?? [],
       createdAt: now,
       updatedAt: now,
+      groupBy: !!params.groupBy ? params.groupBy : ALL_VALUE,
     };
   }
 

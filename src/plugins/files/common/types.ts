@@ -20,6 +20,7 @@ import type {
 } from '@kbn/shared-ux-file-types';
 import type { UploadOptions } from '../server/blob_storage_service';
 import type { ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
+import type { SupportedFileHashAlgorithm } from '../server/saved_objects/file';
 
 export type {
   FileKindBase,
@@ -94,6 +95,12 @@ export interface FileKind extends FileKindBase {
      */
     share?: HttpEndpointDefinition;
   };
+
+  /**
+   * A list of hashes to compute for this file kind. The hashes will be computed
+   * during the file upload process and stored in the file metadata.
+   */
+  hashes?: SupportedFileHashAlgorithm[];
 }
 
 /** Definition for an endpoint that the File's service will generate */

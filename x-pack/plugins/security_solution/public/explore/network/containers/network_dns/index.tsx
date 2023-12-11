@@ -8,17 +8,14 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 
+import type { NetworkDnsRequestOptionsInput } from '../../../../../common/api/search_strategy';
 import type { ESTermQuery } from '../../../../../common/typed_json';
 import type { inputsModel } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { createFilter } from '../../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
 import { networkSelectors } from '../../store';
-import type {
-  NetworkDnsRequestOptions,
-  NetworkDnsEdges,
-  PageInfoPaginated,
-} from '../../../../../common/search_strategy';
+import type { NetworkDnsEdges, PageInfoPaginated } from '../../../../../common/search_strategy';
 import { NetworkQueries } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import type { InspectResponse } from '../../../../types';
@@ -58,7 +55,9 @@ export const useNetworkDns = ({
   const getNetworkDnsSelector = useMemo(() => networkSelectors.dnsSelector(), []);
   const { activePage, sort, isPtrIncluded, limit } = useDeepEqualSelector(getNetworkDnsSelector);
 
-  const [networkDnsRequest, setNetworkDnsRequest] = useState<NetworkDnsRequestOptions | null>(null);
+  const [networkDnsRequest, setNetworkDnsRequest] = useState<NetworkDnsRequestOptionsInput | null>(
+    null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -113,7 +112,7 @@ export const useNetworkDns = ({
 
   useEffect(() => {
     setNetworkDnsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkDnsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         isPtrIncluded,

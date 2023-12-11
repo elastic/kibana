@@ -8,6 +8,10 @@
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import expect from '@kbn/expect';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 
 function findFeature(layer, callbackFn) {
@@ -71,8 +75,10 @@ export default function ({ getService }) {
 
     it('should return ES vector tile containing documents and metadata', async () => {
       const resp = await supertest
-        .get(`/api/maps/mvt/getTile/2/1/1.pbf?${getTileUrlParams(defaultParams)}`)
+        .get(`/internal/maps/mvt/getTile/2/1/1.pbf?${getTileUrlParams(defaultParams)}`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .responseType('blob')
         .expect(200);
 
@@ -133,8 +139,10 @@ export default function ({ getService }) {
         hasLabels: true,
       });
       const resp = await supertest
-        .get(`/api/maps/mvt/getTile/2/1/1.pbf?${tileUrlParams}`)
+        .get(`/internal/maps/mvt/getTile/2/1/1.pbf?${tileUrlParams}`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .responseType('blob')
         .expect(200);
 
@@ -176,10 +184,40 @@ export default function ({ getService }) {
         index: 'notRealIndex',
       });
       await supertest
-        .get(`/api/maps/mvt/getTile/2/1/1.pbf?${tileUrlParams}`)
+        .get(`/internal/maps/mvt/getTile/2/1/1.pbf?${tileUrlParams}`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .responseType('blob')
         .expect(404);
+    });
+
+    it('should return elasticsearch error', async () => {
+      const tileUrlParams = getTileUrlParams({
+        ...defaultParams,
+        requestBody: {
+          ...defaultParams.requestBody,
+          query: {
+            error_query: {
+              indices: [
+                {
+                  error_type: 'exception',
+                  message: 'local shard failure message 123',
+                  name: 'logstash-*',
+                },
+              ],
+            },
+          },
+        },
+      });
+      const resp = await supertest
+        .get(`/internal/maps/mvt/getTile/2/1/1.pbf?${tileUrlParams}`)
+        .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(400);
+
+      expect(resp.body.error.reason).to.be('all shards failed');
     });
   });
 }

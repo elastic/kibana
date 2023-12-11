@@ -8,6 +8,7 @@
 import { EuiFlyoutHeader } from '@elastic/eui';
 import React from 'react';
 
+import type { GetFieldsData } from '../../../../../common/hooks/use_get_fields_data';
 import { ExpandableEventTitle } from '../expandable_event';
 import { BackToAlertDetailsLink } from './back_to_alert_details_link';
 
@@ -18,9 +19,13 @@ interface FlyoutHeaderComponentProps {
   isHostIsolationPanelOpen: boolean;
   isolateAction: 'isolateHost' | 'unisolateHost';
   loading: boolean;
+  promptContextId?: string;
   ruleName: string;
   showAlertDetails: () => void;
   timestamp: string;
+  scopeId: string;
+  refetchFlyoutData: () => Promise<void>;
+  getFieldsData: GetFieldsData;
 }
 
 const FlyoutHeaderContentComponent = ({
@@ -30,9 +35,13 @@ const FlyoutHeaderContentComponent = ({
   isHostIsolationPanelOpen,
   isolateAction,
   loading,
+  promptContextId,
   ruleName,
   showAlertDetails,
   timestamp,
+  scopeId,
+  refetchFlyoutData,
+  getFieldsData,
 }: FlyoutHeaderComponentProps) => {
   return (
     <>
@@ -44,8 +53,12 @@ const FlyoutHeaderContentComponent = ({
           eventIndex={eventIndex}
           isAlert={isAlert}
           loading={loading}
+          promptContextId={promptContextId}
           ruleName={ruleName}
           timestamp={timestamp}
+          scopeId={scopeId}
+          refetchFlyoutData={refetchFlyoutData}
+          getFieldsData={getFieldsData}
         />
       )}
     </>
@@ -60,9 +73,13 @@ const FlyoutHeaderComponent = ({
   isHostIsolationPanelOpen,
   isolateAction,
   loading,
+  promptContextId,
   ruleName,
   showAlertDetails,
   timestamp,
+  scopeId,
+  refetchFlyoutData,
+  getFieldsData,
 }: FlyoutHeaderComponentProps) => {
   return (
     <EuiFlyoutHeader hasBorder={isHostIsolationPanelOpen}>
@@ -73,9 +90,13 @@ const FlyoutHeaderComponent = ({
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
         isolateAction={isolateAction}
         loading={loading}
+        promptContextId={promptContextId}
         ruleName={ruleName}
         showAlertDetails={showAlertDetails}
         timestamp={timestamp}
+        scopeId={scopeId}
+        refetchFlyoutData={refetchFlyoutData}
+        getFieldsData={getFieldsData}
       />
     </EuiFlyoutHeader>
   );

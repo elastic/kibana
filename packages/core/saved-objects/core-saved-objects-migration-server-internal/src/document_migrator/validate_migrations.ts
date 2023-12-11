@@ -7,9 +7,18 @@
  */
 
 import Semver from 'semver';
+import { getFlattenedObject } from '@kbn/std';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectsType,
+  SavedObjectsTypeMappingDefinition,
+  SavedObjectsModelVersionMap,
+} from '@kbn/core-saved-objects-server';
 import { assertValidModelVersion } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  SavedObjectsModelChange,
+  SavedObjectsModelMappingsAdditionChange,
+} from '@kbn/core-saved-objects-server';
 
 /**
  * Validates the consistency of the given type for use with the document migrator.
@@ -64,42 +73,47 @@ export function validateTypeMigrations({
     const modelVersionMap =
       typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions ?? {};
 
-    if (Object.keys(modelVersionMap).length > 0 && !type.switchToModelVersionAt) {
-      throw new Error(
-        `Type ${type.name}: Uusing modelVersions requires to specify switchToModelVersionAt`
+    if (Object.keys(modelVersionMap).length > 0) {
+      if (!type.switchToModelVersionAt) {
+        throw new Error(
+          `Type ${type.name}: Using modelVersions requires to specify switchToModelVersionAt`
+        );
+      }
+
+      Object.entries(modelVersionMap).forEach(([version, definition]) => {
+        assertValidModelVersion(version);
+      });
+
+      const { min: minVersion, max: maxVersion } = Object.keys(modelVersionMap).reduce(
+        (minMax, rawVersion) => {
+          const version = Number.parseInt(rawVersion, 10);
+          minMax.min = Math.min(minMax.min, version);
+          minMax.max = Math.max(minMax.max, version);
+          return minMax;
+        },
+        { min: Infinity, max: -Infinity }
       );
-    }
 
-    Object.entries(modelVersionMap).forEach(([version, definition]) => {
-      assertValidModelVersion(version);
-    });
+      if (minVersion > 1) {
+        throw new Error(`Type ${type.name}: model versioning must start with version 1`);
+      }
 
-    const { min: minVersion, max: maxVersion } = Object.keys(modelVersionMap).reduce(
-      (minMax, rawVersion) => {
-        const version = Number.parseInt(rawVersion, 10);
-        minMax.min = Math.min(minMax.min, version);
-        minMax.max = Math.max(minMax.max, version);
-        return minMax;
-      },
-      { min: Infinity, max: -Infinity }
-    );
+      validateAddedMappings(type.name, type.mappings, modelVersionMap);
 
-    if (minVersion > 1) {
-      throw new Error(`Type ${type.name}: model versioning must start with version 1`);
-    }
-    const missingVersions = getMissingVersions(
-      minVersion,
-      maxVersion,
-      Object.keys(modelVersionMap).map((v) => Number.parseInt(v, 10))
-    );
-    if (missingVersions.length) {
-      throw new Error(
-        `Type ${
-          type.name
-        }: gaps between model versions aren't allowed (missing versions: ${missingVersions.join(
-          ','
-        )})`
+      const missingVersions = getMissingVersions(
+        minVersion,
+        maxVersion,
+        Object.keys(modelVersionMap).map((v) => Number.parseInt(v, 10))
       );
+      if (missingVersions.length) {
+        throw new Error(
+          `Type ${
+            type.name
+          }: gaps between model versions aren't allowed (missing versions: ${missingVersions.join(
+            ','
+          )})`
+        );
+      }
     }
   }
 
@@ -113,6 +127,60 @@ export function validateTypeMigrations({
     );
   }
 }
+
+function isMappingAddition(
+  change: SavedObjectsModelChange
+): change is SavedObjectsModelMappingsAdditionChange {
+  return change.type === 'mappings_addition';
+}
+
+const validateAddedMappings = (
+  typeName: string,
+  mappings: SavedObjectsTypeMappingDefinition,
+  modelVersions: SavedObjectsModelVersionMap
+) => {
+  const flattenedMappings = new Map(Object.entries(getFlattenedObject(mappings.properties)));
+
+  const mappingAdditionChanges = Object.values(modelVersions)
+    .flatMap((version) => version.changes)
+    .filter<SavedObjectsModelMappingsAdditionChange>(isMappingAddition);
+  const addedMappings = mappingAdditionChanges.reduce((map, change) => {
+    const flattened = getFlattenedObject(change.addedMappings);
+    Object.keys(flattened).forEach((key) => {
+      map.set(key, flattened[key]);
+    });
+    return map;
+  }, new Map<string, unknown>());
+
+  const missingMappings: string[] = [];
+  const mappingsWithDifferentValues: string[] = [];
+
+  for (const [key, value] of addedMappings.entries()) {
+    if (!flattenedMappings.has(key)) {
+      missingMappings.push(key);
+    } else {
+      const valueInMappings = flattenedMappings.get(key);
+      if (valueInMappings !== value) {
+        mappingsWithDifferentValues.push(key);
+      }
+    }
+  }
+
+  if (missingMappings.length) {
+    throw new Error(
+      `Type ${typeName}: mappings added on model versions not present on the global mappings definition: ${missingMappings.join(
+        ','
+      )}`
+    );
+  }
+  if (mappingsWithDifferentValues.length) {
+    throw new Error(
+      `Type ${typeName}: mappings added on model versions differs from the global mappings definition: ${mappingsWithDifferentValues.join(
+        ','
+      )}`
+    );
+  }
+};
 
 const assertObjectOrFunction = (entity: any, prefix: string) => {
   if (!entity || (typeof entity !== 'function' && typeof entity !== 'object')) {

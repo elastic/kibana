@@ -8,16 +8,19 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
-import { ObservabilityAlertSearchBarProps } from './types';
+import { ObservabilityAlertSearchBarProps, Services } from './types';
 import { ObservabilityAlertSearchBar } from './alert_search_bar';
-import { observabilityAlertFeatureIds } from '../../config/alert_feature_ids';
+import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { render } from '../../utils/test_helper';
 
 const getAlertsSearchBarMock = jest.fn();
 const ALERT_SEARCH_BAR_DATA_TEST_SUBJ = 'alerts-search-bar';
 
 describe('ObservabilityAlertSearchBar', () => {
-  const renderComponent = (props: Partial<ObservabilityAlertSearchBarProps> = {}) => {
+  const renderComponent = (
+    props: Partial<ObservabilityAlertSearchBarProps> = {},
+    services: Partial<Services> = {}
+  ) => {
     const observabilityAlertSearchBarProps: ObservabilityAlertSearchBarProps = {
       appName: 'testAppName',
       kuery: '',
@@ -35,6 +38,7 @@ describe('ObservabilityAlertSearchBar', () => {
           <div data-test-subj={ALERT_SEARCH_BAR_DATA_TEST_SUBJ} />
         ),
         useToasts: jest.fn(),
+        ...services,
       },
       ...props,
     };
@@ -151,5 +155,27 @@ describe('ObservabilityAlertSearchBar', () => {
         should: [],
       },
     });
+  });
+
+  it('should show error in a toast', async () => {
+    const error = new Error('something is wrong in esQueryChange');
+    const mockedOnEsQueryChange = jest.fn().mockImplementation(() => {
+      throw error;
+    });
+    const mockedAddError = jest.fn();
+    const mockedUseToast = jest.fn().mockImplementation(() => ({
+      addError: mockedAddError,
+    }));
+
+    renderComponent(
+      {
+        onEsQueryChange: mockedOnEsQueryChange,
+      },
+      {
+        useToasts: mockedUseToast,
+      }
+    );
+
+    expect(mockedAddError).toHaveBeenCalledWith(error, { title: 'Invalid query string' });
   });
 });

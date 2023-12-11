@@ -39,7 +39,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, Sl
       defaultMessage: 'Send messages to Slack channels.',
     }),
     actionTypeTitle: i18n.translate('xpack.stackConnectors.components.slack.connectorTypeTitle', {
-      defaultMessage: 'Send to Slack',
+      defaultMessage: 'Slack',
     }),
     validateParams: async (
       actionParams: SlackActionParams

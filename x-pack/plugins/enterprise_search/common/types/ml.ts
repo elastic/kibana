@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 export enum MlModelDeploymentState {
   NotDeployed = '',
   Downloading = 'downloading',
@@ -25,8 +23,25 @@ export interface MlModelDeploymentStatus {
   threadsPerAllocation: number;
 }
 
-// TODO - we can remove this extension once the new types are available
-// in kibana that includes this field
-export interface MlTrainedModelConfigWithDefined extends MlTrainedModelConfig {
-  fully_defined?: boolean;
+export interface MlModel {
+  modelId: string;
+  /** Model inference type, e.g. ner, text_classification */
+  type: string;
+  title: string;
+  description?: string;
+  licenseType?: string;
+  licensePageUrl?: string;
+  modelDetailsPageUrl?: string;
+  deploymentState: MlModelDeploymentState;
+  deploymentStateReason?: string;
+  startTime: number;
+  targetAllocationCount: number;
+  nodeAllocationCount: number;
+  threadsPerAllocation: number;
+  /** Is this model one of the promoted ones (e.g. ELSER, E5)? */
+  isPromoted?: boolean;
+  /** Does this model object act as a placeholder before installing the model? */
+  isPlaceholder: boolean;
+  /** Does this model have deployment stats? */
+  hasStats: boolean;
 }

@@ -12,7 +12,7 @@ import { CoreSetup, IRouter, KibanaRequest, RequestHandler, RouteMethod } from '
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { TSVBMetricModel } from '../../../../common/inventory_models/types';
+import { TSVBMetricModel } from '@kbn/metrics-data-access-plugin/common';
 import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
@@ -24,7 +24,9 @@ import {
   InfraRouteConfig,
   InfraServerPluginSetupDeps,
   InfraServerPluginStartDeps,
+  InfraVersionedRouteConfig,
 } from './adapter_types';
+import { subscribeToAborted$ } from '../../cancel_request_on_abort';
 
 interface FrozenIndexParams {
   ignore_throttled?: boolean;
@@ -33,6 +35,7 @@ interface FrozenIndexParams {
 export class KibanaFramework {
   public router: IRouter<InfraPluginRequestHandlerContext>;
   public plugins: InfraServerPluginSetupDeps;
+  public config: InfraConfig;
   private core: CoreSetup<InfraServerPluginStartDeps>;
 
   constructor(
@@ -43,6 +46,7 @@ export class KibanaFramework {
     this.router = core.http.createRouter();
     this.plugins = plugins;
     this.core = core;
+    this.config = config;
   }
 
   public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
@@ -78,45 +82,84 @@ export class KibanaFramework {
     }
   }
 
+  public registerVersionedRoute<Method extends RouteMethod = any>(
+    config: InfraVersionedRouteConfig<Method>
+  ) {
+    const defaultOptions = {
+      tags: ['access:infra'],
+    };
+    const routeConfig = {
+      access: config.access,
+      path: config.path,
+      // Currently we have no use of custom options beyond tags, this can be extended
+      // beyond defaultOptions if it's needed.
+      options: defaultOptions,
+    };
+    switch (config.method) {
+      case 'get':
+        return this.router.versioned.get(routeConfig);
+      case 'post':
+        return this.router.versioned.post(routeConfig);
+      case 'delete':
+        return this.router.versioned.delete(routeConfig);
+      case 'put':
+        return this.router.versioned.put(routeConfig);
+      case 'patch':
+        return this.router.versioned.patch(routeConfig);
+      default:
+        throw new RangeError(
+          `#registerVersionedRoute: "${config.method}" is not an accepted method`
+        );
+    }
+  }
+
   callWithRequest<Hit = {}, Aggregation = undefined>(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'search',
-    options?: CallWithRequestParams
+    options?: CallWithRequestParams,
+    request?: KibanaRequest
   ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
   callWithRequest<Hit = {}, Aggregation = undefined>(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'msearch',
-    options?: CallWithRequestParams
+    options?: CallWithRequestParams,
+    request?: KibanaRequest
   ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
   callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'indices.existsAlias',
-    options?: CallWithRequestParams
+    options?: CallWithRequestParams,
+    request?: KibanaRequest
   ): Promise<boolean>;
   callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
     method: 'indices.getAlias',
-    options?: object
+    options?: object,
+    request?: KibanaRequest
   ): Promise<InfraDatabaseGetIndicesAliasResponse>;
   callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
     method: 'indices.get' | 'ml.getBuckets',
-    options?: object
+    options?: object,
+    request?: KibanaRequest
   ): Promise<InfraDatabaseGetIndicesResponse>;
   callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
     method: 'transport.request',
-    options?: CallWithRequestParams
+    options?: CallWithRequestParams,
+    request?: KibanaRequest
   ): Promise<unknown>;
   callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: string,
-    options?: CallWithRequestParams
+    options?: CallWithRequestParams,
+    request?: KibanaRequest
   ): Promise<InfraDatabaseSearchResponse>;
   public async callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: string,
-    params: CallWithRequestParams
+    params: CallWithRequestParams,
+    request?: KibanaRequest
   ) {
     const { elasticsearch, uiSettings } = await requestContext.core;
 
@@ -128,6 +171,16 @@ export class KibanaFramework {
       if (maxConcurrentShardRequests > 0) {
         params = { ...params, max_concurrent_shard_requests: maxConcurrentShardRequests };
       }
+    }
+
+    function callWrapper<T>({
+      makeRequestWithSignal,
+    }: {
+      makeRequestWithSignal: (signal: AbortSignal) => Promise<T>;
+    }) {
+      const controller = new AbortController();
+      const promise = makeRequestWithSignal(controller.signal);
+      return request ? subscribeToAborted$(promise, request, controller) : promise;
     }
 
     // Only set the "ignore_throttled" value (to false) if the Kibana setting
@@ -145,41 +198,90 @@ export class KibanaFramework {
     let apiResult;
     switch (endpoint) {
       case 'search':
-        apiResult = elasticsearch.client.asCurrentUser.search({
-          ...params,
-          ...frozenIndicesParams,
+        apiResult = callWrapper({
+          makeRequestWithSignal: (signal) =>
+            elasticsearch.client.asCurrentUser.search(
+              {
+                ...params,
+                ...frozenIndicesParams,
+              } as estypes.MsearchRequest,
+              { signal }
+            ),
         });
+
         break;
       case 'msearch':
-        apiResult = elasticsearch.client.asCurrentUser.msearch({
-          ...params,
-          ...frozenIndicesParams,
-        } as estypes.MsearchRequest);
+        apiResult = callWrapper({
+          makeRequestWithSignal: (signal) =>
+            elasticsearch.client.asCurrentUser.msearch(
+              {
+                ...params,
+                ...frozenIndicesParams,
+              } as estypes.MsearchRequest,
+              { signal }
+            ),
+        });
+
         break;
       case 'indices.existsAlias':
-        apiResult = elasticsearch.client.asCurrentUser.indices.existsAlias({
-          ...params,
-        } as estypes.IndicesExistsAliasRequest);
+        apiResult = callWrapper({
+          makeRequestWithSignal: (signal) =>
+            elasticsearch.client.asCurrentUser.indices.existsAlias(
+              {
+                ...params,
+              } as estypes.IndicesExistsAliasRequest,
+              { signal }
+            ),
+        });
+
         break;
       case 'indices.getAlias':
-        apiResult = elasticsearch.client.asCurrentUser.indices.getAlias({
-          ...params,
+        apiResult = callWrapper({
+          makeRequestWithSignal: (signal) =>
+            elasticsearch.client.asCurrentUser.indices.getAlias(
+              {
+                ...params,
+              },
+              { signal }
+            ),
         });
+
         break;
       case 'indices.get':
-        apiResult = elasticsearch.client.asCurrentUser.indices.get({
-          ...params,
-        } as estypes.IndicesGetRequest);
+        apiResult = callWrapper({
+          makeRequestWithSignal: (signal) =>
+            elasticsearch.client.asCurrentUser.indices.get(
+              {
+                ...params,
+              } as estypes.IndicesGetRequest,
+              { signal }
+            ),
+        });
+
         break;
       case 'transport.request':
-        apiResult = elasticsearch.client.asCurrentUser.transport.request({
-          ...params,
-        } as TransportRequestParams);
+        apiResult = callWrapper({
+          makeRequestWithSignal: (signal) =>
+            elasticsearch.client.asCurrentUser.transport.request(
+              {
+                ...params,
+              } as TransportRequestParams,
+              { signal }
+            ),
+        });
+
         break;
       case 'ml.getBuckets':
-        apiResult = elasticsearch.client.asCurrentUser.ml.getBuckets({
-          ...params,
-        } as estypes.MlGetBucketsRequest);
+        apiResult = callWrapper({
+          makeRequestWithSignal: (signal) =>
+            elasticsearch.client.asCurrentUser.ml.getBuckets(
+              {
+                ...params,
+              } as estypes.MlGetBucketsRequest,
+              { signal }
+            ),
+        });
+
         break;
     }
     return apiResult ? await apiResult : undefined;

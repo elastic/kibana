@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import pRetry from 'p-retry';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -16,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
   const dockerServers = getService('dockerServers');
+  const esArchiver = getService('esArchiver');
   const server = dockerServers.get('registry');
   const pkgName = 'system';
   const pkgVersion = '1.27.0';
@@ -66,12 +68,13 @@ export default function (providerContext: FtrProviderContext) {
       })
       .catch(() => {});
 
-  describe('When installing system integration in multiple spaces', async () => {
+  describe.skip('When installing system integration in multiple spaces', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
     before(async () => {
       if (!server.enabled) return;
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await installPackage(pkgName, pkgVersion);
 
       await createSpace(testSpaceId);
@@ -81,19 +84,29 @@ export default function (providerContext: FtrProviderContext) {
 
     after(async () => {
       await deleteSpace(testSpaceId);
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
     it('should install kibana assets', async function () {
       // These are installed from Fleet along with every package
-      const resIndexPatternLogs = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'logs-*',
-      });
+      const resIndexPatternLogs = await pRetry(
+        () =>
+          kibanaServer.savedObjects.get({
+            type: 'index-pattern',
+            id: 'logs-*',
+          }),
+        { retries: 3 }
+      );
       expect(resIndexPatternLogs.id).equal('logs-*');
-      const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'metrics-*',
-      });
+
+      const resIndexPatternMetrics = await pRetry(
+        () =>
+          kibanaServer.savedObjects.get({
+            type: 'index-pattern',
+            id: 'metrics-*',
+          }),
+        { retries: 3 }
+      );
       expect(resIndexPatternMetrics.id).equal('metrics-*');
     });
 

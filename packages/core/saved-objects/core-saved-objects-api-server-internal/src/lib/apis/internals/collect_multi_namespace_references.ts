@@ -108,12 +108,14 @@ export async function collectMultiNamespaceReferences(
   );
   const objectOriginsToSearchFor = foundObjects.map(({ type, id, originId }) => ({
     type,
-    origin: originId || id,
+    id,
+    origin: originId,
   }));
   const originsMap = await findSharedOriginObjects(
     createPointInTimeFinder,
     objectOriginsToSearchFor,
-    ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE
+    ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE,
+    options?.purpose
   );
   const results = objectsWithContext.map((obj) => {
     const aliasesVal = aliasesMap.get(getObjectKey(obj));

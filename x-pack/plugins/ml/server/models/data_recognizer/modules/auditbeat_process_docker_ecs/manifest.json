@@ -70,5 +70,6 @@
         "file": "ml_auditbeat_docker_process_occurrence_ecs.json"
       }
     ]
-  }
+  },
+  "tags": ["security"]
 }

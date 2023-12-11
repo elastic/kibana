@@ -111,6 +111,19 @@ describe('request utils', () => {
       });
       expect(params).toHaveProperty('keep_on_completion', false);
     });
+
+    test('Sets `batched_reduce_size` and `ccs_minimize_roundtrips`', async () => {
+      const mockUiSettingsClient = getMockUiSettingsClient({
+        [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false,
+      });
+      const batchedReduceSize = Math.floor(Math.random() * 64);
+      const mockConfig = getMockSearchConfig({
+        asyncSearch: { batchedReduceSize },
+      });
+      const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {});
+      expect(params).toHaveProperty('batched_reduce_size', batchedReduceSize);
+      expect(params).toHaveProperty('ccs_minimize_roundtrips', true);
+    });
   });
 
   describe('getDefaultAsyncGetParams', () => {

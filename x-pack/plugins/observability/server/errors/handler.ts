@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ObservabilityError, SLOIdConflict, SLONotFound } from './errors';
+import { ObservabilityError, SecurityException, SLOIdConflict, SLONotFound } from './errors';
 
 export function getHTTPResponseCode(error: ObservabilityError): number {
   if (error instanceof SLONotFound) {
@@ -14,6 +14,10 @@ export function getHTTPResponseCode(error: ObservabilityError): number {
 
   if (error instanceof SLOIdConflict) {
     return 409;
+  }
+
+  if (error instanceof SecurityException) {
+    return 403;
   }
 
   return 400;

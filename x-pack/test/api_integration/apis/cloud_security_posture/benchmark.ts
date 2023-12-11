@@ -5,11 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type { BenchmarkResponse } from '@kbn/cloud-security-posture-plugin/common/types';
-import type { SuperTest, Test } from 'supertest';
+import type { GetBenchmarkResponse } from '@kbn/cloud-security-posture-plugin/common/types_old';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-// import { createPackagePolicy } from './status';
-
+import { createPackagePolicy } from './helper';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -19,6 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     let agentPolicyId: string;
     let agentPolicyId2: string;
     let agentPolicyId3: string;
+    let agentPolicyId4: string;
 
     beforeEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -26,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'Test policy',
@@ -36,6 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: agentPolicyResponse2 } = await supertest
         .post(`/api/fleet/agent_policies`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'Test policy 2',
@@ -46,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: agentPolicyResponse3 } = await supertest
         .post(`/api/fleet/agent_policies`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'Test policy 3',
@@ -53,6 +56,17 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
       agentPolicyId3 = agentPolicyResponse3.item.id;
+
+      const { body: agentPolicyResponse4 } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy 4',
+          namespace: 'default',
+        });
+
+      agentPolicyId4 = agentPolicyResponse4.item.id;
 
       await createPackagePolicy(
         supertest,
@@ -83,6 +97,16 @@ export default function ({ getService }: FtrProviderContext) {
         'vuln_mgmt',
         'CNVM-1'
       );
+
+      await createPackagePolicy(
+        supertest,
+        agentPolicyId4,
+        'kspm',
+        'cloudbeat/cis_k8s',
+        'vanilla',
+        'kspm',
+        'KSPM-2'
+      );
     });
 
     afterEach(async () => {
@@ -91,8 +115,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`Should return non-empty array filled with Rules if user has CSP integrations`, async () => {
-      const { body: res }: { body: BenchmarkResponse } = await supertest
+      const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
@@ -101,8 +126,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {
-      const { body: res }: { body: BenchmarkResponse } = await supertest
+      const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks?per_page=2`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
@@ -111,8 +137,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {
-      const { body: res }: { body: BenchmarkResponse } = await supertest
+      const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks?per_page=2&page=2`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
@@ -121,8 +148,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`Should return empty array when we set page to be above the last page number`, async () => {
-      const { body: res }: { body: BenchmarkResponse } = await supertest
+      const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks?per_page=2&page=3`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
@@ -130,65 +158,4 @@ export default function ({ getService }: FtrProviderContext) {
       expect(res.total).equal(3);
     });
   });
-}
-
-export async function createPackagePolicy(
-  supertest: SuperTest<Test>,
-  agentPolicyId: string,
-  policyTemplate: string,
-  input: string,
-  deployment: string,
-  posture: string,
-  packageName: string
-) {
-  const version = posture === 'kspm' || posture === 'cspm' ? '1.2.8' : '1.3.0-preview2';
-  const title = 'Security Posture Management';
-  const streams = [
-    {
-      enabled: false,
-      data_stream: {
-        type: 'logs',
-        dataset: 'cloud_security_posture.vulnerabilities',
-      },
-    },
-  ];
-
-  const inputTemplate = {
-    enabled: true,
-    type: input,
-    policy_template: policyTemplate,
-  };
-
-  const inputs = posture === 'vuln_mgmt' ? { ...inputTemplate, streams } : { ...inputTemplate };
-
-  const { body: postPackageResponse } = await supertest
-    .post(`/api/fleet/package_policies`)
-    .set('kbn-xsrf', 'xxxx')
-    .send({
-      force: true,
-      name: packageName,
-      description: '',
-      namespace: 'default',
-      policy_id: agentPolicyId,
-      enabled: true,
-      inputs: [inputs],
-      package: {
-        name: 'cloud_security_posture',
-        title,
-        version,
-      },
-      vars: {
-        deployment: {
-          value: deployment,
-          type: 'text',
-        },
-        posture: {
-          value: posture,
-          type: 'text',
-        },
-      },
-    })
-    .expect(200);
-
-  return postPackageResponse.item;
 }

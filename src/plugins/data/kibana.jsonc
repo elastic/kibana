@@ -28,7 +28,6 @@
     ],
     "optionalPlugins": [
       "usageCollection",
-      "taskManager",
       "security"
     ],
     "requiredBundles": [

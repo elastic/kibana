@@ -16,28 +16,33 @@ const createRequestBodySchema = ImportedWorkpadSchema;
 
 export function initializeImportWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
-  router.post(
-    {
+  router.versioned
+    .post({
       path: `${API_ROUTE_WORKPAD_IMPORT}`,
-      validate: {
-        body: createRequestBodySchema,
-      },
       options: {
         body: {
           maxBytes: 26214400,
           accepts: ['application/json'],
         },
       },
-    },
-    catchErrorHandler(async (context, request, response) => {
-      const workpad = request.body as ImportedCanvasWorkpad;
-
-      const canvasContext = await context.canvas;
-      const createdObject = await canvasContext.workpad.import(workpad);
-
-      return response.ok({
-        body: { ...okResponse, id: createdObject.id },
-      });
+      access: 'internal',
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: { body: createRequestBodySchema },
+        },
+      },
+      catchErrorHandler(async (context, request, response) => {
+        const workpad = request.body as ImportedCanvasWorkpad;
+
+        const canvasContext = await context.canvas;
+        const createdObject = await canvasContext.workpad.import(workpad);
+
+        return response.ok({
+          body: { ...okResponse, id: createdObject.id },
+        });
+      })
+    );
 }

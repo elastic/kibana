@@ -6,28 +6,28 @@
  */
 
 import React from 'react';
-import type { Store } from 'redux';
-import { createStore, applyMiddleware } from 'redux';
+import type { Store, AnyAction } from 'redux';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import type { History as HistoryPackageHistoryInterface } from 'history';
 import { createMemoryHistory } from 'history';
 import { coreMock } from '@kbn/core/public/mocks';
+import { createStore } from '../../../common/store/store';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
-import { resolverReducer } from '../../store/reducer';
 import { MockResolver } from './mock_resolver';
-import type {
-  ResolverState,
-  DataAccessLayer,
-  SpyMiddleware,
-  SideEffectSimulator,
-  TimeFilters,
-} from '../../types';
-import type { ResolverAction } from '../../store/actions';
+import type { DataAccessLayer, SpyMiddleware, SideEffectSimulator, TimeFilters } from '../../types';
 import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
 import { uiSetting } from '../../mocks/ui_setting';
-
+import { EMPTY_RESOLVER } from '../../store/helpers';
+import type { State } from '../../../common/store/types';
+import {
+  createSecuritySolutionStorageMock,
+  kibanaObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+} from '../../../common/mock';
+import { createResolver } from '../../store/actions';
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.
  */
@@ -36,7 +36,7 @@ export class Simulator {
    * The redux store, creating in the constructor using the `dataAccessLayer`.
    * This code subscribes to state transitions.
    */
-  private readonly store: Store<ResolverState, ResolverAction>;
+  private readonly store: Store<State, AnyAction>;
   /**
    * A fake 'History' API used with `react-router` to simulate a browser history.
    */
@@ -111,18 +111,20 @@ export class Simulator {
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
 
-    /**
-     * Create the real resolver middleware with a fake data access layer.
-     * By providing different data access layers, you can simulate different data and server environments.
-     */
-    const middlewareEnhancer = applyMiddleware(
-      resolverMiddlewareFactory(dataAccessLayer),
-      // install the spyMiddleware
-      this.spyMiddleware.middleware
-    );
-
     // Create a redux store w/ the top level Resolver reducer and the enhancer that includes the Resolver middleware and the `spyMiddleware`
-    this.store = createStore(resolverReducer, middlewareEnhancer);
+    const { storage } = createSecuritySolutionStorageMock();
+    this.store = createStore(
+      {
+        ...mockGlobalState,
+        analyzer: {
+          [resolverComponentInstanceID]: EMPTY_RESOLVER,
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage,
+      [resolverMiddlewareFactory(dataAccessLayer), this.spyMiddleware.middleware]
+    );
 
     // If needed, create a fake 'history' instance.
     // Resolver will use to read and write query string values.
@@ -169,6 +171,7 @@ export class Simulator {
    * Change the component instance ID (updates the React component props.)
    */
   public set resolverComponentInstanceID(value: string) {
+    this.store.dispatch(createResolver({ id: value }));
     this.wrapper.setProps({ resolverComponentInstanceID: value });
   }
 

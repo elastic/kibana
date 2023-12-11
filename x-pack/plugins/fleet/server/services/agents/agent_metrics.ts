@@ -9,6 +9,9 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
+import { DATA_TIERS } from '../../../common/constants';
+
+const AGGREGATION_MAX_SIZE = 1000;
 
 export async function fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
   try {
@@ -71,6 +74,11 @@ const aggregationQueryBuilder = (agentIds: string[]) => ({
     bool: {
       must: [
         {
+          terms: {
+            _tier: DATA_TIERS,
+          },
+        },
+        {
           range: {
             '@timestamp': {
               gte: 'now-5m',
@@ -106,6 +114,7 @@ const aggregationQueryBuilder = (agentIds: string[]) => ({
     agents: {
       terms: {
         field: 'elastic_agent.id',
+        size: AGGREGATION_MAX_SIZE,
       },
       aggs: {
         sum_memory_size: {
@@ -121,6 +130,7 @@ const aggregationQueryBuilder = (agentIds: string[]) => ({
         processes: {
           terms: {
             field: 'elastic_agent.process',
+            size: AGGREGATION_MAX_SIZE,
             order: {
               _count: 'desc',
             },
@@ -161,7 +171,7 @@ const aggregationQueryBuilder = (agentIds: string[]) => ({
                     },
                     script: {
                       source: `if (params.cpu_total > 0) {
-                      return params.cpu_total / params._interval  
+                      return params.cpu_total / params._interval
                     }
                     `,
                       lang: 'painless',

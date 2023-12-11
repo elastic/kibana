@@ -43,7 +43,7 @@ export const TimeSlider: FC<Props> = (props: Props) => {
 
   const rangeRef = useRef<EuiDualRangeRef>(null);
 
-  const onPanelResize = (width?: number) => {
+  const onPanelResize = (width: number) => {
     rangeRef.current?.onResize(width);
   };
 
@@ -53,7 +53,6 @@ export const TimeSlider: FC<Props> = (props: Props) => {
   return (
     <EuiInputPopover
       className="timeSlider__popoverOverride"
-      anchorClassName="timeSlider__anchorOverride"
       panelClassName="timeSlider__panelOverride"
       input={
         <TimeSliderPopoverButton
@@ -68,18 +67,12 @@ export const TimeSlider: FC<Props> = (props: Props) => {
       isOpen={isOpen}
       closePopover={() => timeSlider.dispatch.setIsOpen({ isOpen: false })}
       panelPaddingSize="s"
-      anchorPosition="downCenter"
-      disableFocusTrap
-      attachToAnchor={false}
       onPanelResize={onPanelResize}
     >
       <TimeSliderPopoverContent
         rangeRef={rangeRef}
         value={[from, to]}
         onChange={props.onChange}
-        onClear={() => {
-          props.onChange([timeRangeMin, timeRangeMax]);
-        }}
         stepSize={stepSize}
         ticks={ticks}
         timeRangeMin={timeRangeMin}

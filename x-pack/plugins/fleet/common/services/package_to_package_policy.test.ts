@@ -365,18 +365,16 @@ describe('Fleet - packageToPackagePolicy', () => {
         packageToPackagePolicy(
           {
             ...mockPackage,
-            savedObject: {
-              attributes: {
-                experimental_data_stream_features: [
-                  {
-                    data_stream: 'metrics-test.testdataset',
-                    features: {
-                      synthetic_source: true,
-                      tsdb: true,
-                    },
+            installationInfo: {
+              experimental_data_stream_features: [
+                {
+                  data_stream: 'metrics-test.testdataset',
+                  features: {
+                    synthetic_source: true,
+                    tsdb: true,
                   },
-                ],
-              },
+                },
+              ],
             } as any,
           },
           '1'

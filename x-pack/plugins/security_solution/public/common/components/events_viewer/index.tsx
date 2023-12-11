@@ -23,7 +23,12 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
-import type { Direction, EntityType, RowRenderer } from '@kbn/timelines-plugin/common';
+import type {
+  DeprecatedCellValueElementProps,
+  DeprecatedRowRenderer,
+  Direction,
+  EntityType,
+} from '@kbn/timelines-plugin/common';
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
@@ -37,6 +42,7 @@ import type {
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../common/types';
+import type { RowRenderer } from '../../../../common/types/timeline';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -73,6 +79,7 @@ import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
+import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
 
 const storage = new Storage(localStorage);
 
@@ -86,7 +93,7 @@ export interface EventsViewerProps {
   leadingControlColumns: ControlColumnProps[];
   sourcererScope: SourcererScopeName;
   start: string;
-  showTotalCount?: boolean;
+  showTotalCount?: boolean; // eslint-disable-line react/no-unused-prop-types
   pageFilters?: Filter[];
   currentFilter?: AlertWorkflowStatus;
   onRuleChange?: () => void;
@@ -177,6 +184,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(sourcererScope);
+
+  const getFieldSpec = useGetFieldSpec(sourcererScope);
 
   const { globalFullScreen } = useGlobalFullScreen();
 
@@ -490,7 +499,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     tableId,
     data: nonDeletedEvents,
     totalItems: totalCountMinusDeleted,
-    indexNames: selectedPatterns,
     hasAlertsCrud: hasCrudPermissions,
     showCheckboxes,
     filterStatus: currentFilter,
@@ -580,8 +588,14 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                             data={nonDeletedEvents}
                             id={tableId}
                             loadPage={loadPage}
-                            renderCellValue={renderCellValue}
-                            rowRenderers={rowRenderers}
+                            // TODO: migrate away from deprecated type
+                            renderCellValue={
+                              renderCellValue as (
+                                props: DeprecatedCellValueElementProps
+                              ) => React.ReactNode
+                            }
+                            // TODO: migrate away from deprecated type
+                            rowRenderers={rowRenderers as unknown as DeprecatedRowRenderer[]}
                             totalItems={totalCountMinusDeleted}
                             bulkActions={bulkActions}
                             fieldBrowserOptions={fieldBrowserOptions}
@@ -591,6 +605,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                             isEventRenderedView={tableView === 'eventRenderedView'}
                             rowHeightsOptions={rowHeightsOptions}
                             getFieldBrowser={getFieldBrowser}
+                            getFieldSpec={getFieldSpec}
                           />
                         </StatefulEventContext.Provider>
                       </ScrollableFlexItem>

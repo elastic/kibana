@@ -61,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('PNG file matches the baseline image, using sample geo data', async function () {
       await reporting.initEcommerce();
 
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('Ecommerce Map');
       await PageObjects.reporting.openPngReportingPanel();
       await PageObjects.reporting.clickGenerateReportButton();
@@ -73,15 +73,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('PNG file matches the baseline image, using embeddable example', async function () {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
       await PageObjects.reporting.openPngReportingPanel();
       await PageObjects.reporting.clickGenerateReportButton();
 
       const percentDiff = await measurePngDifference('example_map_report');
-      // TODO: lower the threshold to 0.03. Currently this test is not passing with a low diff percentage due to
-      // unwanted behavior: https://github.com/elastic/kibana/issues/156623
-      expect(percentDiff).to.be.lessThan(0.09);
+      expect(percentDiff).to.be.lessThan(0.03);
     });
   });
 }

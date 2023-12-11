@@ -30,6 +30,7 @@ import {
   ConnectorTypeSecretsType,
 } from '.';
 import { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
@@ -439,6 +440,7 @@ describe('params validation', () => {
           "text": "Go to Elastic",
         },
         "message": "this is the message",
+        "messageHTML": null,
         "subject": "this is a test",
         "to": Array [
           "bob@example.com",
@@ -506,6 +508,7 @@ describe('execute()', () => {
     bcc: ['jimmy@example.com'],
     subject: 'the subject',
     message: 'a message to you',
+    messageHTML: null,
     kibanaFooterLink: {
       path: '/',
       text: 'Go to Elastic',
@@ -547,6 +550,7 @@ describe('execute()', () => {
       ---
 
       This message was sent by Elastic.",
+          "messageHTML": null,
           "subject": "the subject",
         },
         "hasAuth": true,
@@ -567,6 +571,127 @@ describe('execute()', () => {
           "service": "__json",
           "user": "bob",
         },
+      }
+    `);
+  });
+
+  test('ensure parameters are as expected with HTML message with source NOTIFICATION', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.NOTIFICATION, source: null },
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "data": undefined,
+        "status": "ok",
+      }
+    `);
+
+    delete sendEmailMock.mock.calls[0][1].configurationUtilities;
+    expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "connectorId": "some-id",
+        "content": Object {
+          "message": "a message to you
+
+      ---
+
+      This message was sent by Elastic.",
+          "messageHTML": "<html><body><span>My HTML message</span></body></html>",
+          "subject": "the subject",
+        },
+        "hasAuth": true,
+        "routing": Object {
+          "bcc": Array [
+            "jimmy@example.com",
+          ],
+          "cc": Array [
+            "james@example.com",
+          ],
+          "from": "bob@example.com",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+        "transport": Object {
+          "password": "supersecret",
+          "service": "__json",
+          "user": "bob",
+        },
+      }
+    `);
+  });
+
+  test('ensure error when using HTML message with no source', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "HTML email can only be sent via notifications",
+        "status": "error",
+      }
+    `);
+  });
+
+  test('ensure error when using HTML message with source HTTP_REQUEST', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "HTML email can only be sent via notifications",
+        "status": "error",
+      }
+    `);
+  });
+
+  test('ensure error when using HTML message with source SAVED_OBJECT', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "HTML email can only be sent via notifications",
+        "status": "error",
       }
     `);
   });
@@ -598,6 +723,7 @@ describe('execute()', () => {
       ---
 
       This message was sent by Elastic.",
+          "messageHTML": null,
           "subject": "the subject",
         },
         "hasAuth": false,
@@ -649,6 +775,7 @@ describe('execute()', () => {
       ---
 
       This message was sent by Elastic.",
+          "messageHTML": null,
           "subject": "the subject",
         },
         "hasAuth": false,
@@ -709,6 +836,49 @@ describe('execute()', () => {
       bcc: ['jim', '{{rogue}}', 'bob'],
       subject: '{{rogue}}',
       message: '{{rogue}}',
+      messageHTML: null,
+      kibanaFooterLink: {
+        path: '/',
+        text: 'Go to Elastic',
+      },
+    };
+    const variables = {
+      rogue: '*bold*',
+    };
+    const renderedParams = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
+
+    expect(renderedParams.message).toBe('\\*bold\\*');
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "bcc": Array [
+          "jim",
+          "*bold*",
+          "bob",
+        ],
+        "cc": Array [
+          "*bold*",
+        ],
+        "kibanaFooterLink": Object {
+          "path": "/",
+          "text": "Go to Elastic",
+        },
+        "message": "\\\\*bold\\\\*",
+        "messageHTML": null,
+        "subject": "*bold*",
+        "to": Array [],
+      }
+    `);
+  });
+
+  test('renders parameter templates with HTML as expected', async () => {
+    expect(connectorType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      to: [],
+      cc: ['{{rogue}}'],
+      bcc: ['jim', '{{rogue}}', 'bob'],
+      subject: '{{rogue}}',
+      message: '{{rogue}}',
+      messageHTML: `<html><body><span>{{rogue}}</span></body></html>`,
       kibanaFooterLink: {
         path: '/',
         text: 'Go to Elastic',
@@ -736,6 +906,7 @@ describe('execute()', () => {
           "text": "Go to Elastic",
         },
         "message": "\\\\*bold\\\\*",
+        "messageHTML": "<html><body><span>*bold*</span></body></html>",
         "subject": "*bold*",
         "to": Array [],
       }

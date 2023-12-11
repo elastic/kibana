@@ -15,11 +15,8 @@ import type {
   SavedObjectsUpdateOptions,
 } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
-import type { CommentType } from '../../../common';
-import type {
-  CommentAttributes as AttachmentAttributes,
-  CommentPatchAttributes as AttachmentPatchAttributes,
-} from '../../../common/api';
+import type { AttachmentType } from '../../../common';
+import type { AttachmentAttributes, AttachmentPatchAttributes } from '../../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type { PartialField } from '../../types';
 import type { IndexRefresh } from '../types';
@@ -59,7 +56,7 @@ export interface AlertIdsAggsResult {
 export type AlertsAttachedToCaseArgs = AttachedToCaseArgs;
 
 export interface AttachmentsAttachedToCaseArgs extends AttachedToCaseArgs {
-  attachmentType: CommentType;
+  attachmentType: AttachmentType;
   aggregations: Record<string, estypes.AggregationsAggregationContainer>;
 }
 

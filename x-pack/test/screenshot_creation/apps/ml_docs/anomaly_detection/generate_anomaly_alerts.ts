@@ -78,7 +78,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('anomaly detection alert', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
 
       const { job, datafeed } = createTestJobAndDatafeed();
 
@@ -123,6 +123,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           1920,
           1400
         );
+        await ml.alerting.selectSlackConnectorType();
+        await ml.testExecution.logTestStep('should open connectors');
+        await ml.alerting.clickCreateConnectorButton();
+        await ml.alerting.setConnectorName('test-connector');
+        await ml.alerting.setWebhookUrl('https://www.elastic.co');
+        await ml.alerting.clickSaveActionButton();
+        await commonScreenshots.takeScreenshot(
+          'ml-health-check-action',
+          screenshotDirectories,
+          1920,
+          1400
+        );
         await ml.alerting.clickCancelSaveRuleButton();
 
         await pageObjects.triggersActionsUI.clickCreateAlertButton();
@@ -150,16 +162,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           1920,
           1400
         );
-        await ml.alerting.selectSlackConnectorType();
-        await ml.testExecution.logTestStep('should open connectors');
-        await ml.alerting.clickCreateConnectorButton();
-        await ml.alerting.setConnectorName('test-connector');
-        await ml.alerting.setWebhookUrl('https://www.elastic.co');
-        await ml.alerting.clickSaveActionButton();
+        await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
+        await commonScreenshots.takeScreenshot(
+          'ml-anomaly-alert-action-score-matched',
+          screenshotDirectories,
+          1920,
+          1400
+        );
         await ml.alerting.openAddRuleVariable();
         await ml.testExecution.logTestStep('take screenshot');
         await commonScreenshots.takeScreenshot(
           'ml-anomaly-alert-messages',
+          screenshotDirectories,
+          1920,
+          1400
+        );
+        const actionFrequency = await testSubjects.find('summaryOrPerRuleSelect');
+        await actionFrequency.click();
+        const actionSummary = await testSubjects.find('actionNotifyWhen-option-summary');
+        await actionSummary.click();
+        await commonScreenshots.takeScreenshot(
+          'ml-anomaly-alert-action-summary',
           screenshotDirectories,
           1920,
           1400

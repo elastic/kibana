@@ -77,6 +77,18 @@ export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: 
   }, {} as { [K in TableIdLiteral]: DataTableModel });
 };
 
+/*
+ *
+ *  This migraiton only works for upgrading from
+ *  8.7 -> 8.8. Please do not edit this migration for any
+ *  future release.
+ *
+ *  If there is a migration that is required to be done for
+ *  any future release. It should written as a saperate piece of code
+ *  and should be called after this migration
+ *
+ * **/
+
 export const migrateAlertTableStateToTriggerActionsState = (
   storage: Storage,
   legacyDataTableState: DataTableState['dataTable']['tableById']
@@ -110,6 +122,47 @@ export const migrateAlertTableStateToTriggerActionsState = (
       storage.set(key, stateObj[key]);
     })
   );
+};
+
+/*
+ *
+ * Used for migrating Alert Table from 8.8 => 8.9
+ * */
+export const migrateTriggerActionsVisibleColumnsAlertTable88xTo89 = (storage: Storage) => {
+  const localStorageKeys = [
+    `detection-engine-alert-table-${ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}-gridView`,
+    `detection-engine-alert-table-${ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}-gridView`,
+  ];
+
+  localStorageKeys.forEach((key) => {
+    const alertTableData = storage.get(key);
+    if (!alertTableData) {
+      return;
+    }
+    if ('visibleColumns' in alertTableData) {
+      const visibleColumns =
+        alertTableData.visibleColumns as DataTableState['dataTable']['tableById'][string]['columns'];
+      const v89CompliantFormat = visibleColumns.every((val: unknown) => typeof val === 'string');
+      if (v89CompliantFormat) {
+        return;
+      }
+      const newVisibleColumns = visibleColumns
+        .map((visibleCol) => {
+          if (typeof visibleCol === 'string') {
+            // if column format is 8.9 compliant already
+            return visibleCol;
+          }
+          // if column format is 8.8
+          return visibleCol.id;
+        })
+        .filter(Boolean);
+
+      storage.set(key, {
+        ...alertTableData,
+        visibleColumns: newVisibleColumns,
+      });
+    }
+  });
 };
 
 /**
@@ -155,6 +208,7 @@ export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdL
   }
 
   migrateAlertTableStateToTriggerActionsState(storage, allDataTables);
+  migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
 
   return tableIds.reduce((acc, tableId) => {
     const tableModel = allDataTables[tableId];

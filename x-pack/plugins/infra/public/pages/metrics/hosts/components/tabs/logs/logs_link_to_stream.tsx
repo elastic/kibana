@@ -8,15 +8,17 @@ import React from 'react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LogViewReference } from '@kbn/logs-shared-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 
 interface LogsLinkToStreamProps {
   startTime: number;
   endTime: number;
   query: string;
+  logView: LogViewReference;
 }
 
-export const LogsLinkToStream = ({ startTime, endTime, query }: LogsLinkToStreamProps) => {
+export const LogsLinkToStream = ({ startTime, endTime, query, logView }: LogsLinkToStreamProps) => {
   const { services } = useKibanaContextForPlugin();
   const { locators } = services;
 
@@ -30,6 +32,7 @@ export const LogsLinkToStream = ({ startTime, endTime, query }: LogsLinkToStream
             endTime,
           },
           filter: query,
+          logView,
         })}
         data-test-subj="hostsView-logs-link-to-stream-button"
         iconType="popout"

@@ -180,7 +180,7 @@ export const exploreLinks: LinkItem = {
   id: SecurityPageName.exploreLanding,
   title: EXPLORE,
   path: EXPLORE_PATH,
-  globalNavPosition: 6,
+  globalNavPosition: 8,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.explore', {
@@ -188,5 +188,6 @@ export const exploreLinks: LinkItem = {
     }),
   ],
   links: [hostsLinks, networkLinks, usersLinks],
+  hideTimeline: true,
   skipUrlState: true,
 };

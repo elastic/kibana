@@ -16,10 +16,11 @@ import {
   useGetDownloadSources,
   useGetFleetServerHosts,
 } from '../../../../hooks';
-import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../../../../../common/constants';
+import { LICENCE_FOR_PER_POLICY_OUTPUT, outputType } from '../../../../../../../common/constants';
 import {
   getAllowedOutputTypeForPolicy,
   policyHasFleetServer,
+  policyHasSyntheticsIntegration,
 } from '../../../../../../../common/services';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 
@@ -62,11 +63,11 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
   const outputsRequest = useGetOutputs();
   const licenseService = useLicense();
 
-  const hasFleetServer = policyHasFleetServer(agentPolicy as AgentPolicy);
-
-  // Allow changing output when agent policy has fleet server
-  const isLicenceAllowingPolicyPerOutput =
-    licenseService.hasAtLeast(LICENCE_FOR_PER_POLICY_OUTPUT) || hasFleetServer;
+  // Allow changing output when agent policy has fleet server or synthetics integrations
+  const isPolicyPerOutputAllowed =
+    licenseService.hasAtLeast(LICENCE_FOR_PER_POLICY_OUTPUT) ||
+    policyHasFleetServer(agentPolicy as AgentPolicy) ||
+    policyHasSyntheticsIntegration(agentPolicy as AgentPolicy);
   const allowedOutputTypes = useMemo(
     () => getAllowedOutputTypeForPolicy(agentPolicy as AgentPolicy),
     [agentPolicy]
@@ -89,7 +90,7 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
     const defaultOutputDisabledMessage = defaultOutputDisabled ? (
       <FormattedMessage
         id="xpack.fleet.agentPolicyForm.outputOptionDisableOutputTypeText"
-        defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+        defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
         values={{
           outputType: defaultOutput.type,
         }}
@@ -98,28 +99,30 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
 
     return [
       getDefaultOutput(defaultOutputName, defaultOutputDisabled, defaultOutputDisabledMessage),
-      ...outputsRequest.data.items.map((item) => {
-        const isOutputTypeUnsupported = !allowedOutputTypes.includes(item.type);
+      ...outputsRequest.data.items
+        .filter((item) => item.type !== outputType.RemoteElasticsearch)
+        .map((item) => {
+          const isOutputTypeUnsupported = !allowedOutputTypes.includes(item.type);
 
-        return {
-          value: item.id,
-          inputDisplay: getOutputLabel(
-            item.name,
-            isOutputTypeUnsupported ? (
-              <FormattedMessage
-                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
-                values={{
-                  outputType: item.type,
-                }}
-              />
-            ) : undefined
-          ),
-          disabled: !isLicenceAllowingPolicyPerOutput || isOutputTypeUnsupported,
-        };
-      }),
+          return {
+            value: item.id,
+            inputDisplay: getOutputLabel(
+              item.name,
+              isOutputTypeUnsupported ? (
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
+                  defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
+                  values={{
+                    outputType: item.type,
+                  }}
+                />
+              ) : undefined
+            ),
+            disabled: !isPolicyPerOutputAllowed || isOutputTypeUnsupported,
+          };
+        }),
     ];
-  }, [outputsRequest, isLicenceAllowingPolicyPerOutput, allowedOutputTypes]);
+  }, [outputsRequest, isPolicyPerOutputAllowed, allowedOutputTypes]);
 
   const monitoringOutputOptions = useMemo(() => {
     if (outputsRequest.isLoading || !outputsRequest.data) {
@@ -135,11 +138,11 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
         return {
           value: item.id,
           inputDisplay: item.name,
-          disabled: !isLicenceAllowingPolicyPerOutput,
+          disabled: !isPolicyPerOutputAllowed,
         };
       }),
     ];
-  }, [outputsRequest, isLicenceAllowingPolicyPerOutput]);
+  }, [outputsRequest, isPolicyPerOutputAllowed]);
 
   return useMemo(
     () => ({

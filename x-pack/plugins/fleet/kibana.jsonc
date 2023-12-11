@@ -21,9 +21,9 @@
       "unifiedSearch",
       "savedObjectsTagging",
       "taskManager",
-      "guidedOnboarding",
       "files",
-      "uiActions"
+      "uiActions",
+      "dashboard"
     ],
     "optionalPlugins": [
       "features",
@@ -35,12 +35,12 @@
       "discover",
       "ingestPipelines",
       "spaces",
+      "guidedOnboarding",
     ],
     "requiredBundles": [
       "kibanaReact",
-      "cloudChat",
       "esUiShared",
-      "infra",
+      "logsShared",
       "kibanaUtils",
       "usageCollection",
       "unifiedSearch"

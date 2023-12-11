@@ -1,4 +1,4 @@
-title: Custom KQL indicator type definition
+title: Custom KQL
 required:
   - type
   - params
@@ -12,6 +12,8 @@ properties:
     required:
       - index
       - timestampField
+      - good
+      - total
     properties:
       index:
         description: The index or index pattern to use

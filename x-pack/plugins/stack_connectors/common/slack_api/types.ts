@@ -14,54 +14,77 @@ import {
   PostMessageSubActionParamsSchema,
   SlackApiSecretsSchema,
   SlackApiParamsSchema,
+  SlackApiConfigSchema,
+  ValidChannelIdSubActionParamsSchema,
 } from './schema';
 
 export type SlackApiSecrets = TypeOf<typeof SlackApiSecretsSchema>;
+export type SlackApiConfig = TypeOf<typeof SlackApiConfigSchema>;
 
 export type PostMessageParams = TypeOf<typeof PostMessageParamsSchema>;
 export type PostMessageSubActionParams = TypeOf<typeof PostMessageSubActionParamsSchema>;
+export type ValidChannelIdSubActionParams = TypeOf<typeof ValidChannelIdSubActionParamsSchema>;
 export type SlackApiParams = TypeOf<typeof SlackApiParamsSchema>;
-export type SlackApiConnectorType = ConnectorType<{}, SlackApiSecrets, SlackApiParams, unknown>;
+export type SlackApiConnectorType = ConnectorType<
+  SlackApiConfig,
+  SlackApiSecrets,
+  SlackApiParams,
+  unknown
+>;
 
 export type SlackApiExecutorOptions = ConnectorTypeExecutorOptions<
-  {},
+  SlackApiConfig,
   SlackApiSecrets,
   SlackApiParams
 >;
 
 export type SlackExecutorOptions = ConnectorTypeExecutorOptions<
-  {},
+  SlackApiConfig,
   SlackApiSecrets,
   SlackApiParams
 >;
 
 export type SlackApiActionParams = TypeOf<typeof SlackApiParamsSchema>;
 
-export interface GetChannelsResponse {
-  ok: true;
-  error?: string;
-  channels?: Array<{
-    id: string;
-    name: string;
-    is_channel: boolean;
-    is_archived: boolean;
-    is_private: boolean;
-  }>;
-}
-
-export interface PostMessageResponse {
+export interface SlackAPiResponse {
   ok: boolean;
-  channel?: string;
   error?: string;
   message?: {
     text: string;
   };
+  response_metadata?: {
+    next_cursor: string;
+  };
+}
+
+export interface ChannelResponse {
+  id: string;
+  name: string;
+  is_channel: boolean;
+  is_archived: boolean;
+  is_private: boolean;
+}
+
+export interface ValidChannelResponse extends SlackAPiResponse {
+  channel?: ChannelResponse;
+}
+
+export interface PostMessageResponse extends SlackAPiResponse {
+  channel?: string;
+}
+
+export interface ValidChannelRouteResponse {
+  validChannels: Array<{ id: string; name: string }>;
+  invalidChannels: string[];
 }
 
 export interface SlackApiService {
-  getChannels: () => Promise<ConnectorTypeExecutorResult<unknown>>;
+  validChannelId: (
+    channelId: string
+  ) => Promise<ConnectorTypeExecutorResult<ValidChannelResponse | void>>;
   postMessage: ({
     channels,
+    channelIds,
     text,
   }: PostMessageSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
 }

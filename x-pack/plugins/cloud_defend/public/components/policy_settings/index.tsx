@@ -18,7 +18,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { INPUT_CONTROL } from '../../../common/constants';
-import { getInputFromPolicy } from '../../common/utils';
+import { getInputFromPolicy } from '../../../common/utils/helpers';
 import * as i18n from './translations';
 import { ControlSettings } from '../control_settings';
 import { SettingsDeps, OnChangeDeps } from '../../types';

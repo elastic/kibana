@@ -14,5 +14,9 @@
   ],
   "exclude": [
     "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/core-analytics-browser",
   ]
 }

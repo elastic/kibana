@@ -3861,6 +3861,7 @@
     },
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
         "codec": "best_compression",
         "lifecycle": {
           "name": "apm-rollover-30-days",
@@ -7844,6 +7845,7 @@
     },
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
         "codec": "best_compression",
         "lifecycle": {
           "name": "apm-rollover-30-days",

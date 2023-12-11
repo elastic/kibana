@@ -15,6 +15,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { AllControlStates, State } from './state';
 import { createInitialState } from './initial_state';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -51,17 +52,19 @@ describe('migrationsStateActionMachine', () => {
       algorithm: 'v2',
       batchSize: 1000,
       maxBatchSizeBytes: new ByteSizeValue(1e8),
+      maxReadBatchSizeBytes: new ByteSizeValue(536870888),
       pollInterval: 0,
       scrollDuration: '0s',
       skip: false,
       retryAttempts: 5,
       zdt: {
         metaPickupSyncDelaySec: 120,
-        runOnNonMigratorNodes: false,
+        runOnRoles: ['migrator'],
       },
     },
     typeRegistry,
     docLinks,
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
     logger: mockLogger.get(),
   });
 

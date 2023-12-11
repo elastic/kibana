@@ -108,6 +108,9 @@ describe('getNormalizeCommonFields', () => {
             status: {
               enabled: statusEnabled ?? true,
             },
+            tls: {
+              enabled: true,
+            },
           },
           custom_heartbeat_id: 'test-id-test-projectId-test-namespace',
           enabled: true,
@@ -133,6 +136,7 @@ describe('getNormalizeCommonFields', () => {
           tags: [],
           timeout: '16',
           params: '',
+          max_attempts: 2,
         },
       });
     }
@@ -169,6 +173,9 @@ describe('getNormalizeCommonFields', () => {
           status: {
             enabled: true,
           },
+          tls: {
+            enabled: true,
+          },
         },
         custom_heartbeat_id: 'test-id-test-projectId-test-namespace',
         enabled: true,
@@ -194,6 +201,7 @@ describe('getNormalizeCommonFields', () => {
         tags: [],
         timeout: '16',
         params: '',
+        max_attempts: 2,
       },
     });
   });

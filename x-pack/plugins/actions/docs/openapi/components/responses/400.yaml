@@ -1,0 +1,18 @@
+description: Indicates a bad request.
+content:
+  application/json:
+    schema:
+      type: object
+      properties:
+        error: 
+          type: string
+          examples:
+            - Bad Request
+        message:
+          type: string
+          examples:
+            - "error validating action type config: [index]: expected value of type [string] but got [undefined]"
+        statusCode:
+          type: integer
+          examples:
+            - 400

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import globby from 'globby';
 import path from 'path';
 import fs from 'fs';
 import { createEsClientForTesting } from '@kbn/test';
@@ -26,12 +25,12 @@ export async function loadProfilingData({
     isCloud: true,
   });
 
-  const dataAsArray = globby.sync('*', { cwd: esArchiversPath }).flatMap((fileName) => {
-    const content = fs.readFileSync(`${esArchiversPath}/${fileName}`, 'utf8');
-    return content.split('\n');
-  });
+  const profilingData = fs.readFileSync(
+    `${esArchiversPath}/profiling_data_anonymized.json`,
+    'utf8'
+  );
 
-  await client.bulk({ operations: dataAsArray, refresh: 'wait_for' });
+  await client.bulk({ operations: profilingData.split('\n'), refresh: 'wait_for', timeout: '1m' });
   // eslint-disable-next-line no-console
   console.log('[Done] Loading Universal profiling data.');
 }

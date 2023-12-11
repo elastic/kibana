@@ -1,8 +1,23 @@
 {
   "cat.help": {
     "url_params": {
+      "format": [
+        "text"
+      ],
+      "h": [],
       "help": "__flag__",
-      "s": []
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "s": [],
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
     },
     "methods": [
       "GET"
@@ -10,6 +25,10 @@
     "patterns": [
       "_cat"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

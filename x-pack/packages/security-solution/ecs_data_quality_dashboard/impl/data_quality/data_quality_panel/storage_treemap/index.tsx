@@ -22,6 +22,7 @@ import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import {
   FlattenedBucket,
   getLayersMultiDimensional,
@@ -45,7 +46,8 @@ export interface Props {
   onIndexSelected: ({ indexName, pattern }: SelectedIndex) => void;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
 }
 
 interface GetGroupByFieldsResult {
@@ -89,23 +91,25 @@ const StorageTreemapComponent: React.FC<Props> = ({
   onIndexSelected,
   patternRollups,
   patterns,
-  theme,
+  theme = {},
+  baseTheme,
 }: Props) => {
-  const fillColor = useMemo(() => theme.background.color, [theme.background.color]);
+  const fillColor = useMemo(
+    () => theme?.background?.color ?? baseTheme.background.color,
+    [theme?.background?.color, baseTheme.background.color]
+  );
 
-  const treemapTheme: PartialTheme[] = useMemo(
-    () => [
-      {
-        partition: {
-          fillLabel: { valueFont: { fontWeight: 700 } },
-          idealFontSizeJump: 1.15,
-          maxFontSize: 16,
-          minFontSize: 4,
-          sectorLineStroke: fillColor, // draws the light or dark "lines" between partitions
-          sectorLineWidth: 1.5,
-        },
+  const treemapTheme = useMemo<PartialTheme>(
+    () => ({
+      partition: {
+        fillLabel: { valueFont: { fontWeight: 700 } },
+        idealFontSizeJump: 1.15,
+        maxFontSize: 16,
+        minFontSize: 4,
+        sectorLineStroke: fillColor, // draws the light or dark "lines" between partitions
+        sectorLineWidth: 1.5,
       },
-    ],
+    }),
     [fillColor]
   );
 
@@ -151,10 +155,11 @@ const StorageTreemapComponent: React.FC<Props> = ({
         ) : (
           <Chart>
             <Settings
-              baseTheme={theme}
+              baseTheme={baseTheme}
               showLegend={false}
-              theme={treemapTheme}
+              theme={[treemapTheme, theme]}
               onElementClick={onElementClick}
+              locale={i18n.getLocale()}
             />
             <Partition
               data={flattenedBuckets}

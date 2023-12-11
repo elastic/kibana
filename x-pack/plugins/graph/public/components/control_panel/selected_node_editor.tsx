@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Workspace, WorkspaceNode } from '../../types';
+import { IconRenderer } from '../icon_renderer';
 
 interface SelectedNodeEditorProps {
   workspace: Workspace;
@@ -17,6 +18,7 @@ interface SelectedNodeEditorProps {
 }
 
 export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEditorProps) => {
+  const { euiTheme } = useEuiTheme();
   const groupButtonMsg = i18n.translate('xpack.graph.sidebar.groupButtonTooltip', {
     defaultMessage: 'group the currently selected items into {latestSelectionLabel}',
     values: { latestSelectionLabel: selectedNode.label },
@@ -40,35 +42,27 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
   return (
     <div className="gphSidebar__panel">
       <div className="gphSidebar__header">
-        {selectedNode.icon && <span className={`kuiIcon ${selectedNode.icon.class}`} />}
+        <IconRenderer icon={selectedNode.icon} color={euiTheme.colors.darkShade} />{' '}
         {selectedNode.data.field} {selectedNode.data.term}
       </div>
 
       {(workspace.selectedNodes.length > 1 ||
         (workspace.selectedNodes.length > 0 && workspace.selectedNodes[0] !== selectedNode)) && (
         <EuiToolTip content={groupButtonMsg}>
-          <button
-            className="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small"
-            onClick={onGroupButtonClick}
-          >
-            <span className="kuiButton__icon kuiIcon fa-object-group" />
+          <EuiButtonEmpty iconType="fold" onClick={onGroupButtonClick}>
             <FormattedMessage id="xpack.graph.sidebar.groupButtonLabel" defaultMessage="group" />
-          </button>
+          </EuiButtonEmpty>
         </EuiToolTip>
       )}
 
       {selectedNode.numChildren > 0 && (
         <EuiToolTip content={ungroupButtonMsg}>
-          <button
-            className="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small"
-            onClick={onClickUngroup}
-          >
-            <span className="kuiIcon fa-object-ungroup" />
+          <EuiButtonEmpty iconType="unfold" onClick={onClickUngroup}>
             <FormattedMessage
               id="xpack.graph.sidebar.ungroupButtonLabel"
               defaultMessage="ungroup"
             />
-          </button>
+          </EuiButtonEmpty>
         </EuiToolTip>
       )}
 

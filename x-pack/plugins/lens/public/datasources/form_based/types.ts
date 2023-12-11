@@ -55,6 +55,7 @@ export interface FormBasedLayer {
   // Partial columns represent the temporary invalid states
   incompleteColumns?: Record<string, IncompleteColumn>;
   sampling?: number;
+  ignoreGlobalFilters?: boolean;
 }
 
 export interface FormBasedPersistedState {
@@ -66,7 +67,6 @@ export type PersistedIndexPatternLayer = Omit<FormBasedLayer, 'indexPatternId'>;
 export interface FormBasedPrivateState {
   currentIndexPatternId: string;
   layers: Record<string, FormBasedLayer>;
-  isDimensionClosePrevented?: boolean;
 }
 
 export interface DataViewDragDropOperation extends DragDropOperation {

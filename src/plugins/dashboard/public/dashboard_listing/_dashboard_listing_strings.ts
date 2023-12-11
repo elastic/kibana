@@ -14,6 +14,13 @@ export const dashboardListingErrorStrings = {
     i18n.translate('dashboard.deleteError.toastDescription', {
       defaultMessage: 'Error encountered while deleting dashboard',
     }),
+  getDuplicateTitleWarning: (value: string) =>
+    i18n.translate('dashboard.dashboardListingEditErrorTitle.duplicateWarning', {
+      defaultMessage: 'Saving "{value}" creates a duplicate title',
+      values: {
+        value,
+      },
+    }),
 };
 
 export const getNewDashboardTitle = () =>

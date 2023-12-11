@@ -10,20 +10,18 @@ import React from 'react';
 import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IUiSettingsClient, HttpStart } from '@kbn/core/public';
-
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { ContentClient } from '@kbn/content-management-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import type { BaseVisType } from '../../vis_types';
 import { DialogNavigation } from '../dialog_navigation';
 import { showSavedObject } from './show_saved_object';
 
 interface SearchSelectionProps {
+  contentClient: ContentClient;
+  uiSettings: IUiSettingsClient;
   onSearchSelected: (searchId: string, searchType: string) => void;
   visType: BaseVisType;
-  uiSettings: IUiSettingsClient;
-  http: HttpStart;
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
   goBack: () => void;
 }
 
@@ -81,14 +79,12 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                     defaultMessage: 'Data view',
                   }
                 ),
-                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={this.fixedPageSize}
             services={{
+              contentClient: this.props.contentClient,
               uiSettings: this.props.uiSettings,
-              http: this.props.http,
-              savedObjectsManagement: this.props.savedObjectsManagement,
             }}
           />
         </EuiModalBody>

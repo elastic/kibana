@@ -8,22 +8,23 @@
 import React, { type FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { useChangePointDetectionContext } from './change_point_detection_context';
+import { useChangePointDetectionControlsContext } from './change_point_detection_context';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 interface MetricFieldSelectorProps {
   value: string;
   onChange: (value: string) => void;
+  inline?: boolean;
 }
 
 export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
-  ({ value, onChange }) => {
+  ({ value, onChange, inline = true }) => {
     const { fieldStats } = useAiopsAppContext();
-    const { metricFieldOptions } = useChangePointDetectionContext();
+    const { metricFieldOptions } = useChangePointDetectionControlsContext();
 
-    const { renderOption, closeFlyout } = fieldStats!.useFieldStatsTrigger();
+    const { renderOption, closeFlyout } = fieldStats?.useFieldStatsTrigger() ?? {};
 
-    const options = useMemo<EuiComboBoxOptionOption[]>(() => {
+    const options = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
       return metricFieldOptions.map((v) => {
         return {
           value: v.name,
@@ -41,26 +42,30 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
         if (typeof option !== 'undefined') {
           onChange(option.value as string);
         }
-        closeFlyout();
+        if (closeFlyout) {
+          closeFlyout();
+        }
       },
       [onChange, closeFlyout]
     );
 
+    const label = i18n.translate('xpack.aiops.changePointDetection.selectMetricFieldLabel', {
+      defaultMessage: 'Metric field',
+    });
+
     return (
       <>
-        <EuiFormRow>
+        <EuiFormRow fullWidth label={inline ? undefined : label}>
           <EuiComboBox
+            fullWidth
             compressed
-            prepend={i18n.translate('xpack.aiops.changePointDetection.selectMetricFieldLabel', {
-              defaultMessage: 'Metric field',
-            })}
+            prepend={inline ? label : undefined}
             singleSelection={{ asPlainText: true }}
             options={options}
             selectedOptions={selection}
             onChange={onChangeCallback}
             isClearable={false}
             data-test-subj="aiopsChangePointMetricField"
-            // @ts-ignore
             renderOption={renderOption}
           />
         </EuiFormRow>

@@ -16,7 +16,6 @@ const STORYBOOKS = [
   'canvas',
   'cases',
   'cell_actions',
-  'ci_composite',
   'cloud_chat',
   'coloring',
   'chart_icons',
@@ -26,6 +25,7 @@ const STORYBOOKS = [
   'dashboard_enhanced',
   'dashboard',
   'data',
+  'log_explorer',
   'embeddable',
   'expression_error',
   'expression_image',
@@ -34,6 +34,7 @@ const STORYBOOKS = [
   'expression_reveal_image',
   'expression_shape',
   'expression_tagcloud',
+  'management',
   'fleet',
   'grouping',
   'home',
@@ -41,8 +42,10 @@ const STORYBOOKS = [
   'kibana_react',
   'lists',
   'observability',
+  'observability_ai_assistant',
   'presentation',
   'security_solution',
+  'security_solution_packages',
   'serverless',
   'shared_ux',
   'triggers_actions_ui',
@@ -89,14 +92,12 @@ const upload = () => {
     console.log('--- Generating Storybooks HTML');
 
     process.chdir(path.join('.', 'built_assets', 'storybook'));
-    fs.renameSync('ci_composite', 'composite');
 
     const storybooks = execSync(`ls -1d */`)
       .toString()
       .trim()
       .split('\n')
-      .map((filePath) => filePath.replace('/', ''))
-      .filter((filePath) => filePath !== 'composite');
+      .map((filePath) => filePath.replace('/', ''));
 
     const listHtml = storybooks
       .map((storybook) => `<li><a href="${STORYBOOK_BASE_URL}/${storybook}">${storybook}</a></li>`)
@@ -106,8 +107,6 @@ const upload = () => {
       <html>
         <body>
           <h1>Storybooks</h1>
-          <p><a href="${STORYBOOK_BASE_URL}/composite">Composite Storybook</a></p>
-          <h2>All</h2>
           <ul>
             ${listHtml}
           </ul>

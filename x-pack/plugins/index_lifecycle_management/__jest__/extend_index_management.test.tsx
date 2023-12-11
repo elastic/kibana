@@ -5,22 +5,24 @@
  * 2.0.
  */
 
+import React from 'react';
 import moment from 'moment-timezone';
 
 import { init } from '../integration_tests/helpers/http_requests';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
-import { Index } from '../common/types';
 import {
   retryLifecycleActionExtension,
   removeLifecyclePolicyActionExtension,
   addLifecyclePolicyActionExtension,
   ilmBannerExtension,
   ilmFilterExtension,
-  ilmSummaryExtension,
 } from '../public/extend_index_management';
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
+import { indexLifecycleTab } from '../public/extend_index_management/components/index_lifecycle_summary';
+import { Index } from '@kbn/index-management-plugin/common';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 const { httpSetup } = init();
 
@@ -80,7 +82,7 @@ const indexWithLifecyclePolicy: Index = {
   },
 };
 
-const indexWithLifecycleError = {
+const indexWithLifecycleError: Index = {
   health: 'yellow',
   status: 'open',
   name: 'testy3',
@@ -110,11 +112,72 @@ const indexWithLifecycleError = {
       type: 'illegal_argument_exception',
       reason: 'setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined',
     },
+  },
+};
+const indexWithLifecyclePhaseDefinition: Index = {
+  health: 'yellow',
+  status: 'open',
+  name: 'testy3',
+  uuid: 'XL11TLa3Tvq298_dMUzLHQ',
+  primary: 1,
+  replica: 1,
+  documents: 2,
+  documents_deleted: 0,
+  size: '6.5kb',
+  primary_size: '6.5kb',
+  aliases: 'none',
+  isFrozen: false,
+  hidden: false,
+  ilm: {
+    index: 'testy3',
+    managed: true,
+    policy: 'testy',
+    lifecycle_date_millis: 1544020872361,
+    phase: 'hot',
+    phase_time_millis: 1544187775891,
+    action: 'rollover',
+    action_time_millis: 1544187775891,
+    step: 'test',
+    step_time_millis: 1544187776208,
     phase_execution: {
       policy: 'testy',
+      // @ts-expect-error ILM type is incorrect https://github.com/elastic/elasticsearch-specification/issues/2326
       phase_definition: { min_age: '0s', actions: { rollover: { max_size: '1gb' } } },
       version: 1,
       modified_date_in_millis: 1544031699844,
+    },
+  },
+};
+const indexWithLifecycleWaitingStep: Index = {
+  health: 'yellow',
+  status: 'open',
+  name: 'testy3',
+  uuid: 'XL11TLa3Tvq298_dMUzLHQ',
+  primary: 1,
+  replica: 1,
+  documents: 2,
+  documents_deleted: 0,
+  size: '6.5kb',
+  primary_size: '6.5kb',
+  aliases: 'none',
+  isFrozen: false,
+  hidden: false,
+  ilm: {
+    index: 'testy3',
+    managed: true,
+    policy: 'testy',
+    lifecycle_date_millis: 1544020872361,
+    phase: 'hot',
+    phase_time_millis: 1544187775891,
+    action: 'rollover',
+    action_time_millis: 1544187775891,
+    step: 'test',
+    step_time_millis: 1544187776208,
+    step_info: {
+      message: 'Waiting for all shard copies to be active',
+      shards_left_to_allocate: -1,
+      all_shards_active: false,
+      number_of_replicas: 2,
     },
   },
 };
@@ -242,24 +305,73 @@ describe('extend index management', () => {
   });
 
   describe('ilm summary extension', () => {
-    test('should render null when index has no index lifecycle policy', () => {
-      const extension = ilmSummaryExtension(indexWithoutLifecyclePolicy, getUrlForApp);
-      const rendered = mountWithIntl(extension);
-      expect(rendered.isEmptyRender()).toBeTruthy();
+    const IlmComponent = indexLifecycleTab.renderTabContent;
+    const policyPropertiesPanel = 'policyPropertiesPanel';
+    const policyStepPanel = 'policyStepPanel';
+    const policyErrorPanel = 'policyErrorPanel';
+    const phaseDefinitionPanel = 'phaseDefinitionPanel';
+
+    test('should not render the tab when index has no index lifecycle policy', () => {
+      const shouldRenderTab =
+        indexLifecycleTab.shouldRenderTab &&
+        indexLifecycleTab.shouldRenderTab({
+          index: indexWithoutLifecyclePolicy,
+        });
+      expect(shouldRenderTab).toBeFalsy();
     });
 
-    test('should return extension when index has lifecycle policy', () => {
-      const extension = ilmSummaryExtension(indexWithLifecyclePolicy, getUrlForApp);
-      expect(extension).toBeDefined();
-      const rendered = mountWithIntl(extension);
+    test('should render the tab when index has lifecycle policy', () => {
+      const shouldRenderTab =
+        indexLifecycleTab.shouldRenderTab &&
+        indexLifecycleTab.shouldRenderTab({
+          index: indexWithLifecyclePolicy,
+        });
+      expect(shouldRenderTab).toBeTruthy();
+      const ilmContent = (
+        <IlmComponent index={indexWithLifecyclePolicy} getUrlForApp={getUrlForApp} />
+      );
+      const rendered = mountWithIntl(ilmContent);
       expect(rendered.render()).toMatchSnapshot();
+      expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
+      expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeFalsy();
+      expect(findTestSubject(rendered, policyStepPanel).exists()).toBeFalsy();
+      expect(findTestSubject(rendered, policyErrorPanel).exists()).toBeFalsy();
     });
 
-    test('should return extension when index has lifecycle error', () => {
-      const extension = ilmSummaryExtension(indexWithLifecycleError, getUrlForApp);
-      expect(extension).toBeDefined();
-      const rendered = mountWithIntl(extension);
+    test('should render an error panel when index has lifecycle error', () => {
+      const ilmContent = (
+        <IlmComponent index={indexWithLifecycleError} getUrlForApp={getUrlForApp} />
+      );
+      const rendered = mountWithIntl(ilmContent);
       expect(rendered.render()).toMatchSnapshot();
+      expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
+      expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeFalsy();
+      expect(findTestSubject(rendered, policyStepPanel).exists()).toBeFalsy();
+      expect(findTestSubject(rendered, policyErrorPanel).exists()).toBeTruthy();
+    });
+
+    test('should render a phase definition panel when lifecycle has phase definition', () => {
+      const ilmContent = (
+        <IlmComponent index={indexWithLifecyclePhaseDefinition} getUrlForApp={getUrlForApp} />
+      );
+      const rendered = mountWithIntl(ilmContent);
+      expect(rendered.render()).toMatchSnapshot();
+      expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
+      expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeTruthy();
+      expect(findTestSubject(rendered, policyStepPanel).exists()).toBeFalsy();
+      expect(findTestSubject(rendered, policyErrorPanel).exists()).toBeFalsy();
+    });
+
+    test('should render a step info panel when lifecycle is waiting for a step completion', () => {
+      const ilmContent = (
+        <IlmComponent index={indexWithLifecycleWaitingStep} getUrlForApp={getUrlForApp} />
+      );
+      const rendered = mountWithIntl(ilmContent);
+      expect(rendered.render()).toMatchSnapshot();
+      expect(findTestSubject(rendered, policyPropertiesPanel).exists()).toBeTruthy();
+      expect(findTestSubject(rendered, phaseDefinitionPanel).exists()).toBeFalsy();
+      expect(findTestSubject(rendered, policyStepPanel).exists()).toBeTruthy();
+      expect(findTestSubject(rendered, policyErrorPanel).exists()).toBeFalsy();
     });
   });
 

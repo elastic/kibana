@@ -17,7 +17,7 @@ import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { Coordinate } from '../../../../typings/timeseries';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
@@ -114,11 +114,15 @@ export async function getServiceInstancesTransactionStatistics<
       filter: [
         { term: { [SERVICE_NAME]: serviceName } },
         { term: { [TRANSACTION_TYPE]: transactionType } },
-        ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
+        ...getBackwardCompatibleDocumentTypeFilter(
+          searchAggregatedTransactions
+        ),
         ...rangeQuery(startWithOffset, endWithOffset),
         ...environmentQuery(environment),
         ...kqlQuery(kuery),
-        ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
+        ...getBackwardCompatibleDocumentTypeFilter(
+          searchAggregatedTransactions
+        ),
         ...(isComparisonSearch && serviceNodeIds
           ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
           : []),

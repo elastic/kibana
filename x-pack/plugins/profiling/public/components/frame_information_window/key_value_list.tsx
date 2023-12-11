@@ -9,20 +9,31 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
 
 interface Props {
-  rows: Array<{ label: string | React.ReactNode; value: React.ReactNode }>;
+  'data-test-subj'?: string;
+  rows: Array<{
+    label: string | React.ReactNode;
+    value: React.ReactNode;
+    'data-test-subj'?: string;
+  }>;
+  prependString?: string;
 }
 
-export function KeyValueList({ rows }: Props) {
+export function KeyValueList({ rows, prependString = '', ...props }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {rows.map((row, index) => (
-        <>
+        <React.Fragment key={index}>
           <EuiFlexItem>
             <EuiFlexGroup direction="row">
               <EuiFlexItem grow style={{ display: 'flex', flexDirection: 'row' }}>
                 {row.label}:
               </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end', overflowWrap: 'anywhere' }}>
+              <EuiFlexItem
+                grow={false}
+                style={{ alignSelf: 'flex-end', overflowWrap: 'anywhere' }}
+                data-test-subj={`${props['data-test-subj']}_${row['data-test-subj']}`}
+              >
+                {prependString}
                 {row.value}
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -32,7 +43,7 @@ export function KeyValueList({ rows }: Props) {
               <EuiHorizontalRule size="full" margin="none" />
             </EuiFlexItem>
           ) : undefined}
-        </>
+        </React.Fragment>
       ))}
     </EuiFlexGroup>
   );

@@ -21,7 +21,7 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
+import { AlertTableConfigRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/alert_table_config_registry';
 import {
   AlertsTableConfigurationRegistry,
   AlertsTableFlyoutBaseProps,
@@ -81,8 +81,7 @@ export class TriggersActionsUiExamplePlugin
   ) {
     const {
       alertsTableConfigurationRegistry,
-    }: { alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry> } =
-      triggersActionsUi;
+    }: { alertsTableConfigurationRegistry: AlertTableConfigRegistry } = triggersActionsUi;
 
     const columns: EuiDataGridColumn[] = [
       {
@@ -139,8 +138,8 @@ export class TriggersActionsUiExamplePlugin
       id: 'observabilityCases',
       columns,
       useInternalFlyout,
-      getRenderCellValue: () => (props: any) => {
-        const value = props.data.find((d: any) => d.field === props.columnId)?.value ?? [];
+      getRenderCellValue: () => (props) => {
+        const value = props.data.find((d) => d.field === props.columnId)?.value ?? [];
 
         if (Array.isArray(value)) {
           return <>{value.length ? value.join() : '--'}</>;

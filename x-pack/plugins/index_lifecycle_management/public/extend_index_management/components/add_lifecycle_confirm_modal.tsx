@@ -25,10 +25,11 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 
+import { Index } from '@kbn/index-management-plugin/common';
 import { loadPolicies, addLifecyclePolicyToIndex } from '../../application/services/api';
 import { showApiError } from '../../application/services/api_errors';
 import { toasts } from '../../application/services/notification';
-import { Index, PolicyFromES } from '../../../common/types';
+import { PolicyFromES } from '../../../common/types';
 
 interface Props {
   indexName: string;

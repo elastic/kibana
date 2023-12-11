@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CommentAttributes } from '../api';
-import { CommentType } from '../api';
+import type { AttachmentAttributes } from '../types/domain';
+import { AttachmentType } from '../types/domain';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
@@ -15,11 +15,11 @@ import {
 describe('attachments utils', () => {
   describe('isCommentRequestTypeExternalReference', () => {
     const externalReferenceAttachment = {
-      type: CommentType.externalReference as const,
-    } as CommentAttributes;
+      type: AttachmentType.externalReference as const,
+    } as AttachmentAttributes;
 
-    const commentTypeWithoutAlert = Object.values(CommentType).filter(
-      (type) => type !== CommentType.externalReference
+    const commentTypeWithoutAlert = Object.values(AttachmentType).filter(
+      (type) => type !== AttachmentType.externalReference
     );
 
     it('returns false for type: externalReference', () => {
@@ -29,7 +29,7 @@ describe('attachments utils', () => {
     it.each(commentTypeWithoutAlert)('returns false for type: %s', (type) => {
       const attachment = {
         type,
-      } as CommentAttributes;
+      } as AttachmentAttributes;
 
       expect(isCommentRequestTypeExternalReference(attachment)).toBe(false);
     });
@@ -37,11 +37,11 @@ describe('attachments utils', () => {
 
   describe('isCommentRequestTypePersistableState', () => {
     const persistableStateAttachment = {
-      type: CommentType.persistableState as const,
-    } as CommentAttributes;
+      type: AttachmentType.persistableState as const,
+    } as AttachmentAttributes;
 
-    const commentTypeWithoutAlert = Object.values(CommentType).filter(
-      (type) => type !== CommentType.persistableState
+    const commentTypeWithoutAlert = Object.values(AttachmentType).filter(
+      (type) => type !== AttachmentType.persistableState
     );
 
     it('returns false for type: persistableState', () => {
@@ -51,7 +51,7 @@ describe('attachments utils', () => {
     it.each(commentTypeWithoutAlert)('returns false for type: %s', (type) => {
       const attachment = {
         type,
-      } as CommentAttributes;
+      } as AttachmentAttributes;
 
       expect(isCommentRequestTypePersistableState(attachment)).toBe(false);
     });

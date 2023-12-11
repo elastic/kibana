@@ -28,6 +28,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           .sort()
       ).to.eql(
         [
+          '.d3security',
           '.email',
           '.index',
           '.pagerduty',
@@ -48,6 +49,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.torq',
           '.opsgenie',
           '.gen-ai',
+          '.bedrock',
         ].sort()
       );
     });

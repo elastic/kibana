@@ -7,11 +7,7 @@
 
 import React, { useContext, useState } from 'react';
 
-import {
-  EuiPageHeader,
-  EuiSpacer,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer, EuiPageSection } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ExecuteDetails } from '../../../../models/execute_details';
 import { getActionType } from '../../../../../../common/lib/get_action_type';
@@ -94,7 +90,7 @@ export const JsonWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   );
 
   return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+    <EuiPageSection restrictWidth style={{ width: '100%' }}>
       <EuiPageHeader
         pageTitle={<span data-test-subj="pageTitle">{pageTitle}</span>}
         bottomBorder
@@ -128,6 +124,6 @@ export const JsonWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
       )}
 
       {selectedTab === WATCH_EDIT_TAB && <JsonWatchEditForm />}
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };

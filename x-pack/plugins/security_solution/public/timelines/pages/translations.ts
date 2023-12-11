@@ -45,3 +45,18 @@ export const UPDATE_TIMELINE_ERROR_TEXT = i18n.translate(
     defaultMessage: 'Something went wrong',
   }
 );
+
+export const TIMELINE_VERSION_CONFLICT_TITLE = i18n.translate(
+  'xpack.securitySolution.timelines.timelineVersionConflictTitle',
+  {
+    defaultMessage: 'Version conflict',
+  }
+);
+
+export const TIMELINE_VERSION_CONFLICT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.timelines.timelineVersionConflictDescription',
+  {
+    defaultMessage:
+      'Another user has made changes to this timeline. You need to refresh the page to make changes to this timeline.',
+  }
+);

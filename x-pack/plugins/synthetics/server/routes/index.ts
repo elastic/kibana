@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+import { getSyntheticsParamsRoute } from './settings/params/params';
+import { editSyntheticsParamsRoute } from './settings/params/edit_param';
+import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
+import { getActionConnectorsRoute } from './default_alerts/get_action_connectors';
+import { SyntheticsRestApiRouteFactory } from './types';
+import { getSyntheticsCertsRoute } from './certs/get_certificates';
+import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
+import { inspectSyntheticsMonitorRoute } from './monitor_cruds/inspect_monitor';
 import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
 import { createJourneyScreenshotRoute } from './pings/journey_screenshots';
 import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_blocks';
@@ -12,8 +20,6 @@ import { createLastSuccessfulCheckRoute } from './pings/last_successful_check';
 import { createJourneyFailedStepsRoute, createJourneyRoute } from './pings/journeys';
 import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
 import { syncParamsSyntheticsParamsRoute } from './settings/sync_global_params';
-import { editSyntheticsParamsRoute } from './settings/edit_param';
-import { getSyntheticsParamsRoute } from './settings/params';
 import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
@@ -35,16 +41,9 @@ import { installIndexTemplatesRoute } from './synthetics_service/install_index_t
 import { editSyntheticsMonitorRoute } from './monitor_cruds/edit_monitor';
 import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
 import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/add_monitor_project';
-import { addSyntheticsProjectMonitorRouteLegacy } from './monitor_cruds/add_monitor_project_legacy';
 import { syntheticsGetPingsRoute, syntheticsGetPingStatusesRoute } from './pings';
 import { createGetCurrentStatusRoute } from './overview_status/overview_status';
-import {
-  SyntheticsRestApiRouteFactory,
-  SyntheticsStreamingRouteFactory,
-} from '../legacy_uptime/routes';
 import { getHasIntegrationMonitorsRoute } from './fleet/get_has_integration_monitors';
-import { addSyntheticsParamsRoute } from './settings/add_param';
-import { deleteSyntheticsParamsRoute } from './settings/delete_param';
 import { enableDefaultAlertingRoute } from './default_alerts/enable_default_alert';
 import { getDefaultAlertingRoute } from './default_alerts/get_default_alert';
 import { createNetworkEventsRoute } from './network_events';
@@ -54,6 +53,8 @@ import { getPrivateLocationsRoute } from './settings/private_locations/get_priva
 import { getSyntheticsFilters } from './filters/filters';
 import { getAllSyntheticsMonitorRoute } from './monitor_cruds/get_monitors_list';
 import { getLocationMonitors } from './settings/private_locations/get_location_monitors';
+import { addSyntheticsParamsRoute } from './settings/params/add_param';
+import { deleteSyntheticsParamsRoute } from './settings/params/delete_param';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
@@ -78,10 +79,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getHasIntegrationMonitorsRoute,
   createGetCurrentStatusRoute,
   getIndexSizesRoute,
-  getSyntheticsParamsRoute,
-  editSyntheticsParamsRoute,
-  addSyntheticsParamsRoute,
-  deleteSyntheticsParamsRoute,
   syncParamsSyntheticsParamsRoute,
   enableDefaultAlertingRoute,
   getDefaultAlertingRoute,
@@ -93,13 +90,21 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createNetworkEventsRoute,
   createJourneyScreenshotRoute,
   deletePackagePolicyRoute,
-  addPrivateLocationRoute,
-  deletePrivateLocationRoute,
   getLocationMonitors,
-  getPrivateLocationsRoute,
   getSyntheticsFilters,
+  inspectSyntheticsMonitorRoute,
+  getAgentPoliciesRoute,
+  getSyntheticsCertsRoute,
+  getActionConnectorsRoute,
+  getConnectorTypesRoute,
 ];
 
-export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [
-  addSyntheticsProjectMonitorRouteLegacy,
+export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
+  getSyntheticsParamsRoute,
+  editSyntheticsParamsRoute,
+  addSyntheticsParamsRoute,
+  deleteSyntheticsParamsRoute,
+  addPrivateLocationRoute,
+  deletePrivateLocationRoute,
+  getPrivateLocationsRoute,
 ];

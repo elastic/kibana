@@ -12,10 +12,10 @@ import type {
   KibanaFeature,
 } from '@kbn/features-plugin/server';
 
-import type { SecurityLicense } from '../../../common/licensing';
+import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
+import type { SecurityLicense } from '../../../common';
 import type { RawKibanaPrivileges } from '../../../common/model';
 import type { Actions } from '../actions';
-import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 
 export interface PrivilegesService {
   get(respectLicenseLevel?: boolean): RawKibanaPrivileges;
@@ -37,8 +37,8 @@ export function privilegesFactory(
         (feature) => !feature.excludeFromBasePrivileges
       );
 
-      let allActions: string[] = [];
-      let readActions: string[] = [];
+      const allActionsSet = new Set<string>();
+      const readActionsSet = new Set<string>();
 
       basePrivilegeFeatures.forEach((feature) => {
         for (const { privilegeId, privilege } of featuresService.featurePrivilegeIterator(feature, {
@@ -47,15 +47,17 @@ export function privilegesFactory(
           predicate: (pId, featurePrivilege) => !featurePrivilege.excludeFromBasePrivileges,
         })) {
           const privilegeActions = featurePrivilegeBuilder.getActions(privilege, feature);
-          allActions = [...allActions, ...privilegeActions];
-          if (privilegeId === 'read') {
-            readActions = [...readActions, ...privilegeActions];
-          }
+          privilegeActions.forEach((action) => {
+            allActionsSet.add(action);
+            if (privilegeId === 'read') {
+              readActionsSet.add(action);
+            }
+          });
         }
       });
 
-      allActions = uniq(allActions);
-      readActions = uniq(readActions);
+      const allActions = [...allActionsSet];
+      const readActions = [...readActionsSet];
 
       const featurePrivileges: Record<string, Record<string, string[]>> = {};
       for (const feature of features) {

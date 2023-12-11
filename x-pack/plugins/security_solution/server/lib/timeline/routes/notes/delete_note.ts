@@ -17,7 +17,7 @@ import type { ConfigType } from '../../../..';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import { deleteNoteSchema } from '../../schemas/notes';
+import { deleteNoteSchema } from '../../../../../common/api/timeline';
 import { deleteNote } from '../../saved_object/notes';
 
 export const deleteNoteRoute = (
@@ -25,38 +25,43 @@ export const deleteNoteRoute = (
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {
-  router.delete(
-    {
+  router.versioned
+    .delete({
       path: NOTE_URL,
-      validate: {
-        body: buildRouteValidationWithExcess(deleteNoteSchema),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
+      access: 'public',
+    })
+    .addVersion(
+      {
+        validate: {
+          request: { body: buildRouteValidationWithExcess(deleteNoteSchema) },
+        },
+        version: '2023-10-31',
+      },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const noteId = request.body?.noteId ?? '';
+        try {
+          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const noteId = request.body?.noteId ?? '';
 
-        const res = await deleteNote({
-          request: frameworkRequest,
-          noteId,
-        });
+          const res = await deleteNote({
+            request: frameworkRequest,
+            noteId,
+          });
 
-        return response.ok({
-          body: { data: { persistNote: res } },
-        });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          return response.ok({
+            body: { data: { persistNote: res } },
+          });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

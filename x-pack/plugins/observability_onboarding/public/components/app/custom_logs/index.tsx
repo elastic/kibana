@@ -5,99 +5,83 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { CustomIntegrationOptions } from '@kbn/custom-integrations';
 import { i18n } from '@kbn/i18n';
-import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import React, { ComponentType, useRef, useState } from 'react';
-import { breadcrumbsApp } from '../../../application/app';
 import {
-  FilmstripFrame,
-  FilmstripTransition,
-  TransitionState,
-} from '../../shared/filmstrip_transition';
-import { Provider as WizardProvider, Step as WizardStep } from './wizard';
-import { HorizontalSteps } from './wizard/horizontal_steps';
+  createWizardContext,
+  Step,
+} from '../../../context/create_wizard_context';
+import { ConfigureLogs } from './configure_logs';
+import { Inspect } from './inspect';
+import { InstallElasticAgent } from './install_elastic_agent';
+import { SelectLogs } from './select_logs';
 
-export function CustomLogs() {
-  useBreadcrumbs(
-    [
+interface WizardState {
+  integrationName?: string;
+  lastCreatedIntegrationOptions?: CustomIntegrationOptions;
+  datasetName?: string;
+  serviceName: string;
+  logFilePaths: string[];
+  namespace: string;
+  customConfigurations: string;
+  logsType?:
+    | 'system'
+    | 'sys'
+    | 'http-endpoint'
+    | 'opentelemetry'
+    | 'amazon-firehose'
+    | 'log-file'
+    | 'service';
+  uploadType?: 'log-file' | 'api-key';
+  elasticAgentPlatform: 'linux-tar' | 'macos' | 'windows' | 'deb' | 'rpm';
+  autoDownloadConfig: boolean;
+  apiKeyEncoded: string;
+  onboardingId: string;
+}
+
+const initialState: WizardState = {
+  integrationName: undefined,
+  datasetName: undefined,
+  serviceName: '',
+  logFilePaths: [''],
+  namespace: 'default',
+  customConfigurations: '',
+  elasticAgentPlatform: 'linux-tar',
+  autoDownloadConfig: false,
+  apiKeyEncoded: '',
+  onboardingId: '',
+};
+
+export type CustomLogsSteps =
+  | 'selectLogs'
+  | 'configureLogs'
+  | 'installElasticAgent'
+  | 'inspect';
+
+const steps: Record<CustomLogsSteps, Step> = {
+  selectLogs: { component: SelectLogs },
+  configureLogs: { component: ConfigureLogs },
+  installElasticAgent: {
+    component: InstallElasticAgent,
+    title: i18n.translate(
+      'xpack.observability_onboarding.customLogs.installShipper.title',
       {
-        text: i18n.translate(
-          'xpack.observability_onboarding.breadcrumbs.logs',
-          { defaultMessage: 'Logs' }
-        ),
-      },
-    ],
-    breadcrumbsApp
-  );
-  return <AnimatedTransitionsWizard />;
-}
+        defaultMessage: 'Install shipper to collect logs',
+      }
+    ),
+  },
+  inspect: { component: Inspect },
+};
 
-const TRANSITION_DURATION = 180;
+const {
+  Provider,
+  useWizard,
+  routes: customLogsRoutes,
+} = createWizardContext({
+  initialState,
+  initialStep: 'configureLogs',
+  steps,
+  basePath: '/customLogs',
+});
 
-function AnimatedTransitionsWizard() {
-  const [transition, setTransition] = useState<TransitionState>('ready');
-  const TransitionComponent = useRef<ComponentType>(() => null);
-
-  function onChangeStep({
-    direction,
-    StepComponent,
-  }: {
-    direction: 'back' | 'next';
-    StepComponent: ComponentType;
-  }) {
-    setTransition(direction);
-    TransitionComponent.current = StepComponent;
-    setTimeout(() => {
-      setTransition('ready');
-    }, TRANSITION_DURATION + 10);
-  }
-
-  return (
-    <WizardProvider
-      transitionDuration={TRANSITION_DURATION}
-      onChangeStep={onChangeStep}
-    >
-      <EuiFlexGroup direction="column" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiSpacer size="l" />
-          <EuiTitle size="l">
-            <h1>
-              {i18n.translate(
-                'xpack.observability_onboarding.title.collectCustomLogs',
-                {
-                  defaultMessage: 'Collect custom logs',
-                }
-              )}
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ width: '50%' }}>
-          <HorizontalSteps />
-        </EuiFlexItem>
-        <EuiFlexItem grow={1} style={{ width: '50%' }}>
-          <FilmstripTransition
-            duration={TRANSITION_DURATION}
-            transition={transition}
-          >
-            <FilmstripFrame position="left">
-              {
-                // eslint-disable-next-line react/jsx-pascal-case
-                transition === 'back' ? <TransitionComponent.current /> : null
-              }
-            </FilmstripFrame>
-            <FilmstripFrame position="center">
-              <WizardStep />
-            </FilmstripFrame>
-            <FilmstripFrame position="right">
-              {
-                // eslint-disable-next-line react/jsx-pascal-case
-                transition === 'next' ? <TransitionComponent.current /> : null
-              }
-            </FilmstripFrame>
-          </FilmstripTransition>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </WizardProvider>
-  );
-}
+export { Provider, useWizard, customLogsRoutes };

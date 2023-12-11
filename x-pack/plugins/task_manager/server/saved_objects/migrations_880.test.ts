@@ -11,6 +11,7 @@ import { migrationMocks } from '@kbn/core/server/mocks';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type {
   RuleTaskState,
+  MutableRuleTaskState,
   WrappedLifecycleRuleState,
   RawAlertInstance,
 } from '@kbn/alerting-state-types';
@@ -73,7 +74,7 @@ describe('successful migrations for 8.8.0', () => {
 });
 
 function checkMetaInRuleTaskState(
-  actual: RuleTaskState,
+  actual: MutableRuleTaskState,
   original: RuleTaskState,
   wrappedUUIDs?: Map<string, string>
 ) {

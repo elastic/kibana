@@ -12,9 +12,8 @@ import { omit, orderBy } from 'lodash';
 import { AgentConfigurationIntake } from '@kbn/apm-plugin/common/agent_configuration/configuration_types';
 import { AgentConfigSearchParams } from '@kbn/apm-plugin/server/routes/settings/agent_configuration/route';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import moment from 'moment';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { addAgentConfigMetrics } from './add_agent_config_metrics';
+import { addAgentConfigEtagMetric } from './add_agent_config_metrics';
 
 export default function agentConfigurationTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -27,28 +26,28 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
   async function getEnvironments(serviceName: string) {
     return apmApiClient.readUser({
-      endpoint: 'GET /api/apm/settings/agent-configuration/environments 2023-05-22',
+      endpoint: 'GET /api/apm/settings/agent-configuration/environments 2023-10-31',
       params: { query: { serviceName } },
     });
   }
 
   function getAgentName(serviceName: string) {
     return apmApiClient.readUser({
-      endpoint: 'GET /api/apm/settings/agent-configuration/agent_name 2023-05-22',
+      endpoint: 'GET /api/apm/settings/agent-configuration/agent_name 2023-10-31',
       params: { query: { serviceName } },
     });
   }
 
   function searchConfigurations(configuration: AgentConfigSearchParams) {
     return apmApiClient.readUser({
-      endpoint: 'POST /api/apm/settings/agent-configuration/search 2023-05-22',
+      endpoint: 'POST /api/apm/settings/agent-configuration/search 2023-10-31',
       params: { body: configuration },
     });
   }
 
   function getAllConfigurations() {
     return apmApiClient.readUser({
-      endpoint: 'GET /api/apm/settings/agent-configuration 2023-05-22',
+      endpoint: 'GET /api/apm/settings/agent-configuration 2023-10-31',
     });
   }
 
@@ -57,7 +56,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     const supertestClient = user === 'read' ? apmApiClient.readUser : apmApiClient.writeUser;
 
     return supertestClient({
-      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-05-22',
+      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
       params: { body: configuration },
     });
   }
@@ -67,7 +66,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     const supertestClient = user === 'read' ? apmApiClient.readUser : apmApiClient.writeUser;
 
     return supertestClient({
-      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-05-22',
+      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
       params: { query: { overwrite: true }, body: config },
     });
   }
@@ -77,14 +76,14 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     const supertestClient = user === 'read' ? apmApiClient.readUser : apmApiClient.writeUser;
 
     return supertestClient({
-      endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-05-22',
+      endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
       params: { body: { service } },
     });
   }
 
   function findExactConfiguration(name: string, environment: string) {
     return apmApiClient.readUser({
-      endpoint: 'GET /api/apm/settings/agent-configuration/view 2023-05-22',
+      endpoint: 'GET /api/apm/settings/agent-configuration/view 2023-10-31',
       params: {
         query: {
           name,
@@ -396,9 +395,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       settings: { transaction_sample_rate: '0.9' },
     };
 
-    let agentConfiguration:
-      | APIReturnType<'GET /api/apm/settings/agent-configuration/view 2023-05-22'>
-      | undefined;
+    let agentConfiguration: APIReturnType<'GET /api/apm/settings/agent-configuration/view 2023-10-31'>;
 
     before(async () => {
       log.debug('creating agent configuration');
@@ -412,19 +409,15 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     });
 
     it(`should have 'applied_by_agent=false' when there are no agent config metrics for this etag`, async () => {
-      expect(agentConfiguration?.applied_by_agent).to.be(false);
+      expect(agentConfiguration.applied_by_agent).to.be(false);
     });
 
     describe('when there are agent config metrics for this etag', () => {
       before(async () => {
-        const start = new Date().getTime();
-        const end = moment(start).add(15, 'minutes').valueOf();
-
-        await addAgentConfigMetrics({
+        await addAgentConfigEtagMetric({
           synthtraceEsClient,
-          start,
-          end,
-          etag: agentConfiguration?.etag,
+          timestamp: Date.now(),
+          etag: agentConfiguration.etag,
         });
       });
 

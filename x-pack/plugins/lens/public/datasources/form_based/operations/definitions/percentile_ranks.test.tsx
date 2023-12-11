@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldNumber } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { EuiFormRow } from '@elastic/eui';
 import { shallow, mount } from 'enzyme';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -37,7 +37,6 @@ const uiSettingsMock = {} as IUiSettingsClient;
 const defaultProps = {
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
-  savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
@@ -359,6 +358,74 @@ describe('percentile ranks', () => {
           .find(EuiFieldNumber)
           .prop('value')
       ).toEqual('miaou');
+    });
+
+    it('should support decimals on dimension edit', () => {
+      const updateLayerSpy = jest.fn();
+      const instance = mount(
+        <InlineOptions
+          {...defaultProps}
+          layer={layer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col2"
+          currentColumn={layer.columns.col2 as PercentileRanksIndexPatternColumn}
+        />
+      );
+
+      const input = instance
+        .find('[data-test-subj="lns-indexPattern-percentile_ranks-input"]')
+        .find(EuiFieldNumber);
+
+      act(() => {
+        input.prop('onChange')!({
+          currentTarget: { value: '10.5' },
+        } as React.ChangeEvent<HTMLInputElement>);
+      });
+
+      instance.update();
+
+      expect(updateLayerSpy).toHaveBeenCalled();
+    });
+
+    it('should not support decimals on inline edit', () => {
+      const updateLayerSpy = jest.fn();
+      const instance = mount(
+        <InlineOptions
+          {...defaultProps}
+          layer={layer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col2"
+          currentColumn={layer.columns.col2 as PercentileRanksIndexPatternColumn}
+          paramEditorCustomProps={{ isInline: true }}
+        />
+      );
+
+      const input = instance
+        .find('[data-test-subj="lns-indexPattern-percentile_ranks-input"]')
+        .find(EuiFieldNumber);
+
+      act(() => {
+        input.prop('onChange')!({
+          currentTarget: { value: '10.5' },
+        } as React.ChangeEvent<HTMLInputElement>);
+      });
+
+      instance.update();
+
+      expect(updateLayerSpy).not.toHaveBeenCalled();
+
+      expect(
+        instance
+          .find('[data-test-subj="lns-indexPattern-percentile_ranks-form"]')
+          .first()
+          .prop('isInvalid')
+      ).toEqual(true);
+      expect(
+        instance
+          .find('[data-test-subj="lns-indexPattern-percentile_ranks-input"]')
+          .find(EuiFieldNumber)
+          .prop('value')
+      ).toEqual('10.5');
     });
   });
 });

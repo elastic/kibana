@@ -16,7 +16,6 @@ import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
-
 import {
   SavedObjectConfig,
   type SavedObjectsConfigType,
@@ -24,11 +23,13 @@ import {
   SavedObjectTypeRegistry,
   type IKibanaMigrator,
   type MigrationResult,
+  type IndexTypesMap,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
   ElasticsearchConfig,
   type ElasticsearchConfigType,
+  getCapabilitiesFromClient,
 } from '@kbn/core-elasticsearch-server-internal';
 import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
@@ -49,6 +50,7 @@ import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
 import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
 import { delay } from './test_utils';
+import type { ElasticsearchClientWrapperFactory } from './elasticsearch_client_wrapper';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 
@@ -73,7 +75,9 @@ export interface KibanaMigratorTestKitParams {
   nodeRoles?: NodeRoles;
   settings?: Record<string, any>;
   types?: Array<SavedObjectsType<any>>;
+  defaultIndexTypesMap?: IndexTypesMap;
   logFilePath?: string;
+  clientWrapperFactory?: ElasticsearchClientWrapperFactory;
 }
 
 export interface KibanaMigratorTestKit {
@@ -87,12 +91,14 @@ export interface KibanaMigratorTestKit {
 export const startElasticsearch = async ({
   basePath,
   dataArchive,
+  timeout,
 }: {
   basePath?: string;
   dataArchive?: string;
+  timeout?: number;
 } = {}) => {
   const { startES } = createTestServers({
-    adjustTimeout: (t: number) => jest.setTimeout(t),
+    adjustTimeout: (t: number) => jest.setTimeout(t + (timeout ?? 0)),
     settings: {
       es: {
         license: 'basic',
@@ -124,11 +130,13 @@ export const getEsClient = async ({
 export const getKibanaMigratorTestKit = async ({
   settings = {},
   kibanaIndex = defaultKibanaIndex,
+  defaultIndexTypesMap = {}, // do NOT assume any types are stored in any index by default
   kibanaVersion = currentVersion,
   kibanaBranch = currentBranch,
   types = [],
   logFilePath = defaultLogFilePath,
   nodeRoles = defaultNodeRoles,
+  clientWrapperFactory,
 }: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
   let hasRun = false;
   const loggingSystem = new LoggingSystem();
@@ -140,23 +148,25 @@ export const getKibanaMigratorTestKit = async ({
   const loggingConf = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
   loggingSystem.upgrade(loggingConf);
 
-  const client = await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
+  const rawClient = await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
+  const client = clientWrapperFactory ? clientWrapperFactory(rawClient) : rawClient;
 
   const typeRegistry = new SavedObjectTypeRegistry();
 
   // types must be registered before instantiating the migrator
   registerTypes(typeRegistry, types);
 
-  const migrator = await getMigrator(
+  const migrator = await getMigrator({
     configService,
     client,
     typeRegistry,
     loggerFactory,
     kibanaIndex,
+    defaultIndexTypesMap,
     kibanaVersion,
     kibanaBranch,
-    nodeRoles
-  );
+    nodeRoles,
+  });
 
   const runMigrations = async () => {
     if (hasRun) {
@@ -259,16 +269,29 @@ const getElasticsearchClient = async (
   });
 };
 
-const getMigrator = async (
-  configService: ConfigService,
-  client: ElasticsearchClient,
-  typeRegistry: ISavedObjectTypeRegistry,
-  loggerFactory: LoggerFactory,
-  kibanaIndex: string,
-  kibanaVersion: string,
-  kibanaBranch: string,
-  nodeRoles: NodeRoles
-) => {
+interface GetMigratorParams {
+  configService: ConfigService;
+  client: ElasticsearchClient;
+  kibanaIndex: string;
+  typeRegistry: ISavedObjectTypeRegistry;
+  defaultIndexTypesMap: IndexTypesMap;
+  loggerFactory: LoggerFactory;
+  kibanaVersion: string;
+  kibanaBranch: string;
+  nodeRoles: NodeRoles;
+}
+
+const getMigrator = async ({
+  configService,
+  client,
+  kibanaIndex,
+  typeRegistry,
+  defaultIndexTypesMap,
+  loggerFactory,
+  kibanaVersion,
+  kibanaBranch,
+  nodeRoles,
+}: GetMigratorParams) => {
   const savedObjectsConf = await firstValueFrom(
     configService.atPath<SavedObjectsConfigType>('savedObjects')
   );
@@ -282,16 +305,20 @@ const getMigrator = async (
     links: getDocLinks({ kibanaBranch }),
   };
 
+  const esCapabilities = await getCapabilitiesFromClient(client);
+
   return new KibanaMigrator({
     client,
-    typeRegistry,
     kibanaIndex,
+    typeRegistry,
+    defaultIndexTypesMap,
     soMigrationsConfig: soConfig.migration,
     kibanaVersion,
     logger: loggerFactory.get('savedobjects-service'),
     docLinks,
     waitForMigrationCompletion: false, // ensure we have an active role in the migration
     nodeRoles,
+    esCapabilities,
   });
 };
 
@@ -366,6 +393,16 @@ export const createBaseline = async () => {
   const { client, runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
     kibanaIndex: defaultKibanaIndex,
     types: baselineTypes,
+  });
+
+  // remove the testing index (current and next minor)
+  await client.indices.delete({
+    index: [
+      defaultKibanaIndex,
+      `${defaultKibanaIndex}_${currentVersion}_001`,
+      `${defaultKibanaIndex}_${nextMinor}_001`,
+    ],
+    ignore_unavailable: true,
   });
 
   await runMigrations();

@@ -16,7 +16,7 @@ import { KibanaServices } from '../../../../common/lib/kibana';
 import type {
   IndexPatternArray,
   RuleQuery,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 
 export const getEsQueryFilter = async (

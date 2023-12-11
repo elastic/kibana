@@ -11,7 +11,7 @@ import {
   getImportRulesWithIdSchemaMock,
   ruleIdsToNdJsonString,
   rulesToNdJsonString,
-} from '../../../../../../../common/detection_engine/rule_management/mocks';
+} from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { mlServicesMock } from '../../../../../machine_learning/mocks';
@@ -311,14 +311,14 @@ describe('Import rules route', () => {
         errors: [
           {
             error: {
-              message: 'Invalid value "undefined" supplied to "rule_id"',
+              message: 'rule_id: Required',
               status_code: 400,
             },
             rule_id: '(unknown id)',
           },
           {
             error: {
-              message: 'Invalid value "undefined" supplied to "rule_id"',
+              message: 'rule_id: Required',
               status_code: 400,
             },
             rule_id: '(unknown id)',

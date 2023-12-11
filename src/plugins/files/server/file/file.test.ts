@@ -29,6 +29,7 @@ import { FileMetadataClient } from '../file_client';
 import { SavedObjectsFileMetadataClient } from '../file_client/file_metadata_client/adapters/saved_objects';
 import { File as IFile } from '../../common';
 import { createFileHashTransform } from '..';
+import { FilesPluginError } from '../file_client/utils';
 
 const setImmediate = promisify(global.setImmediate);
 
@@ -82,7 +83,9 @@ describe('File', () => {
     const [{ returnValue: blobStore }] = createBlobSpy.getCalls();
     const blobStoreSpy = sandbox.spy(blobStore, 'delete');
     expect(blobStoreSpy.calledOnce).toBe(false);
-    await expect(file.uploadContent(Readable.from(['test']))).rejects.toThrow(new Error('test'));
+    await expect(file.uploadContent(Readable.from(['test']))).rejects.toThrow(
+      new FilesPluginError('ContentStream.indexChunk(): test')
+    );
     await setImmediate();
     expect(blobStoreSpy.calledOnce).toBe(true);
   });

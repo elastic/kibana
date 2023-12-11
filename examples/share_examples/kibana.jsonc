@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/share-examples-plugin",
-  "owner": "@elastic/kibana-app-services",
+  "owner": "@elastic/appex-sharedux",
   "description": "Small demos of share plugin usage",
   "plugin": {
     "id": "shareExamples",

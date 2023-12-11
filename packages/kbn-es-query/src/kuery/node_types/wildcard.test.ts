@@ -7,14 +7,15 @@
  */
 
 import {
-  buildNode,
-  KQL_WILDCARD_SYMBOL,
-  hasLeadingWildcard,
-  toElasticsearchQuery,
-  test as testNode,
-  toQueryStringQuery,
+  type KqlWildcardNode,
   KQL_NODE_TYPE_WILDCARD,
-  // @ts-ignore
+  KQL_WILDCARD_SYMBOL,
+  buildNode,
+  hasLeadingWildcard,
+  test as testNode,
+  toElasticsearchQuery,
+  toKqlExpression,
+  toQueryStringQuery,
 } from './wildcard';
 
 jest.mock('../grammar');
@@ -96,6 +97,17 @@ describe('kuery node types', () => {
         const leadingWildcardNode = buildNode('*');
 
         expect(hasLeadingWildcard(leadingWildcardNode)).toBe(false);
+      });
+    });
+
+    describe('toKqlExpression', () => {
+      test('should return the string representation of the wildcard literal', () => {
+        const node: KqlWildcardNode = {
+          type: 'wildcard',
+          value: 'foo*bar@kuery-wildcard@baz',
+        };
+        const result = toKqlExpression(node);
+        expect(result).toBe('foo\\*bar*baz');
       });
     });
   });

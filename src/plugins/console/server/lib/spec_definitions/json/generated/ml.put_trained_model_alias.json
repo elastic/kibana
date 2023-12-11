@@ -1,6 +1,10 @@
 {
   "ml.put_trained_model_alias": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "reassign": "__flag__"
     },
     "methods": [
@@ -9,6 +13,10 @@
     "patterns": [
       "_ml/trained_models/{model_id}/model_aliases/{model_alias}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/put-trained-models-aliases.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/put-trained-models-aliases.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

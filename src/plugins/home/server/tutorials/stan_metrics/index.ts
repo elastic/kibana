@@ -38,7 +38,7 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-stan.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/stan.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/stan.svg'),
     artifacts: {
       dashboards: [
         {
@@ -54,7 +54,7 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/stan_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/stan_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),

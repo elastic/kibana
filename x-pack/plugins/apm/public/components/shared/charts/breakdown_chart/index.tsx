@@ -18,6 +18,7 @@ import {
   Settings,
   TickFormatter,
   XYBrushEvent,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -106,8 +107,8 @@ export function BreakdownChart({
       id={id}
     >
       <Chart ref={chartRef}>
+        <Tooltip stickTo="top" showNullValues />
         <Settings
-          tooltip={{ stickTo: 'top', showNullValues: true }}
           onBrushEnd={(event) =>
             onBrushEnd({ x: (event as XYBrushEvent).x, history })
           }
@@ -123,6 +124,7 @@ export function BreakdownChart({
               visible: true,
             },
           }}
+          locale={i18n.getLocale()}
         />
         <Axis
           id="x-axis"

@@ -9,6 +9,7 @@ import { CoreSetup } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
+import { type TransformEnabledFeatures } from './serverless_context';
 import { PluginsDependencies } from '../plugin';
 import { getMlSharedImports } from '../shared_imports';
 
@@ -22,13 +23,15 @@ const localStorage = new Storage(window.localStorage);
 
 export async function mountManagementSection(
   coreSetup: CoreSetup<PluginsDependencies>,
-  params: ManagementAppMountParams
+  params: ManagementAppMountParams,
+  isServerless: boolean
 ) {
   const { element, setBreadcrumbs, history } = params;
   const { http, getStartServices } = coreSetup;
   const startServices = await getStartServices();
   const [core, plugins] = startServices;
   const {
+    analytics,
     application,
     chrome,
     docLinks,
@@ -43,6 +46,7 @@ export async function mountManagementSection(
   const {
     data,
     dataViews,
+    dataViewEditor,
     share,
     spaces,
     triggersActionsUi,
@@ -50,6 +54,8 @@ export async function mountManagementSection(
     charts,
     fieldFormats,
     savedObjectsManagement,
+    savedSearch,
+    contentManagement,
   } = plugins;
   const { docTitle } = chrome;
 
@@ -60,9 +66,11 @@ export async function mountManagementSection(
 
   // AppCore/AppPlugins to be passed on as React context
   const appDependencies: AppDependencies = {
+    analytics,
     application,
     chrome,
     data,
+    dataViewEditor,
     dataViews,
     docLinks,
     http,
@@ -84,9 +92,14 @@ export async function mountManagementSection(
     charts,
     fieldFormats,
     savedObjectsManagement,
+    savedSearch,
+    contentManagement,
   };
 
-  const unmountAppCallback = renderApp(element, appDependencies);
+  const enabledFeatures: TransformEnabledFeatures = {
+    showNodeInfo: !isServerless,
+  };
+  const unmountAppCallback = renderApp(element, appDependencies, enabledFeatures);
 
   return () => {
     docTitle.reset();

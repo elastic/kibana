@@ -23,7 +23,7 @@ const stories: Meta<{}> = {
       const transactionTypeStatus = FETCH_STATUS.SUCCESS;
 
       mockApmApiCallResponse(
-        `GET /api/apm/services/{serviceName}/annotation/search 2023-05-22`,
+        `GET /api/apm/services/{serviceName}/annotation/search 2023-10-31`,
         () => ({ annotations: [] })
       );
       mockApmApiCallResponse(

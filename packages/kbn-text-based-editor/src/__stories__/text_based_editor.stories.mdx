@@ -31,7 +31,7 @@ The TextBasedLanguagesEditor component is a reusable component and can be used t
         name='compact mode'
         args={
             {
-                query: { sql: 'SELECT field1, field2 FROM DATAVIEW' },
+                query: { esql: 'from dataview | keep field1, field2' },
                 isCodeEditorExpanded:false,
                 'data-test-subj':'test-id'
             }
@@ -51,7 +51,7 @@ When there are errors to the query the UI displays the errors to the editor:
         name='with errors'
         args={
             {
-                query: { sql: 'SELECT field1, field2 FROM DATAVIEW' },
+                query: { esql: 'from dataview | keep field1, field2' },
                 isCodeEditorExpanded:false,
                 'data-test-subj':'test-id',
                 errors: [
@@ -76,7 +76,7 @@ When there the query is long and the editor is on the compact view:
         name='with long query'
         args={
             {
-                query: { sql: 'SELECT field1, field2, field 3, field 4, field 5 FROM DATAVIEW WHERE field5 IS NOT NULL AND field4 IS NULL' },
+                query: { esql: 'from dataview | keep field1, field2, field 3, field 4, field 5 | where field5 > 5 | stats var = avg(field3)' },
                 isCodeEditorExpanded:false,
                 'data-test-subj':'test-id',
             }
@@ -97,8 +97,29 @@ The editor also works on the expanded mode:
         name='on expanded mode'
         args={
             {
-                query: { sql: 'SELECT field1, field2 FROM DATAVIEW' },
+                query: { esql: 'from dataview | keep field1, field2' },
                 isCodeEditorExpanded:true,
+                'data-test-subj':'test-id',
+            }
+        }
+        argTypes={
+            { onTextLangQueryChange: { action: 'changed' }, onTextLangQuerySubmit:  { action: 'submitted' }, expandCodeEditor:  { action: 'expanded' }}
+        }
+        >
+    {Template.bind({})}
+    </Story>
+</Canvas>
+
+The editor also works on the expanded mode with the minimize button hidden:
+
+<Canvas>
+    <Story 
+        name='on expanded mode with hidden the minimize button'
+        args={
+            {
+                query: { esql: 'from dataview | keep field1, field2' },
+                isCodeEditorExpanded:true,
+                hideMinimizeButton: true,
                 'data-test-subj':'test-id',
             }
         }

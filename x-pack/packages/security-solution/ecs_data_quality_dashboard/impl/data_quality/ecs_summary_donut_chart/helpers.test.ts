@@ -21,6 +21,7 @@ describe('helpers', () => {
         custom: [],
         ecsCompliant: [],
         incompatible: [],
+        sameFamily: [],
       };
 
       expect(allMetadataIsEmpty(allIsEmpty)).toBe(true);

@@ -14,7 +14,7 @@ import {
   LogDataViewReference,
   logDataViewReferenceRT,
   LogIndexReference,
-} from '../../../../common/log_views';
+} from '@kbn/logs-shared-plugin/common';
 import { FormElement, isFormElementForType } from './form_elements';
 import { IndexNamesConfigurationPanel } from './index_names_configuration_panel';
 import { IndexPatternConfigurationPanel } from './index_pattern_configuration_panel';

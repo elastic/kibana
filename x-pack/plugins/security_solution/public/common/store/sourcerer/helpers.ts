@@ -12,6 +12,23 @@ import type { SelectedDataViewPayload } from './actions';
 import type { sourcererModel } from '../model';
 import { ensurePatternFormat, sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 
+const getPatternListFromScope = (
+  scope: SourcererScopeName,
+  patternList: string[],
+  signalIndexName: string | null
+) => {
+  // when our SIEM data view is set, here are the defaults
+  switch (scope) {
+    case SourcererScopeName.default:
+      return sortWithExcludesAtEnd(patternList.filter((index) => index !== signalIndexName));
+    case SourcererScopeName.detections:
+      // set to signalIndexName whether or not it exists yet in the patternList
+      return signalIndexName != null ? [signalIndexName] : [];
+    case SourcererScopeName.timeline:
+      return sortWithExcludesAtEnd(patternList);
+  }
+};
+
 export const getScopePatternListSelection = (
   theDataView: SourcererDataView | undefined,
   sourcererScope: SourcererScopeName,
@@ -24,16 +41,8 @@ export const getScopePatternListSelection = (
   if (!isDefaultDataView) {
     return sortWithExcludesAtEnd(patternList);
   }
-  // when our SIEM data view is set, here are the defaults
-  switch (sourcererScope) {
-    case SourcererScopeName.default:
-      return sortWithExcludesAtEnd(patternList.filter((index) => index !== signalIndexName));
-    case SourcererScopeName.detections:
-      // set to signalIndexName whether or not it exists yet in the patternList
-      return signalIndexName != null ? [signalIndexName] : [];
-    case SourcererScopeName.timeline:
-      return sortWithExcludesAtEnd(patternList);
-  }
+
+  return getPatternListFromScope(sourcererScope, patternList, signalIndexName);
 };
 
 export const validateSelectedPatterns = (
@@ -55,7 +64,7 @@ export const validateSelectedPatterns = (
       (pattern) => !dedupeAllDefaultPatterns.includes(pattern)
     );
   }
-  const selectedPatterns =
+  let selectedPatterns =
     // shouldValidateSelectedPatterns is false when upgrading from
     // legacy pre-8.0 timeline index patterns to data view.
     shouldValidateSelectedPatterns &&
@@ -75,6 +84,8 @@ export const validateSelectedPatterns = (
         // but removed from the security data view
         // or its a legacy pre-8.0 timeline
         dedupePatterns;
+  const signalIndexName = state.signalIndexName;
+  selectedPatterns = getPatternListFromScope(id, selectedPatterns, signalIndexName);
 
   return {
     [id]: {
@@ -104,14 +115,18 @@ interface CheckIfIndicesExistParams {
   patternList: sourcererModel.SourcererDataView['patternList'];
   scopeId: sourcererModel.SourcererScopeName;
   signalIndexName: string | null;
+  isDefaultDataViewSelected: boolean;
 }
 export const checkIfIndicesExist = ({
   patternList,
   scopeId,
   signalIndexName,
+  isDefaultDataViewSelected,
 }: CheckIfIndicesExistParams) =>
   scopeId === SourcererScopeName.detections
     ? patternList.includes(`${signalIndexName}`)
     : scopeId === SourcererScopeName.default
-    ? patternList.filter((i) => i !== signalIndexName).length > 0
+    ? isDefaultDataViewSelected
+      ? patternList.filter((i) => i !== signalIndexName).length > 0
+      : patternList.length > 0
     : patternList.length > 0;

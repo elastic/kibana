@@ -8,10 +8,11 @@
 import type { ExceptionsListPreSummaryServerExtension } from '@kbn/lists-plugin/server';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
-  TrustedAppValidator,
-  HostIsolationExceptionsValidator,
-  EventFilterValidator,
   BlocklistValidator,
+  EndpointExceptionsValidator,
+  EventFilterValidator,
+  HostIsolationExceptionsValidator,
+  TrustedAppValidator,
 } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreSummaryServerExtension['callback'];
@@ -58,6 +59,15 @@ export const getExceptionsPreSummaryHandler = (
     // Validate Blocklists
     if (BlocklistValidator.isBlocklist({ listId })) {
       await new BlocklistValidator(endpointAppContextService, request).validatePreGetListSummary();
+      return data;
+    }
+
+    // Validate Endpoint Exceptions
+    if (EndpointExceptionsValidator.isEndpointException({ listId })) {
+      await new EndpointExceptionsValidator(
+        endpointAppContextService,
+        request
+      ).validatePreGetListSummary();
       return data;
     }
 

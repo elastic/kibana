@@ -12,5 +12,6 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
   describe('es_query', () => {
     loadTestFile(require.resolve('./rule'));
     loadTestFile(require.resolve('./query_dsl_only'));
+    loadTestFile(require.resolve('./esql_only'));
   });
 }

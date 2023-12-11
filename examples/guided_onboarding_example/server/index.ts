@@ -7,6 +7,8 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { GuidedOnboardingExamplePlugin } from './plugin';
 
-export const plugin = (ctx: PluginInitializerContext) => new GuidedOnboardingExamplePlugin(ctx);
+export const plugin = async (ctx: PluginInitializerContext) => {
+  const { GuidedOnboardingExamplePlugin } = await import('./plugin');
+  return new GuidedOnboardingExamplePlugin(ctx);
+};

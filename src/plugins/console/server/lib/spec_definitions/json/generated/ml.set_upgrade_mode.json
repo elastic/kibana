@@ -1,8 +1,16 @@
 {
   "ml.set_upgrade_mode": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "enabled": "__flag__",
-      "timeout": ""
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "POST"
@@ -10,6 +18,10 @@
     "patterns": [
       "_ml/set_upgrade_mode"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-set-upgrade-mode.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-set-upgrade-mode.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

@@ -49,6 +49,7 @@ const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       ...kibanaStartMock.startContract(),
+      theme: {},
       cases: casesPluginMock.createStartContract(),
       http: {
         basePath: {
@@ -75,16 +76,6 @@ jest.mock('../../hooks/use_fetch_rule', () => {
   };
 });
 jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('../../hooks/use_get_user_cases_permissions', () => ({
-  useGetUserCasesPermissions: () => ({
-    all: true,
-    create: true,
-    delete: true,
-    push: true,
-    read: true,
-    update: true,
-  }),
-}));
 
 const useFetchAlertDetailMock = useFetchAlertDetail as jest.Mock;
 const useParamsMock = useParams as jest.Mock;
@@ -99,7 +90,6 @@ const params = {
 const config: Subset<ConfigSchema> = {
   unsafe: {
     alertDetails: {
-      logs: { enabled: true },
       metrics: { enabled: true },
       uptime: { enabled: true },
     },
@@ -138,7 +128,7 @@ describe('Alert details', () => {
 
     expect(alertDetails.queryByTestId('alertDetails')).toBeTruthy();
     expect(alertDetails.queryByTestId('alertDetailsError')).toBeFalsy();
-    expect(alertDetails.queryByTestId('page-title-container')).toBeTruthy();
+    expect(alertDetails.queryByTestId('alertDetailsPageTitle')).toBeTruthy();
     expect(alertDetails.queryByTestId('alert-summary-container')).toBeTruthy();
   });
 

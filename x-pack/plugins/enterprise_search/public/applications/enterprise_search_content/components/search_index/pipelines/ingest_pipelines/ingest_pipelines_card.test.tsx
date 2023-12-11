@@ -33,7 +33,7 @@ const DEFAULT_VALUES = {
     extract_binary_content: true,
     name: DEFAULT_PIPELINE_NAME,
     reduce_whitespace: true,
-    run_ml_inference: false,
+    run_ml_inference: true,
   },
   showModal: false,
 };
@@ -44,7 +44,7 @@ describe('IngestPipelinesCard', () => {
     setMockValues({ ...DEFAULT_VALUES });
   });
   it('renders with default ingest pipeline', () => {
-    const wrapper = shallow(<IngestPipelinesCard />);
+    const wrapper = shallow(<IngestPipelinesCard extractionDisabled={false} />);
     expect(wrapper.find(DefaultPipelineItem)).toHaveLength(1);
     expect(wrapper.find(CustomPipelineItem)).toHaveLength(0);
   });

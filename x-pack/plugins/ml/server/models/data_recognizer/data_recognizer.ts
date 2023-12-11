@@ -15,10 +15,11 @@ import type {
 } from '@kbn/core/server';
 
 import moment from 'moment';
-import { merge } from 'lodash';
+import { merge, intersection } from 'lodash';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { CompatibleModule } from '../../../common/constants/app';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import type { MlClient } from '../../lib/ml_client';
@@ -75,7 +76,7 @@ function isFileBasedModule(arg: unknown): arg is FileBasedModule {
   return isPopulatedObject(arg) && Array.isArray(arg.jobs) && arg.jobs[0]?.file !== undefined;
 }
 
-interface Config {
+export interface Config {
   dirName?: string;
   module: FileBasedModule | Module;
   isSavedObject: boolean;
@@ -116,6 +117,7 @@ export class DataRecognizer {
   private _jobsService: ReturnType<typeof jobServiceProvider>;
   private _resultsService: ReturnType<typeof resultsServiceProvider>;
   private _calculateModelMemoryLimit: ReturnType<typeof calculateModelMemoryLimitProvider>;
+  private _compatibleModuleType: CompatibleModule | null;
 
   /**
    * A temporary cache of configs loaded from disk and from save object service.
@@ -139,7 +141,8 @@ export class DataRecognizer {
     savedObjectsClient: SavedObjectsClientContract,
     dataViewsService: DataViewsService,
     mlSavedObjectService: MLSavedObjectService,
-    request: KibanaRequest
+    request: KibanaRequest,
+    compatibleModuleType: CompatibleModule | null
   ) {
     this._client = mlClusterClient;
     this._mlClient = mlClient;
@@ -151,6 +154,7 @@ export class DataRecognizer {
     this._jobsService = jobServiceProvider(mlClusterClient, mlClient);
     this._resultsService = resultsServiceProvider(mlClient);
     this._calculateModelMemoryLimit = calculateModelMemoryLimitProvider(mlClusterClient, mlClient);
+    this._compatibleModuleType = compatibleModuleType;
   }
 
   // list all directories under the given directory
@@ -184,12 +188,12 @@ export class DataRecognizer {
     });
   }
 
-  private async _loadConfigs(): Promise<Config[]> {
+  private async _loadConfigs(moduleTagFilters?: string[]): Promise<Config[]> {
     if (this._configCache !== null) {
       return this._configCache;
     }
 
-    const configs: Config[] = [];
+    const localConfigs: Config[] = [];
     const dirs = await this._listDirs(this._modulesDir);
     await Promise.all(
       dirs.map(async (dir) => {
@@ -202,7 +206,7 @@ export class DataRecognizer {
 
         if (file !== undefined) {
           try {
-            configs.push({
+            localConfigs.push({
               dirName: dir,
               module: JSON.parse(file),
               isSavedObject: false,
@@ -219,7 +223,11 @@ export class DataRecognizer {
       isSavedObject: true,
     }));
 
-    this._configCache = [...configs, ...savedObjectConfigs];
+    this._configCache = filterConfigs(
+      [...localConfigs, ...savedObjectConfigs],
+      this._compatibleModuleType,
+      moduleTagFilters ?? []
+    );
 
     return this._configCache;
   }
@@ -234,14 +242,17 @@ export class DataRecognizer {
   }
 
   // get the manifest.json file for a specified id, e.g. "nginx"
-  private async _findConfig(id: string) {
-    const configs = await this._loadConfigs();
+  private async _findConfig(id: string, moduleTagFilters?: string[]) {
+    const configs = await this._loadConfigs(moduleTagFilters);
     return configs.find((i) => i.module.id === id);
   }
 
   // called externally by an endpoint
-  public async findMatches(indexPattern: string): Promise<RecognizeResult[]> {
-    const manifestFiles = await this._loadConfigs();
+  public async findMatches(
+    indexPattern: string,
+    moduleTagFilters?: string[]
+  ): Promise<RecognizeResult[]> {
+    const manifestFiles = await this._loadConfigs(moduleTagFilters);
     const results: RecognizeResult[] = [];
 
     await Promise.all(
@@ -310,8 +321,8 @@ export class DataRecognizer {
     return body.hits.total.value > 0;
   }
 
-  public async listModules() {
-    const manifestFiles = await this._loadConfigs();
+  public async listModules(moduleTagFilters?: string[]): Promise<Module[]> {
+    const manifestFiles = await this._loadConfigs(moduleTagFilters);
     manifestFiles.sort((a, b) => a.module.id.localeCompare(b.module.id)); // sort as json files are read from disk and could be in any order.
 
     const configs: Array<Module | FileBasedModule> = [];
@@ -319,7 +330,7 @@ export class DataRecognizer {
       if (config.isSavedObject) {
         configs.push(config.module);
       } else {
-        configs.push(await this.getModule(config.module.id));
+        configs.push(await this.getModule(config.module.id, moduleTagFilters));
       }
     }
     // casting return as Module[] so not to break external plugins who rely on this function
@@ -330,11 +341,11 @@ export class DataRecognizer {
   // called externally by an endpoint
   // supplying an optional prefix will add the prefix
   // to the job and datafeed configs
-  public async getModule(id: string, prefix = ''): Promise<Module> {
+  public async getModule(id: string, moduleTagFilters?: string[], prefix = ''): Promise<Module> {
     let module: FileBasedModule | Module | null = null;
     let dirName: string | null = null;
 
-    const config = await this._findConfig(id);
+    const config = await this._findConfig(id, moduleTagFilters);
     if (config !== undefined) {
       module = config.module;
       dirName = config.dirName ?? null;
@@ -468,7 +479,7 @@ export class DataRecognizer {
     applyToAllSpaces: boolean = false
   ) {
     // load the config from disk
-    const moduleConfig = await this.getModule(moduleId, jobPrefix);
+    const moduleConfig = await this.getModule(moduleId, undefined, jobPrefix);
 
     if (indexPatternName === undefined && moduleConfig.defaultIndexPattern === undefined) {
       throw Boom.badRequest(
@@ -480,7 +491,7 @@ export class DataRecognizer {
       indexPatternName === undefined ? moduleConfig.defaultIndexPattern : indexPatternName;
     this._indexPatternId = await this._getIndexPatternId(this._indexPatternName);
 
-    // the module's jobs contain custom URLs which require an index patten id
+    // the module's jobs contain custom URLs which require an index pattern id
     // but there is no corresponding data view, throw an error
     if (this._indexPatternId === undefined && this._doJobUrlsContainIndexPatternId(moduleConfig)) {
       throw Boom.badRequest(
@@ -488,7 +499,7 @@ export class DataRecognizer {
       );
     }
 
-    // the module's saved objects require an index patten id
+    // the module's saved objects require an index pattern id
     // but there is no corresponding data view, throw an error
     if (
       this._indexPatternId === undefined &&
@@ -1395,7 +1406,8 @@ export function dataRecognizerFactory(
   savedObjectsClient: SavedObjectsClientContract,
   dataViewsService: DataViewsService,
   mlSavedObjectService: MLSavedObjectService,
-  request: KibanaRequest
+  request: KibanaRequest,
+  compatibleModuleType: CompatibleModule | null
 ) {
   return new DataRecognizer(
     client,
@@ -1403,6 +1415,50 @@ export function dataRecognizerFactory(
     savedObjectsClient,
     dataViewsService,
     mlSavedObjectService,
-    request
+    request,
+    compatibleModuleType
   );
+}
+
+/**
+ * Filters an array of modules based on the provided tag filters
+ *
+ * @param configs - The array of module config objects to filter.
+ * @param compatibleModuleType - The CompatibleModule type to filter by, or null to include all modules. The compatibleModuleType is provided by the kibana yml config.
+ * @param moduleTagFilters - An array of module tags to filter by. Only modules that have at least one matching tag will be included. The moduleTagFilters are provided as a query parameter to the endpoint.
+ * @returns An array of module Config objects that match the provided criteria.
+ */
+export function filterConfigs(
+  configs: Config[],
+  compatibleModuleType: CompatibleModule | null,
+  moduleTagFilters: string[]
+) {
+  let filteredConfigs: Config[] = [];
+  if (compatibleModuleType === null && moduleTagFilters.length === 0) {
+    filteredConfigs = configs;
+  } else {
+    const filteredForCompatibleModule =
+      compatibleModuleType === null
+        ? configs
+        : configs.filter(({ module }) => {
+            if (module.tags === undefined || module.tags.length === 0) {
+              // if the module has no tags, it is compatible with all serverless projects
+              return true;
+            }
+            return module.tags.includes(compatibleModuleType!);
+          });
+    const filteredForModuleTags =
+      moduleTagFilters.length === 0
+        ? filteredForCompatibleModule
+        : filteredForCompatibleModule.filter(({ module }) => {
+            if (module.tags === undefined || module.tags.length === 0) {
+              // a tag filter has been specified when calling the endpoint therefore
+              // if the module has no tags, it should be filtered out from the results
+              return false;
+            }
+            return intersection(module.tags, moduleTagFilters).length > 0;
+          });
+    filteredConfigs = filteredForModuleTags;
+  }
+  return filteredConfigs;
 }

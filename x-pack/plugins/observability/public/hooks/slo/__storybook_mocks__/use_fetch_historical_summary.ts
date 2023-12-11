@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { HistoricalSummaryResponse } from '@kbn/slo-schema';
+import { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
 import {
   HEALTHY_ROLLING_SLO,
   historicalSummaryData,
 } from '../../../data/slo/historical_summary_data';
-import { UseFetchHistoricalSummaryResponse, Params } from '../use_fetch_historical_summary';
+import { Params, UseFetchHistoricalSummaryResponse } from '../use_fetch_historical_summary';
 
 export const useFetchHistoricalSummary = ({
-  sloIds = [],
+  list = [],
 }: Params): UseFetchHistoricalSummaryResponse => {
-  const data: Record<string, HistoricalSummaryResponse[]> = {};
-  sloIds.forEach((sloId) => (data[sloId] = historicalSummaryData[HEALTHY_ROLLING_SLO]));
+  const data: FetchHistoricalSummaryResponse = [];
+  list.forEach(({ sloId, instanceId }) =>
+    data.push({
+      sloId,
+      instanceId,
+      data: historicalSummaryData.find((datum) => datum.sloId === HEALTHY_ROLLING_SLO)!.data,
+    })
+  );
 
   return {
     isLoading: false,
@@ -24,6 +30,6 @@ export const useFetchHistoricalSummary = ({
     isRefetching: false,
     isSuccess: false,
     isError: false,
-    sloHistoricalSummaryResponse: data,
+    data,
   };
 };

@@ -6,56 +6,37 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { AxisTicksSettings, AxisTicksSettingsProps } from './axis_ticks_settings';
+import { render, screen } from '@testing-library/react';
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
-
-  return {
-    ...original,
-    debounce: (fn: unknown) => fn,
-  };
-});
+const renderAxisTicksSettings = (propsOverrides?: Partial<AxisTicksSettingsProps>) => {
+  return render(
+    <AxisTicksSettings
+      isAxisLabelVisible={true}
+      axis="x"
+      updateTicksVisibilityState={jest.fn()}
+      {...propsOverrides}
+    />
+  );
+};
 
 describe('Axes Ticks settings', () => {
-  let props: AxisTicksSettingsProps;
-  beforeEach(() => {
-    props = {
-      isAxisLabelVisible: true,
-      axis: 'x',
-      updateTicksVisibilityState: jest.fn(),
-    };
-  });
   it('should show the ticks switch as on', () => {
-    const component = mount(<AxisTicksSettings {...props} />);
-    expect(
-      component.find('[data-test-subj="lnsshowxAxisTickLabels"]').first().prop('checked')
-    ).toBe(true);
+    renderAxisTicksSettings();
+    expect(screen.getByLabelText('Tick labels')).toBeChecked();
   });
 
   it('should show the ticks switch as off is the isAxisLabelVisible is set to false', () => {
-    const component = mount(<AxisTicksSettings {...props} isAxisLabelVisible={false} />);
-    expect(
-      component.find('[data-test-subj="lnsshowxAxisTickLabels"]').first().prop('checked')
-    ).toBe(false);
+    renderAxisTicksSettings({ isAxisLabelVisible: false });
+    expect(screen.getByLabelText('Tick labels')).not.toBeChecked();
   });
 
   it('should call the updateTicksVisibilityState when changing the switch status', () => {
     const updateTicksVisibilityStateSpy = jest.fn();
-    const component = mount(
-      <AxisTicksSettings {...props} updateTicksVisibilityState={updateTicksVisibilityStateSpy} />
-    );
-
-    // switch mode
-    act(() => {
-      component.find(EuiSwitch).first().prop('onChange')({
-        target: { checked: false },
-      } as EuiSwitchEvent);
+    renderAxisTicksSettings({
+      updateTicksVisibilityState: updateTicksVisibilityStateSpy,
     });
-
+    screen.getByLabelText('Tick labels').click();
     expect(updateTicksVisibilityStateSpy.mock.calls.length).toBe(1);
   });
 });

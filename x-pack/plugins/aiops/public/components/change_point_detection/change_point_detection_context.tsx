@@ -21,6 +21,7 @@ import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
 import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
 import {
   createMergedEsQuery,
@@ -93,6 +94,46 @@ export interface ChangePointAnnotation {
 
 export type SelectedChangePoint = FieldConfig & ChangePointAnnotation;
 
+export const ChangePointDetectionControlsContext = createContext<{
+  metricFieldOptions: DataViewField[];
+  splitFieldsOptions: DataViewField[];
+}>({
+  splitFieldsOptions: [],
+  metricFieldOptions: [],
+});
+
+export const useChangePointDetectionControlsContext = () => {
+  return useContext(ChangePointDetectionControlsContext);
+};
+
+export const ChangePointDetectionControlsContextProvider: FC = ({ children }) => {
+  const { dataView } = useDataSource();
+
+  const metricFieldOptions = useMemo<DataViewField[]>(() => {
+    return dataView.fields.filter(({ aggregatable, type }) => aggregatable && type === 'number');
+  }, [dataView]);
+
+  const splitFieldsOptions = useMemo<DataViewField[]>(() => {
+    return dataView.fields.filter(
+      ({ aggregatable, esTypes, displayName }) =>
+        aggregatable &&
+        esTypes &&
+        esTypes.some((el) =>
+          [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP].includes(el as ES_FIELD_TYPES)
+        ) &&
+        !['_id', '_index'].includes(displayName)
+    );
+  }, [dataView]);
+
+  const value = { metricFieldOptions, splitFieldsOptions };
+
+  return (
+    <ChangePointDetectionControlsContext.Provider value={value}>
+      {children}
+    </ChangePointDetectionControlsContext.Provider>
+  );
+};
+
 export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const { dataView, savedSearch } = useDataSource();
   const {
@@ -120,7 +161,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   >({});
   const [bucketInterval, setBucketInterval] = useState<TimeBucketsInterval>();
 
-  const timeRange = useTimeRangeUpdates();
+  const timeRange = useTimeRangeUpdates(true);
 
   useEffect(function updateIntervalOnTimeBoundsChange() {
     const timeUpdateSubscription = timefilter
@@ -254,7 +295,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
 
   return (
     <ChangePointDetectionContext.Provider value={value}>
-      {children}
+      <FilterQueryContextProvider>{children}</FilterQueryContextProvider>
     </ChangePointDetectionContext.Provider>
   );
 };

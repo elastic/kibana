@@ -13,11 +13,11 @@ import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mock
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
-import type { RoleKibanaPrivilege } from '../../../../../../../common/model';
-import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
-import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeSummary } from './privilege_summary';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
+import type { RoleKibanaPrivilege } from '../../../../../../../common';
+import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
+import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 
 const createRole = (roleKibanaPrivileges: RoleKibanaPrivilege[]) => ({
   name: 'some-role',

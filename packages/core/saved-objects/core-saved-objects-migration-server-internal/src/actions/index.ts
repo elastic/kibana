@@ -106,7 +106,9 @@ export {
 
 import type { UnknownDocsFound } from './check_for_unknown_docs';
 import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
-import { ClusterShardLimitExceeded } from './create_index';
+import type { ClusterShardLimitExceeded } from './create_index';
+import type { SynchronizationFailed } from './synchronize_migrators';
+import type { ActualMappingsIncomplete, ComparedMappingsChanged } from './check_target_mappings';
 
 export type {
   CheckForUnknownDocsParams,
@@ -134,6 +136,11 @@ export interface IndexNotFound {
   index: string;
 }
 
+export interface OperationNotSupported {
+  type: 'operation_not_supported';
+  operationName: string;
+}
+
 export interface WaitForReindexTaskFailure {
   readonly cause: { type: string; reason: string };
 }
@@ -144,6 +151,11 @@ export interface TargetIndexHadWriteBlock {
 
 export interface RequestEntityTooLargeException {
   type: 'request_entity_too_large_exception';
+}
+
+export interface EsResponseTooLargeError {
+  type: 'es_response_too_large';
+  contentLength: number;
 }
 
 /** @internal */
@@ -168,6 +180,11 @@ export interface ActionErrorTypeMap {
   index_not_green_timeout: IndexNotGreenTimeout;
   index_not_yellow_timeout: IndexNotYellowTimeout;
   cluster_shard_limit_exceeded: ClusterShardLimitExceeded;
+  es_response_too_large: EsResponseTooLargeError;
+  synchronization_failed: SynchronizationFailed;
+  actual_mappings_incomplete: ActualMappingsIncomplete;
+  compared_mappings_changed: ComparedMappingsChanged;
+  operation_not_supported: OperationNotSupported;
 }
 
 /**

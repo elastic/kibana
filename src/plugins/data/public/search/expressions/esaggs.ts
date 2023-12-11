@@ -61,20 +61,20 @@ export function getFunctionDefinition({
         return { aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest };
       }).pipe(
         switchMap(({ aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest }) => {
-          const { disableShardWarnings } = getSearchContext();
+          const { disableWarningToasts } = getSearchContext();
 
           return handleEsaggsRequest({
             abortSignal,
             aggs: aggConfigs,
-            filters: get(input, 'filters', undefined),
+            filters: args.ignoreGlobalFilters ? undefined : get(input, 'filters', undefined),
             indexPattern,
             inspectorAdapters,
-            query: get(input, 'query', undefined) as any,
+            query: args.ignoreGlobalFilters ? undefined : (get(input, 'query', undefined) as any),
             searchSessionId: getSearchSessionId(),
             searchSourceService: searchSource,
             timeFields: args.timeFields,
             timeRange: get(input, 'timeRange', undefined),
-            disableShardWarnings: (disableShardWarnings || false) as boolean,
+            disableWarningToasts: (disableWarningToasts || false) as boolean,
             getNow,
             executionContext: getExecutionContext(),
           });

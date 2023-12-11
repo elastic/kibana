@@ -41,6 +41,7 @@ exports[`basePath throws if not specified, but rewriteBasePath is set 1`] = `"ca
 exports[`has defaults for config 1`] = `
 Object {
   "autoListen": true,
+  "cdn": Object {},
   "compression": Object {
     "brotli": Object {
       "enabled": false,
@@ -77,12 +78,11 @@ Object {
     "allowFromAnyIp": false,
     "ipAllowlist": Array [],
   },
-  "restrictInternalApis": false,
   "rewriteBasePath": false,
   "securityResponseHeaders": Object {
     "crossOriginOpenerPolicy": "same-origin",
     "disableEmbedding": false,
-    "permissionsPolicy": null,
+    "permissionsPolicy": "camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()",
     "referrerPolicy": "no-referrer-when-downgrade",
     "strictTransportSecurity": null,
     "xContentTypeOptions": "nosniff",
@@ -125,6 +125,10 @@ Object {
       "TLSv1.3",
     ],
     "truststore": Object {},
+  },
+  "versioned": Object {
+    "strictClientVersionCheck": true,
+    "versionResolution": "oldest",
   },
   "xsrf": Object {
     "allowlist": Array [],

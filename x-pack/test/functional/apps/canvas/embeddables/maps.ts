@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['canvas', 'common', 'header', 'maps']);
+  const PageObjects = getPageObjects(['canvas', 'header', 'maps']);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       // open canvas home
-      await PageObjects.common.navigateToApp('canvas');
+      await PageObjects.canvas.goToListingPage();
       // create new workpad
       await PageObjects.canvas.createNewWorkpad();
       await PageObjects.canvas.setWorkpadName('maps tests');

@@ -283,6 +283,20 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should return a policy with monitoring enabled but no logs/metrics if keep_monitoring_alive is true', async () => {
+    mockAgentPolicy({
+      keep_monitoring_alive: true,
+    });
+
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy?.agent?.monitoring).toEqual({
+      enabled: true,
+      logs: false,
+      metrics: false,
+    });
+  });
+
   it('should get the permissions for monitoring', async () => {
     mockAgentPolicy({
       namespace: 'testnamespace',
@@ -438,19 +452,7 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should populate agent.protection and signed properties if encryption is available', async () => {
-    const mockContext = createAppContextStartContractMock();
-    mockContext.messageSigningService.sign = jest
-      .fn()
-      .mockImplementation((message: Record<string, unknown>) =>
-        Promise.resolve({
-          data: Buffer.from(JSON.stringify(message), 'utf8'),
-          signature: 'thisisasignature',
-        })
-      );
-    mockContext.messageSigningService.getPublicKey = jest
-      .fn()
-      .mockResolvedValue('thisisapublickey');
-    appContextService.start(mockContext);
+    appContextService.start(createAppContextStartContractMock());
 
     mockAgentPolicy({});
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
@@ -461,7 +463,7 @@ describe('getFullAgentPolicy', () => {
       signing_key: 'thisisapublickey',
     });
     expect(agentPolicy!.signed).toMatchObject({
-      data: 'eyJpZCI6ImFnZW50LXBvbGljeSIsImFnZW50Ijp7InByb3RlY3Rpb24iOnsiZW5hYmxlZCI6ZmFsc2UsInVuaW5zdGFsbF90b2tlbl9oYXNoIjoiIiwic2lnbmluZ19rZXkiOiJ0aGlzaXNhcHVibGlja2V5In19fQ==',
+      data: 'eyJpZCI6ImFnZW50LXBvbGljeSIsImFnZW50Ijp7ImZlYXR1cmVzIjp7fSwicHJvdGVjdGlvbiI6eyJlbmFibGVkIjpmYWxzZSwidW5pbnN0YWxsX3Rva2VuX2hhc2giOiIiLCJzaWduaW5nX2tleSI6InRoaXNpc2FwdWJsaWNrZXkifX0sImlucHV0cyI6W119',
       signature: 'thisisasignature',
     });
   });
@@ -483,6 +485,7 @@ describe('transformOutputToFullPolicyOutput', () => {
         "hosts": Array [
           "http://host.fr",
         ],
+        "preset": "balanced",
         "type": "elasticsearch",
       }
     `);
@@ -507,6 +510,7 @@ ssl.test: 123
         "hosts": Array [
           "http://host.fr",
         ],
+        "preset": "balanced",
         "ssl.ca_trusted_fingerprint": "fingerprint123",
         "ssl.test": 123,
         "test": 1234,
@@ -539,6 +543,7 @@ ssl.test: 123
         "hosts": Array [
           "http://host.fr",
         ],
+        "preset": "balanced",
         "proxy_url": "https://proxy1.fr",
         "type": "elasticsearch",
       }
@@ -565,6 +570,7 @@ ssl.test: 123
           "http://host.fr",
         ],
         "password": "\${ES_PASSWORD}",
+        "preset": "balanced",
         "type": "elasticsearch",
         "username": "\${ES_USERNAME}",
       }

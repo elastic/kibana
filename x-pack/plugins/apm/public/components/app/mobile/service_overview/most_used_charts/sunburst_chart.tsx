@@ -100,7 +100,7 @@ export function SunburstChart({
       >
         {isDataAvailable ? (
           <Chart>
-            <Settings theme={theme} />
+            <Settings theme={theme} locale={i18n.getLocale()} />
             <Partition
               id={chartKey}
               data={data}

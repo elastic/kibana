@@ -6,21 +6,22 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexItem, EuiToolTip, EuiBadgeProps } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { euiLightVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 
+import { euiLightVars } from '@kbn/ui-theme';
 import { useKibana } from '../../../../utils/kibana_react';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { isApmIndicatorType } from '../../../../utils/slo/indicator';
 import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
 
 export interface Props {
+  color?: EuiBadgeProps['color'];
   slo: SLOWithSummaryResponse;
 }
 
-export function SloIndicatorTypeBadge({ slo }: Props) {
+export function SloIndicatorTypeBadge({ slo, color }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -54,7 +55,7 @@ export function SloIndicatorTypeBadge({ slo }: Props) {
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiBadge color={euiLightVars.euiColorDisabled}>
+        <EuiBadge color={color ?? euiLightVars.euiColorDisabled}>
           {toIndicatorTypeLabel(slo.indicator.type)}
         </EuiBadge>
       </EuiFlexItem>
@@ -68,7 +69,7 @@ export function SloIndicatorTypeBadge({ slo }: Props) {
             })}
           >
             <EuiBadge
-              color={euiLightVars.euiColorDisabled}
+              color={color ?? euiLightVars.euiColorDisabled}
               onClick={handleNavigateToApm}
               onClickAriaLabel={i18n.translate(
                 'xpack.observability.slo.indicatorTypeBadge.exploreInApm',

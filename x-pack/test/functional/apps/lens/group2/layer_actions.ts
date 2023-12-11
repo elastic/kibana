@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   describe('lens layer actions tests', () => {
     it('should allow creation of lens xy chart', async () => {
@@ -50,6 +51,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await testSubjects.getVisibleText('lnsChangeIndexPatternSamplingInfo')).to.be('1%');
     });
 
+    it('should expose the ignore global filters control for a data layer', async () => {
+      await PageObjects.lens.openLayerContextMenu();
+      expect(
+        await testSubjects.exists('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters')
+      ).to.be(false);
+      // click on open layer settings
+      await testSubjects.click('lnsLayerSettings');
+      // annotations settings have only ignore filters
+      await testSubjects.click('lns-layerSettings-ignoreGlobalFilters');
+      expect(
+        await testSubjects.exists('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters')
+      ).to.be(true);
+      await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+    });
+
     it('should add an annotation layer and settings shoud be available with ignore filters', async () => {
       // configure a date histogram
       await PageObjects.lens.configureDimension({
@@ -66,15 +82,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // add annotation layer
       await PageObjects.lens.createLayer('annotations');
 
-      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
+      expect(
+        await testSubjects.exists('lns-layerPanel-1 > lnsChangeIndexPatternIgnoringFilters')
+      ).to.be(true);
 
       await PageObjects.lens.openLayerContextMenu(1);
       await testSubjects.click('lnsLayerSettings');
       // annotations settings have only ignore filters
-      await testSubjects.click('lnsXY-layerSettings-ignoreGlobalFilters');
+      await testSubjects.click('lns-layerSettings-ignoreGlobalFilters');
       // now close the panel and check the dataView picker has no icon
       await testSubjects.click('lns-indexPattern-dimensionContainerBack');
-      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(false);
+      expect(
+        await testSubjects.exists('lns-layerPanel-1 > lnsChangeIndexPatternIgnoringFilters')
+      ).to.be(false);
     });
 
     it('should add a new visualization layer and disable the sampling if max operation is chosen', async () => {
@@ -116,6 +136,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.getAttribute('lns-indexPattern-random-sampling-slider', 'disabled')
       ).to.be('true');
       await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+    });
+
+    it('should expose sampling and ignore filters settings for reference lines layer', async () => {
+      await PageObjects.lens.createLayer('referenceLine');
+
+      await PageObjects.lens.openLayerContextMenu(3);
+      // click on open layer settings
+      await testSubjects.click('lnsLayerSettings');
+      // random sampling available
+      await testSubjects.existOrFail('lns-indexPattern-random-sampling-row');
+      // tweak the value
+      await PageObjects.lens.dragRangeInput('lns-indexPattern-random-sampling-slider', 2, 'left');
+      // annotations settings have only ignore filters
+      await testSubjects.click('lns-layerSettings-ignoreGlobalFilters');
+      await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+      // Check both sampling and ignore filters are now present
+      await testSubjects.existOrFail('lnsChangeIndexPatternSamplingInfo');
+      expect(
+        await testSubjects.getVisibleText('lns-layerPanel-3 > lnsChangeIndexPatternSamplingInfo')
+      ).to.be('1%');
+      expect(
+        await testSubjects.exists('lns-layerPanel-3 > lnsChangeIndexPatternIgnoringFilters')
+      ).to.be(true);
     });
 
     it('should switch to pie chart and have layer settings available', async () => {
@@ -196,6 +239,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // add annotation layer
       // by default annotations ignore global filters
       await PageObjects.lens.createLayer('annotations');
+
+      await testSubjects.click('lns-layerPanel-2 > lnsXY_xAnnotationsPanel > lns-dimensionTrigger');
+
+      await testSubjects.click('lnsXY_annotation_query');
+
+      await retry.try(async () => {
+        if (!(await testSubjects.exists('annotation-query-based-query-input'))) {
+          await testSubjects.setValue('annotation-query-based-query-input', '*', {
+            clearWithKeyboard: true,
+            typeCharByChar: true,
+          });
+        }
+      });
+
+      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.save('sampledVisualization', false, true, false, 'new');
 

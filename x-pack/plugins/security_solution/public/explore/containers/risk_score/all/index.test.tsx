@@ -34,7 +34,7 @@ let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 const defaultFeatureStatus = {
   isLoading: false,
   isDeprecated: false,
-  isLicenseValid: true,
+  isAuthorized: true,
   isEnabled: true,
   refetch: () => {},
 };
@@ -42,7 +42,7 @@ const defaultRisk = {
   data: undefined,
   inspect: {},
   isInspected: false,
-  isLicenseValid: true,
+  isAuthorized: true,
   isModuleEnabled: true,
   isDeprecated: false,
   totalCount: 0,
@@ -72,7 +72,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
     test('does not search if license is not valid', () => {
       mockUseRiskScoreFeatureStatus.mockReturnValue({
         ...defaultFeatureStatus,
-        isLicenseValid: false,
+        isAuthorized: false,
       });
       const { result } = renderHook(() => useRiskScore({ riskEntity }), {
         wrapper: TestProviders,
@@ -81,7 +81,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       expect(result.current).toEqual({
         loading: false,
         ...defaultRisk,
-        isLicenseValid: false,
+        isAuthorized: false,
         refetch: result.current.refetch,
       });
     });

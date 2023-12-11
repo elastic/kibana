@@ -10,8 +10,8 @@ import React from 'react';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import type { Role } from '../../../../../../common/model';
 import { ClusterPrivileges } from './cluster_privileges';
+import type { Role } from '../../../../../../common';
 
 test('it renders without crashing', () => {
   const role: Role = {

@@ -28,6 +28,7 @@ import {
   EuiButtonGroupProps,
   EuiHighlight,
   EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import {
   PROFILE_OPTIONS,
@@ -63,7 +64,7 @@ import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../../../hooks/use_monitor_name';
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   FormMonitorType,
   HTTPMethod,
   ScreenshotOption,
@@ -76,6 +77,8 @@ import {
   ResponseBodyIndexPolicy,
   ResponseCheckJSON,
   ThrottlingConfig,
+  RequestBodyCheck,
+  SourceType,
 } from '../types';
 import { AlertConfigKey, ALLOWED_SCHEDULES_IN_MINUTES } from '../constants';
 import { getDefaultFormFields } from './defaults';
@@ -240,18 +243,17 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
-    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }): EuiFieldTextProps => {
+    props: ({ setValue, dependenciesFieldMeta, isEdit, trigger }): EuiFieldTextProps => {
       return {
         'data-test-subj': 'syntheticsMonitorConfigURL',
-        onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.URLS, event.target.value, {
-            shouldValidate: Boolean(formState.submitCount > 0),
-          });
+        onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
+          setValue(ConfigKey.URLS, event.target.value, { shouldTouch: true });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
             setValue(ConfigKey.NAME, event.target.value, {
-              shouldValidate: Boolean(formState.submitCount > 0),
+              shouldTouch: true,
             });
           }
+          await trigger();
         },
         readOnly,
       };
@@ -269,16 +271,15 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
-    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }): EuiFieldTextProps => {
+    props: ({ setValue, trigger, dependenciesFieldMeta, isEdit }): EuiFieldTextProps => {
       return {
-        onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.URLS, event.target.value, {
-            shouldValidate: Boolean(formState.submitCount > 0),
-          });
+        onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
+          setValue(ConfigKey.URLS, event.target.value, { shouldTouch: true });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
             setValue(ConfigKey.NAME, event.target.value, {
-              shouldValidate: Boolean(formState.submitCount > 0),
+              shouldTouch: true,
             });
+            await trigger();
           }
         },
         'data-test-subj': 'syntheticsMonitorConfigURL',
@@ -295,17 +296,14 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
-    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }): EuiFieldTextProps => {
+    props: ({ setValue, trigger, dependenciesFieldMeta, isEdit }): EuiFieldTextProps => {
       return {
-        onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.HOSTS, event.target.value, {
-            shouldValidate: Boolean(formState.submitCount > 0),
-          });
+        onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
+          setValue(ConfigKey.HOSTS, event.target.value, { shouldTouch: true });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
-            setValue(ConfigKey.NAME, event.target.value, {
-              shouldValidate: Boolean(formState.submitCount > 0),
-            });
+            setValue(ConfigKey.NAME, event.target.value, { shouldTouch: true });
           }
+          await trigger();
         },
         'data-test-subj': 'syntheticsMonitorConfigHost',
         readOnly,
@@ -321,17 +319,14 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
-    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }): EuiFieldTextProps => {
+    props: ({ setValue, trigger, dependenciesFieldMeta, isEdit }): EuiFieldTextProps => {
       return {
-        onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(ConfigKey.HOSTS, event.target.value, {
-            shouldValidate: Boolean(formState.submitCount > 0),
-          });
+        onChange: async (event: React.ChangeEvent<HTMLInputElement>) => {
+          setValue(ConfigKey.HOSTS, event.target.value, { shouldTouch: true });
           if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
-            setValue(ConfigKey.NAME, event.target.value, {
-              shouldValidate: Boolean(formState.submitCount > 0),
-            });
+            setValue(ConfigKey.NAME, event.target.value, { shouldTouch: true });
           }
+          await trigger();
         },
         'data-test-subj': 'syntheticsMonitorConfigHost',
         readOnly,
@@ -360,7 +355,12 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     validation: () => ({
       validate: {
-        notEmpty: (value) => Boolean(value.trim()),
+        notEmpty: (value) =>
+          !Boolean(value.trim())
+            ? i18n.translate('xpack.synthetics.monitorConfig.name.error', {
+                defaultMessage: 'Monitor name is required',
+              })
+            : true,
       },
     }),
     error: i18n.translate('xpack.synthetics.monitorConfig.name.error', {
@@ -402,47 +402,78 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'Where do you want to run this test from? Additional locations will increase your total cost.',
     }),
-    props: ({ field, setValue, locations, formState }) => {
+    props: ({ field, setValue, locations, trigger }) => {
       return {
         options: Object.values(locations).map((location) => ({
-          label: locations?.find((loc) => location.id === loc.id)?.label || '',
-          id: location.id || '',
+          label: location.label,
+          id: location.id,
           isServiceManaged: location.isServiceManaged || false,
+          isInvalid: location.isInvalid,
+          disabled: location.isInvalid,
         })),
         selectedOptions: Object.values(field?.value || {}).map((location) => ({
-          color: locations.some((s) => s.id === location.id)
-            ? location.isServiceManaged
+          color:
+            location.isInvalid || !locations.some((s) => s.id === location.id)
+              ? 'danger'
+              : location.isServiceManaged
               ? 'default'
-              : 'primary'
-            : 'danger',
-          label: locations?.find((loc) => location.id === loc.id)?.label ?? location.id,
+              : 'primary',
+          label:
+            (location.label || locations?.find((loc) => location.id === loc.id)?.label) ??
+            location.id,
           id: location.id || '',
           isServiceManaged: location.isServiceManaged || false,
         })),
         'data-test-subj': 'syntheticsMonitorConfigLocations',
-        onChange: (updatedValues: FormLocation[]) => {
+        onChange: async (updatedValues: FormLocation[]) => {
           const valuesToSave = updatedValues.map(({ id, label, isServiceManaged }) => ({
             id,
             label,
             isServiceManaged,
           }));
-          setValue(ConfigKey.LOCATIONS, valuesToSave, {
-            shouldValidate: Boolean(formState.submitCount > 0),
-          });
+          setValue(ConfigKey.LOCATIONS, valuesToSave);
+          await trigger(ConfigKey.LOCATIONS);
         },
         isDisabled: readOnly,
         renderOption: (option: FormLocation, searchValue: string) => {
           return (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem>
-                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-              </EuiFlexItem>
-              {!option.isServiceManaged && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="primary">Private</EuiBadge>
+            <EuiToolTip
+              anchorProps={{
+                style: { width: '100%' },
+              }}
+              content={
+                option.isInvalid
+                  ? i18n.translate('xpack.synthetics.monitorConfig.locations.attachedPolicy', {
+                      defaultMessage:
+                        'The attached agent policy for this location has been deleted.',
+                    })
+                  : ''
+              }
+            >
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem>
+                  <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+                {option.isInvalid && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="danger">
+                      {i18n.translate('xpack.synthetics.monitorConfig.locations.invalid', {
+                        defaultMessage: 'Invalid',
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
+                {!option.isServiceManaged && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="primary">
+                      {i18n.translate('xpack.synthetics.monitorConfig.locations.private', {
+                        defaultMessage: 'Private',
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiToolTip>
           );
         },
       };
@@ -451,53 +482,74 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   [ConfigKey.ENABLED]: {
     fieldKey: ConfigKey.ENABLED,
     component: Switch,
-    label: i18n.translate('xpack.synthetics.monitorConfig.enabled.label', {
-      defaultMessage: 'Enable Monitor',
-    }),
     controlled: true,
-    props: ({ isEdit, setValue, field }): EuiSwitchProps => ({
-      id: 'syntheticsMontiorConfigIsEnabled',
-      label: isEdit
-        ? i18n.translate('xpack.synthetics.monitorConfig.edit.enabled.label', {
-            defaultMessage: 'Disabled monitors do not run tests.',
-          })
-        : i18n.translate('xpack.synthetics.monitorConfig.create.enabled.label', {
-            defaultMessage:
-              'Disabled monitors do not run tests. You can create a disabled monitor and enable it later.',
-          }),
-      checked: field?.value || false,
-      onChange: (event) => {
-        setValue(ConfigKey.ENABLED, !!event.target.checked);
-      },
-      'data-test-subj': 'syntheticsEnableSwitch',
-      // enabled is an allowed field for read only
-      // isDisabled: readOnly,
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.edit.enabled.label', {
+      defaultMessage: `When disabled, the monitor doesn't run any tests. You can enable it at any time.`,
     }),
+    props: ({ setValue, field, trigger, formState }): EuiSwitchProps => {
+      const isProjectMonitor =
+        formState.defaultValues?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+      return {
+        id: 'syntheticsMontiorConfigIsEnabled',
+        label: i18n.translate('xpack.synthetics.monitorConfig.enabled.label', {
+          defaultMessage: 'Enable Monitor',
+        }),
+        checked: field?.value || false,
+        onChange: async (event) => {
+          setValue(ConfigKey.ENABLED, !!event.target.checked);
+          await trigger(ConfigKey.ENABLED);
+        },
+        'data-test-subj': 'syntheticsEnableSwitch',
+        // enabled is an allowed field for read only
+        disabled: !isProjectMonitor && readOnly,
+      };
+    },
   },
   [AlertConfigKey.STATUS_ENABLED]: {
     fieldKey: AlertConfigKey.STATUS_ENABLED,
     component: Switch,
-    label: i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
-      defaultMessage: 'Enable status alerts',
-    }),
     controlled: true,
-    props: ({ isEdit, setValue, field }): EuiSwitchProps => ({
-      id: 'syntheticsMonitorConfigIsAlertEnabled',
-      label: isEdit
-        ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertEnabled.label', {
-            defaultMessage: 'Disabling will stop alerting on this monitor.',
-          })
-        : i18n.translate('xpack.synthetics.monitorConfig.create.alertEnabled.label', {
-            defaultMessage: 'Enable status alerts on this monitor.',
-          }),
-      checked: field?.value || false,
-      onChange: (event) => {
-        setValue(AlertConfigKey.STATUS_ENABLED, !!event.target.checked);
-      },
-      'data-test-subj': 'syntheticsAlertStatusSwitch',
-      // alert config is an allowed field for read only
-      // isDisabled: readOnly,
-    }),
+    props: ({ setValue, field, trigger, formState }): EuiSwitchProps => {
+      const isProjectMonitor =
+        formState.defaultValues?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+      return {
+        id: 'syntheticsMonitorConfigIsAlertEnabled',
+        label: i18n.translate('xpack.synthetics.monitorConfig.disabledAlerting.label', {
+          defaultMessage: 'Enable status alerts on this monitor',
+        }),
+        checked: field?.value || false,
+        onChange: async (event) => {
+          setValue(AlertConfigKey.STATUS_ENABLED, !!event.target.checked);
+          await trigger(AlertConfigKey.STATUS_ENABLED);
+        },
+        'data-test-subj': 'syntheticsAlertStatusSwitch',
+        // alert config is an allowed field for read only
+        disabled: !isProjectMonitor && readOnly,
+      };
+    },
+  },
+  [AlertConfigKey.TLS_ENABLED]: {
+    fieldKey: AlertConfigKey.TLS_ENABLED,
+    component: Switch,
+    controlled: true,
+    props: ({ setValue, field, trigger, formState }): EuiSwitchProps => {
+      const isProjectMonitor =
+        formState.defaultValues?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+      return {
+        id: 'syntheticsMonitorConfigIsTlsAlertEnabled',
+        label: i18n.translate('xpack.synthetics.monitorConfig.create.alertTlsEnabled.label', {
+          defaultMessage: 'Enable TLS alerts on this monitor.',
+        }),
+        checked: field?.value || false,
+        onChange: async (event) => {
+          setValue(AlertConfigKey.TLS_ENABLED, !!event.target.checked);
+          await trigger(AlertConfigKey.TLS_ENABLED);
+        },
+        'data-test-subj': 'syntheticsAlertStatusSwitch',
+        // alert config is an allowed field for read only
+        disabled: !isProjectMonitor && readOnly,
+      };
+    },
   },
   [ConfigKey.TAGS]: {
     fieldKey: ConfigKey.TAGS,
@@ -527,14 +579,15 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'The total time allowed for testing the connection and exchanging data.',
     }),
     props: (): EuiFieldNumberProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigTimeout',
       min: 1,
       step: 'any',
       readOnly,
     }),
     dependencies: [ConfigKey.SCHEDULE],
-    validation: ([schedule]) => {
-      return {
-        validate: (value) => {
+    validation: ([schedule]) => ({
+      validate: {
+        validTimeout: (value) => {
           switch (true) {
             case value < 0:
               return i18n.translate('xpack.synthetics.monitorConfig.timeout.greaterThan0Error', {
@@ -542,7 +595,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
               });
             case value > parseFloat((schedule as MonitorFields[ConfigKey.SCHEDULE]).number) * 60:
               return i18n.translate('xpack.synthetics.monitorConfig.timeout.scheduleError', {
-                defaultMessage: 'Timemout must be less than the monitor frequency.',
+                defaultMessage: 'Timeout must be less than the monitor frequency.',
               });
             case !Boolean(`${value}`.match(FLOATS_ONLY)):
               return i18n.translate('xpack.synthetics.monitorConfig.timeout.formatError', {
@@ -552,8 +605,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
               return true;
           }
         },
-      };
-    },
+      },
+    }),
   },
   [ConfigKey.APM_SERVICE_NAME]: {
     fieldKey: ConfigKey.APM_SERVICE_NAME,
@@ -599,7 +652,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       readOnly,
     }),
     validation: () => ({
-      validate: (namespace) => isValidNamespace(namespace).error,
+      validate: {
+        validNamespace: (namespace) => isValidNamespace(namespace).error,
+      },
     }),
   },
   [ConfigKey.MAX_REDIRECTS]: {
@@ -612,6 +667,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'The total number of redirects to follow.',
     }),
     props: (): EuiFieldNumberProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigMaxRedirects',
       min: 0,
       max: 10,
       step: 1,
@@ -619,6 +675,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     validation: () => ({
       min: 0,
+      max: 10,
       pattern: WHOLE_NUMBERS_ONLY,
     }),
     error: i18n.translate('xpack.synthetics.monitorConfig.maxRedirects.error', {
@@ -636,6 +693,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         'The duration to wait before emitting another ICMP Echo Request if no response is received.',
     }),
     props: (): EuiFieldNumberProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigWait',
       min: 1,
       step: 1,
       readOnly,
@@ -716,14 +774,30 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     controlled: true,
     validation: () => ({
-      validate: (headers) => !validateHeaders(headers),
+      validate: {
+        validHeaders: (headers) =>
+          validateHeaders(headers)
+            ? i18n.translate('xpack.synthetics.monitorConfig.requestHeaders.error', {
+                defaultMessage: 'Header key must be a valid HTTP token.',
+              })
+            : true,
+      },
     }),
+    dependencies: [ConfigKey.REQUEST_BODY_CHECK],
     error: i18n.translate('xpack.synthetics.monitorConfig.requestHeaders.error', {
       defaultMessage: 'Header key must be a valid HTTP token.',
     }),
-    props: (): HeaderFieldProps => ({
-      readOnly,
-    }),
+    // contentMode is optional for other implementations, but required for this implementation of this field
+    props: ({
+      dependencies,
+    }): HeaderFieldProps & { contentMode: HeaderFieldProps['contentMode'] } => {
+      const [requestBody] = dependencies;
+      return {
+        'data-test-subj': 'syntheticsHeaderFieldRequestHeaders',
+        readOnly,
+        contentMode: (requestBody as RequestBodyCheck).type,
+      };
+    },
   },
   [ConfigKey.REQUEST_BODY_CHECK]: {
     fieldKey: ConfigKey.REQUEST_BODY_CHECK,
@@ -793,13 +867,15 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       isDisabled: readOnly,
     }),
     validation: () => ({
-      validate: (value) => {
-        const validateFn = validate[DataStream.HTTP][ConfigKey.RESPONSE_STATUS_CHECK];
-        if (validateFn) {
-          return !validateFn({
-            [ConfigKey.RESPONSE_STATUS_CHECK]: value,
-          });
-        }
+      validate: {
+        validResponseStatusCheck: (value) => {
+          const validateFn = validate[MonitorTypeEnum.HTTP][ConfigKey.RESPONSE_STATUS_CHECK];
+          if (validateFn) {
+            return !validateFn({
+              [ConfigKey.RESPONSE_STATUS_CHECK]: value,
+            });
+          }
+        },
       },
     }),
     error: i18n.translate('xpack.synthetics.monitorConfig.responseStatusCheck.error', {
@@ -817,12 +893,17 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     controlled: true,
     validation: () => ({
-      validate: (headers) => !validateHeaders(headers),
-    }),
-    error: i18n.translate('xpack.synthetics.monitorConfig.responseHeadersCheck.error', {
-      defaultMessage: 'Header key must be a valid HTTP token.',
+      validate: {
+        validHeaders: (headers) =>
+          validateHeaders(headers)
+            ? i18n.translate('xpack.synthetics.monitorConfig.responseHeadersCheck.error', {
+                defaultMessage: 'Header key must be a valid HTTP token.',
+              })
+            : true,
+      },
     }),
     props: (): HeaderFieldProps => ({
+      'data-test-subj': 'syntheticsHeaderFieldResponseHeaders',
       readOnly,
     }),
   },
@@ -910,30 +991,35 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       isEditFlow: isEdit,
     }),
     validation: () => ({
-      validate: (value) => {
-        // return false if script contains import or require statement
-        if (
-          value.script?.includes('import ') ||
-          value.script?.includes('require(') ||
-          value.script?.includes('journey(')
-        ) {
-          return i18n.translate('xpack.synthetics.monitorConfig.monitorScript.invalid', {
-            defaultMessage:
-              'Monitor script is invalid. Inline scripts cannot be full journey scripts, they may only contain step definitions.',
-          });
-        }
-        // should contain at least one step
-        if (value.script && !value.script?.includes('step(')) {
-          return i18n.translate('xpack.synthetics.monitorConfig.monitorScript.invalid.oneStep', {
-            defaultMessage:
-              'Monitor script is invalid. Inline scripts must contain at least one step definition.',
-          });
-        }
-        return Boolean(value.script);
+      validate: {
+        validScript: (value) => {
+          if (!value.script) {
+            return i18n.translate('xpack.synthetics.monitorConfig.monitorScript.error', {
+              defaultMessage: 'Monitor script is required',
+            });
+          }
+
+          // return false if script contains import or require statement
+          if (
+            value.script?.includes('import ') ||
+            value.script?.includes('require(') ||
+            value.script?.includes('journey(')
+          ) {
+            return i18n.translate('xpack.synthetics.monitorConfig.monitorScript.invalid', {
+              defaultMessage:
+                'Monitor script is invalid. Inline scripts cannot be full journey scripts, they may only contain step definitions.',
+            });
+          }
+          // should contain at least one step
+          if (value.script && !value.script?.includes('step(')) {
+            return i18n.translate('xpack.synthetics.monitorConfig.monitorScript.invalid.oneStep', {
+              defaultMessage:
+                'Monitor script is invalid. Inline scripts must contain at least one step definition.',
+            });
+          }
+          return true;
+        },
       },
-    }),
-    error: i18n.translate('xpack.synthetics.monitorConfig.monitorScript.error', {
-      defaultMessage: 'Monitor script is required',
     }),
   },
   [ConfigKey.PARAMS]: {
@@ -951,9 +1037,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       }),
       readOnly,
     }),
-    error: i18n.translate('xpack.synthetics.monitorConfig.params.error', {
-      defaultMessage: 'Invalid JSON format',
-    }),
     helpText: (
       <FormattedMessage
         id="xpack.synthetics.monitorConfig.params.helpText"
@@ -964,13 +1047,21 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       />
     ),
     validation: () => ({
-      validate: (value) => {
-        const validateFn = validate[DataStream.BROWSER][ConfigKey.PARAMS];
-        if (validateFn) {
-          return !validateFn({
-            [ConfigKey.PARAMS]: value,
-          });
-        }
+      validate: {
+        validParams: (value) => {
+          const validateFn = validate[MonitorTypeEnum.BROWSER][ConfigKey.PARAMS];
+          if (validateFn) {
+            return validateFn({
+              [ConfigKey.PARAMS]: value,
+            })
+              ? i18n.translate('xpack.synthetics.monitorConfig.params.error', {
+                  defaultMessage: 'Invalid JSON format',
+                })
+              : true;
+          }
+
+          return true;
+        },
       },
     }),
   },
@@ -1027,7 +1118,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       return !Boolean(isTLSEnabled);
     },
     dependencies: ['isTLSEnabled'],
-    props: ({ field, setValue }): EuiComboBoxProps<TLSVersion> => {
+    props: ({ field, setValue, trigger }): EuiComboBoxProps<TLSVersion> => {
       return {
         options: Object.values(TLSVersion).map((version) => ({
           label: version,
@@ -1035,11 +1126,12 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         selectedOptions: Object.values(field?.value || []).map((version) => ({
           label: version as TLSVersion,
         })),
-        onChange: (updatedValues: Array<EuiComboBoxOptionOption<TLSVersion>>) => {
+        onChange: async (updatedValues: Array<EuiComboBoxOptionOption<TLSVersion>>) => {
           setValue(
             ConfigKey.TLS_VERSION,
             updatedValues.map((option) => option.label as TLSVersion)
           );
+          await trigger(ConfigKey.TLS_VERSION);
         },
         isDisabled: readOnly,
       };
@@ -1222,9 +1314,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         </EuiLink>
       </span>
     ),
-    error: i18n.translate('xpack.synthetics.monitorConfig.playwrightOptions.error', {
-      defaultMessage: 'Invalid JSON format',
-    }),
     ariaLabel: i18n.translate(
       'xpack.synthetics.monitorConfig.playwrightOptions.codeEditor.json.ariaLabel',
       {
@@ -1244,13 +1333,21 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       id: 'syntheticsPlaywrightOptionsJSONCodeEditor',
     }),
     validation: () => ({
-      validate: (value) => {
-        const validateFn = validate[DataStream.BROWSER][ConfigKey.PLAYWRIGHT_OPTIONS];
-        if (validateFn) {
-          return !validateFn({
-            [ConfigKey.PLAYWRIGHT_OPTIONS]: value,
-          });
-        }
+      validate: {
+        validPlaywrightOptions: (value) => {
+          const validateFn = validate[MonitorTypeEnum.BROWSER][ConfigKey.PLAYWRIGHT_OPTIONS];
+          if (validateFn) {
+            return validateFn({
+              [ConfigKey.PLAYWRIGHT_OPTIONS]: value,
+            })
+              ? i18n.translate('xpack.synthetics.monitorConfig.playwrightOptions.error', {
+                  defaultMessage: 'Invalid JSON format',
+                })
+              : true;
+          }
+
+          return true;
+        },
       },
     }),
   },
@@ -1292,16 +1389,17 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         })}
       </span>
     ),
-    props: ({ setValue, field }): EuiComboBoxProps<string> => ({
+    props: ({ setValue, field, trigger }): EuiComboBoxProps<string> => ({
       id: 'syntheticsMontiorConfigSyntheticsArgs',
       selectedOptions: Object.values(field?.value || []).map((arg) => ({
         label: arg,
       })),
-      onChange: (updatedValues: Array<EuiComboBoxOptionOption<string>>) => {
+      onChange: async (updatedValues: Array<EuiComboBoxOptionOption<string>>) => {
         setValue(
           ConfigKey.SYNTHETICS_ARGS,
           updatedValues.map((option) => option.label)
         );
+        await trigger(ConfigKey.SYNTHETICS_ARGS);
       },
       onCreateOption: (newValue: string) => {
         setValue(ConfigKey.SYNTHETICS_ARGS, [...(field?.value || []), newValue]);
@@ -1346,7 +1444,12 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       const [responseBodyIndex] = dependencies || [];
       return responseBodyIndex === ResponseBodyIndexPolicy.NEVER;
     },
-    props: (): EuiFieldNumberProps => ({ min: 1, step: 'any', readOnly }),
+    props: (): EuiFieldNumberProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigMaxBytes',
+      min: 1,
+      step: 'any',
+      readOnly,
+    }),
     dependencies: [ConfigKey.RESPONSE_BODY_INDEX],
   },
   [ConfigKey.IPV4]: {
@@ -1360,7 +1463,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     controlled: true,
     dependencies: [ConfigKey.IPV6],
-    props: ({ field, setValue, dependencies }): EuiComboBoxProps<string> => {
+    props: ({ field, setValue, trigger, dependencies }): EuiComboBoxProps<string> => {
       const [ipv6] = dependencies;
       const ipv4 = field?.value;
       const values: string[] = [];
@@ -1382,7 +1485,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         selectedOptions: values.map((version) => ({
           label: version,
         })),
-        onChange: (updatedValues: Array<EuiComboBoxOptionOption<string>>) => {
+        onChange: async (updatedValues: Array<EuiComboBoxOptionOption<string>>) => {
           setValue(
             ConfigKey.IPV4,
             updatedValues.some((value) => value.label === 'IPv4')
@@ -1391,6 +1494,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
             ConfigKey.IPV6,
             updatedValues.some((value) => value.label === 'IPv6')
           );
+          await trigger([ConfigKey.IPV4, ConfigKey.IPV4]);
         },
         isDisabled: readOnly,
       };
@@ -1407,12 +1511,17 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     controlled: true,
     validation: () => ({
-      validate: (headers) => !validateHeaders(headers),
-    }),
-    error: i18n.translate('xpack.synthetics.monitorConfig.proxyHeaders.error', {
-      defaultMessage: 'The header key must be a valid HTTP token.',
+      validate: {
+        validHeaders: (headers) =>
+          validateHeaders(headers)
+            ? i18n.translate('xpack.synthetics.monitorConfig.proxyHeaders.error', {
+                defaultMessage: 'The header key must be a valid HTTP token.',
+              })
+            : true,
+      },
     }),
     props: (): HeaderFieldProps => ({
+      'data-test-subj': 'syntheticsHeaderFieldProxyHeaders',
       readOnly,
     }),
   },
@@ -1427,7 +1536,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         'A list of expressions executed against the body when parsed as JSON. The body size must be less than or equal to 100 MiB.',
     }),
     controlled: true,
-    props: ({ field, setValue }): KeyValuePairsFieldProps => ({
+    props: ({ field, setValue, trigger }): KeyValuePairsFieldProps => ({
       readOnly,
       keyLabel: i18n.translate('xpack.synthetics.monitorConfig.responseJSON.key.label', {
         defaultMessage: 'Description',
@@ -1441,7 +1550,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           defaultMessage: 'Add expression',
         }
       ),
-      onChange: (pairs) => {
+      onChange: async (pairs) => {
         const value: ResponseCheckJSON[] = pairs
           .map((pair) => {
             const [description, expression] = pair;
@@ -1453,21 +1562,42 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           .filter((pair) => pair.description || pair.expression);
         if (!isEqual(value, field?.value)) {
           setValue(ConfigKey.RESPONSE_JSON_CHECK, value);
+          await trigger(ConfigKey.RESPONSE_JSON_CHECK);
         }
       },
       defaultPairs: field?.value.map((check) => [check.description, check.expression]) || [],
     }),
-    validation: () => {
-      return {
-        validate: (value: ResponseCheckJSON[]) => {
+    validation: () => ({
+      validate: {
+        validBodyJSON: (value: ResponseCheckJSON[]) => {
           if (value.some((check) => !check.expression || !check.description)) {
             return i18n.translate('xpack.synthetics.monitorConfig.responseJSON.error', {
               defaultMessage:
                 "This JSON expression isn't valid. Make sure that both the label and expression are defined.",
             });
           }
+          return true;
         },
-      };
-    },
+      },
+    }),
+  },
+  [ConfigKey.MAX_ATTEMPTS]: {
+    fieldKey: ConfigKey.MAX_ATTEMPTS,
+    component: Switch,
+    controlled: true,
+    props: ({ setValue, field, trigger }): EuiSwitchProps => ({
+      disabled: readOnly,
+      id: 'syntheticsMonitorConfigMaxAttempts',
+      label: i18n.translate('xpack.synthetics.monitorConfig.retest.label', {
+        defaultMessage: 'Enable retest on failure',
+      }),
+      checked: field?.value === 2,
+      onChange: async (event) => {
+        const isChecked = !!event.target.checked;
+        setValue(ConfigKey.MAX_ATTEMPTS, isChecked ? 2 : 1);
+        await trigger(ConfigKey.MAX_ATTEMPTS);
+      },
+      'data-test-subj': 'syntheticsEnableAttemptSwitch',
+    }),
   },
 });

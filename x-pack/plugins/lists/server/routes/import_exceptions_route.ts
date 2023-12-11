@@ -9,13 +9,16 @@ import { extname } from 'path';
 
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { importExceptionsResponseSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { ImportQuerySchemaDecoded, importQuerySchema } from '@kbn/securitysolution-io-ts-types';
 
 import type { ListsPluginRouter } from '../types';
 import { ConfigType } from '../config';
+import {
+  ImportExceptionsRequestQueryDecoded,
+  importExceptionsRequestQuery,
+  importExceptionsResponse,
+} from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
@@ -25,8 +28,9 @@ import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from 
  * choice to overwrite any matching lists
  */
 export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigType): void => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       options: {
         body: {
           maxBytes: config.maxImportPayloadBytes,
@@ -35,48 +39,55 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
         tags: ['access:lists-all'],
       },
       path: `${EXCEPTION_LIST_URL}/_import`,
-      validate: {
-        body: schema.any(), // validation on file object is accomplished later in the handler.
-        query: buildRouteValidation<typeof importQuerySchema, ImportQuerySchemaDecoded>(
-          importQuerySchema
-        ),
+    })
+    .addVersion(
+      {
+        validate: {
+          request: {
+            body: schema.any(), // validation on file object is accomplished later in the handler.
+            query: buildRouteValidation<
+              typeof importExceptionsRequestQuery,
+              ImportExceptionsRequestQueryDecoded
+            >(importExceptionsRequestQuery),
+          },
+        },
+        version: '2023-10-31',
       },
-    },
-    async (context, request, response) => {
-      const exceptionListsClient = await getExceptionListClient(context);
-      const siemResponse = buildSiemResponse(response);
+      async (context, request, response) => {
+        const exceptionListsClient = await getExceptionListClient(context);
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const { filename } = request.body.file.hapi;
-        const fileExtension = extname(filename).toLowerCase();
-        if (fileExtension !== '.ndjson') {
+        try {
+          const { filename } = request.body.file.hapi;
+          const fileExtension = extname(filename).toLowerCase();
+          if (fileExtension !== '.ndjson') {
+            return siemResponse.error({
+              body: `Invalid file extension ${fileExtension}`,
+              statusCode: 400,
+            });
+          }
+
+          const importsSummary = await exceptionListsClient.importExceptionListAndItems({
+            exceptionsToImport: request.body.file,
+            generateNewListId: request.query.as_new_list,
+            maxExceptionsImportSize: config.maxExceptionsImportSize,
+            overwrite: request.query.overwrite,
+          });
+
+          const [validated, errors] = validate(importsSummary, importExceptionsResponse);
+
+          if (errors != null) {
+            return siemResponse.error({ body: errors, statusCode: 500 });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
-            body: `Invalid file extension ${fileExtension}`,
-            statusCode: 400,
+            body: error.message,
+            statusCode: error.statusCode,
           });
         }
-
-        const importsSummary = await exceptionListsClient.importExceptionListAndItems({
-          exceptionsToImport: request.body.file,
-          generateNewListId: request.query.as_new_list,
-          maxExceptionsImportSize: config.maxExceptionsImportSize,
-          overwrite: request.query.overwrite,
-        });
-
-        const [validated, errors] = validate(importsSummary, importExceptionsResponseSchema);
-
-        if (errors != null) {
-          return siemResponse.error({ body: errors, statusCode: 500 });
-        } else {
-          return response.ok({ body: validated ?? {} });
-        }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

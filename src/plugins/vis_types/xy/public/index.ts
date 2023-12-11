@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { VisTypeXyPlugin as Plugin } from './plugin';
+import type { XyPublicConfig } from '../config';
 
 export type { VisTypeXyPluginSetup } from './plugin';
 
@@ -27,6 +29,6 @@ export { TruncateLabelsOption } from './editor/components/common/truncate_labels
 export { getPositions } from './editor/positions';
 export { getScaleTypes } from './editor/scale_types';
 
-export function plugin() {
-  return new Plugin();
+export function plugin(initializerContext: PluginInitializerContext<XyPublicConfig>) {
+  return new Plugin(initializerContext);
 }

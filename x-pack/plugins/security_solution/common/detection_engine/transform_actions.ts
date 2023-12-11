@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction as AlertingRuleAction } from '@kbn/alerting-plugin/common';
 import type { NormalizedAlertAction } from '@kbn/alerting-plugin/server/rules_client';
-import type { NormalizedRuleAction } from './rule_management/api/rules/bulk_actions/request_schema';
-import type { ResponseAction, RuleResponseAction } from './rule_response_actions/schemas';
-import { RESPONSE_ACTION_TYPES } from './rule_response_actions/schemas';
-import type { RuleAlertAction } from './types';
+import type { NormalizedRuleAction } from '../api/detection_engine/rule_management';
+import type {
+  ResponseAction,
+  RuleResponseAction,
+} from '../api/detection_engine/model/rule_response_actions';
+import { ResponseActionTypesEnum } from '../api/detection_engine/model/rule_response_actions';
+import type { RuleAction } from '../api/detection_engine/model';
 
 export const transformRuleToAlertAction = ({
   group,
@@ -20,12 +23,14 @@ export const transformRuleToAlertAction = ({
   uuid,
   frequency,
   alerts_filter: alertsFilter,
-}: RuleAlertAction): RuleAction => ({
+}: RuleAction): AlertingRuleAction => ({
   group,
   id,
-  params,
+  params: params as AlertingRuleAction['params'],
   actionTypeId,
-  ...(alertsFilter && { alertsFilter }),
+  ...(alertsFilter && {
+    alertsFilter: alertsFilter as AlertingRuleAction['alertsFilter'],
+  }),
   ...(uuid && { uuid }),
   ...(frequency && { frequency }),
 });
@@ -38,7 +43,7 @@ export const transformAlertToRuleAction = ({
   uuid,
   frequency,
   alertsFilter,
-}: RuleAction): RuleAlertAction => ({
+}: AlertingRuleAction): RuleAction => ({
   group,
   id,
   params,
@@ -57,8 +62,13 @@ export const transformNormalizedRuleToAlertAction = ({
 }: NormalizedRuleAction): NormalizedAlertAction => ({
   group,
   id,
-  params,
-  ...(alertsFilter && { alertsFilter }),
+  params: params as AlertingRuleAction['params'],
+  ...(alertsFilter && {
+    // We use "unknown" as the alerts filter type which is stricter than the one
+    // used in the alerting plugin (what they use is essentially "any"). So we
+    // have to to cast here
+    alertsFilter: alertsFilter as AlertingRuleAction['alertsFilter'],
+  }),
   ...(frequency && { frequency }),
 });
 
@@ -68,7 +78,7 @@ export const transformAlertToNormalizedRuleAction = ({
   params,
   frequency,
   alertsFilter,
-}: RuleAction): NormalizedRuleAction => ({
+}: AlertingRuleAction): NormalizedRuleAction => ({
   group,
   id,
   params,
@@ -80,7 +90,7 @@ export const transformRuleToAlertResponseAction = ({
   action_type_id: actionTypeId,
   params,
 }: ResponseAction): RuleResponseAction => {
-  if (actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
+  if (actionTypeId === ResponseActionTypesEnum['.osquery']) {
     const {
       saved_query_id: savedQueryId,
       ecs_mapping: ecsMapping,
@@ -108,7 +118,7 @@ export const transformAlertToRuleResponseAction = ({
   actionTypeId,
   params,
 }: RuleResponseAction): ResponseAction => {
-  if (actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
+  if (actionTypeId === ResponseActionTypesEnum['.osquery']) {
     const { savedQueryId, ecsMapping, packId, ...rest } = params;
     return {
       params: {

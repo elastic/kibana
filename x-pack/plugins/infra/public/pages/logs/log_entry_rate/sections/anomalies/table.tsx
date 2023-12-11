@@ -13,8 +13,8 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiSpacer,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
@@ -299,6 +299,7 @@ const PaginationControls = ({
       <EuiFlexItem grow={false}>
         <EuiFlexGroup>
           <EuiButtonIcon
+            data-test-subj="infraPaginationControlsButton"
             iconType="arrowLeft"
             isDisabled={!fetchPreviousPage || isLoading}
             onClick={fetchPreviousPage}
@@ -308,6 +309,7 @@ const PaginationControls = ({
             <strong>{page}</strong>
           </span>
           <EuiButtonIcon
+            data-test-subj="infraPaginationControlsButton"
             iconType="arrowRight"
             isDisabled={!fetchNextPage || isLoading}
             onClick={fetchNextPage}

@@ -10,13 +10,18 @@ import { EuiFlexItem, EuiFlexGroup, useEuiFontSize, useEuiTheme } from '@elastic
 import React from 'react';
 import { css } from '@emotion/react';
 
+import styled from 'styled-components';
 import * as i18n from './translations';
 
-import type { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { RiskScore } from '../../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../../explore/components/risk_score/severity/common';
 import type { RiskScoreState } from '../../../../explore/containers/risk_score';
+import { RiskScoreDocTooltip } from '../../../../overview/components/common';
+
+export const TooltipContainer = styled.div`
+  padding: ${({ theme }) => theme.eui.euiSizeS};
+`;
 
 export const RiskScoreField = ({
   riskScoreState,
@@ -25,10 +30,10 @@ export const RiskScoreField = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { fontSize: xsFontSize } = useEuiFontSize('xs');
-  const { data: userRisk, isLicenseValid: isRiskLicenseValid } = riskScoreState;
+  const { data: userRisk, isAuthorized: isRiskScoreAuthorized } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
 
-  if (!isRiskLicenseValid) {
+  if (!isRiskScoreAuthorized) {
     return null;
   }
 
@@ -52,14 +57,20 @@ export const RiskScoreField = ({
         </span>
       </EuiFlexItem>
       {userRiskData ? (
-        <>
+        <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiFlexItem grow={false}>
             {Math.round(userRiskData.user.risk.calculated_score_norm)}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <RiskScore severity={RiskSeverity.high} hideBackgroundColor />
+            <RiskScoreLevel
+              severity={userRiskData.user.risk.calculated_level}
+              hideBackgroundColor
+            />
           </EuiFlexItem>
-        </>
+          <EuiFlexItem grow={false}>
+            <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.user} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : (
         getEmptyTagValue()
       )}

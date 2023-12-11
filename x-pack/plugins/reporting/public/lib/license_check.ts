@@ -6,7 +6,7 @@
  */
 
 import { LicenseCheck } from '@kbn/licensing-plugin/public';
-import { LicenseCheckResults } from '../../common/types';
+import { LicenseCheckResults } from '@kbn/reporting-common/types';
 
 export const checkLicense = (checkResults: LicenseCheck): LicenseCheckResults => {
   switch (checkResults.state) {

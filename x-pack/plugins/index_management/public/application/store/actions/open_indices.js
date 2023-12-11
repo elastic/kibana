@@ -20,14 +20,14 @@ export const openIndices =
     try {
       await request(indexNames);
     } catch (error) {
-      notificationService.showDangerToast(error.message);
+      notificationService.showDangerToast(error.body.message);
       return dispatch(clearRowStatus({ indexNames }));
     }
     dispatch(reloadIndices(indexNames));
     notificationService.showSuccessToast(
       i18n.translate('xpack.idxMgmt.openIndicesAction.successfullyOpenedIndicesMessage', {
-        defaultMessage: 'Successfully opened: [{indexNames}]',
-        values: { indexNames: indexNames.join(', ') },
+        defaultMessage: 'Successfully opened {count, plural, one {# index} other {# indices} }',
+        values: { count: indexNames.length },
       })
     );
   };

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useHistory } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
@@ -88,6 +87,7 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({ search: '' }),
   useHistory: jest.fn().mockReturnValue({
     push: jest.fn(),
+    listen: jest.fn(),
     location: {
       search: '',
     },
@@ -126,6 +126,8 @@ describe('when on the package policy create page', () => {
     testRenderer = createFleetTestRendererMock();
     mockApiCalls(testRenderer.startServices.http);
     testRenderer.mountHistory.push(createPageUrlPath);
+
+    jest.mocked(useStartServices().application.navigateToApp).mockReset();
 
     mockPackageInfo = {
       data: {
@@ -214,13 +216,14 @@ describe('when on the package policy create page', () => {
       beforeEach(async () => {
         await act(async () => {
           render();
+
           cancelLink = renderResult.getByTestId(
             'createPackagePolicy_cancelBackLink'
           ) as HTMLAnchorElement;
 
-          cancelButton = renderResult.getByTestId(
+          cancelButton = (await renderResult.findByTestId(
             'createPackagePolicyCancelButton'
-          ) as HTMLAnchorElement;
+          )) as HTMLAnchorElement;
         });
       });
 
@@ -339,12 +342,15 @@ describe('when on the package policy create page', () => {
       test('should navigate to save navigate path with query param if set', async () => {
         const routeState = {
           onSaveNavigateTo: [PLUGIN_ID, { path: '/save/url/here' }],
+          onSaveQueryParams: {
+            openEnrollmentFlyout: true,
+          },
         };
         const queryParamsPolicyId = 'agent-policy-1';
         await setupSaveNavigate(routeState, queryParamsPolicyId);
 
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
-          path: '/policies/agent-policy-1',
+          path: '/policies/agent-policy-1?openEnrollmentFlyout=true',
         });
       });
 
@@ -357,10 +363,12 @@ describe('when on the package policy create page', () => {
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID);
       });
 
-      test('should set history if no routeState', async () => {
+      test('should navigate to agent policy if no route state is set', async () => {
         await setupSaveNavigate({});
 
-        expect(useHistory().push).toHaveBeenCalledWith('/policies/agent-policy-1');
+        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
+          path: '/policies/agent-policy-1?openEnrollmentFlyout=true',
+        });
       });
     });
 
@@ -394,6 +402,7 @@ describe('when on the package policy create page', () => {
           name: 'Agent policy 2',
           namespace: 'default',
           inactivity_timeout: 1209600,
+          is_protected: false,
         },
         { withSysMonitoring: false }
       );
@@ -425,6 +434,7 @@ describe('when on the package policy create page', () => {
             name: 'Agent policy 2',
             namespace: 'default',
             inactivity_timeout: 1209600,
+            is_protected: false,
           },
           { withSysMonitoring: true }
         );

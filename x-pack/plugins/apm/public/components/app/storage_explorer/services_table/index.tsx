@@ -16,13 +16,22 @@ import {
   EuiIcon,
   EuiProgress,
   EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmServiceInventoryOptimizedSorting } from '@kbn/observability-plugin/common';
+import moment from 'moment';
+import { isEmpty } from 'lodash';
+import { downloadJson } from '../../../../utils/download_json';
 import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
-import { asPercent } from '../../../../../common/utils/formatters';
+import {
+  asPercent,
+  asTransactionRate,
+} from '../../../../../common/utils/formatters';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { StorageDetailsPerService } from './storage_details_per_service';
@@ -36,6 +45,7 @@ import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { SizeLabel } from './size_label';
 import { joinByKey } from '../../../../../common/utils/join_by_key';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 interface StorageExplorerItem {
   serviceName: string;
@@ -51,8 +61,15 @@ enum StorageExplorerFieldName {
   Sampling = 'sampling',
   Size = 'size',
 }
+interface Props {
+  summaryStatsData?: APIReturnType<'GET /internal/apm/storage_explorer_summary_stats'>;
+  loadingSummaryStats: boolean;
+}
 
-export function ServicesTable() {
+export function ServicesTable({
+  summaryStatsData,
+  loadingSummaryStats,
+}: Props) {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, ReactNode>
   >({});
@@ -106,12 +123,14 @@ export function ServicesTable() {
               environment,
               kuery,
               indexLifecyclePhase,
+              start,
+              end,
             },
           },
         });
       }
     },
-    [environment, kuery, indexLifecyclePhase, useOptimizedSorting]
+    [useOptimizedSorting, environment, kuery, indexLifecyclePhase, start, end]
   );
 
   const serviceStatisticsFetch = useProgressiveFetcher(
@@ -218,7 +237,7 @@ export function ServicesTable() {
             {i18n.translate(
               'xpack.apm.storageExplorer.table.samplingColumnName',
               {
-                defaultMessage: 'Sample rate',
+                defaultMessage: 'Sampling rate',
               }
             )}{' '}
             <EuiIcon
@@ -275,6 +294,9 @@ export function ServicesTable() {
     },
   ];
 
+  const isDownloadButtonDisable =
+    isEmpty(serviceStatisticsItems) || loadingSummaryStats;
+
   return (
     <EuiPanel
       hasShadow={false}
@@ -282,11 +304,68 @@ export function ServicesTable() {
       style={{ position: 'relative' }}
     >
       {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="StorageExplorerDownloadReportButton"
+            iconType="download"
+            isDisabled={isDownloadButtonDisable}
+            onClick={() =>
+              downloadJson({
+                fileName: `storage-explorefpr-${moment(Date.now()).format(
+                  'YYYYMMDDHHmmss'
+                )}.json`,
+                data: {
+                  filters: {
+                    rangeFrom,
+                    rangeTo,
+                    environment,
+                    kuery,
+                    indexLifecyclePhase,
+                  },
+                  summary: {
+                    totalSize: asDynamicBytes(summaryStatsData?.totalSize),
+                    diskSpaceUsedPct: asPercent(
+                      summaryStatsData?.diskSpaceUsedPct,
+                      1
+                    ),
+                    estimatedIncrementalSize: asDynamicBytes(
+                      summaryStatsData?.estimatedIncrementalSize
+                    ),
+                    dailyDataGeneration: asDynamicBytes(
+                      summaryStatsData?.dailyDataGeneration
+                    ),
+                    tracesPerMinute: asTransactionRate(
+                      summaryStatsData?.tracesPerMinute
+                    ),
+                    numberOfServices: (
+                      summaryStatsData?.numberOfServices ?? 0
+                    ).toString(),
+                  },
+                  services: serviceStatisticsItems.map((item) => ({
+                    ...item,
+                    sampling: asPercent(item?.sampling, 1),
+                    size: item?.size
+                      ? asDynamicBytes(item?.size)
+                      : NOT_AVAILABLE_LABEL,
+                  })),
+                },
+              })
+            }
+            fill
+          >
+            {i18n.translate('xpack.apm.storageExplorer.downloadReport', {
+              defaultMessage: 'Download report',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiInMemoryTable
         tableCaption={i18n.translate(
           'xpack.apm.storageExplorer.table.caption',
           {
-            defaultMessage: 'Storage explorer',
+            defaultMessage: 'Storage Explorer',
           }
         )}
         items={items ?? []}

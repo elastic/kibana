@@ -6,15 +6,9 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-
 import { i18n } from '@kbn/i18n';
-
 import { isDataView } from '../../../../common/types/data_view';
-
-import { getSavedSearch, getSavedSearchUrlConflictMessage } from '../../../shared_imports';
-
 import { useAppDependencies } from '../../app_dependencies';
-
 import { createSearchItems, getDataViewIdByTitle, loadDataViews, SearchItems } from './common';
 
 export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
@@ -45,15 +39,9 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
     }
 
     try {
-      fetchedSavedSearch = await getSavedSearch(id, {
-        search: appDeps.data.search,
-        savedObjectsClient: appDeps.savedObjects.client,
-        spaces: appDeps.spaces,
-      });
-
-      if (isMounted.current && fetchedSavedSearch?.sharingSavedObjectProps?.errorJSON) {
-        setError(await getSavedSearchUrlConflictMessage(fetchedSavedSearch));
-        return;
+      // If data view already found, no need to get saved search
+      if (!fetchedDataView) {
+        fetchedSavedSearch = await appDeps.savedSearch.get(id);
       }
     } catch (e) {
       // Just let fetchedSavedSearch stay undefined in case it doesn't exist.

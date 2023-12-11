@@ -11,7 +11,7 @@
         "label": "getPositions",
         "description": [],
         "signature": [
-          "() => ({ text: any; value: \"top\"; } | { text: any; value: \"left\"; } | { text: any; value: \"right\"; } | { text: any; value: \"bottom\"; })[]"
+          "() => ({ text: string; value: \"top\"; } | { text: string; value: \"left\"; } | { text: string; value: \"right\"; } | { text: string; value: \"bottom\"; })[]"
         ],
         "path": "src/plugins/vis_types/xy/public/editor/positions.ts",
         "deprecated": false,
@@ -28,7 +28,7 @@
         "label": "getScaleTypes",
         "description": [],
         "signature": [
-          "() => { text: any; value: ",
+          "() => { text: string; value: ",
           {
             "pluginId": "visTypeXy",
             "scope": "public",
@@ -132,7 +132,7 @@
             "label": "position",
             "description": [],
             "signature": [
-              "\"top\" | \"left\" | \"right\" | \"bottom\""
+              "\"right\" | \"left\" | \"top\" | \"bottom\""
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,

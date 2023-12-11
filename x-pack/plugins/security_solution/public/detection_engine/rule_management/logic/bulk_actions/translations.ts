@@ -6,54 +6,57 @@
  */
 
 import type { HTTPError } from '../../../../../common/detection_engine/types';
-import type { BulkActionEditPayload } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import {
-  BulkActionEditType,
+import type {
+  BulkActionEditPayload,
   BulkActionType,
-} from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '../../../../../common/api/detection_engine/rule_management';
+import {
+  BulkActionEditTypeEnum,
+  BulkActionTypeEnum,
+} from '../../../../../common/api/detection_engine/rule_management';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { BulkActionResponse, BulkActionSummary } from '../../api/api';
 
 export function summarizeBulkSuccess(action: BulkActionType): string {
   switch (action) {
-    case BulkActionType.export:
+    case BulkActionTypeEnum.export:
       return i18n.RULES_BULK_EXPORT_SUCCESS;
 
-    case BulkActionType.duplicate:
+    case BulkActionTypeEnum.duplicate:
       return i18n.RULES_BULK_DUPLICATE_SUCCESS;
 
-    case BulkActionType.delete:
+    case BulkActionTypeEnum.delete:
       return i18n.RULES_BULK_DELETE_SUCCESS;
 
-    case BulkActionType.enable:
+    case BulkActionTypeEnum.enable:
       return i18n.RULES_BULK_ENABLE_SUCCESS;
 
-    case BulkActionType.disable:
+    case BulkActionTypeEnum.disable:
       return i18n.RULES_BULK_DISABLE_SUCCESS;
 
-    case BulkActionType.edit:
+    case BulkActionTypeEnum.edit:
       return i18n.RULES_BULK_EDIT_SUCCESS;
   }
 }
 
 export function explainBulkSuccess(
-  action: Exclude<BulkActionType, BulkActionType.edit>,
+  action: Exclude<BulkActionType, BulkActionTypeEnum['edit']>,
   summary: BulkActionSummary
 ): string {
   switch (action) {
-    case BulkActionType.export:
+    case BulkActionTypeEnum.export:
       return getExportSuccessToastMessage(summary.succeeded, summary.total);
 
-    case BulkActionType.duplicate:
+    case BulkActionTypeEnum.duplicate:
       return i18n.RULES_BULK_DUPLICATE_SUCCESS_DESCRIPTION(summary.succeeded);
 
-    case BulkActionType.delete:
+    case BulkActionTypeEnum.delete:
       return i18n.RULES_BULK_DELETE_SUCCESS_DESCRIPTION(summary.succeeded);
 
-    case BulkActionType.enable:
+    case BulkActionTypeEnum.enable:
       return i18n.RULES_BULK_ENABLE_SUCCESS_DESCRIPTION(summary.succeeded);
 
-    case BulkActionType.disable:
+    case BulkActionTypeEnum.disable:
       return i18n.RULES_BULK_DISABLE_SUCCESS_DESCRIPTION(summary.succeeded);
   }
 }
@@ -67,9 +70,9 @@ export function explainBulkEditSuccess(
   if (
     editPayload.some(
       (x) =>
-        x.type === BulkActionEditType.add_index_patterns ||
-        x.type === BulkActionEditType.set_index_patterns ||
-        x.type === BulkActionEditType.delete_index_patterns
+        x.type === BulkActionEditTypeEnum.add_index_patterns ||
+        x.type === BulkActionEditTypeEnum.set_index_patterns ||
+        x.type === BulkActionEditTypeEnum.delete_index_patterns
     )
   ) {
     return `${i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(
@@ -83,22 +86,22 @@ export function explainBulkEditSuccess(
 
 export function summarizeBulkError(action: BulkActionType): string {
   switch (action) {
-    case BulkActionType.export:
+    case BulkActionTypeEnum.export:
       return i18n.RULES_BULK_EXPORT_FAILURE;
 
-    case BulkActionType.duplicate:
+    case BulkActionTypeEnum.duplicate:
       return i18n.RULES_BULK_DUPLICATE_FAILURE;
 
-    case BulkActionType.delete:
+    case BulkActionTypeEnum.delete:
       return i18n.RULES_BULK_DELETE_FAILURE;
 
-    case BulkActionType.enable:
+    case BulkActionTypeEnum.enable:
       return i18n.RULES_BULK_ENABLE_FAILURE;
 
-    case BulkActionType.disable:
+    case BulkActionTypeEnum.disable:
       return i18n.RULES_BULK_DISABLE_FAILURE;
 
-    case BulkActionType.edit:
+    case BulkActionTypeEnum.edit:
       return i18n.RULES_BULK_EDIT_FAILURE;
   }
 }
@@ -112,22 +115,22 @@ export function explainBulkError(action: BulkActionType, error: HTTPError): stri
   }
 
   switch (action) {
-    case BulkActionType.export:
+    case BulkActionTypeEnum.export:
       return i18n.RULES_BULK_EXPORT_FAILURE_DESCRIPTION(summary.failed);
 
-    case BulkActionType.duplicate:
+    case BulkActionTypeEnum.duplicate:
       return i18n.RULES_BULK_DUPLICATE_FAILURE_DESCRIPTION(summary.failed);
 
-    case BulkActionType.delete:
+    case BulkActionTypeEnum.delete:
       return i18n.RULES_BULK_DELETE_FAILURE_DESCRIPTION(summary.failed);
 
-    case BulkActionType.enable:
+    case BulkActionTypeEnum.enable:
       return i18n.RULES_BULK_ENABLE_FAILURE_DESCRIPTION(summary.failed);
 
-    case BulkActionType.disable:
+    case BulkActionTypeEnum.disable:
       return i18n.RULES_BULK_DISABLE_FAILURE_DESCRIPTION(summary.failed);
 
-    case BulkActionType.edit:
+    case BulkActionTypeEnum.edit:
       return i18n.RULES_BULK_EDIT_FAILURE_DESCRIPTION(summary.failed, summary.skipped);
   }
 }

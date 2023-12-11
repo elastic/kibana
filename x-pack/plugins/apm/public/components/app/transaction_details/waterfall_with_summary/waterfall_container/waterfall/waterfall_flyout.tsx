@@ -9,6 +9,7 @@ import { History } from 'history';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../../../hooks/use_time_range';
 import { SpanFlyout } from './span_flyout';
 import { TransactionFlyout } from './transaction_flyout';
 import { IWaterfall } from './waterfall_helpers/waterfall_helpers';
@@ -32,7 +33,7 @@ export function WaterfallFlyout({
 }: Props) {
   const history = useHistory();
   const {
-    query: { flyoutDetailTab },
+    query: { flyoutDetailTab, rangeFrom, rangeTo },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
@@ -42,6 +43,8 @@ export function WaterfallFlyout({
   const currentItem = waterfall.items.find(
     (item) => item.id === waterfallItemId
   );
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   if (!currentItem) {
     return null;
@@ -63,6 +66,8 @@ export function WaterfallFlyout({
           onClose={() => toggleFlyout({ history })}
           spanLinksCount={currentItem.spanLinksCount}
           flyoutDetailTab={flyoutDetailTab}
+          start={start}
+          end={end}
         />
       );
     case 'transaction':
@@ -75,6 +80,8 @@ export function WaterfallFlyout({
           errorCount={waterfall.getErrorCount(currentItem.id)}
           spanLinksCount={currentItem.spanLinksCount}
           flyoutDetailTab={flyoutDetailTab}
+          start={start}
+          end={end}
         />
       );
     default:

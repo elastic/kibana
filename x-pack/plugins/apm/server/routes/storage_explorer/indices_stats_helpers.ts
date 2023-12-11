@@ -18,7 +18,10 @@ export async function getTotalIndicesStats({
 }) {
   const index = getApmIndicesCombined(apmEventClient);
   const esClient = (await context.core).elasticsearch.client;
-  const totalStats = await esClient.asCurrentUser.indices.stats({ index });
+  const totalStats = await esClient.asCurrentUser.indices.stats({
+    index,
+    expand_wildcards: 'all',
+  });
   return totalStats;
 }
 

@@ -17,6 +17,8 @@ import {
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { act } from '@testing-library/react-hooks';
 
+const apiVersion = '2023-10-31';
+
 describe('Bulk delete artifact hook', () => {
   let result: ReturnType<typeof useBulkDeleteArtifact>;
 
@@ -56,6 +58,7 @@ describe('Bulk delete artifact hook', () => {
       expect(onSuccessMock).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.delete).toHaveBeenCalledTimes(2);
       expect(fakeHttpServices.delete).toHaveBeenNthCalledWith(1, '/api/exception_lists/items', {
+        version: apiVersion,
         query: {
           id: 'fakeId-1',
           item_id: undefined,
@@ -63,6 +66,7 @@ describe('Bulk delete artifact hook', () => {
         },
       });
       expect(fakeHttpServices.delete).toHaveBeenNthCalledWith(2, '/api/exception_lists/items', {
+        version: apiVersion,
         query: {
           id: undefined,
           item_id: 'fakeId-2',

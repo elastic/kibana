@@ -15,6 +15,7 @@ import { registerSettingsRoutes } from './api/settings';
 import { registerStatsRoute } from './api/stats';
 import { registerComponentTemplateRoutes } from './api/component_templates';
 import { registerNodesRoute } from './api/nodes';
+import { registerEnrichPoliciesRoute } from './api/enrich_policies';
 
 export class ApiRoutes {
   setup(dependencies: RouteDependencies) {
@@ -22,10 +23,14 @@ export class ApiRoutes {
     registerIndicesRoutes(dependencies);
     registerTemplateRoutes(dependencies);
     registerSettingsRoutes(dependencies);
-    registerStatsRoute(dependencies);
     registerMappingRoute(dependencies);
     registerComponentTemplateRoutes(dependencies);
     registerNodesRoute(dependencies);
+    registerEnrichPoliciesRoute(dependencies);
+
+    if (dependencies.config.isIndexStatsEnabled !== false) {
+      registerStatsRoute(dependencies);
+    }
   }
 
   start() {}

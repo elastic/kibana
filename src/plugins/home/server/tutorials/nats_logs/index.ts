@@ -40,7 +40,7 @@ export function natsLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-nats.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/nats.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/nats.svg'),
     artifacts: {
       dashboards: [
         {
@@ -56,7 +56,7 @@ export function natsLogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/nats_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/nats_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),

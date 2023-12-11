@@ -16,9 +16,9 @@ import {
 } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
+import { AnonymousAccessService } from './anonymous_access_service';
 import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
-import { AnonymousAccessService } from './anonymous_access_service';
 
 const createSecurityConfig = (config: Record<string, any> = {}) => {
   return createConfig(ConfigSchema.validate(config), loggingSystemMock.createLogger(), {
@@ -165,6 +165,7 @@ describe('AnonymousAccessService', () => {
           expect.objectContaining({ headers: {} }),
           {
             useDefaultCapabilities: true,
+            capabilityPath: '*',
           }
         );
       });
@@ -202,6 +203,7 @@ describe('AnonymousAccessService', () => {
           expect.objectContaining({ headers: {} }),
           {
             useDefaultCapabilities: true,
+            capabilityPath: '*',
           }
         );
       });
@@ -225,7 +227,7 @@ describe('AnonymousAccessService', () => {
         expect(startParams.capabilities.resolveCapabilities).toHaveBeenCalledTimes(1);
         expect(startParams.capabilities.resolveCapabilities).toHaveBeenCalledWith(
           expect.objectContaining({ headers: { authorization: 'Basic dXNlcjpwYXNzd29yZA==' } }),
-          { useDefaultCapabilities: false }
+          { useDefaultCapabilities: false, capabilityPath: '*' }
         );
       });
 
@@ -245,7 +247,7 @@ describe('AnonymousAccessService', () => {
         expect(startParams.capabilities.resolveCapabilities).toHaveBeenCalledTimes(1);
         expect(startParams.capabilities.resolveCapabilities).toHaveBeenCalledWith(
           expect.objectContaining({ headers: { authorization: 'Basic dXNlcjpwYXNzd29yZA==' } }),
-          { useDefaultCapabilities: false }
+          { useDefaultCapabilities: false, capabilityPath: '*' }
         );
       });
     });

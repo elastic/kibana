@@ -177,6 +177,10 @@ Array [
     "id": "savedObjectsManagement",
     "subFeatures": undefined,
   },
+  Object {
+    "id": "savedQueryManagement",
+    "subFeatures": undefined,
+  },
 ]
 `;
 
@@ -469,6 +473,10 @@ Array [
     "id": "savedObjectsManagement",
     "subFeatures": undefined,
   },
+  Object {
+    "id": "savedQueryManagement",
+    "subFeatures": undefined,
+  },
 ]
 `;
 
@@ -550,6 +558,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -680,15 +689,11 @@ Array [
     "privilege": Object {
       "alerting": Object {
         "alert": Object {
-          "all": Array [
-            ".es-query",
-          ],
+          "all": Array [],
           "read": Array [],
         },
         "rule": Object {
-          "all": Array [
-            ".es-query",
-          ],
+          "all": Array [],
           "read": Array [],
         },
       },
@@ -706,6 +711,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -739,18 +745,6 @@ Array [
   },
   Object {
     "privilege": Object {
-      "alerting": Object {
-        "alert": Object {
-          "all": Array [
-            ".es-query",
-          ],
-        },
-        "rule": Object {
-          "all": Array [
-            ".es-query",
-          ],
-        },
-      },
       "app": Array [
         "discover",
         "kibana",
@@ -991,6 +985,29 @@ Array [
 ]
 `;
 
+exports[`buildOSSFeatures with a basic license returns the savedQueryManagement feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "app": Array [
+        "kibana",
+      ],
+      "catalogue": Array [],
+      "savedObject": Object {
+        "all": Array [
+          "query",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [
+        "saveQuery",
+      ],
+    },
+    "privilegeId": "all",
+  },
+]
+`;
+
 exports[`buildOSSFeatures with a basic license returns the visualize feature augmented with appropriate sub feature privileges 1`] = `
 Array [
   Object {
@@ -1017,6 +1034,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -1154,6 +1172,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -1284,15 +1303,11 @@ Array [
     "privilege": Object {
       "alerting": Object {
         "alert": Object {
-          "all": Array [
-            ".es-query",
-          ],
+          "all": Array [],
           "read": Array [],
         },
         "rule": Object {
-          "all": Array [
-            ".es-query",
-          ],
+          "all": Array [],
           "read": Array [],
         },
       },
@@ -1310,6 +1325,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -1343,18 +1359,6 @@ Array [
   },
   Object {
     "privilege": Object {
-      "alerting": Object {
-        "alert": Object {
-          "all": Array [
-            ".es-query",
-          ],
-        },
-        "rule": Object {
-          "all": Array [
-            ".es-query",
-          ],
-        },
-      },
       "app": Array [
         "discover",
         "kibana",
@@ -1595,6 +1599,29 @@ Array [
 ]
 `;
 
+exports[`buildOSSFeatures with a enterprise license returns the savedQueryManagement feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "app": Array [
+        "kibana",
+      ],
+      "catalogue": Array [],
+      "savedObject": Object {
+        "all": Array [
+          "query",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [
+        "saveQuery",
+      ],
+    },
+    "privilegeId": "all",
+  },
+]
+`;
+
 exports[`buildOSSFeatures with a enterprise license returns the visualize feature augmented with appropriate sub feature privileges 1`] = `
 Array [
   Object {
@@ -1621,6 +1648,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [

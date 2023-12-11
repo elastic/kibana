@@ -23,7 +23,7 @@ export function FilmstripTransition({
         flexGrow: 1,
         position: 'relative',
         zIndex: 0,
-        transitionTimingFunction: 'ease-out',
+        transitionTimingFunction: 'ease-in-out',
         transition:
           transition !== 'ready' ? `transform ${duration}ms` : undefined,
         transform:

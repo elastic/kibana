@@ -1,47 +1,53 @@
 {
   "cat.indices": {
     "url_params": {
-      "format": "",
+      "format": [
+        "text"
+      ],
+      "h": [],
+      "help": "__flag__",
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "s": [],
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "bytes": [
         "b",
-        "k",
         "kb",
-        "m",
         "mb",
-        "g",
         "gb",
-        "t",
         "tb",
-        "p",
         "pb"
       ],
-      "master_timeout": "",
-      "h": [],
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
       "health": [
         "green",
         "yellow",
         "red"
       ],
-      "help": "__flag__",
-      "pri": "__flag__",
-      "s": [],
-      "time": [
-        "d",
-        "h",
-        "m",
-        "s",
-        "ms",
-        "micros",
-        "nanos"
-      ],
-      "v": "__flag__",
       "include_unloaded_segments": "__flag__",
-      "expand_wildcards": [
-        "open",
-        "closed",
-        "hidden",
-        "none",
-        "all"
+      "pri": "__flag__",
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
       ]
     },
     "methods": [
@@ -49,8 +55,12 @@
     ],
     "patterns": [
       "_cat/indices",
-      "_cat/indices/{indices}"
+      "_cat/indices/{index}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-indices.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-indices.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

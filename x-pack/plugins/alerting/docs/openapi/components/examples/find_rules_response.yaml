@@ -34,7 +34,6 @@ value:
       created_at: '2022-12-05T23:40:33.132Z'
       updated_at: '2022-12-05T23:40:33.132Z'
       api_key_owner: elastic
-      notify_when: onActionGroupChange
       mute_all: false
       muted_alert_ids: []
       scheduled_task_id: 3583a470-74f6-11ed-9801-35303b735aef
@@ -48,8 +47,12 @@ value:
           uuid: 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
           params:
             level: info
-            message: "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+            message: "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
             connector_type_id: .server-log
+          frequency:
+            summary: false
+            notify_when: onActionGroupChange
+            throttle: null
       last_run:
         alerts_count:
           new: 0

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
+import { ByteSizeValue, offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
@@ -16,13 +16,15 @@ import { hostname } from 'os';
 import url from 'url';
 
 import type { Duration } from 'moment';
-import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
+import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
+import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
 import { CspConfigType, CspConfig } from './csp';
 import { ExternalUrlConfig } from './external_url';
 import {
   securityResponseHeadersSchema,
   parseRawSecurityResponseHeadersConfig,
 } from './security_response_headers_config';
+import { CdnConfig } from './cdn';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
 
@@ -56,6 +58,9 @@ const configSchema = schema.object(
           return 'the value should be between 1 second and 2 minutes';
         }
       },
+    }),
+    cdn: schema.object({
+      url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     }),
     cors: schema.object(
       {
@@ -166,7 +171,39 @@ const configSchema = schema.object(
         },
       }
     ),
-    restrictInternalApis: schema.boolean({ defaultValue: false }), // allow access to internal routes by default to prevent breaking changes in current offerings
+    // allow access to internal routes by default to prevent breaking changes in current offerings
+    restrictInternalApis: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: false }),
+    }),
+
+    versioned: schema.object({
+      /**
+       * Which handler resolution algo to use for public routes: "newest" or "oldest".
+       *
+       * @note Internal routes always require a version to be specified.
+       * @note in development we have an additional option "none" which is also the default in dev.
+       *       This prevents any fallbacks and requires that a version specified.
+       *       Useful for ensuring that a given client always specifies a version.
+       */
+      versionResolution: schema.conditional(
+        schema.contextRef('dev'),
+        true,
+        schema.oneOf([schema.literal('newest'), schema.literal('oldest'), schema.literal('none')], {
+          defaultValue: 'none',
+        }),
+        schema.oneOf([schema.literal('newest'), schema.literal('oldest')], {
+          defaultValue: 'oldest',
+        })
+      ),
+
+      /**
+       * Whether we require the Kibana browser build version to match the Kibana server build version.
+       *
+       * This number is determined when a distributable version of Kibana is built and ensures that only
+       * same-build browsers can access the Kibana server.
+       */
+      strictClientVersionCheck: schema.boolean({ defaultValue: true }),
+    }),
   },
   {
     validate: (rawConfig) => {
@@ -229,6 +266,7 @@ export class HttpConfig implements IHttpConfig {
   public basePath?: string;
   public publicBaseUrl?: string;
   public rewriteBasePath: boolean;
+  public cdn: CdnConfig;
   public ssl: SslConfig;
   public compression: {
     enabled: boolean;
@@ -239,6 +277,10 @@ export class HttpConfig implements IHttpConfig {
   public externalUrl: IExternalUrlConfig;
   public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
+  public versioned: {
+    versionResolution: HandlerResolutionStrategy;
+    strictClientVersionCheck: boolean;
+  };
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;
 
@@ -278,14 +320,17 @@ export class HttpConfig implements IHttpConfig {
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
-    this.csp = new CspConfig({ ...rawCspConfig, disableEmbedding });
+    this.cdn = CdnConfig.from(rawHttpConfig.cdn);
+    this.csp = new CspConfig({ ...rawCspConfig, disableEmbedding }, this.cdn.getCspConfig());
     this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
 
-    this.restrictInternalApis = rawHttpConfig.restrictInternalApis;
+    // default to `false` to prevent breaking changes in current offerings
+    this.restrictInternalApis = rawHttpConfig.restrictInternalApis ?? false;
     this.eluMonitor = rawHttpConfig.eluMonitor;
+    this.versioned = rawHttpConfig.versioned;
   }
 }
 

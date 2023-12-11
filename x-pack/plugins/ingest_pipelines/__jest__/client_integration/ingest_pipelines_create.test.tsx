@@ -8,7 +8,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { setupEnvironment, pageHelpers } from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
 import { PipelinesCreateTestBed } from './helpers/pipelines_create.helpers';
@@ -28,23 +27,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
         data-currentvalue={props.value}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
-        }}
-      />
-    ),
-  };
-});
-
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-
-  return {
-    ...original,
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    EuiCodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj']}
-        onChange={(syntheticEvent: any) => {
-          props.onChange(syntheticEvent.jsonString);
         }}
       />
     ),

@@ -7,9 +7,10 @@
  */
 
 import type { ObjectType } from '@kbn/config-schema';
+import type { SavedObjectsValidationSpec } from '../validation';
 
 /**
- * The schemas associated with this model version.
+ * The validation and conversion schemas associated with this model version.
  *
  * @public
  */
@@ -29,15 +30,12 @@ export interface SavedObjectsModelVersionSchemaDefinitions {
    * See {@link SavedObjectModelVersionForwardCompatibilitySchema} for more info.
    */
   forwardCompatibility?: SavedObjectModelVersionForwardCompatibilitySchema;
+  /**
+   * The schema applied when creating a document of the current version
+   * Allows for validating properties using @kbn/config-schema validations
+   */
+  create?: SavedObjectsValidationSpec;
 }
-
-/**
- * Plain javascript function alternative for {@link SavedObjectModelVersionForwardCompatibilitySchema}
- * @public
- */
-export type SavedObjectModelVersionForwardCompatibilityFn<InAttrs = unknown, OutAttrs = unknown> = (
-  attributes: InAttrs
-) => OutAttrs;
 
 /**
  * Schema used when retrieving a document of a higher version to convert them to the older version.
@@ -46,7 +44,7 @@ export type SavedObjectModelVersionForwardCompatibilityFn<InAttrs = unknown, Out
  * - A `@kbn/config-schema`'s Object schema, that will receive the document's attributes
  * - An arbitrary function that will receive the document's attributes as parameter and should return the converted attributes
  *
- * @remark These conversion mechanism shouldn't assert the data itself, only strip unknown fields to convert
+ * @remark These conversion mechanism shouldn't assert the data itself, and only strip unknown fields to convert
  * the document to the *shape* of the document at the given version.
  *
  * @example using a function:
@@ -73,4 +71,39 @@ export type SavedObjectModelVersionForwardCompatibilityFn<InAttrs = unknown, Out
 export type SavedObjectModelVersionForwardCompatibilitySchema<
   InAttrs = unknown,
   OutAttrs = unknown
-> = ObjectType | SavedObjectModelVersionForwardCompatibilityFn<InAttrs, OutAttrs>;
+> =
+  | SavedObjectModelVersionForwardCompatibilityObjectSchema
+  | SavedObjectModelVersionForwardCompatibilityFn<InAttrs, OutAttrs>;
+
+/**
+ * Object-schema (from `@kbn/config-schema`) alternative for {@link SavedObjectModelVersionForwardCompatibilitySchema}
+ *
+ * @example
+ * ```ts
+ * const versionSchema = schema.object(
+ *   {
+ *     someField: schema.maybe(schema.string()),
+ *     anotherField: schema.maybe(schema.string()),
+ *   },
+ *   { unknowns: 'ignore' }
+ * );
+ * ```
+ * @public
+ */
+export type SavedObjectModelVersionForwardCompatibilityObjectSchema = ObjectType;
+
+/**
+ * Plain javascript function alternative for {@link SavedObjectModelVersionForwardCompatibilitySchema}
+ *
+ * @example
+ * ```ts
+ * const versionSchema: SavedObjectModelVersionForwardCompatibilityFn = (attributes) => {
+ *   const knownFields = ['someField', 'anotherField'];
+ *   return pick(attributes, knownFields);
+ * }
+ * ```
+ * @public
+ */
+export type SavedObjectModelVersionForwardCompatibilityFn<InAttrs = unknown, OutAttrs = unknown> = (
+  attributes: InAttrs
+) => OutAttrs;

@@ -8,7 +8,6 @@
 import React, { Component, Fragment } from 'react';
 
 import {
-  EuiCallOut,
   EuiIcon,
   EuiFlexItem,
   EuiTitle,
@@ -17,11 +16,7 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,
   EuiSpacer,
-  EuiAccordion,
-  EuiText,
-  EuiLink,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FilterEditor } from './filter_editor';
@@ -33,10 +28,11 @@ import { StyleDescriptor, VectorLayerDescriptor } from '../../../common/descript
 import { getData, getCore } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { isVectorLayer, IVectorLayer } from '../../classes/layers/vector_layer';
-import { ImmutableSourceProperty, OnSourceChangeArgs } from '../../classes/sources/source';
+import { OnSourceChangeArgs } from '../../classes/sources/source';
 import { IField } from '../../classes/fields/field';
 import { isLayerGroup } from '../../classes/layers/layer_group';
 import { isSpatialJoin } from '../../classes/joins/is_spatial_join';
+import { SourceDetails } from './source_details';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -48,7 +44,6 @@ export interface Props {
 
 interface State {
   displayName: string;
-  immutableSourceProps: ImmutableSourceProperty[];
   leftJoinFields: JoinField[];
   supportsFitToBounds: boolean;
 }
@@ -57,7 +52,6 @@ export class EditLayerPanel extends Component<Props, State> {
   private _isMounted = false;
   state: State = {
     displayName: '',
-    immutableSourceProps: [],
     leftJoinFields: [],
     supportsFitToBounds: false,
   };
@@ -65,7 +59,6 @@ export class EditLayerPanel extends Component<Props, State> {
   componentDidMount() {
     this._isMounted = true;
     this._loadDisplayName();
-    this._loadImmutableSourceProperties();
     this._loadLeftJoinFields();
     this._loadSupportsFitToBounds();
   }
@@ -93,17 +86,6 @@ export class EditLayerPanel extends Component<Props, State> {
     const displayName = await this.props.selectedLayer.getDisplayName();
     if (this._isMounted) {
       this.setState({ displayName });
-    }
-  };
-
-  _loadImmutableSourceProperties = async () => {
-    if (!this.props.selectedLayer || isLayerGroup(this.props.selectedLayer)) {
-      return;
-    }
-
-    const immutableSourceProps = await this.props.selectedLayer.getImmutableSourceProperties();
-    if (this._isMounted) {
-      this.setState({ immutableSourceProps });
     }
   };
 
@@ -140,26 +122,6 @@ export class EditLayerPanel extends Component<Props, State> {
   _onSourceChange = (...args: OnSourceChangeArgs[]) => {
     return this.props.updateSourceProps(this.props.selectedLayer!.getId(), args);
   };
-
-  _renderLayerErrors() {
-    if (!this.props.selectedLayer || !this.props.selectedLayer.hasErrors()) {
-      return null;
-    }
-
-    return (
-      <Fragment>
-        <EuiCallOut
-          color="warning"
-          title={i18n.translate('xpack.maps.layerPanel.settingsPanel.unableToLoadTitle', {
-            defaultMessage: 'Unable to load layer',
-          })}
-        >
-          <p data-test-subj="layerErrorMessage">{this.props.selectedLayer.getErrors()}</p>
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-      </Fragment>
-    );
-  }
 
   _renderFilterSection() {
     if (
@@ -205,37 +167,7 @@ export class EditLayerPanel extends Component<Props, State> {
 
   _renderSourceDetails() {
     return !this.props.selectedLayer || isLayerGroup(this.props.selectedLayer) ? null : (
-      <div className="mapLayerPanel__sourceDetails">
-        <EuiAccordion
-          id="accordion1"
-          buttonContent={i18n.translate('xpack.maps.layerPanel.sourceDetailsLabel', {
-            defaultMessage: 'Source details',
-          })}
-        >
-          <EuiText color="subdued" size="s">
-            <EuiSpacer size="xs" />
-            {this.state.immutableSourceProps.map(
-              ({ label, value, link }: ImmutableSourceProperty) => {
-                function renderValue() {
-                  if (link) {
-                    return (
-                      <EuiLink href={link} target="_blank">
-                        {value}
-                      </EuiLink>
-                    );
-                  }
-                  return <span>{value}</span>;
-                }
-                return (
-                  <p key={label} className="mapLayerPanel__sourceDetail">
-                    <strong>{label}</strong> {renderValue()}
-                  </p>
-                );
-              }
-            )}
-          </EuiText>
-        </EuiAccordion>
-      </div>
+      <SourceDetails source={this.props.selectedLayer.getSource()} />
     );
   }
 
@@ -295,8 +227,6 @@ export class EditLayerPanel extends Component<Props, State> {
 
           <div className="mapLayerPanel__body">
             <div className="mapLayerPanel__bodyOverflow">
-              {this._renderLayerErrors()}
-
               <LayerSettings
                 layer={this.props.selectedLayer}
                 supportsFitToBounds={this.state.supportsFitToBounds}

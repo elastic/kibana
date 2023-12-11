@@ -6,15 +6,16 @@
  */
 
 import type SuperTest from 'supertest';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ExternalReferenceStorageType,
-  CommentType,
+  AttachmentType,
   Case,
-  CommentRequest,
-  CommentRequestExternalReferenceType,
-  CommentRequestPersistableStateType,
-} from '@kbn/cases-plugin/common/api';
+  ExternalReferenceAttachmentPayload,
+  PersistableStateAttachmentPayload,
+} from '@kbn/cases-plugin/common/types/domain';
 import { expect } from 'expect';
+import { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   deleteAllCaseItems,
   findCases,
@@ -49,6 +50,7 @@ const deleteLogStashDataView = async (
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
@@ -56,8 +58,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const es = getService('es');
   const common = getPageObject('common');
   const retry = getService('retry');
+  const dashboard = getPageObject('dashboard');
+  const lens = getPageObject('lens');
+  const listingTable = getService('listingTable');
+  const toasts = getService('toasts');
 
-  const createAttachmentAndNavigate = async (attachment: CommentRequest) => {
+  const createAttachmentAndNavigate = async (attachment: AttachmentRequest) => {
     const caseData = await cases.api.createCase({
       title: `Registered attachment of type ${attachment.type}`,
     });
@@ -99,7 +105,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('renders an external reference attachment type correctly', async () => {
         const attachmentId = caseWithAttachment?.comments?.[0].id;
-        await validateAttachment(CommentType.externalReference, attachmentId);
+        await validateAttachment(AttachmentType.externalReference, attachmentId);
         await testSubjects.existOrFail('test-attachment-content');
       });
     });
@@ -125,7 +131,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('renders a persistable attachment type correctly', async () => {
         const attachmentId = caseWithAttachment?.comments?.[0].id;
-        await validateAttachment(CommentType.persistableState, attachmentId);
+        await validateAttachment(AttachmentType.persistableState, attachmentId);
         await retry.waitFor(
           'persistable state to exist',
           async () => await find.existsByCssSelector('.lnsExpressionRenderer')
@@ -180,8 +186,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const externalRefAttachmentId = theCase?.comments?.[0].id;
         const persistableStateAttachmentId = theCase?.comments?.[1].id;
-        await validateAttachment(CommentType.externalReference, externalRefAttachmentId);
-        await validateAttachment(CommentType.persistableState, persistableStateAttachmentId);
+        await validateAttachment(AttachmentType.externalReference, externalRefAttachmentId);
+        await validateAttachment(AttachmentType.persistableState, persistableStateAttachmentId);
 
         await testSubjects.existOrFail('test-attachment-content');
         await retry.waitFor(
@@ -244,6 +250,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
              */
             await cases.create.createCase({ owner });
             await cases.common.expectToasterToContain('has been updated');
+            await toasts.dismissAllToastsWithChecks();
           }
 
           const casesCreatedFromFlyout = await findCases({ supertest });
@@ -281,7 +288,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('renders different solutions', async () => {
           await openModal();
 
-          await testSubjects.existOrFail('solution-filter-popover-button');
+          await testSubjects.existOrFail('options-filter-popover-button-owner');
 
           for (const [, currentCaseId] of createdCases.entries()) {
             await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
@@ -320,9 +327,103 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await testSubjects.click(`cases-table-row-select-${currentCaseId}`);
 
             await cases.common.expectToasterToContain('has been updated');
+            await toasts.dismissAllToastsWithChecks();
             await ensureFirstCommentOwner(currentCaseId, owner);
           }
         });
+      });
+    });
+
+    describe('Lens visualization as persistable attachment', () => {
+      const myDashboardName = `My-dashboard-${uuidv4()}`;
+
+      before(async () => {
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        );
+
+        await common.navigateToApp('dashboard');
+        await dashboard.preserveCrossAppState();
+        await dashboard.clickNewDashboard();
+
+        // adds lens visualization to dashboard, save and return
+        await lens.createAndAddLensFromDashboard({ title: `My lens visualization-${uuidv4()}` });
+
+        await dashboard.waitForRenderComplete();
+        await dashboard.saveDashboard(myDashboardName);
+      });
+
+      after(async () => {
+        await common.navigateToApp('dashboard');
+        await dashboard.preserveCrossAppState();
+
+        await listingTable.searchForItemWithName(myDashboardName);
+        await listingTable.checkListingSelectAllCheckbox();
+        await listingTable.clickDeleteSelected();
+
+        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        );
+
+        await cases.api.deleteAllCases();
+      });
+
+      it('adds lens visualization to a new case from dashboard', async () => {
+        const caseTitle = 'case created from my dashboard with lens visualization';
+
+        await common.navigateToApp('dashboard');
+        await dashboard.preserveCrossAppState();
+        await dashboard.loadSavedDashboard(myDashboardName);
+
+        await testSubjects.click('embeddablePanelToggleMenuIcon');
+        await testSubjects.click('embeddablePanelMore-mainMenu');
+        await testSubjects.click('embeddablePanelAction-embeddable_addToNewCase');
+
+        await cases.create.createCase({
+          title: caseTitle,
+          description: 'test description',
+          owner: 'cases',
+        });
+        await testSubjects.click('create-case-submit');
+
+        await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
+        await testSubjects.click('toaster-content-case-view-link');
+        await toasts.dismissAllToastsWithChecks();
+
+        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
+        expect(await title.getVisibleText()).toEqual(caseTitle);
+
+        await testSubjects.existOrFail('comment-persistableState-.lens');
+      });
+
+      it('adds lens visualization to an existing case from dashboard', async () => {
+        const theCaseTitle = 'case already exists!!';
+        const theCase = await cases.api.createCase({
+          title: theCaseTitle,
+          description: 'This is a test case to verify existing action scenario!!',
+          owner: 'cases',
+        });
+
+        await common.navigateToApp('dashboard');
+        await dashboard.preserveCrossAppState();
+        await dashboard.loadSavedDashboard(myDashboardName);
+
+        await testSubjects.click('embeddablePanelToggleMenuIcon');
+        await testSubjects.click('embeddablePanelMore-mainMenu');
+        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+
+        await testSubjects.click(`cases-table-row-select-${theCase.id}`);
+
+        await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
+        await testSubjects.click('toaster-content-case-view-link');
+        await toasts.dismissAllToastsWithChecks();
+
+        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
+        expect(await title.getVisibleText()).toEqual(theCaseTitle);
+
+        await testSubjects.existOrFail('comment-persistableState-.lens');
       });
     });
   });
@@ -399,8 +500,8 @@ const getLensState = (dataViewId: string) => ({
   },
 });
 
-const getExternalReferenceAttachment = (): CommentRequestExternalReferenceType => ({
-  type: CommentType.externalReference,
+const getExternalReferenceAttachment = (): ExternalReferenceAttachmentPayload => ({
+  type: AttachmentType.externalReference,
   externalReferenceId: 'my-id',
   externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
   externalReferenceAttachmentTypeId: '.test',
@@ -408,8 +509,8 @@ const getExternalReferenceAttachment = (): CommentRequestExternalReferenceType =
   owner: 'cases',
 });
 
-const getPersistableStateAttachment = (dataViewId: string): CommentRequestPersistableStateType => ({
-  type: CommentType.persistableState,
+const getPersistableStateAttachment = (dataViewId: string): PersistableStateAttachmentPayload => ({
+  type: AttachmentType.persistableState,
   persistableStateAttachmentTypeId: '.test',
   persistableStateAttachmentState: getLensState(dataViewId),
   owner: 'cases',

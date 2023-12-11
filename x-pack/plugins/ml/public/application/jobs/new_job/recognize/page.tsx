@@ -21,27 +21,27 @@ import { isEqual, merge } from 'lodash';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
+import { TIME_FORMAT } from '@kbn/ml-date-utils';
+import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { useDataSource } from '../../../contexts/ml';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
-import { useMlContext } from '../../../contexts/ml';
 import {
   DatafeedResponse,
   JobOverride,
   JobResponse,
   KibanaObject,
+  KibanaObjects,
   KibanaObjectResponse,
   ModuleJob,
 } from '../../../../../common/types/modules';
 import { CreateResultCallout } from './components/create_result_callout';
-import { KibanaObjects } from './components/kibana_objects';
+import { KibanaObjectList } from './components/kibana_objects';
 import { ModuleJobs } from './components/module_jobs';
-import { checkForSavedObjects } from './resolvers';
 import { JobSettingsForm, JobSettingsFormValues } from './components/job_settings_form';
 import { TimeRange } from '../common/components';
 import { JobId } from '../../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
-import { RuntimeMappings } from '../../../../../common/types/fields';
 import { MlPageHeader } from '../../../components/page_header';
 
 export interface ModuleJobUI extends ModuleJob {
@@ -50,10 +50,6 @@ export interface ModuleJobUI extends ModuleJob {
 }
 
 export type KibanaObjectUi = KibanaObject & KibanaObjectResponse;
-
-export interface KibanaObjects {
-  [objectType: string]: KibanaObjectUi[];
-}
 
 interface PageProps {
   moduleId: string;
@@ -92,7 +88,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
   // #endregion
 
-  const { selectedSavedSearch, currentDataView: dataView, combinedQuery } = useMlContext();
+  const { selectedSavedSearch, selectedDataView: dataView, combinedQuery } = useDataSource();
   const pageTitle = selectedSavedSearch
     ? i18n.translate('xpack.ml.newJob.recognize.savedSearchPageTitle', {
         defaultMessage: 'saved search {savedSearchTitle}',
@@ -112,9 +108,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     try {
       const response = await getDataRecognizerModule({ moduleId });
       setJobs(response.jobs);
-
-      const kibanaObjectsResult = await checkForSavedObjects(response.kibana as KibanaObjects);
-      setKibanaObjects(kibanaObjectsResult);
+      setKibanaObjects(response.kibana);
 
       setSaveState(SAVE_STATE.NOT_SAVED);
 
@@ -323,7 +317,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
 
       {jobsAwaitingNodeCount > 0 && <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />}
 
-      <EuiFlexGroup wrap={true} gutterSize="m">
+      <EuiFlexGroup wrap={true} gutterSize="m" data-test-subj="mlPageJobWizard recognizer">
         <EuiFlexItem grow={1}>
           <EuiPanel grow={false} hasShadow={false} hasBorder>
             <EuiTitle size="s">
@@ -369,7 +363,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
               <EuiPanel grow={false} hasShadow={false} hasBorder>
                 {Object.keys(kibanaObjects).map((objectType, i) => (
                   <Fragment key={objectType}>
-                    <KibanaObjects
+                    <KibanaObjectList
                       objectType={objectType}
                       kibanaObjects={kibanaObjects[objectType]}
                       isSaving={saveState === SAVE_STATE.SAVING}

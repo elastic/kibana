@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningForecastProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async assertForecastButtonExists() {
@@ -32,14 +33,22 @@ export function MachineLearningForecastProvider({ getService }: FtrProviderConte
     },
 
     async assertForecastChartElementsExists() {
-      await testSubjects.existOrFail(`mlForecastArea`, {
-        timeout: 30 * 1000,
+      await retry.tryForTime(3000, async () => {
+        await testSubjects.existOrFail(`mlForecastArea`, {
+          timeout: 30 * 1000,
+        });
       });
-      await testSubjects.existOrFail(`mlForecastValuesline`, {
-        timeout: 30 * 1000,
+
+      await retry.tryForTime(3000, async () => {
+        await testSubjects.existOrFail(`mlForecastValuesline`, {
+          timeout: 30 * 1000,
+        });
       });
-      await testSubjects.existOrFail(`mlForecastMarkers`, {
-        timeout: 30 * 1000,
+
+      await retry.tryForTime(3000, async () => {
+        await testSubjects.existOrFail(`mlForecastMarkers`, {
+          timeout: 30 * 1000,
+        });
       });
     },
 

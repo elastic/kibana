@@ -25,15 +25,15 @@ export const ResponseBodyIndexField = ({
   onBlur,
   readOnly,
 }: ResponseBodyIndexFieldProps) => {
-  const [policy, setPolicy] = useState<ResponseBodyIndexPolicy>(
-    defaultValue !== ResponseBodyIndexPolicy.NEVER ? defaultValue : ResponseBodyIndexPolicy.ON_ERROR
-  );
+  const [policy, setPolicy] = useState<ResponseBodyIndexPolicy>(defaultValue);
   const [checked, setChecked] = useState<boolean>(defaultValue !== ResponseBodyIndexPolicy.NEVER);
 
   useEffect(() => {
     if (checked) {
-      setPolicy(policy);
-      onChange(policy);
+      const defaultOrSelected =
+        policy === ResponseBodyIndexPolicy.NEVER ? ResponseBodyIndexPolicy.ON_ERROR : policy;
+      setPolicy(defaultOrSelected);
+      onChange(defaultOrSelected);
     } else {
       onChange(ResponseBodyIndexPolicy.NEVER);
     }
@@ -89,20 +89,20 @@ export const ResponseBodyIndexField = ({
 
 const responseBodyIndexPolicyOptions = [
   {
-    value: ResponseBodyIndexPolicy.ALWAYS,
-    text: i18n.translate(
-      'xpack.synthetics.createPackagePolicy.stepConfigure.responseBodyIndex.always',
-      {
-        defaultMessage: 'Always',
-      }
-    ),
-  },
-  {
     value: ResponseBodyIndexPolicy.ON_ERROR,
     text: i18n.translate(
       'xpack.synthetics.createPackagePolicy.stepConfigure.responseBodyIndex.onError',
       {
         defaultMessage: 'On error',
+      }
+    ),
+  },
+  {
+    value: ResponseBodyIndexPolicy.ALWAYS,
+    text: i18n.translate(
+      'xpack.synthetics.createPackagePolicy.stepConfigure.responseBodyIndex.always',
+      {
+        defaultMessage: 'Always',
       }
     ),
   },

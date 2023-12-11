@@ -9,8 +9,8 @@ import React from 'react';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { AllRule, FieldRule } from '../../model';
 import { AddRuleButton } from './add_rule_button';
+import { AllRule, FieldRule } from '../../model';
 
 describe('AddRuleButton', () => {
   it('allows a field rule to be created', () => {

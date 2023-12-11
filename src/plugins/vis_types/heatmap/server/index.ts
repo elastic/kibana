@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, ConfigSchema } from '../config';
-import { VisTypeHeatmapServerPlugin } from './plugin';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { configSchema, HeatmapConfig } from '../config';
 
-export const config: PluginConfigDescriptor<ConfigSchema> = {
+export const config: PluginConfigDescriptor<HeatmapConfig> = {
+  exposeToBrowser: {
+    readOnly: true,
+  },
   schema: configSchema,
 };
 
-export const plugin = () => new VisTypeHeatmapServerPlugin();
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { VisTypeHeatmapServerPlugin } = await import('./plugin');
+  return new VisTypeHeatmapServerPlugin(initializerContext);
+};

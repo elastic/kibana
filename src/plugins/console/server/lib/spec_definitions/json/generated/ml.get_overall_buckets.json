@@ -1,13 +1,22 @@
 {
   "ml.get_overall_buckets": {
     "url_params": {
-      "top_n": 0,
-      "bucket_span": "",
-      "overall_score": 0,
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_match": "__flag__",
+      "bucket_span": [
+        "-1",
+        "0"
+      ],
+      "end": [],
       "exclude_interim": "__flag__",
-      "start": "",
-      "end": "",
-      "allow_no_match": "__flag__"
+      "overall_score": [],
+      "start": [],
+      "top_n": [
+        "1"
+      ]
     },
     "methods": [
       "GET",
@@ -16,6 +25,10 @@
     "patterns": [
       "_ml/anomaly_detectors/{job_id}/results/overall_buckets"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-overall-buckets.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-overall-buckets.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

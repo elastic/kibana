@@ -194,7 +194,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect(res.error.text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Package contains more than one top-level directory."}'
+        '{"statusCode":400,"error":"Bad Request","message":"Package contains more than one top-level directory; top-level directory found: apache-0.1.4; filePath: apache-0.1.3/manifest.yml"}'
       );
     });
 
@@ -207,7 +207,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect(res.error.text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Package must contain a top-level manifest.yml file."}'
+        '{"statusCode":400,"error":"Bad Request","message":"Package at top-level directory apache-0.1.4 must contain a top-level manifest.yml file."}'
       );
     });
 
@@ -220,7 +220,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect(res.error.text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Could not parse top-level package manifest: YAMLException: bad indentation of a mapping entry at line 2, column 7:\\n      name: apache\\n          ^."}'
+        '{"statusCode":400,"error":"Bad Request","message":"Could not parse top-level package manifest at top-level directory apache-0.1.4: YAMLException: bad indentation of a mapping entry at line 2, column 7:\\n      name: apache\\n          ^."}'
       );
     });
 
@@ -233,7 +233,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect(res.error.text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Invalid top-level package manifest: one or more fields missing of name, version, description, title, format_version, owner"}'
+        '{"statusCode":400,"error":"Bad Request","message":"Invalid top-level package manifest at top-level directory apache-0.1.4 (package name: apache): one or more fields missing of name, version, description, title, format_version, owner."}'
       );
     });
 

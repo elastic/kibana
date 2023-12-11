@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
+import type { InfraConfig } from '../../../../common/plugin_config_types';
+import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import { extractReferences, injectReferences } from './log_threshold_references_manager';
 import {
@@ -94,15 +98,19 @@ const alertReasonMessageActionVariableDescription = i18n.translate(
 const viewInAppUrlActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.viewInAppUrlActionVariableDescription',
   {
-    defaultMessage:
-      'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+    defaultMessage: 'Link to the alert source',
   }
 );
 
 export async function registerLogThresholdRuleType(
   alertingPlugin: PluginSetupContract,
-  libs: InfraBackendLibs
+  libs: InfraBackendLibs,
+  { featureFlags }: InfraConfig
 ) {
+  if (!featureFlags.logThresholdAlertRuleEnabled) {
+    return;
+  }
+
   if (!alertingPlugin) {
     throw new Error(
       'Cannot register log threshold alert type.  Both the actions and alerting plugins need to be enabled.'
@@ -159,12 +167,15 @@ export async function registerLogThresholdRuleType(
         { name: 'tags', description: tagsActionVariableDescription },
       ],
     },
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'logs',
-    getSummarizedAlerts: libs.logsRules.createGetSummarizedAlerts(),
     useSavedObjectReferences: {
       extractReferences,
       injectReferences,
     },
     alerts: LogsRulesTypeAlertDefinition,
+    fieldsForAAD: O11Y_AAD_FIELDS,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   });
 }

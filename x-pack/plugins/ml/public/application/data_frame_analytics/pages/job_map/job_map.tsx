@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { Controls, Cytoscape, JobMapLegend } from './components';
+import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 import { useCurrentThemeVars, useMlKibana, useMlLocator } from '../../../contexts/kibana';
-import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
+import { Controls, Cytoscape, JobMapLegend } from './components';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { EuiThemeType } from '../../../components/color_range_legend';
 import { useRefresh } from '../../../routing/use_refresh';
@@ -34,17 +34,18 @@ linear-gradient(
 center,
 ${theme.euiColorLightShade}`,
   backgroundSize: `${theme.euiSizeL} ${theme.euiSizeL}`,
-  margin: `-${theme.euiSizeL}`,
   marginTop: 0,
 });
 
 interface Props {
+  key?: string;
+  defaultHeight?: number;
   analyticsId?: string;
   modelId?: string;
   forceRefresh?: boolean;
 }
 
-export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
+export const JobMap: FC<Props> = ({ defaultHeight, analyticsId, modelId, forceRefresh }) => {
   // itemsDeleted will reset to false when Controls component calls updateElements to remove nodes deleted from map
   const [itemsDeleted, setItemsDeleted] = useState<boolean>(false);
   const [resetCyToggle, setResetCyToggle] = useState<boolean>(false);
@@ -149,13 +150,18 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
   const { ref, width, height } = useRefDimensions();
 
   const refreshCallback = () => fetchAndSetElementsWrapper({ analyticsId, modelId });
+  const hasMissingJobNode = useMemo(
+    () => elements.map(({ data }) => data.type).includes(JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING),
+    [elements]
+  );
 
+  const h = defaultHeight ?? height;
   return (
     <div data-test-subj="mlPageDataFrameAnalyticsMap">
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <JobMapLegend theme={euiTheme} />
+          <JobMapLegend theme={euiTheme} hasMissingJobNode={hasMissingJobNode} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -171,10 +177,10 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div style={{ height: height - parseInt(euiTheme.euiSizeL, 10) - 20 }} ref={ref}>
+      <div style={{ height: h - parseInt(euiTheme.euiSizeL, 10) - 20 }} ref={ref}>
         <Cytoscape
           theme={euiTheme}
-          height={height - 20}
+          height={h - 20}
           elements={elements}
           width={width}
           style={getCytoscapeDivStyle(euiTheme)}

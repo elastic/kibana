@@ -51,6 +51,7 @@ export function HelpPopoverButton({
 
   return (
     <EuiButtonIcon
+      data-test-subj="apmHelpPopoverButtonButton"
       className="apmHelpPopover__buttonIcon"
       size="s"
       iconType="help"

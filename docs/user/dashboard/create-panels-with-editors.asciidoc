@@ -83,7 +83,7 @@
 |
 
 | Tag cloud
-|
+| &check;
 |
 | &check;
 | &check;
@@ -405,7 +405,7 @@ Bucket aggregations group, or bucket, documents based on the aggregation type. T
 | &check;
 
 | Significant terms
-|
+| &check;
 |
 | &check;
 | &check;

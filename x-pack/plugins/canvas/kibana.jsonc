@@ -30,7 +30,7 @@
       "visualizations",
       "uiActions",
       "share",
-      "savedObjectsManagement",
+      "contentManagement",
       "savedObjectsFinder"
     ],
     "optionalPlugins": [
@@ -41,7 +41,6 @@
       "savedObjects",
     ],
     "requiredBundles": [
-      "discover",
       "kibanaReact",
       "kibanaUtils",
       "lens",

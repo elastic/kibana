@@ -13,21 +13,25 @@
       "search"
     ],
     "requiredPlugins": [
-      "serverless",
       "cloud",
-      "management",
-      "security",
-      "share",
-      "devTools",
       "console",
-      "searchprofiler",
-      "grokdebugger",
-      "painlessLab",
-      "discover",
+      "dataViews",
       "dashboard",
-      "visualizations",
+      "devTools",
+      "discover",
+      "management",
+      "searchprofiler",
+      "security",
+      "serverless",
+      "share",
+      "visualizations"
     ],
-    "optionalPlugins": [],
-    "requiredBundles": ["kibanaReact"]
+    "optionalPlugins": [
+      "indexManagement",
+      "usageCollection",
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

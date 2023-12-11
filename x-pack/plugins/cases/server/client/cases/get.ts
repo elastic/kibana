@@ -6,36 +6,36 @@
  */
 
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
+import type { AttachmentTotals, Case, CaseAttributes, User } from '../../../common/types/domain';
 import type {
-  Case,
-  CaseResolveResponse,
-  User,
-  AllTagsFindRequest,
+  AllCategoriesFindRequest,
   AllReportersFindRequest,
+  AllTagsFindRequest,
+  CaseResolveResponse,
   CasesByAlertIDRequest,
-  CasesByAlertId,
-  CaseAttributes,
-  AttachmentTotals,
-} from '../../../common/api';
+  GetRelatedCasesByAlertResponse,
+} from '../../../common/types/api';
 import {
-  CaseRt,
-  CaseResolveResponseRt,
-  AllTagsFindRequestRt,
-  decodeWithExcessOrThrow,
+  AllCategoriesFindRequestRt,
   AllReportersFindRequestRt,
+  AllTagsFindRequestRt,
+  CaseResolveResponseRt,
   CasesByAlertIDRequestRt,
-  CasesByAlertIdRt,
-  GetTagsResponseRt,
+  GetCategoriesResponseRt,
+  GetRelatedCasesByAlertResponseRt,
   GetReportersResponseRt,
-} from '../../../common/api';
+  GetTagsResponseRt,
+} from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
+import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { CaseRt } from '../../../common/types/domain';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -60,7 +60,7 @@ export interface CasesByAlertIDParams {
 export const getCasesByAlertID = async (
   { alertID, options }: CasesByAlertIDParams,
   clientArgs: CasesClientArgs
-): Promise<CasesByAlertId> => {
+): Promise<GetRelatedCasesByAlertResponse> => {
   const {
     services: { caseService, attachmentService },
     logger,
@@ -131,7 +131,7 @@ export const getCasesByAlertID = async (
       totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
     }));
 
-    return decodeOrThrow(CasesByAlertIdRt)(res);
+    return decodeOrThrow(GetRelatedCasesByAlertResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get case IDs using alert ID: ${alertID} options: ${JSON.stringify(
@@ -204,7 +204,7 @@ export const get = async (
     const res = flattenCaseSavedObject({
       savedObject: theCase,
       comments: theComments.saved_objects,
-      totalComment: theComments.total,
+      totalComment: countUserAttachments(theComments.saved_objects),
       totalAlerts: countAlertsForID({ comments: theComments, id }),
     });
 
@@ -299,7 +299,7 @@ export async function getTags(
     const queryParams = decodeWithExcessOrThrow(AllTagsFindRequestRt)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
-      Operations.findCases
+      Operations.getTags
     );
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
@@ -346,5 +346,39 @@ export async function getReporters(
     return decodeOrThrow(GetReportersResponseRt)(reporters);
   } catch (error) {
     throw createCaseError({ message: `Failed to get reporters: ${error}`, error, logger });
+  }
+}
+
+/**
+ * Retrieves the categories from all the cases.
+ */
+export async function getCategories(
+  params: AllCategoriesFindRequest,
+  clientArgs: CasesClientArgs
+): Promise<string[]> {
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
+
+  try {
+    const queryParams = decodeWithExcessOrThrow(AllCategoriesFindRequestRt)(params);
+
+    const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
+      Operations.getCategories
+    );
+
+    const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
+
+    const categories = await caseService.getCategories({
+      unsecuredSavedObjectsClient,
+      filter,
+    });
+
+    return decodeOrThrow(GetCategoriesResponseRt)(categories);
+  } catch (error) {
+    throw createCaseError({ message: `Failed to get categories: ${error}`, error, logger });
   }
 }

@@ -126,7 +126,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
       <EuiFlyoutHeader>
         <EuiTitle data-test-subj="flyoutTitle">
           <h2>
-            <EuiIcon type="inspect" css={iconCSS} size="l" />
+            <EuiIcon type="iInCircle" css={iconCSS} size="l" />
             <span>{title}</span>
           </h2>
         </EuiTitle>

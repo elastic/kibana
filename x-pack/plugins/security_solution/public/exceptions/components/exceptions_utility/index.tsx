@@ -37,7 +37,7 @@ const StyledCondition = styled.span`
 interface ExceptionsUtilityComponentProps {
   dataTestSubj?: string;
   exceptionsTitle?: string;
-  pagination: Pagination;
+  pagination: Pagination & { pageSize: number };
   // Corresponds to last time exception items were fetched
   lastUpdated: string | number | null;
 }

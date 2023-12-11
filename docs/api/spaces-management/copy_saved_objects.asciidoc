@@ -140,7 +140,7 @@ refer to the <<spaces-api-copy-saved-objects-example,examples>>.
 ===== Successful copy (with `createNewCopies` enabled)
 
 Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
-the dashboard has a reference to a visualization, and that has a reference to {a-data-source}:
+the dashboard has a reference to a visualization, and that has a reference to a {data-source}:
 
 [source,sh]
 ----
@@ -204,7 +204,7 @@ The result indicates a successful copy, and all three objects are created. Since
 ===== Successful copy (with `createNewCopies` disabled)
 
 Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
-the dashboard has a reference to a visualization, and that has a reference to {a-data-source}:
+the dashboard has a reference to a visualization, and that has a reference to a {data-source}:
 
 [source,sh]
 ----
@@ -418,7 +418,7 @@ API>>.
 ===== Failed copy (with missing reference errors)
 
 Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
-the dashboard has a reference to a visualization and a *Canvas* workpad, and the visualization has a reference to {a-data-source}:
+the dashboard has a reference to a visualization and a *Canvas* workpad, and the visualization has a reference to a {data-source}:
 
 [source,sh]
 ----

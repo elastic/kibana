@@ -30,6 +30,12 @@ const getBaseColumns = (
   return [
     {
       columnHeaderType: defaultColumnHeaderType,
+      displayAsText: i18n.ALERTS_HEADERS_ASSIGNEES,
+      id: 'kibana.alert.workflow_assignee_ids',
+      initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+    },
+    {
+      columnHeaderType: defaultColumnHeaderType,
       displayAsText: i18n.ALERTS_HEADERS_SEVERITY,
       id: 'kibana.alert.severity',
       initialWidth: 105,

@@ -20,8 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isDefined } from '@kbn/ml-is-defined';
-import type { DocumentCountChartPoint } from './document_count_chart';
+import type { LogRateHistogramItem } from '@kbn/aiops-utils';
 import {
   RandomSamplerOption,
   RANDOM_SAMPLER_SELECT_OPTIONS,
@@ -30,7 +29,8 @@ import {
 import { TotalCountHeader } from './total_count_header';
 import type { DocumentCountStats } from '../../../../../common/types/field_stats';
 import { DocumentCountChart } from './document_count_chart';
-import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
+import { RandomSamplerRangeSlider } from '../random_sampling_menu/random_sampler_range_slider';
+import { ProbabilityUsedMessage } from '../random_sampling_menu/probability_used';
 
 export interface Props {
   documentCountStats?: DocumentCountStats;
@@ -41,20 +41,6 @@ export interface Props {
   setRandomSamplerPreference: (value: RandomSamplerOption) => void;
   loading: boolean;
 }
-
-const ProbabilityUsedMessage = ({ samplingProbability }: Pick<Props, 'samplingProbability'>) => {
-  return isDefined(samplingProbability) ? (
-    <div data-test-subj="dvRandomSamplerProbabilityUsedMsg">
-      <EuiSpacer size="m" />
-
-      <FormattedMessage
-        id="xpack.dataVisualizer.randomSamplerSettingsPopUp.probabilityLabel"
-        defaultMessage="Probability used: {samplingProbability}%"
-        values={{ samplingProbability: samplingProbability * 100 }}
-      />
-    </div>
-  ) : null;
-};
 
 const CalculatingProbabilityMessage = (
   <div data-test-subj="dvRandomSamplerCalculatingProbabilityMsg">
@@ -122,7 +108,7 @@ export const DocumentCountContent: FC<Props> = ({
   if (timeRangeEarliest === undefined || timeRangeLatest === undefined)
     return <TotalCountHeader totalCount={totalCount} />;
 
-  let chartPoints: DocumentCountChartPoint[] = [];
+  let chartPoints: LogRateHistogramItem[] = [];
   if (documentCountStats.buckets !== undefined) {
     const buckets: Record<string, number> = documentCountStats?.buckets;
     chartPoints = Object.entries(buckets).map(([time, value]) => ({ time: +time, value }));

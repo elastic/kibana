@@ -6,7 +6,7 @@
  */
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiSwitch } from '@elastic/eui';
-import type { ExceptionListRuleReferencesSchema } from '../../../../../../../common/detection_engine/rule_exceptions';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../../../common/api/detection_engine/rule_exceptions';
 
 export const LinkListSwitch = memo(
   ({

@@ -14,7 +14,7 @@ export const links: LinkItem = {
   title: ALERTS,
   path: ALERTS_PATH,
   capabilities: [`${SERVER_APP_ID}.show`],
-  globalNavPosition: 2,
+  globalNavPosition: 3,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.alerts', {
       defaultMessage: 'Alerts',

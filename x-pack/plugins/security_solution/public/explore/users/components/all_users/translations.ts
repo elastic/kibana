@@ -39,14 +39,6 @@ export const UNIT = (totalCount: number) =>
     defaultMessage: `{totalCount, plural, =1 {user} other {users}}`,
   });
 
-export const USER_RISK_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.usersTable.userRiskToolTip',
-  {
-    defaultMessage:
-      'User risk classification is determined by user risk score. Users classified as Critical or High are indicated as risky.',
-  }
-);
-
 export const USER_RISK = i18n.translate('xpack.securitySolution.usersTable.riskTitle', {
-  defaultMessage: 'User risk classification',
+  defaultMessage: 'User risk level',
 });

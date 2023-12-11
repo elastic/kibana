@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { UrlDrilldownCollectConfig } from './url_drilldown_collect_config';
+export {
+  UrlDrilldownCollectConfig,
+  UrlDrilldownOptionsComponent,
+} from './url_drilldown_collect_config';

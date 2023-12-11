@@ -139,9 +139,11 @@ export const TagTable: FC<TagTableProps> = ({
       : []),
   ];
 
+  const testSubjectState = !loading ? 'table-is-ready' : 'table-is-loading';
+
   return (
     <EuiInMemoryTable
-      data-test-subj="tagsManagementTable"
+      data-test-subj={`tagsManagementTable ${testSubjectState}`}
       ref={tableRef}
       childrenBetween={actionBar}
       loading={loading}

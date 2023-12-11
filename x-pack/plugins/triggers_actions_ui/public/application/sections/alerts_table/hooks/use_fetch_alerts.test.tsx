@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useFetchAlerts, FetchAlertsArgs, FetchAlertResp } from './use_fetch_alerts';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -286,9 +286,8 @@ describe('useFetchAlerts', () => {
     ]);
   });
 
-  it('returns the correct response if the request is undefined', () => {
-    // @ts-expect-error
-    const obs$ = of<IKibanaSearchResponse>(undefined);
+  it('handles search error', () => {
+    const obs$ = throwError('simulated search error');
     dataSearchMock.mockReturnValue(obs$);
     const { result } = renderHook(() => useFetchAlerts(args));
 
@@ -308,7 +307,7 @@ describe('useFetchAlerts', () => {
     expect(showErrorMock).toHaveBeenCalled();
   });
 
-  it('returns the correct response if the request is running', () => {
+  it('returns the correct response if the search response is running', () => {
     const obs$ = of<IKibanaSearchResponse>({ ...searchResponse, isRunning: true });
     dataSearchMock.mockReturnValue(obs$);
     const { result } = renderHook(() => useFetchAlerts(args));
@@ -325,47 +324,6 @@ describe('useFetchAlerts', () => {
         updatedAt: 0,
       },
     ]);
-  });
-
-  it('returns the correct response if the request is partial', () => {
-    const obs$ = of<IKibanaSearchResponse>({ ...searchResponse, isPartial: true });
-    dataSearchMock.mockReturnValue(obs$);
-    const { result } = renderHook(() => useFetchAlerts(args));
-
-    expect(result.current).toEqual([
-      false,
-      {
-        ...expectedResponse,
-        alerts: [],
-        getInspectQuery: expect.anything(),
-        refetch: expect.anything(),
-        isInitializing: true,
-        totalAlerts: -1,
-        updatedAt: 0,
-      },
-    ]);
-    expect(showErrorMock).toHaveBeenCalled();
-  });
-
-  it('returns the correct response if there is no rawResponse', () => {
-    // @ts-expect-error
-    const obs$ = of<IKibanaSearchResponse>({ id: '1', isRunning: true, isPartial: false });
-    dataSearchMock.mockReturnValue(obs$);
-    const { result } = renderHook(() => useFetchAlerts(args));
-
-    expect(result.current).toEqual([
-      false,
-      {
-        ...expectedResponse,
-        alerts: [],
-        getInspectQuery: expect.anything(),
-        refetch: expect.anything(),
-        isInitializing: true,
-        totalAlerts: -1,
-        updatedAt: 0,
-      },
-    ]);
-    expect(showErrorMock).toHaveBeenCalled();
   });
 
   it('returns the correct total alerts if the total alerts in the response is an object', () => {

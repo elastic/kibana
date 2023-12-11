@@ -183,8 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
     return createTestDefinitions(testCases, false);
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/156739
-  describe.skip('_update_objects_spaces', () => {
+  describe('_update_objects_spaces', () => {
     getTestScenarios().spaces.forEach(({ spaceId }) => {
       const tests = createSinglePartTests(spaceId);
       addTests(`targeting the ${spaceId} space`, { spaceId, tests });

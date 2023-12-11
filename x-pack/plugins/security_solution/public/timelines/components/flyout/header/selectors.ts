@@ -7,11 +7,15 @@
 
 import { createSelector } from 'reselect';
 
-import { TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineStatus } from '../../../../../common/api/timeline';
 import { timelineSelectors } from '../../../store/timeline';
 
 export const getTimelineStatusByIdSelector = () =>
   createSelector(timelineSelectors.selectTimeline, (timeline) => ({
     status: timeline?.status ?? TimelineStatus.draft,
     updated: timeline?.updated ?? undefined,
+    isSaving: timeline?.isSaving ?? undefined,
+    isLoading: timeline?.isLoading ?? undefined,
+    changed: timeline?.changed ?? undefined,
+    show: timeline?.show ?? undefined,
   }));

@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 
 export const useFetchStatus = () => {
@@ -17,7 +18,9 @@ export const useFetchStatus = () => {
   useEffect(() => {
     const fetchStatus = () => {
       http
-        .get<{ install_status: string }>('/internal/osquery/status')
+        .get<{ install_status: string }>('/internal/osquery/status', {
+          version: API_VERSIONS.internal.v1,
+        })
         .then((response) => {
           setLoading(false);
           setDisabled(response?.install_status !== 'installed');

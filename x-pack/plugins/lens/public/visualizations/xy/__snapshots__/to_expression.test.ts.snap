@@ -28,6 +28,11 @@ Object {
           Object {
             "chain": Array [
               Object {
+                "arguments": Object {},
+                "function": "datasource_expression",
+                "type": "function",
+              },
+              Object {
                 "arguments": Object {
                   "accessors": Array [
                     "b",
@@ -118,6 +123,9 @@ Object {
             ],
             "type": "expression",
           },
+        ],
+        "minBarHeight": Array [
+          1,
         ],
         "showTooltip": Array [],
         "valueLabels": Array [

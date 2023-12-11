@@ -11,7 +11,7 @@ import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import { IContainer } from '@kbn/embeddable-plugin/public';
 import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
@@ -23,6 +23,7 @@ import {
   AnomalySwimlaneServices,
 } from '..';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
+import { AnomalyDetectionEmbeddable } from '../common/anomaly_detection_embeddable';
 
 export const getDefaultSwimlanePanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
@@ -32,7 +33,7 @@ export const getDefaultSwimlanePanelTitle = (jobIds: JobId[]) =>
 
 export type IAnomalySwimlaneEmbeddable = typeof AnomalySwimlaneEmbeddable;
 
-export class AnomalySwimlaneEmbeddable extends Embeddable<
+export class AnomalySwimlaneEmbeddable extends AnomalyDetectionEmbeddable<
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput
 > {
@@ -45,14 +46,7 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
     public services: [CoreStart, MlDependencies, AnomalySwimlaneServices],
     parent?: IContainer
   ) {
-    super(
-      initialInput,
-      {
-        defaultTitle: initialInput.title,
-        defaultDescription: initialInput.description,
-      },
-      parent
-    );
+    super(initialInput, services[2].anomalyDetectorService, services[1].data.dataViews, parent);
   }
 
   public reportsEmbeddableLoad() {

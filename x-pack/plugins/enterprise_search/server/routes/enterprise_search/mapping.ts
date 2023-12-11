@@ -7,9 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { ErrorCode } from '../../../common/types/error_codes';
+
 import { fetchMapping } from '../../lib/fetch_mapping';
 import { RouteDependencies } from '../../plugin';
+import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
+import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 export function registerMappingRoute({ router, log }: RouteDependencies) {
   router.get(
@@ -24,12 +28,24 @@ export function registerMappingRoute({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
 
-      const mapping = await fetchMapping(client, request.params.index_name);
+      try {
+        const mapping = await fetchMapping(client, request.params.index_name);
 
-      return response.ok({
-        body: mapping,
-        headers: { 'content-type': 'application/json' },
-      });
+        return response.ok({
+          body: mapping,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isIndexNotFoundException(error)) {
+          return createError({
+            errorCode: ErrorCode.INDEX_NOT_FOUND,
+            message: 'Could not found index',
+            response,
+            statusCode: 404,
+          });
+        }
+        throw error;
+      }
     })
   );
 }

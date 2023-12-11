@@ -1,24 +1,29 @@
 {
   "nodes.usage": {
     "url_params": {
-      "timeout": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_nodes/usage",
-      "_nodes/{nodes}/usage",
-      "_nodes/usage/{metrics}",
-      "_nodes/{nodes}/usage/{metrics}"
+      "_nodes/{node_id}/usage",
+      "_nodes/usage/{metric}",
+      "_nodes/{node_id}/usage/{metric}"
     ],
-    "url_components": {
-      "nodes": null,
-      "metrics": [
-        "_all",
-        "rest_actions"
-      ]
-    },
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-usage.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-nodes-usage.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

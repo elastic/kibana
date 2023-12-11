@@ -5,14 +5,25 @@
  * 2.0.
  */
 
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
+
 import { curlDefinition } from './curl';
+import { dotnetDefinition } from './dotnet';
+import { goDefinition } from './go';
+import { javaDefinition } from './java';
 import { javascriptDefinition } from './javascript';
+import { phpDefinition } from './php';
+import { pythonDefinition } from './python';
 import { rubyDefinition } from './ruby';
-import { Languages, LanguageDefinition } from './types';
 
 const languageDefinitionRecords: Partial<Record<Languages, LanguageDefinition>> = {
   [Languages.CURL]: curlDefinition,
+  [Languages.JAVA]: javaDefinition,
+  [Languages.DOTNET]: dotnetDefinition,
+  [Languages.PYTHON]: pythonDefinition,
   [Languages.JAVASCRIPT]: javascriptDefinition,
+  [Languages.PHP]: phpDefinition,
+  [Languages.GO]: goDefinition,
   [Languages.RUBY]: rubyDefinition,
 };
 

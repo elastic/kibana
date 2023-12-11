@@ -9,35 +9,35 @@ import { i18n } from '@kbn/i18n';
 import { isLeft } from 'fp-ts/lib/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import {
   BrowserFieldsCodec,
   ProjectMonitorCodec,
   ProjectMonitor,
   ConfigKey,
-  DataStream,
-  DataStreamCodec,
+  MonitorTypeEnum,
+  MonitorTypeCodec,
   HTTPFieldsCodec,
-  ICMPSimpleFieldsCodec,
   MonitorFields,
   TCPFieldsCodec,
   SyntheticsMonitor,
   Locations,
-  PrivateLocation,
+  ICMPFieldsCodec,
 } from '../../../common/runtime_types';
 
 import { ALLOWED_SCHEDULES_IN_MINUTES } from '../../../common/constants/monitor_defaults';
 
 type MonitorCodecType =
-  | typeof ICMPSimpleFieldsCodec
+  | typeof ICMPFieldsCodec
   | typeof TCPFieldsCodec
   | typeof HTTPFieldsCodec
   | typeof BrowserFieldsCodec;
 
-const monitorTypeToCodecMap: Record<DataStream, MonitorCodecType> = {
-  [DataStream.ICMP]: ICMPSimpleFieldsCodec,
-  [DataStream.TCP]: TCPFieldsCodec,
-  [DataStream.HTTP]: HTTPFieldsCodec,
-  [DataStream.BROWSER]: BrowserFieldsCodec,
+const monitorTypeToCodecMap: Record<MonitorTypeEnum, MonitorCodecType> = {
+  [MonitorTypeEnum.ICMP]: ICMPFieldsCodec,
+  [MonitorTypeEnum.TCP]: TCPFieldsCodec,
+  [MonitorTypeEnum.HTTP]: HTTPFieldsCodec,
+  [MonitorTypeEnum.BROWSER]: BrowserFieldsCodec,
 };
 
 export interface ValidationResult {
@@ -55,7 +55,7 @@ export interface ValidationResult {
 export function validateMonitor(monitorFields: MonitorFields): ValidationResult {
   const { [ConfigKey.MONITOR_TYPE]: monitorType } = monitorFields;
 
-  const decodedType = DataStreamCodec.decode(monitorType);
+  const decodedType = MonitorTypeCodec.decode(monitorType);
 
   if (isLeft(decodedType)) {
     return {
@@ -67,7 +67,7 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
   }
 
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
-  const SyntheticsMonitorCodec = monitorTypeToCodecMap[monitorType] as typeof ICMPSimpleFieldsCodec;
+  const SyntheticsMonitorCodec = monitorTypeToCodecMap[monitorType] as typeof ICMPFieldsCodec;
 
   if (!SyntheticsMonitorCodec) {
     return {
@@ -111,7 +111,7 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
 export function validateProjectMonitor(
   monitorFields: ProjectMonitor,
   publicLocations: Locations,
-  privateLocations: PrivateLocation[]
+  privateLocations: PrivateLocationAttributes[]
 ): ValidationResult {
   const locationsError = validateLocation(monitorFields, publicLocations, privateLocations);
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
@@ -143,7 +143,7 @@ export function validateProjectMonitor(
 export function validateLocation(
   monitorFields: ProjectMonitor,
   publicLocations: Locations,
-  privateLocations: PrivateLocation[]
+  privateLocations: PrivateLocationAttributes[]
 ) {
   const hasPublicLocationsConfigured = (monitorFields.locations || []).length > 0;
   const hasPrivateLocationsConfigured = (monitorFields.privateLocations || []).length > 0;

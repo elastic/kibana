@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__/kea_logic';
 import { setMockSearchContextState } from './__mocks__/hooks.mock';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 

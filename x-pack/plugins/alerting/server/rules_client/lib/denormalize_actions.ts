@@ -7,7 +7,10 @@
 
 import { SavedObjectReference } from '@kbn/core/server';
 import { RawRule } from '../../types';
-import { preconfiguredConnectorActionRefPrefix } from '../common/constants';
+import {
+  preconfiguredConnectorActionRefPrefix,
+  systemConnectorActionRefPrefix,
+} from '../common/constants';
 import { NormalizedAlertActionWithGeneratedValues, RulesClientContext } from '../types';
 
 export async function denormalizeActions(
@@ -19,7 +22,12 @@ export async function denormalizeActions(
   if (alertActions.length) {
     const actionsClient = await context.getActionsClient();
     const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];
-    const actionResults = await actionsClient.getBulk(actionIds);
+
+    const actionResults = await actionsClient.getBulk({
+      ids: actionIds,
+      throwIfSystemAction: false,
+    });
+
     const actionTypeIds = [...new Set(actionResults.map((action) => action.actionTypeId))];
     actionTypeIds.forEach((id) => {
       // Notify action type usage via "isActionTypeEnabled" function
@@ -32,6 +40,12 @@ export async function denormalizeActions(
           actions.push({
             ...alertAction,
             actionRef: `${preconfiguredConnectorActionRefPrefix}${id}`,
+            actionTypeId: actionResultValue.actionTypeId,
+          });
+        } else if (actionsClient.isSystemAction(id)) {
+          actions.push({
+            ...alertAction,
+            actionRef: `${systemConnectorActionRefPrefix}${id}`,
             actionTypeId: actionResultValue.actionTypeId,
           });
         } else {

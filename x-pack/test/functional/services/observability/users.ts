@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { Role } from '@kbn/security-plugin/common/model';
+import { Role } from '@kbn/security-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 type CreateRolePayload = Pick<Role, 'metadata' | 'elasticsearch' | 'kibana'>;
 
 const OBSERVABILITY_TEST_ROLE_NAME = 'observability-functional-test-role';
+const HOME_PAGE_SELECTOR = 'homeApp';
 
 export function ObservabilityUsersProvider({ getPageObject, getService }: FtrProviderContext) {
   const security = getService('security');
+  const testSubjects = getService('testSubjects');
   const commonPageObject = getPageObject('common');
 
   /**
@@ -24,7 +26,8 @@ export function ObservabilityUsersProvider({ getPageObject, getService }: FtrPro
    */
   const setTestUserRole = async (roleDefinition: CreateRolePayload) => {
     // return to neutral grounds to avoid running into permission problems on reload
-    await commonPageObject.navigateToActualUrl('kibana');
+    await commonPageObject.navigateToActualUrl('home');
+    await testSubjects.existOrFail(HOME_PAGE_SELECTOR);
 
     await security.role.create(OBSERVABILITY_TEST_ROLE_NAME, roleDefinition);
 

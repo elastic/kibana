@@ -11,7 +11,7 @@ import SemVer from 'semver/classes/semver';
 import { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 
-import { ExtensionsService } from './services';
+import { ExtensionsService, PublicApiService } from './services';
 
 import {
   IndexManagementPluginSetup,
@@ -38,34 +38,53 @@ export class IndexMgmtUIPlugin {
   ): IndexManagementPluginSetup {
     const {
       ui: { enabled: isIndexManagementUiEnabled },
+      enableIndexActions,
+      enableLegacyTemplates,
+      enableIndexStats,
+      editableIndexSettings,
+      enableDataStreamsStorageColumn,
     } = this.ctx.config.get<ClientConfigType>();
 
     if (isIndexManagementUiEnabled) {
-      const { fleet, usageCollection, management } = plugins;
+      const { fleet, usageCollection, management, cloud } = plugins;
       const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
+      const config = {
+        enableIndexActions: enableIndexActions ?? true,
+        enableLegacyTemplates: enableLegacyTemplates ?? true,
+        enableIndexStats: enableIndexStats ?? true,
+        editableIndexSettings: editableIndexSettings ?? 'all',
+        enableDataStreamsStorageColumn: enableDataStreamsStorageColumn ?? true,
+      };
       management.sections.section.data.registerApp({
         id: PLUGIN.id,
         title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
         order: 0,
         mount: async (params) => {
           const { mountManagementSection } = await import('./application/mount_management_section');
-          return mountManagementSection(
+          return mountManagementSection({
             coreSetup,
             usageCollection,
             params,
-            this.extensionsService,
-            Boolean(fleet),
-            kibanaVersion
-          );
+            extensionsService: this.extensionsService,
+            isFleetEnabled: Boolean(fleet),
+            kibanaVersion,
+            config,
+            cloud,
+          });
         },
       });
     }
 
     return {
+      apiService: new PublicApiService(coreSetup.http),
       extensionsService: this.extensionsService.setup(),
     };
   }
 
-  public start() {}
+  public start() {
+    return {
+      extensionsService: this.extensionsService.setup(),
+    };
+  }
   public stop() {}
 }

@@ -36,6 +36,7 @@ export function FeatureEditTools(props: Props) {
   const drawBBoxSelected = props.drawShape === DRAW_SHAPE.BOUNDS;
   const drawPointSelected = props.drawShape === DRAW_SHAPE.POINT;
   const deleteSelected = props.drawShape === DRAW_SHAPE.DELETE;
+  const isWaiting = props.drawShape === DRAW_SHAPE.WAIT;
 
   function toggleDrawShape(mode: DRAW_SHAPE) {
     if (mode && props.drawShape === mode) {
@@ -70,6 +71,7 @@ export function FeatureEditTools(props: Props) {
               aria-pressed={drawLineSelected}
               isSelected={drawLineSelected}
               display={drawLineSelected ? 'fill' : 'empty'}
+              isDisabled={isWaiting}
             />
 
             <EuiButtonIcon
@@ -89,6 +91,7 @@ export function FeatureEditTools(props: Props) {
               aria-pressed={drawPolygonSelected}
               isSelected={drawPolygonSelected}
               display={drawPolygonSelected ? 'fill' : 'empty'}
+              isDisabled={isWaiting}
             />
             <EuiButtonIcon
               className={classNames({
@@ -107,6 +110,7 @@ export function FeatureEditTools(props: Props) {
               aria-pressed={drawCircleSelected}
               isSelected={drawCircleSelected}
               display={drawCircleSelected ? 'fill' : 'empty'}
+              isDisabled={isWaiting}
             />
             <EuiButtonIcon
               className={classNames({
@@ -125,6 +129,7 @@ export function FeatureEditTools(props: Props) {
               aria-pressed={drawBBoxSelected}
               isSelected={drawBBoxSelected}
               display={drawBBoxSelected ? 'fill' : 'empty'}
+              isDisabled={isWaiting}
             />
           </>
         )}
@@ -145,6 +150,7 @@ export function FeatureEditTools(props: Props) {
           aria-pressed={drawPointSelected}
           isSelected={drawPointSelected}
           display={drawPointSelected ? 'fill' : 'empty'}
+          isDisabled={isWaiting}
         />
         <EuiButtonIcon
           className={classNames({
@@ -166,6 +172,7 @@ export function FeatureEditTools(props: Props) {
           aria-pressed={deleteSelected}
           isSelected={deleteSelected}
           display={deleteSelected ? 'fill' : 'empty'}
+          isDisabled={isWaiting}
         />
       </EuiPanel>
     </TrackApplicationView>

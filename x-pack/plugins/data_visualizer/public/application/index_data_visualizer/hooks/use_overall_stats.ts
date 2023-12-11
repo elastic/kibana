@@ -8,8 +8,6 @@
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
 import { from, Subscription, Observable } from 'rxjs';
 import { mergeMap, last, map, toArray } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
-import type { ToastsStart } from '@kbn/core/public';
 import { chunk } from 'lodash';
 import type {
   IKibanaSearchRequest,
@@ -17,13 +15,16 @@ import type {
   ISearchOptions,
 } from '@kbn/data-plugin/common';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { getProcessedFields } from '@kbn/ml-data-grid';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   AggregatableFieldOverallStats,
   checkAggregatableFieldsExistRequest,
   checkNonAggregatableFieldExistsRequest,
+  getSampleOfDocumentsForNonAggregatableFields,
   isAggregatableFieldOverallStats,
   isNonAggregatableFieldOverallStats,
+  isNonAggregatableSampledDocs,
   NonAggregatableFieldOverallStats,
   processAggregatableFieldsExistResponse,
   processNonAggregatableFieldsExistResponse,
@@ -38,6 +39,7 @@ import {
 import { getDocumentCountStats } from '../search_strategy/requests/get_document_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
 import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
+import { displayError } from '../../common/util/display_error';
 
 /**
  * Helper function to run forkJoin
@@ -61,32 +63,6 @@ export function rateLimitingForkJoin<T>(
       indexedObservables.sort((l, r) => l.index - r.index).map((obs) => obs.value)
     )
   );
-}
-
-function displayError(toastNotifications: ToastsStart, index: string, err: any) {
-  if (err.statusCode === 500) {
-    toastNotifications.addError(err, {
-      title: i18n.translate('xpack.dataVisualizer.index.dataLoader.internalServerErrorMessage', {
-        defaultMessage:
-          'Error loading data in index {index}. {message}. ' +
-          'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
-        values: {
-          index,
-          message: err.error ?? err.message,
-        },
-      }),
-    });
-  } else {
-    toastNotifications.addError(err, {
-      title: i18n.translate('xpack.dataVisualizer.index.errorLoadingDataMessage', {
-        defaultMessage: 'Error loading data in index {index}. {message}.',
-        values: {
-          index,
-          message: err.error ?? err.message,
-        },
-      }),
-    });
-  }
 }
 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
@@ -155,6 +131,26 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         probability
       );
 
+      const nonAggregatableFieldsExamplesObs = data.search
+        .search<IKibanaSearchRequest, IKibanaSearchResponse>(
+          {
+            params: getSampleOfDocumentsForNonAggregatableFields(
+              nonAggregatableFields,
+              index,
+              searchQuery,
+              timeFieldName,
+              earliest,
+              latest,
+              runtimeFieldMap
+            ),
+          },
+          searchOptions
+        )
+        .pipe(
+          map((resp) => {
+            return resp as IKibanaSearchResponse;
+          })
+        );
       const nonAggregatableFieldsObs = nonAggregatableFields.map((fieldName: string) =>
         data.search
           .search<IKibanaSearchRequest, IKibanaSearchResponse>(
@@ -217,14 +213,29 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
       const sub = rateLimitingForkJoin<
         AggregatableFieldOverallStats | NonAggregatableFieldOverallStats | undefined
-      >([...aggregatableOverallStatsObs, ...nonAggregatableFieldsObs], MAX_CONCURRENT_REQUESTS);
+      >(
+        [
+          nonAggregatableFieldsExamplesObs,
+          ...aggregatableOverallStatsObs,
+          ...nonAggregatableFieldsObs,
+        ],
+        MAX_CONCURRENT_REQUESTS
+      );
 
       searchSubscription$.current = sub.subscribe({
         next: (value) => {
           const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
           const nonAggregatableOverallStatsResp: NonAggregatableFieldOverallStats[] = [];
 
+          let sampledNonAggregatableFieldsExamples: Array<{ [key: string]: string }> | undefined;
           value.forEach((resp, idx) => {
+            if (idx === 0 && isNonAggregatableSampledDocs(resp)) {
+              const docs = resp.rawResponse.hits.hits.map((d) =>
+                d.fields ? getProcessedFields(d.fields) : {}
+              );
+
+              sampledNonAggregatableFieldsExamples = docs;
+            }
             if (isAggregatableFieldOverallStats(resp)) {
               aggregatableOverallStatsResp.push(resp);
             }
@@ -241,9 +252,27 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
             aggregatableFields
           );
 
+          const nonAggregatableFieldsCount: number[] = new Array(nonAggregatableFields.length).fill(
+            0
+          );
+          const nonAggregatableFieldsUniqueCount = nonAggregatableFields.map(
+            () => new Set<string>()
+          );
+          if (sampledNonAggregatableFieldsExamples) {
+            sampledNonAggregatableFieldsExamples.forEach((doc) => {
+              nonAggregatableFields.forEach((field, fieldIdx) => {
+                if (doc.hasOwnProperty(field)) {
+                  nonAggregatableFieldsCount[fieldIdx] += 1;
+                  nonAggregatableFieldsUniqueCount[fieldIdx].add(doc[field]!);
+                }
+              });
+            });
+          }
           const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
             nonAggregatableOverallStatsResp,
-            nonAggregatableFields
+            nonAggregatableFields,
+            nonAggregatableFieldsCount,
+            nonAggregatableFieldsUniqueCount
           );
 
           setOverallStats({

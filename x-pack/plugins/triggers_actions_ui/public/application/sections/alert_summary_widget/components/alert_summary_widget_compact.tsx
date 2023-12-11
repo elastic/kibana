@@ -7,9 +7,20 @@
 
 import React, { MouseEvent } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
+import {
+  Axis,
+  Chart,
+  CurveType,
+  LineSeries,
+  Position,
+  ScaleType,
+  Settings,
+  TooltipType,
+  Tooltip,
+} from '@elastic/charts';
 import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
 import { AlertStatus } from '@kbn/rule-data-utils';
+import { i18n } from '@kbn/i18n';
 import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, WIDGET_TITLE } from './constants';
 import { Alert, ChartProps } from '../types';
@@ -87,8 +98,16 @@ export const AlertSummaryWidgetCompact = ({
           <EuiFlexGroup wrap>
             <EuiFlexItem style={{ minWidth: '200px' }}>
               <Chart size={{ height: 50 }}>
-                <Settings theme={chartTheme} baseTheme={baseTheme} tooltip={{ type: 'none' }} />
-                <Axis hide id="activeAlertsAxis" position={Position.Left} showGridLines={false} />
+                <Tooltip type={TooltipType.None} />
+                <Settings theme={chartTheme} baseTheme={baseTheme} locale={i18n.getLocale()} />
+                <Axis
+                  hide
+                  id="activeAlertsAxis"
+                  position={Position.Left}
+                  gridLine={{
+                    visible: false,
+                  }}
+                />
                 <LineSeries
                   id={'activeAlertsChart'}
                   xScaleType={ScaleType.Time}

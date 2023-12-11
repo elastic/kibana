@@ -26,8 +26,6 @@ import { RiskScoresNoDataDetected } from '../../../../explore/components/risk_sc
 import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
 import { Loader } from '../../../../common/components/loader';
 import { Panel } from '../../../../common/components/panel';
-import * as commonI18n from '../common/translations';
-import * as i18n from './translations';
 import { useEntityInfo } from './use_entity';
 import { RiskScoreHeaderContent } from './header_content';
 import { ChartContent } from './chart_content';
@@ -111,7 +109,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     inspect,
     refetch,
     isDeprecated,
-    isLicenseValid,
+    isAuthorized,
     isModuleEnabled,
   } = useRiskScore({
     filterQuery,
@@ -140,7 +138,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
 
   const refreshPage = useRefetchQueries();
 
-  if (!isLicenseValid) {
+  if (!isAuthorized) {
     return null;
   }
 
@@ -176,15 +174,8 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
           id={entity.tableQueryId}
           toggleStatus={toggleStatus}
           toggleQuery={setToggleStatus}
-          tooltip={
-            riskEntity === RiskScoreEntity.host
-              ? i18n.HOST_RISK_TABLE_TOOLTIP
-              : i18n.USER_RISK_TABLE_TOOLTIP
-          }
-          tooltipTitle={commonI18n.RISK_TABLE_TOOLTIP_TITLE}
         >
           <RiskScoreHeaderContent
-            entityDocLink={entity.docLink}
             entityLinkProps={entity.linkProps}
             onSelectSeverityFilterGroup={onSelectSeverityFilterGroup}
             riskEntity={riskEntity}

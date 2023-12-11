@@ -17,46 +17,25 @@ patch:
     content:
       application/json:
         schema:
-          type: object
-          properties:
-            closure_type:
-              $ref: '../components/schemas/closure_types.yaml'
-            connector:
-              description: An object that contains the connector configuration.
-              type: object
-              properties:
-                $ref: '../components/schemas/case_configure_connector_properties.yaml'
-              required:
-                - fields
-                - id
-                - name
-                - type
-            version:
-              description: >
-                The version of the connector. To retrieve the version value, use
-                the get configuration API.
-              type: string
-              example: WzIwMiwxXQ==
-          required: 
-            - version
+          $ref: '../components/schemas/update_case_configuration_request.yaml'
+        examples:
+          updateCaseConfigurationRequest:
+            $ref: '../components/examples/update_case_configuration_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.
       content:
         application/json:
           schema:
-            type: array
-            items: 
-              type: object
-              properties:
-                $ref: '../components/schemas/case_configure_response_properties.yaml'
+            type: object
+            properties:
+              $ref: '../components/schemas/case_configure_response_properties.yaml'
+          examples:
+            updateCaseConfigurationResponse:
+              $ref: '../components/examples/update_case_configuration_response.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:
         application/json:
           schema:
             $ref: '../components/schemas/4xx_response.yaml'
-  servers:
-        - url: https://localhost:5601
-servers:
-      - url: https://localhost:5601

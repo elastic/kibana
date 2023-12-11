@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { createHash } from 'crypto';
-import type { CasesPatchRequest } from '@kbn/cases-plugin/common/api';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   ExternalReferenceAttachmentType,
   PersistableStateAttachmentTypeSetup,
 } from '@kbn/cases-plugin/server/attachment_framework/types';
+import { BulkCreateCasesRequest, CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
@@ -103,6 +104,37 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
       } catch (error) {
         logger.error(`Error : ${error}`);
         throw error;
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/cases_fixture/cases:bulkCreate',
+      validate: {
+        body: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const [_, { cases }] = await core.getStartServices();
+        const client = await cases.getCasesClientWithRequest(request);
+
+        return response.ok({
+          body: await client.cases.bulkCreate(request.body as BulkCreateCasesRequest),
+        });
+      } catch (error) {
+        logger.error(`Error : ${error}`);
+
+        const boom = new Boom.Boom(error.message, {
+          statusCode: error.wrappedError.output.statusCode,
+        });
+
+        return response.customError({
+          body: boom,
+          headers: boom.output.headers as { [key: string]: string },
+          statusCode: boom.output.statusCode,
+        });
       }
     }
   );

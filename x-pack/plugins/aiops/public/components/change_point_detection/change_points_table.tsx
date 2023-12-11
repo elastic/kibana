@@ -19,12 +19,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { type Filter, FilterStateStore } from '@kbn/es-query';
+import { NoChangePointsWarning } from './no_change_points_warning';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCommonChartProps } from './use_common_chart_props';
 import {
   type ChangePointAnnotation,
   FieldConfig,
   SelectedChangePoint,
+  useChangePointDetectionContext,
 } from './change_point_detection_context';
 import { type ChartComponentProps } from './chart_component';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -92,6 +94,8 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
 
   const hasActions = fieldConfig.splitField !== undefined;
 
+  const { bucketInterval } = useChangePointDetectionContext();
+
   const columns: Array<EuiBasicTableColumn<ChangePointAnnotation>> = [
     {
       id: 'timestamp',
@@ -116,9 +120,19 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       height: '80px',
       truncateText: false,
       valign: 'middle',
-      css: { display: 'block', padding: 0 },
+      css: {
+        // Extra specificity needed here to override Sass styles
+        // TODO: Can be removed once EuiTable has been converted to Emotion
+        ['&.euiTableCellContent']: { display: 'block', padding: 0 },
+      },
       render: (annotation: ChangePointAnnotation) => {
-        return <MiniChartPreview annotation={annotation} fieldConfig={fieldConfig} />;
+        return (
+          <MiniChartPreview
+            annotation={annotation}
+            fieldConfig={fieldConfig}
+            interval={bucketInterval.expression}
+          />
+        );
       },
     },
     {
@@ -144,12 +158,9 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
           })}
         >
           <span>
-            {i18n.translate(
-              'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueLabel',
-              {
-                defaultMessage: 'p-value',
-              }
-            )}
+            {i18n.translate('xpack.aiops.changePointDetection.pValueLabel', {
+              defaultMessage: 'p-value',
+            })}
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
           </span>
         </EuiToolTip>
@@ -282,25 +293,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             }
           />
         ) : (
-          <EuiEmptyPrompt
-            iconType="search"
-            title={
-              <h2>
-                <FormattedMessage
-                  id="xpack.aiops.changePointDetection.noChangePointsFoundTitle"
-                  defaultMessage="No change points found"
-                />
-              </h2>
-            }
-            body={
-              <p>
-                <FormattedMessage
-                  id="xpack.aiops.changePointDetection.noChangePointsFoundMessage"
-                  defaultMessage="Detect statistically significant change points such as dips, spikes, and distribution changes in a metric. Select a metric and set a time range to start detecting change points in your data."
-                />
-              </p>
-            }
-          />
+          <NoChangePointsWarning />
         )
       }
     />
@@ -312,10 +305,13 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotat
     lens: { EmbeddableComponent },
   } = useAiopsAppContext();
 
+  const { bucketInterval } = useChangePointDetectionContext();
+
   const { filters, query, attributes, timeRange } = useCommonChartProps({
     annotation,
     fieldConfig,
     previewMode: true,
+    bucketInterval: bucketInterval.expression,
   });
 
   return (

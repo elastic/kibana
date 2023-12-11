@@ -8,7 +8,4 @@
 export * from './related_hosts';
 export * from './related_users';
 
-export enum RelatedEntitiesQueries {
-  relatedHosts = 'relatedHosts',
-  relatedUsers = 'relatedUsers',
-}
+export { RelatedEntitiesQueries } from '../../../api/search_strategy';

@@ -16,7 +16,7 @@ import { PresentationUtilServices } from './types';
 
 import { capabilitiesServiceFactory } from './capabilities/capabilities.story';
 import { dataViewsServiceFactory } from './data_views/data_views.story';
-import { dashboardsServiceFactory } from './dashboards/dashboards.stub';
+import { contentManagementServiceFactory } from './content_management/content_management.stub';
 import { labsServiceFactory } from './labs/labs.story';
 import { uiActionsServiceFactory } from './ui_actions/ui_actions.stub';
 
@@ -24,7 +24,7 @@ export const providers: PluginServiceProviders<PresentationUtilServices> = {
   capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
   labs: new PluginServiceProvider(labsServiceFactory),
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
-  dashboards: new PluginServiceProvider(dashboardsServiceFactory),
+  contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
   uiActions: new PluginServiceProvider(uiActionsServiceFactory),
 };
 

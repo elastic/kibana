@@ -10,17 +10,18 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { EndpointAppContextService } from '../../../../../../endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from '../../../../../../endpoint/types';
-import type { UsersRelatedHostsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import { RelatedEntitiesQueries } from '../../../../../../../common/search_strategy/security_solution/related_entities';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
 import { createMockConfig } from '../../../../../../lib/detection_engine/routes/__mocks__';
+import type { RelatedHostsRequestOptions } from '../../../../../../../common/api/search_strategy';
 
-export const mockOptions: UsersRelatedHostsRequestOptions = {
+export const mockOptions: RelatedHostsRequestOptions = {
   defaultIndex: ['test_indices*'],
   factoryQueryType: RelatedEntitiesQueries.relatedHosts,
   userName: 'user1',
   from: '2020-09-02T15:17:13.678Z',
+  isNewRiskScoreModuleInstalled: false,
 };
 
 export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {

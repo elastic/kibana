@@ -24,7 +24,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../../../common/components/link_to');
+jest.mock('../../../../common/components/links/link_props');
 
 describe('Port', () => {
   const mount = useMountAppended();

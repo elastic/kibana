@@ -15,8 +15,11 @@
     "requiredPlugins": [
       "cloud"
     ],
+    "requiredBundles": [
+    ],
     "optionalPlugins": [
-      "security"
+      "security",
+      "cloudExperiments"
     ]
   }
 }

@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Redirect, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { benchmarksNavigation, cloudPosturePages } from '../common/navigation/constants';
 import type { CspSecuritySolutionContext } from '..';
 import { SecuritySolutionContext } from './security_solution_context';
@@ -27,21 +27,25 @@ export interface CspRouterProps {
 export const CspRouter = ({ securitySolutionContext }: CspRouterProps) => {
   const routerElement = (
     <QueryClientProvider client={queryClient}>
-      <Switch>
+      <Routes>
         <CspRoute {...cloudPosturePages.findings} component={pages.Findings} />
         <CspRoute {...cloudPosturePages.dashboard} component={pages.ComplianceDashboard} />
+        <CspRoute
+          {...cloudPosturePages.vulnerability_dashboard}
+          component={pages.VulnerabilityDashboard}
+        />
 
         <CspRoute {...cloudPosturePages.benchmarks}>
-          <Switch>
+          <Routes>
             <CspRoute {...benchmarksNavigation.rules} component={pages.Rules} />
             <CspRoute {...cloudPosturePages.benchmarks} component={pages.Benchmarks} />
-          </Switch>
+          </Routes>
         </CspRoute>
 
         <Route>
           <Redirect to={cloudPosturePages.dashboard.path} />
         </Route>
-      </Switch>
+      </Routes>
     </QueryClientProvider>
   );
 

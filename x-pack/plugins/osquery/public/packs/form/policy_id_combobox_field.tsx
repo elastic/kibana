@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import deepEqual from 'fast-deep-equal';
 import { i18n } from '@kbn/i18n';
 import { useController } from 'react-hook-form';
@@ -21,12 +21,9 @@ import { useAgentPolicies } from '../../agent_policies';
 //     names/descriptions from overflowing the flex items
 //  2) max-width is built from the grow property on the flex items because the value
 //     changes based on if Fleet is enabled/setup or not
-const AgentPolicyNameColumn = styled(EuiFlexItem)`
-  max-width: ${(props) => `${((props.grow as number) / 9) * 100}%`};
-  overflow: hidden;
-`;
-const AgentPolicyDescriptionColumn = styled(EuiFlexItem)`
-  max-width: ${(props) => `${((props.grow as number) / 9) * 100}%`};
+
+const StyledAgentPolicyColumn = styled(EuiFlexItem)`
+  max-width: ${({ grow }) => ((grow as number) / 9) * 100};
   overflow: hidden;
 `;
 
@@ -71,16 +68,16 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption<string>) => (
       <EuiFlexGroup>
-        <AgentPolicyNameColumn grow={2}>
+        <StyledAgentPolicyColumn grow={2}>
           <span className="eui-textTruncate">
             {(option.key && agentPoliciesById?.[option.key]?.name) ?? option.label}
           </span>
-        </AgentPolicyNameColumn>
-        <AgentPolicyDescriptionColumn grow={5}>
+        </StyledAgentPolicyColumn>
+        <StyledAgentPolicyColumn grow={5}>
           <EuiTextColor className="eui-textTruncate" color="subdued">
             {(option.key && agentPoliciesById?.[option.key].description) ?? ''}
           </EuiTextColor>
-        </AgentPolicyDescriptionColumn>
+        </StyledAgentPolicyColumn>
         <EuiFlexItem grow={2} className="eui-textRight">
           <EuiTextColor color="subdued">
             <FormattedMessage

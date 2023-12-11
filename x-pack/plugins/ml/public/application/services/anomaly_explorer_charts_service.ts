@@ -11,9 +11,12 @@ import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { MlEntityField, MlRecordForInfluencer } from '@kbn/ml-anomaly-utils';
+import type {
+  InfluencersFilterQuery,
+  MlEntityField,
+  MlRecordForInfluencer,
+} from '@kbn/ml-anomaly-utils';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { InfluencersFilterQuery } from '../../../common/types/es_client';
 import type { SeriesConfigWithMetadata } from '../../../common/types/results';
 
 import { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';

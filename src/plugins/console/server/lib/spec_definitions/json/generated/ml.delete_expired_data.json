@@ -1,8 +1,16 @@
 {
   "ml.delete_expired_data": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "requests_per_second": "",
-      "timeout": ""
+      "timeout": [
+        "8h",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "DELETE"
@@ -11,6 +19,10 @@
       "_ml/_delete_expired_data/{job_id}",
       "_ml/_delete_expired_data"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-delete-expired-data.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-delete-expired-data.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

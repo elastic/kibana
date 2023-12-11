@@ -5,148 +5,111 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCard } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
+import React, { useState } from 'react';
+import { EuiButton, EuiCallOut, EuiSelect, EuiSpacer } from '@elastic/eui';
 import type { Meta, Story } from '@storybook/react/types-6-0';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { DecorateWithKibanaContext } from './asset_details.story_decorators';
-
-import { AssetDetails, FlyoutTabIds, type AssetDetailsProps } from './asset_details';
+import { MemoryRouter } from 'react-router-dom';
+import { useArgs } from '@storybook/addons';
+import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
+import { type TabIds, type AssetDetailsProps } from './types';
+import { DecorateWithKibanaContext } from './__stories__/decorator';
+import { assetDetailsProps } from './__stories__/context/fixtures';
 
-export default {
-  title: 'infra/Asset Details View/Asset Details Embeddable',
-  decorators: [
-    (wrappedStory) => <EuiCard title="Asset Details">{wrappedStory()}</EuiCard>,
-    (wrappedStory) => <I18nProvider>{wrappedStory()}</I18nProvider>,
-    decorateWithGlobalStorybookThemeProviders,
-    DecorateWithKibanaContext,
-  ],
+interface AssetDetailsStoryArgs extends AssetDetailsProps {
+  tabId: TabIds;
+}
+
+const stories: Meta<AssetDetailsStoryArgs> = {
+  title: 'infra/Asset Details View',
+  decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
   component: AssetDetails,
-  args: {
-    node: {
-      name: 'host1',
-      id: 'host1-macOS',
-      title: {
-        name: 'host1',
-        cloudProvider: null,
+  argTypes: {
+    tabId: {
+      options: assetDetailsProps.tabs.filter(({ id }) => id !== 'linkToApm').map(({ id }) => id),
+      defaultValue: 'overview',
+      control: {
+        type: 'radio',
       },
-      os: 'macOS',
-      ip: '192.168.0.1',
-      rx: 123179.18222222221,
-      tx: 123030.54555555557,
-      memory: 0.9044444444444445,
-      cpu: 0.3979674157303371,
-      diskLatency: 0.15291777273162221,
-      memoryTotal: 34359738368,
     },
-    nodeType: 'host',
-    closeFlyout: () => {},
-    onTabClick: () => {},
-    renderedTabsSet: { current: new Set(['metadata']) },
-    currentTimeRange: {
-      interval: '1s',
-      from: 1683630468,
-      to: 1683630469,
-    },
-    hostFlyoutOpen: {
-      clickedItemId: 'host1-macos',
-      selectedTabId: 'metadata',
-      searchFilter: '',
-      metadataSearch: '',
-    },
-    tabs: [
-      {
-        id: FlyoutTabIds.METADATA,
-        name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.metadata', {
-          defaultMessage: 'Metadata',
-        }),
-        'data-test-subj': 'hostsView-flyout-tabs-metadata',
+    links: {
+      options: assetDetailsProps.links,
+      control: {
+        type: 'inline-check',
       },
-      {
-        id: FlyoutTabIds.PROCESSES,
-        name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
-          defaultMessage: 'Processes',
-        }),
-        'data-test-subj': 'hostsView-flyout-tabs-processes',
-      },
-    ],
-    links: ['apmServices', 'uptime'],
+    },
   },
-} as Meta;
-
-const Template: Story<AssetDetailsProps> = (args) => {
-  return <AssetDetails {...args} />;
+  args: { ...assetDetailsProps },
 };
 
-const FlyoutTemplate: Story<AssetDetailsProps> = (args) => {
-  const [isOpen, setIsOpen] = React.useState(false);
+const PageTabTemplate: Story<AssetDetailsStoryArgs> = (args) => {
+  return (
+    <MemoryRouter initialEntries={[`/infra/metrics/hosts?assetDetails=(tabId:${args.tabId})`]}>
+      <AssetDetails {...args} />
+    </MemoryRouter>
+  );
+};
+
+const FlyoutTemplate: Story<AssetDetailsStoryArgs> = (args) => {
+  const [isOpen, setIsOpen] = useState(false);
   const closeFlyout = () => setIsOpen(false);
+  const options = assetDetailsProps.tabs.filter(({ id }) => id !== 'linkToApm').map(({ id }) => id);
+  const [{ tabId }, updateArgs] = useArgs();
+
   return (
     <div>
+      <EuiCallOut
+        color="warning"
+        title={`To see different tab content please close the flyout if opened, select one of the options from the drop-down and open the flyout again:`}
+      />
+      <EuiSpacer />
+      <EuiSelect
+        data-test-subj="infraFlyoutTemplateSelect"
+        value={tabId}
+        onChange={(e) => {
+          updateArgs({ tabId: e.target.value as TabIds });
+        }}
+        options={options.map((id) => ({
+          text: id,
+          value: id,
+        }))}
+      />
+      <EuiSpacer />
       <EuiButton
         data-test-subj="infraFlyoutTemplateOpenFlyoutButton"
         onClick={() => setIsOpen(true)}
       >
         Open flyout
       </EuiButton>
-      <div hidden={!isOpen}>{isOpen && <AssetDetails {...args} closeFlyout={closeFlyout} />}</div>
+      <div hidden={!isOpen}>
+        {isOpen && (
+          <MemoryRouter
+            key={tabId}
+            initialEntries={[`/infra/metrics/hosts?assetDetails=(tabId:${tabId ?? args?.tabId})`]}
+          >
+            <AssetDetails {...args} renderMode={{ mode: 'flyout', closeFlyout }} />
+          </MemoryRouter>
+        )}
+      </div>
     </div>
   );
 };
 
-export const DefaultAssetDetailsWithMetadataTabSelected = Template.bind({});
-DefaultAssetDetailsWithMetadataTabSelected.args = {
-  showActionsColumn: true,
-};
+export const OverviewTab = PageTabTemplate.bind({});
+OverviewTab.args = { tabId: 'overview' };
 
-export const AssetDetailsWithMetadataTabSelectedWithPersistedSearch = Template.bind({});
-AssetDetailsWithMetadataTabSelectedWithPersistedSearch.args = {
-  showActionsColumn: true,
-  hostFlyoutOpen: {
-    clickedItemId: 'host1-macos',
-    selectedTabId: 'metadata',
-    searchFilter: '',
-    metadataSearch: 'ip',
-  },
-  setHostFlyoutState: () => {},
-};
+export const MetadataTab = PageTabTemplate.bind({});
+MetadataTab.args = { tabId: 'metadata' };
 
-export const AssetDetailsWithMetadataWithoutActions = Template.bind({});
-AssetDetailsWithMetadataWithoutActions.args = {};
+export const ProcessesTab = PageTabTemplate.bind({});
+ProcessesTab.args = { tabId: 'processes' };
 
-export const AssetDetailsWithMetadataWithoutLinks = Template.bind({});
-AssetDetailsWithMetadataWithoutLinks.args = { links: [] };
+export const LogsTab = PageTabTemplate.bind({});
+LogsTab.args = { tabId: 'logs' };
 
-export const AssetDetailsAsFlyout = FlyoutTemplate.bind({});
-AssetDetailsAsFlyout.args = { showInFlyout: true };
+export const AnomaliesTab = PageTabTemplate.bind({});
+AnomaliesTab.args = { tabId: 'anomalies' };
 
-export const AssetDetailsWithProcessesTabSelected = Template.bind({});
-AssetDetailsWithProcessesTabSelected.args = {
-  renderedTabsSet: { current: new Set(['processes']) },
-  currentTimeRange: {
-    interval: '1s',
-    from: 1683630468,
-    to: 1683630469,
-  },
-  hostFlyoutOpen: {
-    clickedItemId: 'host1-macos',
-    selectedTabId: 'processes',
-    searchFilter: '',
-    metadataSearch: '',
-  },
-};
+export const Flyout = FlyoutTemplate.bind({});
 
-export const AssetDetailsWithMetadataTabOnly = Template.bind({});
-AssetDetailsWithMetadataTabOnly.args = {
-  tabs: [
-    {
-      id: FlyoutTabIds.METADATA,
-      name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.metadata', {
-        defaultMessage: 'Metadata',
-      }),
-      'data-test-subj': 'hostsView-flyout-tabs-metadata',
-    },
-  ],
-};
+export default stories;

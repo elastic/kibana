@@ -18,8 +18,6 @@ jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('useUpdateComment', () => {
-  const abortCtrl = new AbortController();
-
   const sampleUpdate = {
     caseId: basicCase.id,
     commentId: basicCase.comments[0].id,
@@ -56,7 +54,7 @@ describe('useUpdateComment', () => {
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'patchComment');
+    const patchCommentSpy = jest.spyOn(api, 'patchComment');
     const { waitForNextUpdate, result } = renderHook(() => useUpdateComment(), {
       wrapper: appMockRender.AppWrapper,
     });
@@ -67,9 +65,8 @@ describe('useUpdateComment', () => {
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith({
+    expect(patchCommentSpy).toHaveBeenCalledWith({
       ...sampleUpdate,
-      signal: abortCtrl.signal,
       owner: 'securitySolution',
     });
   });

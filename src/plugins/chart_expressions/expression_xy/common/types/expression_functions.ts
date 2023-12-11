@@ -9,7 +9,11 @@
 import { type AxisProps, HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import type { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
-import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type {
+  Datatable,
+  DatatableColumnMeta,
+  ExpressionFunctionDefinition,
+} from '@kbn/expressions-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
@@ -132,6 +136,7 @@ export interface DataLayerArgs {
   isStacked: boolean;
   isHorizontal: boolean;
   palette: PaletteOutput;
+  colorMapping?: string; // JSON stringified object of the color mapping
   decorations?: DataDecorationConfigResult[];
   curveType?: XYCurveType;
 }
@@ -159,6 +164,7 @@ export interface ExtendedDataLayerArgs {
   isStacked: boolean;
   isHorizontal: boolean;
   palette: PaletteOutput;
+  colorMapping?: string;
   // palette will always be set on the expression
   decorations?: DataDecorationConfigResult[];
   curveType?: XYCurveType;
@@ -227,6 +233,7 @@ export interface XYArgs extends DataLayerArgs {
   addTimeMarker?: boolean;
   markSizeRatio?: number;
   minTimeBarInterval?: string;
+  minBarHeight?: number;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
   detailedTooltip?: boolean;
@@ -278,6 +285,7 @@ export interface LayeredXYArgs {
   addTimeMarker?: boolean;
   markSizeRatio?: number;
   minTimeBarInterval?: string;
+  minBarHeight?: number;
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
   splitRowAccessor?: ExpressionValueVisDimension | string;
@@ -301,6 +309,7 @@ export interface XYProps {
   addTimeMarker?: boolean;
   markSizeRatio?: number;
   minTimeBarInterval?: string;
+  minBarHeight: number;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
   detailedTooltip?: boolean;
@@ -334,6 +343,7 @@ export interface ReferenceLineArgs extends Omit<ReferenceLineDecorationConfig, '
   name?: string;
   value: number;
   fill: FillStyle;
+  valueMeta?: DatatableColumnMeta;
 }
 
 export interface ReferenceLineLayerArgs {

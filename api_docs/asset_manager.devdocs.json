@@ -3,37 +3,57 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "assetManager",
-        "id": "def-server.AssetManagerConfig",
+        "id": "def-public.AssetManagerPublicPluginSetup",
         "type": "Interface",
         "tags": [],
-        "label": "AssetManagerConfig",
+        "label": "AssetManagerPublicPluginSetup",
         "description": [],
-        "path": "x-pack/plugins/asset_manager/server/plugin.ts",
+        "path": "x-pack/plugins/asset_manager/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "assetManager",
-            "id": "def-server.AssetManagerConfig.alphaEnabled",
-            "type": "CompoundType",
+            "id": "def-public.AssetManagerPublicPluginSetup.publicAssetsClient",
+            "type": "Object",
             "tags": [],
-            "label": "alphaEnabled",
+            "label": "publicAssetsClient",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              "IPublicAssetsClient"
             ],
-            "path": "x-pack/plugins/asset_manager/server/plugin.ts",
+            "path": "x-pack/plugins/asset_manager/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "assetManager",
+        "id": "def-public.AssetManagerPublicPluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "AssetManagerPublicPluginStart",
+        "description": [],
+        "path": "x-pack/plugins/asset_manager/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "assetManager",
+            "id": "def-public.AssetManagerPublicPluginStart.publicAssetsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "publicAssetsClient",
+            "description": [],
+            "signature": [
+              "IPublicAssetsClient"
+            ],
+            "path": "x-pack/plugins/asset_manager/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -43,6 +63,45 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "assetManager",
+        "id": "def-public.AssetManagerAppId",
+        "type": "Type",
+        "tags": [],
+        "label": "AssetManagerAppId",
+        "description": [],
+        "signature": [
+          "\"assetManager\""
+        ],
+        "path": "x-pack/plugins/asset_manager/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "assetManager",
+        "id": "def-server.AssetManagerConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "AssetManagerConfig",
+        "description": [],
+        "signature": [
+          "{ readonly alphaEnabled?: boolean | undefined; readonly sourceIndices: Readonly<{} & { logs: string; }>; }"
+        ],
+        "path": "x-pack/plugins/asset_manager/common/config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "assetManager",
         "id": "def-server.WriteSamplesPostBody",
@@ -59,7 +118,41 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "assetManager",
+      "id": "def-server.AssetManagerServerPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "AssetManagerServerPluginSetup",
+      "description": [],
+      "signature": [
+        "{ assetClient: ",
+        "AssetClient",
+        "; } | undefined"
+      ],
+      "path": "x-pack/plugins/asset_manager/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "assetManager",
+      "id": "def-server.AssetManagerServerPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "AssetManagerServerPluginStart",
+      "description": [],
+      "signature": [
+        "{} | undefined"
+      ],
+      "path": "x-pack/plugins/asset_manager/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],

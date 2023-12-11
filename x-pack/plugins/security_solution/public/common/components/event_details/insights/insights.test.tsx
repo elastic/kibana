@@ -12,7 +12,6 @@ import { TestProviders } from '../../../mock';
 
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
-import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { licenseService } from '../../../hooks/use_license';
 import { noCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
@@ -20,12 +19,13 @@ import { Insights } from './insights';
 import * as i18n from './translations';
 
 const mockedUseKibana = mockUseKibana();
+const mockCanUseCases = jest.fn();
+
 jest.mock('../../../lib/kibana', () => {
   const original = jest.requireActual('../../../lib/kibana');
 
   return {
     ...original,
-    useGetUserCasesPermissions: jest.fn(),
     useToasts: jest.fn().mockReturnValue({ addWarning: jest.fn() }),
     useKibana: () => ({
       ...mockedUseKibana,
@@ -35,12 +35,12 @@ jest.mock('../../../lib/kibana', () => {
           api: {
             getRelatedCases: jest.fn(),
           },
+          helpers: { canUseCases: mockCanUseCases },
         },
       },
     }),
   };
 });
-const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
 
 jest.mock('../../../hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -94,7 +94,7 @@ const data: TimelineEventsDetailsItem[] = [
 
 describe('Insights', () => {
   beforeEach(() => {
-    mockUseGetUserCasesPermissions.mockReturnValue(noCasesPermissions());
+    mockCanUseCases.mockReturnValue(noCasesPermissions());
   });
 
   it('does not render when there is no content to show', () => {
@@ -116,7 +116,7 @@ describe('Insights', () => {
     // It will show for all users that are able to read case data.
     // Enabling that permission, will show the case insight module which
     // is necessary to pass this test.
-    mockUseGetUserCasesPermissions.mockReturnValue(readCasesPermissions());
+    mockCanUseCases.mockReturnValue(readCasesPermissions());
 
     render(
       <TestProviders>

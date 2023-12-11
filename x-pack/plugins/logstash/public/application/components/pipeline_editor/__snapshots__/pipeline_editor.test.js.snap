@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`PipelineEditor component includes required error message for falsy pipeline id 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-"
   restrictWidth={true}
   style={
@@ -90,21 +90,21 @@ exports[`PipelineEditor component includes required error message for falsy pipe
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
@@ -258,12 +258,10 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={true}
         onClick={[Function]}
-        size="m"
       >
         <FormattedMessage
           defaultMessage="Create and deploy"
@@ -276,10 +274,8 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
-        size="m"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -289,11 +285,11 @@ Default value: 1024"
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`PipelineEditor component invalidates form for invalid pipeline id input 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-$invalid-pipeline-name"
   restrictWidth={true}
   style={
@@ -381,21 +377,21 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
@@ -549,12 +545,10 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={true}
         onClick={[Function]}
-        size="m"
       >
         <FormattedMessage
           defaultMessage="Create and deploy"
@@ -567,10 +561,8 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
-        size="m"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -580,11 +572,11 @@ Default value: 1024"
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`PipelineEditor component invalidates form for pipeline id with spaces 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipeline id with spaces"
   restrictWidth={true}
   style={
@@ -672,21 +664,21 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
@@ -840,12 +832,10 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={true}
         onClick={[Function]}
-        size="m"
       >
         <FormattedMessage
           defaultMessage="Create and deploy"
@@ -858,10 +848,8 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
-        size="m"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -871,11 +859,11 @@ Default value: 1024"
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipelineId"
   restrictWidth={true}
   style={
@@ -934,21 +922,21 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
@@ -1102,12 +1090,10 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={false}
         onClick={[Function]}
-        size="m"
       >
         <FormattedMessage
           defaultMessage="Create and deploy"
@@ -1120,10 +1106,8 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
-        size="m"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -1148,11 +1132,11 @@ Default value: 1024"
       </EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipelineId"
   restrictWidth={true}
   style={
@@ -1236,21 +1220,21 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
@@ -1404,12 +1388,10 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={false}
         onClick={[Function]}
-        size="m"
       >
         <FormattedMessage
           defaultMessage="Create and deploy"
@@ -1422,10 +1404,8 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
-        size="m"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -1435,11 +1415,11 @@ Default value: 1024"
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipelineId"
   restrictWidth={true}
   style={
@@ -1498,21 +1478,21 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
@@ -1666,12 +1646,10 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={false}
         onClick={[Function]}
-        size="m"
       >
         <FormattedMessage
           defaultMessage="Create and deploy"
@@ -1684,10 +1662,8 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
-        size="m"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -1712,5 +1688,5 @@ Default value: 1024"
       </EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;

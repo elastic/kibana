@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AggregatedPrebuiltRuleError } from '../../../../../common/detection_engine/prebuilt_rules/model/prebuilt_rules/aggregated_prebuilt_rules_error';
+import type { AggregatedPrebuiltRuleError } from '../../../../../common/api/detection_engine/prebuilt_rules';
 import { getErrorMessage, getErrorStatusCode } from '../../../../utils/error_helpers';
 import type { PromisePoolError } from '../../../../utils/promise_pool';
 

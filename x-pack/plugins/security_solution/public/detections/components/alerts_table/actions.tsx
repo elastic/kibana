@@ -33,6 +33,7 @@ import {
 import { lastValueFrom } from 'rxjs';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
+import type { TimelineEventsDetailsRequestOptionsInput } from '@kbn/timelines-plugin/common';
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,
@@ -41,9 +42,9 @@ import {
   ALERT_NEW_TERMS,
   ALERT_RULE_INDICES,
 } from '../../../../common/field_maps/field_names';
-import type { TimelineResult } from '../../../../common/types/timeline';
-import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
-import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
+import type { TimelineResult } from '../../../../common/api/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import type {
   SendAlertToTimelineActionProps,
   ThresholdAggregationData,
@@ -54,7 +55,6 @@ import type {
 } from './types';
 import type {
   TimelineEventsDetailsItem,
-  TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy/timeline';
 import { TimelineEventsQueries } from '../../../../common/search_strategy/timeline';
@@ -82,20 +82,7 @@ import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
-
-export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
-  return {
-    query: {
-      bool: {
-        filter: {
-          terms: {
-            _id: eventIds,
-          },
-        },
-      },
-    },
-  };
-};
+import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 
 export const updateAlertStatusAction = async ({
   query,
@@ -109,8 +96,12 @@ export const updateAlertStatusAction = async ({
   try {
     setEventsLoading({ eventIds: alertIds, isLoading: true });
 
-    const queryObject = query ? { query: JSON.parse(query) } : getUpdateAlertsQuery(alertIds);
-    const response = await updateAlertStatus({ query: queryObject, status: selectedStatus });
+    const response = await updateAlertStatus({
+      query: query && JSON.parse(query),
+      status: selectedStatus,
+      signalIds: alertIds,
+    });
+
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
 
@@ -460,6 +451,7 @@ const createThresholdTimeline = async (
     const alertResponse = await KibanaServices.get().http.fetch<
       estypes.SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
     >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
+      version: '2023-10-31',
       method: 'POST',
       body: JSON.stringify(buildAlertsQuery([ecsData._id])),
     });
@@ -617,6 +609,7 @@ const createNewTermsTimeline = async (
     const alertResponse = await KibanaServices.get().http.fetch<
       estypes.SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
     >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
+      version: '2023-10-31',
       method: 'POST',
       body: JSON.stringify(buildAlertsQuery([ecsData._id])),
     });
@@ -782,6 +775,7 @@ const createSuppressedTimeline = async (
     const alertResponse = await KibanaServices.get().http.fetch<
       estypes.SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
     >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
+      version: '2023-10-31',
       method: 'POST',
       body: JSON.stringify(buildAlertsQuery([ecsData._id])),
     });
@@ -965,7 +959,7 @@ export const sendAlertToTimelineAction = async ({
         getTimelineTemplate(timelineId),
         lastValueFrom(
           searchStrategyClient.search<
-            TimelineEventsDetailsRequestOptions,
+            TimelineEventsDetailsRequestOptionsInput,
             TimelineEventsDetailsStrategyResponse
           >(
             {

@@ -70,7 +70,15 @@
             "label": "migration",
             "description": [],
             "signature": [
-              "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnNonMigratorNodes: boolean; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
+              "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnRoles: string[]; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              "; readonly maxReadBatchSizeBytes: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -129,7 +137,15 @@
                 "label": "rawMigrationConfig",
                 "description": [],
                 "signature": [
-                  "Readonly<{ discardUnknownObjects?: string | undefined; discardCorruptObjects?: string | undefined; } & { skip: boolean; pollInterval: number; algorithm: \"v2\" | \"zdt\"; zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnNonMigratorNodes: boolean; }>; batchSize: number; maxBatchSizeBytes: ",
+                  "Readonly<{ discardUnknownObjects?: string | undefined; discardCorruptObjects?: string | undefined; } & { skip: boolean; pollInterval: number; algorithm: \"v2\" | \"zdt\"; zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnRoles: string[]; }>; batchSize: number; maxBatchSizeBytes: ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ByteSizeValue",
+                    "text": "ByteSizeValue"
+                  },
+                  "; maxReadBatchSizeBytes: ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -638,6 +654,99 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.getFieldListFromTypeMapping",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldListFromTypeMapping",
+        "description": [
+          "\nReturn the list of fields present in the provided mappings.\nNote that fields only containing properties are still considered fields by this function.\n"
+        ],
+        "signature": [
+          "(typeMappings: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsTypeMappingDefinition",
+            "text": "SavedObjectsTypeMappingDefinition"
+          },
+          ") => string[]"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.getFieldListFromTypeMapping.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "typeMappings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsTypeMappingDefinition",
+                "text": "SavedObjectsTypeMappingDefinition"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.getFieldListMapFromMappingDefinitions",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldListMapFromMappingDefinitions",
+        "description": [
+          "\nReturn the list of fields present in each individual type mappings present in the definition."
+        ],
+        "signature": [
+          "(mappings: ",
+          "SavedObjectsTypeMappingDefinitions",
+          ") => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-base-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
+            "section": "def-common.FieldListMap",
+            "text": "FieldListMap"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.getFieldListMapFromMappingDefinitions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "signature": [
+              "SavedObjectsTypeMappingDefinitions"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
         "id": "def-common.getIndexForType",
         "type": "Function",
         "tags": [],
@@ -868,8 +977,6 @@
         "description": [],
         "signature": [
           "(mappings: ",
-          "IndexMapping",
-          " | ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
             "scope": "common",
@@ -877,6 +984,8 @@
             "section": "def-common.SavedObjectsFieldMapping",
             "text": "SavedObjectsFieldMapping"
           },
+          " | ",
+          "IndexMapping",
           ", path: string | string[]) => ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
@@ -899,15 +1008,15 @@
             "label": "mappings",
             "description": [],
             "signature": [
-              "IndexMapping",
-              " | ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
                 "section": "def-common.SavedObjectsFieldMapping",
                 "text": "SavedObjectsFieldMapping"
-              }
+              },
+              " | ",
+              "IndexMapping"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_property.ts",
             "deprecated": false,
@@ -1048,6 +1157,111 @@
               "IndexMapping"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.getVersionAddedFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getVersionAddedFields",
+        "description": [
+          "\nReturn the list of fields, sorted, that were introduced in the given version."
+        ],
+        "signature": [
+          "(version: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsModelVersion",
+            "text": "SavedObjectsModelVersion"
+          },
+          ") => string[]"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_mapping_changes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.getVersionAddedFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsModelVersion",
+                "text": "SavedObjectsModelVersion"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_mapping_changes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.getVersionAddedMappings",
+        "type": "Function",
+        "tags": [],
+        "label": "getVersionAddedMappings",
+        "description": [
+          "\nReturn the mappings that were introduced in the given version.\nIf multiple 'mappings_addition' changes are present for the version,\nthey will be deep-merged."
+        ],
+        "signature": [
+          "(version: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsModelVersion",
+            "text": "SavedObjectsModelVersion"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsMappingProperties",
+            "text": "SavedObjectsMappingProperties"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_mapping_changes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.getVersionAddedMappings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsModelVersion",
+                "text": "SavedObjectsModelVersion"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_mapping_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1498,6 +1712,21 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.FieldListMap",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldListMap",
+        "description": [],
+        "signature": [
+          "{ [x: string]: string[]; }"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
         "id": "def-common.globalSwitchToModelVersionAt",
         "type": "string",
         "tags": [],
@@ -1578,7 +1807,15 @@
         "label": "SavedObjectsMigrationConfigType",
         "description": [],
         "signature": [
-          "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnNonMigratorNodes: boolean; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
+          "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnRoles: string[]; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
+          "; readonly maxReadBatchSizeBytes: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1612,6 +1849,50 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.DEFAULT_INDEX_TYPES_MAP",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_INDEX_TYPES_MAP",
+        "description": [
+          "\nThis map holds the default breakdown of SO types per index (pre 8.8.0)"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.DEFAULT_INDEX_TYPES_MAP..kibana_task_manager",
+            "type": "Array",
+            "tags": [],
+            "label": "'.kibana_task_manager'",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.DEFAULT_INDEX_TYPES_MAP..kibana",
+            "type": "Array",
+            "tags": [],
+            "label": "'.kibana'",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
         "id": "def-common.savedObjectsConfig",
@@ -1759,6 +2040,22 @@
                 "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
+              ">; maxReadBatchSizeBytes: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
               ">; discardUnknownObjects: ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -1823,7 +2120,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<number>; runOnNonMigratorNodes: ",
+              "<number>; runOnRoles: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -1831,7 +2128,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<boolean>; }>; }>"
+              "<string[]>; }>; }>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,

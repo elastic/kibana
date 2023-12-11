@@ -5,8 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { useEffect } from 'react';
 import { History } from 'history';
+import { getProfile } from '../../../../common/customizations';
+
 export function useUrl({
   history,
   savedSearchId,
@@ -24,7 +27,9 @@ export function useUrl({
     // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
     // to reload the page in a right way
     const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
-      if (!search && !hash && pathname === '/' && !savedSearchId) {
+      const { isProfileRootPath } = getProfile(pathname);
+
+      if ((pathname === '/' || isProfileRootPath) && !search && !hash && !savedSearchId) {
         onNewUrl();
       }
     });

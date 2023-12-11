@@ -8,33 +8,31 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import moment from 'moment';
 import {
   InstallPrebuiltRulesAndTimelinesResponse,
   PREBUILT_RULES_URL,
-} from '../../../../../../common/detection_engine/prebuilt_rules';
-import { importTimelineResultSchema } from '../../../../../../common/types/timeline';
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,
 } from '../../../../../types';
-import { installPrepackagedTimelines } from '../../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { buildSiemResponse } from '../../../routes/utils';
 import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
+import { ensureLatestRulesPackageInstalled } from '../../logic/ensure_latest_rules_package_installed';
 import { getRulesToInstall } from '../../logic/get_rules_to_install';
 import { getRulesToUpdate } from '../../logic/get_rules_to_update';
+import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_rules';
 import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_rules';
 import { rulesToMap } from '../../logic/utils';
-import { ensureLatestRulesPackageInstalled } from '../../logic/ensure_latest_rules_package_installed';
 
 export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
-  router.put(
-    {
+  router.versioned
+    .put({
+      access: 'public',
       path: PREBUILT_RULES_URL,
-      validate: false,
       options: {
         tags: ['access:securitySolution'],
         timeout: {
@@ -45,28 +43,33 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
           idleSocket: moment.duration('1', 'hour').asMilliseconds(),
         },
       },
-    },
-    async (context, _, response) => {
-      const siemResponse = buildSiemResponse(response);
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: false,
+      },
+      async (context, _, response) => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const rulesClient = (await context.alerting).getRulesClient();
+        try {
+          const rulesClient = (await context.alerting).getRulesClient();
 
-        const validated = await createPrepackagedRules(
-          await context.securitySolution,
-          rulesClient,
-          undefined
-        );
-        return response.ok({ body: validated ?? {} });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          const validated = await createPrepackagedRules(
+            await context.securitySolution,
+            rulesClient,
+            undefined
+          );
+          return response.ok({ body: validated ?? {} });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };
 
 export class PrepackagedRulesError extends Error {
@@ -83,13 +86,10 @@ export const createPrepackagedRules = async (
   exceptionsClient?: ExceptionListClient
 ): Promise<InstallPrebuiltRulesAndTimelinesResponse | null> => {
   const config = context.getConfig();
-  const frameworkRequest = context.getFrameworkRequest();
   const savedObjectsClient = context.core.savedObjects.client;
   const siemClient = context.getAppClient();
   const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
   const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
-
-  const { maxTimelineImportExportSize } = config;
 
   if (!siemClient || !rulesClient) {
     throw new PrepackagedRulesError('', 404);
@@ -115,36 +115,16 @@ export const createPrepackagedRules = async (
     throw new AggregateError(result.errors, 'Error installing new prebuilt rules');
   }
 
-  const timeline = await installPrepackagedTimelines(
-    maxTimelineImportExportSize,
-    frameworkRequest,
-    true
-  );
-  const [prepackagedTimelinesResult, timelinesErrors] = validate(
-    timeline,
-    importTimelineResultSchema
-  );
+  const { result: timelinesResult } = await performTimelinesInstallation(context);
 
   await upgradePrebuiltRules(rulesClient, rulesToUpdate);
 
   const prebuiltRulesOutput: InstallPrebuiltRulesAndTimelinesResponse = {
     rules_installed: rulesToInstall.length,
     rules_updated: rulesToUpdate.length,
-    timelines_installed: prepackagedTimelinesResult?.timelines_installed ?? 0,
-    timelines_updated: prepackagedTimelinesResult?.timelines_updated ?? 0,
+    timelines_installed: timelinesResult?.timelines_installed ?? 0,
+    timelines_updated: timelinesResult?.timelines_updated ?? 0,
   };
 
-  const [validated, genericErrors] = validate(
-    prebuiltRulesOutput,
-    InstallPrebuiltRulesAndTimelinesResponse
-  );
-
-  if (genericErrors != null && timelinesErrors != null) {
-    throw new PrepackagedRulesError(
-      [genericErrors, timelinesErrors].filter((msg) => msg != null).join(', '),
-      500
-    );
-  }
-
-  return validated;
+  return InstallPrebuiltRulesAndTimelinesResponse.parse(prebuiltRulesOutput);
 };

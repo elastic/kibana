@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useState } from 'react';
 
-import { toMinutes } from '../../utils/slo/duration';
 import { Duration } from '../../typings';
+import { toMinutes } from '../../utils/slo/duration';
 
 interface Props {
   shortWindowDuration: Duration;
@@ -35,28 +35,19 @@ export function LongWindowDuration({
   };
 
   return (
-    <EuiFormRow
-      label={getRowLabel(shortWindowDuration)}
-      fullWidth
-      isInvalid={hasError}
-      error={hasError ? errors[0] : undefined}
-    >
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem>
-          <EuiFieldNumber
-            isInvalid={hasError}
-            min={1}
-            max={24}
-            step={1}
-            value={String(durationValue)}
-            onChange={onDurationValueChange}
-            aria-label={i18n.translate('xpack.observability.slo.rules.longWindow.valueLabel', {
-              defaultMessage: 'Lookback period in hours',
-            })}
-            data-test-subj="durationValueInput"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiFormRow label={getRowLabel(shortWindowDuration)} fullWidth isInvalid={hasError}>
+      <EuiFieldNumber
+        isInvalid={hasError}
+        min={1}
+        max={72}
+        step={1}
+        value={String(durationValue)}
+        onChange={onDurationValueChange}
+        aria-label={i18n.translate('xpack.observability.slo.rules.longWindow.valueLabel', {
+          defaultMessage: 'Lookback period in hours',
+        })}
+        data-test-subj="durationValueInput"
+      />
     </EuiFormRow>
   );
 }
@@ -64,7 +55,7 @@ export function LongWindowDuration({
 const getRowLabel = (shortWindowDuration: Duration) => (
   <>
     {i18n.translate('xpack.observability.slo.rules.longWindow.rowLabel', {
-      defaultMessage: 'Lookback period (hours)',
+      defaultMessage: 'Lookback (hours)',
     })}{' '}
     <EuiIconTip position="top" content={getTooltipText(shortWindowDuration)} />
   </>

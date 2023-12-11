@@ -1,0 +1,22 @@
+openapi: 3.0.0
+info:
+  title: Warning Schema
+  version: 'not applicable'
+paths: {}
+components:
+  schemas:
+    WarningSchema:
+      type: object
+      properties:
+        type:
+          type: string
+        message:
+          type: string
+        actionPath:
+          type: string
+        buttonLabel:
+          type: string
+      required:
+        - type
+        - message
+        - actionPath

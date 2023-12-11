@@ -286,9 +286,9 @@ export type PublicAppDeepLinkInfo = Omit<
  * user-accessible.
  * @public
  */
-export type AppDeepLink = {
+export type AppDeepLink<Id extends string = string> = {
   /** Identifier to represent this sublink, should be unique for this application */
-  id: string;
+  id: Id;
   /** Title to label represent this deep link */
   title: string;
   /** Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. */
@@ -297,19 +297,25 @@ export type AppDeepLink = {
   navLinkStatus?: AppNavLinkStatus;
   /** Optional flag to determine if the link is searchable in the global search. Defaulting to `true` if `navLinkStatus` is `visible` or omitted */
   searchable?: boolean;
+  /**
+   * Optional category to use instead of the parent app category.
+   * This property is added to customize the way a deep link is rendered in the global search.
+   * Any other feature that consumes the deep links (navigation tree, etc.) will not be affected by this addition.
+   */
+  category?: AppCategory;
 } & AppNavOptions &
   (
     | {
         /** URL path to access this link, relative to the application's appRoute. */
         path: string;
         /** Optional array of links that are 'underneath' this section in the hierarchy */
-        deepLinks?: AppDeepLink[];
+        deepLinks?: Array<AppDeepLink<Id>>;
       }
     | {
         /** Optional path to access this section. Omit if this part of the hierarchy does not have a page URL. */
         path?: string;
         /** Array links that are 'underneath' this section in this hierarchy. */
-        deepLinks: AppDeepLink[];
+        deepLinks: Array<AppDeepLink<Id>>;
       }
   );
 

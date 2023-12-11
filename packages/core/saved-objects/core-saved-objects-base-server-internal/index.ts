@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export { DEFAULT_INDEX_TYPES_MAP } from './src/constants';
 export { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from './src/legacy_alias';
 export {
   getProperty,
@@ -41,7 +42,14 @@ export type {
   MigrationStatus,
   MigrateDocumentOptions,
 } from './src/migration';
-export { parseObjectKey, getObjectKey, getIndexForType } from './src/utils';
+export {
+  parseObjectKey,
+  getObjectKey,
+  getIndexForType,
+  getFieldListFromTypeMapping,
+  getFieldListMapFromMappingDefinitions,
+  type FieldListMap,
+} from './src/utils';
 export {
   modelVersionVirtualMajor,
   globalSwitchToModelVersionAt,
@@ -67,4 +75,6 @@ export {
   buildModelVersionTransformFn,
   aggregateMappingAdditions,
   convertModelVersionBackwardConversionSchema,
+  getVersionAddedMappings,
+  getVersionAddedFields,
 } from './src/model_version';

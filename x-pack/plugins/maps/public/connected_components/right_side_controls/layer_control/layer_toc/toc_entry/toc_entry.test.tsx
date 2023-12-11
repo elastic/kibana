@@ -14,6 +14,13 @@ jest.mock('../../../../../kibana_services', () => {
     getMapsCapabilities() {
       return { save: true };
     },
+    getEMSSettings() {
+      return {
+        isEMSUrlSet() {
+          return false;
+        },
+      };
+    },
   };
 });
 
@@ -43,6 +50,9 @@ const mockLayer = {
   hasErrors: () => {
     return false;
   },
+  getErrors: () => {
+    return [];
+  },
   hasLegendDetails: () => {
     return true;
   },
@@ -53,6 +63,7 @@ const mockLayer = {
 
 const defaultProps = {
   depth: 0,
+  inspectorAdapters: {},
   layer: mockLayer,
   selectedLayer: undefined,
   openLayerPanel: async () => {},

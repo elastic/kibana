@@ -28,10 +28,13 @@ import { Query } from '@kbn/data-plugin/common/query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
-import { RuntimeMappings } from '../../../../common/types/fields';
+import {
+  getCombinedRuntimeMappings,
+  isRuntimeMappings,
+  type RuntimeMappings,
+} from '@kbn/ml-runtime-field-utils';
+import { getProcessedFields } from '@kbn/ml-data-grid';
 
-import { getCombinedRuntimeMappings, getProcessedFields } from '../data_grid';
 import { useCurrentThemeVars, useMlApiContext, useMlKibana } from '../../contexts/kibana';
 
 // Separate imports for lazy loadable VegaChart and related code
@@ -98,7 +101,7 @@ export interface ScatterplotMatrixProps {
   legendType?: LegendType;
   searchQuery?: estypes.QueryDslQueryContainer;
   runtimeMappings?: RuntimeMappings;
-  indexPattern?: DataView;
+  dataView?: DataView;
   query?: Query;
 }
 
@@ -110,7 +113,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   legendType,
   searchQuery,
   runtimeMappings,
-  indexPattern,
+  dataView,
   query,
 }) => {
   const { esSearch } = useMlApiContext();
@@ -207,9 +210,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     vegaSpec.data = {
       url: {
         '%context%': true,
-        ...(indexPattern?.timeFieldName
-          ? { ['%timefield%']: `${indexPattern?.timeFieldName}` }
-          : {}),
+        ...(dataView?.timeFieldName ? { ['%timefield%']: `${dataView?.timeFieldName}` } : {}),
         index,
         body: {
           fields: fieldsToFetch,
@@ -297,7 +298,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
         }
 
         const combinedRuntimeMappings =
-          indexPattern && getCombinedRuntimeMappings(indexPattern, runtimeMappings);
+          dataView && getCombinedRuntimeMappings(dataView, runtimeMappings);
 
         const body = {
           fields: queryFields,
@@ -409,7 +410,10 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       {splom === undefined || vegaSpec === undefined ? (
         <VegaChartLoading />
       ) : (
-        <div data-test-subj={`mlScatterplotMatrix ${isLoading ? 'loading' : 'loaded'}`}>
+        <div
+          data-test-subj={`mlScatterplotMatrix ${isLoading ? 'loading' : 'loaded'}`}
+          className="mlScatterplotMatrix"
+        >
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow
