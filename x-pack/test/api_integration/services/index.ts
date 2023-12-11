@@ -22,6 +22,7 @@ import { IngestManagerProvider } from '../../common/services/ingest_manager';
 import { TransformProvider } from './transform';
 import { IngestPipelinesProvider } from './ingest_pipelines';
 import { IndexManagementProvider } from './index_management';
+import { DataViewApiProvider } from './data_view_api';
 
 export const services = {
   ...commonServices,
@@ -30,6 +31,7 @@ export const services = {
   supertest: kibanaApiIntegrationServices.supertest,
 
   aiops: AiopsProvider,
+  dataViewApi: DataViewApiProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
   infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
   supertestWithoutAuth: SupertestWithoutAuthProvider,
