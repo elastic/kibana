@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import type { RiskInputs } from '../../../../common/risk_engine';
+import type { RiskInputs } from '../../../../common/entity_analytics/risk_engine';
 import { RiskInputsPanelContent } from './content';
 
 export interface RiskInputsPanelProps extends Record<string, unknown> {

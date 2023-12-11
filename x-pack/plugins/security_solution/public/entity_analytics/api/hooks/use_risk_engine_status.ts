@@ -7,7 +7,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { fetchRiskEngineStatus } from '../api';
-import { RiskEngineStatus } from '../../../../common/risk_engine/types';
+import { RiskEngineStatus } from '../../../../common/entity_analytics/risk_engine/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 const FETCH_RISK_ENGINE_STATUS = ['GET', 'FETCH_RISK_ENGINE_STATUS'];
 

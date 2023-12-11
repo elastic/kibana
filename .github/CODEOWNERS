@@ -854,6 +854,7 @@ src/plugins/vis_types/vega @elastic/kibana-visualizations
 src/plugins/vis_types/vislib @elastic/kibana-visualizations
 src/plugins/vis_types/xy @elastic/kibana-visualizations
 packages/kbn-visualization-ui-components @elastic/kibana-visualizations
+packages/kbn-visualization-utils @elastic/kibana-visualizations
 src/plugins/visualizations @elastic/kibana-visualizations
 x-pack/plugins/watcher @elastic/platform-deployment-management
 packages/kbn-web-worker-stub @elastic/kibana-operations
@@ -1471,7 +1472,7 @@ x-pack/plugins/security_solution/public/threat_intelligence @elastic/protections
 x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
 ## Security Solution sub teams - Entity Analytics
-x-pack/plugins/security_solution/common/risk_engine @elastic/security-entity-analytics @elastic/security-entity-analytics
+x-pack/plugins/security_solution/common/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/common/search_strategy/security_solution/risk_score @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/explore/components/risk_score @elastic/security-entity-analytics

@@ -790,13 +790,13 @@ describe('policy preconfiguration', () => {
         {
           name: 'test_package',
           version: '1.0.0',
-          buffer: Buffer.from('test_package'),
+          getBuffer: () => Promise.resolve(Buffer.from('test_package')),
         },
 
         {
           name: 'test_package_2',
           version: '1.0.0',
-          buffer: Buffer.from('test_package_2'),
+          getBuffer: () => Promise.resolve(Buffer.from('test_package_2')),
         },
       ]);
 
@@ -834,7 +834,7 @@ describe('policy preconfiguration', () => {
             {
               name: 'test_package',
               version: '1.0.0',
-              buffer: Buffer.from('test_package'),
+              getBuffer: () => Promise.resolve(Buffer.from('test_package')),
             },
           ]);
 
@@ -875,7 +875,7 @@ describe('policy preconfiguration', () => {
             {
               name: 'test_package',
               version: '1.0.0',
-              buffer: Buffer.from('test_package'),
+              getBuffer: () => Promise.resolve(Buffer.from('test_package')),
             },
           ]);
 

@@ -10,7 +10,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
-} from '../../../../common/risk_engine';
+} from '../../../../common/entity_analytics/risk_engine';
 import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
 
 export const getUserRiskEnginePrivileges = async (
