@@ -39,6 +39,8 @@ export interface PagerDutyActionParams {
   component?: string;
   group?: string;
   class?: string;
+  customDetails?: string;
+  links?: Array<{ href: string; text: string }>;
 }
 
 export interface IndexActionParams {

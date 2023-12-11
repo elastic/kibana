@@ -512,6 +512,7 @@ class AgentPolicyService {
     }
 
     this.checkTamperProtectionLicense(agentPolicy);
+    await this.checkForValidUninstallToken(agentPolicy, id);
 
     const logger = appContextService.getLogger();
 
@@ -1210,6 +1211,24 @@ class AgentPolicyService {
   private checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {
     if (agentPolicy?.is_protected && !licenseService.isPlatinum()) {
       throw new FleetUnauthorizedError('Tamper protection requires Platinum license');
+    }
+  }
+  private async checkForValidUninstallToken(
+    agentPolicy: { is_protected?: boolean },
+    policyId: string
+  ): Promise<void> {
+    if (agentPolicy?.is_protected) {
+      const uninstallTokenService = appContextService.getUninstallTokenService();
+
+      const uninstallTokenError = await uninstallTokenService?.checkTokenValidityForPolicy(
+        policyId
+      );
+
+      if (uninstallTokenError) {
+        throw new Error(
+          `Cannot enable Agent Tamper Protection: ${uninstallTokenError.error.message}`
+        );
+      }
     }
   }
 }

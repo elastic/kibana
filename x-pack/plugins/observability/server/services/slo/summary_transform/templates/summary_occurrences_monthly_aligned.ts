@@ -12,7 +12,7 @@ import {
   SLO_SUMMARY_INGEST_PIPELINE_NAME,
   SLO_SUMMARY_TRANSFORMS_VERSION,
   SLO_SUMMARY_TRANSFORM_NAME_PREFIX,
-} from '../../../../assets/constants';
+} from '../../../../../common/slo/constants';
 import { groupBy } from './common';
 
 export const SUMMARY_OCCURRENCES_MONTHLY_ALIGNED: TransformPutTransformRequest = {

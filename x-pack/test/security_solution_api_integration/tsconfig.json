@@ -36,5 +36,6 @@
     "@kbn/securitysolution-ecs",
     "@kbn/fleet-plugin",
     "@kbn/repo-info",
+    "@kbn/securitysolution-es-utils",
   ]
 }

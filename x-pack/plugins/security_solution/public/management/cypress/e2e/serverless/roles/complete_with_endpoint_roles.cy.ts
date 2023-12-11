@@ -30,8 +30,7 @@ import {
   openConsoleHelpPanel,
 } from '../../../screens';
 
-// FLAKY: https://github.com/elastic/kibana/issues/170052
-describe.skip(
+describe(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
   {
     tags: ['@serverless'],

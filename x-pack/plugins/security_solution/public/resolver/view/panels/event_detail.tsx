@@ -11,18 +11,11 @@ import React, { memo, useMemo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiBreadcrumb } from '@elastic/eui';
-import {
-  EuiSpacer,
-  EuiText,
-  EuiDescriptionList,
-  EuiHorizontalRule,
-  EuiTextColor,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiHorizontalRule, EuiTextColor, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { StyledPanel } from '../styles';
-import { BoldCode, StyledTime } from './styles';
+import { StyledDescriptionList, BoldCode, StyledTime } from './styles';
 import { GeneratedText } from '../generated_text';
 import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
@@ -328,16 +321,6 @@ function EventDetailBreadcrumbs({
   ]);
   return <Breadcrumbs breadcrumbs={breadcrumbs} />;
 }
-
-const StyledDescriptionList = memo(styled(EuiDescriptionList)`
-  .euiDescriptionList__title {
-    word-break: normal;
-  }
-  .euiDescriptionList__title,
-  .euiDescriptionList__description {
-    overflow-wrap: break-word;
-  }
-`);
 
 // Also prevents horizontal scrollbars on long descriptive names
 const StyledDescriptiveName = memo(styled(EuiText)`

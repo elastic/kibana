@@ -17,7 +17,7 @@ import { defineGetComplianceDashboardRoute } from './compliance_dashboard/compli
 import { defineGetVulnerabilitiesDashboardRoute } from './vulnerabilities_dashboard/vulnerabilities_dashboard';
 import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
 import { defineGetCspStatusRoute } from './status/status';
-import { defineFindCspRuleTemplateRoute } from './csp_rule_template/get_csp_rule_template';
+import { defineFindCspBenchmarkRuleRoute } from './benchmark_rules/find/find';
 import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_detection_engine_alerts_count_by_rule_tags';
 
 /**
@@ -38,7 +38,7 @@ export async function setupRoutes({
   defineGetVulnerabilitiesDashboardRoute(router);
   defineGetBenchmarksRoute(router);
   defineGetCspStatusRoute(router);
-  defineFindCspRuleTemplateRoute(router);
+  defineFindCspBenchmarkRuleRoute(router);
   defineGetDetectionEngineAlertsStatus(router);
 
   core.http.registerRouteHandlerContext<CspRequestHandlerContext, typeof PLUGIN_ID>(

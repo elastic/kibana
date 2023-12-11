@@ -8,13 +8,18 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 import { type DataView } from '@kbn/data-views-plugin/common';
-import numeral from '@elastic/numeral';
 import { FieldsSelectorModal } from './fields_selector';
-import { FindingsGroupBySelector } from '../../pages/configurations/layout/findings_group_by_selector';
 import { useStyles } from './use_styles';
+import { getAbbreviatedNumber } from '../../common/utils/get_abbreviated_number';
 
-const formatNumber = (value: number) => {
-  return value < 1000 ? value : numeral(value).format('0.0a');
+const GroupSelectorWrapper: React.FC = ({ children }) => {
+  const styles = useStyles();
+
+  return (
+    <EuiFlexItem grow={false} className={styles.groupBySelector}>
+      {children}
+    </EuiFlexItem>
+  );
 };
 
 export const AdditionalControls = ({
@@ -24,6 +29,7 @@ export const AdditionalControls = ({
   columns,
   onAddColumn,
   onRemoveColumn,
+  groupSelectorComponent,
 }: {
   total: number;
   title: string;
@@ -31,9 +37,8 @@ export const AdditionalControls = ({
   columns: string[];
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
+  groupSelectorComponent?: JSX.Element;
 }) => {
-  const styles = useStyles();
-
   const [isFieldSelectorModalVisible, setIsFieldSelectorModalVisible] = useState(false);
 
   const closeModal = () => setIsFieldSelectorModalVisible(false);
@@ -51,7 +56,7 @@ export const AdditionalControls = ({
         />
       )}
       <EuiFlexItem grow={0}>
-        <span className="cspDataTableTotal">{`${formatNumber(total)} ${title}`}</span>
+        <span className="cspDataTableTotal">{`${getAbbreviatedNumber(total)} ${title}`}</span>
       </EuiFlexItem>
       <EuiFlexItem grow={0}>
         <EuiButtonEmpty
@@ -66,9 +71,9 @@ export const AdditionalControls = ({
           })}
         </EuiButtonEmpty>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} className={styles.groupBySelector}>
-        <FindingsGroupBySelector type="default" />
-      </EuiFlexItem>
+      {groupSelectorComponent && (
+        <GroupSelectorWrapper>{groupSelectorComponent}</GroupSelectorWrapper>
+      )}
     </>
   );
 };

@@ -9,13 +9,16 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
+import { ApmDataSourceWithSummary } from '../../../../common/data_source';
+import { ApmDocumentType } from '../../../../common/document_type';
 import { HOST_NAME } from '../../../../common/es_fields/apm';
-import { toKueryFilterFormat } from '../../../../common/utils/to_kuery_filter_format';
+import {
+  mergeKueries,
+  toKueryFilterFormat,
+} from '../../../../common/utils/kuery_utils';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { HostnamesFilterWarning } from './host_names_filter_warning';
-import { ApmDataSourceWithSummary } from '../../../../common/data_source';
-import { ApmDocumentType } from '../../../../common/document_type';
 
 interface Props {
   serviceName: string;
@@ -27,6 +30,7 @@ interface Props {
   dataSource?: ApmDataSourceWithSummary<
     ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
   >;
+  kuery: string;
 }
 
 export function ProfilingTopNFunctions({
@@ -37,6 +41,7 @@ export function ProfilingTopNFunctions({
   startIndex,
   endIndex,
   dataSource,
+  kuery,
 }: Props) {
   const { profilingLocators } = useProfilingPlugin();
 
@@ -56,13 +61,23 @@ export function ProfilingTopNFunctions({
                 endIndex,
                 documentType: dataSource.documentType,
                 rollupInterval: dataSource.rollupInterval,
+                kuery,
               },
             },
           }
         );
       }
     },
-    [dataSource, serviceName, start, end, environment, startIndex, endIndex]
+    [
+      dataSource,
+      serviceName,
+      start,
+      end,
+      environment,
+      startIndex,
+      endIndex,
+      kuery,
+    ]
   );
 
   const hostNamesKueryFormat = toKueryFilterFormat(
@@ -81,7 +96,7 @@ export function ProfilingTopNFunctions({
             <EuiLink
               data-test-subj="apmProfilingTopNFunctionsGoToUniversalProfilingFlamegraphLink"
               href={profilingLocators?.topNFunctionsLocator.getRedirectUrl({
-                kuery: hostNamesKueryFormat,
+                kuery: mergeKueries([`(${hostNamesKueryFormat})`, kuery]),
               })}
             >
               {i18n.translate('xpack.apm.profiling.topnFunctions.link', {

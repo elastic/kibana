@@ -27,9 +27,13 @@ NotesCountBadge.displayName = 'NotesCountBadge';
 
 interface AddToFavoritesButtonProps {
   timelineId: string;
+  compact?: boolean;
 }
 
-const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ timelineId }) => {
+const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({
+  timelineId,
+  compact,
+}) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
@@ -48,7 +52,19 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ ti
     [dispatch, timelineId, isFavorite]
   );
 
-  return (
+  const label = isFavorite ? i18n.REMOVE_FROM_FAVORITES : i18n.ADD_TO_FAVORITES;
+
+  return compact ? (
+    <EuiButtonIcon
+      iconType={isFavorite ? 'starFilled' : 'starEmpty'}
+      isSelected={isFavorite}
+      onClick={handleClick}
+      data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
+      disabled={disableFavoriteButton}
+      aria-label={label}
+      title={label}
+    />
+  ) : (
     <EuiButton
       isSelected={isFavorite}
       fill={isFavorite}
@@ -56,8 +72,10 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ ti
       onClick={handleClick}
       data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
       disabled={disableFavoriteButton}
+      aria-label={label}
+      title={label}
     >
-      {isFavorite ? i18n.REMOVE_FROM_FAVORITES : i18n.ADD_TO_FAVORITES}
+      {label}
     </EuiButton>
   );
 };
@@ -66,18 +84,18 @@ AddToFavoritesButtonComponent.displayName = 'AddToFavoritesButtonComponent';
 export const AddToFavoritesButton = React.memo(AddToFavoritesButtonComponent);
 
 export interface NewTimelineProps {
-  closeGearMenu?: () => void;
+  onClick?: () => void;
   outline?: boolean;
   timelineId: string;
   title?: string;
 }
 
 export const NewTimeline = React.memo<NewTimelineProps>(
-  ({ closeGearMenu, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
+  ({ onClick, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
     const { getButton } = useCreateTimelineButton({
       timelineId,
       timelineType: TimelineType.default,
-      closeGearMenu,
+      onClick,
     });
     const button = getButton({ outline, title });
 

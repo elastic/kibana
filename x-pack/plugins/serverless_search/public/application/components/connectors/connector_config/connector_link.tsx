@@ -17,6 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { ConnectorStatus } from '@kbn/search-connectors';
 import React from 'react';
@@ -63,7 +64,12 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
         <EuiFlexGroup direction="row" alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
             <span>
-              <EuiButton iconType={`${assetBasePath}/docker.svg`} href={docLinks.connectors} fill>
+              <EuiButton
+                data-test-subj="serverlessSearchConnectorLinkElasticsearchRunWithDockerButton"
+                iconType={`${assetBasePath}/docker.svg`}
+                href={docLinks.connectors}
+                fill
+              >
                 {i18n.translate('xpack.serverlessSearch.connectors.runWithDockerLink', {
                   defaultMessage: 'Run with Docker',
                 })}
@@ -73,6 +79,7 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
           <EuiFlexItem grow={false}>
             <span>
               <EuiButton
+                data-test-subj="serverlessSearchConnectorLinkElasticsearchRunFromSourceButton"
                 iconType={`${assetBasePath}/github_white.svg`}
                 href="https://github.com/elastic/connectors"
                 fill
@@ -89,10 +96,11 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
           <EuiPanel hasBorder>
             <EuiTitle size="xs">
               <h3>
-                {i18n.translate('xpack.serverlessSearch.connectors.variablesTitle', {
-                  defaultMessage: 'Variables for your ',
-                })}
-                <EuiCode>elastic/connectors/config.yml</EuiCode>
+                <FormattedMessage
+                  id="xpack.serverlessSearch.connectors.variablesTitle"
+                  defaultMessage="Variables for your {url}"
+                  values={{ url: <EuiCode>elastic/connectors/config.yml</EuiCode> }}
+                />
               </h3>
             </EuiTitle>
             <EuiSpacer />

@@ -12,6 +12,7 @@ import { InferencePipelineInferenceConfig } from '../../../../../../../common/ty
 export interface InferencePipelineConfiguration {
   existingPipeline?: boolean;
   inferenceConfig?: InferencePipelineInferenceConfig;
+  isPipelineNameUserSupplied?: boolean;
   modelID: string;
   pipelineName: string;
   fieldMappings?: FieldMapping[];
@@ -27,7 +28,6 @@ export interface AddInferencePipelineFormErrors {
 export enum AddInferencePipelineSteps {
   Configuration,
   Fields,
-  Mappings,
   Test,
   Review,
 }

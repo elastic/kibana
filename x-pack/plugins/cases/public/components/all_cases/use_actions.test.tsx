@@ -43,6 +43,7 @@ describe('useActions', () => {
           "align": "right",
           "name": "Actions",
           "render": [Function],
+          "width": "100px",
         },
       }
     `);

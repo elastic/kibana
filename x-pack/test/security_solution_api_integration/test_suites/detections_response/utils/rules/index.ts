@@ -39,5 +39,8 @@ export * from './generate_event';
 export * from './create_legacy_rule_action';
 export * from './get_simple_threat_match';
 export * from './get_simple_ml_rule';
+export * from './remove_server_generated_properties_including_rule_id';
+export * from './get_simple_rule_output_without_rule_id';
+export * from './get_simple_rule_without_rule_id';
 
 export * from './prebuilt_rules';

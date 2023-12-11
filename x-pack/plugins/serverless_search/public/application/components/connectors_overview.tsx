@@ -56,7 +56,11 @@ export const ConnectorsOverview = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
-                    <EuiLink target="_blank" href="https://github.com/elastic/connectors">
+                    <EuiLink
+                      data-test-subj="serverlessSearchConnectorsOverviewElasticConnectorsLink"
+                      target="_blank"
+                      href="https://github.com/elastic/connectors"
+                    >
                       {i18n.translate('xpack.serverlessSearch.connectorsPythonLink', {
                         defaultMessage: 'elastic/connectors',
                       })}
@@ -67,6 +71,7 @@ export const ConnectorsOverview = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButton
+                data-test-subj="serverlessSearchConnectorsOverviewCreateConnectorButton"
                 isLoading={isLoading}
                 fill
                 iconType="plusInCircleFilled"
@@ -87,7 +92,12 @@ export const ConnectorsOverview = () => {
               defaultMessage="Sync third-party data sources to Elasticsearch, by deploying Elastic connectors on your own infrastructure. {learnMoreLink}"
               values={{
                 learnMoreLink: (
-                  <EuiLink external target="_blank" href={'TODO TODO'}>
+                  <EuiLink
+                    data-test-subj="serverlessSearchConnectorsOverviewLink"
+                    external
+                    target="_blank"
+                    href={'TODO TODO'}
+                  >
                     {LEARN_MORE_LABEL}
                   </EuiLink>
                 ),

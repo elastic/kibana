@@ -205,7 +205,7 @@ async function updateRelatedSavedObject(
       outputService.update(soClient, esClient, output.id, {
         ...omit(output, 'id'),
         proxy_id: null,
-      });
+      } as Partial<Output>);
     },
     { concurrency: 20 }
   );

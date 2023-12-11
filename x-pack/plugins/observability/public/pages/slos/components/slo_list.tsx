@@ -10,8 +10,9 @@ import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
-import { SloListItems } from './slo_list_items';
-import { SloListSearchBar, SortField } from './slo_list_search_bar';
+import { SlosView } from './slos_view';
+import { SloListSearchBar, SortDirection, SortField } from './slo_list_search_bar';
+import { SLOView, ToggleSLOView } from './toggle_slo_view';
 
 export interface Props {
   autoRefresh: boolean;
@@ -22,7 +23,9 @@ export function SloList({ autoRefresh }: Props) {
   const [page, setPage] = useState(state.page);
   const [query, setQuery] = useState(state.kqlQuery);
   const [sort, setSort] = useState<SortField>(state.sort.by);
-  const [direction] = useState<'asc' | 'desc'>(state.sort.direction);
+  const [direction] = useState<SortDirection>(state.sort.direction);
+  const [view, setView] = useState<SLOView>(state.view);
+  const [isCompact, setCompact] = useState<boolean>(state.compact);
 
   const {
     isLoading,
@@ -61,6 +64,17 @@ export function SloList({ autoRefresh }: Props) {
     storeState({ page: 0, sort: { by: newSort, direction: state.sort.direction } });
   };
 
+  const handleChangeView = (newView: SLOView) => {
+    setView(newView);
+    storeState({ view: newView });
+  };
+
+  const handleToggleCompactView = () => {
+    const newCompact = !isCompact;
+    setCompact(newCompact);
+    storeState({ compact: newCompact });
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
@@ -71,9 +85,21 @@ export function SloList({ autoRefresh }: Props) {
           initialState={state}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <SloListItems sloList={results} loading={isLoading || isRefetching} error={isError} />
+      <EuiFlexItem grow={false}>
+        <ToggleSLOView
+          sloView={view}
+          onChangeView={handleChangeView}
+          onToggleCompactView={handleToggleCompactView}
+          isCompact={isCompact}
+        />
       </EuiFlexItem>
+      <SlosView
+        sloList={results}
+        loading={isLoading || isRefetching}
+        error={isError}
+        isCompact={isCompact}
+        sloView={view}
+      />
 
       {total > 0 ? (
         <EuiFlexItem>

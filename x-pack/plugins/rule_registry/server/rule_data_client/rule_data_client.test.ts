@@ -6,6 +6,7 @@
  */
 
 import { left, right } from 'fp-ts/lib/Either';
+import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { RuleDataClient, RuleDataClientConstructorOptions, WaitResult } from './rule_data_client';
@@ -378,6 +379,128 @@ describe('RuleDataClient', () => {
             1,
             'error writing to index: something went wrong!',
             error
+          );
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+        });
+
+        test('sanitizes error before logging', async () => {
+          scopedClusterClient.bulk.mockResponseOnce({
+            took: 486,
+            errors: true,
+            items: [
+              {
+                create: {
+                  _index: 'test',
+                  _id: '3',
+                  _version: 1,
+                  result: 'created',
+                  _shards: { total: 2, successful: 1, failed: 0 },
+                  status: 201,
+                  _seq_no: 2,
+                  _primary_term: 3,
+                },
+              },
+              {
+                create: {
+                  _index: 'test',
+                  _id: '4',
+                  _version: 1,
+                  result: 'created',
+                  _shards: { total: 2, successful: 1, failed: 0 },
+                  status: 201,
+                  _seq_no: 2,
+                  _primary_term: 3,
+                },
+              },
+              {
+                create: {
+                  _index: 'index1',
+                  _id: '7',
+                  status: 404,
+                  error: {
+                    type: 'mapper_parsing_exception',
+                    reason:
+                      "failed to parse field [process.command_line] of type [wildcard] in document with id 'f0c9805be95fedbc3c99c663f7f02cc15826c122'. Preview of field's value: 'we don't want this field value to be echoed'",
+                    caused_by: {
+                      type: 'illegal_state_exception',
+                      reason: "Can't get text on a START_OBJECT at 1:3845",
+                    },
+                  },
+                },
+              },
+            ],
+          });
+          const ruleDataClient = new RuleDataClient(
+            getRuleDataClientOptions({ isUsingDataStreams })
+          );
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+          const writer = await ruleDataClient.getWriter();
+
+          // Previously, a delay between calling getWriter() and using a writer function
+          // would cause an Unhandled promise rejection if there were any errors getting a writer
+          // Adding this delay in the tests to ensure this does not pop up again.
+          await delay();
+
+          const bulkWriteResponse = await writer.bulk({});
+          expect(bulkWriteResponse).toEqual({
+            body: {
+              took: 486,
+              errors: true,
+              items: [
+                {
+                  create: {
+                    _index: 'test',
+                    _id: '3',
+                    _version: 1,
+                    result: 'created',
+                    _shards: { total: 2, successful: 1, failed: 0 },
+                    status: 201,
+                    _seq_no: 2,
+                    _primary_term: 3,
+                  },
+                },
+                {
+                  create: {
+                    _index: 'test',
+                    _id: '4',
+                    _version: 1,
+                    result: 'created',
+                    _shards: { total: 2, successful: 1, failed: 0 },
+                    status: 201,
+                    _seq_no: 2,
+                    _primary_term: 3,
+                  },
+                },
+                {
+                  create: {
+                    _index: 'index1',
+                    _id: '7',
+                    status: 404,
+                    error: {
+                      type: 'mapper_parsing_exception',
+                      reason:
+                        "failed to parse field [process.command_line] of type [wildcard] in document with id 'f0c9805be95fedbc3c99c663f7f02cc15826c122'.",
+                      caused_by: {
+                        type: 'illegal_state_exception',
+                        reason: "Can't get text on a START_OBJECT at 1:3845",
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+            headers: {
+              'x-elastic-product': 'Elasticsearch',
+            },
+            meta: {},
+            statusCode: 200,
+            warnings: [],
+          });
+
+          expect(logger.error).toHaveBeenNthCalledWith(
+            1,
+            // @ts-expect-error
+            new errors.ResponseError(bulkWriteResponse)
           );
           expect(ruleDataClient.isWriteEnabled()).toBe(true);
         });

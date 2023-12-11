@@ -27,7 +27,7 @@ const noPanelStyle = css`
   }
 
   .euiLink {
-    padding: 0 8px;
+    padding: 0;
   }
 
   .euiLink:focus {
@@ -37,10 +37,14 @@ const noPanelStyle = css`
   .euiLink:hover {
     text-decoration: underline;
   }
-`;
 
-const avatarStyle = css`
-  cursor: 'pointer';
+  .euiAvatar {
+    cursor: pointer;
+
+    :hover {
+      border: solid 2px #d3dae6;
+    }
+  }
 `;
 
 export function ChatConsolidatedItems({
@@ -71,7 +75,6 @@ export function ChatConsolidatedItems({
         timelineAvatar={
           <EuiAvatar
             color="subdued"
-            css={avatarStyle}
             name="inspect"
             iconType="layers"
             onClick={handleToggleExpand}
@@ -120,12 +123,12 @@ export function ChatConsolidatedItems({
               key={index}
               {...item}
               onFeedbackClick={(feedback) => {
-                onFeedback(item, feedback);
+                onFeedback(item.message, feedback);
               }}
               onRegenerateClick={() => {
-                onRegenerate(item);
+                onRegenerate(item.message);
               }}
-              onEditSubmit={(message) => onEditSubmit(item, message)}
+              onEditSubmit={(message) => onEditSubmit(item.message, message)}
               onStopGeneratingClick={onStopGenerating}
               onActionClick={onActionClick}
             />

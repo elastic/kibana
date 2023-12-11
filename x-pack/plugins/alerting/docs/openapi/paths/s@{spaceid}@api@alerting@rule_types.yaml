@@ -186,14 +186,16 @@ get:
                 minimum_license_required:
                   description: The subscriptions required to use the rule type.
                   type: string
-                  example: basic
+                  examples:
+                    - basic
                 name:
                   description: The descriptive name of the rule type.
                   type: string
                 producer:
                   description: An identifier for the application that produces this rule type.
                   type: string
-                  example: stackAlerts
+                  examples:
+                    - stackAlerts
                 recovery_action_group:
                   description: An action group to use when an alert goes from an active state to an inactive one.
                   type: object
@@ -204,7 +206,8 @@ get:
                       type: string
                 rule_task_timeout:
                   type: string
-                  example: 5m
+                  examples:
+                    - 5m
           examples:
             getRuleTypesResponse:
               $ref: '../components/examples/get_rule_types_response.yaml'

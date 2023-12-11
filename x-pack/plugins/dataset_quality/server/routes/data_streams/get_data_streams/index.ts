@@ -13,10 +13,9 @@ export async function getDataStreams(options: {
   esClient: ElasticsearchClient;
   type?: DataStreamTypes;
   datasetQuery?: string;
-  sortOrder: 'asc' | 'desc';
   uncategorisedOnly: boolean;
 }) {
-  const { esClient, type, datasetQuery, uncategorisedOnly, sortOrder } = options;
+  const { esClient, type, datasetQuery, uncategorisedOnly } = options;
 
   const allDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
     type: type ?? '*',
@@ -31,25 +30,10 @@ export async function getDataStreams(options: {
 
   const mappedDataStreams = filteredDataStreams.map((dataStream) => ({
     name: dataStream.name,
-    ...(dataStream._meta
-      ? {
-          integration: {
-            name: dataStream._meta?.package?.name,
-            managed_by: dataStream._meta?.managed_by,
-          },
-        }
-      : {}),
+    integration: dataStream._meta?.package?.name,
   }));
 
-  const sortedDataStreams = mappedDataStreams.sort((a, b) => {
-    if (sortOrder === 'desc') {
-      return b.name.localeCompare(a.name);
-    }
-
-    return a.name.localeCompare(b.name);
-  });
-
   return {
-    items: sortedDataStreams,
+    items: mappedDataStreams,
   };
 }

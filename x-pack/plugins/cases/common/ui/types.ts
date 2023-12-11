@@ -12,7 +12,11 @@ import type {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
 } from '..';
-import type { CASES_CONNECTORS_CAPABILITY, PUSH_CASES_CAPABILITY } from '../constants';
+import type {
+  CASES_CONNECTORS_CAPABILITY,
+  CASES_SETTINGS_CAPABILITY,
+  PUSH_CASES_CAPABILITY,
+} from '../constants';
 import type { SnakeToCamelCase } from '../types';
 import type {
   CaseSeverity,
@@ -26,6 +30,7 @@ import type {
   ExternalReferenceAttachment,
   PersistableStateAttachment,
   Configuration,
+  CustomFieldTypes,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -64,14 +69,6 @@ export interface CasesUiConfigType {
     enabled: boolean;
   };
 }
-
-export const StatusAll = 'all' as const;
-export type StatusAllType = typeof StatusAll;
-
-export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
-
-export const SeverityAll = 'all' as const;
-export type CaseSeverityWithAll = CaseSeverity | typeof SeverityAll;
 
 export const UserActionTypeAll = 'all' as const;
 export type CaseUserActionTypeWithAll = UserActionFindRequestTypes | typeof UserActionTypeAll;
@@ -153,17 +150,27 @@ export interface ParsedUrlQueryParams extends Partial<UrlQueryParams> {
 
 export type LocalStorageQueryParams = Partial<Omit<QueryParams, 'page'>>;
 
-export interface FilterOptions {
+export interface SystemFilterOptions {
   search: string;
   searchFields: string[];
-  severity: CaseSeverityWithAll;
-  status: CaseStatusWithAllStatus;
+  severity: CaseSeverity[];
+  status: CaseStatuses[];
   tags: string[];
   assignees: Array<string | null> | null;
   reporters: User[];
   owner: string[];
   category: string[];
 }
+
+export interface FilterOptions extends SystemFilterOptions {
+  customFields: {
+    [key: string]: {
+      type: CustomFieldTypes;
+      options: string[];
+    };
+  };
+}
+
 export type PartialFilterOptions = Partial<FilterOptions>;
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
@@ -299,6 +306,7 @@ export interface CasesPermissions {
   delete: boolean;
   push: boolean;
   connectors: boolean;
+  settings: boolean;
 }
 
 export interface CasesCapabilities {
@@ -308,4 +316,5 @@ export interface CasesCapabilities {
   [DELETE_CASES_CAPABILITY]: boolean;
   [PUSH_CASES_CAPABILITY]: boolean;
   [CASES_CONNECTORS_CAPABILITY]: boolean;
+  [CASES_SETTINGS_CAPABILITY]: boolean;
 }

@@ -10,17 +10,18 @@ import { safeLoad, safeDump } from 'js-yaml';
 
 import type { PackagePolicyConfigRecord } from '../../../../common/types';
 import { toCompiledSecretRef } from '../../secrets';
+import { PackageInvalidArchiveError } from '../../../errors';
 
 const handlebars = Handlebars.create();
 
 export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
-  const { vars, yamlValues } = buildTemplateVariables(variables, templateStr);
+  const { vars, yamlValues } = buildTemplateVariables(variables);
   let compiledTemplate: string;
   try {
     const template = handlebars.compile(templateStr, { noEscape: true });
     compiledTemplate = template(vars);
   } catch (err) {
-    throw new Error(`Error while compiling agent template: ${err.message}`);
+    throw new PackageInvalidArchiveError(`Error while compiling agent template: ${err.message}`);
   }
 
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
@@ -64,7 +65,7 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
-function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateStr: string) {
+function buildTemplateVariables(variables: PackagePolicyConfigRecord) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
     // support variables with . like key.patterns
@@ -72,13 +73,17 @@ function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateSt
     const lastKeyPart = keyParts.pop();
 
     if (!lastKeyPart || !isValidKey(lastKeyPart)) {
-      throw new Error('Invalid key');
+      throw new PackageInvalidArchiveError(
+        `Error while compiling agent template: Invalid key ${lastKeyPart}`
+      );
     }
 
     let varPart = acc;
     for (const keyPart of keyParts) {
       if (!isValidKey(keyPart)) {
-        throw new Error('Invalid key');
+        throw new PackageInvalidArchiveError(
+          `Error while compiling agent template: Invalid key ${keyPart}`
+        );
       }
       if (!varPart[keyPart]) {
         varPart[keyPart] = {};

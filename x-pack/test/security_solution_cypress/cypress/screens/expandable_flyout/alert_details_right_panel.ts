@@ -17,6 +17,7 @@ import {
   SEVERITY_VALUE_TEST_ID,
   STATUS_BUTTON_TEST_ID,
   FLYOUT_HEADER_TITLE_TEST_ID,
+  ASSIGNEES_HEADER_TEST_ID,
 } from '@kbn/security-solution-plugin/public/flyout/document_details/right/components/test_ids';
 import {
   COLLAPSE_DETAILS_BUTTON_TEST_ID,
@@ -59,6 +60,8 @@ export const DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE =
   getDataTestSubjectSelector(RISK_SCORE_VALUE_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE =
   getDataTestSubjectSelector(SEVERITY_VALUE_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES =
+  getDataTestSubjectSelector(ASSIGNEES_HEADER_TEST_ID);
 
 /* Footer */
 

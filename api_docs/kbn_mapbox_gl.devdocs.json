@@ -9009,7 +9009,7 @@
             "label": "sourceDataType",
             "description": [],
             "signature": [
-              "\"content\" | \"visibility\" | \"metadata\" | \"idle\""
+              "\"content\" | \"metadata\" | \"visibility\" | \"idle\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,

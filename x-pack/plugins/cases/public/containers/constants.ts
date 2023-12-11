@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SingleCaseMetricsFeature } from './types';
+import type { FilterOptions, QueryParams, SingleCaseMetricsFeature } from './types';
+import { SortFieldCase } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
 export const DEFAULT_TABLE_LIMIT = 10;
@@ -61,4 +62,26 @@ export const casesMutationsKeys = {
   deleteFileAttachment: ['delete-file-attachment'] as const,
   bulkCreateAttachments: ['bulk-create-attachments'] as const,
   persistCaseConfiguration: ['persist-case-configuration'] as const,
+};
+
+const DEFAULT_SEARCH_FIELDS = ['title', 'description'];
+
+export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
+  search: '',
+  searchFields: DEFAULT_SEARCH_FIELDS,
+  severity: [],
+  assignees: [],
+  reporters: [],
+  status: [],
+  tags: [],
+  owner: [],
+  category: [],
+  customFields: {},
+};
+
+export const DEFAULT_QUERY_PARAMS: QueryParams = {
+  page: DEFAULT_TABLE_ACTIVE_PAGE,
+  perPage: DEFAULT_TABLE_LIMIT,
+  sortField: SortFieldCase.createdAt,
+  sortOrder: 'desc',
 };

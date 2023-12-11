@@ -158,6 +158,7 @@ export interface DefineStepRule {
   groupByRadioSelection: GroupByOptions;
   groupByDuration: Duration;
   suppressionMissingFields?: AlertSuppressionMissingFieldsStrategy;
+  enableThresholdSuppression: boolean;
 }
 
 export interface QueryDefineStep {
@@ -174,7 +175,7 @@ export interface QueryDefineStep {
 
 export interface Duration {
   value: number;
-  unit: string;
+  unit: 's' | 'm' | 'h';
 }
 
 export interface ScheduleStepRule {

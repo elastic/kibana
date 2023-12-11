@@ -504,11 +504,13 @@ describe('saved_visualize_utils', () => {
           {
             id: 'wat',
             image: undefined,
+            editor: {
+              editUrl: '/edit/wat',
+            },
             readOnly: false,
             references: undefined,
             icon: undefined,
             savedObjectType: 'visualization',
-            editUrl: '/edit/wat',
             type: 'test',
             typeName: 'test',
             typeTitle: undefined,

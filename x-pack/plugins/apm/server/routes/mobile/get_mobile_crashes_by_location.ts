@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   kqlQuery,
   rangeQuery,
@@ -16,6 +15,8 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 
 interface Props {
   kuery: string;
@@ -64,7 +65,12 @@ export async function getCrashesByLocation({
   };
   const response = await apmEventClient.search('get_mobile_location_crashes', {
     apm: {
-      events: [ProcessorEvent.error],
+      sources: [
+        {
+          documentType: ApmDocumentType.ErrorEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: false,

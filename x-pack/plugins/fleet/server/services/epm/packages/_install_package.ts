@@ -57,6 +57,7 @@ import {
   installIndexTemplatesAndPipelines,
 } from './install';
 import { withPackageSpan } from './utils';
+import { clearLatestFailedAttempts } from './install_errors_helpers';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path
@@ -333,6 +334,10 @@ export async function _installPackage({
         install_status: 'installed',
         package_assets: packageAssetRefs,
         install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
+        latest_install_failed_attempts: clearLatestFailedAttempts(
+          pkgVersion,
+          installedPkg?.attributes.latest_install_failed_attempts ?? []
+        ),
       })
     );
 

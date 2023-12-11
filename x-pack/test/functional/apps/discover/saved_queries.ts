@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -12,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const spaces = getService('spaces');
+  const toasts = getService('toasts');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -70,6 +72,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Refresh to ensure the object is actually deleted
         await browser.refresh();
         await savedQueryManagementComponent.savedQueryMissingOrFail(savedQueryName);
+      });
+
+      it('updates a saved query', async () => {
+        // Navigate to Discover & create a saved query
+        await PageObjects.common.navigateToApp('discover');
+        await queryBar.setQuery('response:200');
+        await savedQueryManagementComponent.saveNewQuery(savedQueryName, '', true, false);
+        await savedQueryManagementComponent.savedQueryExistOrFail(savedQueryName);
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
+
+        // Navigate to Discover & create a saved query
+        await queryBar.setQuery('response:404');
+        await savedQueryManagementComponent.updateCurrentlyLoadedQuery('', true, false);
+
+        // Expect to see a success toast
+        const successToast = await toasts.getToastElement(1);
+        const successText = await successToast.getVisibleText();
+        expect(successText).to.equal(`Your query "${savedQueryName}" was saved`);
+
+        await PageObjects.common.navigateToApp('discover');
+        await savedQueryManagementComponent.deleteSavedQuery(savedQueryName);
       });
     });
   });

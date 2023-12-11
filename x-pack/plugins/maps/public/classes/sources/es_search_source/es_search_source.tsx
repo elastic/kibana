@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { type Filter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
+import { type Filter, buildExistsFilter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
@@ -922,6 +922,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
           : fieldName;
       })
     );
+
+    // Filter out documents without geo fields to avoid shard failures for indices without geo fields
+    searchSource.setField('filter', [
+      ...(searchSource.getField('filter') as Filter[]),
+      buildExistsFilter({ name: this._descriptor.geoField, type: 'geo_point' }, dataView),
+    ]);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(`${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`);
 

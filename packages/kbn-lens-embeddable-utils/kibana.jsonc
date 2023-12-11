@@ -1,5 +1,5 @@
 {
-  "type": "shared-browser",
+  "type": "shared-common",
   "id": "@kbn/lens-embeddable-utils",
-  "owner": "@elastic/obs-ux-infra_services-team"
+  "owner": ["@elastic/obs-ux-infra_services-team", "@elastic/kibana-visualizations"]
 }

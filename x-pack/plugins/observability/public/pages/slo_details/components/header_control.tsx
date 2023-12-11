@@ -33,13 +33,14 @@ export interface Props {
 
 export function HeaderControl({ isLoading, slo }: Props) {
   const {
-    application: { navigateToUrl },
+    application: { navigateToUrl, capabilities },
     http: { basePath },
     share: {
       url: { locators },
     },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
+  const hasApmReadCapabilities = capabilities.apm.show;
   const { hasWriteCapabilities } = useCapabilities();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -202,6 +203,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
                 <EuiContextMenuItem
                   key="exploreInApm"
                   icon="bullseye"
+                  disabled={!hasApmReadCapabilities}
                   onClick={handleNavigateToApm}
                   data-test-subj="sloDetailsHeaderControlPopoverExploreInApm"
                 >

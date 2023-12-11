@@ -15,7 +15,7 @@ import {
   savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { PluginStartContract as ActionsStartContract } from '@kbn/actions-plugin/server';
 import { actionsMock, actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';

@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type { Role } from '../../../../../../common/model';
+import type { Role } from '../../../../../../common';
 import { isRoleReadOnly } from '../../../../../../common/model';
 
 interface Props {

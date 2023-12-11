@@ -176,6 +176,8 @@ describe('Epic Timeline', () => {
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
         savedQueryId: 'my endgame timeline query',
         savedSearchId: null,
+        savedSearch: null,
+        isDataProviderVisible: true,
       };
 
       expect(

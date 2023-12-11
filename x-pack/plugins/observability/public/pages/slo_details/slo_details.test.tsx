@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
+import type { Capabilities } from '@kbn/core/public';
 
 import { useKibana } from '../../utils/kibana_react';
 import { useParams, useLocation } from 'react-router-dom';
@@ -14,7 +15,8 @@ import { useLicense } from '../../hooks/use_license';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
-import { ActiveAlerts, useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
+import { useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
+import { ActiveAlerts } from '../../hooks/slo/active_alerts';
 import { useCloneSlo } from '../../hooks/slo/use_clone_slo';
 import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
 import { render } from '../../utils/test_helper';
@@ -60,6 +62,9 @@ const mockNavigate = jest.fn();
 const mockLocator = jest.fn();
 const mockClone = jest.fn();
 const mockDelete = jest.fn();
+const mockCapabilities = {
+  apm: { show: true },
+} as unknown as Capabilities;
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -68,7 +73,7 @@ const mockKibana = () => {
       lens: {
         EmbeddableComponent: () => <div data-test-subj="errorRateChart">mocked component</div>,
       },
-      application: { navigateToUrl: mockNavigate },
+      application: { navigateToUrl: mockNavigate, capabilities: mockCapabilities },
       charts: chartPluginMock.createStartContract(),
       http: {
         basePath: {
