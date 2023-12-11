@@ -27,32 +27,30 @@ import {
   EuiHorizontalRule,
   EuiButton,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 
+import { Status } from '../../../../common/types/api';
+
 import endpointIcon from '../../../assets/images/endpoint_icon.svg';
+import { CreateApiKeyAPILogic } from '../../enterprise_search_overview/api/create_elasticsearch_api_key_logic';
 import { FetchApiKeysAPILogic } from '../../enterprise_search_overview/api/fetch_api_keys_logic';
+import { CreateApiKeyFlyout } from '../api_key/create_api_key_flyout';
 import { KibanaLogic } from '../kibana';
 
-interface EndpointsHeaderActionProps {
-  isFlyoutOpen: boolean;
-  setIsFlyoutOpen: (isOpen: boolean) => void;
-}
-
-export const EndpointsHeaderAction: React.FC<EndpointsHeaderActionProps> = ({
-  setIsFlyoutOpen,
-}) => {
+export const EndpointsHeaderAction: React.FC = () => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const { cloud, navigateToUrl } = useValues(KibanaLogic);
   const { makeRequest } = useActions(FetchApiKeysAPILogic);
   const { data } = useValues(FetchApiKeysAPILogic);
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const { user } = useValues(KibanaLogic);
+  const { makeRequest: saveApiKey } = useActions(CreateApiKeyAPILogic);
+  const { data: apiKey, error, status } = useValues(CreateApiKeyAPILogic);
 
   useEffect(() => makeRequest({}), []);
-
-  if (!cloud) {
-    return null;
-  }
 
   const COPIED_LABEL = i18n.translate('xpack.enterpriseSearch.pageTemplate.apiKey.copied', {
     defaultMessage: 'Copied',
@@ -76,7 +74,17 @@ export const EndpointsHeaderAction: React.FC<EndpointsHeaderActionProps> = ({
   );
 
   return (
-    <>
+    <I18nProvider>
+      {isFlyoutOpen && (
+        <CreateApiKeyFlyout
+          createdApiKey={apiKey}
+          error={error?.body?.message}
+          isLoading={status === Status.LOADING}
+          onClose={() => setIsFlyoutOpen(false)}
+          setApiKey={saveApiKey}
+          username={user?.full_name || user?.username || ''}
+        />
+      )}
       <EuiPopover
         button={button}
         isOpen={isPopoverOpen}
@@ -119,36 +127,40 @@ export const EndpointsHeaderAction: React.FC<EndpointsHeaderActionProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiContextMenuItem>,
-            <EuiContextMenuItem key="cloudId">
-              <EuiText size="s">
-                {i18n.translate('xpack.enterpriseSearch.apiKey.cloudId', {
-                  defaultMessage: 'Cloud ID:',
-                })}
-              </EuiText>
-              <EuiSpacer size="s" />
+            ...(Boolean(cloudId)
+              ? [
+                  <EuiContextMenuItem key="cloudId">
+                    <EuiText size="s">
+                      {i18n.translate('xpack.enterpriseSearch.apiKey.cloudId', {
+                        defaultMessage: 'Cloud ID:',
+                      })}
+                    </EuiText>
+                    <EuiSpacer size="s" />
 
-              <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
-                <EuiFlexItem>
-                  <EuiCode>{cloudId}</EuiCode>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiCopy textToCopy={cloudId || ''} afterMessage={COPIED_LABEL}>
-                    {(copy) => (
-                      <EuiButtonIcon
-                        onClick={copy}
-                        iconType="copyClipboard"
-                        aria-label={i18n.translate(
-                          'xpack.enterpriseSearch.overview.apiKey.copyCloudID',
-                          {
-                            defaultMessage: 'Copy cloud ID to clipboard.',
-                          }
-                        )}
-                      />
-                    )}
-                  </EuiCopy>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiContextMenuItem>,
+                    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
+                      <EuiFlexItem>
+                        <EuiCode>{cloudId}</EuiCode>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiCopy textToCopy={cloudId || ''} afterMessage={COPIED_LABEL}>
+                          {(copy) => (
+                            <EuiButtonIcon
+                              onClick={copy}
+                              iconType="copyClipboard"
+                              aria-label={i18n.translate(
+                                'xpack.enterpriseSearch.overview.apiKey.copyCloudID',
+                                {
+                                  defaultMessage: 'Copy cloud ID to clipboard.',
+                                }
+                              )}
+                            />
+                          )}
+                        </EuiCopy>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiContextMenuItem>,
+                ]
+              : []),
             <EuiContextMenuItem key="apiKeys">
               <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
                 <EuiFlexItem>
@@ -192,7 +204,10 @@ export const EndpointsHeaderAction: React.FC<EndpointsHeaderActionProps> = ({
               <EuiButton
                 iconType="plusInCircle"
                 size="s"
-                onClick={() => setIsFlyoutOpen(true)}
+                onClick={() => {
+                  setIsFlyoutOpen(true);
+                  setPopoverOpen(false);
+                }}
                 data-test-subj="new-api-key-button"
                 fullWidth
               >
@@ -206,6 +221,6 @@ export const EndpointsHeaderAction: React.FC<EndpointsHeaderActionProps> = ({
           ]}
         />
       </EuiPopover>
-    </>
+    </I18nProvider>
   );
 };

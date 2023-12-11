@@ -11,7 +11,7 @@ import { CIS_AWS, CIS_GCP, CIS_AZURE, CIS_K8S, CIS_EKS } from '../../common/cons
 import { CISBenchmarkIcon } from './cis_benchmark_icon';
 import { CompactFormattedNumber } from './compact_formatted_number';
 import { useNavigateFindings } from '../common/hooks/use_navigate_findings';
-import { BenchmarkData } from '../../common/types';
+import { BenchmarkData } from '../../common/types_old';
 
 // order in array will determine order of appearance in the dashboard
 const benchmarks = [

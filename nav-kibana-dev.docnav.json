@@ -200,6 +200,9 @@
           "id": "ktServerlessReleaseOverview"
         },
         {
+          "id": "ktServerlessEmergencyReleases"
+        },
+        {
           "id": "ktCustomServerlessImage"
         }
       ]
