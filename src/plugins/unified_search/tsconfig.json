@@ -42,7 +42,8 @@
     "@kbn/core-doc-links-browser",
     "@kbn/core-lifecycle-browser",
     "@kbn/ml-string-hash",
-    "@kbn/calculate-width-from-char-count"
+    "@kbn/calculate-width-from-char-count",
+    "@kbn/unified-data-table"
   ],
   "exclude": [
     "target/**/*",
