@@ -87,14 +87,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.setValue('nameField', TEST_TEMPLATE_NAME);
         await testSubjects.setValue('indexPatternsField', 'test*');
 
-        // Finish wizard flow
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
-        await testSubjects.click('nextButton');
+        // Click form summary step and then the submit button
+        await testSubjects.click('formWizardStep-5');
         await testSubjects.click('nextButton');
 
-        expect(await testSubjects.getVisibleText('stepTitle')).to.contain(TEST_TEMPLATE_NAME);
+        await retry.try(async () => {
+          expect(await testSubjects.getVisibleText('stepTitle')).to.contain(TEST_TEMPLATE_NAME);
+        });
       });
     });
   });
