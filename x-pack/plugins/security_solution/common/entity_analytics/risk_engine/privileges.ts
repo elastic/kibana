@@ -12,7 +12,7 @@ import {
 } from './constants';
 
 export type MissingClusterPrivileges = string[];
-export type MissingIndexPrivileges = Array<[indexName: string, privileges: string[]]>;
+export type MissingIndexPrivileges = Array<readonly [indexName: string, privileges: string[]]>;
 
 export interface MissingPrivileges {
   clusterPrivileges: MissingClusterPrivileges;
@@ -46,13 +46,13 @@ export const getMissingIndexPrivileges = (
 export const getMissingRiskEnginePrivileges = (
   privileges: EntityAnalyticsPrivileges['privileges']
 ): MissingPrivileges => {
-  const missinIndexPrivileges = getMissingIndexPrivileges(privileges.elasticsearch.index);
+  const missingIndexPrivileges = getMissingIndexPrivileges(privileges.elasticsearch.index);
   const missingClusterPrivileges = RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES.filter(
     (privilege) => !privileges.elasticsearch.cluster?.[privilege]
   );
 
   return {
-    indexPrivileges: missinIndexPrivileges,
+    indexPrivileges: missingIndexPrivileges,
     clusterPrivileges: missingClusterPrivileges,
   };
 };
