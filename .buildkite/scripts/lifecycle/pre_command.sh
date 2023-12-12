@@ -142,6 +142,12 @@ export SYNTHETICS_REMOTE_KIBANA_URL
 DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(vault_get kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL)"}
 export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
 
+GCS_SA_CDN_QA_KEY="$(retry 5 5 vault read -field=key secret/kibana-issues/dev/gcs-sa-cdn-qa)"
+export GCS_SA_CDN_QA_KEY
+
+GCS_SA_CDN_QA_BUCKET="$(retry 5 5 vault read -field=bucket secret/kibana-issues/dev/gcs-sa-cdn-qa)"
+export GCS_SA_CDN_QA_BUCKET
+
 # Setup Failed Test Reporter Elasticsearch credentials
 {
   TEST_FAILURES_ES_CLOUD_ID=$(vault_get failed_tests_reporter_es cloud_id)
