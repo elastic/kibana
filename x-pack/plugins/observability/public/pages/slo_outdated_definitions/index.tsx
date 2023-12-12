@@ -67,7 +67,23 @@ export function SlosOutdatedDefinitions() {
   const hasRequiredWritePrivileges =
     !!globalDiagnosis?.userPrivileges.write.has_all_requested && hasWriteCapabilities;
 
-  const hasSlosAndHasPermissions = hasAtLeast('platinum') === true && hasRequiredWritePrivileges;
+  const hasPlatinumLicense = hasAtLeast('platinum') === true;
+
+  const hasSlosAndHasPermissions = hasPlatinumLicense && hasRequiredWritePrivileges;
+
+  const errors = !hasRequiredWritePrivileges ? (
+    <EuiText>
+      {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.permissionsError', {
+        defaultMessage: 'You must have write permissions for SLOs to access this page',
+      })}
+    </EuiText>
+  ) : !hasPlatinumLicense ? (
+    <EuiText>
+      {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.permissionsError', {
+        defaultMessage: 'You must have atleast a platinum license to access this page',
+      })}
+    </EuiText>
+  ) : null;
 
   return (
     <ObservabilityPageTemplate
@@ -80,12 +96,8 @@ export function SlosOutdatedDefinitions() {
     >
       <HeaderMenu />
 
-      {!hasSlosAndHasPermissions ? (
-        <EuiText>
-          {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.permissionsError', {
-            defaultMessage: 'You must have write permissions to access this page',
-          })}
-        </EuiText>
+      {!hasRequiredWritePrivileges ? (
+        errors
       ) : (
         <>
           <p>
