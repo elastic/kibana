@@ -134,34 +134,33 @@ from the {sn} store.
 [[servicenow-itsm-connector-privileges]]
 ==== Assign cross-scope privileges
 
-The Elastic for ITSM app requires specific cross-scope privilege records to run successfully:
+The Elastic for ITSM app requires specific cross-scope privilege records to run successfully.
+In particular, you must have a privilege record for the `Elastic for ITSM` application and source scope with a `global` target scope for each of the following targets:
 
 |===
-|Source scope|Target scope|Target name|Operation|Status
+|Target name, type|Operation|Status
 
-.6+|Elastic for ITSM
-.6+|Global
-|GlideRecord.insert
+|GlideRecord.insert, Scriptable
 |Execute API
 |Allowed
 
-|GlideRecord.setValue
+|GlideRecord.setValue, Scriptable
 |Execute API
 |Allowed
 
-|GlideRecordSecure.getValue
+|GlideRecordSecure.getValue, Scriptable
 |Execute API
 |Allowed
 
-|Incident
+|Incident, Table
 |Read
 |Allowed
 
-|ScriptableServiceResultBuilder.setBody
+|ScriptableServiceResultBuilder.setBody, Scriptable
 |Execute API
 |Allowed
 
-|ScopedGlideElement
+|ScopedGlideElement, Scriptable
 |Execute API
 |Allowed
 |===
