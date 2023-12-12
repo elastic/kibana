@@ -12,21 +12,29 @@ import {
   useKibana,
 } from '@kbn/kibana-react-plugin/public';
 import { useMemo } from 'react';
-import { ObservabilityLogExplorerPluginStart, ObservabilityLogExplorerStartDeps } from '../types';
+import {
+  ObservabilityLogExplorerAppMountParameters,
+  ObservabilityLogExplorerPluginStart,
+  ObservabilityLogExplorerStartDeps,
+} from '../types';
 
 export type PluginKibanaContextValue = CoreStart &
   ObservabilityLogExplorerStartDeps &
-  ObservabilityLogExplorerPluginStart;
+  ObservabilityLogExplorerPluginStart & {
+    appParams: ObservabilityLogExplorerAppMountParameters;
+  };
 
 export const createKibanaContextForPlugin = (
   core: CoreStart,
   plugins: ObservabilityLogExplorerStartDeps,
-  pluginStart: ObservabilityLogExplorerPluginStart
+  pluginStart: ObservabilityLogExplorerPluginStart,
+  appParams: ObservabilityLogExplorerAppMountParameters
 ) =>
   createKibanaReactContext<PluginKibanaContextValue>({
     ...core,
     ...plugins,
     ...pluginStart,
+    appParams,
   });
 
 export const useKibanaContextForPlugin =
@@ -35,11 +43,12 @@ export const useKibanaContextForPlugin =
 export const useKibanaContextForPluginProvider = (
   core: CoreStart,
   plugins: ObservabilityLogExplorerStartDeps,
-  pluginStart: ObservabilityLogExplorerPluginStart
+  pluginStart: ObservabilityLogExplorerPluginStart,
+  appParams: ObservabilityLogExplorerAppMountParameters
 ) => {
   const { Provider } = useMemo(
-    () => createKibanaContextForPlugin(core, plugins, pluginStart),
-    [core, pluginStart, plugins]
+    () => createKibanaContextForPlugin(core, plugins, pluginStart, appParams),
+    [appParams, core, pluginStart, plugins]
   );
 
   return Provider;
