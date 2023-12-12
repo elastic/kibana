@@ -80,6 +80,9 @@ import {
   HostedAgentPolicyRestrictionRelatedError,
   FleetUnauthorizedError,
   PackagePolicyNameExistsError,
+  AgentPolicyNotFoundError,
+  InputNotFoundError,
+  StreamNotFoundError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -171,6 +174,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const logger = appContextService.getLogger();
     let secretReferences: PolicySecretReference[] | undefined;
+    logger.debug(`Creating new package policy`);
+
     let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
       packagePolicy,
@@ -300,6 +305,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     const createdPackagePolicy = { id: newSo.id, version: newSo.version, ...newSo.attributes };
+    logger.debug(`Created new package policy with id ${newSo.id} and version ${newSo.version}`);
 
     return packagePolicyService.runExternalCallbacks(
       'packagePolicyPostCreate',
@@ -351,6 +357,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }> = [];
 
     const logger = appContextService.getLogger();
+    logger.debug(`Starting bulk create of package policy`);
 
     const packagePoliciesWithIds = packagePolicies.map((p) => {
       if (!p.id) {
@@ -420,7 +427,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if (hasCreatedSO?.error && !hasFailed) {
         failedPolicies.push({
           packagePolicy,
-          error: hasCreatedSO?.error ?? new Error('Failed to create package policy.'),
+          error: hasCreatedSO?.error ?? new FleetError('Failed to create package policy.'),
         });
       }
     });
@@ -434,7 +441,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         });
       }
     }
-
+    logger.debug(`Created new package policies`);
     return {
       created: newSos.map((newSo) => ({
         id: newSo.id,
@@ -498,7 +505,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     if (packagePolicySO.error) {
-      throw new Error(packagePolicySO.error.message);
+      throw new FleetError(packagePolicySO.error.message);
     }
 
     let experimentalFeatures: ExperimentalDataStreamFeature[] | undefined;
@@ -587,7 +594,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           } else if (so.error.statusCode === 404) {
             throw new PackagePolicyNotFoundError(`Package policy ${so.id} not found`);
           } else {
-            throw new Error(so.error.message);
+            throw new FleetError(so.error.message);
           }
         }
 
@@ -689,12 +696,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       id,
       savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     });
+    const logger = appContextService.getLogger();
 
     let enrichedPackagePolicy: UpdatePackagePolicy;
     let secretReferences: PolicySecretReference[] | undefined;
     let secretsToDelete: PolicySecretReference[] | undefined;
 
     try {
+      logger.debug(`Starting update of package policy ${id}`);
       enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
         'packagePolicyUpdate',
         packagePolicyUpdate,
@@ -702,7 +711,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         esClient
       );
     } catch (error) {
-      const logger = appContextService.getLogger();
       logger.error(`An error occurred executing "packagePolicyUpdate" callback: ${error}`);
       logger.error(error);
       if (error.apiPassThrough) {
@@ -718,7 +726,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
     }
     if (!oldPackagePolicy) {
-      throw new Error('Package policy not found');
+      throw new PackagePolicyNotFoundError('Package policy not found');
     }
 
     if (
@@ -774,6 +782,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy: restOfPackagePolicy,
     });
 
+    logger.debug(`Updating SO with revision ${oldPackagePolicy.revision + 1}`);
     await soClient.update<PackagePolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       id,
@@ -825,6 +834,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
     // Bump revision of associated agent policy
+    logger.debug(`Bumping revision of associated agent policy ${packagePolicy.policy_id}`);
     const bumpPromise = agentPolicyService.bumpRevision(
       soClient,
       esClient,
@@ -845,6 +855,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     await Promise.all([bumpPromise, assetRemovePromise, deleteSecretsPromise]);
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, [packagePolicyUpdate], [oldPackagePolicy]);
+    logger.debug(`Package policy ${id} update completed`);
 
     return newPolicy;
   }
@@ -874,7 +885,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     );
 
     if (!oldPackagePolicies || oldPackagePolicies.length === 0) {
-      throw new Error('Package policy not found');
+      throw new PackagePolicyNotFoundError('Package policy not found');
     }
 
     const packageInfos = await getPackageInfoForPackagePolicies(packagePolicyUpdates, soClient);
@@ -892,7 +903,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
         const oldPackagePolicy = oldPackagePolicies.find((p) => p.id === id);
         if (!oldPackagePolicy) {
-          throw new Error('Package policy not found');
+          throw new PackagePolicyNotFoundError('Package policy not found');
         }
 
         let secretReferences: PolicySecretReference[] | undefined;
@@ -1050,6 +1061,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const result: PostDeletePackagePoliciesResponse = [];
     const logger = appContextService.getLogger();
+    logger.debug(`Deleting package policies ${ids}`);
 
     const packagePolicies = await this.getByIDs(soClient, ids, { ignoreMissing: true });
     if (!packagePolicies) {
@@ -1194,6 +1206,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         context,
         request
       );
+      logger.debug(`Deleted package policies ${ids}`);
     } catch (error) {
       logger.error(`An error occurred executing "packagePolicyPostDelete" callback: ${error}`);
       logger.error(error);
@@ -1924,7 +1937,9 @@ async function _compilePackagePolicyInput(
 
   const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
   if (!packageInput) {
-    throw new Error(`Input template not found, unable to find input type ${input.type}`);
+    throw new InputNotFoundError(
+      `Input template not found, unable to find input type ${input.type}`
+    );
   }
   if (!packageInput.template_path) {
     return undefined;
@@ -1935,7 +1950,9 @@ async function _compilePackagePolicyInput(
   );
 
   if (!pkgInputTemplate || !pkgInputTemplate.buffer) {
-    throw new Error(`Unable to load input template at /agent/input/${packageInput.template_path!}`);
+    throw new InputNotFoundError(
+      `Unable to load input template at /agent/input/${packageInput.template_path!}`
+    );
   }
 
   return compileTemplate(
@@ -2019,7 +2036,7 @@ async function _compilePackageStream(
 
   const packageDataStreams = getNormalizedDataStreams(pkgInfo);
   if (!packageDataStreams) {
-    throw new Error('Stream template not found, no data streams');
+    throw new StreamNotFoundError('Stream template not found, no data streams');
   }
 
   const packageDataStream = packageDataStreams.find(
@@ -2027,7 +2044,7 @@ async function _compilePackageStream(
   );
 
   if (!packageDataStream) {
-    throw new Error(
+    throw new StreamNotFoundError(
       `Stream template not found, unable to find dataset ${stream.data_stream.dataset}`
     );
   }
@@ -2038,11 +2055,15 @@ async function _compilePackageStream(
     (pkgStream) => pkgStream.input === input.type
   );
   if (!streamFromPkg) {
-    throw new Error(`Stream template not found, unable to find stream for input ${input.type}`);
+    throw new StreamNotFoundError(
+      `Stream template not found, unable to find stream for input ${input.type}`
+    );
   }
 
   if (!streamFromPkg.template_path) {
-    throw new Error(`Stream template path not found for dataset ${stream.data_stream.dataset}`);
+    throw new StreamNotFoundError(
+      `Stream template path not found for dataset ${stream.data_stream.dataset}`
+    );
   }
 
   const datasetPath = packageDataStream.path;
@@ -2054,7 +2075,7 @@ async function _compilePackageStream(
   );
 
   if (!pkgStreamTemplate || !pkgStreamTemplate.buffer) {
-    throw new Error(
+    throw new StreamNotFoundError(
       `Unable to load stream template ${streamFromPkg.template_path} for dataset ${stream.data_stream.dataset}`
     );
   }
@@ -2484,7 +2505,7 @@ async function validateIsNotHostedPolicy(
   const agentPolicy = await agentPolicyService.get(soClient, id, false);
 
   if (!agentPolicy) {
-    throw new Error('Agent policy not found');
+    throw new AgentPolicyNotFoundError('Agent policy not found');
   }
 
   if (agentPolicy.is_managed && !force) {
