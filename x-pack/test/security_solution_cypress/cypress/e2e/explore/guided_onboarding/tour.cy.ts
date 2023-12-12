@@ -68,7 +68,7 @@ describe('Guided onboarding tour', { tags: ['@ess'] }, () => {
     assertTourStepExist(AlertsCasesTourSteps.pointToAlertName);
   });
 
-  describe('persists tour steps in flyout on flyout toggle', { tags: ['@ess'] }, () => {
+  describe('persists tour steps in flyout on flyout toggle', () => {
     const stepsInAlertsFlyout = [
       AlertsCasesTourSteps.reviewAlertDetailsFlyout,
       AlertsCasesTourSteps.addAlertToCase,
@@ -78,7 +78,7 @@ describe('Guided onboarding tour', { tags: ['@ess'] }, () => {
     const stepsInCasesFlyout = [AlertsCasesTourSteps.createCase, AlertsCasesTourSteps.submitCase];
 
     stepsInAlertsFlyout.forEach((step) => {
-      it(`step: ${step}, resets to ${step}`, { tags: ['@ess'] }, () => {
+      it(`step: ${step}, resets to ${step}`, () => {
         startTour();
         goToStep(step);
         assertTourStepExist(step);
@@ -90,7 +90,7 @@ describe('Guided onboarding tour', { tags: ['@ess'] }, () => {
     });
 
     stepsInCasesFlyout.forEach((step) => {
-      it(`step: ${step}, resets to ${AlertsCasesTourSteps.createCase}`, { tags: ['@ess'] }, () => {
+      it(`step: ${step}, resets to ${AlertsCasesTourSteps.createCase}`, () => {
         startTour();
         goToStep(step);
         assertTourStepExist(step);
