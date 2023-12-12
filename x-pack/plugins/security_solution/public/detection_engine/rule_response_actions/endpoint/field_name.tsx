@@ -66,7 +66,8 @@ const FieldNameFieldComponent = ({
 
   const CONFIG = {
     label: i18n.translate('xpack.securitySolution.responseActions.endpoint.fieldLabel', {
-      defaultMessage: `${FIELD_LABEL}`,
+      defaultMessage: '{field}',
+      values: { field: FIELD_LABEL },
     }),
     helpText: renderEntityIdNote,
     validations: [
