@@ -23,7 +23,7 @@ function options(y: Argv) {
   return y
     .usage('$0 <file>')
     .positional('file', {
-      describe: 'Path to file that contains the scenario or name of a built-in scenario',
+      describe: 'Name of scenario',
       demandOption: true,
       string: true,
       choices: getBuiltinScenarios(),
