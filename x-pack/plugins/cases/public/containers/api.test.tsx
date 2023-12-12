@@ -14,7 +14,6 @@ import {
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   SECURITY_SOLUTION_OWNER,
-  OWNERS,
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
@@ -522,28 +521,6 @@ describe('Cases API', () => {
         method: 'POST',
         body: JSON.stringify({
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          ...DEFAULT_QUERY_PARAMS,
-        }),
-        signal: abortCtrl.signal,
-      });
-    });
-
-    it('should set all owners when no owner is provided', async () => {
-      await getCases({
-        filterOptions: {
-          ...DEFAULT_FILTER_OPTIONS,
-          owner: [],
-        },
-        queryParams: DEFAULT_QUERY_PARAMS,
-        signal: abortCtrl.signal,
-        initialOptions: { owner: [...OWNERS] },
-      });
-
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
-        method: 'POST',
-        body: JSON.stringify({
-          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          owner: [...OWNERS],
           ...DEFAULT_QUERY_PARAMS,
         }),
         signal: abortCtrl.signal,

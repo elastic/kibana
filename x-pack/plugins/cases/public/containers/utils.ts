@@ -172,10 +172,6 @@ export const constructReportersFilter = (reporters: User[]) => {
     : {};
 };
 
-export const constructOwnerFilter = (owner: string[], initialOwner?: string[]) => {
-  return owner.length > 0 ? { owner } : { owner: initialOwner };
-};
-
 export const constructCustomFieldsFilter = (
   optionKeysByCustomFieldKey: FilterOptions['customFields']
 ) => {

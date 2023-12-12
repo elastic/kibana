@@ -88,7 +88,6 @@ import {
   constructReportersFilter,
   decodeCaseUserActionStatsResponse,
   constructCustomFieldsFilter,
-  constructOwnerFilter,
 } from './utils';
 import { decodeCasesFindResponse } from '../api/decoders';
 
@@ -270,7 +269,6 @@ export const getCases = async ({
     sortField: SortFieldCase.createdAt,
     sortOrder: 'desc',
   },
-  initialOptions = {},
   signal,
 }: FetchCasesProps): Promise<CasesFindResponseUI> => {
   const body = {
@@ -289,7 +287,7 @@ export const getCases = async ({
     ...(filterOptions.tags.length > 0 ? { tags: filterOptions.tags } : {}),
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
-    ...constructOwnerFilter(filterOptions.owner, initialOptions.owner),
+    ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
     ...constructCustomFieldsFilter(filterOptions.customFields),
     ...queryParams,

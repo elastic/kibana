@@ -63,9 +63,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const isLoading = useIsLoadingCases();
 
     const hasOwner = !!owner.length;
-    const initialOptions = {
-      owner: hasOwner ? owner : availableSolutions,
-    };
+
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions = {
       ...(!isEmpty(hiddenStatuses) && firstAvailableStatus && { status: [firstAvailableStatus] }),
@@ -80,7 +78,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const { data = initialData, isFetching: isLoadingCases } = useGetCases({
       filterOptions,
       queryParams,
-      initialOptions,
     });
 
     const assigneesFromCases = useMemo(() => {
