@@ -96,7 +96,7 @@ export function SlosOutdatedDefinitions() {
     >
       <HeaderMenu />
 
-      {!hasRequiredWritePrivileges ? (
+      {!hasSlosAndHasPermissions ? (
         errors
       ) : (
         <>
