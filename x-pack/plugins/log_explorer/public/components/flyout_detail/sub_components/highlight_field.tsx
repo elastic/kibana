@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextTruncate } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTextTruncate } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { ValuesType } from 'utility-types';
+import { EcsFlat } from '@kbn/ecs';
+import { FieldIcon } from '@kbn/react-field';
 import { HoverActionPopover } from './hover_popover_action';
 import { LogDocument } from '../types';
 
@@ -32,9 +34,16 @@ export function HighlightField({
   return formattedValue ? (
     <EuiFlexGroup direction="column" gutterSize="none" {...props}>
       <EuiFlexItem>
-        <EuiText color="subdued" size="xs">
-          {label}
-        </EuiText>
+        <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiText color="subdued" size="xs">
+              {label}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FieldDescription fieldName={field} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <HoverActionPopover title={value as string} value={value} field={field}>
@@ -61,4 +70,23 @@ export function HighlightField({
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : null;
+}
+
+function FieldDescription({ fieldName }: { fieldName: string }) {
+  const { short, type } = EcsFlat[fieldName as keyof typeof EcsFlat];
+
+  if (!short) return null;
+
+  const title = (
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      {type && (
+        <EuiFlexItem grow={false}>
+          <FieldIcon type={type} size="s" />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>{fieldName}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  return <EuiIconTip title={title} content={short} color="subdued" />;
 }
