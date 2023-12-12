@@ -77,7 +77,6 @@ export const isScreenshotMode = () => {
   return pluginsStart.screenshotMode ? pluginsStart.screenshotMode.isScreenshotMode() : false;
 };
 export const getServerless = () => pluginsStart.serverless;
-export const getExpressionsService = () => pluginsStart.expressions;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;
