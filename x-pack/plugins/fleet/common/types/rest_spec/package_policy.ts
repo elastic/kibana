@@ -34,7 +34,7 @@ export interface GetOnePackagePolicyResponse {
 }
 
 export interface CreatePackagePolicyRequest {
-  body: NewPackagePolicy & { force?: boolean; skip_ensure_installed?: boolean };
+  body: NewPackagePolicy & { force?: boolean };
 }
 
 export interface CreatePackagePolicyResponse {

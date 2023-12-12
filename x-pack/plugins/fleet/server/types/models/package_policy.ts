@@ -118,7 +118,6 @@ export const NewPackagePolicySchema = schema.object({
   ...PackagePolicyBaseSchema,
   id: schema.maybe(schema.string()),
   force: schema.maybe(schema.boolean()),
-  skip_ensure_installed: schema.maybe(schema.boolean()),
 });
 
 const CreatePackagePolicyProps = {
@@ -148,7 +147,6 @@ export const CreatePackagePolicyRequestBodySchema = schema.object({
   ...CreatePackagePolicyProps,
   id: schema.maybe(schema.string()),
   force: schema.maybe(schema.boolean()),
-  skip_ensure_installed: schema.maybe(schema.boolean()),
 });
 
 const SimplifiedVarsSchema = schema.recordOf(
@@ -176,7 +174,6 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema = schema.object({
     experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
   }),
   force: schema.maybe(schema.boolean()),
-  skip_ensure_installed: schema.maybe(schema.boolean()),
   vars: schema.maybe(SimplifiedVarsSchema),
   inputs: schema.maybe(
     schema.recordOf(
@@ -211,7 +208,6 @@ export const UpdatePackagePolicyRequestBodySchema = schema.object({
   ),
   version: schema.maybe(schema.string()),
   force: schema.maybe(schema.boolean()),
-  skip_ensure_installed: schema.maybe(schema.boolean()),
 });
 
 export const UpdatePackagePolicySchema = schema.object({

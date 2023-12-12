@@ -23,7 +23,6 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { memoize } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
 import { usageTracker } from './usage_tracker';
 import { getEndpointPackageInfo } from '../utils/package';
@@ -111,50 +110,8 @@ export const indexFleetEndpointPolicy = usageTracker.track(
         version: packageVersion,
       },
     };
-    log?.info('Installing package');
 
-    const installEndpointPackage = async (): Promise<InstallPackageResponse> =>
-      kbnClient
-        .request<InstallPackageResponse>({
-          path: '/api/fleet/epm/packages/endpoint',
-          method: 'POST',
-          headers: {
-            'elastic-api-version': API_VERSIONS.public.v1,
-          },
-          body: {
-            force: false,
-          },
-        })
-        .catch(catchAxiosErrorFormatAndThrow)
-        .then((res) => res.data);
-
-    const startedPackageInstallation = new Date();
-    const packageInstallationHasTimedOut = (): boolean => {
-      const elapsedTime = Date.now() - startedPackageInstallation.getTime();
-      return elapsedTime > 5 * 60 * 1000;
-    };
-
-    let installedPackage: InstallPackageResponse | undefined;
-
-    while (!installedPackage && !packageInstallationHasTimedOut()) {
-      installedPackage = await retryOnError(
-        async () => installEndpointPackage(),
-        [...RETRYABLE_TRANSIENT_ERRORS, 'resource_not_found_exception'],
-        log
-      );
-
-      if (!installedPackage) {
-        await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
-      }
-    }
-
-    if (!installedPackage) {
-      throw new Error(`Package installation failed`);
-    }
-
-    log?.info('Installed endpoint package');
-
-    const fetchPackagePolicy = async (): Promise<CreatePackagePolicyResponse> =>
+    const createPackagePolicy = async (): Promise<CreatePackagePolicyResponse> =>
       kbnClient
         .request<CreatePackagePolicyResponse>({
           path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
@@ -178,7 +135,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
 
     while (!packagePolicy && !hasTimedOut()) {
       packagePolicy = await retryOnError(
-        async () => fetchPackagePolicy(),
+        async () => createPackagePolicy(),
         [...RETRYABLE_TRANSIENT_ERRORS, 'resource_not_found_exception'],
         log
       );

@@ -223,7 +223,7 @@ export const waitForHostToEnroll = async (
   }
   log.info('Querying indices');
 
-  log.info(
+  log.debug(
     JSON.stringify(
       await esClient?.search({
         index: [
