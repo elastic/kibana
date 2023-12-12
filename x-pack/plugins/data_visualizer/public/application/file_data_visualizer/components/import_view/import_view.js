@@ -29,6 +29,7 @@ import { ImportProgress, IMPORT_STATUS } from '../import_progress';
 import { ImportErrors } from '../import_errors';
 import { ImportSummary } from '../import_summary';
 import { ImportSettings } from '../import_settings';
+import { DocCountChart } from '../doc_count_chart';
 import {
   addCombinedFieldsToPipeline,
   addCombinedFieldsToMappings,
@@ -74,6 +75,7 @@ const DEFAULT_STATE = {
   isFilebeatFlyoutVisible: false,
   checkingValidIndex: false,
   combinedFields: [],
+  readDocCount: 0,
 };
 
 export class ImportView extends Component {
@@ -225,6 +227,7 @@ export class ImportView extends Component {
                     this.setState({
                       readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
                       reading: false,
+                      readDocCount: readResp.docCount,
                     });
 
                     if (readResp.success === false) {
@@ -487,40 +490,40 @@ export class ImportView extends Component {
           </EuiTitle>
         </EuiPageHeader>
         <EuiSpacer size="m" />
-        <EuiPanel data-test-subj="dataVisualizerFileImportSettingsPanel">
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.dataVisualizer.file.importView.importDataTitle"
-                defaultMessage="Import data"
-              />
-            </h2>
-          </EuiTitle>
+        {initialized === false ? (
+          <EuiPanel data-test-subj="dataVisualizerFileImportSettingsPanel">
+            <EuiTitle size="s">
+              <h2>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.importView.importDataTitle"
+                  defaultMessage="Import data"
+                />
+              </h2>
+            </EuiTitle>
 
-          <ImportSettings
-            index={index}
-            dataView={dataView}
-            initialized={initialized}
-            onIndexChange={this.onIndexChange}
-            createDataView={createDataView}
-            onCreateDataViewChange={this.onCreateDataViewChange}
-            onDataViewChange={this.onDataViewChange}
-            indexSettingsString={indexSettingsString}
-            mappingsString={mappingsString}
-            pipelineString={pipelineString}
-            onIndexSettingsStringChange={this.onIndexSettingsStringChange}
-            onMappingsStringChange={this.onMappingsStringChange}
-            onPipelineStringChange={this.onPipelineStringChange}
-            indexNameError={indexNameError}
-            dataViewNameError={dataViewNameError}
-            combinedFields={combinedFields}
-            onCombinedFieldsChange={this.onCombinedFieldsChange}
-            results={this.props.results}
-          />
+            <ImportSettings
+              index={index}
+              dataView={dataView}
+              initialized={initialized}
+              onIndexChange={this.onIndexChange}
+              createDataView={createDataView}
+              onCreateDataViewChange={this.onCreateDataViewChange}
+              onDataViewChange={this.onDataViewChange}
+              indexSettingsString={indexSettingsString}
+              mappingsString={mappingsString}
+              pipelineString={pipelineString}
+              onIndexSettingsStringChange={this.onIndexSettingsStringChange}
+              onMappingsStringChange={this.onMappingsStringChange}
+              onPipelineStringChange={this.onPipelineStringChange}
+              indexNameError={indexNameError}
+              dataViewNameError={dataViewNameError}
+              combinedFields={combinedFields}
+              onCombinedFieldsChange={this.onCombinedFieldsChange}
+              results={this.props.results}
+            />
 
-          <EuiSpacer size="m" />
+            <EuiSpacer size="m" />
 
-          {(initialized === false || importing === true) && (
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -557,40 +560,8 @@ export class ImportView extends Component {
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
-          )}
-
-          {initialized === true && importing === false && (
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={this.clickReset}>
-                  <FormattedMessage
-                    id="xpack.dataVisualizer.file.importView.resetButtonLabel"
-                    defaultMessage="Reset"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={() => this.props.onChangeMode(DATAVISUALIZER_MODE.READ)}
-                  isDisabled={importing}
-                >
-                  <FormattedMessage
-                    id="xpack.dataVisualizer.file.importView.backButtonLabel"
-                    defaultMessage="Back"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={() => this.props.onCancel()} isDisabled={importing}>
-                  <FormattedMessage
-                    id="xpack.dataVisualizer.file.importView.importNewButtonLabel"
-                    defaultMessage="Import a new file"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </EuiPanel>
+          </EuiPanel>
+        ) : null}
 
         {initialized === true && (
           <React.Fragment>
@@ -598,6 +569,15 @@ export class ImportView extends Component {
 
             <EuiPanel>
               <ImportProgress statuses={statuses} />
+
+              <DocCountChart
+                statuses={statuses}
+                dataStart={this.props.dataStart}
+                index={index}
+                mappingsString={mappingsString}
+                fileUpload={this.props.fileUpload}
+                readDocCount={this.state.readDocCount}
+              />
 
               {imported === true && (
                 <React.Fragment>
@@ -612,6 +592,27 @@ export class ImportView extends Component {
                     createDataView={createDataView}
                     createPipeline={createPipeline}
                   />
+
+                  <EuiSpacer size="l" />
+
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton onClick={this.clickReset}>
+                        <FormattedMessage
+                          id="xpack.dataVisualizer.file.importView.resetButtonLabel"
+                          defaultMessage="Reset"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={() => this.props.onCancel()} isDisabled={importing}>
+                        <FormattedMessage
+                          id="xpack.dataVisualizer.file.importView.importNewButtonLabel"
+                          defaultMessage="Import a new file"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
 
                   <EuiSpacer size="l" />
 

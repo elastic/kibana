@@ -342,6 +342,7 @@ export class FileDataVisualizerView extends Component {
               fileContents={fileContents}
               data={data}
               dataViewsContract={this.props.dataViewsContract}
+              dataStart={this.props.dataStart}
               fileUpload={this.props.fileUpload}
               getAdditionalLinks={this.props.getAdditionalLinks}
               capabilities={this.props.capabilities}

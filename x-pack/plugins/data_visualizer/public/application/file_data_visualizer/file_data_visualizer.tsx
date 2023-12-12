@@ -42,6 +42,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks }) => {
         <CloudContext>
           <FileDataVisualizerView
             dataViewsContract={data.dataViews}
+            dataStart={data}
             http={coreStart.http}
             fileUpload={fileUpload}
             getAdditionalLinks={getAdditionalLinks}
