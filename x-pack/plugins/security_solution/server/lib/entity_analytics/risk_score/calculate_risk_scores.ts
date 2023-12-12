@@ -71,7 +71,7 @@ const formatForResponse = ({
 }): RiskScore => {
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
   const normalizedScoreWithCriticality = applyCriticalityToScore({
-    score: bucket.risk_details.value.normalized_score, // TODO investigate whether normalization can be done in memory with negligible overhead
+    score: bucket.risk_details.value.normalized_score,
     modifier: criticalityModifier,
   });
   const calculatedLevel = getRiskLevel(normalizedScoreWithCriticality);
@@ -242,7 +242,6 @@ const processScores = async ({
 
   const criticalities = await assetCriticalityService.getCriticalitiesByIdentifiers(identifiers);
 
-  // TODO can we do this better? We're searching through criticalities on every bucket
   return buckets.map((bucket) => {
     const criticality = criticalities.find(
       (c) => c.id_field === identifierField && c.id_value === bucket.key[identifierField]
