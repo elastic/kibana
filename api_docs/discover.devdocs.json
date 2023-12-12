@@ -1526,7 +1526,15 @@
             "section": "def-public.CustomizationCallback",
             "text": "CustomizationCallback"
           },
-          "[]; }"
+          "[]; stateStorageContainer?: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.IKbnUrlStateStorage",
+            "text": "IKbnUrlStateStorage"
+          },
+          " | undefined; }"
         ],
         "path": "src/plugins/discover/public/components/discover_container/index.ts",
         "deprecated": false,
