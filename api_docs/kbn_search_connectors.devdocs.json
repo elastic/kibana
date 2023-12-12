@@ -4922,7 +4922,7 @@
             "section": "def-common.ConnectorStatus",
             "text": "ConnectorStatus"
           },
-          "; language: string | null; index_name: string | null; configuration: ",
+          "; language: string | null; configuration: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -4930,7 +4930,7 @@
             "section": "def-common.ConnectorConfiguration",
             "text": "ConnectorConfiguration"
           },
-          "; pipeline?: ",
+          "; index_name: string | null; pipeline?: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
