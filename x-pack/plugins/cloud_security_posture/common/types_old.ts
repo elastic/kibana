@@ -141,7 +141,6 @@ export interface BaseCspSetupStatus {
 
 export type CspSetupStatus = BaseCspSetupStatus;
 
-
 export type BenchmarkId = CspBenchmarkRuleMetadata['benchmark']['id'];
 export type BenchmarkName = CspBenchmarkRuleMetadata['benchmark']['name'];
 export type RuleSection = CspBenchmarkRuleMetadata['section'];

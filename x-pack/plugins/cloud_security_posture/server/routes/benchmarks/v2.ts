@@ -5,28 +5,15 @@
  * 2.0.
  */
 
-import { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger } from '@kbn/core/server';
-import {
-  PackagePolicyClient,
-  AgentPolicyServiceInterface,
-  AgentService,
-} from '@kbn/fleet-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
-  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  POSTURE_TYPE_ALL,
   CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '../../../common/constants';
 
-import {
-  getCspPackagePolicies,
-  getCspAgentPolicies,
-  getAgentStatusesByAgentPolicies,
-} from '../../lib/fleet_util';
 import { CspBenchmarkRule, Benchmark } from '../../../common/types/latest';
 import { getClusters } from '../compliance_dashboard/get_clusters';
 import { getStats } from '../compliance_dashboard/get_stats';
