@@ -63,9 +63,7 @@ describe('useEuiComboBoxReset', () => {
       );
     };
 
-    const { debug } = render(<EuiComboBoxResetTest />);
-
-    debug();
+    render(<EuiComboBoxResetTest />);
 
     const initialValue = screen.getByRole('combobox');
     expect(initialValue).toHaveValue(options[0].label);
