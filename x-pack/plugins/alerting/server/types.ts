@@ -141,6 +141,7 @@ export interface RuleExecutorOptions<
   flappingSettings: RulesSettingsFlappingProperties;
   maintenanceWindowIds?: string[];
   getTimeRange: (timeWindow?: string) => { dateStart: string; dateEnd: string };
+  queryDelay?: number;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {

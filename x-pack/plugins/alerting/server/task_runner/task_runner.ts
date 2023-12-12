@@ -533,6 +533,8 @@ export class TaskRunner<
                 : {}),
               getTimeRange: (timeWindow) =>
                 getTimeRange(this.logger, queryDelaySettings, timeWindow),
+              // TODO: Make only accessible by user defined rule type
+              queryDelay: queryDelaySettings.delay,
             })
           );
 

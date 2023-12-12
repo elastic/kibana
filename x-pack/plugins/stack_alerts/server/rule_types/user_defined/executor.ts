@@ -47,7 +47,7 @@ export async function executor(
 
   const userDefinedCode = params.stringifiedUserCode;
   // Wrap customCode with our own code file to provide utilities
-  const wrappedCode = wrapUserDefinedCode(userDefinedCode);
+  const wrappedCode = wrapUserDefinedCode(userDefinedCode, options);
 
   const alertLimit = alertsClient.getAlertLimitValue();
   let hasReachedLimit = false;
@@ -114,7 +114,10 @@ export async function executor(
   return { state: {} };
 }
 
-function wrapUserDefinedCode(code: string) {
+function wrapUserDefinedCode(
+  code: string,
+  options: RuleExecutorOptions<Params, {}, {}, {}, typeof ActionGroupId, StackAlertType>
+) {
   const template = fs.readFileSync(`${__dirname}/child_process_template.tplt`, 'utf8');
   const wrappedTemplate = template.replace(
     '// INJECT CODE HERE',
@@ -125,7 +128,7 @@ function wrapUserDefinedCode(code: string) {
   );
 
   // Inject necessary variables
-  return wrappedTemplate.replace(`{{queryDelay}}`, '15000'); // TODO: Pull from settings
+  return wrappedTemplate.replace(`{{queryDelay}}`, `${options.queryDelay}`);
 }
 
 function getDetectedAlerts(output: string) {
