@@ -8,6 +8,8 @@
 import type { RegisterRuleTypesParams } from '../types';
 import { getRuleType } from './rule_type';
 
+export { ID } from './rule_type';
+
 export function register(params: RegisterRuleTypesParams) {
   const { alerting } = params;
   alerting.registerType(getRuleType());
