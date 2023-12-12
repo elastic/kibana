@@ -13,15 +13,15 @@ import { ChatItem } from './chat_item';
 import { ChatWelcomePanel } from './chat_welcome_panel';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import type { Feedback } from '../feedback_buttons';
-import { type Message } from '../../../common';
+import type { Message } from '../../../common';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import type { ChatActionClickHandler } from './types';
+import type { ObservabilityAIAssistantChatService } from '../../types';
+import { ChatState } from '../../hooks/use_chat';
 import {
   getTimelineItemsfromConversation,
   StartedFrom,
 } from '../../utils/get_timeline_items_from_conversation';
-import { ObservabilityAIAssistantChatService } from '../../types';
-import { ChatState } from '../../hooks/use_chat';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
@@ -118,6 +118,7 @@ export function ChatTimeline({
           return Array.isArray(item) ? (
             <ChatConsolidatedItems
               key={index}
+              chatService={chatService}
               consolidatedItem={item}
               onFeedback={onFeedback}
               onRegenerate={onRegenerate}
@@ -130,6 +131,7 @@ export function ChatTimeline({
               // use index, not id to prevent unmounting of component when message is persisted
               key={index}
               {...item}
+              chatService={chatService}
               onFeedbackClick={(feedback) => {
                 onFeedback(item.message, feedback);
               }}

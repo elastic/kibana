@@ -11,6 +11,7 @@ import { EuiAvatar, EuiButtonIcon, EuiComment, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { ChatItem } from './chat_item';
 import type { ChatTimelineItem, ChatTimelineProps } from './chat_timeline';
+import type { ObservabilityAIAssistantChatService } from '../../types';
 
 const noPanelStyle = css`
   .euiCommentEvent {
@@ -48,6 +49,7 @@ const noPanelStyle = css`
 `;
 
 export function ChatConsolidatedItems({
+  chatService,
   consolidatedItem,
   onFeedback,
   onRegenerate,
@@ -55,6 +57,7 @@ export function ChatConsolidatedItems({
   onStopGenerating,
   onActionClick,
 }: {
+  chatService: ObservabilityAIAssistantChatService;
   consolidatedItem: ChatTimelineItem[];
   onFeedback: ChatTimelineProps['onFeedback'];
   onRegenerate: ChatTimelineProps['onRegenerate'];
@@ -122,6 +125,7 @@ export function ChatConsolidatedItems({
               // use index, not id to prevent unmounting of component when message is persisted
               key={index}
               {...item}
+              chatService={chatService}
               onFeedbackClick={(feedback) => {
                 onFeedback(item.message, feedback);
               }}

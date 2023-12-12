@@ -8,10 +8,12 @@
 import React from 'react';
 import { MessageText } from '../message_panel/message_text';
 import { ChatPromptEditor } from './chat_prompt_editor';
-import { MessageRole, type Message } from '../../../common';
-import { ChatActionClickHandler } from './types';
+import { type Message, MessageRole } from '../../../common';
+import type { ChatActionClickHandler } from './types';
+import type { ObservabilityAIAssistantChatService } from '../../types';
 
 interface Props {
+  chatService: ObservabilityAIAssistantChatService;
   content: string | undefined;
   functionCall:
     | {
@@ -26,6 +28,7 @@ interface Props {
   onActionClick: ChatActionClickHandler;
 }
 export function ChatItemContentInlinePromptEditor({
+  chatService,
   content,
   functionCall,
   editing,
@@ -37,6 +40,7 @@ export function ChatItemContentInlinePromptEditor({
     <MessageText content={content || ''} loading={loading} onActionClick={onActionClick} />
   ) : (
     <ChatPromptEditor
+      chatService={chatService}
       disabled={false}
       loading={false}
       initialPrompt={content}

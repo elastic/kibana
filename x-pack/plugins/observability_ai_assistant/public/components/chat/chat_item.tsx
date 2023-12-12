@@ -21,12 +21,14 @@ import { ChatItemContentInlinePromptEditor } from './chat_item_content_inline_pr
 import { ChatItemControls } from './chat_item_controls';
 import { ChatTimelineItem } from './chat_timeline';
 import { getRoleTranslation } from '../../utils/get_role_translation';
-import type { Feedback } from '../feedback_buttons';
-import { Message } from '../../../common';
 import { FailedToLoadResponse } from '../message_panel/failed_to_load_response';
-import { ChatActionClickHandler } from './types';
+import type { Message } from '../../../common';
+import type { Feedback } from '../feedback_buttons';
+import type { ChatActionClickHandler } from './types';
+import type { ObservabilityAIAssistantChatService } from '../../types';
 
 export interface ChatItemProps extends ChatTimelineItem {
+  chatService: ObservabilityAIAssistantChatService;
   onEditSubmit: (message: Message) => void;
   onFeedbackClick: (feedback: Feedback) => void;
   onRegenerateClick: () => void;
@@ -66,15 +68,16 @@ const noPanelMessageClassName = css`
 
 export function ChatItem({
   actions: { canCopy, canEdit, canGiveFeedback, canRegenerate },
-  display: { collapsed },
-  message: {
-    message: { function_call: functionCall, role },
-  },
+  chatService,
   content,
   currentUser,
+  display: { collapsed },
   element,
   error,
   loading,
+  message: {
+    message: { function_call: functionCall, role },
+  },
   title,
   onEditSubmit,
   onFeedbackClick,
@@ -124,6 +127,7 @@ export function ChatItem({
   let contentElement: React.ReactNode =
     content || loading || error ? (
       <ChatItemContentInlinePromptEditor
+        chatService={chatService}
         content={content}
         editing={editing}
         functionCall={functionCall}
