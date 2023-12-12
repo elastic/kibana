@@ -194,12 +194,25 @@ export const createExternalService = (
         });
       }
 
+      // use blocks like this:
+      // [
+      //   {
+      //     "type": "section",
+      //     "text": {
+      //         "type": "mrkdwn",
+      //         "text": "hallo from blockkit!"
+      //     }
+      //   }
+      // ]
+
+      const blocks = getBlocks(text);
+
       const result: AxiosResponse<PostMessageResponse> = await request({
         axios: axiosInstance,
         method: 'post',
         url: `${SLACK_URL}chat.postMessage`,
         logger,
-        data: { channel: channelToUse, text },
+        data: { channel: channelToUse, blocks },
         headers,
         configurationUtilities,
       });
@@ -215,3 +228,18 @@ export const createExternalService = (
     postMessage,
   };
 };
+
+function getBlocks(text: string) {
+  if (text.trim().startsWith('[')) return text;
+  if (text.trim().startsWith('{')) return text;
+
+  return `[
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: ${JSON.stringify(text)},
+      }
+    }
+  ]`;
+}
