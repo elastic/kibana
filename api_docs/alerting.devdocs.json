@@ -3491,6 +3491,10 @@
               },
               {
                 "plugin": "observability",
+                "path": "x-pack/plugins/observability/server/lib/rules/custom_threshold/custom_threshold_executor.ts"
+              },
+              {
+                "plugin": "observability",
                 "path": "x-pack/plugins/observability/server/lib/rules/slo_burn_rate/executor.ts"
               },
               {
