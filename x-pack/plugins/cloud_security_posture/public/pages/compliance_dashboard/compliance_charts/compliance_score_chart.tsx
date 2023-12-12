@@ -35,7 +35,7 @@ import { DASHBOARD_COMPLIANCE_SCORE_CHART } from '../test_subjects';
 import { statusColors } from '../../../common/constants';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
-import type { Evaluation, PostureTrend, Stats } from '../../../../common/types';
+import type { Evaluation, PostureTrend, Stats } from '../../../../common/types_old';
 import { useKibana } from '../../../common/hooks/use_kibana';
 
 interface ComplianceScoreChartProps {

@@ -14,14 +14,21 @@ import type { LangChainTracer } from 'langchain/callbacks';
 import { RequestBody, ResponseBody } from '../types';
 
 export interface AgentExecutorParams {
+  alertsIndexPattern?: string;
   actions: ActionsPluginStart;
+  allow?: string[];
+  allowReplacement?: string[];
+  assistantLangChain: boolean;
   connectorId: string;
   esClient: ElasticsearchClient;
   kbResource: string | undefined;
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
+  onNewReplacements?: (newReplacements: Record<string, string>) => void;
+  replacements?: Record<string, string>;
   request: KibanaRequest<unknown, unknown, RequestBody>;
+  size?: number;
   elserId?: string;
   traceOptions?: TraceOptions;
 }

@@ -15,7 +15,7 @@ import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VULN_MGMT_AWS,
 } from '../../../common/constants';
-import type { PostureInput } from '../../../common/types';
+import type { PostureInput } from '../../../common/types_old';
 
 export const getMockPolicyAWS = () => getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws');
 export const getMockPolicyGCP = () => getPolicyMock(CLOUDBEAT_GCP, 'cspm', 'gcp');

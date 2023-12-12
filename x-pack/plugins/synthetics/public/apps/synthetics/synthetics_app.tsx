@@ -98,7 +98,9 @@ const Application = (props: SyntheticsAppProps) => {
               }}
             >
               <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
-                <ObservabilityAIAssistantProvider value={startPlugins.observabilityAIAssistant}>
+                <ObservabilityAIAssistantProvider
+                  value={startPlugins.observabilityAIAssistant.service}
+                >
                   <Router history={appMountParameters.history}>
                     <EuiThemeProvider darkMode={darkMode}>
                       <SyntheticsRefreshContextProvider>
