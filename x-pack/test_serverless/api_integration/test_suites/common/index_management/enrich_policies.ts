@@ -12,7 +12,8 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const indexManagementService = getService('indexManagement');
 
-  describe('Enrich policies', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/172697
+  describe.skip('Enrich policies', function () {
     const INDEX_NAME = `index-${Math.random()}`;
     const POLICY_NAME = `policy-${Math.random()}`;
 

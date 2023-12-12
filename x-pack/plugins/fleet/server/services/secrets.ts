@@ -412,7 +412,7 @@ export async function extractAndUpdateSecrets(opts: {
   });
 
   const policyWithSecretRefs = JSON.parse(JSON.stringify(packagePolicyUpdate));
-  toCreate.forEach((secretPath, i) => {
+  secretsToCreate.forEach((secretPath, i) => {
     set(policyWithSecretRefs, secretPath.path + '.value', toVarSecretRef(createdSecrets[i].id));
   });
 

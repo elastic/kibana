@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, type FC } from 'react';
-import {
-  ExpandableFlyout,
-  type ExpandableFlyoutProps,
-  ExpandableFlyoutProvider,
-} from '@kbn/expandable-flyout';
+import React, { memo } from 'react';
+import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import {
   IsolateHostPanel,
@@ -92,13 +88,6 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
 ];
-
-// NOTE: provider below accepts "storage" prop, please take a look into component's JSDoc.
-export const SecuritySolutionFlyoutContextProvider: FC = ({ children }) => (
-  <ExpandableFlyoutProvider storage="url">{children}</ExpandableFlyoutProvider>
-);
-
-SecuritySolutionFlyoutContextProvider.displayName = 'SecuritySolutionFlyoutContextProvider';
 
 export const SecuritySolutionFlyout = memo(() => (
   <ExpandableFlyout registeredPanels={expandableFlyoutDocumentsPanels} paddingSize="none" />

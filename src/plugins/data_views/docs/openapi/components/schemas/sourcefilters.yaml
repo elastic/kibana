@@ -1,2 +1,9 @@
 type: array
 description: The array of field names you want to filter out in Discover.
+items:
+  type: object
+  required:
+    - value
+  properties:
+    value:
+      type: string
