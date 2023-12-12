@@ -489,6 +489,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         advanced: { enabled: true },
         basic: { enabled: true },
       },
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.confluence.name', {
       defaultMessage: 'Confluence',
@@ -784,7 +787,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTAREA,
-        label: 'Google Cloud service account JSON',
+        label: i18n.translate('searchConnectors.nativeConnectors.googleCloudStorage.label', {
+          defaultMessage: 'Google Cloud service account JSON',
+        }),
         options: [],
         order: 1,
         required: true,
@@ -799,7 +804,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 3,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: 'Maximum retries for failed requests',
+        label: i18n.translate('searchConnectors.nativeConnectors.googleCloudStorage.retry.label', {
+          defaultMessage: 'Maximum retries for failed requests',
+        }),
         options: [],
         order: 2,
         required: false,
@@ -814,13 +821,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
-        label: 'Use text extraction service',
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
         order: 3,
         required: true,
         sensitive: false,
-        tooltip:
-          'Requires a separate deployment of the Elastic Text Extraction Service. Requires that pipeline settings disable text extraction.',
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
         type: FieldType.BOOLEAN,
         ui_restrictions: ['advanced'],
         validations: [],
@@ -2618,12 +2624,16 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTAREA,
-        label: 'AWS Buckets',
+        label: i18n.translate('searchConnectors.content.nativeConnectors.s3.buckets.label', {
+          defaultMessage: 'AWS Buckets',
+        }),
         options: [],
         order: 1,
         required: true,
         sensitive: false,
-        tooltip: 'AWS Buckets are ignored when Advanced Sync Rules are used.',
+        tooltip: i18n.translate('searchConnectors.content.nativeConnectors.s3.buckets.tooltip', {
+          defaultMessage: 'AWS Buckets are ignored when Advanced Sync Rules are used.',
+        }),
         type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
@@ -2633,7 +2643,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'AWS Access Key Id',
+        label: i18n.translate('searchConnectors.content.nativeConnectors.s3.accessKey.label', {
+          defaultMessage: 'AWS Access Key Id',
+        }),
         options: [],
         order: 2,
         required: true,
@@ -2648,7 +2660,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'AWS Secret Key',
+        label: i18n.translate('searchConnectors.content.nativeConnectors.s3.secretKey.label', {
+          defaultMessage: 'AWS Secret Key',
+        }),
         options: [],
         order: 3,
         required: true,
@@ -2663,7 +2677,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 90,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: 'Read timeout',
+
+        label: i18n.translate('searchConnectors.content.nativeConnectors.s3.readTimeout.label', {
+          defaultMessage: 'Read timeout',
+        }),
         options: [],
         order: 4,
         required: false,
@@ -2678,7 +2695,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 90,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: 'Connection timeout',
+        label: i18n.translate('searchConnectors.content.nativeConnectors.s3.connectTimeout.label', {
+          defaultMessage: 'Connection timeout',
+        }),
         options: [],
         order: 5,
         required: false,
@@ -2693,7 +2712,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 5,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: 'Maximum retry attempts',
+        label: i18n.translate('searchConnectors.content.nativeConnectors.s3.maxAttempts.label', {
+          defaultMessage: 'Maximum retry attempts',
+        }),
         options: [],
         order: 6,
         required: false,
@@ -2708,7 +2729,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 100,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: 'Maximum size of page',
+        label: i18n.translate('searchConnectors.content.nativeConnectors.s3.maxPageSize.label', {
+          defaultMessage: 'Maximum size of page',
+        }),
         options: [],
         order: 7,
         required: false,
@@ -2723,13 +2746,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
-        label: 'Use text extraction service',
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
         order: 8,
         required: true,
         sensitive: false,
-        tooltip:
-          'Requires a separate deployment of the Elastic Text Extraction Service. Requires that pipeline settings disable text extraction.',
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
         type: FieldType.BOOLEAN,
         ui_restrictions: ['advanced'],
         validations: [],
@@ -2749,13 +2771,20 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'Domain',
+        label: i18n.translate('searchConnectors.content.nativeConnectors.salesforce.domain.label', {
+          defaultMessage: 'Domain',
+        }),
         options: [],
         order: 1,
         required: true,
         sensitive: false,
-        tooltip:
-          "The domain for your Salesforce instance. If your Salesforce URL is 'foo.my.salesforce.com', the domain would be 'foo'.",
+        tooltip: i18n.translate(
+          'searchConnectors.content.nativeConnectors.salesforce.domain.tooltip',
+          {
+            defaultMessage:
+              "The domain for your Salesforce instance. If your Salesforce URL is, the domain would be 'foo'.",
+          }
+        ),
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
@@ -2765,12 +2794,23 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'Client ID',
+        label: i18n.translate(
+          'searchConnectors.content.nativeConnectors.salesforce.clientId.label',
+          {
+            defaultMessage: 'Client ID',
+          }
+        ),
         options: [],
         order: 2,
         required: true,
         sensitive: true,
-        tooltip: "The client id for your OAuth2-enabled connected app. Also called 'consumer key'",
+        tooltip: i18n.translate(
+          'searchConnectors.content.nativeConnectors.salesforce.clientId.tooltip',
+          {
+            defaultMessage:
+              "The client id for your OAuth2-enabled connected app. Also called 'consumer key'",
+          }
+        ),
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
@@ -2780,13 +2820,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'Client Secret',
+        label: i18n.translate(
+          'searchConnectors.content.nativeConnectors.salesforce.clientSecret.label',
+          { defaultMessage: 'Client Secret' }
+        ),
         options: [],
         order: 3,
         required: true,
         sensitive: true,
-        tooltip:
-          "The client secret for your OAuth2-enabled connected app. Also called 'consumer secret'",
+        tooltip: i18n.translate(
+          'searchConnectors.content.nativeConnectors.salesforce.clientSecret.tooltip',
+          {
+            defaultMessage:
+              "The client secret for your OAuth2-enabled connected app. Also called 'consumer secret'",
+          }
+        ),
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
@@ -2796,13 +2844,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
-        label: 'Use text extraction service',
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
         order: 4,
         required: true,
         sensitive: false,
-        tooltip:
-          'Requires a separate deployment of the Elastic Text Extraction Service. Requires that pipeline settings disable text extraction.',
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
         type: FieldType.BOOLEAN,
         ui_restrictions: ['advanced'],
         validations: [],
@@ -2820,7 +2867,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'Service URL',
+        label: i18n.translate('searchConnectors.nativeConnectors.servicenow.url.label', {
+          defaultMessage: 'Service URL',
+        }),
         options: [],
         order: 1,
         required: true,
@@ -2835,7 +2884,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTAREA,
-        label: 'Username',
+        label: i18n.translate('searchConnectors.nativeConnectors.servicenow.username.label', {
+          defaultMessage: 'Username',
+        }),
         options: [],
         order: 2,
         required: true,
@@ -2850,7 +2901,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'Password',
+        label: i18n.translate('searchConnectors.nativeConnectors.servicenow.password.label', {
+          defaultMessage: 'Password',
+        }),
         options: [],
         order: 3,
         required: true,
@@ -2864,13 +2917,17 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       services: {
         default_value: null,
         depends_on: [],
+        label: i18n.translate('searchConnectors.nativeConnectors.servicenow.services.label', {
+          defaultMessage: 'Comma-separated list of services',
+        }),
         display: DisplayType.TEXTAREA,
-        label: 'Comma-separated list of services',
         options: [],
         order: 4,
         required: true,
         sensitive: false,
-        tooltip: 'List of services is ignored when Advanced Sync Rules are used.',
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.servicenow.services.tooltip', {
+          defaultMessage: 'List of services is ignored when Advanced Sync Rules are used.',
+        }),
         type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
@@ -2880,7 +2937,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 3,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: 'Retries per request',
+        label: RETRIES_PER_REQUEST_LABEL,
         options: [],
         order: 5,
         required: false,
@@ -2895,7 +2952,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 10,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: 'Maximum concurrent downloads',
+        label: MAX_CONCURRENT_DOWNLOADS_LABEL,
         options: [],
         order: 6,
         required: false,
