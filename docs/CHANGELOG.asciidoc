@@ -89,7 +89,13 @@ Review important information about the {kib} 7.17.x releases.
 [[release-notes-7.17.16]]
 == {kib} 7.17.16
 
-The 7.17.16 release includes the following bug fixes.
+Review the following information about the {kib} 7.17.16 release.
+
+[float]
+[[security-update-v7.17.16]]
+=== Security updates
+
+* The 7.17.16 patch release contains a fix for a potential security vulnerability. https://discuss.elastic.co/c/announcements/security-announcements/31[Please see our security advisory for more details].
 
 [float]
 [[fixes-v7.17.16]]
