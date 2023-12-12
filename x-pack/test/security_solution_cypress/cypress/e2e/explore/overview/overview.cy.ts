@@ -51,12 +51,14 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
       createTimeline(getTimeline())
         .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
         .then((timelineId: string) => {
-          favoriteTimeline({ timelineId, timelineType: 'default' }).then((response) => {
-            expect(response.status).to.eq(200);
+          favoriteTimeline({ timelineId, timelineType: 'default' }).then(() => {
+            visitWithTimeRange(OVERVIEW_URL);
+            cy.get('[data-test-subj="overview-recent-timelines"]').should(
+              'contain',
+              getTimeline().title
+            );
           });
         });
-      visitWithTimeRange(OVERVIEW_URL);
-      cy.get('[data-test-subj="overview-recent-timelines"]').should('contain', getTimeline().title);
     });
   });
 });

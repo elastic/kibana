@@ -61,7 +61,7 @@ const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
 
 const DEFAULT_REGION = 'aws-eu-west-1';
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
-const BASE_ENV_URL = 'https://global.qa.cld.elstc.co';
+const BASE_ENV_URL = 'https://console.qa.cld.elstc.co';
 let log: ToolingLog;
 const API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress-creds',
@@ -585,6 +585,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             }
 
             if (isOpen) {
+              process.env.TEST_CLOUD_HOST_NAME = new URL(BASE_ENV_URL).hostname;
+
               await cypress.open({
                 configFile: cypressConfigFilePath,
                 config: {
