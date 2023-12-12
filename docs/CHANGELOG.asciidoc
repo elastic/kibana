@@ -81,6 +81,12 @@ Operations::
 The 8.11.2 release includes the following bug fixes.
 
 [float]
+[[security-update-v8.11.2]]
+=== Security updates
+
+* The 8.11.2 patch release contains a fix for a potential security vulnerability. https://discuss.elastic.co/c/announcements/security-announcements/31[Please see our security advisory for more details].
+
+[float]
 [[enhancement-v8.11.2]]
 === Enhancements
 APM::
