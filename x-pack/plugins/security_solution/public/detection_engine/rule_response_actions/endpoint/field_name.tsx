@@ -31,7 +31,7 @@ const ECSSchemaOptions = ECSSchema.map((ecs) => ({
 }));
 
 const SINGLE_SELECTION = { asPlainText: true };
-
+const FIELD_LABEL = 'Custom field name';
 const FieldNameFieldComponent = ({
   path,
   disabled,
@@ -42,27 +42,14 @@ const FieldNameFieldComponent = ({
   const fieldValue = get(data, path);
   const context = useFormContext();
 
-  const currentField = context.getFields()[path];
+  const currentFieldNameField = context.getFields()[path];
 
   useEffect(() => {
     // hackish way to clear errors on this field - because we base this validation on the value of overwrite toggle
-    if (currentField) {
-      if (!isRequired) {
-        currentField?.clearErrors();
-      } else if (isRequired && currentField.value === '') {
-        currentField.setErrors([
-          {
-            message: i18n.translate(
-              'xpack.securitySolution.responseActions.endpoint.validations.fieldRequiredErrorMessage',
-              {
-                defaultMessage: 'This is a required field.',
-              }
-            ),
-          },
-        ]);
-      }
+    if (currentFieldNameField && !isRequired) {
+      currentFieldNameField?.clearErrors();
     }
-  }, [currentField, isRequired]);
+  }, [currentFieldNameField, isRequired]);
 
   const renderEntityIdNote = useMemo(() => {
     const contains = fieldValue?.includes('entity_id');
@@ -77,14 +64,32 @@ const FieldNameFieldComponent = ({
     return null;
   }, [fieldValue]);
 
-  const CONFIG = useMemo(() => {
-    return {
-      label: i18n.translate('xpack.securitySolution.responseActions.endpoint.fieldLabel', {
-        defaultMessage: 'Custom field name',
-      }),
-      helpText: renderEntityIdNote,
-    };
-  }, [renderEntityIdNote]);
+  const CONFIG = {
+    label: i18n.translate('xpack.securitySolution.responseActions.endpoint.fieldLabel', {
+      defaultMessage: FIELD_LABEL,
+    }),
+    helpText: renderEntityIdNote,
+    validations: [
+      {
+        validator: ({ value }: { value: string }) => {
+          if (isRequired && value === '') {
+            return {
+              code: 'ERR_FIELD_MISSING',
+              path,
+              message: i18n.translate(
+                'xpack.securitySolution.responseActions.endpoint.validations.commandIsRequiredErrorMessage',
+                {
+                  defaultMessage:
+                    '{field} is a required field when process.pid toggle is turned off',
+                  values: { field: FIELD_LABEL },
+                }
+              ),
+            };
+          }
+        },
+      },
+    ],
+  };
 
   const optionsAsComboBoxOptions = ECSSchemaOptions.map(({ label }) => ({
     label,
@@ -131,5 +136,4 @@ const FieldNameFieldComponent = ({
     </>
   );
 };
-
 export const FieldNameField = React.memo(FieldNameFieldComponent);
