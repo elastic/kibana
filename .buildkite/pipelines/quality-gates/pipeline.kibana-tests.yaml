@@ -10,7 +10,7 @@
 #
 # Docs: https://docs.elastic.dev/serverless/qualitygates
 
-agent:
+agents:
   cpu: 2
   ephemeralStorage: "20G"
   memory: "8G"
