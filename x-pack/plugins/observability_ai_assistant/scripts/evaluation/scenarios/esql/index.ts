@@ -119,14 +119,15 @@ export const apmServiceInventoryQuery = createEsqlQueryEvaluation({
 });
 
 export const metricbeatCpuQuery = createEsqlQueryEvaluation({
-  question: `from \`metricbeat*\`, I want to see the percentage of CPU time normalized by the number of CPU cores, broken down by hostname. the fields are system.cpu.user.pct, system.cpu.system.pct, and system.cpu.cores`,
+  question: `from \`metricbeat*\`, using ES|QL, I want to see the percentage of CPU time normalized by the number of CPU cores, broken down by hostname. the fields are system.cpu.user.pct, system.cpu.system.pct, and system.cpu.cores`,
   expected: `FROM metricbeat*
   | EVAL cpu_pct_normalized = (system.cpu.user.pct + system.cpu.system.pct) / system.cpu.cores
   | STATS AVG(cpu_pct_normalized) BY host.name`,
 });
 
 export const postgresDurationQuery = createEsqlQueryEvaluation({
-  question: 'extract the query duration from postgres log messages, and calculate the avg',
+  question:
+    'extract the query duration from postgres log messages in postgres-logs*, using ECS fields, and calculate the avg',
   expected: `FROM postgres-logs
   | DISSECT message "%{} duration: %{query_duration} ms"
   | EVAL query_duration_num = TO_DOUBLE(query_duration)

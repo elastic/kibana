@@ -86,7 +86,7 @@ function runEvaluations() {
             });
           }
 
-          const evaluationFunctions: Array<{
+          let evaluationFunctions: Array<{
             name: string;
             fileName: string;
             fn: EvaluationFunction;
@@ -98,6 +98,13 @@ function runEvaluations() {
             Object.keys(mod).forEach((key) => {
               evaluationFunctions.push({ name: key, fileName, fn: mod[key] });
             });
+          }
+
+          if (argv.grep) {
+            const lc = argv.grep.toLowerCase();
+            evaluationFunctions = evaluationFunctions.filter((fn) =>
+              fn.name.toLowerCase().includes(lc)
+            );
           }
 
           const header: string[][] = [
