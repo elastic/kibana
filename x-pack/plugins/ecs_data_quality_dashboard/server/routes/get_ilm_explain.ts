@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 
 import { GET_ILM_EXPLAIN, INTERNAL_API_VERSION } from '../../common/constants';
 import { fetchILMExplain } from '../lib';

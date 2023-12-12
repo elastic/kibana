@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/data-stream",
+  "version": "1.0.0",
+  "description": "Utility library to for Elasticsearch DataStream creation",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "private": true
+}

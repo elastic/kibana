@@ -249,6 +249,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               })
             : EMPTY_MARKDOWN_COMMENTS;
 
+        console.log('updatePatternRollup index_properties');
         updatePatternRollup({
           ...patternRollup,
           results: {

@@ -12,7 +12,7 @@ import { serverMock } from '../__mocks__/server';
 import { requestMock } from '../__mocks__/request';
 import { requestContextMock } from '../__mocks__/request_context';
 import { getILMExplainRoute } from './get_ilm_explain';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 jest.mock('../lib', () => ({
   fetchILMExplain: jest.fn(),

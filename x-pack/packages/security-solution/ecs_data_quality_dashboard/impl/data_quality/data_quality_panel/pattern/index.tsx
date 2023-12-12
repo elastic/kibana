@@ -264,6 +264,7 @@ const PatternComponent: React.FC<Props> = ({
         stats,
       })
     ) {
+      console.log('updatePatternRollup pattern');
       updatePatternRollup({
         docsCount: newDocsCount,
         error,

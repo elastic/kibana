@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsFlat, EcsVersion } from '@kbn/ecs';
+import { EcsFlat } from '@kbn/ecs';
 
 import { EuiButton } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -106,7 +106,6 @@ const CheckAllComponent: React.FC<Props> = ({
               allIndicesToCheck.length > 0 ? checked === allIndicesToCheck.length - 1 : true,
             onCheckCompleted,
             pattern,
-            version: EcsVersion,
           });
 
           if (!abortController.current.signal.aborted) {

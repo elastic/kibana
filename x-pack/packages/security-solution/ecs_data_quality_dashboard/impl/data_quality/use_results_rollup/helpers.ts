@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { HttpHandler } from '@kbn/core-http-browser';
+import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 import { getIndexDocsCountFromRollup } from '../data_quality_panel/data_quality_summary/summary_actions/check_all/helpers';
 import { getIlmPhase } from '../data_quality_panel/pattern/helpers';
 import { getAllIncompatibleMarkdownComments } from '../data_quality_panel/tabs/incompatible_tab/helpers';
@@ -13,6 +15,7 @@ import {
   getTotalPatternIncompatible,
   getTotalPatternIndicesChecked,
   getTotalPatternSameFamily,
+  INTERNAL_API_VERSION,
 } from '../helpers';
 import type { IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../types';
 
@@ -175,3 +178,22 @@ export const updateResultOnCheckCompleted = ({
     return patternRollups;
   }
 };
+
+export const RESULTS_API_ROUTE = '/internal/ecs_data_quality_dashboard/results';
+
+export async function postResult({
+  abortController,
+  httpFetch,
+  result,
+}: {
+  abortController: AbortController;
+  httpFetch: HttpHandler;
+  result: unknown;
+}): Promise<Record<string, IndicesGetMappingIndexMappingRecord>> {
+  return httpFetch<Record<string, IndicesGetMappingIndexMappingRecord>>(RESULTS_API_ROUTE, {
+    method: 'POST',
+    signal: abortController.signal,
+    version: INTERNAL_API_VERSION,
+    body: JSON.stringify(result),
+  });
+}
