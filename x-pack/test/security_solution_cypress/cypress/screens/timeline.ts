@@ -296,7 +296,9 @@ export const TIMELINE_DATE_PICKER_CONTAINER = getDataTestSubjectSelector(
 
 export const TIMELINE_FILTER_BADGE = `[data-test-subj^='timeline-filters-container'] [data-test-subj^="filter-badge"]`;
 
-export const NEW_TIMELINE_ACTION = getDataTestSubjectSelector('new-timeline-action');
+export const NEW_TIMELINE_ACTION = `${getDataTestSubjectSelector('flyoutBottomBar')} 
+  ${TIMELINE_SETTINGS_ICON}
+`;
 
 export const SAVE_TIMELINE_ACTION = getDataTestSubjectSelector('save-timeline-action');
 export const SAVE_TIMELINE_ACTION_BTN = getDataTestSubjectSelector('save-timeline-action-btn');

@@ -84,6 +84,7 @@ import {
   TIMELINE_SEARCH_OR_FILTER,
   TIMELINE_KQLMODE_FILTER,
   TIMELINE_KQLMODE_SEARCH,
+  TIMELINE_DATA_PROVIDERS_CONTAINER,
 } from '../screens/timeline';
 
 import { REFRESH_BUTTON, TIMELINE, TIMELINES_TAB_TEMPLATE } from '../screens/timelines';
@@ -213,6 +214,10 @@ export const changeTimelineQueryLanguage = (language: 'kuery' | 'lucene') => {
 };
 
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
+  cy.get(TOGGLE_DATA_PROVIDER_BTN).click();
+  // Cypress doesn't properly wait for the data provider to finish expanding, so we wait for the animation to finish.
+  cy.wait(600);
+  cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('be.visible');
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
   cy.get(LOADING_INDICATOR).should('not.exist');
   cy.get('[data-popover-open]').should('exist');
@@ -223,9 +228,15 @@ export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuer
   cy.get(TIMELINE_DATA_PROVIDER_FIELD)
     .find(COMBO_BOX_INPUT)
     .type(`${filter.field}{downarrow}{enter}`);
+
+  cy.get(TIMELINE_DATA_PROVIDER_OPERATOR)
+    .find(`${COMBO_BOX_INPUT} input`)
+    .type(`{selectall}{backspace}{selectall}{backspace}`);
+
   cy.get(TIMELINE_DATA_PROVIDER_OPERATOR)
     .find(COMBO_BOX_INPUT)
     .type(`${filter.operator}{downarrow}{enter}`);
+
   if (filter.operator !== 'exists') {
     cy.get(TIMELINE_DATA_PROVIDER_VALUE).type(`${filter.value}{enter}`);
   }
@@ -302,7 +313,7 @@ export const closeTimeline = () => {
 };
 
 export const createNewTimeline = () => {
-  cy.get(NEW_TIMELINE_ACTION).click();
+  cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
   cy.get(CREATE_NEW_TIMELINE).first().click();
 };
 
