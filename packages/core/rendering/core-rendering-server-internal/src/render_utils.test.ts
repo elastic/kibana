@@ -6,14 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { getDarkModeStylesheetPaths } from './render_utils';
+import { getThemeStylesheetPaths, getCommonStylesheetPaths } from './render_utils';
+
+describe('getCommonStylesheetPaths', () => {
+  it('returns the correct list', () => {
+    expect(
+      getCommonStylesheetPaths({
+        baseHref: '/base-path',
+        buildNum: 17,
+      })
+    ).toMatchInlineSnapshot(`
+      Array [
+        "/base-path/17/bundles/kbn-ui-shared-deps-src/kbn-ui-shared-deps-src.css",
+        "/base-path/ui/legacy_styles.css",
+      ]
+    `);
+  });
+});
 
 describe('getStylesheetPaths', () => {
   describe('when darkMode is `true`', () => {
     describe('when themeVersion is `v8`', () => {
       it('returns the correct list', () => {
         expect(
-          getDarkModeStylesheetPaths({
+          getThemeStylesheetPaths({
             darkMode: true,
             themeVersion: 'v8',
             baseHref: '/base-path',
@@ -22,7 +38,6 @@ describe('getStylesheetPaths', () => {
         ).toMatchInlineSnapshot(`
           Array [
             "/base-path/17/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.v8.dark.css",
-            "/base-path/17/bundles/kbn-ui-shared-deps-src/kbn-ui-shared-deps-src.css",
             "/base-path/ui/legacy_dark_theme.min.css",
           ]
         `);
@@ -33,7 +48,7 @@ describe('getStylesheetPaths', () => {
     describe('when themeVersion is `v8`', () => {
       it('returns the correct list', () => {
         expect(
-          getDarkModeStylesheetPaths({
+          getThemeStylesheetPaths({
             darkMode: false,
             themeVersion: 'v8',
             baseHref: '/base-path',
@@ -42,7 +57,6 @@ describe('getStylesheetPaths', () => {
         ).toMatchInlineSnapshot(`
           Array [
             "/base-path/69/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.v8.light.css",
-            "/base-path/69/bundles/kbn-ui-shared-deps-src/kbn-ui-shared-deps-src.css",
             "/base-path/ui/legacy_light_theme.min.css",
           ]
         `);

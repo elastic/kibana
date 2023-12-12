@@ -33,7 +33,10 @@ export const getCommonStylesheetPaths = ({
   baseHref: string;
 }) => {
   const bundlesHref = getBundlesHref(baseHref, String(buildNum));
-  return [`${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`];
+  return [
+    `${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
+    `${baseHref}/ui/legacy_styles.css`,
+  ];
 };
 
 export const getThemeStylesheetPaths = ({
