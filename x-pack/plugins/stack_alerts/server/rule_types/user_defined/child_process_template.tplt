@@ -2,9 +2,7 @@ import process from 'node:process';
 
 import { esClient } from './lib/es_client.ts';
 import { alertsClient, reportAlert } from './lib/alerts_client.ts';
-import { getTimeRangeFn } from './lib/get_time_range.ts';
-
-const getTimeRange = getTimeRangeFn({{queryDelay}});
+import { getTimeRange } from './lib/get_time_range.ts';
 
 (async () => {
   try {

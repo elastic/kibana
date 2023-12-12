@@ -47,7 +47,7 @@ export async function executor(
 
   const userDefinedCode = params.stringifiedUserCode;
   // Wrap customCode with our own code file to provide utilities
-  const wrappedCode = wrapUserDefinedCode(userDefinedCode, options);
+  const wrappedCode = wrapUserDefinedCode(userDefinedCode);
 
   const alertLimit = alertsClient.getAlertLimitValue();
   let hasReachedLimit = false;
@@ -62,6 +62,7 @@ export async function executor(
         env: {
           PATH: process.env.PATH,
           ELASTICSEARCH_API_KEY: apiKey,
+          QUERY_DELAY_MS: options.queryDelay?.toString(),
         },
       }
     );
@@ -114,21 +115,15 @@ export async function executor(
   return { state: {} };
 }
 
-function wrapUserDefinedCode(
-  code: string,
-  options: RuleExecutorOptions<Params, {}, {}, {}, typeof ActionGroupId, StackAlertType>
-) {
+function wrapUserDefinedCode(code: string) {
   const template = fs.readFileSync(`${__dirname}/child_process_template.tplt`, 'utf8');
-  const wrappedTemplate = template.replace(
+  return template.replace(
     '// INJECT CODE HERE',
     code
       .split('\n')
       .map((s) => `    ${s}`)
       .join('\n')
   );
-
-  // Inject necessary variables
-  return wrappedTemplate.replace(`{{queryDelay}}`, `${options.queryDelay}`);
 }
 
 function getDetectedAlerts(output: string) {
