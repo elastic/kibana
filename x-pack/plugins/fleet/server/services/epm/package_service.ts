@@ -183,7 +183,7 @@ class PackageClientImpl implements PackageClient {
   }): Promise<InstallResult | undefined> {
     await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
-    const { pkgName, pkgVersion, spaceId = DEFAULT_SPACE_ID, force = true } = options;
+    const { pkgName, pkgVersion, spaceId = DEFAULT_SPACE_ID, force = false } = options;
 
     // If pkgVersion isn't specified, find the latest package version
     const pkgKeyProps = pkgVersion
