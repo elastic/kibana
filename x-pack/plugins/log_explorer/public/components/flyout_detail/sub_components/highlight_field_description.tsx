@@ -11,7 +11,7 @@ import { FieldIcon } from '@kbn/react-field';
 import React from 'react';
 
 export function HighlightFieldDescription({ fieldName }: { fieldName: string }) {
-  const { short, type } = EcsFlat[fieldName as keyof typeof EcsFlat];
+  const { short, type } = EcsFlat[fieldName as keyof typeof EcsFlat] ?? {};
 
   if (!short) return null;
 
