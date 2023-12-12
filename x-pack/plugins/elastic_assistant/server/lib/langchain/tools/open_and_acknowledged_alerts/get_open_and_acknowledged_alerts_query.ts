@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const getOpenAlertsQuery = ({
+export const getOpenAndAcknowledgedAlertsQuery = ({
   alertsIndexPattern,
   allow,
   size,
