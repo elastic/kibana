@@ -8,7 +8,7 @@ import { httpServerMock, httpServiceMock, savedObjectsClientMock } from '@kbn/co
 import {
   benchmarksQueryParamsSchema,
   DEFAULT_BENCHMARKS_PER_PAGE,
-} from '../../../common/schemas/benchmark';
+} from '../../../common/types/benchmarks/v1';
 import { getCspAgentPolicies } from '../../lib/fleet_util';
 import { defineGetBenchmarksRoute } from './benchmarks';
 import { getRulesCountForPolicy } from './utilities';

@@ -26,7 +26,7 @@ import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { BenchmarksTable } from './benchmarks_table';
 import {
-  useCspBenchmarkIntegrations,
+  useCspBenchmarkIntegrationsV2,
   UseCspBenchmarkIntegrationsProps,
 } from './use_csp_benchmark_integrations';
 import { extractErrorMessage, getBenchmarkCisName } from '../../../common/utils/helpers';
@@ -145,7 +145,7 @@ export const Benchmarks = () => {
     sortOrder: 'asc',
   });
 
-  const queryResult = useCspBenchmarkIntegrations(query);
+  const queryResult = useCspBenchmarkIntegrationsV2();
   const benchmarkResult =
     queryResult.data?.items.filter((obj) => getBenchmarkCisName(obj.id)?.includes(query.name)) ||
     [];
