@@ -76,7 +76,7 @@ const formatForResponse = ({
   });
   const calculatedLevel = getRiskLevel(normalizedScoreWithCriticality);
   const categoryFiveScore =
-    bucket.risk_details.value.normalized_score - normalizedScoreWithCriticality;
+    normalizedScoreWithCriticality - bucket.risk_details.value.normalized_score;
   const categoryFiveCount = criticalityModifier ? 1 : 0;
 
   return {
