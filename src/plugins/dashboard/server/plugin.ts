@@ -15,6 +15,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
+import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
@@ -35,6 +36,7 @@ interface SetupDeps {
   usageCollection: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   contentManagement: ContentManagementServerSetup;
+  lens: LensServerPluginSetup;
 }
 
 interface StartDeps {
@@ -61,7 +63,7 @@ export class DashboardPlugin
       })
     );
 
-    setupQueryExtractionRoute(core);
+    setupQueryExtractionRoute(core, plugins.lens.docToExpression);
 
     plugins.contentManagement.register({
       id: CONTENT_ID,

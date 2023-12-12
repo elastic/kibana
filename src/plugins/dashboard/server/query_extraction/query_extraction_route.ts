@@ -10,10 +10,14 @@ import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/s
 import type { CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { LensByValueInput } from '@kbn/lens-plugin/public/embeddable/embeddable';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SavedDashboardPanel } from '../../common/content_management';
 import { convertSavedDashboardPanelToPanelState, type DashboardAttributes } from '../../common';
 
-export const setupQueryExtractionRoute = ({ http, getStartServices }: CoreSetup) => {
+export const setupQueryExtractionRoute = (
+  { http, getStartServices }: CoreSetup,
+  docToExpression: LensServerPluginSetup['docToExpression']
+) => {
   const router = http.createRouter();
 
   router.versioned
@@ -68,9 +72,10 @@ export const setupQueryExtractionRoute = ({ http, getStartServices }: CoreSetup)
             // savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
           };
 
-          // try {
-          //   const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
-          //     await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);
+          const expression = await docToExpression(savedVis, {
+            elasticsearch: (await context.core).elasticsearch.client.asCurrentUser,
+            savedObjects: client,
+          });
 
           return response.ok({
             body: {

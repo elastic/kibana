@@ -36,6 +36,7 @@ import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { NowProvider } from '@kbn/data-plugin/common';
 import type { EventAnnotationGroupSavedObjectAttributes } from '@kbn/event-annotation-plugin/common';
 import { mapSavedObjectToGroupConfig } from '@kbn/event-annotation-plugin/common';
+import { toExpression } from '@kbn/interpreter';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
@@ -44,7 +45,7 @@ import { LensAppLocatorDefinition } from '../common/locator/locator';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { LensStorage } from './content_management';
 import type { Document } from '../public/persistence';
-import { docToExpression } from '../common';
+import { docToExpression as _docToExpression } from '../common';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -75,6 +76,13 @@ export interface LensServerPluginSetup {
     id: string,
     migrationsGetter: () => MigrateFunctionsObject
   ) => void;
+  /**
+   * Converts a Lens document to an expression
+   */
+  docToExpression: (
+    doc: Document,
+    clients: { savedObjects: SavedObjectsClientContract; elasticsearch: ElasticsearchClient }
+  ) => Promise<string | null>;
 }
 
 export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {}> {
@@ -111,26 +119,13 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
     );
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
 
-    return {
-      lensEmbeddableFactory,
-      registerVisualizationMigration: (
-        id: string,
-        migrationsGetter: () => MigrateFunctionsObject
-      ) => {
-        if (this.customVisualizationMigrations[id]) {
-          throw new Error(`Migrations object for visualization ${id} registered already`);
-        }
-        this.customVisualizationMigrations[id] = migrationsGetter;
-      },
-    };
-  }
-
-  async start(core: CoreStart, plugins: PluginStartContract) {
-    const expressionFromAttributes = async (
+    const docToExpression = async (
       doc: Document,
       clients: { savedObjects: SavedObjectsClientContract; elasticsearch: ElasticsearchClient }
     ) => {
-      const dataViewsService = await plugins.dataViews.dataViewsServiceFactory(
+      const [, { dataViews }] = await core.getStartServices();
+
+      const dataViewsService = await dataViews.dataViewsServiceFactory(
         clients.savedObjects,
         clients.elasticsearch
       );
@@ -144,12 +139,12 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
         return mapSavedObjectToGroupConfig(savedObject);
       };
 
-      const expression = docToExpression(
+      const { ast } = await _docToExpression(
         {},
         {},
         doc,
         '',
-        { from: new Date().toISOString(), to: new Date().toISOString() },
+        { from: '', to: '' },
         loadAnnotationGroup,
         {
           dataViews: dataViewsService,
@@ -157,12 +152,26 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
         }
       );
 
-      return expression;
+      return ast ? toExpression(ast) : null;
     };
 
     return {
-      expressionFromAttributes,
+      lensEmbeddableFactory,
+      registerVisualizationMigration: (
+        id: string,
+        migrationsGetter: () => MigrateFunctionsObject
+      ) => {
+        if (this.customVisualizationMigrations[id]) {
+          throw new Error(`Migrations object for visualization ${id} registered already`);
+        }
+        this.customVisualizationMigrations[id] = migrationsGetter;
+      },
+      docToExpression,
     };
+  }
+
+  start(_core: CoreStart, _plugins: PluginStartContract) {
+    return {};
   }
 
   stop() {}
