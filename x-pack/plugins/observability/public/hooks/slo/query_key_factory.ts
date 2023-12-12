@@ -28,7 +28,8 @@ export const sloKeys = {
   historicalSummaries: () => [...sloKeys.all, 'historicalSummary'] as const,
   historicalSummary: (list: Array<{ sloId: string; instanceId: string }>) =>
     [...sloKeys.historicalSummaries(), list] as const,
-  definitions: (search: string) => [...sloKeys.all, 'definitions', search] as const,
+  definitions: (search: string, page: number, perPage: number, includeOutdatedOnly: boolean) =>
+    [...sloKeys.all, 'definitions', search, page, perPage, includeOutdatedOnly] as const,
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
   burnRates: (sloId: string, instanceId: string | undefined) =>
     [...sloKeys.all, 'burnRates', sloId, instanceId] as const,
