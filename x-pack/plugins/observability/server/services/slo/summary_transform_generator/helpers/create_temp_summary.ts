@@ -8,7 +8,7 @@
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO } from '../../../../domain/models';
 
-export function createTempSummaryDocument(slo: SLO) {
+export function createTempSummaryDocument(slo: SLO, spaceId: string) {
   return {
     service: {
       environment: null,
@@ -33,6 +33,11 @@ export function createTempSummaryDocument(slo: SLO) {
       id: slo.id,
       budgetingMethod: slo.budgetingMethod,
       revision: slo.revision,
+      objective: {
+        target: slo.objective.target,
+        timesliceTarget: slo.objective.timesliceTarget ?? null,
+        timesliceWindow: slo.objective.timesliceWindow?.format() ?? null,
+      },
       tags: slo.tags,
     },
     goodEvents: 0,
@@ -45,5 +50,6 @@ export function createTempSummaryDocument(slo: SLO) {
     statusCode: 0,
     status: 'NO_DATA',
     isTempDoc: true,
+    spaceId,
   };
 }
