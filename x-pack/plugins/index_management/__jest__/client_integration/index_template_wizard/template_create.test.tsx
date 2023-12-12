@@ -160,7 +160,7 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  describe.skip('form validation', () => {
+  describe('form validation', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup(httpSetup);
