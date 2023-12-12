@@ -78,6 +78,61 @@ describe('<RepositoryEdit />', () => {
     });
   });
 
+  describe('should disable client, bucket / container and base path fields for managed repositories', () => {
+    const mountComponentWithMock = async (repository: any) => {
+      httpRequestsMockHelpers.setGetRepositoryResponse(REPOSITORY_NAME, {
+        repository: { name: getRandomString(), ...repository },
+        snapshots: { count: 0 },
+        isManagedRepository: true,
+      });
+      testBed = await setup(httpSetup);
+
+      await act(async () => {
+        await nextTick();
+        testBed.component.update();
+      });
+    };
+
+    it('azure repository', async () => {
+      await mountComponentWithMock({ type: 'azure' });
+      const { find } = testBed;
+      const clientInput = find('clientInput');
+      expect(clientInput.props().disabled).toEqual(true);
+
+      const containerInput = find('containerInput');
+      expect(containerInput.props().disabled).toEqual(true);
+
+      const basePathInput = find('basePathInput');
+      expect(basePathInput.props().disabled).toEqual(true);
+    });
+
+    it('gcs repository', async () => {
+      await mountComponentWithMock({ type: 'gcs' });
+      const { find } = testBed;
+      const clientInput = find('clientInput');
+      expect(clientInput.props().disabled).toEqual(true);
+
+      const bucketInput = find('bucketInput');
+      expect(bucketInput.props().disabled).toEqual(true);
+
+      const basePathInput = find('basePathInput');
+      expect(basePathInput.props().disabled).toEqual(true);
+    });
+
+    it('s3 repository', async () => {
+      await mountComponentWithMock({ type: 's3' });
+      const { find } = testBed;
+      const clientInput = find('clientInput');
+      expect(clientInput.props().disabled).toEqual(true);
+
+      const bucketInput = find('bucketInput');
+      expect(bucketInput.props().disabled).toEqual(true);
+
+      const basePathInput = find('basePathInput');
+      expect(basePathInput.props().disabled).toEqual(true);
+    });
+  });
+
   describe('should populate the correct values', () => {
     const mountComponentWithMock = async (repository: any) => {
       httpRequestsMockHelpers.setGetRepositoryResponse(REPOSITORY_NAME, {
