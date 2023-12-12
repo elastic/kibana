@@ -6,7 +6,39 @@
  * Side Public License, v 1.
  */
 
-import { getThemeStylesheetPaths, getCommonStylesheetPaths } from './render_utils';
+import { getThemeStylesheetPaths, getCommonStylesheetPaths, getScriptPaths } from './render_utils';
+
+describe('getScriptPaths', () => {
+  it('returns the correct list when darkMode is `system`', () => {
+    expect(
+      getScriptPaths({
+        baseHref: '/base-path',
+        buildNum: 17,
+        darkMode: 'system',
+      })
+    ).toEqual(['/base-path/ui/legacy_theme.js']);
+  });
+
+  it('returns the correct list when darkMode is `true`', () => {
+    expect(
+      getScriptPaths({
+        baseHref: '/base-path',
+        buildNum: 17,
+        darkMode: true,
+      })
+    ).toEqual([]);
+  });
+
+  it('returns the correct list when darkMode is `false`', () => {
+    expect(
+      getScriptPaths({
+        baseHref: '/base-path',
+        buildNum: 17,
+        darkMode: false,
+      })
+    ).toEqual([]);
+  });
+});
 
 describe('getCommonStylesheetPaths', () => {
   it('returns the correct list', () => {

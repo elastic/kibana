@@ -68,7 +68,7 @@ export const getThemeSettings = (
         schema.literal('enabled'),
         schema.literal('disabled'),
         schema.literal('system'),
-        // backward-compatibility by still supporting boolean format
+        // for backward-compatibility
         schema.boolean(),
       ]),
     },
