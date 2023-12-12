@@ -19,8 +19,8 @@ import {
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
   OPTION_SELECTABLE_COUNT,
-  FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
   FILTER_GROUP_CONTROL_ACTION_EDIT,
+  FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
 } from '../../../screens/common/filter_group';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { login } from '../../../tasks/login';
@@ -117,12 +117,12 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     waitForAlerts();
   });
 
-  it.skip('Default page filters are populated when nothing is provided in the URL', () => {
+  it('Default page filters are populated when nothing is provided in the URL', () => {
     assertFilterControlsWithFilterObject();
   });
 
-  context.skip('Alert Page Filters Customization ', () => {
-    it.skip('should be able to delete Controls', () => {
+  context('Alert Page Filters Customization ', () => {
+    it('should be able to delete Controls', () => {
       waitForPageFilters();
       editFilterGroupControls();
       deleteFilterGroupControl(3);
@@ -132,7 +132,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
       discardFilterGroupControls();
     });
 
-    it.skip('should be able to add new Controls', () => {
+    it('should be able to add new Controls', () => {
       const fieldName = 'event.module';
       const label = 'EventModule';
       editFilterGroupControls();
@@ -146,7 +146,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
       cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
     });
 
-    it.skip('should be able to edit Controls', () => {
+    it('should be able to edit Controls', () => {
       const fieldName = 'event.module';
       const label = 'EventModule';
       editFilterGroupControls();
@@ -156,7 +156,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
       cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
     });
 
-    it.skip('should not sync to the URL in edit mode but only in view mode', () => {
+    it('should not sync to the URL in edit mode but only in view mode', () => {
       cy.url().then((urlString) => {
         editFilterGroupControls();
         deleteFilterGroupControl(3);
@@ -168,7 +168,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  it.skip('Page filters are loaded with custom values provided in the URL', () => {
+  it('Page filters are loaded with custom values provided in the URL', () => {
     const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.filter((item) => item.persist).map(
       (filter) => {
         return {
@@ -189,7 +189,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  it.skip('Page filters are loaded with custom filters and values', () => {
+  it('Page filters are loaded with custom filters and values', () => {
     const CUSTOM_URL_FILTER = [
       {
         title: 'Process',
@@ -221,14 +221,14 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
   });
 
-  context.skip('with data modificiation', () => {
-    it.skip(`Alert list is updated when the alerts are updated`, () => {
+  context('with data modificiation', () => {
+    it(`Alert list is updated when the alerts are updated`, () => {
       // mark status of one alert to be acknowledged
       selectCountTable();
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((noOfAlerts) => {
-          const originalAlertCount = noOfAlerts.split.skip(' ')[0];
+          const originalAlertCount = noOfAlerts.split(' ')[0];
           markAcknowledgedFirstAlert();
           waitForAlerts();
           cy.get(OPTION_LIST_VALUES(0)).click();
@@ -236,13 +236,13 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
           cy.get(ALERTS_COUNT)
             .invoke('text')
             .should((newAlertCount) => {
-              expect(newAlertCount.split.skip(' ')[0]).eq(String(parseInt(originalAlertCount, 10)));
+              expect(newAlertCount.split(' ')[0]).eq(String(parseInt(originalAlertCount, 10)));
             });
         });
     });
   });
 
-  it.skip(`URL is updated when filters are updated`, () => {
+  it(`URL is updated when filters are updated`, () => {
     openPageFilterPopover(1);
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
     cy.get(OPTION_SELECTABLE(1, 'high')).click();
@@ -258,7 +258,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     cy.url().should('include', expectedVal);
   });
 
-  it.skip(`Filters are restored from localstorage when user navigates back to the page.`, () => {
+  it(`Filters are restored from localstorage when user navigates back to the page.`, () => {
     cy.get(OPTION_LIST_VALUES(1)).click();
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
     cy.get(OPTION_SELECTABLE(1, 'high')).click({});
@@ -276,7 +276,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     cy.get(OPTION_LIST_VALUES(1)).contains('high'); // severity should be low as previously selected
   });
 
-  it.skip('Custom filters from URLS are populated & changed banner is displayed', () => {
+  it('Custom filters from URLS are populated & changed banner is displayed', () => {
     visitAlertsPageWithCustomFilters(customFilters);
     waitForPageFilters();
 
@@ -285,7 +285,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
   });
 
-  it.skip('Changed banner should hide on saving changes', () => {
+  it('Changed banner should hide on saving changes', () => {
     visitAlertsPageWithCustomFilters(customFilters);
     waitForPageFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
@@ -293,7 +293,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
 
-  it.skip('Changed banner should hide on discarding changes', () => {
+  it('Changed banner should hide on discarding changes', () => {
     visitAlertsPageWithCustomFilters(customFilters);
     waitForPageFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
@@ -301,15 +301,15 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
 
-  it.skip('Changed banner should hide on Reset', () => {
+  it('Changed banner should hide on Reset', () => {
     visitAlertsPageWithCustomFilters(customFilters);
     waitForPageFilters();
     resetFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
 
-  context.skip('Impact of inputs', () => {
-    it.skip('should recover from invalid kql Query result', () => {
+  context('Impact of inputs', () => {
+    it('should recover from invalid kql Query result', () => {
       // do an invalid search
       //
       kqlSearch('\\');
@@ -322,7 +322,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
       cy.get(OPTION_SELECTABLE(0, 'open')).get(OPTION_SELECTABLE_COUNT).should('have.text', 1);
     });
 
-    it.skip('should take kqlQuery into account', () => {
+    it('should take kqlQuery into account', () => {
       kqlSearch('kibana.alert.workflow_status: "nothing"');
       cy.get(ALERTS_REFRESH_BTN).trigger('click');
       waitForPageFilters();
@@ -331,7 +331,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
       cy.get(EMPTY_ALERT_TABLE).should('be.visible');
     });
 
-    it.skip('should take filters into account', () => {
+    it('should take filters into account', () => {
       openAddFilterPopover();
       fillAddFilterForm({
         key: 'kibana.alert.workflow_status',
@@ -343,7 +343,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
       cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
       cy.get(EMPTY_ALERT_TABLE).should('be.visible');
     });
-    it.skip('should take timeRange into account', () => {
+    it('should take timeRange into account', () => {
       const startDateWithZeroAlerts = 'Jan 1, 2002 @ 00:00:00.000';
       const endDateWithZeroAlerts = 'Jan 1, 2010 @ 00:00:00.000';
       setStartDate(startDateWithZeroAlerts);
