@@ -1,0 +1,12 @@
+functions
+COUNT
+Counts field values.
+    FROM employees
+    | STATS COUNT(height)
+  COUNT(height):long
+  --------------------
+  100
+Can take any field type as input and the result is always a long not
+matter the input type.
+There isn’t yet a COUNT(*). Please count a single valued field if you
+need a count of rows.

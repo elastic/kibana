@@ -1,0 +1,13 @@
+commands
+DISSECT
+DISSECT enables you to extract structured data out of a string. DISSECT
+matches the string against a delimiter-based pattern, and extracts the
+specified keys as columns.
+Refer to the dissect processor documentation for the syntax of dissect
+patterns.
+    ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1;"
+    | DISSECT a "%{Y}-%{M}-%{D}T%{h}:%{m}:%{s}Z - %{msg} - %{ip};"
+    | KEEP Y, M, D, h, m, s, msg, ip
+  Y:keyword   M:keyword   D:keyword   h:keyword   m:keyword   s:keyword   msg:keyword   ip:keyword
+  ----------- ----------- ----------- ----------- ----------- ----------- ------------- ------------
+  1953        01          23          12          15          00          some text     127.0.0.1

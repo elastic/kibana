@@ -1,0 +1,14 @@
+TO_STRING
+Converts a field into a string. For example:
+    ROW a=10
+    | EVAL j = TO_STRING(a)
+  a:integer   j:keyword
+  ----------- -----------
+  10          "10"
+It also works fine on multivalued fields:
+    ROW a=[10, 9, 8]
+    | EVAL j = TO_STRING(a)
+  a:integer    j:keyword
+  ------------ ------------------
+  [10, 9, 8]   ["10", "9", "8"]
+Alias: TO_STR

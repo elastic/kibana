@@ -1,0 +1,17 @@
+FLOOR
+[]
+Round a number down to the nearest integer.
+    ROW a=1.8
+    | EVAL a=FLOOR(a)
+  a:double
+  ----------
+  1
+This is a noop for long (including unsigned) and integer. For double
+this picks the the closest double value to the integer ala Math.floor.
+Supported types:
+  n               result
+  --------------- ---------------
+  double          double
+  integer         integer
+  long            long
+  unsigned_long   unsigned_long

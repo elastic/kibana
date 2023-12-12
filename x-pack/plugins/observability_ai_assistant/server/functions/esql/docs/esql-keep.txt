@@ -1,0 +1,24 @@
+commands
+KEEP
+The KEEP command enables you to specify what columns are returned and
+the order in which they are returned.
+To limit the columns that are returned, use a comma-separated list of
+column names. The columns are returned in the specified order:
+    FROM employees
+    | KEEP emp_no, first_name, last_name, height
+  emp_no:integer   first_name:keyword   last_name:keyword   height:double
+  ---------------- -------------------- ------------------- ---------------
+  10001            Georgi               Facello             2.03
+  10002            Bezalel              Simmel              2.08
+  10003            Parto                Bamford             1.83
+  10004            Chirstian            Koblick             1.78
+  10005            Kyoichi              Maliniak            2.05
+Rather than specify each column by name, you can use wildcards to return
+all columns with a name that matches a pattern:
+    FROM employees
+    | KEEP h*
+The asterisk wildcard (*) by itself translates to all columns that do
+not match the other arguments. This query will first return all columns
+with a name that starts with an h, followed by all other columns:
+    FROM employees
+    | KEEP h*, *

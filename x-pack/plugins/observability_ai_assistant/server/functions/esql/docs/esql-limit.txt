@@ -1,0 +1,5 @@
+LIMIT
+The LIMIT processing command enables you to limit the number of rows:
+    ```FROM employees
+    | SORT emp_no ASC
+    | LIMIT 5```

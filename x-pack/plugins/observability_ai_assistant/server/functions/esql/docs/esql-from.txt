@@ -1,0 +1,9 @@
+FROM
+The FROM source command returns a table from
+a data stream, index, or alias.
+    `FROM employees`
+Use comma-separated lists or wildcards to query multiple data streams,
+indices, or aliases:
+    `FROM employees-00001,employees-*`
+Use the METADATA directive to enable metadata fields:
+    `FROM employees [METADATA _id]`

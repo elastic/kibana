@@ -1,0 +1,26 @@
+ES|QL task management
+You can get running ES|QL queries with the task management API:
+    GET /_tasks?pretty&detailed&group_by=parents&human&actions=*data/read/esql
+Which returns a list of statuses like this:
+    {
+      "node" : "2j8UKw1bRO283PMwDugNNg",
+      "id" : 5326,
+      "type" : "transport",
+      "action" : "indices:data/read/esql",
+      "description" : "FROM test | STATS MAX(d) by a, b",  
+      "start_time" : "2023-07-31T15:46:32.328Z",
+      "start_time_in_millis" : 1690818392328,
+      "running_time" : "41.7ms",                           
+      "running_time_in_nanos" : 41770830,
+      "cancellable" : true,
+      "cancelled" : false,
+      "headers" : { }
+    }
+  -- ----------------------------------
+     The user submitted query.
+     Time the query has been running.
+  -- ----------------------------------
+You can use this to find long running queries and, if you need to,
+cancel them with the task cancellation API:
+    POST _tasks/2j8UKw1bRO283PMwDugNNg:5326/_cancel
+It may take a few seconds for the query to be stopped.

@@ -1,0 +1,16 @@
+MV_MIN
+Converts a multivalued field into a single valued field containing the
+minimum value. For example:
+    ROW a=[2, 1]
+    | EVAL min_a = MV_MIN(a)
+  a:integer   min_a:integer
+  ----------- ---------------
+  [2, 1]      1
+It can be used by any field type, including keyword fields. In that case
+picks the first string, comparing their utf-8 representation byte by
+byte:
+    ROW a=["foo", "bar"]
+    | EVAL min_a = MV_MIN(a)
+  a:keyword        min_a:keyword
+  ---------------- ---------------
+  ["foo", "bar"]   "bar"

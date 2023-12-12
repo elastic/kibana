@@ -1,0 +1,11 @@
+ES|QL aggregation functions
+STATS ... BY support these functions:
+-   AVG
+-   COUNT
+-   COUNT_DISTINCT
+-   MAX
+-   MEDIAN
+-   MEDIAN_ABSOLUTE_DEVIATION
+-   MIN
+-   PERCENTILE
+-   SUM

@@ -1,0 +1,13 @@
+ROUND
+Rounds a number to the closest number with the specified number of
+digits. Defaults to 0 digits if no number of digits is provided. If the
+specified number of digits is negative, rounds to the number of digits
+left of the decimal point.
+    FROM employees
+    | KEEP first_name, last_name, height
+    | EVAL height_ft = ROUND(height * 3.281, 1)
+  first_name:keyword   last_name:keyword   height:double   height_ft:double
+  -------------------- ------------------- --------------- ------------------
+  Arumugam             Ossenbruggen        2.1             6.9
+  Kwee                 Schusler            2.1             6.9
+  Saniya               Kalloufi            2.1             6.9

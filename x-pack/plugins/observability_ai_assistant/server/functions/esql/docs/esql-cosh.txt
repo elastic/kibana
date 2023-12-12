@@ -1,0 +1,15 @@
+COSH
+[]
+Cosine hyperbolic function.
+    ROW a=1.8
+    | EVAL cosh=COSH(a)
+  a:double   cosh:double
+  ---------- --------------------
+  1.8        3.1074731763172667
+Supported types:
+  n               result
+  --------------- --------
+  double          double
+  integer         double
+  long            double
+  unsigned_long   double

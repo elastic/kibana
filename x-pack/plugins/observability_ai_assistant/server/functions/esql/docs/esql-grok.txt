@@ -1,0 +1,14 @@
+commands
+GROK
+GROK enables you to extract structured data out of a string. GROK
+matches the string against patterns, based on regular expressions, and
+extracts the specified patterns as columns.
+Refer to the grok processor documentation for the syntax for of grok
+patterns.
+For example:
+    ROW a = "1953-01-23T12:15:00Z 127.0.0.1 some.email@foo.com 42"
+    | GROK a "%{TIMESTAMP_ISO8601:date} %{IP:ip} %{EMAILADDRESS:email} %{NUMBER:num:int}"
+    | KEEP date, ip, email, num
+  date:keyword           ip:keyword   email:keyword        num:integer
+  ---------------------- ------------ -------------------- -------------
+  1953-01-23T12:15:00Z   127.0.0.1    some.email@foo.com   42

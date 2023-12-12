@@ -1,0 +1,9 @@
+MV_COUNT
+Converts a multivalued field into a single valued field containing a
+count of the number of values:
+    ROW a=["foo", "zoo", "bar"]
+    | EVAL count_a = MV_COUNT(a)
+  a:keyword               count_a:integer
+  ----------------------- -----------------
+  ["foo", "zoo", "bar"]   3
+This function accepts all types and always returns an integer.

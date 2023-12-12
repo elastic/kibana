@@ -1,0 +1,18 @@
+LOG10
+[]
+Returns the log base 10. The input can be any numeric value, the return
+value is always a double.
+Logs of negative numbers are NaN. Logs of infinites are infinite, as is
+the log of 0.
+    ROW d = 1000.0
+    | EVAL s = LOG10(d)
+  d: double   s:double
+  ----------- ----------
+  1000.0      3.0
+Supported types:
+  n               result
+  --------------- --------
+  double          double
+  integer         double
+  long            double
+  unsigned_long   double

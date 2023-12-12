@@ -1,0 +1,34 @@
+ES|QL metadata fields
+ES|QL can access metadata fields. The currently supported ones are:
+-   _index: the index to which the document belongs. The field is of the
+    type keyword.
+-   _id: the source document’s ID. The field is of the type keyword.
+-   _version: the source document’s version. The field is of the type
+    long.
+To enable the access to these fields, the FROM source command needs to
+be provided with a dedicated directive:
+    FROM index [METADATA _index, _id]
+Metadata fields are only available if the source of the data is an
+index. Consequently, FROM is the only source commands that supports the
+METADATA directive.
+Once enabled, the fields are then available to subsequent processing
+commands, just like the other index fields:
+    FROM ul_logs, apps [METADATA _index, _version]
+    | WHERE id IN (13, 14) AND _version == 1
+    | EVAL key = CONCAT(_index, "_", TO_STR(id))
+    | SORT id, _index
+    | KEEP id, _index, _version, key
+  id:long   _index:keyword   _version:long   key:keyword
+  --------- ---------------- --------------- -------------
+  13        apps             1               apps_13
+  13        ul_logs          1               ul_logs_13
+  14        apps             1               apps_14
+  14        ul_logs          1               ul_logs_14
+Also, similar to the index fields, once an aggregation is performed, a
+metadata field will no longer be accessible to subsequent commands,
+unless used as grouping field:
+    FROM employees [METADATA _index, _id]
+    | STATS max = MAX(emp_no) BY _index
+  max:integer   _index:keyword
+  ------------- ----------------
+  10100         employees

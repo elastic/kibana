@@ -1,0 +1,8 @@
+functions
+MIN
+The minimum value of a numeric field.
+    FROM employees
+    | STATS MIN(languages)
+  MIN(languages):integer
+  ------------------------
+  1

@@ -1,0 +1,15 @@
+SINH
+[]
+Sine hyperbolic function.
+    ROW a=1.8
+    | EVAL sinh=SINH(a)
+  a:double   sinh:double
+  ---------- ------------------
+  1.8        2.94217428809568
+Supported types:
+  n               result
+  --------------- --------
+  double          double
+  integer         double
+  long            double
+  unsigned_long   double

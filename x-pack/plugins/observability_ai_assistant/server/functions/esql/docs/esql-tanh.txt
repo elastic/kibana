@@ -1,0 +1,15 @@
+TANH
+[]
+Tangent hyperbolic function.
+    ROW a=1.8
+    | EVAL tanh=TANH(a)
+  a:double   tanh:double
+  ---------- --------------------
+  1.8        0.9468060128462683
+Supported types:
+  n               result
+  --------------- --------
+  double          double
+  integer         double
+  long            double
+  unsigned_long   double

@@ -1,0 +1,13 @@
+ABS
+[]
+Returns the absolute value.
+    FROM employees
+    | KEEP first_name, last_name, height
+    | EVAL abs_height = ABS(0.0 - height)
+Supported types:
+  n               result
+  --------------- ---------------
+  double          double
+  integer         integer
+  long            long
+  unsigned_long   unsigned_long

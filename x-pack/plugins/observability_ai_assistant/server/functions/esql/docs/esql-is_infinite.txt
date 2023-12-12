@@ -1,0 +1,4 @@
+IS_INFINITE
+Returns a boolean that indicates whether its input is infinite.
+    ROW d = 1.0
+    | EVAL s = IS_INFINITE(d/0)

@@ -1,0 +1,3 @@
+NOW
+Returns current date and time.
+    ROW current_date = NOW()

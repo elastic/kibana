@@ -1,0 +1,12 @@
+functions
+MEDIAN
+The value that is greater than half of all values and less than half of
+all values, also known as the 50% PERCENTILE.
+    FROM employees
+    | STATS MEDIAN(salary), PERCENTILE(salary, 50)
+  MEDIAN(salary):double   PERCENTILE(salary,50):double
+  ----------------------- ------------------------------
+  47003                   47003
+Like PERCENTILE, MEDIAN is usually approximate.
+MEDIAN is also non-deterministic. This means you can get slightly
+different results using the same data.

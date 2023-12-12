@@ -1,0 +1,10 @@
+EVAL
+EVAL enables you to append new columns:
+    ```FROM employees
+    | SORT emp_no
+    | KEEP first_name, last_name, height
+    | EVAL height_feet = height * 3.281, height_cm = height * 100```
+  
+Functions
+EVAL supports various functions for calculating values. Refer to
+Functions for more information.

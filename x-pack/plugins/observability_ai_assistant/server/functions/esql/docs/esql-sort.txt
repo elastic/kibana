@@ -1,0 +1,23 @@
+SORT
+Use the SORT command to sort rows on one or more fields:
+    ```FROM employees
+    | KEEP first_name, last_name, height
+    | SORT height```
+The default sort order is ascending. Set an explicit sort order using
+ASC or DESC:
+    ```FROM employees
+    | KEEP first_name, last_name, height
+    | SORT height DESC```
+Two rows with the same sort key are considered equal. You can provide
+additional sort expressions to act as tie breakers:
+    ```FROM employees
+    | KEEP first_name, last_name, height
+    | SORT height DESC, first_name ASC```
+null values
+By default, null values are treated as being larger than any other
+value. With an ascending sort order, null values are sorted last, and
+with a descending sort order, null values are sorted first. You can
+change that by providing NULLS FIRST or NULLS LAST:
+    ```FROM employees
+    | KEEP first_name, last_name, height
+    | SORT first_name ASC NULLS FIRST```
