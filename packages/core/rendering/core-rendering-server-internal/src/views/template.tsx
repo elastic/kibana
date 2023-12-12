@@ -7,11 +7,9 @@
  */
 
 import React, { FunctionComponent, createElement } from 'react';
-
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
-import { Styles } from './styles';
 import { Logo } from './logo';
 
 interface Props {
@@ -22,8 +20,8 @@ export const Template: FunctionComponent<Props> = ({
   metadata: {
     uiPublicUrl,
     locale,
-    darkMode,
     stylesheetPaths,
+    scriptPaths,
     injectedMetadata,
     i18n,
     bootstrapScriptUrl,
@@ -55,7 +53,12 @@ export const Template: FunctionComponent<Props> = ({
         {/* Inject EUI reset and global styles before all other component styles */}
         <meta name={EUI_STYLES_GLOBAL} />
         <meta name="emotion" />
-        <Styles darkMode={darkMode} stylesheetPaths={stylesheetPaths} />
+        {stylesheetPaths.map((path) => (
+          <link key={path} rel="stylesheet" type="text/css" href={path} />
+        ))}
+        {scriptPaths.map((path) => (
+          <script key={path} src={path} />
+        ))}
         {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
         <meta name="add-styles-here" />
         <meta name="add-scripts-here" />

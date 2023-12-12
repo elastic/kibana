@@ -30,9 +30,9 @@ export interface RenderingMetadata {
   bootstrapScriptUrl: string;
   i18n: typeof i18n.translate;
   locale: string;
-  darkMode: DarkModeValue;
   themeVersion: ThemeVersion;
   stylesheetPaths: string[];
+  scriptPaths: string[];
   injectedMetadata: InjectedMetadata;
   customBranding: CustomBranding;
 }

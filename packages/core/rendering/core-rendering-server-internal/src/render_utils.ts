@@ -25,6 +25,10 @@ export const getSettingValue = <T>(
 export const getBundlesHref = (baseHref: string, buildNr: string): string =>
   `${baseHref}/${buildNr}/bundles`;
 
+export const getScriptPaths = ({ baseHref, buildNum }: { buildNum: number; baseHref: string }) => {
+  return [`${baseHref}/ui/legacy_theme.js`];
+};
+
 export const getCommonStylesheetPaths = ({
   baseHref,
   buildNum,

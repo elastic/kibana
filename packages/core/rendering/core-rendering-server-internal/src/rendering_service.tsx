@@ -33,7 +33,12 @@ import {
   RenderingMetadata,
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
-import { getSettingValue, getCommonStylesheetPaths, getThemeStylesheetPaths } from './render_utils';
+import {
+  getSettingValue,
+  getCommonStylesheetPaths,
+  getThemeStylesheetPaths,
+  getScriptPaths,
+} from './render_utils';
 import { filterUiPlugins } from './filter_ui_plugins';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
@@ -187,8 +192,11 @@ export class RenderingService {
         baseHref: staticAssetsHrefBase,
         buildNum,
       });
-
     const commonStylesheetPaths = getCommonStylesheetPaths({
+      baseHref: staticAssetsHrefBase,
+      buildNum,
+    });
+    const scriptPaths = getScriptPaths({
       baseHref: staticAssetsHrefBase,
       buildNum,
     });
@@ -201,9 +209,9 @@ export class RenderingService {
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       i18n: i18n.translate,
       locale: i18n.getLocale(),
-      darkMode,
       themeVersion,
       stylesheetPaths: commonStylesheetPaths,
+      scriptPaths,
       customBranding: {
         faviconSVG: branding?.faviconSVG,
         faviconPNG: branding?.faviconPNG,
