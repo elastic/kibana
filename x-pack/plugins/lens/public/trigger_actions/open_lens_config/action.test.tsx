@@ -13,10 +13,12 @@ import type { LensPluginStartDependencies } from '../../plugin';
 import { createMockStartDependencies } from '../../editor_frame_service/mocks';
 import { DOC_TYPE } from '../../../common/constants';
 import { ConfigureInLensPanelAction } from './action';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 
 describe('open config panel action', () => {
   const overlays = overlayServiceMock.createStartContract();
   const theme = themeServiceMock.createStartContract();
+  const application = applicationServiceMock.createStartContract();
   const mockStartDependencies =
     createMockStartDependencies() as unknown as LensPluginStartDependencies;
   describe('compatibility check', () => {
@@ -33,7 +35,8 @@ describe('open config panel action', () => {
       const configurablePanelAction = new ConfigureInLensPanelAction(
         mockStartDependencies,
         overlays,
-        theme
+        theme,
+        application
       );
 
       const isCompatible = await configurablePanelAction.isCompatible({
@@ -55,7 +58,8 @@ describe('open config panel action', () => {
       const configurablePanelAction = new ConfigureInLensPanelAction(
         mockStartDependencies,
         overlays,
-        theme
+        theme,
+        application
       );
 
       const isCompatible = await configurablePanelAction.isCompatible({
@@ -79,7 +83,8 @@ describe('open config panel action', () => {
       const configurablePanelAction = new ConfigureInLensPanelAction(
         mockStartDependencies,
         overlays,
-        theme
+        theme,
+        application
       );
 
       const isCompatible = await configurablePanelAction.isCompatible({
@@ -111,7 +116,8 @@ describe('open config panel action', () => {
       const configurablePanelAction = new ConfigureInLensPanelAction(
         mockStartDependencies,
         overlays,
-        theme
+        theme,
+        application
       );
       const spy = jest.spyOn(overlays, 'openFlyout');
 
