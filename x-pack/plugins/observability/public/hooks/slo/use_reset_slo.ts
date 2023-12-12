@@ -24,7 +24,7 @@ export function useResetSlo() {
       } catch (error) {
         return Promise.reject(
           i18n.translate('xpack.observability.slo.slo.reset.errorMessage', {
-            defaultMessage: 'Failed to reset {name} ({id}), something went wrong: {error}',
+            defaultMessage: 'Failed to reset {name} (id: {id}), something went wrong: {error}',
             values: { error: String(error), name, id },
           })
         );
