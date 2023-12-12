@@ -235,13 +235,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
-  const {
-    force,
-    id,
-    package: pkg,
-    skip_ensure_installed: skipEnsureInstalled,
-    ...newPolicy
-  } = request.body;
+  const { force, id, package: pkg, ...newPolicy } = request.body;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   if ('output_id' in newPolicy) {
@@ -282,7 +276,6 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         force,
         spaceId,
         authorizationHeader,
-        skipEnsureInstalled,
       },
       context,
       request
