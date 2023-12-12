@@ -12,6 +12,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTrackPageview, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { useSyntheticsAssetsCheck } from '../../hooks/use_synthetics_assets_check';
 import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
 import { EditMonitorNotFound } from './edit_monitor_not_found';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
@@ -35,6 +36,8 @@ export const MonitorEditPage: React.FC = () => {
   useMonitorAddEditBreadcrumbs(true);
   const dispatch = useDispatch();
   const { locationsLoaded, error: locationsError } = useSelector(selectServiceLocationsState);
+
+  useSyntheticsAssetsCheck();
 
   useEffect(() => {
     if (!locationsLoaded) {
