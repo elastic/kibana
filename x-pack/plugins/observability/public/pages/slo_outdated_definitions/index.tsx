@@ -40,7 +40,7 @@ export function SlosOutdatedDefinitions() {
     },
     {
       text: i18n.translate('xpack.observability.breadcrumbs.slosOutdatedDefinitions', {
-        defaultMessage: 'Outdated SLO Definitinos',
+        defaultMessage: 'Outdated SLO Definitions',
       }),
     },
   ]);
