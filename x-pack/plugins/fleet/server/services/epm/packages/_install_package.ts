@@ -46,7 +46,7 @@ import { installTransforms } from '../elasticsearch/transform/install';
 import { installMlModel } from '../elasticsearch/ml_model';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
-import { ConcurrentInstallOperationError } from '../../../errors';
+import { ConcurrentInstallOperationError, PackageSavedObjectConflictError } from '../../../errors';
 import { appContextService, packagePolicyService } from '../..';
 
 import { auditLoggingService } from '../../audit_logging';
@@ -385,10 +385,10 @@ export async function _installPackage({
     return [...installedKibanaAssetsRefs, ...esReferences];
   } catch (err) {
     if (SavedObjectsErrorHelpers.isConflictError(err)) {
-      throw new ConcurrentInstallOperationError(
-        `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
+      throw new PackageSavedObjectConflictError(
+        `Saved Object conflict encountered while installing ${pkgName || 'unknown'}-${
           pkgVersion || 'unknown'
-        } detected, aborting. Original error: ${err.message}`
+        }. Original error: ${err.message}`
       );
     } else {
       throw err;
