@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { ActionVariable, RuleTypeParams } from '@kbn/alerting-plugin/common';
 
 export interface UserDefinedRuleParams extends RuleTypeParams {
   stringifiedUserCode: string;
+  customContextVariables?: ActionVariable[];
 }

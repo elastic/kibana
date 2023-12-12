@@ -20,6 +20,14 @@ export const ActionGroupId = 'user defined threshold met';
 export type Params = TypeOf<typeof ParamsSchema>;
 export const ParamsSchema = schema.object({
   stringifiedUserCode: schema.string(),
+  customContextVariables: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        description: schema.string(),
+      })
+    )
+  ),
 });
 
 export function getRuleType(): RuleType<

@@ -49,7 +49,7 @@ import {
   AlertInstanceState,
   AlertsHealth,
   WithoutReservedActionGroups,
-  ActionVariable,
+  RuleTypeActionVariables,
   SanitizedRuleConfig,
   RuleMonitoring,
   MappedParams,
@@ -299,11 +299,7 @@ export interface RuleType<
   >;
   category: string;
   producer: string;
-  actionVariables?: {
-    context?: ActionVariable[];
-    state?: ActionVariable[];
-    params?: ActionVariable[];
-  };
+  actionVariables?: RuleTypeActionVariables;
   minimumLicenseRequired: LicenseType;
   useSavedObjectReferences?: {
     extractReferences: (params: Params) => RuleParamsAndRefs<ExtractedParams>;
