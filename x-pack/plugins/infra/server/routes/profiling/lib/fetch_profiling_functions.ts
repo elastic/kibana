@@ -19,6 +19,7 @@ export async function fetchProfilingFunctions(
   const { hostname, from, to, startIndex, endIndex } = params;
 
   return await profilingDataAccess.services.fetchFunction({
+    core: coreRequestContext,
     esClient: coreRequestContext.elasticsearch.client.asCurrentUser,
     rangeFromMs: from,
     rangeToMs: to,

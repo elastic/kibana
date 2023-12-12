@@ -101,7 +101,7 @@ export const renderApp = ({
                 isServerless,
               }}
             >
-              <ObservabilityAIAssistantProvider value={plugins.observabilityAIAssistant}>
+              <ObservabilityAIAssistantProvider value={plugins.observabilityAIAssistant.service}>
                 <PluginContext.Provider
                   value={{
                     config,

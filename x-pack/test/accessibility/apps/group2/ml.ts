@@ -48,7 +48,8 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('with data loaded', function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/172598
+      describe.skip('with data loaded', function () {
         const dfaOutlierResultsJobId = 'iph_outlier_a11y';
         const ecIndexName = 'ft_module_sample_ecommerce';
         const ihpIndexName = 'ft_ihp_outlier';

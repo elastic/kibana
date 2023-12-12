@@ -7,7 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
-import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
+import { ALERT_UUID, getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import {
@@ -119,7 +119,6 @@ export class ExecutionHandler<
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private mutedAlertIdsSet: Set<string> = new Set();
   private previousStartedAt: Date | null;
-  private maintenanceWindowIds: string[] = [];
   private alertsClient: IAlertsClient<
     AlertData,
     State,
@@ -142,7 +141,6 @@ export class ExecutionHandler<
     ruleLabel,
     previousStartedAt,
     actionsClient,
-    maintenanceWindowIds,
     alertsClient,
   }: ExecutionHandlerOptions<
     Params,
@@ -172,7 +170,6 @@ export class ExecutionHandler<
     );
     this.previousStartedAt = previousStartedAt;
     this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
-    this.maintenanceWindowIds = maintenanceWindowIds ?? [];
     this.alertsClient = alertsClient;
   }
 
@@ -577,9 +574,9 @@ export class ExecutionHandler<
     throttledSummaryActions: ThrottledActions
   ): Promise<Array<Executable<State, Context, ActionGroupIds, RecoveryActionGroupId>>> {
     const executables = [];
-
     for (const action of this.rule.actions) {
       const alertsArray = Object.entries(alerts);
+
       let summarizedAlerts = null;
       if (this.shouldGetSummarizedAlerts({ action, throttledSummaryActions })) {
         summarizedAlerts = await this.getSummarizedAlerts({
@@ -596,16 +593,7 @@ export class ExecutionHandler<
         }
       }
 
-      // By doing that we are not cancelling the summary action but just waiting
-      // for the window maintenance to be over before sending the summary action
-      if (isSummaryAction(action) && this.maintenanceWindowIds.length > 0) {
-        this.logger.debug(
-          `no scheduling of summary actions "${action.id}" for rule "${
-            this.taskInstance.params.alertId
-          }": has active maintenance windows ${this.maintenanceWindowIds.join()}.`
-        );
-        continue;
-      } else if (isSummaryAction(action)) {
+      if (isSummaryAction(action)) {
         if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
           executables.push({ action, summarizedAlerts });
         }
@@ -613,16 +601,17 @@ export class ExecutionHandler<
       }
 
       for (const [alertId, alert] of alertsArray) {
-        if (alert.isFilteredOut(summarizedAlerts)) {
+        const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
+        if (alertMaintenanceWindowIds.length !== 0) {
+          this.logger.debug(
+            `no scheduling of summary actions "${action.id}" for rule "${
+              this.taskInstance.params.alertId
+            }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
+          );
           continue;
         }
 
-        if (alert.getMaintenanceWindowIds().length > 0) {
-          this.logger.debug(
-            `no scheduling of actions "${action.id}" for rule "${
-              this.taskInstance.params.alertId
-            }": has active maintenance windows ${alert.getMaintenanceWindowIds().join()}.`
-          );
+        if (alert.isFilteredOut(summarizedAlerts)) {
           continue;
         }
 
@@ -742,12 +731,40 @@ export class ExecutionHandler<
     }
     const alerts = await this.alertsClient.getSummarizedAlerts!(options);
 
-    const total = alerts.new.count + alerts.ongoing.count + alerts.recovered.count;
+    /**
+     * We need to remove all new alerts with maintenance windows retrieved from
+     * getSummarizedAlerts because they might not have maintenance window IDs
+     * associated with them from maintenance windows with scoped query updated
+     * yet (the update call uses refresh: false). So we need to rely on the in
+     * memory alerts to do this.
+     */
+    const newAlertsInMemory =
+      Object.values(this.alertsClient.getProcessedAlerts('new') || {}) || [];
+
+    const newAlertsWithMaintenanceWindowIds = newAlertsInMemory.reduce<string[]>(
+      (result, alert) => {
+        if (alert.getMaintenanceWindowIds().length > 0) {
+          result.push(alert.getUuid());
+        }
+        return result;
+      },
+      []
+    );
+
+    const newAlerts = alerts.new.data.filter((alert) => {
+      return !newAlertsWithMaintenanceWindowIds.includes(alert[ALERT_UUID]);
+    });
+
+    const total = newAlerts.length + alerts.ongoing.count + alerts.recovered.count;
     return {
       ...alerts,
+      new: {
+        count: newAlerts.length,
+        data: newAlerts,
+      },
       all: {
         count: total,
-        data: [...alerts.new.data, ...alerts.ongoing.data, ...alerts.recovered.data],
+        data: [...newAlerts, ...alerts.ongoing.data, ...alerts.recovered.data],
       },
     };
   }

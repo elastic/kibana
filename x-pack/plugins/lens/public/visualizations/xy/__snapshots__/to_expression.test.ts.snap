@@ -124,6 +124,9 @@ Object {
             "type": "expression",
           },
         ],
+        "minBarHeight": Array [
+          1,
+        ],
         "showTooltip": Array [],
         "valueLabels": Array [
           "hide",

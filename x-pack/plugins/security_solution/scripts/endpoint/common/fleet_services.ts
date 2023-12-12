@@ -53,6 +53,7 @@ import type {
   PostAgentUnenrollResponse,
   GenerateServiceTokenResponse,
   GetOutputsResponse,
+  DeleteAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
@@ -323,6 +324,28 @@ export const fetchAgentPolicy = async (
 };
 
 /**
+ * Delete a single Fleet Agent Policy
+ * @param kbnClient
+ * @param agentPolicyId
+ */
+export const deleteAgentPolicy = async (
+  kbnClient: KbnClient,
+  agentPolicyId: string
+): Promise<DeleteAgentPolicyResponse> => {
+  return kbnClient
+    .request<DeleteAgentPolicyResponse>({
+      method: 'POST',
+      path: agentPolicyRouteService.getDeletePath(),
+      body: {
+        agentPolicyId,
+      },
+      headers: { 'elastic-api-version': '2023-10-31' },
+    })
+    .then((response) => response.data)
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
+/**
  * Retrieves a list of Fleet Integration policies
  * @param kbnClient
  * @param options
@@ -531,6 +554,33 @@ export const unEnrollFleetAgent = async (
     .catch(catchAxiosErrorFormatAndThrow);
 
   return data;
+};
+
+/**
+ * Un-enrolls a Fleet agent
+ *
+ * @param kbnClient
+ * @param agentId
+ * @param force
+ */
+export const getAgentPolicyEnrollmentKey = async (
+  kbnClient: KbnClient,
+  policyId: string
+): Promise<string> => {
+  const { data } = await kbnClient
+    .request<GetEnrollmentAPIKeysResponse>({
+      method: 'GET',
+      path: enrollmentAPIKeyRouteService.getListPath(),
+      query: {
+        policy_id: policyId,
+      },
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
+    })
+    .catch(catchAxiosErrorFormatAndThrow);
+
+  return data.items?.[0]?.api_key;
 };
 
 export const generateFleetServiceToken = async (

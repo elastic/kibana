@@ -9,6 +9,11 @@ const createAlertsClientMock = () => {
     return {
       initializeExecution: jest.fn(),
       processAndLogAlerts: jest.fn(),
+      processAlerts: jest.fn(),
+      logAlerts: jest.fn(),
+      updateAlertMaintenanceWindowIds: jest.fn(),
+      getMaintenanceWindowScopedQueryAlerts: jest.fn(),
+      updateAlertsMaintenanceWindowIdByScopedQuery: jest.fn(),
       getTrackedAlerts: jest.fn(),
       getProcessedAlerts: jest.fn(),
       getAlertsToSerialize: jest.fn(),

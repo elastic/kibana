@@ -133,24 +133,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "unifiedDocViewer",
-        "id": "def-public.useUnifiedDocViewerServices",
-        "type": "Function",
-        "tags": [],
-        "label": "useUnifiedDocViewerServices",
-        "description": [],
-        "signature": [
-          "() => ",
-          "UnifiedDocViewerServices"
-        ],
-        "path": "src/plugins/unified_doc_viewer/public/hooks/use_doc_viewer_services.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [],

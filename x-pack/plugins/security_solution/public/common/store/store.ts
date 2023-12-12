@@ -169,6 +169,7 @@ export const createStoreFactory = async (
 
   return createStore(initialState, rootReducer, libs$.pipe(pluck('kibana')), storage, [
     ...(subPlugins.management.store.middleware ?? []),
+    ...(subPlugins.explore.store.middleware ?? []),
     ...[resolverMiddlewareFactory(dataAccessLayerFactory(coreStart)) ?? []],
   ]);
 };

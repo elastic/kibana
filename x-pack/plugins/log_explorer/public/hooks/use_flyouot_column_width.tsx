@@ -16,8 +16,8 @@ export const useFlyoutColumnWidth = (width: number): FlyoutColumnWidth => {
   const { euiTheme } = useEuiTheme();
 
   const numberOfColumns = width > euiTheme.breakpoint.m ? 3 : width > euiTheme.breakpoint.s ? 2 : 1;
-  const widthFactor = numberOfColumns === 3 ? 2.5 : 2.2;
-  const fieldWidth = width / (numberOfColumns * widthFactor);
+  const WIDTH_FACTOR = 1.25;
+  const fieldWidth = width / (numberOfColumns * WIDTH_FACTOR);
 
   return {
     columns: numberOfColumns,

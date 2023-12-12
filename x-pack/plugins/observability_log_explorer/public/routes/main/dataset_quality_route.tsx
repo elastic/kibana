@@ -19,7 +19,7 @@ export interface DatasetQualityRouteProps {
 
 export const DatasetQualityRoute = ({ core }: DatasetQualityRouteProps) => {
   const { services } = useKibanaContextForPlugin();
-  const { observabilityShared, serverless, datasetQuality: DatasetQuality } = services;
+  const { serverless, datasetQuality: DatasetQuality } = services;
   const breadcrumb: EuiBreadcrumb[] = [
     {
       text: datasetQualityAppTitle,
@@ -29,13 +29,8 @@ export const DatasetQualityRoute = ({ core }: DatasetQualityRouteProps) => {
   useBreadcrumbs(breadcrumb, core.chrome, serverless);
 
   return (
-    <>
-      <ObservabilityLogExplorerPageTemplate
-        observabilityShared={observabilityShared}
-        pageProps={{ paddingSize: 'l' }}
-      >
-        <DatasetQuality.DatasetQuality />
-      </ObservabilityLogExplorerPageTemplate>
-    </>
+    <ObservabilityLogExplorerPageTemplate pageProps={{ paddingSize: 'l' }}>
+      <DatasetQuality.DatasetQuality />
+    </ObservabilityLogExplorerPageTemplate>
   );
 };

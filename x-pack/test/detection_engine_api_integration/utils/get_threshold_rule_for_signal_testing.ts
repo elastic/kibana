@@ -28,4 +28,5 @@ export const getThresholdRuleForSignalTesting = (
     field: 'process.name',
     value: 21,
   },
+  alert_suppression: undefined,
 });

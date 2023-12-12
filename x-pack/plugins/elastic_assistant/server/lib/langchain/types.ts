@@ -10,9 +10,10 @@ import { PostActionsConnectorExecuteBodyInputs } from '../../schemas/post_action
 export type RequestBody = PostActionsConnectorExecuteBodyInputs;
 
 export interface ResponseBody {
-  status: string;
   data: string;
   connector_id: string;
+  replacements?: Record<string, string>;
+  status: string;
   trace_data?: {
     transaction_id: string;
     trace_id: string;

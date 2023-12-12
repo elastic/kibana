@@ -106,4 +106,7 @@ const ResourceFindingsTableComponent = ({
   );
 };
 
+/**
+ * @deprecated: This component is deprecated and will be removed in the next release.
+ */
 export const ResourceFindingsTable = React.memo(ResourceFindingsTableComponent);
