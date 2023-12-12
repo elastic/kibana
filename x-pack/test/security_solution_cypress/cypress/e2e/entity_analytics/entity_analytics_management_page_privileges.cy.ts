@@ -8,8 +8,10 @@
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { RISK_ENGINE_PRIVILEGES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
+  RISK_SCORE_PREVIEW_PRIVILEGES_CALLOUT,
   RISK_SCORE_PRIVILEGES_CALLOUT,
   RISK_SCORE_STATUS_LOADING,
+  RISK_SCORE_SWITCH,
 } from '../../screens/entity_analytics_management';
 
 import { login } from '../../tasks/login';
@@ -23,7 +25,7 @@ const loadPageAsUserWithNoPrivileges = () => {
 
 // this test suite doesn't run on serverless because it requires a custom role
 describe(
-  'Entity analytics management page - Risk Engine Privileges Callout',
+  'Entity analytics management page - Risk Engine Privileges Behaviour',
   {
     tags: ['@ess'],
   },
@@ -37,7 +39,7 @@ describe(
       cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should('not.exist');
     });
 
-    it('should show the callout for user without risk engine privileges', () => {
+    it('should show the callout, diable the risk score switch, and hide preview for user without risk engine privileges', () => {
       cy.intercept(RISK_ENGINE_PRIVILEGES_URL).as('getPrivileges');
       loadPageAsUserWithNoPrivileges();
       cy.get(RISK_SCORE_STATUS_LOADING).should('not.exist');
@@ -49,6 +51,8 @@ describe(
       );
       cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should('contain', 'manage_index_templates');
       cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should('contain', 'manage_transform');
+      cy.get(RISK_SCORE_PREVIEW_PRIVILEGES_CALLOUT);
+      cy.get(RISK_SCORE_SWITCH).should('be.disabled');
     });
   }
 );
