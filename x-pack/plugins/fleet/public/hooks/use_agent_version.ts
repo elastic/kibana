@@ -33,7 +33,7 @@ export const useAgentVersion = (): string | undefined => {
           availableVersions.sort(semverRcompare);
           agentVersionToUse =
             availableVersions.find((version) => {
-              return semverLt(version, kibanaVersion);
+              return semverLt(version, kibanaVersion) || differsOnlyInPatch(version, kibanaVersion);
             }) || availableVersions[0];
         } else {
           agentVersionToUse = kibanaVersion;
@@ -49,4 +49,11 @@ export const useAgentVersion = (): string | undefined => {
   }, [kibanaVersion]);
 
   return agentVersion;
+};
+
+const differsOnlyInPatch = (versionA: string, versionB: string): boolean => {
+  const [majorA, minorA, patchA] = versionA.split('.');
+  const [majorB, minorB, patchB] = versionB.split('.');
+
+  return majorA === majorB && minorA === minorB && patchA !== patchB;
 };
