@@ -1,4 +1,11 @@
-import { parseDuration } from '../../../../../alerting/common/parse_duration.ts';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 
 if (!Deno.env.get('QUERY_DELAY_MS')) {
   throw new Error('QUERY_DELAY_MS not set');
@@ -22,4 +29,4 @@ export function getTimeRange(window?: string): { dateStart: string; dateEnd: str
   const dateEnd = new Date(date - queryDelay).toISOString();
 
   return { dateStart, dateEnd };
-};
+}
