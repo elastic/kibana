@@ -10,21 +10,21 @@ import { Query } from '@kbn/es-query';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useControlPanels } from '../hooks/use_control_panels';
-import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
+import { LogExplorerControllerStateService } from '../state_machines/log_explorer_controller';
 
 const DATASET_FILTERS_CUSTOMIZATION_ID = 'datasetFiltersCustomization';
 
 interface CustomDatasetFiltersProps {
-  logExplorerProfileStateService: LogExplorerProfileStateService;
+  logExplorerControllerStateService: LogExplorerControllerStateService;
   data: DataPublicPluginStart;
 }
 
 const CustomDatasetFilters = ({
-  logExplorerProfileStateService,
+  logExplorerControllerStateService,
   data,
 }: CustomDatasetFiltersProps) => {
   const { getInitialInput, setControlGroupAPI, query, filters, timeRange } = useControlPanels(
-    logExplorerProfileStateService,
+    logExplorerControllerStateService,
     data
   );
 
