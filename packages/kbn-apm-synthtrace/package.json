@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Elastic APM trace data generator",
   "license": "SSPL-1.0 OR Elastic License 2.0",
+  "sideEffects": false,
   "bin": {
     "synthtrace": "./bin/synthtrace"
   },

@@ -1,6 +1,7 @@
 {
   "description": "OpenAPI code generator for Kibana",
   "license": "SSPL-1.0 OR Elastic License 2.0",
+  "sideEffects": false,
   "name": "@kbn/openapi-generator",
   "private": true,
   "version": "1.0.0"

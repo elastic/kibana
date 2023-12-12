@@ -1,6 +1,7 @@
 {
   "description": "OpenAPI specs bundler for Kibana",
   "license": "SSPL-1.0 OR Elastic License 2.0",
+  "sideEffects": false,
   "name": "@kbn/openapi-bundler",
   "private": true,
   "version": "1.0.0"

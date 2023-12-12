@@ -10,6 +10,7 @@
   "keywords": [],
   "author": "Spencer Alger <email@spalger.com>",
   "license": "SSPL-1.0 OR Elastic License 2.0",
+  "sideEffects": false,
   "bugs": {
     "url": "https://github.com/elastic/kibana/tree/main/packages/kbn-eslint-config"
   },

@@ -12,6 +12,7 @@
   },
   "author": "",
   "license": "SSPL-1.0 OR Elastic License 2.0",
+  "sideEffects": false,
   "bugs": {
     "url": "https://github.com/jbudz/spec-to-console/issues"
   },
