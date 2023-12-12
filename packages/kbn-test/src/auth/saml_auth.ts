@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-plugin/common';
+import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosResponse } from 'axios';
 import * as cheerio from 'cheerio';

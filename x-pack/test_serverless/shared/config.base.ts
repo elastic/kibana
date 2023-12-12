@@ -18,7 +18,7 @@ import {
 } from '@kbn/test';
 import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-plugin/common';
+import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { services } from './services';
 
 export default async () => {
