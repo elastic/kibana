@@ -68,3 +68,11 @@ export interface RiskScore {
   notes: string[];
   inputs: RiskInputs;
 }
+
+export enum RiskLevels {
+  unknown = 'Unknown',
+  low = 'Low',
+  moderate = 'Moderate',
+  high = 'High',
+  critical = 'Critical',
+}
