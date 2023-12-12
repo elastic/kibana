@@ -5,14 +5,37 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+
+import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import type { HelloAppProps } from './app';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
 }
+
+const HelloAppSuspense = withSuspense(
+  React.lazy(async () => {
+    const { HelloApp } = await import('./app');
+
+    // demonstrate loading fallback
+    return new Promise<{ default: React.FC<HelloAppProps> }>((resolve) => {
+      setTimeout(() => {
+        resolve({ default: HelloApp });
+      }, 1150);
+    });
+  }),
+  <EuiPageTemplate>
+    <EuiPageTemplate.Section color="subdued">
+      <EuiLoadingSpinner size="xl" />
+    </EuiPageTemplate.Section>
+  </EuiPageTemplate>
+);
 
 export class HelloWorldPlugin implements Plugin<void, void, SetupDeps> {
   public setup(core: CoreSetup, deps: SetupDeps) {
@@ -21,7 +44,9 @@ export class HelloWorldPlugin implements Plugin<void, void, SetupDeps> {
       id: 'helloWorld',
       title: 'Hello World',
       async mount({ element }: AppMountParameters) {
-        ReactDOM.render(<div data-test-subj="helloWorldDiv">Hello World!</div>, element);
+        const [coreStart] = await core.getStartServices();
+
+        ReactDOM.render(<HelloAppSuspense core={coreStart} />, element);
         return () => ReactDOM.unmountComponentAtNode(element);
       },
     });
@@ -33,7 +58,7 @@ export class HelloWorldPlugin implements Plugin<void, void, SetupDeps> {
       description: `Build a plugin that registers an application that simply says "Hello World"`,
     });
   }
-  public start(core: CoreStart) {
+  public start(_core: CoreStart) {
     return {};
   }
   public stop() {}
