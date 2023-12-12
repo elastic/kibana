@@ -10,7 +10,6 @@ import {
   openAnalyzerForFirstAlertInTimeline,
   openSessionViewerFromAlertTable,
 } from '../../../tasks/alerts';
-import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
@@ -18,7 +17,6 @@ import { ALERTS_URL } from '../../../urls/navigation';
 
 describe('Alerts Table Action column', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     cy.task('esArchiverLoad', {
       archiveName: 'process_ancestry',
       useCreate: true,

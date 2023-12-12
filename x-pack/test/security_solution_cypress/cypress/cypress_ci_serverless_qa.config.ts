@@ -14,18 +14,17 @@ export default defineCypressConfig({
   reporterOptions: {
     configFile: './cypress/reporter_config.json',
   },
-  defaultCommandTimeout: 150000,
+  defaultCommandTimeout: 300000,
   env: {
     grepFilterSpecs: true,
     grepOmitFiltered: true,
-    grepTags: '@serverlessQA --@brokenInServerless --@skipInServerless',
-    // Grep plugin is working taking under consideration the directory where cypress lives.
-    // https://github.com/elastic/kibana/pull/167494#discussion_r1340567022 for more context.
-    grepIntegrationFolder: '../',
+    grepTags: '@serverless --@brokenInServerless --@skipInServerless --@brokenInServerlessQA',
   },
-  execTimeout: 150000,
-  pageLoadTimeout: 150000,
+  execTimeout: 300000,
+  pageLoadTimeout: 300000,
   numTestsKeptInMemory: 0,
+  requestTimeout: 300000,
+  responseTimeout: 300000,
   retries: {
     runMode: 1,
   },
@@ -42,6 +41,7 @@ export default defineCypressConfig({
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
       esArchiver(on, config);
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
       return config;

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { INPUT_FILE, TOASTER, TOASTER_BODY } from '../screens/alerts_detection_rules';
+import {
+  INPUT_FILE,
+  TOASTER,
+  TOASTER_BODY,
+  TOASTER_CLOSE_ICON,
+} from '../screens/alerts_detection_rules';
 import {
   EXCEPTIONS_TABLE,
   EXCEPTIONS_TABLE_SEARCH,
@@ -70,6 +75,12 @@ export const exportExceptionList = (listId: string) => {
     .click();
   cy.get(EXCEPTIONS_TABLE_EXPORT_MODAL_BTN).first().click();
   cy.get(EXCEPTIONS_TABLE_EXPIRED_EXCEPTION_ITEMS_MODAL_CONFIRM_BTN).first().click();
+  cy.root().then(($page) => {
+    const element = $page.find(TOASTER_CLOSE_ICON);
+    if (element.length > 0) {
+      closeErrorToast();
+    }
+  });
 };
 
 export const assertNumberLinkedRules = (listId: string, numberOfRulesAsString: string) => {

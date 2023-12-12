@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { last } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
@@ -45,7 +45,7 @@ class TableSeriesConfigUi extends Component {
     const { model } = this.props;
     if (!model.color_rules || (model.color_rules && model.color_rules.length === 0)) {
       this.props.onChange({
-        color_rules: [{ id: uuidv1() }],
+        color_rules: [{ id: uuidv4() }],
       });
     }
   }

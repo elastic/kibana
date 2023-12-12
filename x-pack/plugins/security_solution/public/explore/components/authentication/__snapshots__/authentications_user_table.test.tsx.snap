@@ -105,7 +105,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
                     class="euiFlexItem emotion-euiFlexItem-grow-1"
                   >
                     <h4
-                      class="euiTitle emotion-euiTitle-m"
+                      class="euiTitle emotion-euiTitle-l"
                       data-test-subj="header-section-title"
                     >
                       <span

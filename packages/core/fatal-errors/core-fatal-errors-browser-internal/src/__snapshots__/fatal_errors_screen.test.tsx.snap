@@ -22,7 +22,6 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
               data-test-subj="clearSession"
               fill={true}
               onClick={[Function]}
-              size="m"
             >
               <FormattedMessage
                 defaultMessage="Clear your session"

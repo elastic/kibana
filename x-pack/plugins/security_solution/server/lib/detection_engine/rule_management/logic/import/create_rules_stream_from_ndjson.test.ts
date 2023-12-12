@@ -16,6 +16,7 @@ import {
   getSampleDetailsAsNdjson,
 } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import type { RuleExceptionsPromiseFromStreams } from './import_rules_utils';
+import type { InvestigationFields } from '../../../../../../common/api/detection_engine';
 
 export const getOutputSample = (): Partial<RuleToImport> => ({
   rule_id: 'rule-1',
@@ -282,7 +283,7 @@ describe('create_rules_stream_from_ndjson', () => {
         immutable: false,
       });
       expect(resultOrError[1].message).toContain(
-        'Invalid value "undefined" supplied to "name",Invalid value "undefined" supplied to "description",Invalid value "undefined" supplied to "risk_score",Invalid value "undefined" supplied to "severity"'
+        `name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 1 more`
       );
       expect(resultOrError[2]).toEqual({
         rule_id: 'rule-2',
@@ -318,6 +319,63 @@ describe('create_rules_stream_from_ndjson', () => {
       >([ndJsonStream, ...rulesObjectsStream]);
       const resultOrError = result as BadRequestError[];
       expect(resultOrError[1] instanceof BadRequestError).toEqual(true);
+    });
+
+    test('migrates investigation_fields', async () => {
+      const sample1 = {
+        ...getOutputSample(),
+        investigation_fields: ['foo', 'bar'] as unknown as InvestigationFields,
+      };
+      const sample2 = {
+        ...getOutputSample(),
+        rule_id: 'rule-2',
+        investigation_fields: [] as unknown as InvestigationFields,
+      };
+      sample2.rule_id = 'rule-2';
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(getSampleAsNdjson(sample1));
+          this.push(getSampleAsNdjson(sample2));
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesAndExceptionsStreamFromNdJson(1000);
+      const [{ rules: result }] = await createPromiseFromStreams<
+        RuleExceptionsPromiseFromStreams[]
+      >([ndJsonStream, ...rulesObjectsStream]);
+      expect(result).toEqual([
+        {
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          immutable: false,
+          investigation_fields: {
+            field_names: ['foo', 'bar'],
+          },
+        },
+        {
+          rule_id: 'rule-2',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          immutable: false,
+        },
+      ]);
     });
   });
 });

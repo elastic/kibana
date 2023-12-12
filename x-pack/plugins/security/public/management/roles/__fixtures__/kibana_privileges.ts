@@ -9,7 +9,7 @@ import type { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 
-import type { SecurityLicenseFeatures } from '../../../../common/licensing';
+import type { SecurityLicenseFeatures } from '../../../../common';
 import { Actions } from '../../../../server/authorization';
 import { privilegesFactory } from '../../../../server/authorization/privileges';
 import { KibanaPrivileges } from '../model';

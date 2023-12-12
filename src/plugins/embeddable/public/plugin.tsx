@@ -54,7 +54,6 @@ import {
   getTelemetryFunction,
 } from '../common/lib';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
-import { setTheme } from './services';
 import { setKibanaServices } from './kibana_services';
 import { CustomTimeRangeBadge, EditPanelAction } from './embeddable_panel/panel_actions';
 
@@ -120,7 +119,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
-    setTheme(core.theme);
     bootstrap(uiActions);
 
     return {

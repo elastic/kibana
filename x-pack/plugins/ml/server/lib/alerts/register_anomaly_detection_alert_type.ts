@@ -6,20 +6,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, KibanaRequest } from '@kbn/core/server';
 import type {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
+  RecoveredActionGroupId,
   RuleTypeParams,
   RuleTypeState,
-  RecoveredActionGroupId,
 } from '@kbn/alerting-plugin/common';
 import { IRuleTypeAlerts, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { ALERT_NAMESPACE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
+import {
+  ALERT_ANOMALY_DETECTION_JOB_ID,
+  ALERT_ANOMALY_IS_INTERIM,
+  ALERT_ANOMALY_SCORE,
+  ALERT_ANOMALY_TIMESTAMP,
+  ALERT_TOP_INFLUENCERS,
+  ALERT_TOP_RECORDS,
+  ML_ALERT_TYPES,
+} from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import {
@@ -78,17 +86,6 @@ export const ANOMALY_SCORE_MATCH_GROUP_ID = 'anomaly_score_match';
 export type AnomalyScoreMatchGroupId = typeof ANOMALY_SCORE_MATCH_GROUP_ID;
 
 export const ANOMALY_DETECTION_AAD_INDEX_NAME = 'ml.anomaly-detection';
-
-const ML_ALERT_NAMESPACE = ALERT_NAMESPACE;
-
-export const ALERT_ANOMALY_DETECTION_JOB_ID = `${ML_ALERT_NAMESPACE}.job_id` as const;
-
-export const ALERT_ANOMALY_SCORE = `${ML_ALERT_NAMESPACE}.anomaly_score` as const;
-export const ALERT_ANOMALY_IS_INTERIM = `${ML_ALERT_NAMESPACE}.is_interim` as const;
-export const ALERT_ANOMALY_TIMESTAMP = `${ML_ALERT_NAMESPACE}.anomaly_timestamp` as const;
-
-export const ALERT_TOP_RECORDS = `${ML_ALERT_NAMESPACE}.top_records` as const;
-export const ALERT_TOP_INFLUENCERS = `${ML_ALERT_NAMESPACE}.top_influencers` as const;
 
 export const ANOMALY_DETECTION_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionAlert> = {
   context: ANOMALY_DETECTION_AAD_INDEX_NAME,

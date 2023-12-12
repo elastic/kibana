@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentName } from '../typings/es_schemas/ui/fields/agent';
+import { AgentName } from '@kbn/elastic-agent-utils';
 import { ServiceHealthStatus } from './service_health_status';
 
 export interface ServiceListItem {

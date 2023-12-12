@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import {
   inputQuery,
@@ -24,6 +25,7 @@ describe(
     let ruleName: string;
 
     before(() => {
+      initializeDataViews();
       loadRule(true).then((data) => {
         ruleId = data.id;
         ruleName = data.name;

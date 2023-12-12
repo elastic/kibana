@@ -7,22 +7,27 @@
 
 import { useCallback, useMemo } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { useLogMlJobIdFormatsShimContext } from '../../../pages/logs/shared/use_log_ml_job_id_formats_shim';
+import { IdFormat, JobType } from '../../../../common/http_api/latest';
 import { DatasetFilter } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { useModuleStatus } from './log_analysis_module_status';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
 
-export const useLogAnalysisModule = <JobType extends string>({
+export const useLogAnalysisModule = <T extends JobType>({
   sourceConfiguration,
+  idFormat,
   moduleDescriptor,
 }: {
   sourceConfiguration: ModuleSourceConfiguration;
-  moduleDescriptor: ModuleDescriptor<JobType>;
+  idFormat: IdFormat;
+  moduleDescriptor: ModuleDescriptor<T>;
 }) => {
   const { services } = useKibanaContextForPlugin();
   const { spaceId, sourceId: logViewId, timestampField, runtimeMappings } = sourceConfiguration;
   const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes);
+  const { migrateIdFormat } = useLogMlJobIdFormatsShimContext();
 
   const trackMetric = useUiTracker({ app: 'infra_logs' });
 
@@ -31,7 +36,12 @@ export const useLogAnalysisModule = <JobType extends string>({
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
         dispatchModuleStatus({ type: 'fetchingJobStatuses' });
-        return await moduleDescriptor.getJobSummary(spaceId, logViewId, services.http.fetch);
+        return await moduleDescriptor.getJobSummary(
+          spaceId,
+          logViewId,
+          idFormat,
+          services.http.fetch
+        );
       },
       onResolve: (jobResponse) => {
         dispatchModuleStatus({
@@ -39,13 +49,14 @@ export const useLogAnalysisModule = <JobType extends string>({
           payload: jobResponse,
           spaceId,
           logViewId,
+          idFormat,
         });
       },
       onReject: () => {
         dispatchModuleStatus({ type: 'failedFetchingJobStatuses' });
       },
     },
-    [spaceId, logViewId]
+    [spaceId, logViewId, idFormat]
   );
 
   const [, setUpModule] = useTrackedPromise(
@@ -74,6 +85,7 @@ export const useLogAnalysisModule = <JobType extends string>({
         const jobSummaries = await moduleDescriptor.getJobSummary(
           spaceId,
           logViewId,
+          'hashed',
           services.http.fetch
         );
         return { setupResult, jobSummaries };
@@ -105,7 +117,9 @@ export const useLogAnalysisModule = <JobType extends string>({
           jobSummaries,
           spaceId,
           logViewId,
+          idFormat: 'hashed',
         });
+        migrateIdFormat(moduleDescriptor.jobTypes[0]);
       },
       onReject: (e: any) => {
         dispatchModuleStatus({ type: 'failedSetup' });
@@ -121,13 +135,18 @@ export const useLogAnalysisModule = <JobType extends string>({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await moduleDescriptor.cleanUpModule(spaceId, logViewId, services.http.fetch);
+        return await moduleDescriptor.cleanUpModule(
+          spaceId,
+          logViewId,
+          idFormat,
+          services.http.fetch
+        );
       },
       onReject: (e) => {
         throw new Error(`Failed to clean up previous ML job: ${e}`);
       },
     },
-    [spaceId, logViewId]
+    [spaceId, logViewId, idFormat]
   );
 
   const isCleaningUp = useMemo(
@@ -159,8 +178,8 @@ export const useLogAnalysisModule = <JobType extends string>({
   }, [dispatchModuleStatus]);
 
   const jobIds = useMemo(
-    () => moduleDescriptor.getJobIds(spaceId, logViewId),
-    [moduleDescriptor, spaceId, logViewId]
+    () => moduleDescriptor.getJobIds(spaceId, logViewId, idFormat),
+    [moduleDescriptor, spaceId, logViewId, idFormat]
   );
 
   return {

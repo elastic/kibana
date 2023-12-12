@@ -64,6 +64,7 @@ export async function fetchEsqlQuery({
       },
       resultLimit: alertLimit,
     }),
+    index: null,
   };
 }
 

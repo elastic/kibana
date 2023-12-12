@@ -17,6 +17,7 @@ import {
   CREATE_TEMPLATE_TIMELINE_WITHOUT_VERSION_ERROR_MESSAGE,
   NO_MATCH_ID_ERROR_MESSAGE,
   NO_MATCH_VERSION_ERROR_MESSAGE,
+  NO_MATCH_TEMPLATE_VERSION_ERROR_MESSAGE,
   NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE,
   UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
   CREATE_WITH_INVALID_STATUS_ERROR_MESSAGE,
@@ -266,13 +267,40 @@ describe('failure cases', () => {
       });
     });
 
-    test('should return error if given version field is defferent from existing version of timelin template', () => {
+    test('should return error if given version field is defferent from existing version of timeline template', () => {
       const isHandlingTemplateTimeline = true;
       const version = 'xxx';
       const templateTimelineVersion = mockGetTemplateTimelineValue.templateTimelineVersion;
       const templateTimelineId = mockGetTemplateTimelineValue.templateTimelineId;
       const existTimeline = null;
       const existTemplateTimeline = mockGetTemplateTimelineValue as TimelineSavedObject;
+      const result = checkIsUpdateFailureCases(
+        isHandlingTemplateTimeline,
+        TimelineStatus.active,
+        TimelineType.template,
+        version,
+        templateTimelineVersion,
+        templateTimelineId,
+        existTimeline,
+        existTemplateTimeline
+      );
+
+      expect(result).toEqual({
+        body: NO_MATCH_TEMPLATE_VERSION_ERROR_MESSAGE,
+        statusCode: 409,
+      });
+    });
+
+    test('should return error if given version field is defferent from existing version of timeline', () => {
+      const isHandlingTemplateTimeline = false;
+      const version = 'xxx';
+      const templateTimelineVersion = null;
+      const templateTimelineId = null;
+      const existTimeline = {
+        ...(mockGetTemplateTimelineValue as TimelineSavedObject),
+        savedObjectId: 'someOtherId',
+      };
+      const existTemplateTimeline = null;
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
@@ -489,7 +517,7 @@ describe('failure cases', () => {
       });
     });
 
-    test('should return error if given version field is defferent from existing version of timelin template', () => {
+    test('should return error if given version field is defferent from existing version of timeline template', () => {
       const isHandlingTemplateTimeline = true;
       const version = 'xxx';
       const templateTimelineVersion = mockGetTemplateTimelineValue.templateTimelineVersion;
@@ -508,12 +536,12 @@ describe('failure cases', () => {
       );
 
       expect(result).toEqual({
-        body: NO_MATCH_VERSION_ERROR_MESSAGE,
+        body: NO_MATCH_TEMPLATE_VERSION_ERROR_MESSAGE,
         statusCode: 409,
       });
     });
 
-    test('should return error if given templateTimelineVersion field is less or equal to existing templateTimelineVersion of timelin template', () => {
+    test('should return error if given templateTimelineVersion field is less or equal to existing templateTimelineVersion of timeline template', () => {
       const isHandlingTemplateTimeline = true;
       const version = mockGetTemplateTimelineValue.version;
       const templateTimelineVersion = mockGetTemplateTimelineValue.templateTimelineVersion;

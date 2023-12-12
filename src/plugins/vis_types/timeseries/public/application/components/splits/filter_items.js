@@ -12,7 +12,7 @@ import _ from 'lodash';
 import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { ColorPicker } from '../color_picker';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, withEuiTheme } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n-react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
@@ -50,7 +50,7 @@ class FilterItemsUi extends Component {
 
     const newFilter = () => ({
       color: this.props.model.color,
-      id: uuidv1(),
+      id: uuidv4(),
       filter: { language: model.filter.language || getDefaultQueryLanguage(), query: '' },
     });
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newFilter);

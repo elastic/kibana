@@ -20,12 +20,14 @@ import {
   MetricWTrend,
   MetricWNumber,
   SettingsProps,
+  MetricWText,
 } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import type {
   Datatable,
   DatatableColumn,
+  DatatableRow,
   IInterpreterRenderHandlers,
   RenderMode,
 } from '@kbn/expressions-plugin/common';
@@ -64,6 +66,28 @@ function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undef
   }
   return serializedFieldFormat ?? { id: formatId };
 }
+
+const renderSecondaryMetric = (
+  columns: DatatableColumn[],
+  row: DatatableRow,
+  config: Pick<VisParams, 'metric' | 'dimensions'>
+) => {
+  let secondaryMetricColumn: DatatableColumn | undefined;
+  let formatSecondaryMetric: ReturnType<typeof getMetricFormatter>;
+  if (config.dimensions.secondaryMetric) {
+    secondaryMetricColumn = getColumnByAccessor(config.dimensions.secondaryMetric, columns);
+    formatSecondaryMetric = getMetricFormatter(config.dimensions.secondaryMetric, columns);
+  }
+  const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
+  return (
+    <span>
+      {secondaryPrefix}
+      {secondaryMetricColumn
+        ? `${secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(row[secondaryMetricColumn.id])}`
+        : undefined}
+    </span>
+  );
+};
 
 const getMetricFormatter = (
   accessor: ExpressionValueVisDimension | string,
@@ -149,13 +173,6 @@ export const MetricVis = ({
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
   const formatPrimaryMetric = getMetricFormatter(config.dimensions.metric, data.columns);
 
-  let secondaryMetricColumn: DatatableColumn | undefined;
-  let formatSecondaryMetric: ReturnType<typeof getMetricFormatter>;
-  if (config.dimensions.secondaryMetric) {
-    secondaryMetricColumn = getColumnByAccessor(config.dimensions.secondaryMetric, data.columns);
-    formatSecondaryMetric = getMetricFormatter(config.dimensions.secondaryMetric, data.columns);
-  }
-
   let breakdownByColumn: DatatableColumn | undefined;
   let formatBreakdownValue: FieldFormatConvertFunction;
   if (config.dimensions.breakdownBy) {
@@ -172,28 +189,32 @@ export const MetricVis = ({
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : data.rows.slice(0, 1)
   ).map((row, rowIdx) => {
-    const value: number = row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
+    const value: number | string =
+      row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
     const title = breakdownByColumn
       ? formatBreakdownValue(row[breakdownByColumn.id])
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
-    const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
+
+    if (typeof value !== 'number') {
+      const nonNumericMetric: MetricWText = {
+        value: formatPrimaryMetric(value),
+        title: String(title),
+        subtitle,
+        icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
+        extra: renderSecondaryMetric(data.columns, row, config),
+        color: config.metric.color ?? defaultColor,
+      };
+      return nonNumericMetric;
+    }
+
     const baseMetric: MetricWNumber = {
       value,
       valueFormatter: formatPrimaryMetric,
       title: String(title),
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-      extra: (
-        <span>
-          {secondaryPrefix}
-          {secondaryMetricColumn
-            ? `${secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(
-                row[secondaryMetricColumn.id]
-              )}`
-            : undefined}
-        </span>
-      ),
+      extra: renderSecondaryMetric(data.columns, row, config),
       color:
         config.metric.palette && value != null
           ? getColor(

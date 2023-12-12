@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
@@ -15,16 +15,17 @@ import { toCalendarAlignedMomentUnitOfTime } from '../../../../utils/slo/duratio
 import { toDurationLabel } from '../../../../utils/slo/labels';
 
 export interface Props {
+  color?: EuiBadgeProps['color'];
   slo: SLOWithSummaryResponse;
 }
 
-export function SloTimeWindowBadge({ slo }: Props) {
+export function SloTimeWindowBadge({ slo, color }: Props) {
   const unit = slo.timeWindow.duration.slice(-1);
   if (rollingTimeWindowTypeSchema.is(slo.timeWindow.type)) {
     return (
       <EuiFlexItem grow={false}>
         <EuiBadge
-          color={euiLightVars.euiColorDisabled}
+          color={color ?? euiLightVars.euiColorDisabled}
           iconType="editorItemAlignRight"
           iconSide="left"
         >
@@ -45,7 +46,7 @@ export function SloTimeWindowBadge({ slo }: Props) {
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiBadge color={euiLightVars.euiColorDisabled} iconType="calendar" iconSide="left">
+      <EuiBadge color={color ?? euiLightVars.euiColorDisabled} iconType="calendar" iconSide="left">
         {i18n.translate('xpack.observability.slo.slo.timeWindow.calendar', {
           defaultMessage: '{elapsed}/{total} days',
           values: {

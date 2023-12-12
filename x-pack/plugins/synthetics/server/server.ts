@@ -11,7 +11,7 @@ import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from './typ
 import { createSyntheticsRouteWithAuth } from './routes/create_route_with_auth';
 import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { syntheticsRouteWrapper } from './synthetics_route_wrapper';
-import { syntheticsAppRestApiRoutes } from './routes';
+import { syntheticsAppPublicRestApiRoutes, syntheticsAppRestApiRoutes } from './routes';
 
 export const initSyntheticsServer = (
   server: SyntheticsServerSetup,
@@ -19,6 +19,7 @@ export const initSyntheticsServer = (
   plugins: SyntheticsPluginsSetupDependencies,
   ruleDataClient: IRuleDataClient
 ) => {
+  const { router } = server;
   syntheticsAppRestApiRoutes.forEach((route) => {
     const { method, options, handler, validate, path } = syntheticsRouteWrapper(
       createSyntheticsRouteWithAuth(route),
@@ -34,16 +35,103 @@ export const initSyntheticsServer = (
 
     switch (method) {
       case 'GET':
-        server.router.get(routeDefinition, handler);
+        router.get(routeDefinition, handler);
         break;
       case 'POST':
-        server.router.post(routeDefinition, handler);
+        router.post(routeDefinition, handler);
         break;
       case 'PUT':
-        server.router.put(routeDefinition, handler);
+        router.put(routeDefinition, handler);
         break;
       case 'DELETE':
-        server.router.delete(routeDefinition, handler);
+        router.delete(routeDefinition, handler);
+        break;
+      default:
+        throw new Error(`Handler for method ${method} is not defined`);
+    }
+  });
+
+  syntheticsAppPublicRestApiRoutes.forEach((route) => {
+    const { method, options, handler, validate, path, validation } = syntheticsRouteWrapper(
+      createSyntheticsRouteWithAuth(route),
+      server,
+      syntheticsMonitorClient
+    );
+
+    const routeDefinition = {
+      path,
+      validate,
+      options,
+    };
+
+    switch (method) {
+      case 'GET':
+        router.versioned
+          .get({
+            access: 'public',
+            path: routeDefinition.path,
+            options: {
+              tags: options?.tags,
+            },
+          })
+          .addVersion(
+            {
+              version: '2023-10-31',
+              validate: validation ?? false,
+            },
+            handler
+          );
+        break;
+      case 'PUT':
+        router.versioned
+          .put({
+            access: 'public',
+            path: routeDefinition.path,
+            options: {
+              tags: options?.tags,
+            },
+          })
+          .addVersion(
+            {
+              version: '2023-10-31',
+              validate: validation ?? false,
+            },
+            handler
+          );
+        break;
+      case 'POST':
+        router.versioned
+          .post({
+            access: 'public',
+            path: routeDefinition.path,
+            options: {
+              tags: options?.tags,
+            },
+          })
+          .addVersion(
+            {
+              version: '2023-10-31',
+              validate: validation ?? false,
+            },
+            handler
+          );
+        break;
+      case 'DELETE':
+        router.versioned
+          .delete({
+            access: 'public',
+            path: routeDefinition.path,
+            options: {
+              tags: options?.tags,
+            },
+          })
+          .addVersion(
+            {
+              version: '2023-10-31',
+              validate: validation ?? false,
+            },
+            handler
+          );
         break;
       default:
         throw new Error(`Handler for method ${method} is not defined`);

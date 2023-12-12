@@ -9,19 +9,10 @@ import { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/li
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import {
-  Aggregators,
-  Comparator,
-  MetricExpressionParams,
-} from '../../../../../common/custom_threshold_rule/types';
+import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
 
-import {
-  CONTAINER_ID,
-  AdditionalContext,
-  doFieldsExist,
-  KUBERNETES_POD_UID,
-  UNGROUPED_FACTORY_KEY,
-} from '../utils';
+import { UNGROUPED_FACTORY_KEY } from '../constants';
+import { CONTAINER_ID, AdditionalContext, doFieldsExist, KUBERNETES_POD_UID } from '../utils';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 export type GetDataResponse = Record<
@@ -86,11 +77,6 @@ interface ResponseAggregations extends Partial<Aggs> {
   };
 }
 
-const getValue = (aggregatedValue: AggregatedValue, params: MetricExpressionParams) =>
-  [Aggregators.P95, Aggregators.P99].includes(params.aggType) && aggregatedValue.values != null
-    ? aggregatedValue.values[params.aggType === Aggregators.P95 ? '95.0' : '99.0']
-    : aggregatedValue.value;
-
 const NO_DATA_RESPONSE = {
   [UNGROUPED_FACTORY_KEY]: {
     value: null,
@@ -110,7 +96,7 @@ const createContainerList = (containerContext: ContainerContext) => {
 
 export const getData = async (
   esClient: ElasticsearchClient,
-  params: MetricExpressionParams,
+  params: CustomMetricExpressionParams,
   index: string,
   timeFieldName: string,
   groupBy: string | undefined | string[],
@@ -137,16 +123,10 @@ export const getData = async (
       const nextAfterKey = groupings.after_key;
       for (const bucket of groupings.buckets) {
         const key = Object.values(bucket.key).join(',');
-        const {
-          shouldTrigger,
-          missingGroup,
-          currentPeriod,
-          aggregatedValue: aggregatedValueForRate,
-          additionalContext,
-          containerContext,
-        } = bucket;
+        const { shouldTrigger, missingGroup, currentPeriod, additionalContext, containerContext } =
+          bucket;
 
-        const { aggregatedValue, doc_count: docCount } = currentPeriod.buckets.all;
+        const { aggregatedValue } = currentPeriod.buckets.all;
 
         const containerList = containerContext ? createContainerList(containerContext) : undefined;
 
@@ -161,14 +141,7 @@ export const getData = async (
             bucketKey: bucket.key,
           };
         } else {
-          const value =
-            params.aggType === Aggregators.COUNT
-              ? docCount
-              : params.aggType === Aggregators.RATE && aggregatedValueForRate != null
-              ? aggregatedValueForRate.value
-              : aggregatedValue != null
-              ? getValue(aggregatedValue, params)
-              : null;
+          const value = aggregatedValue ? aggregatedValue.value : null;
 
           previous[key] = {
             trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
@@ -199,36 +172,10 @@ export const getData = async (
       return previous;
     }
     if (aggs.all?.buckets.all) {
-      const {
-        currentPeriod,
-        aggregatedValue: aggregatedValueForRate,
-        shouldTrigger,
-      } = aggs.all.buckets.all;
+      const { currentPeriod, shouldTrigger } = aggs.all.buckets.all;
 
-      const { aggregatedValue, doc_count: docCount } = currentPeriod.buckets.all;
-
-      const value =
-        params.aggType === Aggregators.COUNT
-          ? docCount
-          : params.aggType === Aggregators.RATE && aggregatedValueForRate != null
-          ? aggregatedValueForRate.value
-          : aggregatedValue != null
-          ? getValue(aggregatedValue, params)
-          : null;
-      // There is an edge case where there is no results and the shouldTrigger
-      // bucket scripts will be missing. This is only an issue for document count because
-      // the value will end up being ZERO, for other metrics it will be null. In this case
-      // we need to do the evaluation in Node.js
-      if (aggs.all && params.aggType === Aggregators.COUNT && value === 0) {
-        const trigger = comparatorMap[params.comparator](value, params.threshold);
-        return {
-          [UNGROUPED_FACTORY_KEY]: {
-            value,
-            trigger,
-            bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
-          },
-        };
-      }
+      const { aggregatedValue } = currentPeriod.buckets.all;
+      const value = aggregatedValue ? aggregatedValue.value : null;
       return {
         [UNGROUPED_FACTORY_KEY]: {
           value,
@@ -272,16 +219,4 @@ export const getData = async (
     return previousResults;
   }
   return NO_DATA_RESPONSE;
-};
-
-const comparatorMap = {
-  [Comparator.BETWEEN]: (value: number, [a, b]: number[]) =>
-    value >= Math.min(a, b) && value <= Math.max(a, b),
-  // `threshold` is always an array of numbers in case the BETWEEN comparator is
-  // used; all other compartors will just destructure the first value in the array
-  [Comparator.GT]: (a: number, [b]: number[]) => a > b,
-  [Comparator.LT]: (a: number, [b]: number[]) => a < b,
-  [Comparator.OUTSIDE_RANGE]: (value: number, [a, b]: number[]) => value < a || value > b,
-  [Comparator.GT_OR_EQ]: (a: number, [b]: number[]) => a >= b,
-  [Comparator.LT_OR_EQ]: (a: number, [b]: number[]) => a <= b,
 };

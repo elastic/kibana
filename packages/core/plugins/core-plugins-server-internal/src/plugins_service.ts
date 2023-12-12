@@ -201,7 +201,7 @@ export class PluginsService
     this.log.debug('Stopping plugins service');
 
     if (!this.arePrebootPluginsStopped) {
-      this.arePrebootPluginsStopped = false;
+      this.arePrebootPluginsStopped = true;
       await this.prebootPluginsSystem.stopPlugins();
     }
 

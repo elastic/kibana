@@ -14,49 +14,23 @@ import {
   EuiPageTemplate,
   EuiText,
 } from '@elastic/eui';
-import { Connector } from '@kbn/search-connectors';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useMutation } from '@tanstack/react-query';
-import React, { useEffect } from 'react';
+import React from 'react';
 
-import { generatePath } from 'react-router-dom';
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 import { PLUGIN_ID } from '../../../common';
 import { useConnectors } from '../hooks/api/use_connectors';
+import { useCreateConnector } from '../hooks/api/use_create_connector';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { EmptyConnectorsPrompt } from './connectors/empty_connectors_prompt';
 import { ConnectorsTable } from './connectors/connectors_table';
-import { EDIT_CONNECTOR_PATH } from './connectors_router';
 
 export const ConnectorsOverview = () => {
   const { data, isLoading: connectorsLoading } = useConnectors();
-  const {
-    application: { navigateToUrl },
-    http,
-  } = useKibanaServices();
+  const { http } = useKibanaServices();
 
-  const {
-    data: connector,
-    isLoading,
-    isSuccess,
-    mutate,
-  } = useMutation({
-    mutationFn: async () => {
-      const result = await http.post<{ connector: Connector }>(
-        '/internal/serverless_search/connectors'
-      );
-      return result.connector;
-    },
-  });
-
-  useEffect(() => {
-    if (isSuccess) {
-      navigateToUrl(generatePath(EDIT_CONNECTOR_PATH, { id: connector?.id || '' }));
-    }
-  }, [connector, isSuccess, navigateToUrl]);
-
-  const createConnector = () => mutate();
+  const { createConnector, isLoading } = useCreateConnector();
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchConnectorsPage">
@@ -82,9 +56,13 @@ export const ConnectorsOverview = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
-                    <EuiLink target="_blank" href="https://github.com/elastic/connectors-python">
+                    <EuiLink
+                      data-test-subj="serverlessSearchConnectorsOverviewElasticConnectorsLink"
+                      target="_blank"
+                      href="https://github.com/elastic/connectors"
+                    >
                       {i18n.translate('xpack.serverlessSearch.connectorsPythonLink', {
-                        defaultMessage: 'connectors-python',
+                        defaultMessage: 'elastic/connectors',
                       })}
                     </EuiLink>
                   </EuiText>
@@ -93,6 +71,7 @@ export const ConnectorsOverview = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButton
+                data-test-subj="serverlessSearchConnectorsOverviewCreateConnectorButton"
                 isLoading={isLoading}
                 fill
                 iconType="plusInCircleFilled"
@@ -113,7 +92,12 @@ export const ConnectorsOverview = () => {
               defaultMessage="Sync third-party data sources to Elasticsearch, by deploying Elastic connectors on your own infrastructure. {learnMoreLink}"
               values={{
                 learnMoreLink: (
-                  <EuiLink external target="_blank" href={'TODO TODO'}>
+                  <EuiLink
+                    data-test-subj="serverlessSearchConnectorsOverviewLink"
+                    external
+                    target="_blank"
+                    href={'TODO TODO'}
+                  >
                     {LEARN_MORE_LABEL}
                   </EuiLink>
                 ),

@@ -13,6 +13,12 @@ export const componentTemplateSchema = schema.object({
     settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     aliases: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     mappings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    lifecycle: schema.maybe(
+      schema.object({
+        enabled: schema.boolean(),
+        data_retention: schema.maybe(schema.string()),
+      })
+    ),
   }),
   version: schema.maybe(schema.number()),
   _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),

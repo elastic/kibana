@@ -15,13 +15,15 @@ import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { BurnRateRuleParams, WindowSchema } from '../../typings';
 import { SloSelector } from './slo_selector';
 import { ValidationBurnRateRuleResult } from './validation';
-import { createNewWindow, Windows, calculateMaxBurnRateThreshold } from './windows';
+import { createNewWindow, Windows } from './windows';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
 } from '../../../common/constants';
+import { BURN_RATE_DEFAULTS } from './constants';
+import { AlertTimeTable } from './alert_time_table';
 
 type Props = Pick<
   RuleTypeParamsExpressionProps<BurnRateRuleParams>,
@@ -78,14 +80,12 @@ export function BurnRateRuleEditor(props: Props) {
 
   // When the SLO changes, recalculate the max burn rates
   useEffect(() => {
-    setWindowDefs((previous) =>
-      previous.map((windowDef) => {
-        return {
-          ...windowDef,
-          maxBurnRateThreshold: calculateMaxBurnRateThreshold(windowDef.longWindow, selectedSlo),
-        };
-      })
-    );
+    setWindowDefs(() => {
+      const burnRateDefaults = selectedSlo
+        ? BURN_RATE_DEFAULTS[selectedSlo?.timeWindow.duration]
+        : BURN_RATE_DEFAULTS['30d'];
+      return burnRateDefaults.map((partialWindow) => createNewWindow(selectedSlo, partialWindow));
+    });
   }, [selectedSlo]);
 
   useEffect(() => {
@@ -95,7 +95,11 @@ export function BurnRateRuleEditor(props: Props) {
   return (
     <>
       <EuiTitle size="xs">
-        <h5>Choose a SLO to monitor</h5>
+        <h5>
+          {i18n.translate('xpack.observability.burnRateRuleEditor.h5.chooseASLOToMonitorLabel', {
+            defaultMessage: 'Choose a SLO to monitor',
+          })}
+        </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
       <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} errors={errors.sloId} />
@@ -114,17 +118,17 @@ export function BurnRateRuleEditor(props: Props) {
         </>
       )}
       <EuiSpacer size="l" />
-      <EuiTitle size="xs">
-        <h5>Define multiple burn rate windows</h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <Windows
-        slo={selectedSlo}
-        windows={windowDefs}
-        onChange={setWindowDefs}
-        errors={errors.windows}
-      />
-      <EuiSpacer size="m" />
+      {selectedSlo && (
+        <>
+          <Windows
+            slo={selectedSlo}
+            windows={windowDefs}
+            onChange={setWindowDefs}
+            errors={errors.windows}
+          />
+          <AlertTimeTable slo={selectedSlo} windows={windowDefs} />
+        </>
+      )}
     </>
   );
 }

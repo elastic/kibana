@@ -15,7 +15,7 @@ import type {
   RouteValidationError,
 } from '@kbn/core/server';
 import type { TypeOf, ZodType } from 'zod';
-import { stringifyZodError } from '@kbn/securitysolution-es-utils';
+import { stringifyZodError } from '@kbn/zod-helpers';
 import type { GenericIntersectionC } from '../runtime_types';
 import { excess } from '../runtime_types';
 

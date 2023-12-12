@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -14,12 +13,13 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { createOptionsFromFields } from '../../helpers/create_options';
-import { QueryBuilder } from '../common/query_builder';
-import { CreateSLOForm } from '../../types';
-import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../helpers/aggregation_options';
 import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../helpers/aggregation_options';
+import { createOptionsFromFields, Option } from '../../helpers/create_options';
+import { CreateSLOForm } from '../../types';
+import { QueryBuilder } from '../common/query_builder';
 
 const fieldLabel = i18n.translate(
   'xpack.observability.slo.sloEdit.sliType.timesliceMetric.fieldLabel',
@@ -66,11 +66,28 @@ export function MetricInput({
 }: MetricInputProps) {
   const { control, watch } = useFormContext<CreateSLOForm>();
   const metric = watch(`indicator.params.metric.metrics.${index}`);
-  const metricFields = indexFields.filter((field) =>
-    metric.aggregation === 'cardinality'
-      ? CARDINALITY_FIELD_TYPES.includes(field.type)
-      : NUMERIC_FIELD_TYPES.includes(field.type)
+  const metricAggregation = watch(`indicator.params.metric.metrics.${index}.aggregation`);
+
+  const [metricFields, setMetricFields] = useState(
+    indexFields.filter((field) => NUMERIC_FIELD_TYPES.includes(field.type))
   );
+  const [aggregationOptions, setAggregationOptions] = useState(AGGREGATION_OPTIONS);
+  const [fieldOptions, setFieldOptions] = useState<Option[]>(createOptionsFromFields(metricFields));
+
+  useEffect(() => {
+    setMetricFields(
+      indexFields.filter((field) =>
+        metricAggregation === 'cardinality'
+          ? CARDINALITY_FIELD_TYPES.includes(field.type)
+          : NUMERIC_FIELD_TYPES.includes(field.type)
+      )
+    );
+  }, [metricAggregation, setMetricFields, indexFields]);
+
+  useEffect(() => {
+    setFieldOptions(createOptionsFromFields(metricFields));
+  }, [metricFields, setFieldOptions]);
+
   return (
     <>
       <EuiFlexItem>
@@ -115,7 +132,7 @@ export function MetricInput({
                 selectedOptions={
                   !!indexPattern &&
                   !!field.value &&
-                  AGGREGATION_OPTIONS.some((agg) => agg.value === agg.value)
+                  AGGREGATION_OPTIONS.some((agg) => agg.value === field.value)
                     ? [
                         {
                           value: field.value,
@@ -124,13 +141,18 @@ export function MetricInput({
                       ]
                     : []
                 }
-                options={AGGREGATION_OPTIONS}
+                onSearchChange={(searchValue: string) => {
+                  setAggregationOptions(
+                    AGGREGATION_OPTIONS.filter(({ value }) => value.includes(searchValue))
+                  );
+                }}
+                options={aggregationOptions}
               />
             </EuiFormRow>
           )}
         />
       </EuiFlexItem>
-      {metric.aggregation === 'percentile' && (
+      {metricAggregation === 'percentile' && (
         <EuiFlexItem grow={0}>
           <Controller
             name={`indicator.params.metric.metrics.${index}.percentile`}
@@ -175,7 +197,7 @@ export function MetricInput({
           />
         </EuiFlexItem>
       )}
-      {metric.aggregation !== 'doc_count' && (
+      {metricAggregation !== 'doc_count' && (
         <EuiFlexItem>
           <Controller
             name={`indicator.params.metric.metrics.${index}.field`}
@@ -227,7 +249,14 @@ export function MetricInput({
                         ]
                       : []
                   }
-                  options={createOptionsFromFields(metricFields)}
+                  onSearchChange={(searchValue: string) => {
+                    setFieldOptions(
+                      createOptionsFromFields(metricFields, ({ value }) =>
+                        value.includes(searchValue)
+                      )
+                    );
+                  }}
+                  options={fieldOptions}
                 />
               </EuiFormRow>
             )}

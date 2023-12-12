@@ -11,7 +11,7 @@ import React from 'react';
 import { RightPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_context';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
-import { isInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import * as mock from '../mocks/mock_analyzer_data';
@@ -53,10 +53,10 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
 };
 
-const renderAnalyzerPreview = () =>
+const renderAnalyzerPreview = (context = panelContextValue) =>
   render(
     <TestProviders>
-      <RightPanelContext.Provider value={panelContextValue}>
+      <RightPanelContext.Provider value={context}>
         <AnalyzerPreviewContainer />
       </RightPanelContext.Provider>
     </TestProviders>
@@ -68,7 +68,7 @@ describe('AnalyzerPreviewContainer', () => {
   });
 
   it('should render component and link in header', () => {
-    (isInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
     (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
@@ -103,7 +103,7 @@ describe('AnalyzerPreviewContainer', () => {
   });
 
   it('should render error message and text in header', () => {
-    (isInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(false);
+    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(false);
     (useInvestigateInTimeline as jest.Mock).mockReturnValue({
       investigateInTimelineAlertClick: jest.fn(),
     });
@@ -117,8 +117,8 @@ describe('AnalyzerPreviewContainer', () => {
     ).toHaveTextContent(NO_ANALYZER_MESSAGE);
   });
 
-  it('should navigate to left section Visualize tab when clicking on title', () => {
-    (isInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+  it('should navigate to analyzer in timeline when clicking on title', () => {
+    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
     (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
@@ -135,5 +135,25 @@ describe('AnalyzerPreviewContainer', () => {
 
     getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID)).click();
     expect(investigateInTimelineAlertClick).toHaveBeenCalled();
+  });
+
+  it('should not navigate to analyzer when in preview and clicking on title', () => {
+    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+    (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      alertIds: ['alertid'],
+      statsNodes: mock.mockStatsNodes,
+    });
+    (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+      investigateInTimelineAlertClick: jest.fn(),
+    });
+
+    const { queryByTestId } = renderAnalyzerPreview({ ...panelContextValue, isPreview: true });
+    expect(
+      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
+    const { investigateInTimelineAlertClick } = useInvestigateInTimeline({});
+    expect(investigateInTimelineAlertClick).not.toHaveBeenCalled();
   });
 });

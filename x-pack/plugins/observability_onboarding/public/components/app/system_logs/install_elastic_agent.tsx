@@ -24,8 +24,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
+import { BackButton } from '../../shared/back_button';
 import {
   ElasticAgentPlatform,
   getElasticAgentSetupCommand,
@@ -61,8 +61,7 @@ export function InstallElasticAgent() {
     ALL_DATASETS_LOCATOR_ID
   );
 
-  const { navigateToKibanaUrl } = useKibanaNavigation();
-  const { getState, setState } = useWizard();
+  const { goBack, getState, setState } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
@@ -77,10 +76,6 @@ export function InstallElasticAgent() {
   );
 
   const datasetName = 'system-logs';
-
-  function onBack() {
-    navigateToKibanaUrl('/app/observabilityOnboarding');
-  }
 
   async function onContinue() {
     if (systemIntegrationStatus === 'rejected') {
@@ -224,16 +219,7 @@ export function InstallElasticAgent() {
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton
-              data-test-subj="observabilityOnboardingInstallElasticAgentBackButton"
-              color="text"
-              onClick={onBack}
-            >
-              {i18n.translate(
-                'xpack.observability_onboarding.systemLogs.back',
-                { defaultMessage: 'Back' }
-              )}
-            </EuiButton>,
+            <BackButton onBack={goBack} />,
             <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiButton

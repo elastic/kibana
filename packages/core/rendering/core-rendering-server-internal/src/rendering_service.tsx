@@ -209,6 +209,7 @@ export class RenderingService {
         basePath,
         serverBasePath,
         publicBaseUrl,
+        assetsHrefBase: staticAssetsHrefBase,
         env,
         clusterInfo,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,

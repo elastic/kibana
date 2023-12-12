@@ -176,7 +176,7 @@
         "label": "ToolbarButton",
         "description": [],
         "signature": [
-          "({ label, type, iconSide, size, isDisabled, ...rest }: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/shared-ux-button-toolbar",
             "scope": "common",
@@ -184,7 +184,7 @@
             "section": "def-common.Props",
             "text": "Props"
           },
-          ">) => JSX.Element"
+          "<T>) => JSX.Element"
         ],
         "path": "packages/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
@@ -193,12 +193,11 @@
           {
             "parentPluginId": "@kbn/shared-ux-button-toolbar",
             "id": "def-common.ToolbarButton.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
-            "label": "{\n  label,\n  type = 'empty',\n  iconSide = 'left',\n  size = 'm',\n  isDisabled,\n  ...rest\n}",
+            "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/shared-ux-button-toolbar",
                 "scope": "common",
@@ -206,7 +205,7 @@
                 "section": "def-common.Props",
                 "text": "Props"
               },
-              ">"
+              "<T>"
             ],
             "path": "packages/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
             "deprecated": false,
@@ -438,59 +437,6 @@
         "tags": [],
         "label": "Props",
         "description": [
-          "\nProps for `PrimaryButton`."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/shared-ux-button-toolbar",
-            "scope": "common",
-            "docId": "kibKbnSharedUxButtonToolbarPluginApi",
-            "section": "def-common.Props",
-            "text": "Props"
-          },
-          " extends Pick<",
-          "EuiButtonPropsForButton",
-          ", \"onClick\" | \"data-test-subj\" | \"isDisabled\" | \"iconType\" | \"size\" | \"iconSide\">"
-        ],
-        "path": "packages/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-button-toolbar",
-            "id": "def-common.Props.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/shared-ux-button-toolbar",
-            "id": "def-common.Props.type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "ToolbarButtonTypes | undefined"
-            ],
-            "path": "packages/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-button-toolbar",
-        "id": "def-common.Props",
-        "type": "Interface",
-        "tags": [],
-        "label": "Props",
-        "description": [
           "\nProps for a generic toolbar component"
         ],
         "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
@@ -525,11 +471,28 @@
         "label": "Props",
         "description": [],
         "signature": [
-          "{ onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; 'data-test-subj'?: string | undefined; isDisabled?: boolean | undefined; size?: \"m\" | \"s\" | undefined; iconSide?: ",
+          "{ fullWidth?: boolean | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; 'data-test-subj'?: string | undefined; isDisabled?: boolean | undefined; isLoading?: boolean | undefined; size?: \"m\" | \"s\" | undefined; as?: \"standard\" | undefined; fontWeight?: ToolbarButtonFontWeights | undefined; iconSide?: ",
           "ButtonContentIconSide",
-          "; }"
+          "; groupPosition?: ButtonPositions | undefined; hasArrow?: boolean | undefined; }"
         ],
         "path": "packages/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-button-toolbar",
+        "id": "def-common.Props",
+        "type": "Type",
+        "tags": [],
+        "label": "Props",
+        "description": [
+          "\nProps for `PrimaryButton`."
+        ],
+        "signature": [
+          "T extends \"iconButton\" ? ToolbarIconButton : ToolbarStandardButton"
+        ],
+        "path": "packages/shared-ux/button_toolbar/src/buttons/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -544,7 +507,7 @@
           "\nProps for `ToolbarPopover`."
         ],
         "signature": [
-          "AllowedButtonProps & AllowedPopoverProps & { children: (arg: { closePopover: () => void; }) => React.ReactNode; }"
+          "AllowedButtonProps & AllowedPopoverProps & { children: (arg: { closePopover: () => void; }) => React.ReactNode; label: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal; }"
         ],
         "path": "packages/shared-ux/button_toolbar/src/popover/popover.tsx",
         "deprecated": false,
@@ -561,7 +524,7 @@
           "type for cases with both button or a popover could be used"
         ],
         "signature": [
-          "React.FunctionComponent<",
+          "(<T extends ButtonRenderStyle>(props: ",
           {
             "pluginId": "@kbn/shared-ux-button-toolbar",
             "scope": "common",
@@ -569,7 +532,7 @@
             "section": "def-common.Props",
             "text": "Props"
           },
-          "> | (({ type, label, iconType, size, children, isDisabled, ...popover }: ",
+          "<T>) => JSX.Element) | (({ type, label, iconType, size, children, isDisabled, ...popover }: ",
           {
             "pluginId": "@kbn/shared-ux-button-toolbar",
             "scope": "common",

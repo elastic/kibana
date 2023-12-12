@@ -12,10 +12,9 @@ import {
   WEBSITE_URL_HELP_TEXT,
   WEBSITE_URL_LABEL,
 } from './simple_monitor_form';
-import { screen } from '@testing-library/react';
 import { render } from '../../utils/testing';
 import React from 'react';
-import { act, fireEvent, waitFor } from '@testing-library/react';
+import { act, fireEvent, waitFor, screen } from '@testing-library/react';
 import { syntheticsTestSubjects } from '../../../../../common/constants/data_test_subjects';
 import { apiService } from '../../../../utils/api_service';
 import * as reduxHooks from 'react-redux';

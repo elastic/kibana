@@ -6,7 +6,7 @@
  */
 
 import { union } from 'lodash';
-import { ApmRuleType } from './apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,

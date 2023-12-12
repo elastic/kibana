@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { SAVED_QUERY_BASE_URL } from '@kbn/data-plugin/common/constants';
-import { rootRequest } from '../common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { rootRequest } from './common';
 
 export const createSavedQuery = (
   title: string,
@@ -36,7 +36,9 @@ export const createSavedQuery = (
         },
       ],
     },
-    headers: { 'kbn-xsrf': 'cypress-creds', [ELASTIC_HTTP_VERSION_HEADER]: '1' },
+    headers: {
+      [ELASTIC_HTTP_VERSION_HEADER]: '1',
+    },
   });
 
 export const deleteSavedQueries = () => {

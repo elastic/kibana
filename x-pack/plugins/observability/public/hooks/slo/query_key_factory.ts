@@ -32,7 +32,8 @@ export const sloKeys = {
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
   burnRates: (sloId: string, instanceId: string | undefined) =>
     [...sloKeys.all, 'burnRates', sloId, instanceId] as const,
-  preview: (indicator?: Indicator) => [...sloKeys.all, 'preview', indicator] as const,
+  preview: (indicator: Indicator, range: { start: number; end: number }) =>
+    [...sloKeys.all, 'preview', indicator, range] as const,
 };
 
 export type SloKeys = typeof sloKeys;

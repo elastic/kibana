@@ -25,6 +25,7 @@ import type {
 } from '../../../common/types/domain';
 import { CaseStatuses, UserActionTypes, AttachmentType } from '../../../common/types/domain';
 import type {
+  CasePostRequest,
   CaseRequestCustomFields,
   CaseUserActionsDeprecatedResponse,
 } from '../../../common/types/api';
@@ -480,3 +481,18 @@ export const fillMissingCustomFields = ({
 
   return [...customFields, ...missingCustomFields];
 };
+
+export const normalizeCreateCaseRequest = (
+  request: CasePostRequest,
+  customFieldsConfiguration?: CustomFieldsConfiguration
+) => ({
+  ...request,
+  title: request.title.trim(),
+  description: request.description.trim(),
+  category: request.category?.trim() ?? null,
+  tags: request.tags?.map((tag) => tag.trim()) ?? [],
+  customFields: fillMissingCustomFields({
+    customFields: request.customFields,
+    customFieldsConfiguration,
+  }),
+});

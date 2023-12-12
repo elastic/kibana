@@ -7,12 +7,12 @@
 
 import { isoToEpochRt, nonEmptyStringRt, inRangeRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
+import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import {
   SnapshotCustomMetricInputRT,
   SnapshotGroupByRT,
   SnapshotMetricInputRT,
 } from '../http_api/snapshot_api';
-import { ItemTypeRT } from '../inventory_models/types';
 
 export const inventoryColorPaletteRT = rt.keyof({
   status: null,

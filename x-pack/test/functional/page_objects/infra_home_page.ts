@@ -347,6 +347,10 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await thresholdInput.type([threshold]);
     },
 
+    async ensureAlertsAndRulesDropdownIsMissing() {
+      await testSubjects.missingOrFail('infrastructure-alerts-and-rules');
+    },
+
     async clickAlertsAndRules() {
       await testSubjects.click('infrastructure-alerts-and-rules');
     },
@@ -369,7 +373,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async dismissDatePickerTooltip() {
       const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`, {
-        timeout: 1000,
+        timeout: 3000,
       });
 
       if (isTooltipOpen) {

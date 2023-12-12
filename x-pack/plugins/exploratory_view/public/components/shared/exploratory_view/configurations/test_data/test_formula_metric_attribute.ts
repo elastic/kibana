@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FINAL_SUMMARY_KQL } from '../synthetics/single_metric_config';
 import { mockDataView } from '../../rtl_helpers';
 
 export const sampleMetricFormulaAttribute = {
@@ -40,8 +41,7 @@ export const sampleMetricFormulaAttribute = {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query:
-                    'summary.final_attempt: true or (not summary.final_attempt: * and summary:*)',
+                  query: FINAL_SUMMARY_KQL,
                 },
                 isBucketed: false,
                 label: 'Availability',
@@ -63,8 +63,7 @@ export const sampleMetricFormulaAttribute = {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query:
-                    '(summary.final_attempt: true or (not summary.final_attempt: * and summary:*)) AND (summary.down > 0)',
+                  query: `(${FINAL_SUMMARY_KQL}) AND (summary.down > 0)`,
                 },
                 isBucketed: false,
                 label: 'Part of Availability',
@@ -80,8 +79,7 @@ export const sampleMetricFormulaAttribute = {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query:
-                    'summary.final_attempt: true or (not summary.final_attempt: * and summary:*)',
+                  query: FINAL_SUMMARY_KQL,
                 },
                 isBucketed: false,
                 label: 'Part of Availability',

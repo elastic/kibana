@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ProfilingSetupOptions } from '@kbn/profiling-data-access-plugin/common/setup';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { RouteRegisterParameters } from '..';
 import { getRoutePaths } from '../../../common';
-import { getCloudSetupInstructions } from './get_cloud_setup_instructions';
+import { getHasSetupPrivileges } from '../../lib/setup/get_has_setup_privileges';
 import { handleRouteHandlerError } from '../../utils/handle_route_error_handler';
 import { getClient } from '../compat';
+import { getCloudSetupInstructions } from './get_cloud_setup_instructions';
+import { getSelfManagedInstructions } from './get_self_managed_instructions';
 import { setupCloud } from './setup_cloud';
 import { setupSelfManaged } from './setup_self_managed';
-import { getSelfManagedInstructions } from './get_self_managed_instructions';
 
 export function registerSetupRoute({
   router,
@@ -23,7 +24,6 @@ export function registerSetupRoute({
   dependencies,
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  // Check if Elasticsearch and Fleet are set up for Universal Profiling
   router.get(
     {
       path: paths.HasSetupESResources,
@@ -32,16 +32,22 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
-        const esClient = await getClient(context);
+        const hasRequiredRole = dependencies.start.security
+          ? await getHasSetupPrivileges({
+              securityPluginStart: dependencies.start.security,
+              request,
+            })
+          : true;
+
         const core = await context.core;
 
         const profilingStatus = await dependencies.start.profilingDataAccess.services.getStatus({
-          esClient,
+          esClient: core.elasticsearch.client,
           soClient: core.savedObjects.client,
           spaceId: dependencies.setup.spaces?.spacesService?.getSpaceId(request),
         });
 
-        return response.ok({ body: profilingStatus });
+        return response.ok({ body: { ...profilingStatus, has_required_role: hasRequiredRole } });
       } catch (error) {
         return handleRouteHandlerError({
           error,
@@ -83,9 +89,10 @@ export function registerSetupRoute({
             dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
         };
 
+        const scopedESClient = (await context.core).elasticsearch.client;
         const { type, setupState } =
           await dependencies.start.profilingDataAccess.services.getSetupState({
-            esClient,
+            esClient: scopedESClient,
             soClient: core.savedObjects.client,
             spaceId:
               dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,

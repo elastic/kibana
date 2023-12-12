@@ -7,6 +7,8 @@
 
 import http from 'http';
 
+import { EventStreamCodec } from '@smithy/eventstream-codec';
+import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { ProxyArgs, Simulator } from './simulator';
 
 export class BedrockSimulator extends Simulator {
@@ -27,6 +29,10 @@ export class BedrockSimulator extends Simulator {
       return BedrockSimulator.sendErrorResponse(response);
     }
 
+    if (request.url === '/model/anthropic.claude-v2/invoke-with-response-stream') {
+      return BedrockSimulator.sendStreamResponse(response);
+    }
+
     return BedrockSimulator.sendResponse(response);
   }
 
@@ -34,6 +40,14 @@ export class BedrockSimulator extends Simulator {
     response.statusCode = 202;
     response.setHeader('Content-Type', 'application/json');
     response.end(JSON.stringify(bedrockSuccessResponse, null, 4));
+  }
+
+  private static sendStreamResponse(response: http.ServerResponse) {
+    response.statusCode = 200;
+    response.setHeader('Content-Type', 'application/octet-stream');
+    response.setHeader('Transfer-Encoding', 'chunked');
+    response.write(encodeBedrockResponse('Hello world, what a unique string!'));
+    response.end();
   }
 
   private static sendErrorResponse(response: http.ServerResponse) {
@@ -52,3 +66,20 @@ export const bedrockFailedResponse = {
   message:
     'Malformed input request: extraneous key [ooooo] is not permitted, please reformat your input and try again.',
 };
+
+function encodeBedrockResponse(completion: string) {
+  return new EventStreamCodec(toUtf8, fromUtf8).encode({
+    headers: {
+      ':event-type': { type: 'string', value: 'chunk' },
+      ':content-type': { type: 'string', value: 'application/json' },
+      ':message-type': { type: 'string', value: 'event' },
+    },
+    body: Uint8Array.from(
+      Buffer.from(
+        JSON.stringify({
+          bytes: Buffer.from(JSON.stringify({ completion })).toString('base64'),
+        })
+      )
+    ),
+  });
+}

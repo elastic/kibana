@@ -12,9 +12,14 @@ export type {
   MetricLayerOptions,
   MetricLayerConfig,
   XYLayerOptions,
-  XYLayerConfig,
+  XYDataLayerConfig,
   XYReferenceLinesLayerConfig,
   XYVisualOptions,
+  XYLayerConfig,
+  ChartTypes,
+  ChartModel,
+  XYChartModel,
+  MetricChartModel,
 } from './attribute_builder/visualization_types';
 
 export {
@@ -25,6 +30,11 @@ export {
   XYChart,
   XYDataLayer,
   XYReferenceLinesLayer,
+  METRIC_ID,
+  METRIC_TREND_LINE_ID,
+  XY_ID,
+  XY_DATA_ID,
+  XY_REFERENCE_LINE_ID,
 } from './attribute_builder/visualization_types';
 
 export { LensAttributesBuilder } from './attribute_builder/lens_attributes_builder';

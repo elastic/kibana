@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
@@ -25,16 +25,21 @@ import {
 } from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
-import {
-  LensEditConfigurationFlyout,
-  type EditConfigPanelProps,
-} from './lens_configuration_flyout';
+import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
+import type { EditConfigPanelProps } from './types';
 import { SavedObjectIndexStore, type Document } from '../../../persistence';
+import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { DOC_TYPE } from '../../../../common/constants';
 
 export type EditLensConfigurationProps = Omit<
   EditConfigPanelProps,
-  'startDependencies' | 'coreStart' | 'visualizationMap' | 'datasourceMap' | 'saveByRef'
+  | 'startDependencies'
+  | 'coreStart'
+  | 'visualizationMap'
+  | 'datasourceMap'
+  | 'saveByRef'
+  | 'setCurrentAttributes'
+  | 'previousAttributes'
 >;
 function LoadingSpinnerWithOverlay() {
   return (
@@ -44,7 +49,11 @@ function LoadingSpinnerWithOverlay() {
   );
 }
 
-type UpdaterType = (datasourceState: unknown, visualizationState: unknown) => void;
+type UpdaterType = (
+  datasourceState: unknown,
+  visualizationState: unknown,
+  visualizationType?: string
+) => void;
 
 // exported for testing
 export const updatingMiddleware =
@@ -68,7 +77,12 @@ export const updatingMiddleware =
       if (initExisting.match(action) || initEmpty.match(action)) {
         return;
       }
-      updater(datasourceStates[activeDatasourceId].state, visualization.state);
+
+      updater(
+        datasourceStates[activeDatasourceId].state,
+        visualization.state,
+        visualization.activeId
+      );
     }
   };
 
@@ -88,6 +102,7 @@ export async function getEditLensConfiguration(
   return ({
     attributes,
     updatePanelState,
+    updateSuggestion,
     closeFlyout,
     wrapInFlyout,
     datasourceId,
@@ -98,10 +113,13 @@ export async function getEditLensConfiguration(
     updateByRefInput,
     navigateToLensEditor,
     displayFlyoutHeader,
+    canEditTextBasedQuery,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
     }
+    const [currentAttributes, setCurrentAttributes] =
+      useState<TypedLensByValueInput['attributes']>(attributes);
     /**
      * During inline editing of a by reference panel, the panel is converted to a by value one.
      * When the user applies the changes we save them to the Lens SO
@@ -117,7 +135,7 @@ export async function getEditLensConfiguration(
       },
       [savedObjectId]
     );
-    const datasourceState = attributes.state.datasourceStates[datasourceId];
+    const datasourceState = currentAttributes.state.datasourceStates[datasourceId];
     const storeDeps = {
       lensServices,
       datasourceMap,
@@ -135,7 +153,7 @@ export async function getEditLensConfiguration(
     lensStore.dispatch(
       loadInitial({
         initialInput: {
-          attributes,
+          attributes: currentAttributes,
           id: panelId ?? generateId(),
         },
         inlineEditing: true,
@@ -148,6 +166,7 @@ export async function getEditLensConfiguration(
           <EuiFlyout
             type="push"
             ownFocus
+            paddingSize="m"
             onClose={() => {
               closeFlyout?.();
             }}
@@ -169,8 +188,9 @@ export async function getEditLensConfiguration(
     };
 
     const configPanelProps = {
-      attributes,
+      attributes: currentAttributes,
       updatePanelState,
+      updateSuggestion,
       closeFlyout,
       datasourceId,
       coreStart,
@@ -184,6 +204,8 @@ export async function getEditLensConfiguration(
       updateByRefInput,
       navigateToLensEditor,
       displayFlyoutHeader,
+      canEditTextBasedQuery,
+      setCurrentAttributes,
     };
 
     return getWrapper(

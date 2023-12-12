@@ -55,7 +55,7 @@ export class HeatmapLayer extends AbstractLayer {
   }
 
   getLayerIcon(isTocIcon: boolean) {
-    const { docCount } = getAggsMeta(this._getMetaFromTiles());
+    const { docCount } = getAggsMeta(this._getTileMetaFeatures());
     return docCount === 0 ? NO_RESULTS_ICON_AND_TOOLTIPCONTENT : super.getLayerIcon(isTocIcon);
   }
 
@@ -169,7 +169,9 @@ export class HeatmapLayer extends AbstractLayer {
     const metricField = metricFields[0];
 
     // do not use tile meta features from previous tile URL to avoid styling new tiles from previous tile meta features
-    const tileMetaFeatures = this._requiresPrevSourceCleanup(mbMap) ? [] : this._getMetaFromTiles();
+    const tileMetaFeatures = this._requiresPrevSourceCleanup(mbMap)
+      ? []
+      : this._getTileMetaFeatures();
     let max = 0;
     for (let i = 0; i < tileMetaFeatures.length; i++) {
       const range = metricField.pluckRangeFromTileMetaFeature(tileMetaFeatures[i]);

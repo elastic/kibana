@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFocusTrap,
   EuiPanel,
   EuiSpacer,
   EuiTextArea,
   keys,
-  EuiFocusTrap,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common';
 import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
 import { FunctionListPopover } from './function_list_popover';
@@ -30,7 +30,7 @@ export interface ChatPromptEditorProps {
   initialSelectedFunctionName?: string;
   initialFunctionPayload?: string;
   trigger?: MessageRole;
-  onSubmit: (message: Message) => Promise<void>;
+  onSubmit: (message: Message) => void;
 }
 
 export function ChatPromptEditor({
@@ -216,7 +216,10 @@ export function ChatPromptEditor({
               {selectedFunctionName ? (
                 <EuiPanel borderRadius="none" color="subdued" hasShadow={false} paddingSize="xs">
                   <CodeEditor
-                    aria-label="payloadEditor"
+                    aria-label={i18n.translate(
+                      'xpack.observabilityAiAssistant.chatPromptEditor.codeEditor.payloadEditorLabel',
+                      { defaultMessage: 'payloadEditor' }
+                    )}
                     data-test-subj="observabilityAiAssistantChatPromptEditorCodeEditor"
                     fullWidth
                     height={functionEditorLineCount > 8 ? '200px' : '120px'}
@@ -284,7 +287,10 @@ export function ChatPromptEditor({
           <EuiSpacer size="xl" />
           <EuiButtonIcon
             data-test-subj="observabilityAiAssistantChatPromptEditorButtonIcon"
-            aria-label="Submit"
+            aria-label={i18n.translate(
+              'xpack.observabilityAiAssistant.chatPromptEditor.euiButtonIcon.submitLabel',
+              { defaultMessage: 'Submit' }
+            )}
             disabled={selectedFunctionName ? false : !prompt?.trim() || loading || disabled}
             display={
               selectedFunctionName ? (functionPayload ? 'fill' : 'base') : prompt ? 'fill' : 'base'

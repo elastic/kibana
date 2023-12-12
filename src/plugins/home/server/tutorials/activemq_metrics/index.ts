@@ -38,7 +38,7 @@ export function activemqMetricsSpecProvider(context: TutorialContext): TutorialS
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-activemq.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/activemq.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/activemq.svg'),
     isBeta: true,
     artifacts: {
       application: {

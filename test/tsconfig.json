@@ -70,6 +70,6 @@
     "@kbn/core-http-common",
     "@kbn/event-annotation-plugin",
     "@kbn/event-annotation-common",
-    "@kbn/links-plugin"
+    "@kbn/links-plugin",
   ]
 }

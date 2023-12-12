@@ -9,10 +9,10 @@ import { EuiSkeletonText } from '@elastic/eui';
 import React, { useRef } from 'react';
 import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
+import { useMetadataStateContext } from '../../hooks/use_metadata_state';
 
 export const Osquery = () => {
-  const { metadata, loading } = useMetadataStateProviderContext();
+  const { metadata, loading } = useMetadataStateContext();
   const agentId = useRef<string | undefined>(undefined);
 
   // When a host has multiple agents reporting metrics, it's possible that one of them may not report an agent id.

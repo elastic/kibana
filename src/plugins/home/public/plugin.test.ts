@@ -29,6 +29,7 @@ describe('HomePublicPlugin', () => {
       const setup = new HomePublicPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
         share: mockShare,
         urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        cloud: cloudMock.createSetup(),
       });
       expect(setup).toHaveProperty('featureCatalogue');
       expect(setup.featureCatalogue.register).toHaveBeenCalledTimes(1);
@@ -46,6 +47,7 @@ describe('HomePublicPlugin', () => {
       const setup = new HomePublicPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
         share: mockShare,
         urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        cloud: cloudMock.createSetup(),
       });
       expect(setup).toHaveProperty('featureCatalogue');
       expect(setup.featureCatalogue).toHaveProperty('register');
@@ -55,6 +57,7 @@ describe('HomePublicPlugin', () => {
       const setup = new HomePublicPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
         share: {} as SharePluginSetup,
         urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        cloud: cloudMock.createSetup(),
       });
       expect(setup).toHaveProperty('environment');
       expect(setup.environment).toHaveProperty('update');
@@ -64,6 +67,7 @@ describe('HomePublicPlugin', () => {
       const setup = new HomePublicPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
         share: mockShare,
         urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        cloud: cloudMock.createSetup(),
       });
       expect(setup).toHaveProperty('tutorials');
       expect(setup.tutorials).toHaveProperty('setVariable');
@@ -73,6 +77,7 @@ describe('HomePublicPlugin', () => {
       const setup = new HomePublicPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
         share: mockShare,
         urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        cloud: cloudMock.createSetup(),
       });
       expect(setup).toHaveProperty('welcomeScreen');
       expect(setup.welcomeScreen).toHaveProperty('registerOnRendered');

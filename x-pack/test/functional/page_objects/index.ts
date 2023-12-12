@@ -48,6 +48,7 @@ import { StatusPageObject } from './status_page';
 import { TagManagementPageObject } from './tag_management_page';
 import { UpgradeAssistantPageObject } from './upgrade_assistant_page';
 import { UptimePageObject } from './uptime_page';
+import { UserProfilePageProvider } from './user_profile_page';
 import { WatcherPageObject } from './watcher_page';
 
 // just like services, PageObjects are defined as a map of
@@ -95,5 +96,6 @@ export const pageObjects = {
   tagManagement: TagManagementPageObject,
   upgradeAssistant: UpgradeAssistantPageObject,
   uptime: UptimePageObject,
+  userProfiles: UserProfilePageProvider,
   watcher: WatcherPageObject,
 };

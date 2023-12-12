@@ -13,25 +13,22 @@ import {
   TIMELINE_SEARCH_OR_FILTER,
 } from '../../../screens/timeline';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
-import { cleanKibana } from '../../../tasks/common';
 
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
+  addNameToTimelineAndSave,
   changeTimelineQueryLanguage,
   executeTimelineKQL,
   executeTimelineSearch,
+  showDataProviderQueryBuilder,
 } from '../../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
 import { hostsUrl, TIMELINES_URL } from '../../../urls/navigation';
 
 describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   describe('timeline search or filter KQL bar', () => {
     beforeEach(() => {
       login();
@@ -56,7 +53,8 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
     });
   });
 
-  describe('Update kqlMode for timeline', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169882
+  describe.skip('Update kqlMode for timeline', () => {
     beforeEach(() => {
       login();
       visit(TIMELINES_URL);
@@ -64,12 +62,14 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
       openTimelineUsingToggle();
       cy.intercept('PATCH', '/api/timeline').as('update');
       cy.get(LOADING_INDICATOR).should('not.exist');
+      showDataProviderQueryBuilder();
       cy.get(TIMELINE_SEARCH_OR_FILTER).click();
       cy.get(TIMELINE_SEARCH_OR_FILTER).should('exist');
     });
 
     it('should be able to update timeline kqlMode with filter', () => {
       cy.get(TIMELINE_KQLMODE_FILTER).click();
+      addNameToTimelineAndSave('Test');
       cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
         cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'filter');
@@ -77,8 +77,9 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
       });
     });
 
-    it.skip('should be able to update timeline kqlMode with search', () => {
+    it('should be able to update timeline kqlMode with search', () => {
       cy.get(TIMELINE_KQLMODE_SEARCH).click();
+      addNameToTimelineAndSave('Test');
       cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
         cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'search');

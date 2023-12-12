@@ -92,6 +92,7 @@ export async function fetchSearchSourceQuery({
     numMatches: Number(searchResult.hits.total),
     searchResult,
     parsedResults: parseAggregationResults({ isCountAgg, isGroupAgg, esResult: searchResult }),
+    index: [index.name],
   };
 }
 

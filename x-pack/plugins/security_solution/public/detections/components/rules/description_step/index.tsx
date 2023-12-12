@@ -9,7 +9,6 @@ import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
-import { css } from '@emotion/css';
 import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -17,7 +16,7 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-} from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { buildRelatedIntegrationsDescription } from '../related_integrations/integrations_description';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -65,13 +64,6 @@ const DescriptionListContainer = styled(EuiDescriptionList)`
   }
 `;
 
-const panelViewStyle = css`
-  dt {
-    font-size: 90% !important;
-  }
-  text-overflow: ellipsis;
-`;
-
 const DESCRIPTION_LIST_COLUMN_WIDTHS: [string, string] = ['50%', '50%'];
 
 interface StepRuleDescriptionProps<T> {
@@ -79,7 +71,6 @@ interface StepRuleDescriptionProps<T> {
   data: unknown;
   indexPatterns?: DataViewBase;
   schema: FormSchema<T>;
-  isInPanelView?: boolean; // Option to show description list in smaller font
 }
 
 export const StepRuleDescriptionComponent = <T,>({
@@ -87,7 +78,6 @@ export const StepRuleDescriptionComponent = <T,>({
   columns = 'multi',
   indexPatterns,
   schema,
-  isInPanelView,
 }: StepRuleDescriptionProps<T>) => {
   const kibana = useKibana();
   const license = useLicense();
@@ -130,16 +120,6 @@ export const StepRuleDescriptionComponent = <T,>({
             <EuiDescriptionList listItems={chunkListItems} />
           </EuiFlexItem>
         ))}
-      </EuiFlexGroup>
-    );
-  }
-
-  if (isInPanelView) {
-    return (
-      <EuiFlexGroup>
-        <EuiFlexItem data-test-subj="listItemColumnStepRuleDescriptionPanel">
-          <EuiDescriptionList listItems={listItems} className={panelViewStyle} />
-        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
@@ -225,7 +205,7 @@ export const getDescriptionItem = (
     return [];
   } else if (field === 'groupByFields') {
     const values: string[] = get(field, data);
-    return buildAlertSuppressionDescription(label, values, license);
+    return buildAlertSuppressionDescription(label, values);
   } else if (field === 'groupByRadioSelection') {
     return [];
   } else if (field === 'groupByDuration') {
@@ -234,7 +214,6 @@ export const getDescriptionItem = (
       return buildAlertSuppressionWindowDescription(
         label,
         value,
-        license,
         get('groupByRadioSelection', data)
       );
     } else {
@@ -243,7 +222,7 @@ export const getDescriptionItem = (
   } else if (field === 'suppressionMissingFields') {
     if (get('groupByFields', data).length > 0) {
       const value = get(field, data);
-      return buildAlertSuppressionMissingFieldsDescription(label, value, license);
+      return buildAlertSuppressionMissingFieldsDescription(label, value);
     } else {
       return [];
     }

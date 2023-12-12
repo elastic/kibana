@@ -437,3 +437,20 @@ export async function snoozeRule({
     .expect(204);
   return body;
 }
+
+export async function findRule({
+  supertest,
+  ruleId,
+}: {
+  supertest: SuperTest<Test>;
+  ruleId: string;
+}) {
+  if (!ruleId) {
+    throw new Error(`'ruleId' is undefined`);
+  }
+  const response = await supertest
+    .get(`/api/alerting/rule/${ruleId}`)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo');
+  return response.body || {};
+}

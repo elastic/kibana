@@ -12,7 +12,6 @@ import {
   createSymbolizerPackagePolicy,
   removeProfilingFromApmPackagePolicy,
 } from '../../lib/setup/fleet_policies';
-import { setSecurityRole } from '../../lib/setup/security_role';
 import { ProfilingCloudSetupOptions } from '../../lib/setup/types';
 
 export async function setupCloud({
@@ -24,7 +23,6 @@ export async function setupCloud({
 }) {
   const executeAdminFunctions = [
     ...(setupState.resource_management.enabled ? [] : [enableResourceManagement]),
-    ...(setupState.permissions.configured ? [] : [setSecurityRole]),
     ...(setupState.settings.configured ? [] : [setMaximumBuckets]),
   ];
 

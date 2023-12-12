@@ -109,7 +109,7 @@ describe('ResolveAllConflicts', () => {
         panelPaddingSize="none"
         repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={
             Array [
               <EuiContextMenuItem

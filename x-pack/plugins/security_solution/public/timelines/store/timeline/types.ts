@@ -5,24 +5,15 @@
  * 2.0.
  */
 
-import type { Action } from 'redux';
-import type { Observable } from 'rxjs';
-
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { TableById } from '@kbn/securitysolution-data-table';
+import type { RootEpicDependencies } from '../../../common/store/epic';
 import type { ColumnHeaderOptions, SortColumnTimeline } from '../../../../common/types';
 import type { RowRendererId } from '../../../../common/api/timeline';
 import type { inputsModel } from '../../../common/store/inputs';
 import type { NotesById } from '../../../common/store/app/model';
 
 import type { TimelineModel } from './model';
-
-export interface AutoSavedWarningMsg {
-  timelineId: string | null;
-  newTimelineModel: TimelineModel | null;
-}
 
 /** A map of id to timeline  */
 export interface TimelineById {
@@ -41,27 +32,16 @@ export const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 /** The state of all timelines is stored here */
 export interface TimelineState {
   timelineById: TimelineById;
-  autoSavedWarningMsg: AutoSavedWarningMsg;
   showCallOutUnauthorizedMsg: boolean;
   insertTimeline: InsertTimeline | null;
 }
 
-export interface ActionTimeline extends Action<string> {
-  payload: {
-    id: string;
-    eventId: string;
-    noteId: string;
-  };
-}
-
-export interface TimelineEpicDependencies<State> {
+export interface TimelineEpicDependencies<State> extends RootEpicDependencies {
   timelineByIdSelector: (state: State) => TimelineById;
   timelineTimeRangeSelector: (state: State) => inputsModel.TimeRange;
   selectAllTimelineQuery: () => (state: State, id: string) => inputsModel.GlobalQuery;
   selectNotesByIdSelector: (state: State) => NotesById;
   tableByIdSelector: (state: State) => TableById;
-  kibana$: Observable<CoreStart>;
-  storage: Storage;
 }
 
 export interface TimelineModelSettings {

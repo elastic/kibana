@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { DateFromStringOrNumber } from '@kbn/io-ts-utils';
 import { ascending, bisector } from 'd3-array';
 import * as rt from 'io-ts';
 import { pick } from 'lodash';
 
 export const minimalTimeKeyRT = rt.type({
-  time: rt.number,
+  time: DateFromStringOrNumber,
   tiebreaker: rt.number,
 });
 export type MinimalTimeKey = rt.TypeOf<typeof minimalTimeKeyRT>;

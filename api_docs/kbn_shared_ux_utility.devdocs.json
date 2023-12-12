@@ -130,10 +130,18 @@
         "tags": [],
         "label": "withSuspense",
         "description": [
-          "\nA HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors."
+          "\nA HOC which supplies React.Suspense with a fallback component, and a `KibanaErrorBoundary` to contain errors."
         ],
         "signature": [
-          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<R>>"
+          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
+          "> & React.RefAttributes<R>>"
         ],
         "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
         "deprecated": false,
@@ -178,7 +186,47 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.WithSuspenseExtendedDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "WithSuspenseExtendedDeps",
+        "description": [
+          "\nOptional services that the Suspense wrapper can use"
+        ],
+        "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-utility",
+            "id": "def-common.WithSuspenseExtendedDeps.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [
+              "\nThe `AnalyticsServiceStart` object from `CoreStart`"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-analytics-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+                "section": "def-common.AnalyticsServiceStart",
+                "text": "AnalyticsServiceStart"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []

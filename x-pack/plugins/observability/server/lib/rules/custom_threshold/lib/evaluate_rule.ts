@@ -8,23 +8,20 @@
 import moment from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { MetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
-import { isCustom } from './metric_expression_params';
+import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
 import { AdditionalContext, getIntervalInSeconds } from '../utils';
-import { SearchConfigurationType } from '../custom_threshold_executor';
-import { CUSTOM_EQUATION_I18N, DOCUMENT_COUNT_I18N } from '../messages';
+import { SearchConfigurationType } from '../types';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
 import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';
 
 export interface EvaluatedRuleParams {
-  criteria: MetricExpressionParams[];
+  criteria: CustomMetricExpressionParams[];
   groupBy: string | undefined | string[];
   searchConfiguration: SearchConfigurationType;
 }
 
-export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {
-  metric: string;
+export type Evaluation = CustomMetricExpressionParams & {
   currentValue: number | null;
   timestamp: string;
   shouldFire: boolean;
@@ -52,12 +49,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
       const interval = `${criterion.timeSize}${criterion.timeUnit}`;
       const intervalAsSeconds = getIntervalInSeconds(interval);
       const intervalAsMS = intervalAsSeconds * 1000;
-      const calculatedTimerange = createTimerange(
-        intervalAsMS,
-        criterion.aggType,
-        timeframe,
-        lastPeriodEnd
-      );
+      const calculatedTimerange = createTimerange(intervalAsMS, timeframe, lastPeriodEnd);
 
       const currentValues = await getData(
         esClient,
@@ -101,14 +93,6 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         if (result.trigger || result.value === null) {
           evaluations[key] = {
             ...criterion,
-            metric:
-              criterion.aggType === 'count'
-                ? DOCUMENT_COUNT_I18N
-                : isCustom(criterion) && criterion.label
-                ? criterion.label
-                : criterion.aggType === 'custom'
-                ? CUSTOM_EQUATION_I18N
-                : criterion.metric,
             currentValue: result.value,
             timestamp: moment(calculatedTimerange.end).toISOString(),
             shouldFire: result.trigger,

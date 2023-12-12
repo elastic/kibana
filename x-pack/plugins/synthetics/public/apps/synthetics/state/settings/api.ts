@@ -12,9 +12,9 @@ import {
 import { apiService } from '../../../../utils/api_service';
 import {
   DynamicSettings,
-  DynamicSettingsSaveResponse,
-  DynamicSettingsSaveCodec,
   DynamicSettingsCodec,
+  DynamicSettingsSaveCodec,
+  DynamicSettingsSaveResponse,
   LocationMonitorsResponse,
   LocationMonitorsType,
 } from '../../../../../common/runtime_types';
@@ -47,13 +47,11 @@ export const setDynamicSettings = async ({
 };
 
 export const fetchLocationMonitors = async (): Promise<LocationMonitor[]> => {
-  const { payload } = await apiService.get<LocationMonitorsResponse>(
+  return await apiService.get<LocationMonitorsResponse>(
     SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_MONITORS,
     undefined,
     LocationMonitorsType
   );
-
-  return payload;
 };
 
 export type ActionConnector = Omit<RawActionConnector, 'secrets'>;

@@ -12,7 +12,7 @@ import * as api from './api';
 import { useToasts } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { casesQueriesKeys } from '../constants';
 
 jest.mock('./api');
@@ -130,7 +130,9 @@ describe('useCreateAttachments', () => {
 
     await waitForNextUpdate();
 
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.configuration());
+    expect(queryClientSpy).toHaveBeenCalledWith(
+      casesQueriesKeys.configuration({ owner: [SECURITY_SOLUTION_OWNER] })
+    );
   });
 
   it('shows the success toaster', async () => {

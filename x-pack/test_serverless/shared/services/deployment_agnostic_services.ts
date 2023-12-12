@@ -21,12 +21,14 @@ const deploymentAgnosticApiIntegrationServices = _.pick(apiIntegrationServices, 
   'esSupertest',
   'indexPatterns',
   'ingestPipelines',
+  'indexManagement',
   'kibanaServer',
   'ml',
   'randomness',
   'retry',
   'security',
   'usageAPI',
+  'console',
 ]);
 
 export const services = {

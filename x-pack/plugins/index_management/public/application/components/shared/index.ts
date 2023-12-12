@@ -6,6 +6,7 @@
  */
 
 export type { CommonWizardSteps } from './components';
+
 export {
   TabAliases,
   TabMappings,
@@ -15,3 +16,6 @@ export {
   StepSettingsContainer,
   TemplateContentIndicator,
 } from './components';
+
+export { UnitField } from './fields/unit_field';
+export { timeUnits } from '../../constants/time_units';

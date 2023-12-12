@@ -25,7 +25,7 @@ export const VIEW_ALL = i18n.translate(
   }
 );
 
-export const LEARN_MORE = (riskEntity: RiskScoreEntity) =>
+export const LEARN_MORE = (riskEntity?: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.learnMore', {
     defaultMessage: 'Learn more about {riskEntity} risk',
     values: {

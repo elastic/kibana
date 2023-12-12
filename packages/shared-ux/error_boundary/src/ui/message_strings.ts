@@ -30,7 +30,7 @@ export const errorMessageStrings = {
           }),
         componentName: (errorComponentName: string) =>
           i18n.translate('sharedUXPackages.error_boundary.fatal.prompt.details', {
-            defaultMessage: 'An error occurred in {name}:',
+            defaultMessage: 'The above error occurred in {name}:',
             values: { name: errorComponentName },
           }),
         closeButton: () =>
@@ -56,7 +56,7 @@ export const errorMessageStrings = {
         }),
       body: () =>
         i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.body', {
-          defaultMessage: 'A refresh fixes problems caused by upgrades or being offline.',
+          defaultMessage: 'This should resolve any issues loading the page.',
         }),
       pageReloadButton: () =>
         i18n.translate('sharedUXPackages.error_boundary.recoverable.prompt.pageReloadButton', {

@@ -25,16 +25,22 @@ const navigationTree: NavigationTreeDefinition = {
       title: 'Observability',
       icon: 'logoObservability',
       defaultIsCollapsed: false,
-      accordionProps: {
-        arrowProps: { css: { display: 'none' } },
-      },
+      isCollapsible: false,
       breadcrumbStatus: 'hidden',
       children: [
         {
-          title: i18n.translate('xpack.serverlessObservability.nav.logExplorer', {
-            defaultMessage: 'Log Explorer',
+          title: i18n.translate('xpack.serverlessObservability.nav.discover', {
+            defaultMessage: 'Discover',
           }),
-          link: 'observability-log-explorer',
+          link: 'discover',
+          renderAs: 'item',
+          children: [
+            {
+              // This is to show "observability-log-explorer" breadcrumbs when navigating from "discover" to "log explorer"
+              link: 'observability-log-explorer',
+              sideNavStatus: 'hidden',
+            },
+          ],
         },
         {
           title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
@@ -80,9 +86,6 @@ const navigationTree: NavigationTreeDefinition = {
           id: 'aiops',
           title: 'AIOps',
           renderAs: 'accordion',
-          accordionProps: {
-            arrowProps: { css: { display: 'none' } },
-          },
           spaceBefore: null,
           children: [
             {
@@ -135,9 +138,6 @@ const navigationTree: NavigationTreeDefinition = {
             defaultMessage: 'Applications',
           }),
           renderAs: 'accordion',
-          accordionProps: {
-            arrowProps: { css: { display: 'none' } },
-          },
           children: [
             {
               link: 'apm:services',
@@ -166,9 +166,6 @@ const navigationTree: NavigationTreeDefinition = {
             defaultMessage: 'Infrastructure',
           }),
           renderAs: 'accordion',
-          accordionProps: {
-            arrowProps: { css: { display: 'none' } },
-          },
           children: [
             {
               link: 'metrics:inventory',

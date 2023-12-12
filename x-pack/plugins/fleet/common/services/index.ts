@@ -7,6 +7,7 @@
 
 export * from './routes';
 export * as AgentStatusKueryHelper from './agent_status';
+export * from './package_helpers';
 export {
   packageToPackagePolicyInputs,
   packageToPackagePolicy,

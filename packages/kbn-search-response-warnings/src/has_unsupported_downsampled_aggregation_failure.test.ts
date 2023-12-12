@@ -13,7 +13,7 @@ describe('hasUnsupportedDownsampledAggregationFailure', () => {
     expect(
       hasUnsupportedDownsampledAggregationFailure({
         type: 'incomplete',
-        message: 'The data might be incomplete or wrong.',
+        requestName: 'My request',
         clusters: {
           '(local)': {
             status: 'partial',
@@ -49,7 +49,7 @@ describe('hasUnsupportedDownsampledAggregationFailure', () => {
     expect(
       hasUnsupportedDownsampledAggregationFailure({
         type: 'incomplete',
-        message: 'The data might be incomplete or wrong.',
+        requestName: 'My request',
         clusters: {
           '(local)': {
             status: 'partial',

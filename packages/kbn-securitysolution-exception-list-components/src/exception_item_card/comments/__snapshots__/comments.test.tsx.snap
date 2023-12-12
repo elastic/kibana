@@ -143,7 +143,7 @@ Object {
                       class="emotion-euiTimelineItemEvent-top"
                     >
                       <div
-                        class="euiCommentEvent emotion-euiCommentEvent-custom"
+                        class="euiCommentEvent emotion-euiCommentEvent"
                         data-type="custom"
                       >
                         <div
@@ -182,7 +182,7 @@ Object {
                       class="emotion-euiTimelineItemEvent-top"
                     >
                       <div
-                        class="euiCommentEvent emotion-euiCommentEvent-custom"
+                        class="euiCommentEvent emotion-euiCommentEvent"
                         data-type="custom"
                       >
                         <div
@@ -281,7 +281,7 @@ Object {
                     class="emotion-euiTimelineItemEvent-top"
                   >
                     <div
-                      class="euiCommentEvent emotion-euiCommentEvent-custom"
+                      class="euiCommentEvent emotion-euiCommentEvent"
                       data-type="custom"
                     >
                       <div
@@ -320,7 +320,7 @@ Object {
                     class="emotion-euiTimelineItemEvent-top"
                   >
                     <div
-                      class="euiCommentEvent emotion-euiCommentEvent-custom"
+                      class="euiCommentEvent emotion-euiCommentEvent"
                       data-type="custom"
                     >
                       <div
@@ -475,7 +475,7 @@ Object {
                       class="emotion-euiTimelineItemEvent-top"
                     >
                       <div
-                        class="euiCommentEvent emotion-euiCommentEvent-custom"
+                        class="euiCommentEvent emotion-euiCommentEvent"
                         data-type="custom"
                       >
                         <div
@@ -514,7 +514,7 @@ Object {
                       class="emotion-euiTimelineItemEvent-top"
                     >
                       <div
-                        class="euiCommentEvent emotion-euiCommentEvent-custom"
+                        class="euiCommentEvent emotion-euiCommentEvent"
                         data-type="custom"
                       >
                         <div
@@ -612,7 +612,7 @@ Object {
                     class="emotion-euiTimelineItemEvent-top"
                   >
                     <div
-                      class="euiCommentEvent emotion-euiCommentEvent-custom"
+                      class="euiCommentEvent emotion-euiCommentEvent"
                       data-type="custom"
                     >
                       <div
@@ -651,7 +651,7 @@ Object {
                     class="emotion-euiTimelineItemEvent-top"
                   >
                     <div
-                      class="euiCommentEvent emotion-euiCommentEvent-custom"
+                      class="euiCommentEvent emotion-euiCommentEvent"
                       data-type="custom"
                     >
                       <div

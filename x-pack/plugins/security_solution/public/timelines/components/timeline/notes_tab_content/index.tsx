@@ -21,6 +21,7 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineActions } from '../../../store/timeline';
@@ -51,6 +52,8 @@ const FullWidthFlexGroup = styled(EuiFlexGroup)`
 const ScrollableFlexItem = styled(EuiFlexItem)`
   overflow-x: hidden;
   overflow-y: auto;
+  padding-inline: ${({ theme }) => (theme as EuiTheme).eui.euiSizeM};
+  padding-block: ${({ theme }) => (theme as EuiTheme).eui.euiSizeS};
 `;
 
 const VerticalRule = styled.div`
@@ -202,7 +205,6 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
       <>
         {createdBy && (
           <>
-            <EuiSpacer size="m" />
             <EuiTitle size="xs">
               <h4>{CREATED_BY}</h4>
             </EuiTitle>
@@ -218,13 +220,12 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
   );
 
   return (
-    <FullWidthFlexGroup>
+    <FullWidthFlexGroup gutterSize="none">
       <ScrollableFlexItem grow={2} id="scrollableNotes">
-        <StyledPanel paddingSize="s">
+        <StyledPanel paddingSize="none">
           <EuiTitle>
             <h3>{NOTES}</h3>
           </EuiTitle>
-          <EuiSpacer />
           <NotePreviews
             eventIdToNoteIds={eventIdToNoteIds}
             notes={notes}

@@ -12,8 +12,8 @@ import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/comm
 
 import expect from 'expect';
 import {
-  BulkActionType,
-  BulkActionEditType,
+  BulkActionTypeEnum,
+  BulkActionEditTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule());
 
       const { body } = await postDryRunBulkAction()
-        .send({ action: BulkActionType.export })
+        .send({ action: BulkActionTypeEnum.export })
         .expect(400);
 
       expect(body).toEqual({
@@ -80,7 +80,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, testRule);
 
       const { body } = await postDryRunBulkAction()
-        .send({ action: BulkActionType.delete })
+        .send({ action: BulkActionTypeEnum.delete })
         .expect(200);
 
       expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -101,7 +101,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule(ruleId));
 
       const { body } = await postDryRunBulkAction()
-        .send({ action: BulkActionType.enable })
+        .send({ action: BulkActionTypeEnum.enable })
         .expect(200);
 
       expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -123,7 +123,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule(ruleId, true));
 
       const { body } = await postDryRunBulkAction()
-        .send({ action: BulkActionType.disable })
+        .send({ action: BulkActionTypeEnum.disable })
         .expect(200);
 
       expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, ruleToDuplicate);
 
       const { body } = await postDryRunBulkAction()
-        .send({ action: BulkActionType.disable })
+        .send({ action: BulkActionTypeEnum.disable })
         .expect(200);
 
       expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -172,10 +172,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body } = await postDryRunBulkAction()
           .send({
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.set_tags,
+                type: BulkActionEditTypeEnum.set_tags,
                 value: ['reset-tag'],
               },
             ],
@@ -208,10 +208,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postDryRunBulkAction()
           .send({
             ids: [immutableRule.id],
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.set_tags,
+                type: BulkActionEditTypeEnum.set_tags,
                 value: ['reset-tag'],
               },
             ],
@@ -242,9 +242,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('validate updating index pattern for machine learning rule', () => {
         const actions = [
-          BulkActionEditType.add_index_patterns,
-          BulkActionEditType.set_index_patterns,
-          BulkActionEditType.delete_index_patterns,
+          BulkActionEditTypeEnum.add_index_patterns,
+          BulkActionEditTypeEnum.set_index_patterns,
+          BulkActionEditTypeEnum.delete_index_patterns,
         ];
 
         actions.forEach((editAction) => {
@@ -254,8 +254,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postDryRunBulkAction()
               .send({
                 ids: [mlRule.id],
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
                     type: editAction,
                     value: [],
@@ -295,9 +295,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('validate updating index pattern for ES|QL rule', () => {
         const actions = [
-          BulkActionEditType.add_index_patterns,
-          BulkActionEditType.set_index_patterns,
-          BulkActionEditType.delete_index_patterns,
+          BulkActionEditTypeEnum.add_index_patterns,
+          BulkActionEditTypeEnum.set_index_patterns,
+          BulkActionEditTypeEnum.delete_index_patterns,
         ];
 
         actions.forEach((editAction) => {
@@ -307,8 +307,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postDryRunBulkAction()
               .send({
                 ids: [esqlRule.id],
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
                     type: editAction,
                     value: [],

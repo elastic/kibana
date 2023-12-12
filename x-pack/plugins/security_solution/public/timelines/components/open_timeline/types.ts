@@ -225,19 +225,10 @@ export interface UpdateTimeline {
   to: string;
   ruleNote?: string;
   ruleAuthor?: string;
+  preventSettingQuery?: boolean;
 }
 
-export type DispatchUpdateTimeline = ({
-  duplicate,
-  id,
-  from,
-  notes,
-  resolveTimelineConfig,
-  timeline,
-  to,
-  ruleNote,
-  ruleAuthor,
-}: UpdateTimeline) => () => void;
+export type DispatchUpdateTimeline = (args: UpdateTimeline) => () => void;
 
 export enum TimelineTabsStyle {
   tab = 'tab',

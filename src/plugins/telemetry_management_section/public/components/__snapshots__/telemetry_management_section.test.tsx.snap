@@ -281,6 +281,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
           "register": [MockFunction],
         },
         "basePath": BasePath {
+          "assetsHrefBase": "",
           "basePath": "",
           "get": [Function],
           "prepend": [Function],
@@ -302,6 +303,9 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         "patch": [MockFunction],
         "post": [MockFunction],
         "put": [MockFunction],
+        "staticAssets": Object {
+          "getPluginAssetHref": [MockFunction],
+        },
       },
       "isScreenshotMode": false,
       "notifications": Object {

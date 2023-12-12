@@ -136,6 +136,30 @@ describe('ES search strategy', () => {
         expect(request).toHaveProperty('keep_alive', '60000ms');
       });
 
+      it('allows overriding keep_alive and wait_for_completion_timeout', async () => {
+        mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+        const params = {
+          index: 'logstash-*',
+          body: { query: {} },
+          wait_for_completion_timeout: '10s',
+          keep_alive: '5m',
+        };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockLegacyConfig$,
+          mockSearchConfig,
+          mockLogger
+        );
+
+        await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
+
+        expect(mockGetCaller).toBeCalled();
+        const request = mockGetCaller.mock.calls[0][0];
+        expect(request.id).toEqual('foo');
+        expect(request).toHaveProperty('wait_for_completion_timeout', '10s');
+        expect(request).toHaveProperty('keep_alive', '5m');
+      });
+
       it('sets transport options on POST requests', async () => {
         const transportOptions = { maxRetries: 1 };
         mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);

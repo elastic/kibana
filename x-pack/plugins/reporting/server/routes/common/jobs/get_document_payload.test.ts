@@ -6,10 +6,15 @@
  */
 
 import { Readable } from 'stream';
-import { CSV_JOB_TYPE, PDF_JOB_TYPE, PDF_JOB_TYPE_V2 } from '../../../../common/constants';
-import { ReportApiJSON } from '../../../../common/types';
-import { ContentStream, getContentStream, statuses } from '../../../lib';
-import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
+
+import { JOB_STATUS } from '@kbn/reporting-common';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
+import { CSV_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
+import { PDF_JOB_TYPE, PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+
+import { ContentStream, getContentStream } from '../../../lib';
+import { createMockReportingCore } from '../../../test_helpers';
 import { getDocumentPayloadFactory } from './get_document_payload';
 import { jobsQueryFactory } from './jobs_query';
 
@@ -45,7 +50,7 @@ describe('getDocumentPayload', () => {
         getDocumentPayload({
           id: 'id1',
           index: '.reporting-12345',
-          status: statuses.JOB_STATUS_COMPLETED,
+          status: JOB_STATUS.COMPLETED,
           jobtype: PDF_JOB_TYPE,
           output: {
             content_type: 'application/pdf',
@@ -71,7 +76,7 @@ describe('getDocumentPayload', () => {
         getDocumentPayload({
           id: 'id1',
           index: '.reporting-12345',
-          status: statuses.JOB_STATUS_WARNINGS,
+          status: JOB_STATUS.WARNINGS,
           jobtype: CSV_JOB_TYPE,
           output: {
             content_type: 'text/csv',
@@ -103,7 +108,7 @@ describe('getDocumentPayload', () => {
         getDocumentPayload({
           id: 'id1',
           index: '.reporting-12345',
-          status: statuses.JOB_STATUS_FAILED,
+          status: JOB_STATUS.FAILED,
           jobtype: PDF_JOB_TYPE_V2,
           output: {},
           payload: {},
@@ -127,7 +132,7 @@ describe('getDocumentPayload', () => {
         getDocumentPayload({
           id: 'id1',
           index: '.reporting-12345',
-          status: statuses.JOB_STATUS_PENDING,
+          status: JOB_STATUS.PENDING,
           jobtype: PDF_JOB_TYPE_V2,
           output: {},
           payload: {},

@@ -5,68 +5,47 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiToolTip,
-  EuiButtonIcon,
-  EuiText,
-  EuiButtonEmpty,
-  EuiTextColor,
-  useEuiTheme,
-} from '@elastic/eui';
-import type { MouseEventHandler, MouseEvent } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { FormattedRelative } from '@kbn/i18n-react';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
-import type { State } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
-import { AddToFavoritesButton } from '../../timeline/properties/helpers';
-import type { TimerangeInput } from '../../../../../common/search_strategy';
-import { AddToCaseButton } from '../add_to_case_button';
-import { AddTimelineButton } from '../add_timeline_button';
-import { EditTimelineButton } from '../../timeline/header/edit_timeline_button';
-import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
-import { InspectButton } from '../../../../common/components/inspect';
-import { useTimelineKpis } from '../../../containers/kpis';
+import type { State } from '../../../../common/store';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import type { TimelineModel } from '../../../store/timeline/model';
-import {
-  startSelector,
-  endSelector,
-} from '../../../../common/components/super_date_picker/selectors';
 import { focusActiveTimelineButton } from '../../timeline/helpers';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
-import * as commonI18n from '../../timeline/properties/translations';
-import { getTimelineStatusByIdSelector } from './selectors';
-import { TimelineKPIs } from './kpis';
-
-import { setActiveTabTimeline } from '../../../store/timeline/actions';
-import { useIsOverflow } from '../../../../common/hooks/use_is_overflow';
-
-interface FlyoutHeaderProps {
-  timelineId: string;
-}
+import { TimelineActionMenu } from '../action_menu';
+import { AddToFavoritesButton } from '../../timeline/properties/helpers';
+import { TimelineStatusInfo } from './timeline_status_info';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 
 interface FlyoutHeaderPanelProps {
   timelineId: string;
 }
 
+const FlyoutHeaderPanelContentFlexGroupContainer = styled(EuiFlexGroup)`
+  overflow-x: auto;
+`;
+
 const ActiveTimelinesContainer = styled(EuiFlexItem)`
   overflow: hidden;
+`;
+
+const TimelinePanel = euiStyled(EuiPanel)<{ $isOpen?: boolean }>`
+  backgroundColor: ${(props) => props.theme.eui.euiColorEmptyShade};
+  color: ${(props) => props.theme.eui.euiTextColor};
+  padding-inline: ${(props) => props.theme.eui.euiSizeM};
+  border-radius: ${({ $isOpen, theme }) => ($isOpen ? theme.eui.euiBorderRadius : '0px')};
 `;
 
 const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timelineId }) => {
@@ -86,6 +65,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     show,
     filters,
     kqlMode,
+    changed = false,
   } = useDeepEqualSelector((state) =>
     pick(
       [
@@ -99,6 +79,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
         'show',
         'filters',
         'kqlMode',
+        'changed',
       ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
@@ -109,14 +90,15 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   );
 
   const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterQuerySelector(), []);
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId)!);
+
+  const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId));
 
   const kqlQueryExpression =
     isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
       ? ' '
-      : kqlQueryTimeline;
-  const kqlQueryTest = useMemo(
+      : kqlQueryTimeline ?? '';
+
+  const kqlQueryObj = useMemo(
     () => ({ query: kqlQueryExpression, language: 'kuery' }),
     [kqlQueryExpression]
   );
@@ -129,55 +111,69 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
         indexPattern,
         browserFields,
         filters: filters ? filters : [],
-        kqlQuery: kqlQueryTest,
+        kqlQuery: kqlQueryObj,
         kqlMode,
       }),
-    [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQueryTest]
+    [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQueryObj]
   );
 
   const handleClose = useCallback(() => {
+    createHistoryEntry();
     dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
     focusActiveTimelineButton();
   }, [dispatch, timelineId]);
 
-  const { euiTheme } = useEuiTheme();
-
   return (
-    <EuiPanel
-      borderRadius="none"
+    <TimelinePanel
+      $isOpen={show}
       grow={false}
       paddingSize="s"
       hasShadow={false}
       data-test-subj="timeline-flyout-header-panel"
-      style={{ backgroundColor: euiTheme.colors.emptyShade, color: euiTheme.colors.text }}
+      data-show={show}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <AddTimelineButton timelineId={timelineId} />
-        <ActiveTimelinesContainer grow={false}>
-          <ActiveTimelines
-            timelineId={timelineId}
-            timelineType={timelineType}
-            timelineTitle={title}
-            timelineStatus={timelineStatus}
-            isOpen={show}
-            updated={updated}
-          />
-        </ActiveTimelinesContainer>
+      <FlyoutHeaderPanelContentFlexGroupContainer
+        className="eui-scrollBar"
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <ActiveTimelinesContainer grow={false}>
+                <ActiveTimelines
+                  timelineId={timelineId}
+                  timelineType={timelineType}
+                  timelineTitle={title}
+                  isOpen={show}
+                />
+              </ActiveTimelinesContainer>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <TimelineStatusInfo status={timelineStatus} updated={updated} changed={changed} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <AddToFavoritesButton timelineId={timelineId} compact />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
         {show && (
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-              {(activeTab === TimelineTabs.query || activeTab === TimelineTabs.eql) && (
-                <EuiFlexItem grow={false}>
-                  <InspectButton
-                    compact
-                    queryId={`${timelineId}-${activeTab}`}
-                    inputId={InputsModelId.timeline}
-                    inspectIndex={0}
-                    isDisabled={!isDataInTimeline || combinedQueries?.filterQuery === undefined}
-                    title={i18n.INSPECT_TIMELINE_TITLE}
-                  />
-                </EuiFlexItem>
-              )}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              justifyContent="flexEnd"
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+            >
+              <TimelineActionMenu
+                timelineId={timelineId}
+                activeTab={activeTab}
+                isInspectButtonDisabled={
+                  !isDataInTimeline || combinedQueries?.filterQuery === undefined
+                }
+              />
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={i18n.CLOSE_TIMELINE_OR_TEMPLATE(timelineType === 'default')}>
                   <EuiButtonIcon
@@ -191,272 +187,9 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
-      </EuiFlexGroup>
-    </EuiPanel>
+      </FlyoutHeaderPanelContentFlexGroupContainer>
+    </TimelinePanel>
   );
 };
 
 export const FlyoutHeaderPanel = React.memo(FlyoutHeaderPanelComponent);
-
-const StyledDiv = styled.div`
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  word-break: break-word;
-`;
-
-const ReadMoreButton = ({
-  description,
-  onclick,
-}: {
-  description: string;
-  onclick: MouseEventHandler<HTMLButtonElement>;
-}) => {
-  const [isOverflow, ref] = useIsOverflow(description);
-  return (
-    <>
-      <StyledDiv ref={ref}>{description}</StyledDiv>
-      {isOverflow && (
-        <EuiButtonEmpty flush="left" onClick={onclick}>
-          {i18n.READ_MORE}
-        </EuiButtonEmpty>
-      )}
-    </>
-  );
-};
-
-const StyledTimelineHeader = styled(EuiFlexGroup)`
-  ${({ theme }) => `margin: ${theme.eui.euiSizeXS} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS};`}
-  flex: 0;
-`;
-
-const TimelineStatusInfoContainer = styled.span`
-  ${({ theme }) => `margin-left: ${theme.eui.euiSizeS};`}
-  white-space: nowrap;
-`;
-
-const KpisContainer = styled.div`
-  ${({ theme }) => `margin-right: ${theme.eui.euiSizeM};`}
-`;
-
-const RowFlexItem = styled(EuiFlexItem)`
-  flex-direction: row;
-  align-items: center;
-`;
-
-const TimelineTitleContainer = styled.h3`
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  word-break: break-word;
-`;
-
-const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { title, timelineType } = useDeepEqualSelector((state) =>
-    pick(['title', 'timelineType'], getTimeline(state, timelineId) ?? timelineDefaults)
-  );
-  const placeholder = useMemo(
-    () =>
-      timelineType === TimelineType.template
-        ? commonI18n.UNTITLED_TEMPLATE
-        : commonI18n.UNTITLED_TIMELINE,
-    [timelineType]
-  );
-
-  const content = useMemo(() => title || placeholder, [title, placeholder]);
-
-  return (
-    <EuiToolTip content={content} position="bottom">
-      <EuiText>
-        <TimelineTitleContainer data-test-subj="timeline-title">{content}</TimelineTitleContainer>
-      </EuiText>
-    </EuiToolTip>
-  );
-};
-
-const TimelineName = React.memo(TimelineNameComponent);
-
-const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const description = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).description
-  );
-  const dispatch = useDispatch();
-
-  const onReadMore: MouseEventHandler<HTMLButtonElement> = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
-      dispatch(
-        setActiveTabTimeline({
-          id: timelineId,
-          activeTab: TimelineTabs.notes,
-          scrollToTop: true,
-        })
-      );
-    },
-    [dispatch, timelineId]
-  );
-
-  return (
-    <EuiText size="s" data-test-subj="timeline-description">
-      <ReadMoreButton description={description || commonI18n.DESCRIPTION} onclick={onReadMore} />
-    </EuiText>
-  );
-};
-
-const TimelineDescription = React.memo(TimelineDescriptionComponent);
-
-const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const getTimelineStatus = useMemo(() => getTimelineStatusByIdSelector(), []);
-  const { status: timelineStatus, updated } = useDeepEqualSelector((state) =>
-    getTimelineStatus(state, timelineId)
-  );
-
-  const isUnsaved = useMemo(() => timelineStatus === TimelineStatus.draft, [timelineStatus]);
-
-  if (isUnsaved) {
-    return (
-      <EuiText size="xs">
-        <EuiTextColor color="warning" data-test-subj="timeline-status">
-          {i18n.UNSAVED}
-        </EuiTextColor>
-      </EuiText>
-    );
-  }
-
-  return (
-    <EuiText size="xs">
-      <EuiTextColor color="default">
-        {i18n.AUTOSAVED}{' '}
-        <FormattedRelative
-          data-test-subj="timeline-status"
-          key="timeline-status-autosaved"
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          value={new Date(updated!)}
-        />
-      </EuiTextColor>
-    </EuiText>
-  );
-};
-
-const TimelineStatusInfo = React.memo(TimelineStatusInfoComponent);
-
-const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const { selectedPatterns, indexPattern, browserFields } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
-  const getStartSelector = useMemo(() => startSelector(), []);
-  const getEndSelector = useMemo(() => endSelector(), []);
-  const isActive = useMemo(() => timelineId === TimelineId.active, [timelineId]);
-  const timerange: TimerangeInput = useDeepEqualSelector((state) => {
-    if (isActive) {
-      return {
-        from: getStartSelector(state.inputs.timeline),
-        to: getEndSelector(state.inputs.timeline),
-        interval: '',
-      };
-    } else {
-      return {
-        from: getStartSelector(state.inputs.global),
-        to: getEndSelector(state.inputs.global),
-        interval: '',
-      };
-    }
-  });
-  const { uiSettings } = useKibana().services;
-  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const timeline: TimelineModel = useSelector(
-    (state: State) => getTimeline(state, timelineId) ?? timelineDefaults
-  );
-  const { dataProviders, filters, timelineType, kqlMode, activeTab } = timeline;
-  const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterQuerySelector(), []);
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId)!);
-
-  const kqlQueryExpression =
-    isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
-      ? ' '
-      : kqlQueryTimeline;
-  const kqlQuery = useMemo(
-    () => ({ query: kqlQueryExpression, language: 'kuery' }),
-    [kqlQueryExpression]
-  );
-
-  const combinedQueries = useMemo(
-    () =>
-      combineQueries({
-        config: esQueryConfig,
-        dataProviders,
-        indexPattern,
-        browserFields,
-        filters: filters ? filters : [],
-        kqlQuery,
-        kqlMode,
-      }),
-    [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQuery]
-  );
-
-  const isBlankTimeline: boolean = useMemo(
-    () =>
-      (isEmpty(dataProviders) && isEmpty(filters) && isEmpty(kqlQuery.query)) ||
-      combinedQueries?.filterQuery === undefined,
-    [dataProviders, filters, kqlQuery, combinedQueries]
-  );
-
-  const [loading, kpis] = useTimelineKpis({
-    defaultIndex: selectedPatterns,
-    timerange,
-    isBlankTimeline,
-    filterQuery: combinedQueries?.filterQuery ?? '',
-  });
-
-  const userCasesPermissions = useGetUserCasesPermissions();
-
-  return (
-    <StyledTimelineHeader alignItems="center" gutterSize="s">
-      <EuiFlexItem>
-        <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="none">
-          <RowFlexItem>
-            <TimelineName timelineId={timelineId} />
-            <EditTimelineButton timelineId={timelineId} initialFocus="title" />
-            <TimelineStatusInfoContainer>
-              <TimelineStatusInfo timelineId={timelineId} />
-            </TimelineStatusInfoContainer>
-          </RowFlexItem>
-          <RowFlexItem>
-            <TimelineDescription timelineId={timelineId} />
-            <EditTimelineButton timelineId={timelineId} initialFocus="description" />
-          </RowFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <KpisContainer>
-          {activeTab === TimelineTabs.query ? (
-            <TimelineKPIs kpis={kpis} isLoading={loading} />
-          ) : null}
-        </KpisContainer>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <AddToFavoritesButton timelineId={timelineId} />
-          </EuiFlexItem>
-          {userCasesPermissions.create && userCasesPermissions.read && (
-            <EuiFlexItem grow={false}>
-              <AddToCaseButton timelineId={timelineId} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </StyledTimelineHeader>
-  );
-};
-
-FlyoutHeaderComponent.displayName = 'FlyoutHeaderComponent';
-
-export const FlyoutHeader = React.memo(FlyoutHeaderComponent);

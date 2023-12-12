@@ -73,7 +73,9 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const [manifestVersion, setManifestVersion] = useState(deployedVersion);
 
     const today = moment.utc();
-    const [selectedDate, setSelectedDate] = useState<Moment>(today);
+    const defaultDate = today.clone().subtract(1, 'days');
+
+    const [selectedDate, setSelectedDate] = useState<Moment>(defaultDate);
 
     const { data: fetchedNote, isLoading: getNoteInProgress } = useGetProtectionUpdatesNote({
       packagePolicyId: _policy.id,
@@ -181,24 +183,24 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         if (checked && !automaticUpdatesEnabled) {
           setManifestVersion('latest');
           // Clear selected date on user enabling automatic updates
-          if (selectedDate !== today) {
-            setSelectedDate(today);
+          if (selectedDate !== defaultDate) {
+            setSelectedDate(defaultDate);
           }
         } else {
           setManifestVersion(selectedDate.format(internalDateFormat));
         }
       },
-      [automaticUpdatesEnabled, selectedDate, today]
+      [automaticUpdatesEnabled, selectedDate, defaultDate]
     );
 
     const updateDatepickerSelectedDate = useCallback(
       (date: Moment | null) => {
-        if (date?.isAfter(cutoffDate) && date?.isSameOrBefore(today)) {
-          setSelectedDate(date || today);
+        if (date?.isAfter(cutoffDate) && date?.isSameOrBefore(defaultDate)) {
+          setSelectedDate(date || defaultDate);
           setManifestVersion(date?.format(internalDateFormat) || 'latest');
         }
       },
-      [cutoffDate, today]
+      [cutoffDate, defaultDate]
     );
 
     const renderVersionToDeployPicker = () => {
@@ -224,7 +226,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
                 popoverPlacement={'downCenter'}
                 dateFormat={displayDateFormat}
                 selected={selectedDate}
-                maxDate={today}
+                maxDate={defaultDate}
                 minDate={cutoffDate}
                 onChange={updateDatepickerSelectedDate}
               />
@@ -304,13 +306,22 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
               }
             )}
           >
-            {i18n.translate(
-              'xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabled',
-              {
-                defaultMessage:
-                  'Manifest will always be updated to the latest available version. If you want to control updates manually, disable "Update manifest automatically".',
-              }
-            )}
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabled"
+              defaultMessage="Protection updates will always be updated to the latest available version. If you want to control updates manually, disable the {toggleName} toggle."
+              values={{
+                toggleName: (
+                  <strong>
+                    {i18n.translate(
+                      'xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabled.toggleName',
+                      {
+                        defaultMessage: 'Enable automatic updates',
+                      }
+                    )}
+                  </strong>
+                ),
+              }}
+            />
           </EuiCallOut>
         );
       }

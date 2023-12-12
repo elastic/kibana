@@ -27,7 +27,6 @@ interface StepScheduleRuleReadOnlyProps {
   addPadding: boolean;
   descriptionColumns: 'multi' | 'single' | 'singleSplit';
   defaultValues: ScheduleStepRule;
-  isInPanelView?: boolean; // Option to show description list in smaller font
 }
 
 const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
@@ -70,16 +69,10 @@ const StepScheduleRuleReadOnlyComponent: FC<StepScheduleRuleReadOnlyProps> = ({
   addPadding,
   defaultValues: data,
   descriptionColumns,
-  isInPanelView = false,
 }) => {
   return (
     <StepContentWrapper addPadding={addPadding}>
-      <StepRuleDescription
-        columns={descriptionColumns}
-        schema={schema}
-        data={data}
-        isInPanelView={isInPanelView}
-      />
+      <StepRuleDescription columns={descriptionColumns} schema={schema} data={data} />
     </StepContentWrapper>
   );
 };

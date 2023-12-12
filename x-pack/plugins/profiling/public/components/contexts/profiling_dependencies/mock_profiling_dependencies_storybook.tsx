@@ -43,6 +43,7 @@ const mockPlugin = {
 };
 
 const mockCore = {
+  uiSettings: { get: () => {} },
   application: {
     currentAppId$: new Observable(),
     getUrlForApp: (appId: string) => '',

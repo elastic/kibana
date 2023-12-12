@@ -15,7 +15,7 @@ import {
   VULN_MGMT_POLICY_TEMPLATE,
   CNVM_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
+import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types_old';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
@@ -114,6 +114,7 @@ export const PolicyTemplateInfo = ({ postureType }: PolicyTemplateInfoProps) => 
         <EuiCallOut
           iconType="iInCircle"
           color="primary"
+          data-test-subj="additionalChargeCalloutTestSubj"
           title={
             <FormattedMessage
               id="xpack.csp.fleetIntegration.cnvm.additionalChargesCalloutTitle"

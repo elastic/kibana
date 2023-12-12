@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import * as z from 'zod';
 import {
   RelatedIntegrationArray,
   RequiredFieldArray,
@@ -30,22 +30,13 @@ import {
  *  - rule_id is required here
  *  - version is a required field that must exist
  */
-export type PrebuiltRuleAsset = t.TypeOf<typeof PrebuiltRuleAsset>;
-export const PrebuiltRuleAsset = t.intersection([
-  BaseCreateProps,
-  TypeSpecificCreateProps,
-  // version is required here, which supercedes the defaultable version in baseSchema
-  t.exact(
-    t.type({
-      rule_id: RuleSignatureId,
-      version: RuleVersion,
-    })
-  ),
-  t.exact(
-    t.partial({
-      related_integrations: RelatedIntegrationArray,
-      required_fields: RequiredFieldArray,
-      setup: SetupGuide,
-    })
-  ),
-]);
+export type PrebuiltRuleAsset = z.infer<typeof PrebuiltRuleAsset>;
+export const PrebuiltRuleAsset = BaseCreateProps.and(TypeSpecificCreateProps).and(
+  z.object({
+    rule_id: RuleSignatureId,
+    version: RuleVersion,
+    related_integrations: RelatedIntegrationArray.optional(),
+    required_fields: RequiredFieldArray.optional(),
+    setup: SetupGuide.optional(),
+  })
+);

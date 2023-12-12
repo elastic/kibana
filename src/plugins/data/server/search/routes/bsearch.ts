@@ -52,6 +52,7 @@ export function registerBsearchRoute(
                     ? {
                         error: err.errBody.error,
                         rawResponse: err.errBody.response,
+                        ...(err.requestParams ? { requestParams: err.requestParams } : {}),
                       }
                     : undefined,
                 };

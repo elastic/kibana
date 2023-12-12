@@ -436,6 +436,21 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       });
+
+      describe('legacy investigation fields', () => {
+        it('should error trying to create a rule with legacy investigation fields format', async () => {
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_BULK_CREATE)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .send([{ ...getSimpleRule(), investigation_fields: ['foo'] }])
+            .expect(400);
+
+          expect(body.message).to.eql(
+            '[request body]: 0.investigation_fields: Expected object, received array'
+          );
+        });
+      });
     });
   });
 };

@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
@@ -31,22 +32,20 @@ export function CustomKqlIndicatorTypeForm() {
           <IndexSelection />
         </EuiFlexItem>
 
-        <EuiFlexItem>
-          <IndexFieldSelector
-            indexFields={timestampFields}
-            name="indicator.params.timestampField"
-            label={i18n.translate('xpack.observability.slo.sloEdit.timestampField.label', {
-              defaultMessage: 'Timestamp field',
-            })}
-            placeholder={i18n.translate(
-              'xpack.observability.slo.sloEdit.timestampField.placeholder',
-              { defaultMessage: 'Select a timestamp field' }
-            )}
-            isLoading={!!index && isIndexFieldsLoading}
-            isDisabled={!index}
-            isRequired
-          />
-        </EuiFlexItem>
+        <IndexFieldSelector
+          indexFields={timestampFields}
+          name="indicator.params.timestampField"
+          label={i18n.translate('xpack.observability.slo.sloEdit.timestampField.label', {
+            defaultMessage: 'Timestamp field',
+          })}
+          placeholder={i18n.translate(
+            'xpack.observability.slo.sloEdit.timestampField.placeholder',
+            { defaultMessage: 'Select a timestamp field' }
+          )}
+          isLoading={!!index && isIndexFieldsLoading}
+          isDisabled={!index}
+          isRequired
+        />
       </EuiFlexGroup>
 
       <EuiFlexItem>
@@ -138,6 +137,7 @@ export function CustomKqlIndicatorTypeForm() {
       <IndexFieldSelector
         indexFields={partitionByFields}
         name="groupBy"
+        defaultValue={ALL_VALUE}
         label={
           <span>
             {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import React, { FC } from 'react';
 
-import { expandLiteralStrings, XJsonMode, EuiCodeEditorProps } from '../../../shared_imports';
+import { CodeEditor, type CodeEditorProps } from '@kbn/kibana-react-plugin/public';
+import { expandLiteralStrings, XJsonMode } from '../../../shared_imports';
 
 export const EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
 
@@ -18,7 +18,7 @@ interface JobEditorProps {
   width?: string;
   mode?: typeof EDITOR_MODE[keyof typeof EDITOR_MODE];
   readOnly?: boolean;
-  onChange?: EuiCodeEditorProps['onChange'];
+  onChange?: CodeEditorProps['onChange'];
 }
 export const JsonEditor: FC<JobEditorProps> = ({
   value,

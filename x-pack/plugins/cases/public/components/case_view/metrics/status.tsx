@@ -21,7 +21,7 @@ import {
 } from './translations';
 import { getMaybeDate } from '../../formatted_date/maybe_date';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
-import { getEmptyTagValue } from '../../empty_value';
+import { getEmptyCellValue } from '../../empty_value';
 
 export const CaseStatusMetrics = React.memo(
   ({ metrics, features }: { metrics: SingleCaseMetrics; features: SingleCaseMetricsFeature[] }) => {
@@ -112,7 +112,7 @@ const useGetLifespanMetrics = (
 const CreationDate: React.FC<{ date: string }> = React.memo(({ date }) => {
   const creationDate = getMaybeDate(date);
   if (!creationDate.isValid()) {
-    return getEmptyTagValue();
+    return getEmptyCellValue();
   }
 
   return (
@@ -127,7 +127,7 @@ CreationDate.displayName = 'CreationDate';
 
 const getInProgressDuration = (duration: number) => {
   if (duration <= 0) {
-    return getEmptyTagValue();
+    return getEmptyCellValue();
   }
 
   return formatDuration(duration);
@@ -190,7 +190,7 @@ CaseStatusMetricsOpenCloseDuration.displayName = 'OpenCloseDuration';
 
 const getOpenCloseDurationText = (value: string | undefined, reopens: string[]) => {
   if (value == null) {
-    return getEmptyTagValue();
+    return getEmptyCellValue();
   } else if (reopens.length > 0) {
     return `${value} ${CASE_REOPENED}`;
   }

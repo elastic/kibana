@@ -5,39 +5,13 @@
  * 2.0.
  */
 
-export type ElasticAgentName =
-  | 'go'
-  | 'java'
-  | 'js-base'
-  | 'iOS/swift'
-  | 'rum-js'
-  | 'nodejs'
-  | 'python'
-  | 'dotnet'
-  | 'ruby'
-  | 'php'
-  | 'android/java';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 
-export type OpenTelemetryAgentName =
-  | 'otlp'
-  | 'opentelemetry/cpp'
-  | 'opentelemetry/dotnet'
-  | 'opentelemetry/erlang'
-  | 'opentelemetry/go'
-  | 'opentelemetry/java'
-  | 'opentelemetry/nodejs'
-  | 'opentelemetry/php'
-  | 'opentelemetry/python'
-  | 'opentelemetry/ruby'
-  | 'opentelemetry/rust'
-  | 'opentelemetry/swift'
-  | 'opentelemetry/webjs';
-
-/*
- * Support additional agent types by appending definitions in mappings.json
- * (for telemetry) and the AgentName type.
- */
-export type AgentName = ElasticAgentName | OpenTelemetryAgentName;
+export type {
+  ElasticAgentName,
+  OpenTelemetryAgentName,
+  AgentName,
+} from '@kbn/elastic-agent-utils';
 
 export interface Agent {
   ephemeral_id?: string;

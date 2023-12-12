@@ -138,11 +138,9 @@ exports[`renders 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="loadSavedObjects"
         isLoading={false}
         onClick={[Function]}
-        size="m"
       >
         Load Kibana objects
       </EuiButton>

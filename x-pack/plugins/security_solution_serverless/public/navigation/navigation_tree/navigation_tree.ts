@@ -52,9 +52,7 @@ export const formatNavigationTree = (
         breadcrumbStatus: 'hidden',
         defaultIsCollapsed: false,
         children: bodyChildren,
-        accordionProps: {
-          arrowProps: { css: { display: 'none' } },
-        },
+        isCollapsible: false,
       },
     ],
     footer: formatFooterNodesFromLinks(footerNavItems, footerCategories),
@@ -165,7 +163,6 @@ const formatFooterNodesFromLinks = (
           title: category.label,
           icon: category.iconType,
           breadcrumbStatus: 'hidden',
-          defaultIsCollapsed: true,
           children:
             category.linkIds?.reduce<NodeDefinition[]>((acc, linkId) => {
               const projectNavLink = projectNavLinks.find(({ id }) => id === linkId);

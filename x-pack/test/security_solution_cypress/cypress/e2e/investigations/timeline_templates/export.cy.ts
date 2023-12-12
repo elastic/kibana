@@ -15,15 +15,12 @@ import {
 
 import { TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
-import { cleanKibana } from '../../../tasks/common';
 import { searchByTitle } from '../../../tasks/table_pagination';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165760
 // FLAKY: https://github.com/elastic/kibana/issues/165645
 describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
-
     createTimelineTemplate(getTimelineTemplate()).then((response) => {
       cy.wrap(response).as('templateResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');

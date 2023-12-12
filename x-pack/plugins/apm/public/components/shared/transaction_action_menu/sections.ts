@@ -11,7 +11,10 @@ import { IBasePath } from '@kbn/core/public';
 import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
 import url from 'url';
-import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
+import {
+  LogsLocatorParams,
+  NodeLogsLocatorParams,
+} from '@kbn/logs-shared-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
@@ -44,32 +47,35 @@ export const getSections = ({
   basePath,
   location,
   apmRouter,
-  infraLocators,
   infraLinksAvailable,
   profilingLocators,
   rangeFrom,
   rangeTo,
   environment,
   allDatasetsLocator,
+  logsLocator,
+  nodeLogsLocator,
+  dataViewId,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
   location: Location;
   apmRouter: ApmRouter;
-  infraLocators?: InfraLocators;
   infraLinksAvailable: boolean;
   profilingLocators?: ProfilingLocators;
   rangeFrom: string;
   rangeTo: string;
   environment: Environment;
   allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>;
+  logsLocator: LocatorPublic<LogsLocatorParams>;
+  nodeLogsLocator: LocatorPublic<NodeLogsLocatorParams>;
+  dataViewId: string;
 }) => {
   if (!transaction) return [];
 
   const hostName = transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;
   const containerId = transaction.container?.id;
-  const { nodeLogsLocator, logsLocator } = infraLocators ?? {};
 
   const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
@@ -267,6 +273,7 @@ export const getSections = ({
         basePath,
         query: getDiscoverQuery(transaction),
         location,
+        dataViewId,
       }),
       condition: true,
     },

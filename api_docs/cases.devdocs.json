@@ -230,7 +230,13 @@
           "; basePath?: string | undefined; releasePhase?: ",
           "ReleasePhase",
           " | undefined; hiddenStatuses?: ",
-          "CaseStatusWithAllStatus",
+          {
+            "pluginId": "@kbn/cases-components",
+            "scope": "common",
+            "docId": "kibKbnCasesComponentsPluginApi",
+            "section": "def-common.CaseStatuses",
+            "text": "CaseStatuses"
+          },
           "[] | undefined; onRowClick?: ((theCase?: ",
           {
             "pluginId": "cases",
@@ -482,7 +488,15 @@
               "section": "def-common.CaseStatuses",
               "text": "CaseStatuses"
             },
-            " | undefined; severity?: ",
+            " | ",
+            {
+              "pluginId": "@kbn/cases-components",
+              "scope": "common",
+              "docId": "kibKbnCasesComponentsPluginApi",
+              "section": "def-common.CaseStatuses",
+              "text": "CaseStatuses"
+            },
+            "[] | undefined; severity?: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -490,7 +504,15 @@
               "section": "def-common.CaseSeverity",
               "text": "CaseSeverity"
             },
-            " | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; from?: string | undefined; search?: string | undefined; searchFields?: \"description\" | \"title\" | (\"description\" | \"title\")[] | undefined; sortField?: \"category\" | \"title\" | \"createdAt\" | \"updatedAt\" | \"status\" | \"severity\" | \"closedAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; category?: string | string[] | undefined; } & Partial<",
+            " | ",
+            {
+              "pluginId": "cases",
+              "scope": "common",
+              "docId": "kibCasesPluginApi",
+              "section": "def-common.CaseSeverity",
+              "text": "CaseSeverity"
+            },
+            "[] | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; from?: string | undefined; search?: string | undefined; searchFields?: \"description\" | \"title\" | (\"description\" | \"title\")[] | undefined; sortField?: \"category\" | \"title\" | \"createdAt\" | \"updatedAt\" | \"status\" | \"severity\" | \"closedAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; category?: string | string[] | undefined; } & Partial<",
             "Pagination",
             ">, signal?: AbortSignal | undefined) => Promise<",
             {
@@ -1316,6 +1338,97 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.CasesCapabilities",
+        "type": "Interface",
+        "tags": [],
+        "label": "CasesCapabilities",
+        "description": [],
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesCapabilities.CREATE_CASES_CAPABILITY",
+            "type": "boolean",
+            "tags": [],
+            "label": "[CREATE_CASES_CAPABILITY]",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesCapabilities.READ_CASES_CAPABILITY",
+            "type": "boolean",
+            "tags": [],
+            "label": "[READ_CASES_CAPABILITY]",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesCapabilities.UPDATE_CASES_CAPABILITY",
+            "type": "boolean",
+            "tags": [],
+            "label": "[UPDATE_CASES_CAPABILITY]",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesCapabilities.DELETE_CASES_CAPABILITY",
+            "type": "boolean",
+            "tags": [],
+            "label": "[DELETE_CASES_CAPABILITY]",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesCapabilities.PUSH_CASES_CAPABILITY",
+            "type": "boolean",
+            "tags": [],
+            "label": "[PUSH_CASES_CAPABILITY]",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesCapabilities.CASES_CONNECTORS_CAPABILITY",
+            "type": "boolean",
+            "tags": [],
+            "label": "[CASES_CONNECTORS_CAPABILITY]",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesCapabilities.CASES_SETTINGS_CAPABILITY",
+            "type": "boolean",
+            "tags": [],
+            "label": "[CASES_SETTINGS_CAPABILITY]",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.CasesPermissions",
         "type": "Interface",
         "tags": [],
@@ -1401,6 +1514,17 @@
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesPermissions.settings",
+            "type": "boolean",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1450,6 +1574,20 @@
             "type": "Object",
             "tags": [],
             "label": "delete",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesUiCapabilities.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
             "description": [],
             "signature": [
               "readonly string[]"
@@ -2186,6 +2324,21 @@
         "description": [],
         "signature": [
           "\"cases_connectors\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.CASES_SETTINGS_CAPABILITY",
+        "type": "string",
+        "tags": [],
+        "label": "CASES_SETTINGS_CAPABILITY",
+        "description": [],
+        "signature": [
+          "\"cases_settings\""
         ],
         "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
@@ -3022,21 +3175,6 @@
           "{ alerts?: { count?: number | undefined; hosts?: { total: number; values: { name: string | undefined; id: string; count: number; }[]; } | undefined; users?: { total: number; values: { name: string; count: number; }[]; } | undefined; } | undefined; connectors?: { total: number; } | undefined; actions?: { isolateHost?: { isolate: { total: number; }; unisolate: { total: number; }; } | undefined; } | undefined; lifespan?: { creationDate: string; closeDate: string | null; statusInfo: { openDuration: number; inProgressDuration: number; reopenDates: string[]; }; } | undefined; }"
         ],
         "path": "x-pack/plugins/cases/common/types/api/metrics/v1.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-common.StatusAll",
-        "type": "string",
-        "tags": [],
-        "label": "StatusAll",
-        "description": [],
-        "signature": [
-          "\"all\""
-        ],
-        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

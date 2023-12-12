@@ -7,7 +7,13 @@
     "server": true,
     "browser": true,
     "requiredPlugins": ["dataViews", "share", "urlForwarding"],
-    "optionalPlugins": ["usageCollection", "customIntegrations", "cloud", "guidedOnboarding"],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": ["kibanaReact"],
+    "optionalPlugins": [
+      "usageCollection",
+      "customIntegrations",
+      "cloud",
+      "guidedOnboarding",
+      "cloudExperiments"
+    ]
   }
 }
