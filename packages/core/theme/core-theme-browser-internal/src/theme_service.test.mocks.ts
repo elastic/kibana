@@ -29,3 +29,13 @@ jest.doMock('./utils', () => {
     createStyleSheet: createStyleSheetMock,
   };
 });
+
+export const setDarkModeMock = jest.fn();
+
+jest.doMock('@kbn/ui-theme', () => {
+  const actual = jest.requireActual('@kbn/ui-theme');
+  return {
+    ...actual,
+    _setDarkMode: setDarkModeMock,
+  };
+});

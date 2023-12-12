@@ -11,6 +11,7 @@ import {
   onSystemThemeChangeMock,
   systemThemeIsDarkMock,
   createStyleSheetMock,
+  setDarkModeMock,
 } from './theme_service.test.mocks';
 
 import { firstValueFrom } from 'rxjs';
@@ -34,7 +35,8 @@ describe('ThemeService', () => {
     browsersSupportsSystemThemeMock.mockReset().mockReturnValue(true);
     systemThemeIsDarkMock.mockReset().mockReturnValue(false);
     onSystemThemeChangeMock.mockReset();
-    createStyleSheetMock.mockReset();
+    createStyleSheetMock.mockReset().mockReturnValue({ remove: jest.fn() });
+    setDarkModeMock.mockReset();
   });
 
   describe('#setup', () => {
@@ -67,6 +69,12 @@ describe('ThemeService', () => {
         themeService.setup({ injectedMetadata });
         expect(createStyleSheetMock).toHaveBeenCalledTimes(1);
         expect(createStyleSheetMock).toHaveBeenCalledWith({ href: 'light-1.css' });
+      });
+
+      it('calls _setDarkMode with the correct parameters', async () => {
+        themeService.setup({ injectedMetadata });
+        expect(setDarkModeMock).toHaveBeenCalledTimes(1);
+        expect(setDarkModeMock).toHaveBeenCalledWith(false);
       });
 
       it('does not call onSystemThemeChange', async () => {
@@ -106,9 +114,120 @@ describe('ThemeService', () => {
         expect(createStyleSheetMock).toHaveBeenCalledWith({ href: 'dark-1.css' });
       });
 
+      it('calls _setDarkMode with the correct parameters', async () => {
+        themeService.setup({ injectedMetadata });
+        expect(setDarkModeMock).toHaveBeenCalledTimes(1);
+        expect(setDarkModeMock).toHaveBeenCalledWith(true);
+      });
+
       it('does not call onSystemThemeChange', async () => {
         themeService.setup({ injectedMetadata });
         expect(onSystemThemeChangeMock).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('darkMode is `system`', () => {
+      beforeEach(() => {
+        injectedMetadata.getTheme.mockReturnValue({
+          version: 'v8',
+          darkMode: 'system',
+          stylesheetPaths: {
+            dark: ['dark-1.css'],
+            default: ['light-1.css'],
+          },
+        });
+      });
+
+      describe('when browser does not support system theme', () => {
+        beforeEach(() => {
+          browsersSupportsSystemThemeMock.mockReturnValue(false);
+        });
+
+        it('fallbacks to default light theme', async () => {
+          const { theme$ } = themeService.setup({ injectedMetadata });
+          const theme = await firstValueFrom(theme$);
+
+          expect(theme).toEqual({
+            darkMode: false,
+          });
+
+          expect(window.__kbnThemeTag__).toEqual('v8light');
+
+          expect(setDarkModeMock).toHaveBeenCalledTimes(1);
+          expect(setDarkModeMock).toHaveBeenCalledWith(false);
+
+          expect(createStyleSheetMock).toHaveBeenCalledTimes(1);
+          expect(createStyleSheetMock).toHaveBeenCalledWith({ href: 'light-1.css' });
+
+          expect(onSystemThemeChangeMock).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('when browser supports system theme', () => {
+        beforeEach(() => {
+          browsersSupportsSystemThemeMock.mockReturnValue(true);
+        });
+
+        it('uses the system theme when light', async () => {
+          systemThemeIsDarkMock.mockReturnValue(false);
+
+          const { theme$ } = themeService.setup({ injectedMetadata });
+          const theme = await firstValueFrom(theme$);
+
+          expect(theme).toEqual({
+            darkMode: false,
+          });
+
+          expect(window.__kbnThemeTag__).toEqual('v8light');
+
+          expect(setDarkModeMock).toHaveBeenCalledTimes(1);
+          expect(setDarkModeMock).toHaveBeenCalledWith(false);
+
+          expect(createStyleSheetMock).toHaveBeenCalledTimes(1);
+          expect(createStyleSheetMock).toHaveBeenCalledWith({ href: 'light-1.css' });
+        });
+
+        it('uses the system theme when dark', async () => {
+          systemThemeIsDarkMock.mockReturnValue(true);
+
+          const { theme$ } = themeService.setup({ injectedMetadata });
+          const theme = await firstValueFrom(theme$);
+
+          expect(theme).toEqual({
+            darkMode: true,
+          });
+
+          expect(window.__kbnThemeTag__).toEqual('v8dark');
+
+          expect(setDarkModeMock).toHaveBeenCalledTimes(1);
+          expect(setDarkModeMock).toHaveBeenCalledWith(true);
+
+          expect(createStyleSheetMock).toHaveBeenCalledTimes(1);
+          expect(createStyleSheetMock).toHaveBeenCalledWith({ href: 'dark-1.css' });
+        });
+
+        it('reacts to system theme change', async () => {
+          systemThemeIsDarkMock.mockReturnValue(false);
+
+          let handler: (mode: boolean) => void;
+          onSystemThemeChangeMock.mockImplementation((_handler: (mode: boolean) => void) => {
+            handler = _handler;
+          });
+
+          const { theme$ } = themeService.setup({ injectedMetadata });
+
+          expect(await firstValueFrom(theme$)).toEqual({
+            darkMode: false,
+          });
+          expect(window.__kbnThemeTag__).toEqual('v8light');
+
+          handler!(true);
+
+          expect(await firstValueFrom(theme$)).toEqual({
+            darkMode: true,
+          });
+          expect(window.__kbnThemeTag__).toEqual('v8dark');
+        });
       });
     });
   });
