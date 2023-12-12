@@ -23,6 +23,9 @@ function createInlineStyles(content) {
   head.appendChild(style);
 }
 
+// must be kept in sync with
+// packages/core/rendering/core-rendering-server-internal/src/views/styles.tsx
+
 var lightStyles = [
   'html { background-color: #F8FAFD; }',
   '.kbnWelcomeText { color: #69707D; }',

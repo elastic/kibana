@@ -197,6 +197,7 @@ export class RenderingService {
       buildNum,
     });
     const scriptPaths = getScriptPaths({
+      darkMode,
       baseHref: staticAssetsHrefBase,
       buildNum,
     });
@@ -210,6 +211,7 @@ export class RenderingService {
       i18n: i18n.translate,
       locale: i18n.getLocale(),
       themeVersion,
+      darkMode,
       stylesheetPaths: commonStylesheetPaths,
       scriptPaths,
       customBranding: {

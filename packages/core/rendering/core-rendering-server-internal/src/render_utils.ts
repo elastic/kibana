@@ -9,6 +9,7 @@
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import type { DarkModeValue } from '@kbn/core-ui-settings-common';
 
 export const getSettingValue = <T>(
   settingName: string,
@@ -25,8 +26,20 @@ export const getSettingValue = <T>(
 export const getBundlesHref = (baseHref: string, buildNr: string): string =>
   `${baseHref}/${buildNr}/bundles`;
 
-export const getScriptPaths = ({ baseHref, buildNum }: { buildNum: number; baseHref: string }) => {
-  return [`${baseHref}/ui/legacy_theme.js`];
+export const getScriptPaths = ({
+  baseHref,
+  buildNum,
+  darkMode,
+}: {
+  buildNum: number;
+  baseHref: string;
+  darkMode: DarkModeValue;
+}) => {
+  if (darkMode === 'system') {
+    return [`${baseHref}/ui/legacy_theme.js`];
+  } else {
+    return [];
+  }
 };
 
 export const getCommonStylesheetPaths = ({

@@ -11,6 +11,7 @@ import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
 import { Logo } from './logo';
+import { Styles } from './styles';
 
 interface Props {
   metadata: RenderingMetadata;
@@ -20,6 +21,7 @@ export const Template: FunctionComponent<Props> = ({
   metadata: {
     uiPublicUrl,
     locale,
+    darkMode,
     stylesheetPaths,
     scriptPaths,
     injectedMetadata,
@@ -53,9 +55,7 @@ export const Template: FunctionComponent<Props> = ({
         {/* Inject EUI reset and global styles before all other component styles */}
         <meta name={EUI_STYLES_GLOBAL} />
         <meta name="emotion" />
-        {stylesheetPaths.map((path) => (
-          <link key={path} rel="stylesheet" type="text/css" href={path} />
-        ))}
+        <Styles darkMode={darkMode} stylesheetPaths={stylesheetPaths} />
         {scriptPaths.map((path) => (
           <script key={path} src={path} />
         ))}
