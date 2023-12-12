@@ -153,7 +153,7 @@ export const RiskScoreField = ({
           // TODO: https://github.com/elastic/kibana/issues/161456
           // The About step page contains EuiRange component which does not work properly within memoized parents.
           // EUI team suggested not to memoize EuiRange/EuiDualRange: https://github.com/elastic/eui/issues/6846
-          // Workaround: We force EuiRange re-rendering by removeing/adding it into the DOM.
+          // Workaround: We force EuiRange re-rendering by removing/adding it into the DOM.
           // NOTE: We should remove this workaround once EUI team fixed EuiRange.
           // Related ticket: https://github.com/elastic/kibana/issues/160561
         }
