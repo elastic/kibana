@@ -185,7 +185,7 @@ describe('ExpressionRenderer', () => {
         reload$={refreshSubject}
         expression=""
         debounce={1000}
-        searchContext={{ from: 'now-15m', to: 'now' }}
+        searchContext={{ timeRange: { from: 'now-15m', to: 'now' } }}
       />
     );
 
