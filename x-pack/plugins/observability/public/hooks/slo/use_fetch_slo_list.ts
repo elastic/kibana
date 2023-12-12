@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { DEFAULT_SLO_PAGE_SIZE } from '../../../common/slo/constants';
 import { SLO_LONG_REFETCH_INTERVAL, SLO_SHORT_REFETCH_INTERVAL } from '../../constants';
 
 import { useKibana } from '../../utils/kibana_react';
@@ -38,7 +39,7 @@ export function useFetchSloList({
   sortBy = 'status',
   sortDirection = 'desc',
   shouldRefetch,
-  perPage = 25,
+  perPage = DEFAULT_SLO_PAGE_SIZE,
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,

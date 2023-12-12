@@ -35,3 +35,5 @@ export const SLO_SUMMARY_INGEST_PIPELINE_NAME = `.slo-observability.summary.pipe
 
 export const getSLOTransformId = (sloId: string, sloRevision: number) =>
   `slo-${sloId}-${sloRevision}`;
+
+export const DEFAULT_SLO_PAGE_SIZE = 25;
