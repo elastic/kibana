@@ -146,23 +146,6 @@ describe('agent policy', () => {
       expect(attributes).toHaveProperty('is_managed', true);
     });
 
-    it('should not create an uninstall token if is_managed is true', async () => {
-      agentPolicyService.requireUniqueName = async () => {};
-      const soClient = getAgentPolicyCreateMock();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      await expect(
-        agentPolicyService.create(soClient, esClient, {
-          name: 'is_managed: true provided',
-          namespace: 'default',
-          is_managed: true,
-        })
-      ).resolves.toHaveProperty('is_managed', true);
-
-      const [, attributes] = soClient.create.mock.calls[0];
-      expect(attributes).toHaveProperty('is_managed', true);
-      expect(mockedAppContextService.getUninstallTokenService.mock.calls).toHaveLength(0);
-    });
-
     it('should call audit logger', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = savedObjectsClientMock.create();

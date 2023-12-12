@@ -280,11 +280,7 @@ class AgentPolicyService {
       options
     );
 
-    // we do not want to create uninstall tokens for managed policies
-    if (!agentPolicy.is_managed) {
-      await appContextService.getUninstallTokenService()?.generateTokenForPolicyId(newSo.id);
-    }
-
+    await appContextService.getUninstallTokenService()?.generateTokenForPolicyId(newSo.id);
     await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id);
 
     return { id: newSo.id, ...newSo.attributes };
