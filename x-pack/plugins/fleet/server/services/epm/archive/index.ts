@@ -41,10 +41,10 @@ export async function unpackBufferToCache({
   contentType: string;
   archiveBuffer: Buffer;
 }): Promise<string[]> {
+  const entries = await unpackBufferEntries(archiveBuffer, contentType);
   // Make sure any buffers from previous installations from registry or upload are deleted first
   clearPackageFileCache({ name, version });
 
-  const entries = await unpackBufferEntries(archiveBuffer, contentType);
   const paths: string[] = [];
   entries.forEach((entry) => {
     const { path, buffer } = entry;
