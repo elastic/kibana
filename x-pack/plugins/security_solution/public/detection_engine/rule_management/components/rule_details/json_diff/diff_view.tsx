@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import classNames from 'classnames';
 import { css, Global } from '@emotion/react';
 import {
   Diff,
@@ -23,7 +24,7 @@ import type {
   HunkTokens,
 } from 'react-diff-view';
 import unidiff from 'unidiff';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, hexToRgb, EuiRadioGroup } from '@elastic/eui';
 import { Hunks } from './hunks';
 import { markEdits, DiffMethod } from './mark_edits';
 
@@ -140,9 +141,15 @@ const convertToDiffFile = (oldSource: string, newSource: string) => {
 const TABLE_CLASS_NAME = 'rule-update-diff-table';
 const CODE_CLASS_NAME = 'rule-update-diff-code';
 const GUTTER_CLASS_NAME = 'rule-update-diff-gutter';
+const DARK_THEME_CLASS_NAME = 'rule-update-diff-dark-theme';
+
+const GITHUB_STYLES_CLASS_NAME = 'NIKITA-DONT-FORGET-TO-REMOVE-THIS-CLASS';
 
 const CustomStyles: React.FC = ({ children }) => {
   const { euiTheme } = useEuiTheme();
+
+  const insertionRgb = hexToRgb(euiTheme.colors.successText);
+  const deletionRgb = hexToRgb(euiTheme.colors.dangerText);
 
   const customCss = css`
     .${TABLE_CLASS_NAME} .diff-gutter-col {
@@ -157,33 +164,92 @@ const CustomStyles: React.FC = ({ children }) => {
       border-left: 1px solid ${euiTheme.colors.mediumShade};
     }
 
+    .${CODE_CLASS_NAME}.diff-code {
+      padding: 0 ${euiTheme.size.l} 0 ${euiTheme.size.m};
+    }
+
+    //
+
     .${GUTTER_CLASS_NAME}.diff-gutter-delete {
       color: ${euiTheme.colors.dangerText};
       font-weight: bold;
+    }
+    .${GITHUB_STYLES_CLASS_NAME} .${GUTTER_CLASS_NAME}.diff-gutter-delete {
+      background: rgb(255, 215, 213);
+    }
+    .${DARK_THEME_CLASS_NAME}.${GITHUB_STYLES_CLASS_NAME} .${GUTTER_CLASS_NAME}.diff-gutter-delete {
+      background: rgba(248, 81, 73, 0.3);
     }
 
     .${GUTTER_CLASS_NAME}.diff-gutter-insert {
       color: ${euiTheme.colors.successText};
       font-weight: bold;
     }
-
-    .${CODE_CLASS_NAME}.diff-code {
-      padding: 0 ${euiTheme.size.l} 0 ${euiTheme.size.m};
+    .${GITHUB_STYLES_CLASS_NAME} .${GUTTER_CLASS_NAME}.diff-gutter-insert {
+      background: rgb(204, 255, 216);
+    }
+    .${DARK_THEME_CLASS_NAME}.${GITHUB_STYLES_CLASS_NAME} .${GUTTER_CLASS_NAME}.diff-gutter-insert {
+      background: rgba(63, 185, 80, 0.3);
     }
 
-    .${CODE_CLASS_NAME}.diff-code-delete .diff-code-edit,
-    .${CODE_CLASS_NAME}.diff-code-insert .diff-code-edit {
+    //
+
+    .${CODE_CLASS_NAME}.diff-code-delete {
       background: transparent;
     }
+    .${GITHUB_STYLES_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-delete {
+      background: rgb(255, 235, 233);
+    }
+    .${DARK_THEME_CLASS_NAME}.${GITHUB_STYLES_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-delete {
+      background: rgba(248, 81, 73, 0.1);
+    }
+
+    .${CODE_CLASS_NAME}.diff-code-insert {
+      background: transparent;
+    }
+    .${GITHUB_STYLES_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-insert {
+      background: rgb(230, 255, 236);
+    }
+    .${DARK_THEME_CLASS_NAME}.${GITHUB_STYLES_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-insert {
+      background: rgba(46, 160, 67, 0.15);
+    }
+
+    //
 
     .${CODE_CLASS_NAME}.diff-code-delete .diff-code-edit {
       color: ${euiTheme.colors.dangerText};
       text-decoration: line-through;
+      background: rgba(${deletionRgb.join()}, 0.05);
+    }
+    .${GITHUB_STYLES_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-delete .diff-code-edit {
+      color: unset;
+      text-decoration: none;
+      background: rgba(255, 129, 130, 0.4);
+    }
+    .${DARK_THEME_CLASS_NAME}.${GITHUB_STYLES_CLASS_NAME}
+      .${CODE_CLASS_NAME}.diff-code-delete
+      .diff-code-edit {
+      color: unset;
+      text-decoration: none;
+      background: rgba(248, 81, 73, 0.4);
     }
 
     .${CODE_CLASS_NAME}.diff-code-insert .diff-code-edit {
       color: ${euiTheme.colors.successText};
       text-decoration: underline;
+      background: rgba(${insertionRgb.join()}, 0.05);
+    }
+    .${GITHUB_STYLES_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-insert .diff-code-edit {
+      color: unset;
+      text-decoration: none;
+      background: rgb(171, 242, 188);
+    }
+    .${DARK_THEME_CLASS_NAME}.${GITHUB_STYLES_CLASS_NAME}
+      .${CODE_CLASS_NAME}.diff-code-insert
+      .diff-code-edit {
+      color: unset;
+      text-decoration: none;
+      background: rgba(46, 160, 67, 0.4);
     }
   `;
 
@@ -229,8 +295,36 @@ export const DiffView = ({
   */
   const tokens = useTokens(hunks, diffMethod, oldSource);
 
+  const { colorMode } = useEuiTheme();
+
+  const [selectedStyle, setSelectedStyle] = React.useState('our-styles');
+
+  const tableClassName = classNames(TABLE_CLASS_NAME, {
+    [DARK_THEME_CLASS_NAME]: colorMode === 'DARK',
+    [GITHUB_STYLES_CLASS_NAME]: selectedStyle === 'github-styles',
+  });
+
   return (
     <CustomStyles>
+      <EuiRadioGroup
+        options={[
+          {
+            id: 'our-styles',
+            label: 'Our styles with added line highlighting',
+          },
+          {
+            id: 'github-styles',
+            label: 'GitHub styles',
+          },
+        ]}
+        idSelected={selectedStyle}
+        onChange={(optionId) => {
+          setSelectedStyle(optionId);
+        }}
+        legend={{
+          children: <span>{'Highlighting style (also try with dark theme)'}</span>,
+        }}
+      />
       <Diff
         /*
           "diffType": can be either 'add', 'delete', 'modify', 'rename' or 'copy'.
@@ -240,7 +334,7 @@ export const DiffView = ({
         hunks={hunks}
         renderGutter={renderGutter}
         tokens={tokens}
-        className={TABLE_CLASS_NAME}
+        className={tableClassName}
         gutterClassName={GUTTER_CLASS_NAME}
         codeClassName={CODE_CLASS_NAME}
       >
