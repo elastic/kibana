@@ -31,6 +31,15 @@ export function OutdatedSloSearchBar({
     }
   };
 
+  const handleClick = (event: React.ChangeEvent<HTMLInputElement>) =>
+    setTempSearch(event.target.value);
+
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      refreshOrUpdateSearch();
+    }
+  };
+
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
@@ -38,12 +47,8 @@ export function OutdatedSloSearchBar({
           data-test-subj="o11ySlosOutdatedDefinitionsFieldSearch"
           fullWidth
           value={tempSearch}
-          onChange={(e) => setTempSearch(e.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              refreshOrUpdateSearch();
-            }
-          }}
+          onChange={handleClick}
+          onKeyDown={handleKeyPress}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={0}>
