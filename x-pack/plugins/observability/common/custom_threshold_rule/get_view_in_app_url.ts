@@ -7,25 +7,30 @@
 
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import type { TimeRange } from '@kbn/es-query';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { CustomThresholdExpressionMetric } from './types';
 
-export const getViewInAppUrl = (
-  metrics: CustomThresholdExpressionMetric[],
-  startedAt?: string,
-  logExplorerLocator?: LocatorPublic<DiscoverAppLocatorParams>,
-  filter?: string,
-  dataViewId?: string,
-  endedAt?: string
-) => {
+export interface GetViewInAppUrlArgs {
+  startedAt: string;
+  dataViewId?: string;
+  endedAt?: string;
+  filter?: string;
+  logExplorerLocator?: LocatorPublic<DiscoverAppLocatorParams>;
+  metrics?: CustomThresholdExpressionMetric[];
+}
+
+export const getViewInAppUrl = ({
+  dataViewId,
+  endedAt,
+  filter,
+  logExplorerLocator,
+  metrics = [],
+  startedAt,
+}: GetViewInAppUrlArgs) => {
   if (!logExplorerLocator) return '';
 
-  let timeRange: TimeRange | undefined;
-  if (startedAt) {
-    timeRange = getPaddedAlertTimeRange(startedAt, endedAt);
-    timeRange.to = endedAt ? timeRange.to : 'now';
-  }
+  const timeRange = getPaddedAlertTimeRange(startedAt, endedAt);
+  timeRange.to = endedAt ? timeRange.to : 'now';
 
   const query = {
     query: '',

@@ -10,6 +10,7 @@ export interface ActionDocument {
   alertDetailsUrl: string;
   reason: string;
   value: string;
+  viewInAppUrl: string;
   host?: string;
   group?: string;
 }

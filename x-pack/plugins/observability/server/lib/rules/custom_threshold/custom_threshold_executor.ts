@@ -285,13 +285,13 @@ export const createCustomThresholdExecutor = ({
             }
             return formatAlertResult(evaluation).currentValue;
           }),
-          viewInAppUrl: getViewInAppUrl(
-            alertResults.length === 1 ? alertResults[0][group].metrics : [],
-            indexedStartedAt,
+          viewInAppUrl: getViewInAppUrl({
+            dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
+            filter: params.searchConfiguration.query.query,
             logExplorerLocator,
-            params.searchConfiguration.query.query,
-            params.searchConfiguration?.index?.title ?? dataViewId
-          ),
+            metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
+            startedAt: indexedStartedAt,
+          }),
           ...additionalContext,
         });
       }
@@ -323,6 +323,13 @@ export const createCustomThresholdExecutor = ({
         ),
         group: groupByKeysObjectForRecovered[recoveredAlertId],
         timestamp: startedAt.toISOString(),
+        viewInAppUrl: getViewInAppUrl({
+          dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
+          filter: params.searchConfiguration.query.query,
+          logExplorerLocator,
+          metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
+          startedAt: indexedStartedAt,
+        }),
         ...additionalContext,
       });
     }
