@@ -17,7 +17,7 @@ import type {
   CreateEnrichmentFunction,
 } from '../types';
 import { getFieldValue } from '../utils/events';
-import { getAssetCriticalityIndex } from '../../../../../../../common/asset_criticality';
+import { getAssetCriticalityIndex } from '../../../../../../../common/entity_analytics/asset_criticality';
 
 export const doesAssetCriticalityIndexExist: DoesAssetCriticalityAvailable = async ({
   spaceId,
