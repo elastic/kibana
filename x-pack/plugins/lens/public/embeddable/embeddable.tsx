@@ -750,7 +750,8 @@ export class Embeddable
   async updateVisualization(
     datasourceState: unknown,
     visualizationState: unknown,
-    visualizationType?: string
+    visualizationType?: string,
+    onUpdate?: (input: TypedLensByValueInput['attributes']) => void
   ) {
     const viz = this.savedVis;
     const activeDatasourceId = (this.activeDatasourceId ??
@@ -785,13 +786,14 @@ export class Embeddable
         },
         references,
         visualizationType: visualizationType ?? viz.visualizationType,
-      };
+      } as TypedLensByValueInput['attributes'];
 
       /**
        * SavedObjectId is undefined for by value panels and defined for the by reference ones.
        * Here we are converting the by reference panels to by value when user is inline editing
        */
       this.updateInput({ attributes: attrs, savedObjectId: undefined });
+      onUpdate?.(attrs);
       /**
        * Should load again the user messages,
        * otherwise the embeddable state is stuck in an error state
@@ -800,13 +802,17 @@ export class Embeddable
     }
   }
 
-  async updateSuggestion(attrs: LensSavedObjectAttributes) {
+  async updateSuggestion(
+    attrs: LensSavedObjectAttributes,
+    onUpdate?: (input: TypedLensByValueInput['attributes']) => void
+  ) {
     const viz = this.savedVis;
     const newViz = {
       ...viz,
       ...attrs,
-    };
+    } as TypedLensByValueInput['attributes'];
     this.updateInput({ attributes: newViz });
+    onUpdate?.(newViz);
   }
 
   /**
@@ -844,7 +850,10 @@ export class Embeddable
     this.updateInput({ attributes: attrs, savedObjectId });
   }
 
-  async openConfingPanel(startDependencies: LensPluginStartDependencies) {
+  async openConfingPanel(
+    startDependencies: LensPluginStartDependencies,
+    onUpdate?: (input: TypedLensByValueInput['attributes']) => void
+  ) {
     const { getEditLensConfiguration } = await import('../async_services');
     const Component = await getEditLensConfiguration(
       this.deps.coreStart,
@@ -861,8 +870,10 @@ export class Embeddable
       return (
         <Component
           attributes={attributes}
-          updatePanelState={this.updateVisualization.bind(this)}
-          updateSuggestion={this.updateSuggestion.bind(this)}
+          updatePanelState={(...attrs) => {
+            this.updateVisualization.bind(this)(...attrs, onUpdate);
+          }}
+          updateSuggestion={(...attrs) => this.updateSuggestion.bind(this)(...attrs, onUpdate)}
           datasourceId={datasourceId}
           lensAdapters={this.lensInspector.adapters}
           output$={this.getOutput$()}

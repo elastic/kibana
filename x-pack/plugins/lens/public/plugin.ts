@@ -105,11 +105,13 @@ import type {
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
+import { EditLensEmbeddableAction } from './trigger_actions/open_lens_config/embeddable_edit_action';
 import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
 import { visualizeDashboardVisualizePanelction } from './trigger_actions/dashboard_visualize_panel_actions';
+import { inAppEditTrigger } from './trigger_actions/open_lens_config/in_app_edit_trigger';
 
 import type { LensEmbeddableInput } from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
@@ -327,6 +329,10 @@ export class LensPlugin {
         this.editorFrameService!.loadVisualizations(),
         this.editorFrameService!.loadDatasources(),
       ]);
+      const { setVisualizationMap, setDatasourceMap } = await import('./async_services');
+      setDatasourceMap(datasourceMap);
+      setVisualizationMap(visualizationMap);
+
       const eventAnnotationService = await plugins.eventAnnotation.getService();
 
       if (plugins.usageCollection) {
@@ -597,6 +603,13 @@ export class LensPlugin {
       core.theme
     );
     startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
+
+    // this trigger enables external consumers to use the inline editing flyout
+    startDependencies.uiActions.registerTrigger(inAppEditTrigger);
+
+    // Allows the Lens embeddable to easily open the inapp editing flyout
+    const editLensEmbeddableAction = new EditLensEmbeddableAction(startDependencies, core);
+    startDependencies.uiActions.addTriggerAction('IN_APP_EDIT_TRIGGER', editLensEmbeddableAction);
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {

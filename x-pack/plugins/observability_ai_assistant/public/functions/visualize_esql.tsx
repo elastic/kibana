@@ -15,10 +15,11 @@ import {
 } from '@elastic/eui';
 import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getLensAttributes } from '@kbn/visualization-utils';
 import type { LensPublicStart, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import type { VisualizeESQLFunctionArguments } from '../../common/functions/visualize_esql';
 import type {
@@ -38,11 +39,13 @@ function generateId() {
 function ESQLLens({
   lens,
   dataViews,
+  uiActions,
   columns,
   query,
 }: {
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
+  uiActions: UiActionsStart;
   columns: DatatableColumn[];
   query: string;
 }) {
@@ -59,38 +62,55 @@ function ESQLLens({
   }, [indexPattern]);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [lensInput, setLensInput] = useState<TypedLensByValueInput | null>(null);
 
-  if (!lensHelpersAsync.value || !dataViewAsync.value) {
+  // initialization
+  useEffect(() => {
+    if (lensHelpersAsync.value && dataViewAsync.value && !lensInput) {
+      const context = {
+        dataViewSpec: dataViewAsync.value?.toSpec(),
+        fieldName: '',
+        textBasedColumns: columns,
+        query: {
+          esql: query,
+        },
+      };
+
+      const chartSuggestions = lensHelpersAsync.value.suggestions(context, dataViewAsync.value);
+      if (chartSuggestions?.length) {
+        const [firstSuggestion] = chartSuggestions;
+
+        const attrs = getLensAttributes({
+          filters: [],
+          query: {
+            esql: query,
+          },
+          suggestion: firstSuggestion,
+          dataView: dataViewAsync.value,
+        }) as TypedLensByValueInput['attributes'];
+
+        const lensEmbeddableInput = {
+          attributes: attrs,
+          id: generateId(),
+        };
+        setLensInput(lensEmbeddableInput);
+      }
+    }
+  }, [columns, dataViewAsync.value, lensHelpersAsync.value, lensInput, query]);
+
+  if (!lensHelpersAsync.value || !dataViewAsync.value || !lensInput) {
     return <EuiLoadingSpinner />;
   }
 
-  const context = {
-    dataViewSpec: dataViewAsync.value?.toSpec(),
-    fieldName: '',
-    textBasedColumns: columns,
-    query: {
-      esql: query,
+  const triggerOptions = {
+    ...lensInput,
+    onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => {
+      const newInput = {
+        ...lensInput,
+        attributes: newAttributes,
+      };
+      setLensInput(newInput);
     },
-  };
-
-  const chartSuggestions = lensHelpersAsync.value.suggestions(context, dataViewAsync.value);
-
-  // Lens might not return suggestions for some cases, i.e. in case of errors
-  if (!chartSuggestions?.length) return null;
-  const [firstSuggestion] = chartSuggestions;
-
-  const attrs = getLensAttributes({
-    filters: [],
-    query: {
-      esql: query,
-    },
-    suggestion: firstSuggestion,
-    dataView: dataViewAsync.value,
-  }) as TypedLensByValueInput['attributes'];
-
-  const lensEmbeddableInput = {
-    attributes: attrs,
-    id: generateId(),
   };
 
   return (
@@ -98,19 +118,21 @@ function ESQLLens({
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-            {/* <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="observabilityAiAssistantLensOpenInLensButton"
-                iconType="lensApp"
-                onClick={() => {
-                  lens.navigateToPrefilledEditor(lensEmbeddableInput);
-                }}
-              >
-                {i18n.translate('xpack.observabilityAiAssistant.lensFunction.openInLens', {
-                  defaultMessage: 'Open in Lens',
+            <EuiToolTip
+              content={i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.edit', {
+                defaultMessage: 'Edit visualization',
+              })}
+            >
+              <EuiButtonIcon
+                size="xs"
+                iconType="pencil"
+                onClick={() => uiActions.getTrigger('IN_APP_EDIT_TRIGGER').exec(triggerOptions)}
+                data-test-subj="observabilityAiAssistantLensESQLEditButton"
+                aria-label={i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.edit', {
+                  defaultMessage: 'Edit visualization',
                 })}
-              </EuiButton>
-            </EuiFlexItem> */}
+              />
+            </EuiToolTip>
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.save', {
@@ -135,7 +157,7 @@ function ESQLLens({
         </EuiFlexItem>
         <EuiFlexItem>
           <lens.EmbeddableComponent
-            {...lensEmbeddableInput}
+            {...lensInput}
             style={{
               height: 240,
             }}
@@ -144,7 +166,7 @@ function ESQLLens({
       </EuiFlexGroup>
       {isSaveModalOpen ? (
         <lens.SaveModalComponent
-          initialInput={lensEmbeddableInput}
+          initialInput={lensInput}
           onClose={() => {
             setIsSaveModalOpen(() => false);
           }}
@@ -176,6 +198,7 @@ export function registerVisualizeQueryRenderFunction({
         <ESQLLens
           lens={pluginsStart.lens}
           dataViews={pluginsStart.dataViews}
+          uiActions={pluginsStart.uiActions}
           columns={content}
           query={query}
         />

@@ -560,7 +560,7 @@ export const getPieVisualization = ({
 
   getUserMessages(state, { frame }) {
     const hasTooManyBucketDimensions = state.layers
-      .map((layer) => {
+      ?.map((layer) => {
         const totalBucketDimensions =
           Array.from(new Set([...layer.primaryGroups, ...(layer.secondaryGroups ?? [])])).filter(
             (columnId) => !isCollapsed(columnId, layer)
@@ -597,8 +597,8 @@ export const getPieVisualization = ({
       : [];
 
     const warningMessages: UserMessage[] = [];
-    if (state?.layers.length > 0 && frame.activeData) {
-      for (const layer of state.layers) {
+    if (state?.layers?.length > 0 && frame.activeData) {
+      for (const layer of state?.layers) {
         const { layerId, metrics } = layer;
         const rows = frame.activeData[layerId]?.rows;
         const numericColumn = frame.activeData[layerId]?.columns.find(

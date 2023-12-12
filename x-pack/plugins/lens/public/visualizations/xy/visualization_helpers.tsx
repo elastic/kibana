@@ -81,7 +81,7 @@ export function checkXAccessorCompatibility(state: XYState, datasourceLayers: Da
   const hasOrdinalAxisIndex = dataLayers.findIndex(
     checkScaleOperation('ordinal', undefined, datasourceLayers)
   );
-  if (state.layers.length > 1) {
+  if (state?.layers?.length > 1) {
     const erroredLayers = [hasDateHistogramSetIndex, hasNumberHistogramIndex, hasOrdinalAxisIndex]
       .filter((v) => v >= 0)
       .sort((a, b) => a - b);

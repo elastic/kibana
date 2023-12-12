@@ -12,12 +12,14 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { isLensEmbeddable } from '../utils';
 import type { LensPluginStartDependencies } from '../../plugin';
+import type { TypedLensByValueInput } from '../../embeddable/embeddable_component';
 
 interface Context {
   embeddable: IEmbeddable;
   startDependencies: LensPluginStartDependencies;
   overlays: OverlayStart;
   theme: ThemeServiceStart;
+  onUpdate?: (input: TypedLensByValueInput['attributes']) => void;
 }
 
 export async function isActionCompatible(embeddable: IEmbeddable) {
@@ -26,14 +28,20 @@ export async function isActionCompatible(embeddable: IEmbeddable) {
   return Boolean(isLensEmbeddable(embeddable) && embeddable.getIsEditable() && inDashboardEditMode);
 }
 
-export async function executeAction({ embeddable, startDependencies, overlays, theme }: Context) {
+export async function executeAction({
+  embeddable,
+  startDependencies,
+  overlays,
+  theme,
+  onUpdate,
+}: Context) {
   const isCompatibleAction = await isActionCompatible(embeddable);
   if (!isCompatibleAction || !isLensEmbeddable(embeddable)) {
     throw new IncompatibleActionError();
   }
   const rootEmbeddable = embeddable.getRoot();
   const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-  const ConfigPanel = await embeddable.openConfingPanel(startDependencies);
+  const ConfigPanel = await embeddable.openConfingPanel(startDependencies, onUpdate);
   if (ConfigPanel) {
     const handle = overlays.openFlyout(
       toMountPoint(
