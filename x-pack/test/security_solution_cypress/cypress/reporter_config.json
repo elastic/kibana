@@ -2,7 +2,6 @@
   "reporterEnabled": "mochawesome, mocha-junit-reporter, buildkite-test-collector/mocha/reporter",
   "buildkiteTestCollectorMochaReporterReporterOptions": {
     "token_name": "BK_ANALYTICS_API_KEY",
-    "debug": true,
     "follow-symlinks": true,
     "timeout": 120,
     "upload-concurrency": 50
