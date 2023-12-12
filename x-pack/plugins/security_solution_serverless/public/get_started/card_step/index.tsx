@@ -77,18 +77,19 @@ const CardStepComponent: React.FC<{
   const toggleStep = useCallback(
     (e) => {
       e.preventDefault();
+      const newStatus = !isExpandedStep;
 
       if (hasStepContent) {
         // Toggle step and sync the expanded card step to storage & reducer
-        onStepClicked({ stepId, cardId, sectionId, isExpanded: !isExpandedStep });
+        onStepClicked({ stepId, cardId, sectionId, isExpanded: newStatus });
 
         navigateTo({
           deepLinkId: SecurityPageName.landing,
-          path: `#${stepId}`,
+          path: newStatus ? `#${stepId}` : undefined,
         });
       }
     },
-    [hasStepContent, onStepClicked, stepId, cardId, sectionId, isExpandedStep, navigateTo]
+    [isExpandedStep, hasStepContent, onStepClicked, stepId, cardId, sectionId, navigateTo]
   );
 
   const {
@@ -169,7 +170,5 @@ const CardStepComponent: React.FC<{
     </EuiPanel>
   );
 };
-
-CardStepComponent.displayName = 'CardStepComponent';
 
 export const CardStep = React.memo(CardStepComponent);

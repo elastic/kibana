@@ -17,17 +17,23 @@ import { createCategorizeQuery } from './create_categorize_query';
 const CATEGORY_LIMIT = 1000;
 const EXAMPLE_LIMIT = 1;
 
+export interface CategorizationAdditionalFilter {
+  from: number;
+  to: number;
+  field?: { name: string; value: string };
+}
+
 export function createCategoryRequest(
   index: string,
   field: string,
   timeField: string,
-  from: number | undefined,
-  to: number | undefined,
+  timeRange: { from: number; to: number } | undefined,
   queryIn: QueryDslQueryContainer,
   wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
-  intervalMs?: number
+  intervalMs?: number,
+  additionalFilter?: CategorizationAdditionalFilter
 ) {
-  const query = createCategorizeQuery(queryIn, timeField, from, to);
+  const query = createCategorizeQuery(queryIn, timeField, timeRange);
   const aggs = {
     categories: {
       categorize_text: {
@@ -36,7 +42,7 @@ export function createCategoryRequest(
         categorization_analyzer: categorizationAnalyzer,
       },
       aggs: {
-        hit: {
+        examples: {
           top_hits: {
             size: EXAMPLE_LIMIT,
             sort: [timeField],
@@ -49,6 +55,37 @@ export function createCategoryRequest(
                 date_histogram: {
                   field: timeField,
                   fixed_interval: `${intervalMs}ms`,
+                },
+              },
+            }
+          : {}),
+        ...(additionalFilter
+          ? {
+              sub_time_range: {
+                date_range: {
+                  field: timeField,
+                  format: 'epoch_millis',
+                  ranges: [{ from: additionalFilter.from, to: additionalFilter.to }],
+                },
+                aggs: {
+                  examples: {
+                    top_hits: {
+                      size: EXAMPLE_LIMIT,
+                      sort: [timeField],
+                      _source: field,
+                    },
+                  },
+                  ...(additionalFilter.field
+                    ? {
+                        sub_field: {
+                          filter: {
+                            term: {
+                              [additionalFilter.field.name]: additionalFilter.field.value,
+                            },
+                          },
+                        },
+                      }
+                    : {}),
                 },
               },
             }

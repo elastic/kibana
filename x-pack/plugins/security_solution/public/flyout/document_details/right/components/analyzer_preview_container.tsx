@@ -16,7 +16,7 @@ import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { getScopedActions } from '../../../../helpers';
 import { setActiveTabTimeline } from '../../../../timelines/store/timeline/actions';
 import { useRightPanelContext } from '../context';
-import { isInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
@@ -30,7 +30,7 @@ export const AnalyzerPreviewContainer: React.FC = () => {
   const { dataAsNestedObject, isPreview } = useRightPanelContext();
 
   // decide whether to show the analyzer preview or not
-  const isEnabled = isInvestigateInResolverActionEnabled(dataAsNestedObject);
+  const isEnabled = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
 
   const dispatch = useDispatch();
   const { startTransaction } = useStartTransaction();

@@ -6,7 +6,9 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { appIds } from '@kbn/management-cards-navigation';
+import { appCategories } from '@kbn/management-cards-navigation/src/types';
 import { getObservabilitySideNavComponent } from './components/side_navigation';
 import { createObservabilityDashboardRegistration } from './logs_signal/overview_registration';
 import {
@@ -49,6 +51,21 @@ export class ServerlessObservabilityPlugin
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.RULES],
+      extendCardNavDefinitions: {
+        aiAssistantManagementObservability: {
+          category: appCategories.OTHER,
+          title: i18n.translate('xpack.serverlessObservability.aiAssistantManagementTitle', {
+            defaultMessage: 'AI assistant for Observability settings',
+          }),
+          description: i18n.translate(
+            'xpack.serverlessObservability.aiAssistantManagementDescription',
+            {
+              defaultMessage: 'Manage your AI assistant for Observability settings.',
+            }
+          ),
+          icon: 'sparkles',
+        },
+      },
     });
     return {};
   }

@@ -54,10 +54,17 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
 
     const stream = query.stream;
 
+    const controller = new AbortController();
+
+    request.events.aborted$.subscribe(() => {
+      controller.abort();
+    });
+
     return client.chat({
       messages,
       connectorId,
       stream,
+      signal: controller.signal,
       ...(functions.length
         ? {
             functions,
@@ -68,6 +75,62 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
   },
 });
 
+const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  params: t.type({
+    body: t.intersection([
+      t.type({
+        messages: t.array(messageRt),
+        connectorId: t.string,
+        persist: toBooleanRt,
+      }),
+      t.partial({
+        conversationId: t.string,
+        title: t.string,
+      }),
+    ]),
+  }),
+  handler: async (resources): Promise<Readable | CreateChatCompletionResponse> => {
+    const { request, params, service } = resources;
+
+    const client = await service.getClient({ request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    const {
+      body: { messages, connectorId, conversationId, title, persist },
+    } = params;
+
+    const controller = new AbortController();
+
+    request.events.aborted$.subscribe(() => {
+      controller.abort();
+    });
+
+    const functionClient = await service.getFunctionClient({
+      signal: controller.signal,
+      resources,
+      client,
+    });
+
+    return client.complete({
+      messages,
+      connectorId,
+      conversationId,
+      title,
+      persist,
+      signal: controller.signal,
+      functionClient,
+    });
+  },
+});
+
 export const chatRoutes = {
   ...chatRoute,
+  ...chatCompleteRoute,
 };

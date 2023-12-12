@@ -13,8 +13,8 @@ import type { Filter } from '@kbn/es-query';
 import { HeaderSection } from '../../../../common/components/header_section';
 
 import * as i18n from './translations';
-import type { RiskInputs } from '../../../../../common/risk_engine';
-import { RiskScoreEntity } from '../../../../../common/risk_engine';
+import type { RiskInputs } from '../../../../../common/entity_analytics/risk_engine';
+import { RiskScoreEntity } from '../../../../../common/entity_analytics/risk_engine';
 import type { HostRiskScore, UserRiskScore } from '../../../../../common/search_strategy';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../../common/constants';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';

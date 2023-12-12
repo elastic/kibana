@@ -7,9 +7,13 @@
 
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+
 import { executeAction } from '../lib/executor';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
-import { getLangChainMessages } from '../lib/langchain/helpers';
+import {
+  getLangChainMessages,
+  requestHasRequiredAnonymizationParams,
+} from '../lib/langchain/helpers';
 import { buildResponse } from '../lib/build_response';
 import { buildRouteValidation } from '../schemas/common';
 import {
@@ -43,8 +47,8 @@ export const postActionsConnectorExecuteRoute = (
         const actions = (await context.elasticAssistant).actions;
 
         // if not langchain, call execute action directly and return the response:
-        if (!request.body.assistantLangChain) {
-          logger.debug('Executing via actions framework directly, assistantLangChain: false');
+        if (!request.body.assistantLangChain && !requestHasRequiredAnonymizationParams(request)) {
+          logger.debug('Executing via actions framework directly');
           const result = await executeAction({ actions, request, connectorId });
           return response.ok({
             body: result,
@@ -64,19 +68,34 @@ export const postActionsConnectorExecuteRoute = (
 
         const elserId = await getElser(request, (await context.core).savedObjects.getClient());
 
+        let latestReplacements = { ...request.body.replacements };
+        const onNewReplacements = (newReplacements: Record<string, string>) => {
+          latestReplacements = { ...latestReplacements, ...newReplacements };
+        };
+
         const langChainResponseBody = await callAgentExecutor({
+          alertsIndexPattern: request.body.alertsIndexPattern,
+          allow: request.body.allow,
+          allowReplacement: request.body.allowReplacement,
           actions,
+          assistantLangChain: request.body.assistantLangChain,
           connectorId,
+          elserId,
           esClient,
+          kbResource: ESQL_RESOURCE,
           langChainMessages,
           logger,
+          onNewReplacements,
           request,
-          elserId,
-          kbResource: ESQL_RESOURCE,
+          replacements: request.body.replacements,
+          size: request.body.size,
         });
 
         return response.ok({
-          body: langChainResponseBody,
+          body: {
+            ...langChainResponseBody,
+            replacements: latestReplacements,
+          },
         });
       } catch (err) {
         logger.error(err);
