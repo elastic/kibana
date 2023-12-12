@@ -15,19 +15,20 @@ const muteStatesMap = {
 };
 
 export const bulkActionBenchmarkRulesHandler = async (
-  soClient: SavedObjectsClientContract,
+  encryptedSoClient: SavedObjectsClientContract,
   rulesToUpdate: CspBenchmarkRules,
   action: 'mute' | 'unmute',
   logger: Logger
 ) => {
-  const cspSettings = await getCspSettingsSafe(soClient, logger);
+  const cspSettings = await getCspSettingsSafe(encryptedSoClient, logger);
 
   const currentRulesStates = cspSettings.rules;
   const ruleKeys = rulesToUpdate.map((rule) =>
     buildRuleKey(rule.benchmark_id, rule.benchmark_version, rule.rule_number)
   );
   const newRulesStates = setRulesStates(currentRulesStates, ruleKeys, muteStatesMap[action]);
-  const newCspSettings = await updateRulesStates(soClient, newRulesStates);
+
+  const newCspSettings = await updateRulesStates(encryptedSoClient, newRulesStates);
 
   return newCspSettings;
 };

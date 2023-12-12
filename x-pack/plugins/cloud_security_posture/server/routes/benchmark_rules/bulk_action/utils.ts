@@ -16,10 +16,10 @@ import {
 } from '../../../../common/constants';
 
 export const updateRulesStates = async (
-  soClient: SavedObjectsClientContract,
+  encryptedSoClient: SavedObjectsClientContract,
   newRulesStates: CspBenchmarkRulesStates
 ) => {
-  return await soClient.update<CspSettings>(
+  return await encryptedSoClient.update<CspSettings>(
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
     { rules: newRulesStates }
@@ -43,8 +43,8 @@ export const setRulesStates = (
   return rulesStates;
 };
 
-export const createCspSettingObject = async (soClient: SavedObjectsClientContract) => {
-  return soClient.create<CspSettings>(
+export const createCspSettingObject = async (encryptedSoClient: SavedObjectsClientContract) => {
+  return encryptedSoClient.create<CspSettings>(
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
     {
       rules: {},
@@ -54,19 +54,19 @@ export const createCspSettingObject = async (soClient: SavedObjectsClientContrac
 };
 
 export const createCspSettingObjectSafe = async (
-  soClient: SavedObjectsClientContract,
+  encryptedSoClient: SavedObjectsClientContract,
   logger: Logger
 ) => {
-  const cspSettings = await getCspSettingsSafe(soClient, logger);
+  const cspSettings = await getCspSettingsSafe(encryptedSoClient, logger);
   return cspSettings;
 };
 
 export const getCspSettingsSafe = async (
-  soClient: SavedObjectsClientContract,
+  encryptedSoClient: SavedObjectsClientContract,
   logger: Logger
 ): Promise<CspSettings> => {
   try {
-    const cspSettings = await soClient.get<CspSettings>(
+    const cspSettings = await encryptedSoClient.get<CspSettings>(
       INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
       INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID
     );
@@ -75,7 +75,7 @@ export const getCspSettingsSafe = async (
     const error = transformError(err);
     logger.error(`An error occurred while trying to fetch csp settings: ${error}`);
     logger.warn(`Trying to create new csp settings object`);
-    return (await createCspSettingObject(soClient)).attributes;
+    return (await createCspSettingObject(encryptedSoClient)).attributes;
   }
 };
 
