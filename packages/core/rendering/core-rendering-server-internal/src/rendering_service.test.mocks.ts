@@ -18,9 +18,11 @@ jest.doMock('./bootstrap', () => ({
 export const getSettingValueMock = jest.fn();
 export const getCommonStylesheetPathsMock = jest.fn();
 export const getThemeStylesheetPathsMock = jest.fn();
+export const getScriptPathsMock = jest.fn();
 
 jest.doMock('./render_utils', () => ({
   getSettingValue: getSettingValueMock,
   getCommonStylesheetPaths: getCommonStylesheetPathsMock,
   getThemeStylesheetPaths: getThemeStylesheetPathsMock,
+  getScriptPaths: getScriptPathsMock,
 }));

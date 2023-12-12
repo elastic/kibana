@@ -12,6 +12,7 @@ import {
   getSettingValueMock,
   getCommonStylesheetPathsMock,
   getThemeStylesheetPathsMock,
+  getScriptPathsMock,
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
@@ -179,6 +180,24 @@ function renderTestCases(
 
       expect(getCommonStylesheetPathsMock).toHaveBeenCalledTimes(1);
       expect(getCommonStylesheetPathsMock).toHaveBeenCalledWith({
+        baseHref: '/mock-server-basepath',
+        buildNum: expect.any(Number),
+      });
+    });
+
+    it('calls `getScriptPaths` with the correct parameters', async () => {
+      getSettingValueMock.mockImplementation((settingName: string) => {
+        if (settingName === 'theme:darkMode') {
+          return true;
+        }
+        return settingName;
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings);
+
+      expect(getScriptPathsMock).toHaveBeenCalledTimes(1);
+      expect(getScriptPathsMock).toHaveBeenCalledWith({
         baseHref: '/mock-server-basepath',
         buildNum: expect.any(Number),
       });
@@ -446,6 +465,7 @@ describe('RenderingService', () => {
     getSettingValueMock.mockImplementation((settingName: string) => settingName);
     getCommonStylesheetPathsMock.mockReturnValue(['/common-1.css']);
     getThemeStylesheetPathsMock.mockReturnValue(['/style-1.css', '/style-2.css']);
+    getScriptPathsMock.mockReturnValue(['/script-1.js']);
   });
 
   describe('preboot()', () => {
