@@ -64,7 +64,7 @@ export async function mountManagementSection(
     },
     indexPatternManagementStart,
   ] = await getStartServices();
-  console.log(url);
+  console.log('get start service url', url);
   const canSave = dataViews.getCanSaveSync();
 
   if (!canSave) {
@@ -92,9 +92,8 @@ export async function mountManagementSection(
     spaces: spaces?.hasOnlyDefaultSpace ? undefined : spaces,
     theme,
     savedObjectsManagement,
-    url,
+    url
   };
-  console.log('\n\n\n\n share url', url);
 
   const editPath = '/dataView/:id/field/:fieldName';
   const createPath = '/dataView/:id/create-field/';

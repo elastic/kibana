@@ -14,6 +14,7 @@ import type { CardsNavigationComponentProps } from '@kbn/management-cards-naviga
 import { AppNavLinkStatus } from '@kbn/core/public';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
@@ -73,6 +74,7 @@ export interface ManagementAppMountParams {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   history: ScopedHistory;
   theme$: Observable<CoreTheme>;
+  url: SharePluginStart['url']
 }
 
 export interface CreateManagementItemArgs {

@@ -27,7 +27,6 @@ export const NoDataViewsPrompt = ({
   onClickCreate,
   canCreateNewDataView,
   dataViewsDocLink,
-  showESQL,
   esqlLink,
   emptyPromptColor = 'plain',
 }: NoDataViewsPromptComponentProps) => {
@@ -86,7 +85,6 @@ export const NoDataViewsPrompt = ({
     <NoDataButtonLink
       onClickCreate={onClickCreate}
       canCreateNewDataView={canCreateNewDataView}
-      showESQL={showESQL}
       esqlLocator={esqlLink}
     />
   );

@@ -14,7 +14,6 @@ import React from 'react';
 interface NoDataButtonProps {
   onClickCreate: (() => void) | undefined;
   canCreateNewDataView: boolean;
-  showESQL: boolean;
   esqlLocator: string;
 }
 
@@ -25,45 +24,33 @@ const createDataViewText = i18n.translate('sharedUXPackages.noDataViewsPrompt.ad
 export const NoDataButtonLink = ({
   onClickCreate,
   canCreateNewDataView,
-  showESQL,
   esqlLocator,
 }: NoDataButtonProps) => {
-  if (canCreateNewDataView && !showESQL) {
-    return (
-      <EuiButton
-        onClick={onClickCreate}
-        iconType="plusInCircle"
-        fill={true}
-        data-test-subj="createDataViewButton"
-      >
-        {createDataViewText}
-      </EuiButton>
-    );
-  } else if (showESQL) {
-    return (
-      <>
-        <EuiButton
-          onClick={onClickCreate}
-          iconType="plusInCircle"
-          fill={true}
-          data-test-subj="createDataViewButton"
-        >
-          {createDataViewText}
-        </EuiButton>
-        <EuiSpacer size="m" />
-        - OR -
-        <EuiSpacer size="m" />
-        <EuiText size="s">
-          <FormattedMessage
-            id="sharedUx.no_data_views.button"
-            defaultMessage="Query your data directly with ES|QL (Beta).  "
-          />
-          <EuiLink href={esqlLocator} target={'_blank'} external>
-            Try ES|QL
-          </EuiLink>
-        </EuiText>
-      </>
-    );
-  }
-  return null;
+  return (
+    <>
+      {canCreateNewDataView && (
+        <>
+          <EuiButton
+            onClick={onClickCreate}
+            iconType="plusInCircle"
+            fill={true}
+            data-test-subj="createDataViewButton"
+          >
+            {createDataViewText}
+          </EuiButton>
+          <EuiSpacer size="m" />- OR -
+        </>
+      )}
+      <EuiSpacer size="m" />
+      <EuiText size="s">
+        <FormattedMessage
+          id="sharedUx.no_data_views.button"
+          defaultMessage="Query your data directly with ES|QL (Beta).  "
+        />
+        <EuiLink href={esqlLocator} target={'_blank'} external>
+          Try ES|QL
+        </EuiLink>
+      </EuiText>
+    </>
+  );
 };

@@ -26,7 +26,12 @@ export class StorybookMock extends AbstractStorybookMock<
   {},
   ServiceArguments
 > {
-  propArguments = {};
+  propArguments = {
+    esqlLink: {
+      options: ['some/link', undefined],
+      control: { type: 'radio' },
+    },
+  };
   serviceArguments = {
     canCreateNewDataView: {
       control: 'boolean',
@@ -42,6 +47,7 @@ export class StorybookMock extends AbstractStorybookMock<
   getProps() {
     return {
       onDataViewCreated: action('onDataViewCreated'),
+      esqlLink: 'test link'
     };
   }
 

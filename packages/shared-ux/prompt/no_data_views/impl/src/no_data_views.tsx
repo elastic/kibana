@@ -26,7 +26,6 @@ type CloseDataViewEditorFn = ReturnType<NoDataViewsPromptServices['openDataViewE
  */
 export const NoDataViewsPrompt = ({
   onDataViewCreated,
-  showESQL,
   esqlLink,
   allowAdHocDataView = false,
 }: NoDataViewsPromptProps) => {
@@ -75,7 +74,7 @@ export const NoDataViewsPrompt = ({
 
   return (
     <NoDataViewsPromptComponent
-      {...{ onClickCreate, canCreateNewDataView, dataViewsDocLink, showESQL, esqlLink }}
+      {...{ onClickCreate, canCreateNewDataView, dataViewsDocLink, esqlLink }}
     />
   );
 };
