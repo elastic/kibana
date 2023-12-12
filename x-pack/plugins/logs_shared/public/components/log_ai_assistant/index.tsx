@@ -20,9 +20,9 @@ export type LogAIAssistantComponent = ComponentType<
 >;
 
 export function createLogAIAssistant({
-  observabilityAIAssistant: aiAssistant,
+  observabilityAIAssistant: aiAssistantService,
 }: LogAIAssistantFactoryDeps): LogAIAssistantComponent {
-  return ({ observabilityAIAssistant = aiAssistant, ...props }) => (
+  return ({ observabilityAIAssistant = aiAssistantService, ...props }) => (
     <LogAIAssistant observabilityAIAssistant={observabilityAIAssistant} {...props} />
   );
 }

@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
 import type { Duration } from 'moment/moment';
-import { memoize, pick } from 'lodash';
+import { capitalize, get, memoize, pick } from 'lodash';
 import {
   FIELD_FORMAT_IDS,
   type IFieldFormat,
@@ -22,9 +22,13 @@ import {
   type MlAnomalyRecordDoc,
   type MlAnomalyResultType,
   ML_ANOMALY_RESULT_TYPE,
+  MlAnomaliesTableRecordExtended,
 } from '@kbn/ml-anomaly-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import { getAnomalyDescription } from '../../../common/util/anomaly_description';
+import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
 import type { MlClient } from '../ml_client';
 import type {
   MlAnomalyDetectionAlertParams,
@@ -183,6 +187,8 @@ export function alertingServiceProvider(
   getDataViewsService: GetDataViewsService
 ) {
   type FieldFormatters = AwaitReturnType<ReturnType<typeof getFormatters>>;
+
+  let jobs: MlJob[] = [];
 
   /**
    * Provides formatters based on the data view of the datafeed index pattern
@@ -397,6 +403,72 @@ export function alertingServiceProvider(
     return alertInstanceKey;
   };
 
+  const getAlertMessage = (
+    resultType: MlAnomalyResultType,
+    source: Record<string, unknown>
+  ): string => {
+    let message = i18n.translate('xpack.ml.alertTypes.anomalyDetectionAlertingRule.alertMessage', {
+      defaultMessage:
+        'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
+    });
+
+    if (resultType === ML_ANOMALY_RESULT_TYPE.RECORD) {
+      const recordSource = source as MlAnomalyRecordDoc;
+
+      const detectorsByJob = jobs.reduce((acc, job) => {
+        acc[job.job_id] = job.analysis_config.detectors.reduce((innterAcc, detector) => {
+          innterAcc[detector.detector_index!] = detector.detector_description;
+          return innterAcc;
+        }, {} as Record<number, string | undefined>);
+        return acc;
+      }, {} as Record<string, Record<number, string | undefined>>);
+
+      const detectorDescription = get(detectorsByJob, [
+        recordSource.job_id,
+        recordSource.detector_index,
+      ]);
+
+      const record = {
+        source: recordSource,
+        detector: detectorDescription ?? recordSource.function_description,
+        severity: recordSource.record_score,
+      } as MlAnomaliesTableRecordExtended;
+      const entityName = getEntityFieldName(recordSource);
+      if (entityName !== undefined) {
+        record.entityName = entityName;
+        record.entityValue = getEntityFieldValue(recordSource);
+      }
+
+      const { anomalyDescription, mvDescription } = getAnomalyDescription(record);
+
+      const anomalyDescriptionSummary = `${anomalyDescription}${
+        mvDescription ? ` (${mvDescription})` : ''
+      }`;
+
+      let actual = recordSource.actual;
+      let typical = recordSource.typical;
+      if (
+        (!isDefined(actual) || !isDefined(typical)) &&
+        Array.isArray(recordSource.causes) &&
+        recordSource.causes.length === 1
+      ) {
+        actual = recordSource.causes[0].actual;
+        typical = recordSource.causes[0].typical;
+      }
+
+      let metricChangeDescription = '';
+      if (isDefined(actual) && isDefined(typical)) {
+        metricChangeDescription = capitalize(getMetricChangeDescription(actual, typical).message);
+      }
+
+      message = `${anomalyDescriptionSummary}. ${
+        metricChangeDescription ? `${metricChangeDescription}.` : ''
+      }`;
+    }
+
+    return message;
+  };
+
   /**
    * Returns a callback for formatting elasticsearch aggregation response
    * to the alert-as-data document.
@@ -419,14 +491,10 @@ export function alertingServiceProvider(
       const topAnomaly = requestedAnomalies[0];
       const timestamp = topAnomaly._source.timestamp;
 
+      const message = getAlertMessage(resultType, topAnomaly._source);
+
       return {
-        [ALERT_REASON]: i18n.translate(
-          'xpack.ml.alertTypes.anomalyDetectionAlertingRule.alertMessage',
-          {
-            defaultMessage:
-              'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
-          }
-        ),
+        [ALERT_REASON]: message,
         job_id: [...new Set(requestedAnomalies.map((h) => h._source.job_id))][0],
         is_interim: requestedAnomalies.some((h) => h._source.is_interim),
         anomaly_timestamp: timestamp,
@@ -495,14 +563,12 @@ export function alertingServiceProvider(
       const alertInstanceKey = getAlertInstanceKey(topAnomaly._source);
       const timestamp = topAnomaly._source.timestamp;
       const bucketSpanInSeconds = topAnomaly._source.bucket_span;
+      const message = getAlertMessage(resultType, topAnomaly._source);
 
       return {
         count: aggTypeResults.doc_count,
         key: v.key,
-        message: i18n.translate('xpack.ml.alertTypes.anomalyDetectionAlertingRule.alertMessage', {
-          defaultMessage:
-            'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
-        }),
+        message,
         alertInstanceKey,
         jobIds: [...new Set(requestedAnomalies.map((h) => h._source.job_id))],
         isInterim: requestedAnomalies.some((h) => h._source.is_interim),
@@ -563,6 +629,8 @@ export function alertingServiceProvider(
 
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
     const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).jobs;
+
+    jobs = jobsResponse;
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
@@ -698,6 +766,9 @@ export function alertingServiceProvider(
 
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
     const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).jobs;
+
+    // Cache jobs response
+    jobs = jobsResponse;
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.

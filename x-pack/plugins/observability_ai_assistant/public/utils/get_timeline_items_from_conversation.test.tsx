@@ -137,7 +137,7 @@ describe('getTimelineItemsFromConversation', () => {
         actions: {
           canCopy: true,
           canEdit: true,
-          canGiveFeedback: false,
+          canGiveFeedback: true,
           canRegenerate: true,
         },
         display: {
@@ -499,7 +499,7 @@ describe('getTimelineItemsFromConversation', () => {
           canCopy: true,
           canRegenerate: true,
           canEdit: false,
-          canGiveFeedback: false,
+          canGiveFeedback: true,
         },
         display: {
           collapsed: false,

@@ -73,6 +73,7 @@ import {
   assetCriticalityUpsertRoute,
   assetCriticalityGetRoute,
   assetCriticalityDeleteRoute,
+  assetCriticalityPrivilegesRoute,
 } from '../lib/entity_analytics/asset_criticality/routes';
 
 export const initRoutes = (
@@ -117,7 +118,7 @@ export const initRoutes = (
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
-  setSignalsStatusRoute(router, logger, security, telemetrySender);
+  setSignalsStatusRoute(router, logger, telemetrySender, getStartServices);
   setAlertTagsRoute(router);
   setAlertAssigneesRoute(router);
   querySignalsRoute(router, ruleDataClient);
@@ -173,5 +174,6 @@ export const initRoutes = (
     assetCriticalityUpsertRoute(router, logger);
     assetCriticalityGetRoute(router, logger);
     assetCriticalityDeleteRoute(router, logger);
+    assetCriticalityPrivilegesRoute(router, getStartServices, logger);
   }
 };

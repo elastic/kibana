@@ -222,9 +222,11 @@ function _generateMappings(
   properties: IndexTemplateMappings['properties'];
   hasNonDynamicTemplateMappings: boolean;
   hasDynamicTemplateMappings: boolean;
+  subobjects?: boolean;
 } {
   let hasNonDynamicTemplateMappings = false;
   let hasDynamicTemplateMappings = false;
+  let subobjects: boolean | undefined;
   const props: Properties = {};
 
   function addParentObjectAsStaticProperty(field: Field) {
@@ -237,6 +239,7 @@ function _generateMappings(
     const fieldProps = {
       type: 'object',
       dynamic: true,
+      ...(field.subobjects !== undefined && { subobjects: field.subobjects }),
     };
 
     props[field.name] = fieldProps;
@@ -435,6 +438,17 @@ function _generateMappings(
             );
         }
 
+        // When a wildcard field specifies the subobjects setting,
+        // the parent intermediate object should set the subobjects
+        // setting.
+        //
+        // For example, if a wildcard field `foo.*` has subobjects,
+        // we should set subobjects on the intermediate object `foo`.
+        //
+        if (field.subobjects !== undefined && path.includes('*')) {
+          subobjects = field.subobjects;
+        }
+
         if (dynProperties && matchingType) {
           addDynamicMappingWithIntermediateObjects(path, pathMatch, matchingType, dynProperties);
 
@@ -475,6 +489,9 @@ function _generateMappings(
               hasDynamicTemplateMappings = true;
             } else {
               return;
+            }
+            if (mappings.subobjects !== undefined) {
+              fieldProps.subobjects = mappings.subobjects;
             }
             break;
           case 'group-nested':
@@ -583,6 +600,10 @@ function _generateMappings(
           fieldProps.time_series_dimension = field.dimension;
         }
 
+        if (field.subobjects !== undefined) {
+          fieldProps.subobjects = field.subobjects;
+        }
+
         // Even if we don't add the property because it has a wildcard, notify
         // the parent that there is some kind of property, so the intermediate object
         // is still created.
@@ -601,7 +622,12 @@ function _generateMappings(
     });
   }
 
-  return { properties: props, hasNonDynamicTemplateMappings, hasDynamicTemplateMappings };
+  return {
+    properties: props,
+    hasNonDynamicTemplateMappings,
+    hasDynamicTemplateMappings,
+    subobjects,
+  };
 }
 
 function generateDynamicAndEnabled(field: Field) {
