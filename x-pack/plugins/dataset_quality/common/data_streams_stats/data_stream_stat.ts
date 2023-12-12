@@ -15,7 +15,7 @@ export class DataStreamStat {
   sizeBytes?: DataStreamStatType['size_bytes'];
   lastActivity?: DataStreamStatType['last_activity'];
   integration?: IntegrationType;
-  malformedDocs?: number;
+  degradedDocs?: number;
 
   private constructor(dataStreamStat: DataStreamStat) {
     this.name = dataStreamStat.name;
@@ -24,7 +24,7 @@ export class DataStreamStat {
     this.sizeBytes = dataStreamStat.sizeBytes;
     this.lastActivity = dataStreamStat.lastActivity;
     this.integration = dataStreamStat.integration;
-    this.malformedDocs = dataStreamStat.malformedDocs;
+    this.degradedDocs = dataStreamStat.degradedDocs;
   }
 
   public static create(dataStreamStat: DataStreamStatType) {
