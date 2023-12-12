@@ -58,7 +58,7 @@ describe('SloSummaryCleanupTask', () => {
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalled();
     expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-      index: '.slo-observability.summary-v2*',
+      index: '.slo-observability.summary-v3*',
       query: {
         bool: {
           should: [
@@ -124,7 +124,7 @@ describe('SloSummaryCleanupTask', () => {
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(1);
     expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-      index: '.slo-observability.summary-v2*',
+      index: '.slo-observability.summary-v3*',
       query: {
         bool: {
           should: getDeleteQueryFilter(['01', '02', '03', '04']),
@@ -174,7 +174,7 @@ describe('SloSummaryCleanupTask', () => {
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(2);
     expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-      index: '.slo-observability.summary-v2*',
+      index: '.slo-observability.summary-v3*',
       query: {
         bool: {
           should: getDeleteQueryFilter([
@@ -233,7 +233,7 @@ describe('SloSummaryCleanupTask', () => {
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(2);
     expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-      index: '.slo-observability.summary-v2*',
+      index: '.slo-observability.summary-v3*',
       query: {
         bool: {
           should: getDeleteQueryFilter([
@@ -288,7 +288,7 @@ describe('SloSummaryCleanupTask', () => {
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(2);
     expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-      index: '.slo-observability.summary-v2*',
+      index: '.slo-observability.summary-v3*',
       query: {
         bool: {
           should: getDeleteQueryFilter([

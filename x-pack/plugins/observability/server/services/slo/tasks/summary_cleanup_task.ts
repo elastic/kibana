@@ -141,6 +141,7 @@ export class SloSummaryCleanupTask {
         );
 
         await this.esClient.deleteByQuery({
+          wait_for_completion: false,
           index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
           query: {
             bool: {
@@ -155,7 +156,7 @@ export class SloSummaryCleanupTask {
   };
 
   fetchSloSummariesIds = async (searchAfter?: SortResults) => {
-    this.logger.info(`[SLO] Fetching SLO Summaries ids after ${searchAfter}`);
+    this.logger.debug(`[SLO] Fetching SLO Summaries ids after ${searchAfter}`);
     if (!this.esClient) {
       return {
         searchAfter: undefined,
