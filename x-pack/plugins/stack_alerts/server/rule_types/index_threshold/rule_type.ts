@@ -17,6 +17,7 @@ import {
   ALERT_REASON,
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
+import { parseDuration } from '@kbn/alerting-plugin/common';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE, STACK_ALERTS_AAD_CONFIG } from '..';
 import { ComparatorFns, getComparatorScript, getHumanReadableComparator } from '../../../common';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
@@ -287,6 +288,59 @@ export function getRuleType(
     const unmetGroupValues: Record<string, number> = {};
     const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
 
+// begin alert image data generation
+    // create chart with 20 intervals of data
+    const intervals = 20;
+    const interval = options.rule.schedule.interval;
+    const intervalMillis = parseDuration(interval);
+    const chartDateEndMillis = Math.round(Date.parse(dateEnd) / 1000) * 1000;
+    const chartDateStartMillis = chartDateEndMillis - intervalMillis * intervals;
+    const chartDateStart = new Date(chartDateStartMillis).toISOString();
+    const chartDateEnd = new Date(chartDateEndMillis).toISOString();
+
+    const chartQueryParams: TimeSeriesQuery = {
+      ...queryParams,
+      dateStart: chartDateStart,
+      dateEnd: chartDateEnd,
+      interval,
+    };
+
+    const chartResult = await (
+      await data
+    ).timeSeriesQuery({
+      logger,
+      esClient,
+      query: chartQueryParams,
+      useCalculatedDateRange: false,
+    });
+
+    const field = chartQueryParams.aggField || chartQueryParams.aggType;
+    const thresholds = params.threshold;
+
+    interface ChartDatum {
+      d: string; // date
+      v: number; // value
+      g: string; // group
+    }
+    interface ChartData {
+      values: ChartDatum[];
+      field: string;
+      thresholds: number[];
+    }
+
+    const chartData: ChartData = { field, thresholds, values: [] };
+    for (const groupResult of chartResult.results || []) {
+      const { group, metrics } = groupResult;
+      for (const metric of metrics || []) {
+        const [date, value] = metric;
+        if (!value) continue;
+        chartData.values.push({ d: date, v: value, g: group });
+      }
+    }
+
+    // logger.info(`chart data <- ${JSON.stringify(chartData, null, 4)}`);
+// end alert image data generation
+
     const groupResults = result.results || [];
     // console.log(`index_threshold: response: ${JSON.stringify(groupResults, null, 4)}`);
     for (const groupResult of groupResults) {
@@ -318,11 +372,13 @@ export function getRuleType(
         params.thresholdComparator
       )} ${params.threshold.join(' and ')}`;
 
+      // in an action message, use {{{context.chartData}}}
       const baseContext: BaseActionContext = {
         date: dateEnd,
         group: alertId,
         value,
         conditions: humanFn,
+        chartData: `<kibana-chart-data>${JSON.stringify(chartData)}</kibana-chart-data>`,
       };
       const actionContext = addMessages(name, baseContext, params);
 
