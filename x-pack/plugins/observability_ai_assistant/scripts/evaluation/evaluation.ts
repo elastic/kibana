@@ -33,7 +33,7 @@ function runEvaluations() {
             kibana: argv.kibana,
           });
 
-          const kibanaClient = new KibanaClient(serviceUrls.kibanaUrl);
+          const kibanaClient = new KibanaClient(serviceUrls.kibanaUrl, argv.spaceId);
           const esClient = new Client({
             node: serviceUrls.esUrl,
           });
@@ -80,7 +80,7 @@ function runEvaluations() {
             await esClient.deleteByQuery({
               index: '.kibana-observability-ai-assistant-conversations',
               query: {
-                match_all: {},
+                ...(argv.spaceId ? { term: { namespace: argv.spaceId } } : { match_all: {} }),
               },
               refresh: true,
             });
@@ -166,9 +166,9 @@ function runEvaluations() {
               ],
               result.conversationId
                 ? [
-                    `${format(
-                      omit(parse(serviceUrls.kibanaUrl), 'auth')
-                    )}/app/observabilityAIAssistant/conversations/${result.conversationId}`,
+                    `${format(omit(parse(serviceUrls.kibanaUrl), 'auth'))}/${
+                      argv.spaceId ? `s/${argv.spaceId}/` : ''
+                    }app/observabilityAIAssistant/conversations/${result.conversationId}`,
                     '',
                     '',
                   ]

@@ -27,6 +27,12 @@ export function options(y: Argv) {
       string: true,
       default: process.env.KIBANA_HOST || 'http://localhost:5601',
     })
+    .option('spaceId', {
+      describe:
+        'The space to use. If space is set, conversations will only be cleared for that spaceId',
+      string: true,
+      array: false,
+    })
     .option('elasticsearch', {
       alias: 'es',
       describe: 'Where Elasticsearch is running',

@@ -43,7 +43,7 @@ interface ChatClient {
 
 export class KibanaClient {
   axios: AxiosInstance;
-  constructor(private readonly url: string) {
+  constructor(private readonly url: string, private readonly spaceId?: string) {
     this.axios = axios.create({
       headers: {
         'kbn-xsrf': 'foo',
@@ -56,14 +56,17 @@ export class KibanaClient {
 
     const baseUrl = parsed.pathname?.replaceAll('/', '') ?? '';
 
-    return format({
+    const url = format({
       ...parsed,
       pathname: `/${[
         baseUrl,
+        ...(this.spaceId ? ['s', this.spaceId] : []),
         props.pathname.startsWith('/') ? props.pathname.substring(1) : props.pathname,
       ].join('/')}`,
       query: props.query,
     });
+
+    return url;
   }
 
   createChatClient({
