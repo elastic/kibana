@@ -15,7 +15,7 @@ import {
   observabilityPaths,
   ProcessorEvent,
 } from '@kbn/observability-plugin/common';
-import { termQuery } from '@kbn/observability-plugin/server';
+import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -54,7 +54,7 @@ import {
 } from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
 import { anomalyParamsSchema } from '../../../../../common/rules/schema';
-import { getAnomalyDetectorTypeIndex } from './get_anomaly_detector_type_index';
+import { getApmMlDetectorIndex } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 
@@ -185,9 +185,9 @@ export function registerAnomalyRuleType({
                   ...termQuery('by_field_value', ruleParams.transactionType, {
                     queryEmptyString: false,
                   }),
-                  ...termQuery(
+                  ...termsQuery(
                     'detector_index',
-                    getAnomalyDetectorTypeIndex(ruleParams.anomalyDetectorType)
+                    getApmMlDetectorIndex(ruleParams.anomalyDetectorTypes)
                   ),
                 ] as QueryDslQueryContainer[],
               },
@@ -199,6 +199,7 @@ export function registerAnomalyRuleType({
                     { field: 'partition_field_value' },
                     { field: 'by_field_value' },
                     { field: 'job_id' },
+                    { field: 'detector_index' },
                   ],
                   size: 1000,
                   order: { 'latest_score.record_score': 'desc' as const },
@@ -283,6 +284,7 @@ export function registerAnomalyRuleType({
             severityLevel,
             windowSize: params.windowSize,
             windowUnit: params.windowUnit,
+            anomalyDetectorTypes: params.anomalyDetectorTypes,
           });
 
           const alertId = [

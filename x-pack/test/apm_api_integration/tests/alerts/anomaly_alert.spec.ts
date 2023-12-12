@@ -11,7 +11,6 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-import { ANOMALY_DETECTOR_TYPES } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
 import { createApmRule } from './helpers/alerting_api_helper';
@@ -87,7 +86,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               windowSize: 5,
               windowUnit: 'h',
               anomalySeverityType: ML_ANOMALY_SEVERITY.WARNING,
-              anomalyDetectorType: ANOMALY_DETECTOR_TYPES.LATENCY,
+              anomalyDetectorTypes: ['latency'],
             },
             ruleTypeId: ApmRuleType.Anomaly,
           });

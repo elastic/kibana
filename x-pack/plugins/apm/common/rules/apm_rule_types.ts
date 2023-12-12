@@ -182,20 +182,24 @@ export function formatAnomalyReason({
   measured,
   windowSize,
   windowUnit,
+  anomalyDetectorTypes,
 }: {
   serviceName: string;
   severityLevel: string;
   measured: number;
   windowSize: number;
   windowUnit: string;
+  anomalyDetectorTypes: AnomalyAlertDetectorType[];
 }) {
+  const detectorTypesToString = anomalyDetectorTypes.toString();
   return i18n.translate(
     'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
     {
-      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last {interval} for {serviceName}.`,
+      defaultMessage: `{severityLevel} anomaly with a score of {measured} and detector type {detectorTypeToString}, was detected in the last {interval} for {serviceName}.`,
       values: {
         serviceName,
         severityLevel,
+        detectorTypesToString,
         measured,
         interval: formatDurationFromTimeUnitChar(
           windowSize,
@@ -294,34 +298,21 @@ export type AnomalyAlertSeverityType = ValuesType<
   typeof ANOMALY_ALERT_SEVERITY_TYPES
 >['type'];
 
-export enum ANOMALY_DETECTOR_TYPES {
-  ALL = 'all',
-  LATENCY = 'latency',
-  THROUGHPUT = 'throughput',
-  FAILED_TRANSACTION_RATE = 'failed_transaction_rate',
-}
-
-export const ANOMALY_ALERT_DETECTOR_TYPES = [
+export const ANOMALY_ALERT_DETECTORS = [
   {
-    type: ANOMALY_DETECTOR_TYPES.ALL,
-    label: i18n.translate('xpack.apm.alerts.anomalyDetector.allLabel', {
-      defaultMessage: 'all',
-    }),
-  },
-  {
-    type: ANOMALY_DETECTOR_TYPES.LATENCY,
+    type: 'latency',
     label: i18n.translate('xpack.apm.alerts.anomalyDetector.latencyLabel', {
       defaultMessage: 'latency',
     }),
   },
   {
-    type: ANOMALY_DETECTOR_TYPES.THROUGHPUT,
+    type: 'throughput',
     label: i18n.translate('xpack.apm.alerts.anomalyDetector.throughputLabel', {
       defaultMessage: 'throughput',
     }),
   },
   {
-    type: ANOMALY_DETECTOR_TYPES.FAILED_TRANSACTION_RATE,
+    type: 'failed_transaction_rate',
     label: i18n.translate(
       'xpack.apm.alerts.anomalyDetector.failedTransactionRateLabel',
       {
@@ -329,10 +320,10 @@ export const ANOMALY_ALERT_DETECTOR_TYPES = [
       }
     ),
   },
-];
+] as const;
 
 export type AnomalyAlertDetectorType = ValuesType<
-  typeof ANOMALY_ALERT_DETECTOR_TYPES
+  typeof ANOMALY_ALERT_DETECTORS
 >['type'];
 
 // Server side registrations

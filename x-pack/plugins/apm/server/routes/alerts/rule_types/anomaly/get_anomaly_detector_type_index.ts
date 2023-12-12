@@ -9,19 +9,19 @@ import {
   ApmMlDetectorType,
   getApmMlDetectorIndex,
 } from '../../../../../common/anomaly_detection/apm_ml_detectors';
-import { ANOMALY_DETECTOR_TYPES } from '../../../../../common/rules/apm_rule_types';
+import { AnomalyAlertDetectorType } from '../../../../../common/rules/apm_rule_types';
 
 export function getAnomalyDetectorTypeIndex(
-  detectorType: ANOMALY_DETECTOR_TYPES
+  detectorTypes: AnomalyAlertDetectorType[]
 ) {
-  if (detectorType && detectorType !== ANOMALY_DETECTOR_TYPES.ALL) {
-    switch (detectorType) {
-      case ANOMALY_DETECTOR_TYPES.LATENCY:
+  return detectorTypes.map((detector) => {
+    switch (detector) {
+      case 'latency':
         return getApmMlDetectorIndex(ApmMlDetectorType.txLatency);
-      case ANOMALY_DETECTOR_TYPES.THROUGHPUT:
+      case 'throughput':
         return getApmMlDetectorIndex(ApmMlDetectorType.txThroughput);
-      case ANOMALY_DETECTOR_TYPES.FAILED_TRANSACTION_RATE:
+      case 'failed_transaction_rate':
         return getApmMlDetectorIndex(ApmMlDetectorType.txFailureRate);
     }
-  }
+  });
 }

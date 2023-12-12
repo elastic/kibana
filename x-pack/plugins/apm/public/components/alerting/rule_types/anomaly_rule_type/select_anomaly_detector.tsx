@@ -5,32 +5,45 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiSuperSelect } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiSelectable, EuiSelectableOption } from '@elastic/eui';
 import {
   AnomalyAlertDetectorType,
-  ANOMALY_ALERT_DETECTOR_TYPES,
+  ANOMALY_ALERT_DETECTORS,
 } from '../../../../../common/rules/apm_rule_types';
 
 interface Props {
-  onChange: (value: AnomalyAlertDetectorType) => void;
-  value: AnomalyAlertDetectorType;
+  values: AnomalyAlertDetectorType[];
+  onChange: (values?: AnomalyAlertDetectorType[]) => void;
 }
 
-export function SelectAnomalyDetector({ onChange, value }: Props) {
+export function SelectAnomalyDetector({ values, onChange }: Props) {
+  const options: EuiSelectableOption[] = ANOMALY_ALERT_DETECTORS.map(
+    (option) => ({
+      key: option.type,
+      label: option.label,
+      checked: values.includes(option.type) ? 'on' : undefined,
+    })
+  );
+
+  const onOptionSelect = useCallback(
+    (selectedOptions: EuiSelectableOption[]) => {
+      onChange(
+        selectedOptions
+          .filter(({ checked }) => checked === 'on')
+          .map(({ key }) => key) as AnomalyAlertDetectorType[]
+      );
+    },
+    [onChange]
+  );
+
   return (
-    <EuiSuperSelect
-      hasDividers
+    <EuiSelectable
+      options={options}
+      onChange={onOptionSelect}
       style={{ width: 200 }}
-      options={ANOMALY_ALERT_DETECTOR_TYPES.map((option) => ({
-        value: option.type,
-        inputDisplay: option.type,
-        dropdownDisplay: option.type,
-      }))}
-      valueOfSelected={value}
-      onChange={(selectedValue: AnomalyAlertDetectorType) => {
-        onChange(selectedValue);
-      }}
-    />
+    >
+      {(list) => list}
+    </EuiSelectable>
   );
 }
