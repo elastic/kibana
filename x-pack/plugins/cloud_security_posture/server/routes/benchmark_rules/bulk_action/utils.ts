@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CspBenchmarkRulesStates, CspSettings } from '../../../../common/types/rules/v3';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { CspBenchmarkRulesStates, CspSettings } from '../../../../common/types/rules/v3';
 
 import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
