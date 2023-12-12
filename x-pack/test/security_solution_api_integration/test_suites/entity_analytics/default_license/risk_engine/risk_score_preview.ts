@@ -580,8 +580,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(sanitizeScores(body.scores.host!)).to.eql([
             {
-              asset_criticality_level: 'very_important',
-              asset_criticality_modifier: 2.0,
+              criticality_level: 'very_important',
+              criticality_modifier: 2.0,
               calculated_level: 'Unknown',
               calculated_score: 21,
               calculated_score_norm: 14.8830616583983,

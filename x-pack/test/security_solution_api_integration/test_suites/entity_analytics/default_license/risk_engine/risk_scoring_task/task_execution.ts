@@ -252,10 +252,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(riskScores.length).to.be.greaterThan(0);
             const assetCriticalityLevels = riskScores.map(
-              (riskScore) => riskScore.host?.risk.asset_criticality_level
+              (riskScore) => riskScore.host?.risk.criticality_level
             );
             const assetCriticalityModifiers = riskScores.map(
-              (riskScore) => riskScore.host?.risk.asset_criticality_modifier
+              (riskScore) => riskScore.host?.risk.criticality_modifier
             );
 
             expect(assetCriticalityLevels).to.contain('very_important');
@@ -266,8 +266,8 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 id_field: 'host.name',
                 id_value: 'host-1',
-                asset_criticality_level: 'very_important',
-                asset_criticality_modifier: 2,
+                criticality_level: 'very_important',
+                criticality_modifier: 2,
                 calculated_level: 'Low',
                 calculated_score: 79.81345973382406,
                 calculated_score_norm: 46.809565696393314,

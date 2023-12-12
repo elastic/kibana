@@ -56,8 +56,8 @@ export interface RiskScore {
   '@timestamp': string;
   id_field: string;
   id_value: string;
-  asset_criticality_level: string | undefined;
-  asset_criticality_modifier: number | undefined;
+  criticality_level: string | undefined;
+  criticality_modifier: number | undefined;
   calculated_level: string;
   calculated_score: number;
   calculated_score_norm: number;

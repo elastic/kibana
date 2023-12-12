@@ -306,8 +306,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(normalizeScores(scores)).to.eql([
             {
-              asset_criticality_level: 'important',
-              asset_criticality_modifier: 1.5,
+              criticality_level: 'important',
+              criticality_modifier: 1.5,
               calculated_level: 'Unknown',
               calculated_score: 21,
               calculated_score_norm: 11.59366948840633,
