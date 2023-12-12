@@ -778,10 +778,18 @@ function getPolicyWithSecretReferences(
 ) {
   const result = JSON.parse(JSON.stringify(packagePolicy));
 
-  secretPaths.forEach((secretPath, i) => {
-    secretPath.path.reduce((acc, val, j) => {
-      if (j === [...secretPath.path].length - 1) {
-        acc[val].value = toVarSecretRef(secrets[i].id);
+  secretPaths.forEach((secretPath, secretPathIndex) => {
+    secretPath.path.reduce((acc, val, secretPathComponentIndex) => {
+      if (!acc[val]) {
+        acc[val] = {};
+
+        return acc[val];
+      }
+
+      const isLast = secretPathComponentIndex === secretPath.path.length - 1;
+
+      if (isLast) {
+        acc[val].value = toVarSecretRef(secrets[secretPathIndex].id);
       }
 
       return acc[val];
