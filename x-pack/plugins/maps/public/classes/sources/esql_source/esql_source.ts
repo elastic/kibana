@@ -33,6 +33,7 @@ export class EsqlSource extends AbstractVectorSource implements IVectorSource {
       id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuidv4(),
       type: SOURCE_TYPES.ESQL,
       esql: descriptor.esql!,
+      columns: descriptor.columns ? descriptor.columns : [],
     };
   }
 

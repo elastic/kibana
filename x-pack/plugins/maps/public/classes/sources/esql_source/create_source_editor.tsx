@@ -6,19 +6,20 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { EuiSkeletonText } from '@elastic/eui';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
-import type { EsqlColumn } from '../../../../common/descriptor_types';
+import type { EsqlSourceDescriptor } from '../../../../common/descriptor_types';
 import { getIndexPatternService } from '../../../kibana_services';
 import { EsqlEditor } from './esql_editor';
 
 interface Props {
-
+  onSourceConfigChange: (sourceConfig: Partial<EsqlSourceDescriptor> | null) => void;
 }
 
 export function CreateSourceEditor(props: Props) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [columns, setColumns] = useState<EsqlColumn[]>([]);
+  const [columns, setColumns] = useState<EsqlSourceDescriptor['columns']>([]);
   const [esql, setEsql] = useState('');
   const [dateField, setDateField] = useState<string | undefined>();
   const [geoField, setGeoField] = useState<string | undefined>();
@@ -51,6 +52,28 @@ export function CreateSourceEditor(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [, cancel] = useDebounce(
+    () => {
+      const sourceConfig = esql && esql.length
+        ? {
+            columns,
+            esql,
+            dateField,
+            geoField,
+          }
+        : null;
+      props.onSourceConfigChange(sourceConfig);
+    },
+    300,
+    [columns, esql, dateField, geoField]
+  );
+
+  useEffect(() => {
+    return () => {
+      cancel();
+    };
+  }, [cancel]);
+
   return (
     <EuiSkeletonText
         lines={3}
@@ -60,7 +83,7 @@ export function CreateSourceEditor(props: Props) {
         dateField={dateField}
         geoField={geoField}
         esql={esql}
-        onEsqlChange={({ columns, esql }: { columns: EsqlColumn[], esql: string }) => {
+        onEsqlChange={({ columns, esql }: { columns: EsqlSourceDescriptor['columns'], esql: string }) => {
           setColumns(columns);
           setEsql(esql);
         }}

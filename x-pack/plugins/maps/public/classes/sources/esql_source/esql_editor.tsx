@@ -10,14 +10,14 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
-import type { EsqlColumn } from '../../../../common/descriptor_types';
+import type { EsqlSourceDescriptor } from '../../../../common/descriptor_types';
 import { getEsqlMeta } from './get_esql_meta';
 
 interface Props {
   dateField?: string;
   geoField?: string;
   esql: string;
-  onEsqlChange: ({ columns, esql }: { columns: EsqlColumn[], esql: string }) => void;
+  onEsqlChange: ({ columns, esql }: { columns: EsqlSourceDescriptor['columns'], esql: string }) => void;
   onDateFieldChange: (dateField?: string) => void;
   onGeoFieldChange: (geoField?: string) => void;
 }
@@ -47,8 +47,7 @@ export function EsqlEditor(props: Props) {
         if (ignore) {
           return;
         }
-        console.log(esqlMeta);
-        
+
         setIsLoading(false);
         const hasGeoColumn = esqlMeta.columns.some(column => {
           return column.type === 'geo_point';
@@ -86,13 +85,13 @@ export function EsqlEditor(props: Props) {
   }, [props.esql]);
 
   useEffect(() => {
-    if (props.dateField && !dateFields.includes(props.dateField)) {
+    if (!props.dateField || !dateFields.includes(props.dateField)) {
       props.onDateFieldChange(dateFields.length ? dateFields[0] : undefined);
     }
   }, [dateFields]);
 
   useEffect(() => {
-    if (props.geoField && !geoFields.includes(props.geoField)) {
+    if (!props.geoField || !geoFields.includes(props.geoField)) {
       props.onGeoFieldChange(geoFields.length ? geoFields[0] : undefined);
     }
   }, [geoFields]);

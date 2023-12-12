@@ -47,6 +47,15 @@ export type EsqlSourceDescriptor = AbstractSourceDescriptor & {
   // id: UUID
   id: string;
   esql: string;
+  columns: EsqlColumn[];
+  /*
+   * When provided, esql requests narrowed by hits within kibana global time range
+   */
+  dateField?: string;
+  /*
+   * When provided, esql requests narrowed by hits within map view port
+   */
+  geoField?: string;
 };
 
 export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {

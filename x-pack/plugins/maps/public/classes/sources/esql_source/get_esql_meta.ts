@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
-import { EsqlColumn } from '../../../../common/descriptor_types';
+import type { EsqlSourceDescriptor } from '../../../../common/descriptor_types';
 import { getData, getIndexPatternService } from '../../../kibana_services';
 
 export async function getEsqlMeta(esql: string) {
@@ -33,7 +33,7 @@ async function getColumns(esql: string) {
       })
     );
 
-    return (resp.rawResponse as unknown as { columns: EsqlColumn[] }).columns;
+    return (resp.rawResponse as unknown as { columns: EsqlSourceDescriptor['columns'] }).columns;
   } catch (error) {
     throw new Error(i18n.translate('xpack.maps.source.esql.getColumnsErrorMsg', {
       defaultMessage: 'Unable to load columns. {errorMessage}',
