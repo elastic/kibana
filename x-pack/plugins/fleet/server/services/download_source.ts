@@ -70,7 +70,7 @@ class DownloadSourceService {
     options?: { id?: string; overwrite?: boolean }
   ): Promise<DownloadSource> {
     const logger = appContextService.getLogger();
-    logger.info(`Creating new download source`);
+    logger.debug(`Creating new download source`);
 
     const data: DownloadSourceSOAttributes = downloadSource;
 
@@ -103,7 +103,7 @@ class DownloadSourceService {
         overwrite: options?.overwrite ?? false,
       }
     );
-    logger.info(`Creating new download source ${options?.id}`);
+    logger.debug(`Creating new download source ${options?.id}`);
     return savedObjectToDownloadSource(newSo);
   }
 
@@ -113,7 +113,7 @@ class DownloadSourceService {
     newData: Partial<DownloadSource>
   ) {
     const logger = appContextService.getLogger();
-    logger.info(`Updating download source ${id} with ${newData}`);
+    logger.debug(`Updating download source ${id} with ${newData}`);
     const updateData: Partial<DownloadSourceSOAttributes> = newData;
 
     if (updateData.proxy_id) {
@@ -142,13 +142,13 @@ class DownloadSourceService {
     if (soResponse.error) {
       throw new FleetError(soResponse.error.message);
     } else {
-      logger.info(`Updated download source ${id}`);
+      logger.debug(`Updated download source ${id}`);
     }
   }
 
   public async delete(soClient: SavedObjectsClientContract, id: string) {
     const logger = appContextService.getLogger();
-    logger.info(`Deleting download source ${id}`);
+    logger.debug(`Deleting download source ${id}`);
 
     const targetDS = await this.get(soClient, id);
 
@@ -160,7 +160,7 @@ class DownloadSourceService {
       appContextService.getInternalUserESClient(),
       id
     );
-    logger.info(`Deleted download source ${id}`);
+    logger.debug(`Deleted download source ${id}`);
     return soClient.delete(DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE, id);
   }
 

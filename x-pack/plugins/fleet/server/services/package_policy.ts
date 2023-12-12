@@ -174,7 +174,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const logger = appContextService.getLogger();
     let secretReferences: PolicySecretReference[] | undefined;
-    logger.info(`Creating new package policy`);
+    logger.debug(`Creating new package policy`);
 
     let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
@@ -305,7 +305,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     const createdPackagePolicy = { id: newSo.id, version: newSo.version, ...newSo.attributes };
-    logger.info(`Created new package policy with id ${newSo.id} and version ${newSo.version}`);
+    logger.debug(`Created new package policy with id ${newSo.id} and version ${newSo.version}`);
 
     return packagePolicyService.runExternalCallbacks(
       'packagePolicyPostCreate',
@@ -357,7 +357,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }> = [];
 
     const logger = appContextService.getLogger();
-    logger.info(`Starting bulk create of package policy`);
+    logger.debug(`Starting bulk create of package policy`);
 
     const packagePoliciesWithIds = packagePolicies.map((p) => {
       if (!p.id) {
@@ -441,7 +441,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         });
       }
     }
-    logger.info(`Created new package policies`);
+    logger.debug(`Created new package policies`);
     return {
       created: newSos.map((newSo) => ({
         id: newSo.id,
@@ -703,7 +703,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     let secretsToDelete: PolicySecretReference[] | undefined;
 
     try {
-      logger.info(`Starting update of package policy ${id}`);
+      logger.debug(`Starting update of package policy ${id}`);
       enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
         'packagePolicyUpdate',
         packagePolicyUpdate,
@@ -782,7 +782,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy: restOfPackagePolicy,
     });
 
-    logger.info(`Updating SO with revision ${oldPackagePolicy.revision + 1}`);
+    logger.debug(`Updating SO with revision ${oldPackagePolicy.revision + 1}`);
     await soClient.update<PackagePolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       id,
@@ -834,7 +834,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
     // Bump revision of associated agent policy
-    logger.info(`Bumping revision of associated agent policy ${packagePolicy.policy_id}`);
+    logger.debug(`Bumping revision of associated agent policy ${packagePolicy.policy_id}`);
     const bumpPromise = agentPolicyService.bumpRevision(
       soClient,
       esClient,
@@ -855,7 +855,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     await Promise.all([bumpPromise, assetRemovePromise, deleteSecretsPromise]);
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, [packagePolicyUpdate], [oldPackagePolicy]);
-    logger.info(`Package policy ${id} update completed`);
+    logger.debug(`Package policy ${id} update completed`);
 
     return newPolicy;
   }
@@ -1061,7 +1061,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const result: PostDeletePackagePoliciesResponse = [];
     const logger = appContextService.getLogger();
-    logger.info(`Deleting package policies ${ids}`);
+    logger.debug(`Deleting package policies ${ids}`);
 
     const packagePolicies = await this.getByIDs(soClient, ids, { ignoreMissing: true });
     if (!packagePolicies) {
@@ -1206,7 +1206,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         context,
         request
       );
-      logger.info(`Deleted package policies ${ids}`);
+      logger.debug(`Deleted package policies ${ids}`);
     } catch (error) {
       logger.error(`An error occurred executing "packagePolicyPostDelete" callback: ${error}`);
       logger.error(error);

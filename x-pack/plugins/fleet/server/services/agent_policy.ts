@@ -127,7 +127,7 @@ class AgentPolicyService {
       savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
     });
     const logger = appContextService.getLogger();
-    logger.info(`Starting update of agent policy ${id}`);
+    logger.debug(`Starting update of agent policy ${id}`);
 
     const existingAgentPolicy = await this.get(soClient, id, true);
 
@@ -167,7 +167,7 @@ class AgentPolicyService {
     if (options.bumpRevision || options.removeProtection) {
       await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', id);
     }
-    logger.info(`Agent policy ${id} update completed`);
+    logger.debug(`Agent policy ${id} update completed`);
     return (await this.get(soClient, id)) as AgentPolicy;
   }
 
@@ -255,7 +255,7 @@ class AgentPolicyService {
     this.checkTamperProtectionLicense(agentPolicy);
 
     const logger = appContextService.getLogger();
-    logger.info(`Creating new agent policy`);
+    logger.debug(`Creating new agent policy`);
 
     if (agentPolicy?.is_protected) {
       logger.warn(
@@ -284,7 +284,7 @@ class AgentPolicyService {
 
     await appContextService.getUninstallTokenService()?.generateTokenForPolicyId(newSo.id);
     await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id);
-    logger.info(`Created new agent policy with id ${newSo.id}`);
+    logger.debug(`Created new agent policy with id ${newSo.id}`);
     return { id: newSo.id, ...newSo.attributes };
   }
 
@@ -501,7 +501,7 @@ class AgentPolicyService {
     }
   ): Promise<AgentPolicy> {
     const logger = appContextService.getLogger();
-    logger.info(`Starting update of agent policy ${id}`);
+    logger.debug(`Starting update of agent policy ${id}`);
 
     if (agentPolicy.name) {
       await this.requireUniqueName(soClient, {
@@ -562,7 +562,7 @@ class AgentPolicyService {
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
     const logger = appContextService.getLogger();
-    logger.info(`Starting copy of agent policy ${id}`);
+    logger.debug(`Starting copy of agent policy ${id}`);
 
     // Copy base agent policy
     const baseAgentPolicy = await this.get(soClient, id, true);
@@ -641,7 +641,7 @@ class AgentPolicyService {
     }
 
     await this.deployPolicy(soClient, newAgentPolicy.id);
-    logger.info(`Completed copy of agent policy ${id}`);
+    logger.debug(`Completed copy of agent policy ${id}`);
     return updatedAgentPolicy;
   }
 
@@ -806,7 +806,7 @@ class AgentPolicyService {
     options?: { force?: boolean; removeFleetServerDocuments?: boolean; user?: AuthenticatedUser }
   ): Promise<DeleteAgentPolicyResponse> {
     const logger = appContextService.getLogger();
-    logger.info(`Deleting agent policy ${id}`);
+    logger.debug(`Deleting agent policy ${id}`);
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
@@ -869,7 +869,7 @@ class AgentPolicyService {
     if (options?.removeFleetServerDocuments) {
       await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
     }
-    logger.info(`Deleted agent policy ${id}`);
+    logger.debug(`Deleted agent policy ${id}`);
     return {
       id,
       name: agentPolicy.name,

@@ -73,7 +73,7 @@ export async function createFleetProxy(
   options?: { id?: string; overwrite?: boolean; fromPreconfiguration?: boolean }
 ): Promise<FleetProxy> {
   const logger = appContextService.getLogger();
-  logger.info(`Creating fleet proxy ${data}`);
+  logger.debug(`Creating fleet proxy ${data}`);
 
   const res = await soClient.create<FleetProxySOAttributes>(
     FLEET_PROXY_SAVED_OBJECT_TYPE,
@@ -83,7 +83,7 @@ export async function createFleetProxy(
       overwrite: options?.overwrite,
     }
   );
-  logger.info(`Created fleet proxy ${options?.id}`);
+  logger.debug(`Created fleet proxy ${options?.id}`);
   return savedObjectToFleetProxy(res);
 }
 
@@ -103,7 +103,7 @@ export async function deleteFleetProxy(
   options?: { fromPreconfiguration?: boolean }
 ) {
   const logger = appContextService.getLogger();
-  logger.info(`Deleting fleet proxy ${id}`);
+  logger.debug(`Deleting fleet proxy ${id}`);
 
   const fleetProxy = await getFleetProxy(soClient, id);
 
@@ -128,7 +128,7 @@ export async function deleteFleetProxy(
   }
 
   await updateRelatedSavedObject(soClient, esClient, fleetServerHosts, outputs, downloadSources);
-  logger.info(`Deleted fleet proxy ${id}`);
+  logger.debug(`Deleted fleet proxy ${id}`);
 
   return await soClient.delete(FLEET_PROXY_SAVED_OBJECT_TYPE, id);
 }
@@ -140,7 +140,7 @@ export async function updateFleetProxy(
   options?: { fromPreconfiguration?: boolean }
 ) {
   const logger = appContextService.getLogger();
-  logger.info(`Updating fleet proxy ${id}`);
+  logger.debug(`Updating fleet proxy ${id}`);
   const originalItem = await getFleetProxy(soClient, id);
 
   if (data.is_preconfigured && !options?.fromPreconfiguration) {
@@ -152,7 +152,7 @@ export async function updateFleetProxy(
     id,
     fleetProxyDataToSOAttribute(data)
   );
-  logger.info(`Updated fleet proxy ${id}`);
+  logger.debug(`Updated fleet proxy ${id}`);
   return {
     ...originalItem,
     ...data,

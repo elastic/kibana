@@ -438,7 +438,7 @@ class OutputService {
     }
   ): Promise<Output> {
     const logger = appContextService.getLogger();
-    logger.info(`Creating new output`);
+    logger.debug(`Creating new output`);
 
     const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
     if (output.type === outputType.RemoteElasticsearch) {
@@ -608,7 +608,7 @@ class OutputService {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
       id,
     });
-    logger.info(`Created new output ${id}`);
+    logger.debug(`Created new output ${id}`);
     return outputSavedObjectToOutput(newSo);
   }
 
@@ -712,7 +712,7 @@ class OutputService {
     }
   ) {
     const logger = appContextService.getLogger();
-    logger.info(`Deleting output ${id}`);
+    logger.debug(`Deleting output ${id}`);
 
     const originalOutput = await this.get(soClient, id);
 
@@ -748,7 +748,7 @@ class OutputService {
       esClient: appContextService.getInternalUserESClient(),
       output: originalOutput,
     });
-    logger.info(`Deleted output ${id}`);
+    logger.debug(`Deleted output ${id}`);
     return soDeleteResult;
   }
 
@@ -765,7 +765,7 @@ class OutputService {
     }
   ) {
     const logger = appContextService.getLogger();
-    logger.info(`Updating output ${id}`);
+    logger.debug(`Updating output ${id}`);
 
     if (data.type === outputType.RemoteElasticsearch) {
       if (data.is_default) {
@@ -1018,7 +1018,7 @@ class OutputService {
         logger.warn(`Error cleaning up secrets for output ${id}: ${err.message}`);
       }
     }
-    logger.info(`Updated output ${id}`);
+    logger.debug(`Updated output ${id}`);
   }
 
   public async backfillAllOutputPresets(

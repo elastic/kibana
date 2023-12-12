@@ -109,7 +109,7 @@ export async function deleteEnrollmentApiKey(
   forceDelete = false
 ) {
   const logger = appContextService.getLogger();
-  logger.info(`Deleting enrollment API key ${id}`);
+  logger.debug(`Deleting enrollment API key ${id}`);
 
   const enrollmentApiKey = await getEnrollmentAPIKey(esClient, id);
 
@@ -137,7 +137,7 @@ export async function deleteEnrollmentApiKey(
       refresh: 'wait_for',
     });
   }
-  logger.info(
+  logger.debug(
     `Deleted enrollment API key ${enrollmentApiKey.id} [api_key_id=${enrollmentApiKey.api_key_id}`
   );
 }
@@ -178,7 +178,7 @@ export async function generateEnrollmentAPIKey(
   const id = uuidv4();
   const { name: providedKeyName, forceRecreate } = data;
   const logger = appContextService.getLogger();
-  logger.info(`Creating enrollment API key ${data}`);
+  logger.debug(`Creating enrollment API key ${data}`);
 
   if (data.agentPolicyId) {
     await validateAgentPolicyId(soClient, data.agentPolicyId);
@@ -228,7 +228,7 @@ export async function generateEnrollmentAPIKey(
   auditLoggingService.writeCustomAuditLog({
     message: `User creating enrollment API key [name=${name}] [policy_id=${agentPolicyId}]`,
   });
-  logger.info(`Creating enrollment API key [name=${name}] [policy_id=${agentPolicyId}]`);
+  logger.debug(`Creating enrollment API key [name=${name}] [policy_id=${agentPolicyId}]`);
 
   const key = await esClient.security
     .createApiKey({
