@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { BfetchRequestError } from '@kbn/bfetch-error';
 import { ErrorLike } from '../batch';
-import { BfetchRequestError } from '..';
 
 export const normalizeError = <E extends ErrorLike = ErrorLike>(err: any): E => {
   if (!err) {

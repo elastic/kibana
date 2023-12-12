@@ -7,12 +7,10 @@
  */
 
 export {
-  OBSERVABILITY_ONBOARDING_APP_ID,
   LOGS_APP_ID,
-  OBSERVABILITY_LOG_EXPLORER,
+  OBSERVABILITY_LOG_EXPLORER_APP_ID,
+  OBSERVABILITY_ONBOARDING_APP_ID,
   OBSERVABILITY_OVERVIEW_APP_ID,
 } from './constants';
-
 export type { AppId, DeepLinkId } from './deep_links';
-
 export * from './locators';
