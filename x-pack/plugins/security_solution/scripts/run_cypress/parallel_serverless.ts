@@ -583,10 +583,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               ----------------------------------------------
               `);
             }
+            process.env.TEST_CLOUD_HOST_NAME = new URL(BASE_ENV_URL).hostname;
 
             if (isOpen) {
-              process.env.TEST_CLOUD_HOST_NAME = new URL(BASE_ENV_URL).hostname;
-
               await cypress.open({
                 configFile: cypressConfigFilePath,
                 config: {
