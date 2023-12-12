@@ -41,7 +41,7 @@ steps:
       queue: n2-4-spot
     # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
     timeout_in_minutes: 300
-    parallelism: 6
+    parallelism: 2
     retry:
       automatic:
         - exit_status: "*"
