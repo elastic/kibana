@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getSyntheticsAssetsCheckRoute } from './synthetics_service/assets_check';
 import { getSyntheticsParamsRoute } from './settings/params/params';
 import { editSyntheticsParamsRoute } from './settings/params/edit_param';
 import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
@@ -60,6 +61,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
   addSyntheticsProjectMonitorRoute,
   getSyntheticsEnablementRoute,
+  getSyntheticsAssetsCheckRoute,
   deleteSyntheticsMonitorRoute,
   deleteSyntheticsMonitorProjectRoute,
   disableSyntheticsRoute,

@@ -6,6 +6,8 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
+import { AssetsCheckResult } from './api';
+import { createAsyncAction } from '../utils/actions';
 import { MonitorManagementEnablementResult } from '../../../../../common/runtime_types';
 import { IHttpSerializedFetchError } from '../utils/http_error';
 
@@ -15,4 +17,8 @@ export const getSyntheticsEnablementSuccess = createAction<MonitorManagementEnab
 );
 export const getSyntheticsEnablementFailure = createAction<IHttpSerializedFetchError>(
   '[SYNTHETICS_ENABLEMENT] GET FAILURE'
+);
+
+export const getSyntheticsAssetsChecks = createAsyncAction<void, AssetsCheckResult>(
+  '[SYNTHETICS_ASSETS_CHECK] GET'
 );

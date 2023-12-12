@@ -26,7 +26,10 @@ import { syncGlobalParamsEffect } from './settings';
 import { fetchAgentPoliciesEffect, fetchPrivateLocationsEffect } from './private_locations';
 import { fetchNetworkEventsEffect } from './network_events/effects';
 import { fetchSyntheticsMonitorEffect } from './monitor_details';
-import { fetchSyntheticsEnablementEffect } from './synthetics_enablement';
+import {
+  fetchSyntheticsAssetsCheckEffect,
+  fetchSyntheticsEnablementEffect,
+} from './synthetics_enablement';
 import {
   enableMonitorAlertEffect,
   fetchMonitorListEffect,
@@ -42,6 +45,7 @@ import { fetchOverviewStatusEffect } from './overview_status';
 export const rootEffect = function* root(): Generator {
   yield all([
     fork(fetchSyntheticsEnablementEffect),
+    fork(fetchSyntheticsAssetsCheckEffect),
     fork(upsertMonitorEffect),
     fork(fetchMonitorFiltersEffect),
     fork(fetchServiceLocationsEffect),
