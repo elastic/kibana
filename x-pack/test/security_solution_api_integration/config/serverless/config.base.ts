@@ -42,6 +42,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ...svlSharedConfig.get('mochaOpts'),
         grep: '/^(?!.*@brokenInServerless).*@serverless.*/',
       },
+      reporter: '../../../node_modules/mocha-multi-reporters',
+      reporterOptions: {
+        configFile: './cypress/reporter_config.json',
+      },
     };
   };
 }
