@@ -51,9 +51,15 @@ export const useAgentVersion = (): string | undefined => {
   return agentVersion;
 };
 
-const differsOnlyInPatch = (versionA: string, versionB: string): boolean => {
-  const [majorA, minorA] = versionA.split('.');
-  const [majorB, minorB] = versionB.split('.');
+export const differsOnlyInPatch = (
+  versionA: string,
+  versionB: string,
+  allowEqualPatch: boolean = true
+): boolean => {
+  const [majorA, minorA, patchA] = versionA.split('.');
+  const [majorB, minorB, patchB] = versionB.split('.');
 
-  return majorA === majorB && minorA === minorB;
+  return (
+    majorA === majorB && minorA === minorB && (allowEqualPatch ? patchA >= patchB : patchA > patchB)
+  );
 };
