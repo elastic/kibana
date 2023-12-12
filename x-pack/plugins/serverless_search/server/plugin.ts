@@ -28,6 +28,7 @@ import type {
 } from './types';
 import { registerConnectorsRoutes } from './routes/connectors_routes';
 import { registerTelemetryUsageCollector } from './collectors/connectors/telemetry';
+import { registerMappingRoutes } from './routes/mapping_routes';
 
 export interface RouteDependencies {
   http: CoreSetup<StartDependencies>['http'];
@@ -93,6 +94,7 @@ export class ServerlessSearchPlugin
       registerApiKeyRoutes(dependencies);
       registerConnectorsRoutes(dependencies);
       registerIndicesRoutes(dependencies);
+      registerMappingRoutes(dependencies);
     });
 
     if (usageCollection) {
