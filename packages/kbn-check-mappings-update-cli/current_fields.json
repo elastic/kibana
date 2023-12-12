@@ -528,6 +528,7 @@
     "output_id",
     "partition",
     "password",
+    "preset",
     "proxy_id",
     "random",
     "random.group_events",

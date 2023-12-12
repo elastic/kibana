@@ -67,12 +67,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * a range that has data in our dataset.
      */
     async goToTimeRange(fromTime?: string, toTime?: string) {
-      await PageObjects.timePicker.ensureHiddenNoDataPopover();
-      fromTime = fromTime || PageObjects.timePicker.defaultStartTime;
-      toTime = toTime || PageObjects.timePicker.defaultEndTime;
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      // give some time for the update button tooltip to close
-      await PageObjects.common.sleep(500);
+      const from = fromTime || PageObjects.timePicker.defaultStartTime;
+      const to = toTime || PageObjects.timePicker.defaultEndTime;
+      await retry.try(async () => {
+        await PageObjects.timePicker.ensureHiddenNoDataPopover();
+        await PageObjects.timePicker.setAbsoluteRange(from, to);
+        // give some time for the update button tooltip to close
+        await PageObjects.common.sleep(500);
+      });
     },
 
     /**

@@ -327,7 +327,7 @@ export class KnowledgeBaseService {
       >({
         index: [this.dependencies.resources.aliases.kb],
         query,
-        size: 5,
+        size: 20,
         _source: {
           includes: ['text', 'is_correction', 'labels'],
         },

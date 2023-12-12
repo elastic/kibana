@@ -198,8 +198,9 @@ export async function getBundledArchive(
   const bundledPackage = await getBundledPackageByName(pkgName);
 
   if (bundledPackage && bundledPackage.version === pkgVersion) {
+    const archiveBuffer = await bundledPackage.getBuffer();
     const archivePackage = await generatePackageInfoFromArchiveBuffer(
-      bundledPackage.buffer,
+      archiveBuffer,
       'application/zip'
     );
 

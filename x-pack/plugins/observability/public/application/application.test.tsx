@@ -77,7 +77,6 @@ describe('renderApp', () => {
   const config = {
     unsafe: {
       alertDetails: {
-        logs: { enabled: false },
         metrics: { enabled: false },
         uptime: { enabled: false },
       },

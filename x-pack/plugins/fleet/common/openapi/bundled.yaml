@@ -5130,6 +5130,14 @@ components:
           type: string
         config:
           type: object
+        preset:
+          type: string
+          enum:
+            - balanced
+            - custom
+            - throughput
+            - scale
+            - latency
         config_yaml:
           type: string
         ssl:
@@ -5451,6 +5459,14 @@ components:
           type: string
         config:
           type: object
+        preset:
+          type: string
+          enum:
+            - balanced
+            - custom
+            - throughput
+            - scale
+            - latency
         config_yaml:
           type: string
         ssl:
