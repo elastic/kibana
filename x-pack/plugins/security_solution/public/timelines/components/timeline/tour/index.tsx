@@ -95,8 +95,6 @@ const TimelineTourComp = (props: TimelineTourProps) => {
 
   const currentStepConfig = timelineTourSteps[tourState.currentTourStep - 1];
 
-  const tourStep = useMemo((step: typeof timelineTourSteps[number], idx: number) => {}, []);
-
   if (currentStepConfig?.timelineTab && currentStepConfig.timelineTab !== activeTab) {
     switchToTab(currentStepConfig.timelineTab);
   }
