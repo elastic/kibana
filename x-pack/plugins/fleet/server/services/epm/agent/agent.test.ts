@@ -372,7 +372,7 @@ describe('encode', () => {
 
     const vars = {
       username: { value: 'db_elastic_agent', type: 'text' },
-      password: { value: 'dbelasticagent[!#@2023', type: 'text' },
+      password: { value: 'dbelasticagent[!#@2023', type: 'password' },
       hosts: { value: 'localhost', type: 'text' },
     };
 
