@@ -90,13 +90,10 @@ export default function ({ getService }: FtrProviderContext) {
               rule_number: rule2.ruleNumber,
             },
           ],
-        });
-      // .expect(200);
+        })
+        .expect(200);
 
-      expect(body.new_csp_settings.type).to.eql('cloud-security-posture-settings');
-      expect(body.new_csp_settings.id).to.eql('csp-internal-settings');
-
-      expectExpect(body.new_csp_settings.attributes.rules).toEqual(
+      expectExpect(body.updated_benchmark_rules).toEqual(
         expectExpect.objectContaining({
           [generateRuleKey(rule1)]: { muted: true },
           [generateRuleKey(rule2)]: { muted: true },
@@ -130,9 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(body.new_csp_settings.type).to.eql('cloud-security-posture-settings');
-      expect(body.new_csp_settings.id).to.eql('csp-internal-settings');
-      expectExpect(body.new_csp_settings.attributes.rules).toEqual(
+      expectExpect(body.updated_benchmark_rules).toEqual(
         expectExpect.objectContaining({
           [generateRuleKey(rule1)]: { muted: false },
           [generateRuleKey(rule2)]: { muted: false },
@@ -168,7 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expectExpect(cspSettingsResponse.body.new_csp_settings.attributes.rules).toEqual(
+      expectExpect(cspSettingsResponse.body.updated_benchmark_rules).toEqual(
         expectExpect.objectContaining({
           [generateRuleKey(rule1)]: { muted: false },
           [generateRuleKey(rule2)]: { muted: false },
@@ -198,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expectExpect(updatedCspSettingsResponse.body.new_csp_settings.attributes.rules).toEqual(
+      expectExpect(updatedCspSettingsResponse.body.updated_benchmark_rules).toEqual(
         expectExpect.objectContaining({
           [generateRuleKey(rule1)]: { muted: true },
           [generateRuleKey(rule2)]: { muted: false },

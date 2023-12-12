@@ -212,7 +212,6 @@ export class CspPlugin
     await initializeCspIndices(esClient, this.config, this.logger);
     await initializeCspTransforms(esClient, this.logger);
     await scheduleFindingsStatsTask(taskManager, this.logger);
-    await createCspSettingObjectSafe(core.savedObjects.createInternalRepository(), this.logger);
     this.#isInitialized = true;
   }
 
