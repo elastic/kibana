@@ -62,7 +62,7 @@ import {
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
-import { NowProviderInternalContract } from '../now_provider';
+import { NowProviderInternalContract } from '../../common/now_provider';
 import { DataPublicPluginStart, DataStartDependencies } from '../types';
 import { AggsService } from './aggs';
 import { createUsageCollector, SearchUsageCollector } from './collectors';

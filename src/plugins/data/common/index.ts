@@ -46,6 +46,8 @@ export type {
 } from './types';
 export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from './types';
 
+export { NowProvider } from './now_provider';
+
 export {
   createEscapeValue,
   tableHasFormulas,

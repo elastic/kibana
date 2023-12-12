@@ -16,7 +16,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { QueryService, QueryStart } from './query_service';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { TimefilterContract } from './timefilter';
-import { createNowProviderMock } from '../now_provider/mocks';
+import { createNowProviderMock } from '../../common/now_provider/mocks';
 
 const setupMock = coreMock.createSetup();
 const startMock = coreMock.createStart();

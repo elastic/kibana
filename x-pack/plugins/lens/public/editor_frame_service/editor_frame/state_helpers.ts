@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
+import { SavedObjectReference } from '@kbn/core/public';
 import { Ast } from '@kbn/interpreter';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
-import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
-import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
+import { DataViewPersistableStateService, DataViewsService } from '@kbn/data-views-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
   type EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
 } from '@kbn/event-annotation-common';
+import { TimeRange } from '@kbn/es-query';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
 
 import type {
@@ -121,11 +122,11 @@ export async function initializeDataViews(
     adHocDataViews: persistedAdHocDataViews,
     annotationGroups,
   }: {
-    dataViews: DataViewsContract;
+    dataViews: DataViewsService;
     datasourceMap: DatasourceMap;
     datasourceStates: DatasourceStates;
     defaultIndexPatternId: string;
-    storage: IStorageWrapper;
+    storage?: IStorageWrapper;
     references?: SavedObjectReference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
@@ -155,7 +156,9 @@ export async function initializeDataViews(
     : []);
 
   // if no state is available, use the fallbackId
-  const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
+  const lastUsedIndexPatternId = storage
+    ? getLastUsedIndexPatternId(storage, indexPatternRefs)
+    : undefined;
   const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
   const initialId =
     !initialContext &&
@@ -198,7 +201,7 @@ export async function initializeDataViews(
 }
 
 const initializeEventAnnotationGroups = async (
-  eventAnnotationService: EventAnnotationServiceType,
+  loadAnnotationGroup: (id: string) => Promise<EventAnnotationGroupConfig>,
   references?: SavedObjectReference[]
 ) => {
   const annotationGroups: Record<string, EventAnnotationGroupConfig> = {};
@@ -207,7 +210,7 @@ const initializeEventAnnotationGroups = async (
     (references || [])
       .filter((ref) => ref.type === EVENT_ANNOTATION_GROUP_TYPE)
       .map(({ id }) =>
-        eventAnnotationService.loadAnnotationGroup(id).then((group) => {
+        loadAnnotationGroup(id).then((group) => {
           annotationGroups[id] = group;
         })
       )
@@ -233,14 +236,14 @@ export async function initializeSources(
     initialContext,
     adHocDataViews,
   }: {
-    dataViews: DataViewsContract;
+    dataViews: DataViewsService;
     eventAnnotationService: EventAnnotationServiceType;
     datasourceMap: DatasourceMap;
     visualizationMap: VisualizationMap;
     visualizationState: VisualizationState;
     datasourceStates: DatasourceStates;
     defaultIndexPatternId: string;
-    storage: IStorageWrapper;
+    storage?: IStorageWrapper;
     references?: SavedObjectReference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
@@ -248,7 +251,7 @@ export async function initializeSources(
   options?: InitializationOptions
 ) {
   const annotationGroups = await initializeEventAnnotationGroups(
-    eventAnnotationService,
+    eventAnnotationService.loadAnnotationGroup,
     references
   );
 
@@ -359,13 +362,13 @@ export async function persistedStateToExpression(
   datasourceMap: DatasourceMap,
   visualizations: VisualizationMap,
   doc: Document,
+  defaultIndexPatternId: string,
+  currentTimeRange: TimeRange,
+  loadAnnotationGroup: (id: string) => Promise<EventAnnotationGroupConfig>,
   services: {
-    uiSettings: IUiSettingsClient;
-    storage: IStorageWrapper;
-    dataViews: DataViewsContract;
-    timefilter: TimefilterContract;
+    storage?: IStorageWrapper;
+    dataViews: DataViewsService;
     nowProvider: DataPublicPluginStart['nowProvider'];
-    eventAnnotationService: EventAnnotationServiceType;
   }
 ): Promise<DocumentToExpressionReturnType> {
   const {
@@ -384,10 +387,7 @@ export async function persistedStateToExpression(
     return { ast: null, indexPatterns: {}, indexPatternRefs: [], activeVisualizationState: null };
   }
 
-  const annotationGroups = await initializeEventAnnotationGroups(
-    services.eventAnnotationService,
-    references
-  );
+  const annotationGroups = await initializeEventAnnotationGroups(loadAnnotationGroup, references);
 
   const visualization = visualizations[visualizationType!];
   const activeVisualizationState = initializeVisualization({
@@ -412,7 +412,7 @@ export async function persistedStateToExpression(
       references,
       dataViews: services.dataViews,
       storage: services.storage,
-      defaultIndexPatternId: services.uiSettings.get('defaultIndex'),
+      defaultIndexPatternId,
       adHocDataViews,
       annotationGroups,
     },
@@ -437,8 +437,6 @@ export async function persistedStateToExpression(
       activeVisualizationState,
     };
   }
-
-  const currentTimeRange = services.timefilter.getAbsoluteTime();
 
   return {
     ast: buildExpression({

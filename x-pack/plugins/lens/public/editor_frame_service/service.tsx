@@ -103,7 +103,15 @@ export class EditorFrameService {
 
     const { persistedStateToExpression } = await import('../async_services');
 
-    return persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc, services);
+    return persistedStateToExpression(
+      resolvedDatasources,
+      resolvedVisualizations,
+      doc,
+      services.uiSettings.get('defaultIndex'),
+      services.timefilter.getAbsoluteTime(),
+      services.eventAnnotationService.loadAnnotationGroup,
+      services
+    );
   };
 
   public setup(): EditorFrameSetup {

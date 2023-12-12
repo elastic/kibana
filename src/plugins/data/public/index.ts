@@ -244,8 +244,11 @@ export {
   QueryService,
 } from './query';
 
-export { NowProvider } from './now_provider';
-export type { NowProviderInternalContract, NowProviderPublicContract } from './now_provider';
+export { NowProvider } from '../common/now_provider';
+export type {
+  NowProviderInternalContract,
+  NowProviderPublicContract,
+} from '../common/now_provider';
 
 export type {
   QueryState,

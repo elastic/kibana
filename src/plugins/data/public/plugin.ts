@@ -40,8 +40,8 @@ import {
 } from './actions';
 import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
-import { NowProvider, NowProviderInternalContract } from './now_provider';
-import { getAggsFormats, DatatableUtilitiesService } from '../common';
+import type { NowProviderInternalContract } from '../common/now_provider';
+import { NowProvider, getAggsFormats, DatatableUtilitiesService } from '../common';
 
 export class DataPublicPlugin
   implements

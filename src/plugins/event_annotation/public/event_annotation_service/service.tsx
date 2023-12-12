@@ -41,6 +41,29 @@ import type {
   EventAnnotationGroupUpdateOut,
 } from '../../common/content_management';
 
+export const mapSavedObjectToGroupConfig = (
+  savedObject: EventAnnotationGroupSavedObject
+): EventAnnotationGroupConfig => {
+  const adHocDataViewSpec = savedObject.attributes.dataViewSpec
+    ? DataViewPersistableStateService.inject(
+        savedObject.attributes.dataViewSpec,
+        savedObject.references
+      )
+    : undefined;
+
+  return {
+    title: savedObject.attributes.title,
+    description: savedObject.attributes.description,
+    tags: savedObject.references.filter((ref) => ref.type === 'tag').map(({ id }) => id),
+    ignoreGlobalFilters: savedObject.attributes.ignoreGlobalFilters,
+    indexPatternId: adHocDataViewSpec
+      ? adHocDataViewSpec.id!
+      : savedObject.references.find((ref) => ref.type === 'index-pattern')?.id!,
+    annotations: savedObject.attributes.annotations,
+    dataViewSpec: adHocDataViewSpec,
+  };
+};
+
 export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'empty';
 }
@@ -50,29 +73,6 @@ export function getEventAnnotationService(
   contentManagement: ContentManagementPublicStart
 ): EventAnnotationServiceType {
   const client = contentManagement.client;
-
-  const mapSavedObjectToGroupConfig = (
-    savedObject: EventAnnotationGroupSavedObject
-  ): EventAnnotationGroupConfig => {
-    const adHocDataViewSpec = savedObject.attributes.dataViewSpec
-      ? DataViewPersistableStateService.inject(
-          savedObject.attributes.dataViewSpec,
-          savedObject.references
-        )
-      : undefined;
-
-    return {
-      title: savedObject.attributes.title,
-      description: savedObject.attributes.description,
-      tags: savedObject.references.filter((ref) => ref.type === 'tag').map(({ id }) => id),
-      ignoreGlobalFilters: savedObject.attributes.ignoreGlobalFilters,
-      indexPatternId: adHocDataViewSpec
-        ? adHocDataViewSpec.id!
-        : savedObject.references.find((ref) => ref.type === 'index-pattern')?.id!,
-      annotations: savedObject.attributes.annotations,
-      dataViewSpec: adHocDataViewSpec,
-    };
-  };
 
   const mapSavedObjectToGroupContent = (
     savedObject: EventAnnotationGroupSavedObject

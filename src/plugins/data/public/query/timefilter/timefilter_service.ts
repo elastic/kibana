@@ -10,7 +10,7 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { TimeHistory, Timefilter, TimeHistoryContract, TimefilterContract } from '.';
 import { UI_SETTINGS } from '../../../common';
-import { NowProviderInternalContract } from '../../now_provider';
+import { NowProviderInternalContract } from '../../../common/now_provider';
 
 /**
  * Filter Service

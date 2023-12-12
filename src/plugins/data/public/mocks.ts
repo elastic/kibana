@@ -11,7 +11,7 @@ import { createDatatableUtilitiesMock } from '../common/mocks';
 import { DataPlugin } from '.';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
-import { createNowProviderMock } from './now_provider/mocks';
+import { createNowProviderMock } from '../common/now_provider/mocks';
 import { dataViewPluginMocks } from './data_views/mocks';
 
 export type Setup = jest.Mocked<ReturnType<DataPlugin['setup']>>;

@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
-import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import {
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+  SavedObjectsClientContract,
+  ElasticsearchClient,
+} from '@kbn/core/server';
+import {
+  DataViewsServerPluginSetup,
+  PluginStart as DataViewsServerPluginStart,
+} from '@kbn/data-views-plugin/server';
 import {
   PluginStart as DataPluginStart,
   PluginSetup as DataPluginSetup,
@@ -23,6 +33,9 @@ import {
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
+import { NowProvider } from '@kbn/data-plugin/common';
+import type { EventAnnotationGroupSavedObjectAttributes } from '@kbn/event-annotation-plugin/common';
+import { mapSavedObjectToGroupConfig } from '@kbn/event-annotation-plugin/public/event_annotation_service/service';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
@@ -30,6 +43,8 @@ import type { CustomVisualizationMigrations } from './migrations/types';
 import { LensAppLocatorDefinition } from '../common/locator/locator';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { LensStorage } from './content_management';
+import type { Document } from '../public/persistence';
+import { persistedStateToExpression } from '../public/editor_frame_service/editor_frame/state_helpers';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -38,6 +53,7 @@ export interface PluginSetupContract {
   data: DataPluginSetup;
   share?: SharePluginSetup;
   contentManagement: ContentManagementServerSetup;
+  dataViews: DataViewsServerPluginSetup;
 }
 
 export interface PluginStartContract {
@@ -94,6 +110,7 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
       this.customVisualizationMigrations
     );
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
+
     return {
       lensEmbeddableFactory,
       registerVisualizationMigration: (
@@ -108,8 +125,44 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
     };
   }
 
-  start(core: CoreStart, plugins: PluginStartContract) {
-    return {};
+  async start(core: CoreStart, plugins: PluginStartContract) {
+    const expressionFromAttributes = async (
+      doc: Document,
+      clients: { savedObjects: SavedObjectsClientContract; elasticsearch: ElasticsearchClient }
+    ) => {
+      const dataViewsService = await plugins.dataViews.dataViewsServiceFactory(
+        clients.savedObjects,
+        clients.elasticsearch
+      );
+
+      const loadAnnotationGroup = async (id: string) => {
+        const savedObject =
+          await clients.savedObjects.get<EventAnnotationGroupSavedObjectAttributes>(
+            'annotation',
+            id
+          );
+        return mapSavedObjectToGroupConfig(savedObject);
+      };
+
+      const expression = persistedStateToExpression(
+        {},
+        {},
+        doc,
+        '',
+        { from: new Date().toISOString(), to: new Date().toISOString() },
+        loadAnnotationGroup,
+        {
+          dataViews: dataViewsService,
+          nowProvider: new NowProvider(),
+        }
+      );
+
+      return expression;
+    };
+
+    return {
+      expressionFromAttributes,
+    };
   }
 
   stop() {}
