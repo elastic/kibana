@@ -16,11 +16,10 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCategories } from '../../containers/use_get_categories';
 import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import type { AssigneesFilteringSelection } from '../user_profiles/types';
 import { useSystemFilterConfig } from './table_filter_config/use_system_filter_config';
 import { useFilterConfig } from './table_filter_config/use_filter_config';
 
-interface CasesTableFiltersProps {
+export interface CasesTableFiltersProps {
   countClosedCases: number | null;
   countInProgressCases: number | null;
   countOpenCases: number | null;
@@ -56,22 +55,9 @@ const CasesTableFiltersComponent = ({
   filterOptions,
 }: CasesTableFiltersProps) => {
   const [search, setSearch] = useState(filterOptions.search);
-  const [selectedAssignees, setSelectedAssignees] = useState<AssigneesFilteringSelection[]>([]);
   const { data: tags = [] } = useGetTags();
   const { data: categories = [] } = useGetCategories();
   const { caseAssignmentAuthorized } = useCasesFeatures();
-
-  const handleSelectedAssignees = useCallback(
-    (newAssignees: AssigneesFilteringSelection[]) => {
-      if (!isEqual(newAssignees, selectedAssignees)) {
-        setSelectedAssignees(newAssignees);
-        onFilterChanged({
-          assignees: newAssignees.map((assignee) => assignee?.uid ?? null),
-        });
-      }
-    },
-    [selectedAssignees, onFilterChanged]
-  );
 
   const onFilterOptionsChange = useCallback(
     (partialFilterOptions: Partial<FilterOptions>) => {
@@ -91,13 +77,11 @@ const CasesTableFiltersComponent = ({
     countInProgressCases,
     countOpenCases,
     currentUserProfile,
-    handleSelectedAssignees,
     hiddenStatuses,
     initialFilterOptions,
     isLoading,
     isSelectorView,
     onFilterOptionsChange,
-    selectedAssignees,
     tags,
   });
 
