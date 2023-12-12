@@ -73,13 +73,13 @@ export function SlosOutdatedDefinitions() {
 
   const errors = !hasRequiredWritePrivileges ? (
     <EuiText>
-      {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.permissionsError', {
+      {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.sloPermissionsError', {
         defaultMessage: 'You must have write permissions for SLOs to access this page',
       })}
     </EuiText>
   ) : !hasPlatinumLicense ? (
     <EuiText>
-      {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.permissionsError', {
+      {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.licenseError', {
         defaultMessage: 'You must have atleast a platinum license to access this page',
       })}
     </EuiText>
