@@ -534,10 +534,7 @@ export const riskEngineRouteHelpersFactoryNoAuth = (
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(expectStatusCode),
-  enable: async (
-    { username, password }: Credentials,
-    expectStatusCode: number = expectStatusCode
-  ) =>
+  enable: async ({ username, password }: Credentials, expectStatusCode: number = 200) =>
     await supertestWithoutAuth
       .post(routeWithNamespace(RISK_ENGINE_ENABLE_URL, namespace))
       .auth(username, password)
