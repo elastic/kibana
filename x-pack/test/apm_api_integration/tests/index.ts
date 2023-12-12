@@ -26,8 +26,10 @@ function getGlobPattern() {
 export default function apmApiIntegrationTests({ getService, loadTestFile }: FtrProviderContext) {
   const registry = getService('registry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172772
-  describe.skip('APM API tests', function () {
+  // DO NOT SKIP
+  // Skipping here will skip the entire apm api test suite
+  // Instead skip (flaky) tests individually
+  describe('APM API tests', function () {
     const filePattern = getGlobPattern();
     const tests = globby.sync(filePattern, { cwd });
 
