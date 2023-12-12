@@ -186,15 +186,22 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       if (!dataViewId) {
         this.setState({ isLoadingDataView: false });
       } else {
-        this.props.dataViewService.get(dataViewId).then((dataView) => {
-          this.setState({
-            selectedDataView: dataView,
-            isLoadingDataView: false,
-            indexPatterns: [dataView, ...this.props.indexPatterns],
-            localFilter: merge({}, this.props.filter),
-            queryDsl: this.parseFilterToQueryDsl(this.props.filter, this.state.indexPatterns),
+        this.props.dataViewService
+          .get(dataViewId)
+          .then((dataView) => {
+            this.setState({
+              selectedDataView: dataView,
+              isLoadingDataView: false,
+              indexPatterns: [dataView, ...this.props.indexPatterns],
+              localFilter: merge({}, this.props.filter),
+              queryDsl: this.parseFilterToQueryDsl(this.props.filter, this.state.indexPatterns),
+            });
+          })
+          .catch(() => {
+            this.setState({
+              isLoadingDataView: false,
+            });
           });
-        });
       }
     }
   }
@@ -324,6 +331,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       return null;
     }
     const { selectedDataView } = this.state;
+
     return (
       <>
         <EuiFormRow fullWidth label={strings.getDataView()}>
@@ -332,7 +340,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             placeholder={strings.getSelectDataView()}
             options={this.state.indexPatterns}
             selectedOptions={selectedDataView ? [selectedDataView] : []}
-            getLabel={(indexPattern) => indexPattern.getName()}
+            getLabel={(indexPattern) => indexPattern?.getName()}
             onChange={this.onIndexPatternChange}
             isClearable={false}
             data-test-subj="filterIndexPatternsSelect"
