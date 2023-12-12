@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
+import { ActiveAlerts } from '../../../hooks/slo/active_alerts';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { UseFetchRulesForSloResponse } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { SloListItem } from './slo_list_item';

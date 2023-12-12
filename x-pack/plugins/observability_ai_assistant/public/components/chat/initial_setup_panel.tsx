@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiBetaBadge,
   EuiButton,
-  EuiCallOut,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,16 +18,16 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
-import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
-import { ExperimentalFeatureBanner } from './experimental_feature_banner';
+import { Disclaimer } from './disclaimer';
 import { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+import { useKibana } from '../../hooks/use_kibana';
+import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 
 export function InitialSetupPanel({
   connectors,
-  connectorsManagementHref,
-  knowledgeBase,
   startedFrom,
 }: {
   connectors: UseGenAIConnectorsResult;
@@ -36,9 +35,34 @@ export function InitialSetupPanel({
   knowledgeBase: UseKnowledgeBaseResult;
   startedFrom?: StartedFrom;
 }) {
+  const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
+
+  const {
+    application: { navigateToApp, capabilities },
+    triggersActionsUi: { getAddConnectorFlyout: ConnectorFlyout },
+  } = useKibana().services;
+
+  const handleConnectorClick = () => {
+    if (capabilities.management?.insightsAndAlerting?.triggersActions) {
+      setConnectorFlyoutOpen(true);
+    } else {
+      navigateToApp('management', {
+        path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
+      });
+    }
+  };
+
+  const onConnectorCreated = (createdConnector: ActionConnector) => {
+    setConnectorFlyoutOpen(false);
+
+    if (createdConnector.actionTypeId === '.gen-ai') {
+      connectors.reloadConnectors();
+    }
+  };
+
   return (
     <>
-      <ExperimentalFeatureBanner />
+      <Disclaimer />
 
       <EuiPanel paddingSize="m" style={{ overflowY: 'auto' }}>
         <EuiSpacer size="s" />
@@ -52,78 +76,6 @@ export function InitialSetupPanel({
         <EuiSpacer size="l" />
 
         <EuiFlexGroup direction={startedFrom === 'conversationView' ? 'row' : 'column'}>
-          <EuiFlexItem>
-            <EuiCard
-              icon={<EuiIcon type="machineLearningApp" size="xl" />}
-              title={i18n.translate(
-                'xpack.observabilityAiAssistant.initialSetupPanel.knowledgeBase.title',
-                {
-                  defaultMessage: 'Knowledge Base',
-                }
-              )}
-              description={
-                <>
-                  <EuiText size="s">
-                    {i18n.translate(
-                      'xpack.observabilityAiAssistant.initialSetupPanel.knowledgeBase.description.paragraph1',
-                      {
-                        defaultMessage:
-                          'We recommend you enable the knowledge base for a better experience. It will provide the assistant with the ability to learn from your interaction with it.',
-                      }
-                    )}
-                  </EuiText>
-                  <EuiText size="s">
-                    {i18n.translate(
-                      'xpack.observabilityAiAssistant.initialSetupPanel.knowledgeBase.description.paragraph2',
-                      {
-                        defaultMessage: 'This step is optional, you can always do it later.',
-                      }
-                    )}
-                  </EuiText>
-                </>
-              }
-              footer={
-                knowledgeBase.status.value?.ready ? (
-                  <EuiCallOut
-                    color="success"
-                    iconType="checkInCircleFilled"
-                    size="s"
-                    style={{ padding: '10px 14px', display: 'inline-flex', borderRadius: '6px' }}
-                    title={i18n.translate(
-                      'xpack.observabilityAiAssistant.initialSetupPanel.knowledgeBase.buttonLabel.alreadyInstalled',
-                      {
-                        defaultMessage: 'Knowledge base installed',
-                      }
-                    )}
-                  />
-                ) : (
-                  <EuiButton
-                    data-test-subj="observabilityAiAssistantInitialSetupPanelButton"
-                    color={knowledgeBase.status.value?.ready ? 'success' : 'primary'}
-                    fill
-                    isLoading={knowledgeBase.isInstalling || knowledgeBase.status.loading}
-                    onClick={knowledgeBase.install}
-                    iconType="dotInCircle"
-                  >
-                    {knowledgeBase.isInstalling || knowledgeBase.status.loading
-                      ? i18n.translate(
-                          'xpack.observabilityAiAssistant.initialSetupPanel.knowledgeBase.buttonLabel.installingKb',
-                          {
-                            defaultMessage: 'Installing knowledge base',
-                          }
-                        )
-                      : i18n.translate(
-                          'xpack.observabilityAiAssistant.initialSetupPanel.knowledgeBase.buttonLabel.kbNotInstalledYet',
-                          {
-                            defaultMessage: 'Set up knowledge base',
-                          }
-                        )}
-                  </EuiButton>
-                )
-              }
-            />
-          </EuiFlexItem>
-
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon type="devToolsApp" size="xl" />}
@@ -177,9 +129,7 @@ export function InitialSetupPanel({
                       }
                     )}
                   </EuiText>
-                ) : (
-                  ''
-                )
+                ) : undefined
               }
               footer={
                 !connectors.connectors?.length ? (
@@ -187,7 +137,7 @@ export function InitialSetupPanel({
                     data-test-subj="observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton"
                     fill
                     color="primary"
-                    href={connectorsManagementHref}
+                    onClick={handleConnectorClick}
                   >
                     {i18n.translate(
                       'xpack.observabilityAiAssistant.initialSetupPanel.setupConnector.buttonLabel',
@@ -213,6 +163,13 @@ export function InitialSetupPanel({
           })}
         </EuiText>
       </EuiPanel>
+
+      {connectorFlyoutOpen ? (
+        <ConnectorFlyout
+          onClose={() => setConnectorFlyoutOpen(false)}
+          onConnectorCreated={onConnectorCreated}
+        />
+      ) : null}
     </>
   );
 }

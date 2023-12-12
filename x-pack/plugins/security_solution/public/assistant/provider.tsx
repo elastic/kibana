@@ -6,7 +6,9 @@
  */
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { AssistantProvider as ElasticAssistantProvider } from '@kbn/elastic-assistant';
+
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
@@ -19,7 +21,9 @@ import { BASE_SECURITY_SYSTEM_PROMPTS } from './content/prompts/system';
 import { useAnonymizationStore } from './use_anonymization_store';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { APP_ID } from '../../common/constants';
+import { useAppToasts } from '../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
+import { useSignalIndex } from '../detections/containers/detection_engine/alerts/use_signal_index';
 
 const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
   defaultMessage: 'Elastic AI Assistant',
@@ -51,9 +55,15 @@ export const AssistantProvider: React.FC = ({ children }) => {
 
   const nameSpace = `${APP_ID}.${LOCAL_STORAGE_KEY}`;
 
+  const { signalIndexName } = useSignalIndex();
+  const alertsIndexPattern = signalIndexName ?? undefined;
+  const ragOnAlerts = useIsExperimentalFeatureEnabled('assistantRagOnAlerts');
+  const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
+
   return (
     <ElasticAssistantProvider
       actionTypeRegistry={actionTypeRegistry}
+      alertsIndexPattern={alertsIndexPattern}
       augmentMessageCodeBlocks={augmentMessageCodeBlocks}
       assistantAvailability={assistantAvailability}
       assistantTelemetry={assistantTelemetry}
@@ -72,10 +82,12 @@ export const AssistantProvider: React.FC = ({ children }) => {
       assistantStreamingEnabled={assistantStreamingEnabled}
       modelEvaluatorEnabled={isModelEvaluationEnabled}
       nameSpace={nameSpace}
+      ragOnAlerts={ragOnAlerts}
       setConversations={setConversations}
       setDefaultAllow={setDefaultAllow}
       setDefaultAllowReplacement={setDefaultAllowReplacement}
       title={ASSISTANT_TITLE}
+      toasts={toasts}
     >
       {children}
     </ElasticAssistantProvider>

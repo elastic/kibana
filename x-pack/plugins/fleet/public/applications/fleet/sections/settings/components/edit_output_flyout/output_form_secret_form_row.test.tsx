@@ -15,6 +15,7 @@ describe('SecretFormRow', () => {
   const initialValue = 'initial value';
   const clear = jest.fn();
   const onUsePlainText = jest.fn();
+  const cancelEdit = jest.fn();
 
   it('should switch to edit mode when the replace button is clicked', () => {
     const { getByText, queryByText, container } = render(
@@ -23,6 +24,7 @@ describe('SecretFormRow', () => {
         initialValue={initialValue}
         clear={clear}
         onUsePlainText={onUsePlainText}
+        cancelEdit={cancelEdit}
       >
         <input id="myinput" type="text" value={initialValue} />
       </SecretFormRow>
@@ -38,13 +40,14 @@ describe('SecretFormRow', () => {
     expect(queryByText(initialValue)).not.toBeInTheDocument();
   });
 
-  it('should call the clear function when the cancel button is clicked', () => {
+  it('should call the cancelEdit function when the cancel button is clicked', () => {
     const { getByText } = render(
       <SecretFormRow
         title={title}
         initialValue={initialValue}
         clear={clear}
         onUsePlainText={onUsePlainText}
+        cancelEdit={cancelEdit}
       >
         <input type="text" value={initialValue} />
       </SecretFormRow>
@@ -53,12 +56,17 @@ describe('SecretFormRow', () => {
     fireEvent.click(getByText('Replace Test Secret'));
     fireEvent.click(getByText('Cancel Test Secret change'));
 
-    expect(clear).toHaveBeenCalled();
+    expect(cancelEdit).toHaveBeenCalled();
   });
 
   it('should call the onUsePlainText function when the revert link is clicked', () => {
     const { getByText } = render(
-      <SecretFormRow title={title} clear={clear} onUsePlainText={onUsePlainText}>
+      <SecretFormRow
+        title={title}
+        clear={clear}
+        onUsePlainText={onUsePlainText}
+        cancelEdit={cancelEdit}
+      >
         <input type="text" />
       </SecretFormRow>
     );

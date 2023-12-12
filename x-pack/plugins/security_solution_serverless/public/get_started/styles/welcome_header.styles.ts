@@ -31,7 +31,7 @@ export const useWelcomeHeaderStyles = () => {
         line-height: ${euiTheme.size.l};
       `,
       headerSubtitleStyles: css`
-        font-size: ${euiTheme.size.l};
+        font-size: ${euiTheme.base * 2.125}px;
         color: ${euiTheme.colors.title};
         font-weight: ${euiTheme.font.weight.bold};
       `,
@@ -44,7 +44,7 @@ export const useWelcomeHeaderStyles = () => {
       currentPlanWrapperStyles: css`
         background-color: ${euiTheme.colors.lightestShade};
         border-radius: 56px;
-        padding: ${euiTheme.size.xs} ${euiTheme.size.xs} ${euiTheme.size.xs} ${euiTheme.size.s};
+        padding: ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.xs} ${euiTheme.size.m};
         height: ${euiTheme.size.xl};
       `,
       currentPlanTextStyles: css`

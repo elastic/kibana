@@ -20,6 +20,7 @@
       "dataViews",
       "dataViewEditor",
       "embeddable",
+      "uiActions",
       "exploratoryView",
       "features",
       "files",
