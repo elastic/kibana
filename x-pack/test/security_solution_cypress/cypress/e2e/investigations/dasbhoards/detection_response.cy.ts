@@ -12,7 +12,6 @@ import {
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
 } from '../../../screens/common/filter_group';
-
 import {
   ALERTS_DONUT_CHART,
   HOST_TABLE_HOST_NAME_BTN,
