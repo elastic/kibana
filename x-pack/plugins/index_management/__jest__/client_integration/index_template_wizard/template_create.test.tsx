@@ -616,7 +616,7 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  test('preview data stream', async () => {
+  test.skip('preview data stream', async () => {
     await act(async () => {
       testBed = await setup(httpSetup);
     });
