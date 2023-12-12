@@ -48,7 +48,7 @@ export interface IndexPatternManagmentContext {
   fieldFormatEditors: IndexPatternFieldEditorStart['fieldFormatEditors'];
   IndexPatternEditor: DataViewEditorStart['IndexPatternEditorComponent'];
   fieldFormats: FieldFormatsStart;
-  share: SharePluginStart;
+  url: SharePluginStart['url'];
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;

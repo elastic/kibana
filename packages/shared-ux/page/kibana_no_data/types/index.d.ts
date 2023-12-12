@@ -59,4 +59,5 @@ export interface KibanaNoDataPageProps {
   allowAdHocDataView?: boolean;
   /** Set to true if the kibana is customly branded */
   showPlainSpinner: boolean;
+  esqlLink: string;
 }

@@ -26,6 +26,8 @@ import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public'
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { EmptyIndexListPrompt } from '../empty_index_list_prompt';
 import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
@@ -70,7 +72,25 @@ interface Props extends RouteComponentProps {
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
-export const IndexPatternTable = async ({
+const helperFunction = async (dataViews: DataViewsServicePublic, url: SharePluginStart['url']) => {
+  const defaultDataView = await dataViews.getDefaultDataView({ displayErrors: false });
+  console.log('\n\n\n\n\n\n default data view', defaultDataView);
+  const params = {
+    query: {
+      esql: `from ${defaultDataView?.getIndexPattern()} | limit 10`,
+    },
+    dataViewSpec: defaultDataView?.toSpec(),
+  };
+
+  const location = await url.locators
+    .get(DISCOVER_APP_ID)
+    ?.getLocation(params)
+    .then((location) => location);
+  console.log({ location });
+  return location;
+};
+
+export const IndexPatternTable = ({
   history,
   canSave,
   showCreateDialog: showCreateDialogProp = false,
@@ -85,7 +105,7 @@ export const IndexPatternTable = async ({
     spaces,
     overlays,
     docLinks,
-    share,
+    url,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [query, setQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
@@ -115,17 +135,9 @@ export const IndexPatternTable = async ({
       setQuery(queryText);
     }
   };
-  const defaultDataView = await dataViews.getDefaultDataView({ displayErrors: false });
-
-  const params = {
-    query: {
-      esql: `from ${defaultDataView?.getIndexPattern()} | limit 10`,
-    },
-    dataViewSpec: defaultDataView?.toSpec(),
-  };
-
-  const discoverLocation = await share.url.locators.get(DISCOVER_APP_ID)?.getLocation(params);
-
+  console.log('share start', url);
+  const discoverLocation = helperFunction(dataViews, url);
+  console.log('\n\n\n\n discover Location', discoverLocation);
   const esqlLink = `/app/${discoverLocation?.app}${discoverLocation?.path}`;
 
   const renderDeleteButton = () => {

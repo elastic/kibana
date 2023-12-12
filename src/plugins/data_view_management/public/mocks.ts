@@ -17,6 +17,7 @@ import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/publi
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
   IndexPatternManagementSetup,
   IndexPatternManagementStart,
@@ -87,6 +88,7 @@ const createIndexPatternManagmentContext = (): {
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     theme,
     savedObjectsManagement,
+    url: sharePluginMock.createStartContract().url,
   };
 };
 

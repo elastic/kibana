@@ -81,7 +81,7 @@ export const NoDataViewsPrompt = ({
   );
 
   const icon = <Illustration />;
-
+  console.log(esqlLink);
   const actions = (
     <NoDataButtonLink
       onClickCreate={onClickCreate}

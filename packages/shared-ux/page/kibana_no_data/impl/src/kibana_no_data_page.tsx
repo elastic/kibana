@@ -21,6 +21,7 @@ export const KibanaNoDataPage = ({
   noDataConfig,
   allowAdHocDataView,
   showPlainSpinner,
+  esqlLink,
 }: KibanaNoDataPageProps) => {
   // These hooks are temporary, until this component is moved to a package.
   const services = useServices();
@@ -52,12 +53,13 @@ export const KibanaNoDataPage = ({
   }
 
   if (!hasUserDataViews && dataExists) {
+    console.log(esqlLink);
     return (
       <NoDataViewsPrompt
         onDataViewCreated={onDataViewCreated}
         allowAdHocDataView={allowAdHocDataView}
         showESQL={dataExists}
-        esqlLink={``}
+        esqlLink={esqlLink}
       />
     );
   }
