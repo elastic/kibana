@@ -41,7 +41,7 @@ export const SecretFormRow: React.FC<{
   onUsePlainText,
   cancelEdit,
 }) => {
-  const hasInitialValue = initialValue !== undefined;
+  const hasInitialValue = !!initialValue;
   const [editMode, setEditMode] = useState(!initialValue);
   const valueHiddenPanel = (
     <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
@@ -98,7 +98,7 @@ export const SecretFormRow: React.FC<{
     <>
       {children}
       {hasInitialValue && (
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="flexEnd" data-test-subj="secretCancelChangeBtn">
           <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>
         </EuiFlexGroup>
       )}
