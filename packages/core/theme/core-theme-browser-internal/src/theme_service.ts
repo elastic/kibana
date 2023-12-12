@@ -45,7 +45,7 @@ export class ThemeService {
   }
 
   public start(): ThemeServiceStart {
-    if (!this.theme$) {
+    if (!this.themeMetadata) {
       throw new Error('setup must be called before start');
     }
 
