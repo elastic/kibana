@@ -196,7 +196,6 @@ export default function ({ getService }: FtrProviderContext) {
       expectExpect(updatedCspSettingsResponse.body.updated_benchmark_rules).toEqual(
         expectExpect.objectContaining({
           [generateRuleKey(rule1)]: { muted: true },
-          [generateRuleKey(rule2)]: { muted: false },
           [generateRuleKey(rule3)]: { muted: true },
         })
       );

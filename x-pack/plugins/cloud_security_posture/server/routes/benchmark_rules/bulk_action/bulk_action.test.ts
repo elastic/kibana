@@ -5,114 +5,32 @@
  * 2.0.
  */
 import expect from 'expect';
-
-import { coreMock } from '@kbn/core/server/mocks';
-import {
-  setRulesStates,
-  createCspSettingObject,
-  createCspSettingObjectSafe,
-  getCspSettingsSafe,
-} from './utils';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { Logger } from '@kbn/core/server';
-import {
-  INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
-  INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-} from '../../../../common/constants';
+import { setRulesStates, buildRuleKey } from './utils';
 
 describe('CSP Rule State Management', () => {
-  let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockLogger: Logger;
-
   beforeEach(() => {
-    mockSoClient = savedObjectsClientMock.create();
-    mockLogger = coreMock.createPluginInitializerContext().logger.get();
-
     jest.clearAllMocks();
   });
 
-  it('should create a new CSP setting object', async () => {
-    await createCspSettingObject(mockSoClient);
-
-    expect(mockSoClient.create).toHaveBeenCalledWith(
-      INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-      {
-        rules: {},
-      },
-      { id: INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID }
-    );
-  });
-
   it('should set rules states correctly', () => {
-    const currentRulesStates = {
-      rule1: { muted: false },
-      rule2: { muted: true },
-    };
-
     const ruleIds = ['rule1', 'rule3'];
     const newState = true;
 
-    const updatedRulesStates = setRulesStates(currentRulesStates, ruleIds, newState);
+    const updatedRulesStates = setRulesStates(ruleIds, newState);
 
     expect(updatedRulesStates).toEqual({
       rule1: { muted: true },
-      rule2: { muted: true },
       rule3: { muted: true },
     });
   });
 
-  it('should get CSP settings safely when settings already exists', async () => {
-    const mockExistingCspSettings = {
-      id: INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
-      type: INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-      references: [],
-      attributes: {
-        rules: { rule1: { muted: false } },
-      },
-    };
+  it('should build a rule key with the provided benchmarkId, benchmarkVersion, and ruleNumber', () => {
+    const benchmarkId = 'randomId';
+    const benchmarkVersion = 'v1';
+    const ruleNumber = '001';
 
-    mockSoClient.get.mockResolvedValueOnce(mockExistingCspSettings);
+    const result = buildRuleKey(benchmarkId, benchmarkVersion, ruleNumber);
 
-    const result = await getCspSettingsSafe(mockSoClient, mockLogger);
-
-    expect(result).toEqual({
-      rules: { rule1: { muted: false } },
-    });
-  });
-
-  it('should handle error when creating CSP settings safely', async () => {
-    const mockError = { message: 'Not Found', statsCode: 404 };
-
-    mockSoClient.get.mockRejectedValueOnce(mockError);
-
-    mockSoClient.create.mockResolvedValueOnce({
-      id: INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
-      type: INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-      references: [],
-      attributes: {
-        rules: {},
-      },
-    });
-
-    const result = await createCspSettingObjectSafe(mockSoClient, mockLogger);
-
-    expect(mockSoClient.get).toHaveBeenCalledWith(
-      INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-      INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID
-    );
-
-    expect(mockSoClient.create).toHaveBeenCalledWith(
-      INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-      {
-        rules: {},
-      },
-      { id: INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID }
-    );
-
-    expect(result).toEqual({
-      rules: {},
-    });
+    expect(result).toBe(`${benchmarkId};${benchmarkVersion};${ruleNumber}`);
   });
 });
