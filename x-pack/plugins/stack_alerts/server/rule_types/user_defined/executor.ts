@@ -20,7 +20,7 @@ const childProcessTemplatePromise = readFile(`${__dirname}/child_process_templat
 export async function executor(
   options: RuleExecutorOptions<Params, {}, {}, {}, typeof ActionGroupId, StackAlertType>
 ) {
-  const { apiKey, services, params, logger } = options;
+  const { apiKey, services, params, logger, queryDelay } = options;
   const { alertsClient, shouldStopExecution } = services;
 
   if (!apiKey) {
@@ -66,7 +66,7 @@ export async function executor(
         env: {
           PATH: process.env.PATH,
           ELASTICSEARCH_API_KEY: apiKey,
-          QUERY_DELAY_MS: options.queryDelay?.toString(),
+          QUERY_DELAY_MS: queryDelay?.toString(),
         },
       }
     );
