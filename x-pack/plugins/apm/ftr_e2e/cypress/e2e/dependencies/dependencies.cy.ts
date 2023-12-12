@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { synthtrace } from '../../synthtrace';
-import { opbeans } from '../fixtures/synthtrace/opbeans';
-import { checkA11y } from '../support/commands';
+import { synthtrace } from '../../../synthtrace';
+import { opbeans } from '../../fixtures/synthtrace/opbeans';
+import { checkA11y } from '../../support/commands';
+import { generateManyDependencies } from './generate_many_dependencies';
 
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
@@ -118,5 +119,48 @@ describe('Dependencies', () => {
 
       cy.contains('h1', 'postgresql');
     });
+  });
+});
+
+describe('Dependencies with high volume of data', () => {
+  before(() => {
+    synthtrace.index(
+      generateManyDependencies({
+        from: new Date(start).getTime(),
+        to: new Date(end).getTime(),
+      })
+    );
+  });
+
+  after(() => {
+    synthtrace.clean();
+  });
+
+  beforeEach(() => {
+    cy.loginAsViewerUser();
+  });
+
+  it('shows dependencies inventory page', () => {
+    cy.visitKibana(
+      `/app/apm/dependencies/inventory?${new URLSearchParams({
+        ...timeRange,
+        kuery: 'elasticsearch*',
+      })}`
+    );
+
+    cy.getByTestSubj('dependenciesTable');
+    cy.contains('nav', 'Page 1 of 400');
+  });
+
+  it('shows service dependencies', () => {
+    cy.visitKibana(
+      `/app/apm/services/synth-java-0/dependencies?${new URLSearchParams({
+        ...timeRange,
+      })}`
+    );
+
+    cy.getByTestSubj('serviceDependenciesBreakdownChart').get('canvas');
+    cy.getByTestSubj('dependenciesTable');
+    cy.contains('nav', 'Page 1 of 100');
   });
 });

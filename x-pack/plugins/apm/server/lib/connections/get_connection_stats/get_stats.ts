@@ -33,6 +33,7 @@ import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../helpers/spans/get_is_using_service_destination_metrics';
 
+const MAX_BUCKETS = 10000;
 export const getStats = async ({
   apmEventClient,
   start,
@@ -54,145 +55,13 @@ export const getStats = async ({
     offset,
   });
 
-  const runQuery = async (after?: {
-    serviceName: string | number;
-    dependencyName: string | number;
-  }) => {
-    const response = await apmEventClient.search('get_connection_stats', {
-      apm: {
-        sources: [
-          {
-            documentType: ApmDocumentType.ServiceDestinationMetric,
-            rollupInterval: RollupInterval.OneMinute,
-          },
-        ],
-      },
-      body: {
-        track_total_hits: true,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...filter,
-              ...getDocumentTypeFilterForServiceDestinationStatistics(true),
-              ...rangeQuery(startWithOffset, endWithOffset),
-              ...excludeRumExitSpansQuery(),
-            ],
-          },
-        },
-        aggs: {
-          connections: {
-            composite: {
-              size: 1000,
-              sources: asMutableArray([
-                {
-                  serviceName: {
-                    terms: {
-                      field: SERVICE_NAME,
-                    },
-                  },
-                },
-                {
-                  dependencyName: {
-                    terms: {
-                      field: SPAN_DESTINATION_SERVICE_RESOURCE,
-                    },
-                  },
-                },
-              ] as const),
-              after,
-            },
-            aggs: {
-              sample: {
-                top_metrics: {
-                  size: 1,
-                  metrics: asMutableArray([
-                    {
-                      field: SERVICE_ENVIRONMENT,
-                    },
-                    {
-                      field: AGENT_NAME,
-                    },
-                    {
-                      field: SPAN_TYPE,
-                    },
-                    {
-                      field: SPAN_SUBTYPE,
-                    },
-                  ] as const),
-                  sort: {
-                    '@timestamp': 'desc',
-                  },
-                },
-              },
-              total_latency_sum: {
-                sum: {
-                  field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-                },
-              },
-              total_latency_count: {
-                sum: {
-                  field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-                },
-              },
-              timeseries: {
-                date_histogram: {
-                  field: '@timestamp',
-                  fixed_interval: getBucketSize({
-                    start: startWithOffset,
-                    end: endWithOffset,
-                    numBuckets,
-                    minBucketSize: 60,
-                  }).intervalString,
-                  extended_bounds: {
-                    min: startWithOffset,
-                    max: endWithOffset,
-                  },
-                },
-                aggs: {
-                  latency_sum: {
-                    sum: {
-                      field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-                    },
-                  },
-                  count: {
-                    sum: {
-                      field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-                    },
-                  },
-                  [EVENT_OUTCOME]: {
-                    terms: {
-                      field: EVENT_OUTCOME,
-                    },
-                    aggs: {
-                      count: {
-                        sum: {
-                          field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    const afterKey = response.aggregations?.connections.after_key;
-
-    if (afterKey) {
-      const currentReponse = await runQuery(afterKey);
-      response.aggregations?.connections.buckets.push(
-        ...(currentReponse.aggregations?.connections.buckets ?? [])
-      );
-    }
-
-    return response;
-  };
-
-  const response = await runQuery();
+  const response = await getAllConnectionStats({
+    apmEventClient,
+    startWithOffset,
+    endWithOffset,
+    filter,
+    numBuckets,
+  });
 
   return (
     response.aggregations?.connections.buckets.map((bucket) => {
@@ -249,3 +118,197 @@ export const getStats = async ({
     }) ?? []
   );
 };
+
+async function getAllConnectionStats({
+  apmEventClient,
+  startWithOffset,
+  endWithOffset,
+  filter,
+  numBuckets,
+  after,
+  size = 0,
+}: {
+  apmEventClient: APMEventClient;
+  startWithOffset: number;
+  endWithOffset: number;
+  filter: QueryDslQueryContainer[];
+  numBuckets: number;
+  after?: { serviceName: string | number; dependencyName: string | number };
+  size?: number;
+}): Promise<ReturnType<typeof getConnectionStats>> {
+  const response = await getConnectionStats({
+    apmEventClient,
+    startWithOffset,
+    endWithOffset,
+    filter,
+    numBuckets,
+    after,
+  });
+
+  const afterKey = response.aggregations?.connections.after_key;
+
+  if (afterKey && size < MAX_BUCKETS) {
+    const currentReponse = await getAllConnectionStats({
+      apmEventClient,
+      startWithOffset,
+      endWithOffset,
+      filter,
+      numBuckets,
+      after: afterKey,
+      size: size + (response.aggregations?.connections.buckets.length ?? 0),
+    });
+
+    const buckets = [
+      ...(response.aggregations?.connections.buckets ?? []),
+      ...(currentReponse.aggregations?.connections.buckets ?? []),
+    ];
+
+    return {
+      ...response,
+      aggregations: {
+        ...response.aggregations,
+        connections: { after_key: afterKey, buckets },
+      },
+    };
+  }
+
+  return response;
+}
+
+async function getConnectionStats({
+  apmEventClient,
+  startWithOffset,
+  endWithOffset,
+  filter,
+  numBuckets,
+  after,
+}: {
+  apmEventClient: APMEventClient;
+  startWithOffset: number;
+  endWithOffset: number;
+  filter: QueryDslQueryContainer[];
+  numBuckets: number;
+  after?: { serviceName: string | number; dependencyName: string | number };
+}) {
+  return apmEventClient.search('get_connection_stats', {
+    apm: {
+      sources: [
+        {
+          documentType: ApmDocumentType.ServiceDestinationMetric,
+          rollupInterval: RollupInterval.OneMinute,
+        },
+      ],
+    },
+    body: {
+      track_total_hits: true,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...filter,
+            ...getDocumentTypeFilterForServiceDestinationStatistics(true),
+            ...rangeQuery(startWithOffset, endWithOffset),
+            ...excludeRumExitSpansQuery(),
+          ],
+        },
+      },
+      aggs: {
+        connections: {
+          composite: {
+            size: 1000,
+            sources: asMutableArray([
+              {
+                serviceName: {
+                  terms: {
+                    field: SERVICE_NAME,
+                  },
+                },
+              },
+              {
+                dependencyName: {
+                  terms: {
+                    field: SPAN_DESTINATION_SERVICE_RESOURCE,
+                  },
+                },
+              },
+            ] as const),
+            after,
+          },
+          aggs: {
+            sample: {
+              top_metrics: {
+                size: 1,
+                metrics: asMutableArray([
+                  {
+                    field: SERVICE_ENVIRONMENT,
+                  },
+                  {
+                    field: AGENT_NAME,
+                  },
+                  {
+                    field: SPAN_TYPE,
+                  },
+                  {
+                    field: SPAN_SUBTYPE,
+                  },
+                ] as const),
+                sort: {
+                  '@timestamp': 'desc',
+                },
+              },
+            },
+            total_latency_sum: {
+              sum: {
+                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+              },
+            },
+            total_latency_count: {
+              sum: {
+                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+              },
+            },
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: getBucketSize({
+                  start: startWithOffset,
+                  end: endWithOffset,
+                  numBuckets,
+                  minBucketSize: 60,
+                }).intervalString,
+                extended_bounds: {
+                  min: startWithOffset,
+                  max: endWithOffset,
+                },
+              },
+              aggs: {
+                latency_sum: {
+                  sum: {
+                    field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+                  },
+                },
+                count: {
+                  sum: {
+                    field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                  },
+                },
+                [EVENT_OUTCOME]: {
+                  terms: {
+                    field: EVENT_OUTCOME,
+                  },
+                  aggs: {
+                    count: {
+                      sum: {
+                        field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+}
