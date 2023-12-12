@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import type { BoolQuery, TimeRange, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { RiskScoreEntity, type RiskScore } from '../../../common/risk_engine';
+import { RiskScoreEntity, type RiskScore } from '../../../common/entity_analytics/risk_engine';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../translations';
 import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
