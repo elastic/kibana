@@ -110,7 +110,7 @@ const getRefsForAdHocDataViewsFromContext = (
   return adHocDataViewsList.map(({ id, title, name }) => ({ id, title, name }));
 };
 
-export async function initializeDataViews(
+async function initializeDataViews(
   {
     dataViews,
     datasourceMap,
@@ -292,7 +292,7 @@ export async function initializeSources(
   };
 }
 
-export function initializeVisualization({
+function initializeVisualization({
   visualizationMap,
   visualizationState,
   references,
@@ -319,7 +319,7 @@ export function initializeVisualization({
   return visualizationState.state;
 }
 
-export function initializeDatasources({
+function initializeDatasources({
   datasourceMap,
   datasourceStates,
   indexPatternRefs,
