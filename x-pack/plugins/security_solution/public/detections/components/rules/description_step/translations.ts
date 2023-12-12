@@ -147,14 +147,6 @@ export const EQL_TIMESTAMP_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const ALERT_SUPPRESSION_INSUFFICIENT_LICENSE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionInsufficientLicense',
-  {
-    defaultMessage:
-      'Alert suppression is configured but will not be applied due to insufficient licensing',
-  }
-);
-
 export const ALERT_SUPPRESSION_PER_RULE_EXECUTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionPerRuleExecution',
   {

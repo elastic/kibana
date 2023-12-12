@@ -9,8 +9,8 @@ import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/se
 import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
-  isRegistryEnabled,
   getRegistryUrlFromTestEnv,
+  isRegistryEnabled,
 } from '../../../security_solution_endpoint_api_int/registry';
 
 export default function (providerContext: FtrProviderContext) {
@@ -42,10 +42,11 @@ export default function (providerContext: FtrProviderContext) {
         await pageObjects.svlCommonPage.login();
       }
     });
-    // loadTestFile(require.resolve('./policy_list'));
+    loadTestFile(require.resolve('./policy_list'));
     loadTestFile(require.resolve('./policy_details'));
-    // loadTestFile(require.resolve('./trusted_apps_list'));
-    // loadTestFile(require.resolve('./fleet_integrations'));
-    // loadTestFile(require.resolve('./artifact_entries_list'));
+    loadTestFile(require.resolve('./trusted_apps_list'));
+    loadTestFile(require.resolve('./fleet_integrations'));
+    loadTestFile(require.resolve('./artifact_entries_list'));
+    loadTestFile(require.resolve('./endpoint_exceptions'));
   });
 }

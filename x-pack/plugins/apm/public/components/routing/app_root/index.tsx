@@ -76,7 +76,7 @@ export function ApmAppRoot({
           >
             <i18nCore.Context>
               <ObservabilityAIAssistantProvider
-                value={apmPluginContextValue.observabilityAIAssistant}
+                value={apmPluginContextValue.observabilityAIAssistant.service}
               >
                 <TimeRangeIdContextProvider>
                   <RouterProvider history={history} router={apmRouter as any}>

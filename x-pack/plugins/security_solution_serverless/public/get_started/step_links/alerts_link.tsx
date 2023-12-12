@@ -5,19 +5,52 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useStepContext } from '../context/step_context';
+import {
+  AddAndValidateYourDataCardsId,
+  AddIntegrationsSteps,
+  GetStartedWithAlertsCardsId,
+  SectionId,
+  ViewAlertsSteps,
+} from '../types';
+import { AddIntegrationCallout } from './add_integration_callout';
+import { VIEW_ALERTS, VIEW_ALERTS_CALLOUT_TITLE } from './translations';
 
-const AlertsButtonComponent = () => (
-  <LinkButton id={SecurityPageName.alerts} fill>
-    <FormattedMessage
-      id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description2.button"
-      defaultMessage="View alerts"
-    />
-  </LinkButton>
-);
+const AlertsButtonComponent = () => {
+  const { toggleTaskCompleteStatus, finishedSteps } = useStepContext();
+  const isIntegrationsStepComplete = finishedSteps[
+    AddAndValidateYourDataCardsId.addIntegrations
+  ]?.has(AddIntegrationsSteps.connectToDataSources);
+
+  const onClick = useCallback(() => {
+    toggleTaskCompleteStatus({
+      stepId: ViewAlertsSteps.viewAlerts,
+      cardId: GetStartedWithAlertsCardsId.viewAlerts,
+      sectionId: SectionId.getStartedWithAlerts,
+      undo: false,
+    });
+  }, [toggleTaskCompleteStatus]);
+
+  return (
+    <>
+      {!isIntegrationsStepComplete && (
+        <AddIntegrationCallout stepName={VIEW_ALERTS_CALLOUT_TITLE} />
+      )}
+      <LinkButton
+        className="step-paragraph"
+        disabled={!isIntegrationsStepComplete}
+        fill
+        id={SecurityPageName.alerts}
+        onClick={onClick}
+      >
+        {VIEW_ALERTS}
+      </LinkButton>
+    </>
+  );
+};
 
 export const AlertsButton = React.memo(AlertsButtonComponent);
