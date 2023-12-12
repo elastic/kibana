@@ -22,8 +22,8 @@ interface OutdatedSloProps {
 }
 
 export function OutdatedSlo({ slo, onReset, onDelete }: OutdatedSloProps) {
-  const { mutateAsync: resetSlo } = useResetSlo();
-  const { mutateAsync: deleteSlo } = useDeleteSlo();
+  const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
+  const { mutateAsync: deleteSlo, isLoading: isDeleteLoading } = useDeleteSlo();
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
   const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
 
@@ -81,6 +81,7 @@ export function OutdatedSlo({ slo, onReset, onDelete }: OutdatedSloProps) {
             data-test-subj="o11ySlosOutdatedDefinitionsResetButton"
             color="primary"
             fill
+            isLoading={isResetLoading}
             onClick={handleReset}
           >
             <FormattedMessage
@@ -88,12 +89,13 @@ export function OutdatedSlo({ slo, onReset, onDelete }: OutdatedSloProps) {
               defaultMessage="Reset"
             />
           </EuiButton>
-        </EuiFlexItem>{' '}
+        </EuiFlexItem>
         <EuiFlexItem grow={0}>
           <EuiButton
             data-test-subj="o11ySlosOutdatedDefinitionsDeleteButton"
             color="danger"
             fill
+            isLoading={isDeleteLoading}
             onClick={handleDelete}
           >
             <FormattedMessage

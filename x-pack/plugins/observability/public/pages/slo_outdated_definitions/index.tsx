@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination, EuiText } from '@elastic/eui';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { useLicense } from '../../hooks/use_license';
@@ -69,69 +69,61 @@ export function SlosOutdatedDefinitions() {
 
   const hasSlosAndHasPermissions = hasAtLeast('platinum') === true && hasRequiredWritePrivileges;
 
-  if (!hasSlosAndHasPermissions) {
-    return (
-      <div>
-        {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.permissionsError', {
-          defaultMessage: 'You must have write permissions to access this page',
-        })}
-      </div>
-    );
-  }
-
-  const pageTitle = (
-    <EuiFlexGroup
-      direction="row"
-      gutterSize="m"
-      alignItems="center"
-      justifyContent="flexStart"
-      responsive={false}
-    >
-      <EuiFlexItem grow={false}>
-        {i18n.translate('xpack.observability.slo.slosOutdatedDefintions.pageTitle', {
-          defaultMessage: 'Outdated SLO Definitions',
-        })}
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   return (
-    hasSlosAndHasPermissions && (
-      <ObservabilityPageTemplate
-        data-test-subj="slosOutdatedDefinitions"
-        pageHeader={{ pageTitle }}
-      >
-        <HeaderMenu />
-        <p>
-          {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.description', {
-            defaultMessage:
-              'The following SLOs are from a previous version and need to either be reset to upgrade to the latest version OR deleted and removed from the system. When you reset the SLO, the transfrom will be updated to the latest version and the historical data will be regenerated from the source data.',
+    <ObservabilityPageTemplate
+      data-test-subj="slosOutdatedDefinitions"
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.observability.slo.slosOutdatedDefintions.pageTitle', {
+          defaultMessage: 'Outdated SLO Definitions',
+        }),
+      }}
+    >
+      <HeaderMenu />
+
+      {!hasSlosAndHasPermissions ? (
+        <EuiText>
+          {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.permissionsError', {
+            defaultMessage: 'You must have write permissions to access this page',
           })}
-        </p>
-        <EuiSpacer size="l" />
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>
-            <OutdatedSloSearchBar initialSearch={search} onRefresh={refetch} onSearch={setSearch} />
-          </EuiFlexItem>
-          {!isLoading && total === 0 && <SloListEmpty />}
-          {!isLoading &&
-            total > 0 &&
-            data &&
-            data.results.map((slo) => (
-              <OutdatedSlo slo={slo} onDelete={refetch} onReset={refetch} />
-            ))}
-        </EuiFlexGroup>
-        {!isLoading && data && (
-          <EuiTablePagination
-            activePage={activePage}
-            pageCount={Math.ceil(total / perPage)}
-            itemsPerPage={perPage}
-            onChangePage={setActivePage}
-            onChangeItemsPerPage={handlePerPageChange}
-            itemsPerPageOptions={[10, 20, 50, 100]}
-          />
-        )}
-      </ObservabilityPageTemplate>
-    )
+        </EuiText>
+      ) : (
+        <>
+          <p>
+            {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.description', {
+              defaultMessage:
+                'The following SLOs are from a previous version and need to either be reset to upgrade to the latest version OR deleted and removed from the system. When you reset the SLO, the transfrom will be updated to the latest version and the historical data will be regenerated from the source data.',
+            })}
+          </p>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <OutdatedSloSearchBar
+                initialSearch={search}
+                onRefresh={refetch}
+                onSearch={setSearch}
+              />
+            </EuiFlexItem>
+            {!isLoading && total === 0 && <SloListEmpty />}
+            {!isLoading &&
+              total > 0 &&
+              data &&
+              data.results.map((slo) => (
+                <OutdatedSlo slo={slo} onDelete={refetch} onReset={refetch} />
+              ))}
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          {!isLoading && data && (
+            <EuiTablePagination
+              activePage={activePage}
+              pageCount={Math.ceil(total / perPage)}
+              itemsPerPage={perPage}
+              onChangePage={setActivePage}
+              onChangeItemsPerPage={handlePerPageChange}
+              itemsPerPageOptions={[10, 20, 50, 100]}
+            />
+          )}
+        </>
+      )}
+    </ObservabilityPageTemplate>
   );
 }
