@@ -6,7 +6,9 @@
  */
 
 // Optionally, re-export the entire set of types. Interfaces and types declared after this will override v1 declarations.
-export { BenchmarkScore } from './v1';
+import type { BenchmarkScore } from './v1';
+
+export type { BenchmarkScore } from './v1';
 
 export type BenchmarksCisId = 'cis_k8s' | 'cis_azure' | 'cis_aws' | 'cis_eks' | 'cis_gcp';
 

@@ -108,7 +108,6 @@ export const getBenchmarksData = async (
 export const getBenchmarks = async (
   esClient: any,
   soClient: SavedObjectsClientContract,
-  query: any,
   logger: Logger
 ) => {
   const benchmarks = await getBenchmarksData(soClient, esClient, logger);

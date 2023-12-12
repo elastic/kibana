@@ -81,3 +81,10 @@ export const benchmarksQueryParamsSchema = schema.object({
 });
 
 export type BenchmarksQueryParams = TypeOf<typeof benchmarksQueryParamsSchema>;
+
+export interface GetBenchmarkResponse {
+  items: Benchmark[];
+  total: number;
+  page: number;
+  perPage: number;
+}

@@ -30,8 +30,8 @@ import type {
   GcpCredentialsType,
   AzureCredentialsType,
   RuleSection,
-  BenchmarksCisId,
 } from '../types_old';
+import type { BenchmarksCisId } from '../types/latest';
 
 /**
  * @example

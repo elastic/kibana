@@ -93,7 +93,7 @@ export const getBenchmarks = async (
     logger
   );
 
-  const benchmarks = await getBenchmarksDataV1(
+  const benchmarks = await getBenchmarksData(
     soClient,
     agentPolicies,
     agentStatusesByAgentPolicyId,

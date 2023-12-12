@@ -18,8 +18,7 @@ import {
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { BenchmarksCisId } from '../../../common/types_old';
-import type { BenchmarkScore, Benchmark } from '../../../common/types/latest';
+import type { BenchmarkScore, Benchmark, BenchmarksCisId } from '../../../common/types/latest';
 import * as TEST_SUBJ from './test_subjects';
 import { isCommonError } from '../../components/cloud_posture_page';
 import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
