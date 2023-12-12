@@ -694,7 +694,7 @@ export default ({ getService }: FtrProviderContext) => {
         interval: '30m',
       };
 
-      const { previewId, logs } = await previewRule({
+      const { previewId } = await previewRule({
         supertest,
         rule,
         timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
