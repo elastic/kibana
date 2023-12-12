@@ -107,19 +107,19 @@ export class ObservabilityAIAssistantPlugin
       shareStart: pluginsStart.share,
     }));
 
-    service.register(async ({ signal, registerContext, registerFunction }) => {
+    service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./functions');
 
       return mod.registerFunctions({
         service,
-        signal,
         pluginsStart,
-        coreStart,
-        registerContext,
-        registerFunction,
+        registerRenderFunction,
       });
     });
 
-    return { service, useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service) };
+    return {
+      service,
+      useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
+    };
   }
 }

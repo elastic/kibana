@@ -10,9 +10,7 @@ import React, { useCallback } from 'react';
 import { head } from 'lodash/fp';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiToolTip } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
-import { EcsFlat } from '@kbn/ecs';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { DefaultFieldRenderer } from '../../field_renderers/field_renderers';
 import type {
@@ -36,16 +34,14 @@ const fieldColumn: EuiBasicTableColumn<ObservedUserTable | ManagedUserTable> = {
   name: i18n.FIELD_COLUMN_TITLE,
   field: 'label',
   render: (label: string, { field }) => (
-    <EuiToolTip content={EcsFlat[field as keyof typeof EcsFlat]?.short ?? field}>
-      <span
-        css={css`
-          font-weight: ${euiLightVars.euiFontWeightMedium};
-          color: ${euiLightVars.euiTitleColor};
-        `}
-      >
-        {label ?? field}
-      </span>
-    </EuiToolTip>
+    <span
+      css={css`
+        font-weight: ${euiLightVars.euiFontWeightMedium};
+        color: ${euiLightVars.euiTitleColor};
+      `}
+    >
+      {label ?? field}
+    </span>
   ),
 };
 

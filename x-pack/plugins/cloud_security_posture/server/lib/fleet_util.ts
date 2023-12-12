@@ -19,7 +19,7 @@ import type {
   PackagePolicyInput,
 } from '@kbn/fleet-plugin/common';
 import { errors } from '@elastic/elasticsearch';
-import { CloudSecurityPolicyTemplate, PostureTypes } from '../../common/types';
+import { CloudSecurityPolicyTemplate, PostureTypes } from '../../common/types_old';
 import {
   SUPPORTED_POLICY_TEMPLATES,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
