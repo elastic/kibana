@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
-import { AzureCredentialsType } from '../../../../common/types';
+import { AzureCredentialsType } from '../../../../common/types_old';
 
 export type AzureCredentialsFields = Record<string, { label: string; type?: 'password' | 'text' }>;
 
