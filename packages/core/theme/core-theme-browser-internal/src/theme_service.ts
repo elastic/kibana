@@ -12,6 +12,12 @@ import { _setDarkMode } from '@kbn/ui-theme';
 import type { InjectedMetadataTheme } from '@kbn/core-injected-metadata-common-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
+import {
+  systemThemeIsDark,
+  onSystemThemeChange,
+  browsersSupportsSystemTheme,
+} from './system_theme';
+import { createStyleSheet } from './utils';
 
 /** @internal */
 export interface ThemeServiceSetupDeps {
@@ -30,10 +36,10 @@ export class ThemeService {
     const theme = injectedMetadata.getTheme();
     this.themeMetadata = theme;
 
-    if (theme.darkMode === 'system' && browsersSupportsPrefersColorScheme()) {
-      const darkMode = systemIsDark();
+    if (theme.darkMode === 'system' && browsersSupportsSystemTheme()) {
+      const darkMode = systemThemeIsDark();
       this.applyTheme(darkMode);
-      onSystemPrefersColorSchemeChange((mode) => this.applyTheme(mode));
+      onSystemThemeChange((mode) => this.applyTheme(mode));
     } else {
       const darkMode = theme.darkMode === 'system' ? false : theme.darkMode;
       this.applyTheme(darkMode);
@@ -80,34 +86,4 @@ export class ThemeService {
 const updateKbnThemeTag = (darkMode: boolean) => {
   const globals: any = typeof window === 'undefined' ? {} : window;
   globals.__kbnThemeTag__ = darkMode ? 'v8dark' : 'v8light';
-};
-
-const createStyleSheet = ({ href }: { href: string }) => {
-  const head = document.getElementsByTagName('head')[0];
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.type = 'text/css';
-  link.href = href;
-  link.media = 'all';
-  head.appendChild(link);
-  return link;
-};
-
-const systemIsDark = (): boolean => {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
-};
-
-const onSystemPrefersColorSchemeChange = (handler: (darkMode: boolean) => void) => {
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    handler(e.matches);
-  });
-};
-
-const browsersSupportsPrefersColorScheme = (): boolean => {
-  try {
-    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
-    return matchMedia.matches !== undefined && matchMedia.addEventListener !== undefined;
-  } catch (e) {
-    return false;
-  }
 };
