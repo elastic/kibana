@@ -217,7 +217,7 @@ export const createLocalSAMLSession = async (params: LocalSamlSessionParams) => 
   const samlResponse = await createMockedSAMLResponse({
     kibanaUrl: kbnHost + '/api/security/saml/callback',
     username,
-    fullname,
+    full_name: fullname,
     email,
     roles: [role],
   });
