@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { MalformedDocsStatType } from './types';
+import { DegradedDocsStatType } from './types';
 
-export class MalformedDocsStat {
-  dataset: MalformedDocsStatType['dataset'];
-  percentage: MalformedDocsStatType['percentage'];
+export class DegradedDocsStat {
+  dataset: DegradedDocsStatType['dataset'];
+  percentage: DegradedDocsStatType['percentage'];
 
-  private constructor(malformedDocsStat: MalformedDocsStat) {
-    this.dataset = malformedDocsStat.dataset;
-    this.percentage = malformedDocsStat.percentage;
+  private constructor(degradedDocsStat: DegradedDocsStat) {
+    this.dataset = degradedDocsStat.dataset;
+    this.percentage = degradedDocsStat.percentage;
   }
 
-  public static create(malformedDocsStat: MalformedDocsStatType) {
-    return new MalformedDocsStat(malformedDocsStat);
+  public static create(degradedDocsStat: DegradedDocsStatType) {
+    return new DegradedDocsStat(degradedDocsStat);
   }
 }
