@@ -927,7 +927,7 @@
     "deepmerge": "^4.2.2",
     "del": "^6.1.0",
     "diff": "^5.1.0",
-    "elastic-apm-node": "^4.2.0",
+    "elastic-apm-node": "^4.3.0",
     "email-addresses": "^5.0.0",
     "execa": "^5.1.1",
     "expiry-js": "0.1.7",
