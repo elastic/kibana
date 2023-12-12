@@ -35,7 +35,7 @@ import { InitialSetupPanel } from './initial_setup_panel';
 import { ChatActionClickType } from './types';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { Feedback } from '../feedback_buttons';
-import { MESSAGE_FEEDBACK } from '../../analytics/schema';
+import { MESSAGE_FEEDBACK } from '../../analytics/feedback_on_assistant_answers';
 
 const timelineClassName = css`
   overflow-y: auto;
@@ -75,8 +75,6 @@ export function ChatBody({
   startedFrom?: StartedFrom;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
 }) {
-  const { analytics } = useKibana().services;
-
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
 
@@ -166,6 +164,7 @@ export function ChatBody({
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
             <ChatPromptEditor
+              chatService={chatService}
               loading={isLoading}
               disabled
               onSubmit={(message) => {
@@ -255,8 +254,9 @@ export function ChatBody({
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
             <ChatPromptEditor
-              loading={isLoading}
+              chatService={chatService}
               disabled={!connectors.selectedConnector || !hasCorrectLicense}
+              loading={isLoading}
               onSubmit={(message) => {
                 setStickToBottom(true);
                 return next(messages.concat(message));
