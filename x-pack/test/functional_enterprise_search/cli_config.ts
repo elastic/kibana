@@ -19,9 +19,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     // default to the xpack functional config
     ...baseConfig.getAll(),
 
-    junit: {
-      reportName: 'X-Pack Enterprise Search Functional Tests with Host Configured',
-    },
     kbnTestServer: {
       ...baseConfig.get('kbnTestServer'),
       serverArgs: [

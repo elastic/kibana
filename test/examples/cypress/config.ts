@@ -9,6 +9,7 @@
 import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 import { resolve } from 'path';
+import { ExamplePluginsHeadlessTestRunner } from './runner';
 
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -16,6 +17,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
+
+    junit: {
+      reportName: 'Example plugin Cypress E2E tests',
+    },
 
     esTestCluster: {
       ...functionalConfig.get('esTestCluster'),
@@ -35,5 +40,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...findTestPluginPaths(resolve(REPO_ROOT, 'examples')),
       ],
     },
+
+    testRunner: ExamplePluginsHeadlessTestRunner,
   };
 }
