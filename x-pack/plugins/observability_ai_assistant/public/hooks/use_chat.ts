@@ -225,9 +225,8 @@ export function useChat({
   );
 
   useEffect(() => {
-    const controller = abortControllerRef.current;
     return () => {
-      controller.abort();
+      abortControllerRef.current.abort();
     };
   }, []);
 
