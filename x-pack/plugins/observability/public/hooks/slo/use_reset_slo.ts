@@ -42,7 +42,7 @@ export function useResetSlo() {
       onSuccess: (_data, { name }) => {
         toasts.addSuccess(
           i18n.translate('xpack.observability.slo.slo.reset.successNotification', {
-            defaultMessage: 'Reset {name} successfully',
+            defaultMessage: '{name} reset successfully',
             values: { name },
           })
         );
