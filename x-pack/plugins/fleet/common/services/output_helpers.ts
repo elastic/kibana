@@ -52,7 +52,10 @@ export function outputYmlIncludesReservedPerformanceKey(
   const parsedYml = safeLoad(configYml);
 
   if (!isObject(parsedYml)) {
-    return RESERVED_CONFIG_YML_KEYS.some((key) => parsedYml.includes(key));
+    if (typeof parsedYml === 'string') {
+      return RESERVED_CONFIG_YML_KEYS.some((key) => parsedYml.includes(key));
+    }
+    return false;
   }
 
   const flattenedYml = isObject(parsedYml) ? getFlattenedObject(parsedYml) : {};
