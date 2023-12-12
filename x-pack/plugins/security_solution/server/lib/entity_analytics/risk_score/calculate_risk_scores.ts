@@ -17,13 +17,14 @@ import {
   ALERT_WORKFLOW_STATUS,
   EVENT_KIND,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type {
-  AfterKeys,
-  IdentifierType,
-  RiskWeights,
-  RiskScore,
+import {
+  type AfterKeys,
+  type IdentifierType,
+  type RiskWeights,
+  type RiskScore,
+  getRiskLevel,
+  RiskCategories,
 } from '../../../../common/entity_analytics/risk_engine';
-import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
@@ -73,6 +74,7 @@ const formatForResponse = ({
     score: bucket.risk_details.value.normalized_score, // TODO investigate whether normalization can be done in memory with negligible overhead
     modifier: criticalityModifier,
   });
+  const calculatedLevel = getRiskLevel(normalizedScoreWithCriticality);
   const categoryFiveScore =
     bucket.risk_details.value.normalized_score - normalizedScoreWithCriticality;
   const categoryFiveCount = criticalityModifier ? 1 : 0;
@@ -83,7 +85,7 @@ const formatForResponse = ({
     id_value: bucket.key[identifierField],
     asset_criticality_level: criticality?.criticality_level,
     asset_criticality_modifier: criticalityModifier,
-    calculated_level: bucket.risk_details.value.level, // TODO calculate new level based on post-criticality score
+    calculated_level: calculatedLevel,
     calculated_score: bucket.risk_details.value.score,
     calculated_score_norm: normalizedScoreWithCriticality,
     category_1_score: normalize({
@@ -146,22 +148,6 @@ const buildReduceScript = ({
     double score_norm = 100 * total_score / params.risk_cap;
     results['score'] = total_score;
     results['normalized_score'] = score_norm;
-
-    if (score_norm < 20) {
-      results['level'] = 'Unknown'
-    }
-    else if (score_norm >= 20 && score_norm < 40) {
-      results['level'] = 'Low'
-    }
-    else if (score_norm >= 40 && score_norm < 70) {
-      results['level'] = 'Moderate'
-    }
-    else if (score_norm >= 70 && score_norm < 90) {
-      results['level'] = 'High'
-    }
-    else if (score_norm >= 90) {
-      results['level'] = 'Critical'
-    }
 
     return results;
   `;
