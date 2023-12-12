@@ -5,21 +5,32 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
-import { SLO_SUMMARY_TEMP_INDEX_NAME } from '../../../common/slo/constants';
+import {
+  getSLOSummaryPipelineId,
+  getSLOSummaryTransformId,
+  getSLOTransformId,
+  SLO_MODEL_VERSION,
+  SLO_SUMMARY_TEMP_INDEX_NAME,
+} from '../../../common/slo/constants';
+import { getSLOSummaryPipelineTemplate } from '../../assets/ingest_templates/slo_summary_pipeline_template';
 import { Duration, DurationUnit, SLO } from '../../domain/models';
 import { validateSLO } from '../../domain/services';
+import { retryTransientEsErrors } from '../../utils/retry';
 import { SLORepository } from './slo_repository';
-import { createTempSummaryDocument } from './summary_transform/helpers/create_temp_summary';
+import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { TransformManager } from './transform_manager';
 
 export class CreateSLO {
   constructor(
     private esClient: ElasticsearchClient,
     private repository: SLORepository,
-    private transformManager: TransformManager
+    private transformManager: TransformManager,
+    private summaryTransformManager: TransformManager,
+    private logger: Logger,
+    private spaceId: string
   ) {}
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
@@ -27,32 +38,47 @@ export class CreateSLO {
     validateSLO(slo);
 
     await this.repository.save(slo, { throwOnConflict: true });
-    let sloTransformId;
+
+    const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
+    const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     try {
-      sloTransformId = await this.transformManager.install(slo);
+      await this.transformManager.install(slo);
+      await this.transformManager.start(rollupTransformId);
+      await retryTransientEsErrors(
+        () => this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(slo, this.spaceId)),
+        { logger: this.logger }
+      );
+
+      await this.summaryTransformManager.install(slo);
+      await this.summaryTransformManager.start(summaryTransformId);
+
+      await retryTransientEsErrors(
+        () =>
+          this.esClient.index({
+            index: SLO_SUMMARY_TEMP_INDEX_NAME,
+            id: `slo-${slo.id}`,
+            document: createTempSummaryDocument(slo, this.spaceId),
+            refresh: true,
+          }),
+        { logger: this.logger }
+      );
     } catch (err) {
+      this.logger.error(
+        `Cannot install the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back.`
+      );
+
+      await this.summaryTransformManager.stop(summaryTransformId);
+      await this.summaryTransformManager.uninstall(summaryTransformId);
+      await this.transformManager.stop(rollupTransformId);
+      await this.transformManager.uninstall(rollupTransformId);
+      await this.esClient.ingest.deletePipeline(
+        { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
+        { ignore: [404] }
+      );
       await this.repository.deleteById(slo.id);
-      throw err;
-    }
-
-    try {
-      await this.transformManager.preview(sloTransformId);
-      await this.transformManager.start(sloTransformId);
-    } catch (err) {
-      await Promise.all([
-        this.transformManager.uninstall(sloTransformId),
-        this.repository.deleteById(slo.id),
-      ]);
 
       throw err;
     }
-
-    await this.esClient.index({
-      index: SLO_SUMMARY_TEMP_INDEX_NAME,
-      id: `slo-${slo.id}`,
-      document: createTempSummaryDocument(slo),
-      refresh: true,
-    });
 
     return this.toResponse(slo);
   }
@@ -72,6 +98,7 @@ export class CreateSLO {
       createdAt: now,
       updatedAt: now,
       groupBy: !!params.groupBy ? params.groupBy : ALL_VALUE,
+      version: SLO_MODEL_VERSION,
     };
   }
 
