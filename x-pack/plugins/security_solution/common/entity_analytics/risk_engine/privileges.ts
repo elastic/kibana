@@ -12,7 +12,7 @@ import {
 } from './constants';
 
 export type MissingClusterPrivileges = string[];
-export type MissingIndexPrivileges = Array<[indexName: string, privileges: string[]]>;
+export type MissingIndexPrivileges = Array<readonly [indexName: string, privileges: string[]]>;
 
 export interface MissingPrivileges {
   clusterPrivileges: MissingClusterPrivileges;
