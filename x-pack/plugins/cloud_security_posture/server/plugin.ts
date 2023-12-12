@@ -51,7 +51,6 @@ import {
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
 import { CloudSecurityPostureConfig } from './config';
 import { CspBenchmarkRule, CspSettings } from '../common/types/latest';
-import { createCspSettingObjectSafe } from './routes/benchmark_rules/bulk_action/utils';
 
 export class CspPlugin
   implements
