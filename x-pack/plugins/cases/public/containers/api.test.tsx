@@ -365,7 +365,7 @@ describe('Cases API', () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          assignees: null,
+          assignees: [],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
@@ -374,7 +374,7 @@ describe('Cases API', () => {
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
         method: 'POST',
         body: JSON.stringify({
-          assignees: 'none',
+          assignees: undefined,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           ...DEFAULT_QUERY_PARAMS,
         }),

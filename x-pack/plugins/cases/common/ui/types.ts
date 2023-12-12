@@ -156,7 +156,7 @@ export interface SystemFilterOptions {
   severity: CaseSeverity[];
   status: CaseStatuses[];
   tags: string[];
-  assignees: Array<string | null> | null;
+  assignees: Array<string | null>;
   reporters: User[];
   owner: string[];
   category: string[];
