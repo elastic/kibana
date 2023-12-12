@@ -293,7 +293,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }}
         />
       </EuiDescribedFormGroup>
-      {agentTamperProtectionEnabled && licenseService.isPlatinum() && !agentPolicy.is_managed && (
+      {agentTamperProtectionEnabled && licenseService.isPlatinum() && (
         <EuiDescribedFormGroup
           title={
             <h4>

@@ -77,12 +77,14 @@ export interface UninstallTokenServiceInterface {
    * @param policyIdFilter a string for partial matching the policyId
    * @param page
    * @param perPage
+   * @param excludeCloud
    * @returns Uninstall Tokens Metadata Response
    */
   getTokenMetadata(
     policyIdFilter?: string,
     page?: number,
-    perPage?: number
+    perPage?: number,
+    excludeCloud?: string
   ): Promise<GetUninstallTokensMetadataResponse>;
 
   /**
@@ -111,7 +113,6 @@ export interface UninstallTokenServiceInterface {
   /**
    * Generate uninstall token for given policy id
    * Will not create a new token if one already exists for a given policy unless force: true is used
-   * Will create an uninstall token even if the policy is managed
    *
    * @param policyId agent policy id
    * @param force generate a new token even if one already exists
@@ -329,7 +330,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   public async getAllHashedTokens(): Promise<Record<string, string>> {
-    const policyIds = await this.getAllUnmanagedPolicyIds();
+    const policyIds = await this.getAllPolicyIds();
     return this.getHashedTokensForPolicyIds(policyIds);
   }
 
@@ -378,7 +379,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   public async generateTokensForAllPolicies(force: boolean = false): Promise<void> {
-    const policyIds = await this.getAllUnmanagedPolicyIds();
+    const policyIds = await this.getAllPolicyIds();
     return this.generateTokensForPolicyIds(policyIds, force);
   }
 
@@ -417,23 +418,11 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     page: number = 1
   ): Promise<string[]> {
     return (
-      await agentPolicyService.list(this.soClient, {
-        page,
-        perPage: batchSize,
-        fields: ['id', 'is_managed'],
-      })
-    ).items.reduce((acc, policy) => {
-      if (!policy.is_managed) {
-        acc.push(policy.id);
-      }
-      return acc;
-    }, [] as string[]);
+      await agentPolicyService.list(this.soClient, { page, perPage: batchSize, fields: ['id'] })
+    ).items.map((policy) => policy.id);
   }
 
-  /**
-   * Returns the policy ids of all non-managed policies
-   */
-  private async getAllUnmanagedPolicyIds(): Promise<string[]> {
+  private async getAllPolicyIds(): Promise<string[]> {
     const batchSize = SO_SEARCH_LIMIT;
     let policyIdsBatch = await this.getPolicyIdsBatch(batchSize);
     let policyIds = policyIdsBatch;
@@ -519,7 +508,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   public async checkTokenValidityForAllPolicies(): Promise<UninstallTokenInvalidError | null> {
-    const policyIds = await this.getAllUnmanagedPolicyIds();
+    const policyIds = await this.getAllPolicyIds();
     return await this.checkTokenValidity(policyIds);
   }
 
