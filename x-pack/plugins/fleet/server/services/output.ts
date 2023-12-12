@@ -1023,7 +1023,13 @@ class OutputService {
       async (output) => {
         const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', safeLoad);
 
-        await outputService.update(soClient, esClient, output.id, { preset });
+        await outputService.update(
+          soClient,
+          esClient,
+          output.id,
+          { preset },
+          { fromPreconfiguration: true }
+        );
         await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id);
       },
       {
