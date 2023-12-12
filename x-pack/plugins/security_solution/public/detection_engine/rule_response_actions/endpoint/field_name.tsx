@@ -31,7 +31,7 @@ const ECSSchemaOptions = ECSSchema.map((ecs) => ({
 }));
 
 const SINGLE_SELECTION = { asPlainText: true };
-const FIELD_LABEL = 'Custom field name';
+const FIELD_LABEL: string = 'Custom field name';
 const FieldNameFieldComponent = ({
   path,
   disabled,
@@ -127,6 +127,7 @@ const FieldNameFieldComponent = ({
                   }
                   setValue(newValue[0].label);
                 }}
+                data-test-subj="config-custom-field-name"
               />
             </EuiFormRow>
           );

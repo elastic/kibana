@@ -39,6 +39,9 @@ const OverwriteFieldComponent = ({
   return (
     <UseField
       component={ToggleField}
+      euiFieldProps={{
+        'data-test-subj': 'config-overwrite-toggle',
+      }}
       path={path}
       readDefaultValueOnForm={readDefaultValueOnForm}
       config={CONFIG}
