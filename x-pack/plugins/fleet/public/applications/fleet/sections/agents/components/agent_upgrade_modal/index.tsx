@@ -26,6 +26,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import semverGt from 'semver/functions/gt';
 import semverLt from 'semver/functions/lt';
+import semverCoerce from 'semver/functions/coerce';
 
 import { AGENT_UPGRADE_COOLDOWN_IN_MIN } from '../../../../../../../common/services';
 
@@ -47,6 +48,10 @@ import {
 } from '../../../../hooks';
 
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
+import {
+  getRecentUpgradeInfoForAgent,
+  isAgentUpgrading,
+} from '../../../../../../../common/services/is_agent_upgradeable';
 
 import {
   FALLBACK_VERSIONS,
@@ -96,6 +101,52 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
 
   const QUERY_STUCK_UPDATING = `status:updating AND upgrade_started_at:* AND NOT upgraded_at:* AND upgrade_started_at < now-${AGENT_UPDATING_TIMEOUT_HOURS}h`;
 
+  const getNotUpgradeableMessage = (
+    agent: Agent,
+    latestAgentVersion: string,
+    versionToUpgrade?: string
+  ) => {
+    let agentVersion: string;
+    if (typeof agent?.local_metadata?.elastic?.agent?.version === 'string') {
+      agentVersion = agent.local_metadata.elastic.agent.version;
+    } else {
+      return `Version missing`;
+    }
+    if (agent.unenrolled_at) {
+      return `Agent was unenrolled`;
+    }
+    if (agent.unenrollment_started_at) {
+      return `Agent unenrollment started at ${new Date(agent.unenrollment_started_at)}`;
+    }
+    if (!agent.local_metadata.elastic.agent.upgradeable) {
+      return `Agent is marked as not upgradeable`;
+    }
+    if (isAgentUpgrading(agent)) {
+      return `An upgrade was already started`;
+    }
+    if (getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) {
+      return `The agent has been upgraded recently. Please wait.`;
+    }
+    if (versionToUpgrade !== undefined) {
+      const agentVersionNumber = semverCoerce(agentVersion);
+      if (!agentVersionNumber) return 'Agent version is not valid';
+
+      const versionToUpgradeNumber = semverCoerce(versionToUpgrade);
+      if (!versionToUpgradeNumber) return 'Target version is not valid';
+
+      // TODO: verify this one
+      if (semverLt(versionToUpgradeNumber, agentVersionNumber))
+        return `Target version is lower than current version`;
+    }
+
+    const latestAgentVersionNumber = semverCoerce(latestAgentVersion);
+    if (!latestAgentVersionNumber) return 'Latest version is not valid';
+
+    // TODO: verify this one
+    if (semverGt(agentVersion, latestAgentVersionNumber))
+      return `Agent version is lower than latest`;
+  };
+
   useEffect(() => {
     const getStuckUpdatingAgentCount = async (agentsOrQuery: Agent[] | string) => {
       let newQuery;
@@ -126,11 +177,11 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         return;
       }
     };
-
+    console.log('updating', updatingQuery);
     if (!isUpdating) return;
 
     getStuckUpdatingAgentCount(agents);
-  }, [isUpdating, setUpdatingQuery, QUERY_STUCK_UPDATING, agents]);
+  }, [isUpdating, setUpdatingQuery, QUERY_STUCK_UPDATING, agents, updatingQuery]);
 
   useEffect(() => {
     const getVersions = async () => {
@@ -517,7 +568,15 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
                 'Error upgrading the selected {count, plural, one {agent} other {{count} agents}}',
               values: { count: isSingleAgent },
             })}
-          />
+          >
+            <FormattedMessage
+              id="xpack.fleet.upgradeAgents.warningCalloutErrorMessage"
+              defaultMessage="{originalMessage}"
+              values={{
+                originalMessage: errors,
+              }}
+            />
+          </EuiCallOut>
         </>
       ) : null}
     </EuiConfirmModal>
