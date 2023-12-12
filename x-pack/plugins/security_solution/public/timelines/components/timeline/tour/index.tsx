@@ -95,6 +95,8 @@ const TimelineTourComp = (props: TimelineTourProps) => {
 
   const currentStepConfig = timelineTourSteps[tourState.currentTourStep - 1];
 
+  const tourStep = useMemo((step: typeof timelineTourSteps[number], idx: number) => {}, []);
+
   if (currentStepConfig?.timelineTab && currentStepConfig.timelineTab !== activeTab) {
     switchToTab(currentStepConfig.timelineTab);
   }
@@ -106,15 +108,16 @@ const TimelineTourComp = (props: TimelineTourProps) => {
   return (
     <>
       {timelineTourSteps.map((steps, idx) => {
-        const step = idx + 1;
-        if (tourState.currentTourStep !== step) return null;
+        const stepCount = idx + 1;
+        if (tourState.currentTourStep !== stepCount) return null;
+        const panelProps = {
+          'data-test-subj': `timeline-tour-step-${idx + 1}`,
+        };
         return (
           <EuiTourStep
-            panelProps={{
-              'data-test-subj': `timeline-tour-step-${idx + 1}`,
-            }}
+            panelProps={panelProps}
             key={idx}
-            step={step}
+            step={stepCount}
             isStepOpen={tourState.isTourActive && tourState.currentTourStep === idx + 1}
             minWidth={tourState.tourPopoverWidth}
             stepsTotal={timelineTourSteps.length}
@@ -123,7 +126,7 @@ const TimelineTourComp = (props: TimelineTourProps) => {
             content={steps.content}
             anchor={`#${steps.anchor}`}
             subtitle={tourConfig.tourSubtitle}
-            footerAction={getFooterAction(step)}
+            footerAction={getFooterAction(stepCount)}
           />
         );
       })}
