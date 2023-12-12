@@ -44,7 +44,7 @@ import { LensAppLocatorDefinition } from '../common/locator/locator';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { LensStorage } from './content_management';
 import type { Document } from '../public/persistence';
-import { persistedStateToExpression } from '../public/editor_frame_service/editor_frame/state_helpers';
+import { docToExpression } from '../common';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -144,7 +144,7 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
         return mapSavedObjectToGroupConfig(savedObject);
       };
 
-      const expression = persistedStateToExpression(
+      const expression = docToExpression(
         {},
         {},
         doc,

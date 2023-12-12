@@ -29,7 +29,7 @@ import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { IUiSettingsClient, HttpSetup, CoreStart, NotificationsStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
-import { generateId } from '../../../id_generator';
+import { generateId } from '../../../../common/id_generator';
 import { FormBasedPrivateState } from '../types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import {

@@ -15,7 +15,7 @@ import {
   renameOperationsMapping,
   BaseIndexPatternColumn,
 } from './definitions';
-import { documentField } from '../document_field';
+import { documentField } from '../../../../common/document_field';
 import { hasField } from '../pure_utils';
 
 export { operationDefinitionMap } from './definitions';

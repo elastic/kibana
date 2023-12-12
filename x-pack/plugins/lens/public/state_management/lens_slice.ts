@@ -26,7 +26,7 @@ import type {
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
 import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
 import type { Datasource, Visualization } from '../types';
-import { generateId } from '../id_generator';
+import { generateId } from '../../common/id_generator';
 import type { DateRange, LayerType } from '../../common/types';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';

@@ -23,7 +23,7 @@ import {
   initExisting,
   initEmpty,
 } from '../../../state_management';
-import { generateId } from '../../../id_generator';
+import { generateId } from '../../../../common/id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';

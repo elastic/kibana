@@ -27,7 +27,7 @@ import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-com
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import useObservable from 'react-use/lib/useObservable';
-import { generateId } from '../../id_generator';
+import { generateId } from '../../../common/id_generator';
 import {
   isDraggedDataViewField,
   isOperationFromCompatibleGroup,

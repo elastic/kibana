@@ -38,7 +38,7 @@ import { isLensEqual } from './lens_document_equality';
 import {
   type IndexPatternServiceAPI,
   createIndexPatternService,
-} from '../data_views_service/service';
+} from '../../common/data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { useApplicationUserMessages } from './get_application_user_messages';
 

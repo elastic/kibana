@@ -22,7 +22,7 @@ import {
 } from '../../../state_management/lens_slice';
 import { AddLayerFunction, DragDropOperation, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
-import { generateId } from '../../../id_generator';
+import { generateId } from '../../../../common/id_generator';
 import { ConfigPanelWrapperProps } from './types';
 import { useFocusUpdate } from './use_focus_update';
 import {

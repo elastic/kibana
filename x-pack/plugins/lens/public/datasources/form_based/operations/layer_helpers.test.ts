@@ -26,7 +26,7 @@ import { AvgIndexPatternColumn } from './definitions/metrics';
 import type { FormBasedLayer, FormBasedPrivateState } from '../types';
 import { documentField } from '../document_field';
 import { getFieldByNameFactory } from '../pure_helpers';
-import { generateId } from '../../../id_generator';
+import { generateId } from '../../../../common/id_generator';
 import { createMockedFullReference, createMockedManagedReference } from './mocks';
 import {
   CounterRateIndexPatternColumn,

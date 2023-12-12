@@ -19,7 +19,7 @@ import {
 } from '..';
 import type { FormBasedLayer } from '../../../types';
 import { mathOperation } from './math';
-import { documentField } from '../../../document_field';
+import { documentField } from '../../../../../../common/document_field';
 import { runASTValidation, shouldHaveFieldArgument, tryToParse } from './validation';
 import {
   filterByVisibleOperation,

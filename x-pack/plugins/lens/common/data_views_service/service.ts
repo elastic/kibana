@@ -8,14 +8,14 @@
 import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  UPDATE_FILTER_REFERENCES_ACTION,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public';
-import type { IndexPattern, IndexPatternMap } from '../types';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+// import {
+//   UPDATE_FILTER_REFERENCES_ACTION,
+//   UPDATE_FILTER_REFERENCES_TRIGGER,
+// } from '@kbn/unified-search-plugin/public';
+import type { DataViewsState } from '../../public/state_management';
+import type { IndexPattern, IndexPatternMap } from '../../public/types';
 import { ensureIndexPattern, loadIndexPatterns } from './loader';
-import type { DataViewsState } from '../state_management';
 import { generateId } from '../id_generator';
 
 export interface IndexPatternServiceProps {
@@ -114,15 +114,15 @@ export const createIndexPatternService = ({
       replaceIndexPattern(loadedPatterns[newDataView.id!], dataView.id!, {
         applyImmediately: true,
       });
-      const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-      const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+      // const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+      // const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
 
-      action?.execute({
-        trigger,
-        fromDataView: dataView.id,
-        toDataView: newDataView.id,
-        usedDataViews: [],
-      } as ActionExecutionContext);
+      // action?.execute({
+      //   trigger,
+      //   fromDataView: dataView.id,
+      //   toDataView: newDataView.id,
+      //   usedDataViews: [],
+      // } as ActionExecutionContext);
     },
     ensureIndexPattern: (args) =>
       ensureIndexPattern({ onError: showLoadingDataViewError, dataViews, ...args }),

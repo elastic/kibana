@@ -31,7 +31,7 @@ import {
 } from './definitions';
 import type { DataViewDragDropOperation, FormBasedLayer, FormBasedPrivateState } from '../types';
 import { getSortScoreByPriorityForField } from './operations';
-import { generateId } from '../../../id_generator';
+import { generateId } from '../../../../common/id_generator';
 import {
   GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
@@ -39,7 +39,7 @@ import {
 } from './definitions/column_types';
 import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './definitions/formula';
 import type { TimeScaleUnit } from '../../../../common/expressions';
-import { documentField } from '../document_field';
+import { documentField } from '../../../../common/document_field';
 import { isColumnOfType } from './definitions/helpers';
 import type { DataType } from '../../..';
 

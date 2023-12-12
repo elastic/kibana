@@ -14,7 +14,7 @@ import {
   XYAnnotationLayerConfig,
   XYDataLayerConfig,
 } from './types';
-import { generateId } from '../../id_generator';
+import { generateId } from '../../../common/id_generator';
 import { getXyVisualization } from './xy_visualization';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';

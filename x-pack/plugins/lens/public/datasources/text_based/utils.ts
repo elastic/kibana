@@ -14,7 +14,7 @@ import {
   getIndexPatternFromESQLQuery,
 } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { generateId } from '../../id_generator';
+import { generateId } from '../../../common/id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 
 import type { IndexPatternRef, TextBasedPrivateState, TextBasedLayerColumn } from './types';

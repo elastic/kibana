@@ -47,7 +47,7 @@ import {
   UserMessagesGetter,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import { getDatasourceExpressionsByLayers } from './expression_helpers';
+import { getDatasourceExpressionsByLayers } from '../../../common/expression_helpers';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors/memoized_error_notification';
 import { getMissingIndexPattern } from './state_helpers';
 import {

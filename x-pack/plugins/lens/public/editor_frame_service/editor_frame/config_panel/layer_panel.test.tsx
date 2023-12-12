@@ -13,7 +13,7 @@ import { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../.
 import { LayerPanel } from './layer_panel';
 import { LayerActions } from './layer_actions';
 import { coreMock } from '@kbn/core/public/mocks';
-import { generateId } from '../../../id_generator';
+import { generateId } from '../../../../common/id_generator';
 import {
   createMockVisualization,
   createMockFramePublicAPI,

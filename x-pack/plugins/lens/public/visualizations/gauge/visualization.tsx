@@ -36,7 +36,7 @@ import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
 import { GaugeToolbar } from './toolbar_component';
 import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
-import { generateId } from '../../id_generator';
+import { generateId } from '../../../common/id_generator';
 import { getAccessorsFromState } from './utils';
 
 const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {

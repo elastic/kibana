@@ -23,7 +23,7 @@ import { LayerPanel } from './layer_panel';
 import { coreMock } from '@kbn/core/public/mocks';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { generateId } from '../../../id_generator';
+import { generateId } from '../../../../common/id_generator';
 import { mountWithProvider } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { ReactWrapper } from 'enzyme';

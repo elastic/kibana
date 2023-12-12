@@ -13,7 +13,7 @@ import type {
   CountColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { DatasourceSuggestion } from '../../types';
-import { generateId } from '../../id_generator';
+import { generateId } from '../../../common/id_generator';
 import type { FormBasedPrivateState } from './types';
 import {
   getDatasourceSuggestionsForField,

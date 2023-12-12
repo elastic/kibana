@@ -14,7 +14,8 @@ import type {
   AnyColumnWithSourceField,
   TermsColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { generateId } from '../../id_generator';
+import { documentField } from '../../../common/document_field';
+import { generateId } from '../../../common/id_generator';
 import type {
   DatasourceSuggestion,
   IndexPattern,
@@ -42,7 +43,6 @@ import {
 } from './operations';
 import { hasField } from './pure_utils';
 import type { FormBasedPrivateState, FormBasedLayer } from './types';
-import { documentField } from './document_field';
 import { OperationDefinition } from './operations/definitions';
 import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
 

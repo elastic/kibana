@@ -76,7 +76,7 @@ import { WrappingHelpPopover } from '../help_popover';
 import { isColumn } from '../operations/definitions/helpers';
 import type { FieldChoiceWithOperationType } from './field_select';
 import type { IndexPattern, IndexPatternField } from '../../../types';
-import { documentField } from '../document_field';
+import { documentField } from '../../../../common/document_field';
 
 export interface DimensionEditorProps extends FormBasedDimensionEditorProps {
   selectedColumn?: GenericIndexPatternColumn;

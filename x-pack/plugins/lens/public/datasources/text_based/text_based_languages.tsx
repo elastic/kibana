@@ -33,7 +33,7 @@ import {
   DataSourceInfo,
   UserMessage,
 } from '../../types';
-import { generateId } from '../../id_generator';
+import { generateId } from '../../../common/id_generator';
 import type {
   TextBasedPrivateState,
   TextBasedPersistedState,

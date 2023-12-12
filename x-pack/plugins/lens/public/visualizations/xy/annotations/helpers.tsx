@@ -27,7 +27,7 @@ import {
   getDataLayers,
   isAnnotationsLayer,
 } from '../visualization_helpers';
-import { generateId } from '../../../id_generator';
+import { generateId } from '../../../../common/id_generator';
 
 const MAX_DATE = 8640000000000000;
 const MIN_DATE = -8640000000000000;

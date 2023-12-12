@@ -15,7 +15,7 @@ import {
   mockedDndOperations,
   mockedColumns,
 } from './mocks';
-import { generateId } from '../../../../id_generator';
+import { generateId } from '../../../../../common/id_generator';
 
 const getDefaultProps = () => ({
   indexPatterns: mockDataViews(),
