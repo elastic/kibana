@@ -38,7 +38,7 @@ export function useFetchSloList({
   sortBy = 'status',
   sortDirection = 'desc',
   shouldRefetch,
-  perPage,
+  perPage = 25,
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,
@@ -50,7 +50,7 @@ export function useFetchSloList({
   );
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: sloKeys.list({ kqlQuery, page, sortBy, sortDirection }),
+    queryKey: sloKeys.list({ kqlQuery, page, perPage, sortBy, sortDirection }),
     queryFn: async ({ signal }) => {
       const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
         query: {

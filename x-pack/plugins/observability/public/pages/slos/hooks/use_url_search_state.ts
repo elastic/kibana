@@ -16,6 +16,7 @@ export const SLO_LIST_SEARCH_URL_STORAGE_KEY = 'search';
 export interface SearchState {
   kqlQuery: string;
   page: number;
+  perPage: number;
   sort: {
     by: SortField;
     direction: SortDirection;
@@ -27,6 +28,7 @@ export interface SearchState {
 export const DEFAULT_STATE = {
   kqlQuery: '',
   page: 0,
+  perPage: 25,
   sort: { by: 'status' as const, direction: 'desc' as const },
   view: 'cardView' as const,
   compact: true,
