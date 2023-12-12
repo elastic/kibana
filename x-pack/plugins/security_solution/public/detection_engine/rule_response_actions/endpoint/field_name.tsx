@@ -77,7 +77,7 @@ const FieldNameFieldComponent = ({
               code: 'ERR_FIELD_MISSING',
               path,
               message: i18n.translate(
-                'xpack.securitySolution.responseActions.endpoint.validations.commandIsRequiredErrorMessage',
+                'xpack.securitySolution.responseActions.endpoint.validations.fieldNameIsRequiredErrorMessage',
                 {
                   defaultMessage:
                     '{field} is a required field when process.pid toggle is turned off',
