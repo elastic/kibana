@@ -116,13 +116,16 @@ export async function executor(
 
 function wrapUserDefinedCode(code: string) {
   const template = fs.readFileSync(`${__dirname}/child_process_template.tplt`, 'utf8');
-  return template.replace(
+  const wrappedTemplate = template.replace(
     '// INJECT CODE HERE',
     code
       .split('\n')
       .map((s) => `    ${s}`)
       .join('\n')
   );
+
+  // Inject necessary variables
+  return wrappedTemplate.replace(`{{queryDelay}}`, '15000'); // TODO: Pull from settings
 }
 
 function getDetectedAlerts(output: string) {
