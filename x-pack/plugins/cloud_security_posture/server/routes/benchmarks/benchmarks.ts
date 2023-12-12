@@ -78,10 +78,6 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
           const cspBenchmarks = await getBenchmarksV2(
             esClient,
             cspContext.soClient,
-            cspContext.packagePolicyService,
-            request.query,
-            cspContext.agentPolicyService,
-            cspContext.agentService,
             cspContext.logger
           );
           return response.ok({

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { type TypeOf } from '@kbn/config-schema';
-import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { CspFinding } from './schemas/csp_finding';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
@@ -142,7 +141,6 @@ export interface BaseCspSetupStatus {
 
 export type CspSetupStatus = BaseCspSetupStatus;
 
-export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: number };
 
 export type BenchmarkId = CspBenchmarkRuleMetadata['benchmark']['id'];
 export type BenchmarkName = CspBenchmarkRuleMetadata['benchmark']['name'];
@@ -237,5 +235,3 @@ export interface AggFieldBucket {
     doc_count?: string;
   }>;
 }
-
-export type BenchmarksCisId = 'cis_k8s' | 'cis_azure' | 'cis_aws' | 'cis_eks' | 'cis_gcp';

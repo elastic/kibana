@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { BenchmarksCisId } from '../../types_old';
-import { BenchmarkScore } from '../latest';
+// Optionally, re-export the entire set of types. Interfaces and types declared after this will override v1 declarations.
+export { BenchmarkScore } from './v1';
+
+export type BenchmarksCisId = 'cis_k8s' | 'cis_azure' | 'cis_aws' | 'cis_eks' | 'cis_gcp';
 
 export interface Benchmark {
   id: BenchmarksCisId;
@@ -14,4 +16,8 @@ export interface Benchmark {
   version: string;
   score: BenchmarkScore;
   evaluation: number;
+}
+
+export interface GetBenchmarkResponse {
+  items: Benchmark[];
 }

@@ -23,7 +23,7 @@ import {
 import { getRulesCountForPolicy } from './utilities';
 import { Benchmark } from '../../../common/types/benchmarks/v1';
 
-export const getBenchmarksDataV1 = (
+export const getBenchmarksData = (
   soClient: SavedObjectsClientContract,
   agentPolicies: AgentPolicy[],
   agentStatusByAgentPolicyId: AgentStatusByAgentPolicyMap,

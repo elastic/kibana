@@ -6,6 +6,4 @@
  */
 
 export * from './rules/v3';
-export * from './benchmarks_score/v1';
 export * from './benchmarks/v2';
-export * from './get_benchmark_response/v2';

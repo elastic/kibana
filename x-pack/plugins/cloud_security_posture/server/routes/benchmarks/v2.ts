@@ -27,13 +27,12 @@ import {
   getCspAgentPolicies,
   getAgentStatusesByAgentPolicies,
 } from '../../lib/fleet_util';
-import { getBenchmarksDataV1 } from './v1';
 import { CspBenchmarkRule, Benchmark } from '../../../common/types/latest';
 import { getClusters } from '../compliance_dashboard/get_clusters';
 import { getStats } from '../compliance_dashboard/get_stats';
 import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 
-export const getBenchmarksDataV2 = async (
+export const getBenchmarksData = async (
   soClient: SavedObjectsClientContract,
   esClient: any,
   logger: Logger
@@ -122,47 +121,12 @@ export const getBenchmarksDataV2 = async (
 export const getBenchmarks = async (
   esClient: any,
   soClient: SavedObjectsClientContract,
-  packagePolicyService: PackagePolicyClient,
   query: any,
-  agentPolicyService: AgentPolicyServiceInterface,
-  agentService: AgentService,
   logger: Logger
 ) => {
-  const excludeVulnMgmtPackages = true;
-
-  const packagePolicies: ListResult<PackagePolicy> = await getCspPackagePolicies(
-    soClient,
-    packagePolicyService,
-    CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-    query,
-    POSTURE_TYPE_ALL,
-    excludeVulnMgmtPackages
-  );
-
-  const agentPolicies = await getCspAgentPolicies(
-    soClient,
-    packagePolicies.items,
-    agentPolicyService
-  );
-
-  const agentStatusesByAgentPolicyId = await getAgentStatusesByAgentPolicies(
-    agentService,
-    agentPolicies,
-    logger
-  );
-
-  const benchmarks = await getBenchmarksDataV1(
-    soClient,
-    agentPolicies,
-    agentStatusesByAgentPolicyId,
-    packagePolicies.items
-  );
-
-  const benchmarksVersion2 = await getBenchmarksDataV2(soClient, esClient, logger);
+  const benchmarks = await getBenchmarksData(soClient, esClient, logger);
   const getBenchmarkResponse = {
-    ...packagePolicies,
-    items: benchmarksVersion2,
-    items_policies_information: benchmarks,
+    items: benchmarks,
   };
   return getBenchmarkResponse;
 };

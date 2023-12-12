@@ -21,7 +21,7 @@ export interface UseCspBenchmarkIntegrationsProps {
   sortOrder: BenchmarksQueryParams['sort_order'];
 }
 
-export const useCspBenchmarkIntegrations = ({
+export const useCspBenchmarkIntegrationsV1 = ({
   name,
   perPage,
   page,
@@ -42,6 +42,19 @@ export const useCspBenchmarkIntegrations = ({
     () =>
       http.get<GetBenchmarkResponse>(BENCHMARKS_ROUTE_PATH, {
         query,
+        version: '1',
+      }),
+    { keepPreviousData: true }
+  );
+};
+
+export const useCspBenchmarkIntegrationsV2 = () => {
+  const { http } = useKibana().services;
+
+  return useQuery(
+    [QUERY_KEY, query],
+    () =>
+      http.get<GetBenchmarkResponse>(BENCHMARKS_ROUTE_PATH, {
         version: '2',
       }),
     { keepPreviousData: true }
