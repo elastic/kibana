@@ -10,12 +10,13 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { DatasetQualityRoute, ObservablityLogExplorerMainRoute } from '../routes/main';
+import { DatasetQualityRoute, ObservabilityLogExplorerMainRoute } from '../routes/main';
 import {
   ObservabilityLogExplorerAppMountParameters,
   ObservabilityLogExplorerPluginStart,
   ObservabilityLogExplorerStartDeps,
 } from '../types';
+import { KbnUrlStateStorageFromRouterProvider } from '../utils/kbn_url_state_context';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 
 export const renderObservabilityLogExplorer = (
@@ -59,26 +60,25 @@ export const ObservabilityLogExplorerApp = ({
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
     core,
     plugins,
-    pluginStart
+    pluginStart,
+    appParams
   );
 
   return (
     <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
       <KibanaContextProviderForPlugin>
-        <Router history={appParams.history}>
-          <Routes>
-            <Route
-              path="/"
-              exact={true}
-              render={() => <ObservablityLogExplorerMainRoute appParams={appParams} core={core} />}
-            />
-            <Route
-              path="/dataset-quality"
-              exact={true}
-              render={() => <DatasetQualityRoute core={core} />}
-            />
-          </Routes>
-        </Router>
+        <KbnUrlStateStorageFromRouterProvider>
+          <Router history={appParams.history}>
+            <Routes>
+              <Route path="/" exact={true} render={() => <ObservabilityLogExplorerMainRoute />} />
+              <Route
+                path="/dataset-quality"
+                exact={true}
+                render={() => <DatasetQualityRoute core={core} />}
+              />
+            </Routes>
+          </Router>
+        </KbnUrlStateStorageFromRouterProvider>
       </KibanaContextProviderForPlugin>
     </KibanaRenderContextProvider>
   );

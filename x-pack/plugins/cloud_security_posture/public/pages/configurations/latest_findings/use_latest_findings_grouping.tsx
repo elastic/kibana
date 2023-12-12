@@ -15,7 +15,7 @@ import {
 } from '@kbn/securitysolution-grouping/src';
 import { useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { Evaluation } from '../../../../common/types';
+import { Evaluation } from '../../../../common/types_old';
 import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
 import {
   FindingsGroupingAggregation,
