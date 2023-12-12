@@ -186,11 +186,15 @@ describe('calculateRiskScores()', () => {
           '@timestamp': expect.any(String),
           id_field: expect.any(String),
           id_value: expect.any(String),
-          calculated_level: 'Unknown',
+          calculated_level: 'Low',
           calculated_score: expect.any(Number),
           calculated_score_norm: expect.any(Number),
           category_1_score: expect.any(Number),
           category_1_count: expect.any(Number),
+          category_5_score: expect.any(Number),
+          category_5_count: expect.any(Number),
+          criticality_level: undefined,
+          criticality_modifier: undefined,
           notes: expect.any(Array),
         })
       );
