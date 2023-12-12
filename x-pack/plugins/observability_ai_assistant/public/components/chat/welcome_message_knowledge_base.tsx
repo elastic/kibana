@@ -33,7 +33,6 @@ export function WelcomeMessageKnowledgeBase({
   knowledgeBase: UseKnowledgeBaseResult;
 }) {
   const previouslyNotInstalled = usePrevious(knowledgeBase.status.value?.ready === false);
-
   const [showHasBeenInstalled, setShowHasBeenInstalled] = useState(false);
   const [timeoutTime, setTimeoutTime] = useState(0);
   const [, , reset] = useTimeoutFn(() => setShowHasBeenInstalled(false), timeoutTime);
@@ -41,6 +40,9 @@ export function WelcomeMessageKnowledgeBase({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const handleClosePopover = () => setIsPopoverOpen(false);
 
+  const [checkForInstallStatus, setCheckForInstallStatus] = useState(false);
+
+  // When the knowledge base is installed, show a success message for 3 seconds
   useEffect(() => {
     if (previouslyNotInstalled && knowledgeBase.status.value?.ready) {
       setTimeoutTime(3000);
@@ -49,7 +51,20 @@ export function WelcomeMessageKnowledgeBase({
     }
   }, [knowledgeBase.status.value?.ready, previouslyNotInstalled, reset]);
 
-  const [checkForInstallStatus, setCheckForInstallStatus] = useState(false);
+  // When the knowledge base is installed, stop checking for install status
+  useEffect(() => {
+    if (!checkForInstallStatus && knowledgeBase.status.value?.ready) {
+      setCheckForInstallStatus(false);
+    }
+  }, [checkForInstallStatus, knowledgeBase.status.value?.ready]);
+
+  // Check for install status every 5 seconds
+  useInterval(
+    () => {
+      knowledgeBase.status.refresh();
+    },
+    checkForInstallStatus ? 5000 : null
+  );
 
   const handleRetryInstall = async () => {
     setCheckForInstallStatus(true);
@@ -59,20 +74,6 @@ export function WelcomeMessageKnowledgeBase({
       setCheckForInstallStatus(false);
     });
   };
-
-  // Poll for status updates
-  useInterval(
-    () => {
-      knowledgeBase.status.refresh();
-    },
-    checkForInstallStatus ? 5000 : null
-  );
-
-  useEffect(() => {
-    if (!checkForInstallStatus && knowledgeBase.status.value?.ready) {
-      setCheckForInstallStatus(false);
-    }
-  }, [checkForInstallStatus, knowledgeBase.status.value?.ready]);
 
   return knowledgeBase.status.value?.ready !== undefined ? (
     <>

@@ -40,7 +40,10 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
   const modelName = knowledgeBase.status.value?.model_name;
 
   return (
-    <div className={panelContainerClassName}>
+    <div
+      className={panelContainerClassName}
+      data-test-subj="observabilityAiAssistantWelcomeMessageKnowledgeBaseSetupErrorPanel"
+    >
       <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
         <EuiDescriptionList>
           <EuiDescriptionListTitle>
