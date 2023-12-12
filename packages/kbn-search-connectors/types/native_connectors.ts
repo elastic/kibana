@@ -1378,6 +1378,84 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      ssl_enabled: {
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.sslEnabledLabel',
+          {
+            defaultMessage: 'SSL/TLS Connection',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.sslEnabledTooltip',
+          {
+            defaultMessage:
+              'This option establishes a secure connection to the MongoDB server using SSL/TLS encryption. Ensure that your MongoDB deployment supports SSL/TLS connections. Enable if MongoDB cluster uses DNS SRV records.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      ssl_ca: {
+        default_value: '',
+        depends_on: [{ field: 'ssl_enabled', value: true }],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.sslCaLabel',
+          {
+            defaultMessage: 'Certificate Authority (.pem)',
+          }
+        ),
+        options: [],
+        order: 8,
+        required: false,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.sslCaTooltip',
+          {
+            defaultMessage:
+              'Specifies the root certificate from the Certificate Authority. The value of the certificate is used to validate the certificate presented by the MongoDB instance.',
+          }
+        ),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      tls_insecure: {
+        default_value: false,
+        depends_on: [{ field: 'ssl_enabled', value: true }],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.tlsInsecureLabel',
+          {
+            defaultMessage: 'Skip certificate verification',
+          }
+        ),
+        options: [],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.tlsInsecureTooltip',
+          {
+            defaultMessage:
+              "This option skips certificate validation for TLS/SSL connections to your MongoDB server. We strongly recommend setting this option to 'disable'.",
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [FeatureName.FILTERING_ADVANCED_CONFIG]: true,

@@ -11,7 +11,7 @@ import { useRiskEnginePrivileges } from '../../api/hooks/use_risk_engine_privile
 import {
   RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
-} from '../../../../common/risk_engine';
+} from '../../../../common/entity_analytics/risk_engine';
 
 const getMissingIndexPrivileges = (
   privileges: EntityAnalyticsPrivileges['privileges']['elasticsearch']['index']
