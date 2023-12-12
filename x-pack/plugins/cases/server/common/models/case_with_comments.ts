@@ -509,9 +509,9 @@ export class CaseCommentModel {
         (attachment) => attachment.error == null
       );
 
-      const attachmentsWithoutErrors = attachments.filter((attachment) =>
-        savedObjectsWithoutErrors.some((so) => so.id === attachment.id)
-      );
+      const attachmentsWithoutErrors = attachments
+        .map((req) => ({ ...req, ...(req.type === 'user' ? { attachments: [] } : {}) }))
+        .filter((attachment) => savedObjectsWithoutErrors.some((so) => so.id === attachment.id));
 
       await Promise.all([
         commentableCase.handleAlertComments(attachmentsWithoutErrors),

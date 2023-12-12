@@ -55,6 +55,7 @@ import type {
   AttachmentsFindResponse,
   CasePostRequest,
   CasesFindResponse,
+  UserCommentRequest,
 } from '../../common/types/api';
 
 /**
@@ -210,16 +211,11 @@ type NewCommentArgs = AttachmentRequest & {
   profile_uid?: string;
 };
 
-export const transformNewComment = ({
-  createdDate,
-  email,
+export const transformNewComment = (req: NewCommentArgs): AttachmentAttributes => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  full_name,
-  username,
-  profile_uid: profileUid,
-  ...comment
-}: NewCommentArgs): AttachmentAttributes => {
-  return {
+  const { createdDate, email, full_name, username, profile_uid: profileUid, ...comment } = req;
+
+  const res = {
     ...comment,
     created_at: createdDate,
     created_by: { email, full_name, username, profile_uid: profileUid },
@@ -228,6 +224,15 @@ export const transformNewComment = ({
     updated_at: null,
     updated_by: null,
   };
+
+  if (isCommentRequestTypeUser(req)) {
+    return {
+      ...res,
+      attachments: res.attachment ?? [],
+    };
+  }
+
+  return res;
 };
 
 /**
@@ -235,7 +240,7 @@ export const transformNewComment = ({
  */
 export const isCommentRequestTypeUser = (
   context: AttachmentRequest
-): context is UserCommentAttachmentPayload => {
+): context is UserCommentRequest => {
   return context.type === AttachmentType.user;
 };
 

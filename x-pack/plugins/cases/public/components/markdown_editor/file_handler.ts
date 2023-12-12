@@ -37,12 +37,14 @@ export const createFileHandler = ({
   domain,
   caseId,
   createAttachments,
+  onUploadFile,
 }: {
   filesClient: BaseFilesClient;
   owner: Owner;
   domain: string;
   caseId: string;
   createAttachments: UseCreateAttachments['mutateAsync'];
+  onUploadFile: (files: Array<{ type: string; url: string; id: string }>) => void;
 }): EuiMarkdownDropHandler => ({
   /**
    * This is the message being shown in the
@@ -103,6 +105,17 @@ export const createFileHandler = ({
 
                 return `![${item.name}](${src})`;
               });
+
+              onUploadFile(
+                files.map((file) => ({
+                  type: 'file',
+                  url: filesClient.getDownloadHref({
+                    id: file.id,
+                    fileKind: kindId,
+                  }),
+                  id: file.id,
+                }))
+              );
 
               resolve({ text: markDownText.join('\n'), config: { block: true } });
             })

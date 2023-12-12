@@ -51,6 +51,7 @@ export const UserCommentAttachmentPayloadRt = rt.strict({
   comment: rt.string,
   type: rt.literal(AttachmentType.user),
   owner: rt.string,
+  attachments: rt.array(rt.strict({ type: rt.string, url: rt.string, id: rt.string })),
 });
 
 const UserCommentAttachmentAttributesRt = rt.intersection([

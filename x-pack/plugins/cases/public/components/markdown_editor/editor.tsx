@@ -6,26 +6,13 @@
  */
 
 import type { ElementRef } from 'react';
-import React, {
-  memo,
-  forwardRef,
-  useCallback,
-  useRef,
-  useState,
-  useImperativeHandle,
-  useMemo,
-} from 'react';
+import React, { memo, forwardRef, useCallback, useRef, useState, useImperativeHandle } from 'react';
 import type { EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
 import { EuiMarkdownEditor } from '@elastic/eui';
 import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
-import { useFilesContext } from '@kbn/shared-ux-file-context';
-import type { Owner } from '../../../common/constants/types';
+import type { EuiMarkdownDropHandler } from '@elastic/eui/src/components/markdown_editor/markdown_types';
 import { usePlugins } from './use_plugins';
 import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
-import { createFileHandler } from './file_handler';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { useCaseViewParams } from '../../common/navigation';
 
 interface MarkdownEditorProps {
   ariaLabel: string;
@@ -35,6 +22,7 @@ interface MarkdownEditorProps {
   onChange: (content: string) => void;
   disabledUiPlugins?: string[] | undefined;
   value: string;
+  dropHandlers?: EuiMarkdownDropHandler[];
 }
 
 export type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
@@ -46,12 +34,10 @@ export interface MarkdownEditorRef {
 }
 
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
-  ({ ariaLabel, dataTestSubj, editorId, height, onChange, value, disabledUiPlugins }, ref) => {
-    const { client: filesClient } = useFilesContext();
-    const { owner } = useCasesContext();
-    const { mutateAsync: createAttachments } = useCreateAttachments();
-    const { detailName: caseId } = useCaseViewParams();
-
+  (
+    { ariaLabel, dataTestSubj, editorId, height, onChange, value, disabledUiPlugins, dropHandlers },
+    ref
+  ) => {
     const astRef = useRef<EuiMarkdownAstNode | undefined>(undefined);
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
     const onParse: EuiMarkdownEditorProps['onParse'] = useCallback((err, { messages, ast }) => {
@@ -61,21 +47,6 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
 
     const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins(disabledUiPlugins);
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
-
-    const fileOwner = owner[0];
-    const domain = `${window.location.protocol}//${window.location.host}`;
-
-    const dropHandlers = useMemo(() => {
-      return [
-        createFileHandler({
-          filesClient,
-          owner: fileOwner as Owner,
-          domain,
-          caseId,
-          createAttachments,
-        }),
-      ];
-    }, [fileOwner, filesClient, domain, createAttachments, caseId]);
 
     useLensButtonToggle({
       astRef,
