@@ -293,7 +293,7 @@ export const ActionTypeForm = ({
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionItem.group, actionItem.frequency?.summary]);
+  }, [messageVariables, actionItem.group, actionItem.frequency?.summary]);
 
   useEffect(() => {
     (async () => {
