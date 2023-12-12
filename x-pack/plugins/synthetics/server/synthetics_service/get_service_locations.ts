@@ -43,7 +43,7 @@ export async function getServiceLocations(server: SyntheticsServerSetup) {
     const { data } = await axios.get<{
       throttling: ThrottlingOptions;
       locations: Record<string, ManifestLocation>;
-    }>(server.config.service!.manifestUrl!);
+    }>(manifestUrl);
 
     const availableLocations =
       server.isDev || server.config.service?.showExperimentalLocations

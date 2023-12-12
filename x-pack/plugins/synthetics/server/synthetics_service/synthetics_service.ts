@@ -17,6 +17,8 @@ import {
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pMap from 'p-map';
+import moment from 'moment';
+import { verifySyntheticsAssetsChecks } from '../routes/synthetics_service/assets_check';
 import { registerCleanUpTask } from './private_location/clean_up_task';
 import { SyntheticsServerSetup } from '../types';
 import { syntheticsMonitorType, syntheticsParamType } from '../../common/types/saved_objects';
@@ -65,9 +67,9 @@ export class SyntheticsService {
 
   public indexTemplateExists?: boolean;
   private indexTemplateInstalling?: boolean;
+  private lastAssetsCheck?: number;
 
   public isAllowed: boolean;
-  public signupUrl: string | null;
 
   public syncErrors?: ServiceLocationErrors | null = [];
 
@@ -78,7 +80,6 @@ export class SyntheticsService {
     this.server = server;
     this.config = server.config.service ?? {};
     this.isAllowed = false;
-    this.signupUrl = null;
 
     this.apiClient = new ServiceAPIClient(server.logger, this.config, this.server);
 
@@ -87,15 +88,21 @@ export class SyntheticsService {
     this.locations = [];
   }
 
-  public async setup(taskManager: TaskManagerSetupContract) {
-    this.registerSyncTask(taskManager);
-    registerCleanUpTask(taskManager, this.server);
+  async assertIsAllowed(refresh = false) {
+    if (this.isAllowed && !refresh) {
+      return true;
+    }
 
     await this.registerServiceLocations();
 
-    const { allowed, signupUrl } = await this.apiClient.checkAccountAccessStatus();
+    const { allowed } = await this.apiClient.checkAccountAccessStatus();
     this.isAllowed = allowed;
-    this.signupUrl = signupUrl;
+    return allowed;
+  }
+
+  public setup(taskManager: TaskManagerSetupContract) {
+    this.registerSyncTask(taskManager);
+    registerCleanUpTask(taskManager, this.server);
   }
 
   public start(taskManager: TaskManagerStartContract) {
@@ -141,16 +148,36 @@ export class SyntheticsService {
     }
   }
 
+  public async verifyAssetsCheck() {
+    if (this.indexTemplateExists) {
+      // only check once a day
+      if (this.lastAssetsCheck && moment().diff(moment(this.lastAssetsCheck), 'days') < 1) {
+        return true;
+      }
+      const { hasAllAssets } = await verifySyntheticsAssetsChecks(this.server);
+      if (!hasAllAssets) {
+        this.lastAssetsCheck = undefined;
+      } else {
+        this.lastAssetsCheck = Date.now();
+      }
+
+      return hasAllAssets;
+    } else {
+      return true;
+    }
+  }
+
   public async registerServiceLocations() {
     const service = this;
-
     try {
       const result = await getServiceLocations(service.server);
       service.throttling = result.throttling;
       service.locations = result.locations;
       service.apiClient.locations = result.locations;
+      return { locations: service.locations, throttling: service.throttling };
     } catch (e) {
       this.logger.error(e);
+      return { locations: [] };
     }
   }
 
@@ -170,27 +197,23 @@ export class SyntheticsService {
             // Perform the work of the task. The return value should fit the TaskResult interface.
             async run() {
               const { state } = taskInstance;
-              try {
-                await service.registerServiceLocations();
-
-                const { allowed, signupUrl } = await service.apiClient.checkAccountAccessStatus();
-                service.isAllowed = allowed;
-                service.signupUrl = signupUrl;
-
-                if (service.isAllowed && service.config.manifestUrl) {
+              if (await service.assertIsAllowed(true)) {
+                try {
                   service.setupIndexTemplates();
-                  await service.pushConfigs();
+                  if (await service.verifyAssetsCheck()) {
+                    await service.pushConfigs();
+                  }
+                } catch (e) {
+                  sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
+                    reason: 'Failed to run scheduled sync task',
+                    message: e?.message,
+                    type: 'runTaskError',
+                    code: e?.code,
+                    status: e.status,
+                    stackVersion: service.server.stackVersion,
+                  });
+                  service.logger.error(e);
                 }
-              } catch (e) {
-                sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-                  reason: 'Failed to run scheduled sync task',
-                  message: e?.message,
-                  type: 'runTaskError',
-                  code: e?.code,
-                  status: e.status,
-                  stackVersion: service.server.stackVersion,
-                });
-                service.logger.error(e);
               }
 
               return { state, schedule: { interval } };
@@ -330,7 +353,7 @@ export class SyntheticsService {
 
   async addConfigs(configs: ConfigData[]) {
     try {
-      if (configs.length === 0) {
+      if (configs.length === 0 || !(await this.assertIsAllowed())) {
         return;
       }
 
@@ -355,7 +378,7 @@ export class SyntheticsService {
 
   async editConfig(monitorConfig: ConfigData[], isEdit = true) {
     try {
-      if (monitorConfig.length === 0) {
+      if (monitorConfig.length === 0 || !(await this.assertIsAllowed())) {
         return;
       }
       const license = await this.getLicense();
