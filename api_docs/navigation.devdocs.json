@@ -278,6 +278,140 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
+        "id": "def-public.TopNavMenuBadges",
+        "type": "Function",
+        "tags": [],
+        "label": "TopNavMenuBadges",
+        "description": [],
+        "signature": [
+          "({ badges }: { badges: ",
+          {
+            "pluginId": "navigation",
+            "scope": "public",
+            "docId": "kibNavigationPluginApi",
+            "section": "def-public.TopNavMenuBadgeProps",
+            "text": "TopNavMenuBadgeProps"
+          },
+          "[] | undefined; }) => JSX.Element | null"
+        ],
+        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuBadges.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ badges }",
+            "description": [],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "navigation",
+                "id": "def-public.TopNavMenuBadges.$1.badges",
+                "type": "Array",
+                "tags": [],
+                "label": "badges",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "navigation",
+                    "scope": "public",
+                    "docId": "kibNavigationPluginApi",
+                    "section": "def-public.TopNavMenuBadgeProps",
+                    "text": "TopNavMenuBadgeProps"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
+        "id": "def-public.TopNavMenuItems",
+        "type": "Function",
+        "tags": [],
+        "label": "TopNavMenuItems",
+        "description": [],
+        "signature": [
+          "({ config, className, }: { config: ",
+          {
+            "pluginId": "navigation",
+            "scope": "public",
+            "docId": "kibNavigationPluginApi",
+            "section": "def-public.TopNavMenuData",
+            "text": "TopNavMenuData"
+          },
+          "[] | undefined; className?: string | undefined; }) => JSX.Element | null"
+        ],
+        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuItems.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  config,\n  className,\n}",
+            "description": [],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "navigation",
+                "id": "def-public.TopNavMenuItems.$1.config",
+                "type": "Array",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "navigation",
+                    "scope": "public",
+                    "docId": "kibNavigationPluginApi",
+                    "section": "def-public.TopNavMenuData",
+                    "text": "TopNavMenuData"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "navigation",
+                "id": "def-public.TopNavMenuItems.$1.className",
+                "type": "string",
+                "tags": [],
+                "label": "className",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -685,7 +819,7 @@
           "EuiToolTipProps",
           "> | undefined; renderCustomBadge?: ((props: { badgeText: string; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>) | undefined; }"
         ],
-        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
+        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getBenchmarkIdQuery } from './benchmarks_section';
-import { BenchmarkData } from '../../../../common/types';
+import { BenchmarkData } from '../../../../common/types_old';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';

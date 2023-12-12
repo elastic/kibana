@@ -14,7 +14,7 @@ import {
   DEFAULT_RISK_SCORE_PAGE_SIZE,
   RISK_SCORE_PREVIEW_URL,
 } from '../../../../../common/constants';
-import { riskScorePreviewRequestSchema } from '../../../../../common/risk_engine/risk_score_preview/request_schema';
+import { riskScorePreviewRequestSchema } from '../../../../../common/entity_analytics/risk_engine/risk_score_preview/request_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { riskScoreServiceFactory } from '../risk_score_service';

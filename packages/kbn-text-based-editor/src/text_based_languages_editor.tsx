@@ -713,6 +713,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         iconType="error"
                         iconSide="left"
                         data-test-subj="TextBasedLangEditor-inline-errors-badge"
+                        title={i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.errorCountTitle',
+                          {
+                            defaultMessage:
+                              '{count} {count, plural, one {error} other {errors}} found',
+                            values: { count: editorMessages.errors.length },
+                          }
+                        )}
                       >
                         {editorMessages.errors.length}
                       </EuiBadge>
@@ -726,6 +734,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           iconType="warning"
                           iconSide="left"
                           data-test-subj="TextBasedLangEditor-inline-warning-badge"
+                          title={i18n.translate(
+                            'textBasedEditor.query.textBasedLanguagesEditor.warningCountTitle',
+                            {
+                              defaultMessage:
+                                '{count} {count, plural, one {warning} other {warnings}} found',
+                              values: { count: editorMessages.warnings.length },
+                            }
+                          )}
                         >
                           {editorMessages.warnings.length}
                         </EuiBadge>

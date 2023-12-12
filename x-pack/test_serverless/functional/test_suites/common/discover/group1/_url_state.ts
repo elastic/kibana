@@ -77,9 +77,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Side nav', function () {
-      // Discover does not exist in Serverless O11y side nav (Log Explorer instead)
-      this.tags('skipSvlOblt');
-
       it('should sync Lens global state to Discover sidebar link and carry over the state when navigating to Discover', async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.navigateToApp('lens');

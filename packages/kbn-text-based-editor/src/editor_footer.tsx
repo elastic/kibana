@@ -109,7 +109,14 @@ export function ErrorsWarningsPopover({
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="error" color={strings.color} size="s" />
+          <EuiIcon
+            type={type}
+            color={strings.color}
+            size="s"
+            onClick={() => {
+              setIsPopoverOpen(!isPopoverOpen);
+            }}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover

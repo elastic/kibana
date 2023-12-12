@@ -288,10 +288,6 @@ export const baseFlamegraph: BaseFlameGraph = {
   SamplingRate: 1,
   SelfCPU: 7,
   TotalCPU: 245,
-  SelfAnnualCO2Tons: 0.0013627551116480942,
-  TotalAnnualCO2Tons: 0.04769642890768329,
-  SelfAnnualCostsUSD: 61.30240940376492,
-  TotalAnnualCostsUSD: 2145.5843291317715,
   TotalSamples: 7,
   TotalSeconds: 4.980000019073486,
 };
