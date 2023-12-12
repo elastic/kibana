@@ -22,7 +22,7 @@ import {
 } from '../../common/mock';
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
 
-import { SortFieldCase, StatusAll } from '../../../common/ui/types';
+import { SortFieldCase } from '../../../common/ui/types';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyCellValue } from '../empty_value';
@@ -38,11 +38,8 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCategories } from '../../containers/use_get_categories';
 import { useUpdateCase } from '../../containers/use_update_case';
-import {
-  useGetCases,
-  DEFAULT_QUERY_PARAMS,
-  DEFAULT_FILTER_OPTIONS,
-} from '../../containers/use_get_cases';
+import { useGetCases } from '../../containers/use_get_cases';
+import { DEFAULT_QUERY_PARAMS, DEFAULT_FILTER_OPTIONS } from '../../containers/constants';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
@@ -50,6 +47,7 @@ import { useLicense } from '../../common/use_license';
 import * as api from '../../containers/api';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/use_get_cases');
@@ -66,6 +64,7 @@ jest.mock('../app/use_available_owners', () => ({
 }));
 jest.mock('../../containers/use_update_case');
 jest.mock('../../common/use_license');
+jest.mock('../../containers/user_profiles/use_suggest_user_profiles');
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
@@ -77,6 +76,7 @@ const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useGetCategoriesMock = useGetCategories as jest.Mock;
+const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
@@ -100,7 +100,7 @@ describe('AllCasesListGeneric', () => {
   };
 
   const defaultColumnArgs = {
-    filterStatus: CaseStatuses.open,
+    filterStatus: [CaseStatuses.open],
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
     isLoadingColumns: false,
@@ -167,6 +167,7 @@ describe('AllCasesListGeneric', () => {
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
     useUpdateCaseMock.mockReturnValue({ mutate: updateCaseProperty });
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+    useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
     mockKibana();
     moment.tz.setDefault('UTC');
     window.localStorage.clear();
@@ -403,7 +404,8 @@ describe('AllCasesListGeneric', () => {
   it('should sort by status', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(screen.getByTitle('Status'));
+    // 0 is the status filter button label
+    userEvent.click(screen.getAllByTitle('Status')[1]);
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -424,14 +426,16 @@ describe('AllCasesListGeneric', () => {
       expect(screen.getByTitle('Name')).toBeInTheDocument();
       expect(screen.getByTitle('Category')).toBeInTheDocument();
       expect(screen.getByTitle('Created on')).toBeInTheDocument();
-      expect(screen.getByTitle('Severity')).toBeInTheDocument();
+      // 0 is the severity filter button label
+      expect(screen.getAllByTitle('Severity')[1]).toBeInTheDocument();
     });
   });
 
   it('should sort by severity', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(screen.getByTitle('Severity'));
+    // 0 is the severity filter button label
+    userEvent.click(screen.getAllByTitle('Severity')[1]);
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -503,7 +507,7 @@ describe('AllCasesListGeneric', () => {
   it('should filter by category', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(screen.getByTestId('options-filter-popover-button-Categories'));
+    userEvent.click(screen.getByTestId('options-filter-popover-button-category'));
     await waitForEuiPopoverOpen();
     userEvent.click(screen.getByTestId('options-filter-popover-item-twix'));
 
@@ -511,7 +515,7 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          searchFields: [],
+          searchFields: ['title', 'description'],
           owner: ['securitySolution'],
           category: ['twix'],
         },
@@ -520,70 +524,20 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('should filter by status: closed', async () => {
-    appMockRenderer.render(<AllCasesList isSelectorView={false} />);
-    userEvent.click(screen.getByTestId('case-status-filter'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('case-status-filter-closed'));
-    await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          queryParams: { ...DEFAULT_QUERY_PARAMS, sortField: SortFieldCase.closedAt },
-        })
-      );
-    });
-  });
-
-  it('should filter by status: in-progress', async () => {
-    appMockRenderer.render(<AllCasesList isSelectorView={false} />);
-    userEvent.click(screen.getByTestId('case-status-filter'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('case-status-filter-in-progress'));
-    await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          queryParams: DEFAULT_QUERY_PARAMS,
-        })
-      );
-    });
-  });
-
-  it('should filter by status: open', async () => {
-    appMockRenderer.render(<AllCasesList isSelectorView={false} />);
-    userEvent.click(screen.getByTestId('case-status-filter'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('case-status-filter-in-progress'));
-    await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          queryParams: DEFAULT_QUERY_PARAMS,
-        })
-      );
-    });
-  });
-
   it('should show the correct count on stats', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(screen.getByTestId('case-status-filter'));
+    userEvent.click(screen.getByTestId('options-filter-popover-button-status'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('case-status-filter-open')).toHaveTextContent('Open (20)');
-      expect(screen.getByTestId('case-status-filter-in-progress')).toHaveTextContent(
+      expect(screen.getByTestId('options-filter-popover-item-open')).toHaveTextContent('Open (20)');
+      expect(screen.getByTestId('options-filter-popover-item-in-progress')).toHaveTextContent(
         'In progress (40)'
       );
-      expect(screen.getByTestId('case-status-filter-closed')).toHaveTextContent('Closed (130)');
+      expect(screen.getByTestId('options-filter-popover-item-closed')).toHaveTextContent(
+        'Closed (130)'
+      );
     });
-  });
-
-  it('renders the first available status when hiddenStatus is given', async () => {
-    appMockRenderer.render(
-      <AllCasesList hiddenStatuses={[StatusAll, CaseStatuses.open]} isSelectorView={true} />
-    );
-
-    await waitFor(() =>
-      expect(screen.getAllByTestId('case-status-badge-in-progress')[0]).toBeInTheDocument()
-    );
   });
 
   it('shows Solution column if there are no set owners', async () => {
@@ -642,9 +596,9 @@ describe('AllCasesListGeneric', () => {
       expect(checkbox).toBeChecked();
     }
 
-    userEvent.click(screen.getByTestId('case-status-filter'));
+    userEvent.click(screen.getByTestId('options-filter-popover-button-status'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('case-status-filter-closed'));
+    userEvent.click(screen.getByTestId('options-filter-popover-item-open'));
 
     for (const checkbox of checkboxes) {
       expect(checkbox).not.toBeChecked();
@@ -701,24 +655,25 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toHaveBeenCalledWith({
         filterOptions: {
           search: '',
-          searchFields: [],
-          severity: 'all',
+          searchFields: ['title', 'description'],
+          severity: [],
           reporters: [],
-          status: 'all',
+          status: [],
           tags: [],
           assignees: [],
           owner: ['securitySolution', 'observability'],
           category: [],
+          customFields: {},
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
 
-      userEvent.click(getByTestId('solution-filter-popover-button'));
+      userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
       await waitForEuiPopoverOpen();
 
       userEvent.click(
-        getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
         undefined,
         {
           skipPointerEventsCheck: true,
@@ -728,20 +683,21 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toBeCalledWith({
         filterOptions: {
           search: '',
-          searchFields: [],
-          severity: 'all',
+          searchFields: ['title', 'description'],
+          severity: [],
           reporters: [],
-          status: 'all',
+          status: [],
           tags: [],
           assignees: [],
           owner: ['securitySolution'],
           category: [],
+          customFields: {},
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
 
       userEvent.click(
-        getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
         undefined,
         {
           skipPointerEventsCheck: true,
@@ -751,14 +707,15 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith({
         filterOptions: {
           search: '',
-          searchFields: [],
-          severity: 'all',
+          searchFields: ['title', 'description'],
+          severity: [],
           reporters: [],
-          status: 'all',
+          status: [],
           tags: [],
           assignees: [],
           owner: ['securitySolution', 'observability'],
           category: [],
+          customFields: {},
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
@@ -771,7 +728,7 @@ describe('AllCasesListGeneric', () => {
         </TestProviders>
       );
 
-      expect(queryByTestId('solution-filter-popover-button')).toBeFalsy();
+      expect(queryByTestId('options-filter-popover-button-owner')).toBeFalsy();
     });
 
     it('should call useGetCases with the correct owner on initial render', async () => {
@@ -784,14 +741,15 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toHaveBeenCalledWith({
         filterOptions: {
           search: '',
-          searchFields: [],
-          severity: 'all',
+          searchFields: ['title', 'description'],
+          severity: [],
           reporters: [],
-          status: 'all',
+          status: [],
           tags: [],
           assignees: [],
           owner: ['securitySolution'],
           category: [],
+          customFields: {},
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
@@ -1123,6 +1081,43 @@ describe('AllCasesListGeneric', () => {
             screen.queryAllByTestId('options-filter-popover-button-assignees').length
           ).toBeGreaterThan(0);
         });
+      });
+
+      it('should reset the assignees when deactivating the filter', async () => {
+        useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+
+        appMockRenderer.render(<AllCasesList />);
+
+        // Opens assignees filter and checks an option
+        const assigneesButton = screen.getByTestId('options-filter-popover-button-assignees');
+        userEvent.click(assigneesButton);
+        userEvent.click(screen.getByText('Damaged Raccoon'));
+        expect(within(assigneesButton).getByLabelText('1 active filters')).toBeInTheDocument();
+
+        // Deactivates assignees filter
+        userEvent.click(screen.getByRole('button', { name: 'More' }));
+        await waitForEuiPopoverOpen();
+        userEvent.click(screen.getByRole('option', { name: 'Assignees' }));
+
+        expect(useGetCasesMock).toHaveBeenLastCalledWith({
+          filterOptions: {
+            ...DEFAULT_FILTER_OPTIONS,
+            owner: [SECURITY_SOLUTION_OWNER],
+            assignees: [],
+          },
+          queryParams: DEFAULT_QUERY_PARAMS,
+        });
+
+        // Reopens assignees filter
+        userEvent.click(screen.getByRole('option', { name: 'Assignees' }));
+        // Opens the assignees popup
+        userEvent.click(assigneesButton);
+        expect(screen.getByLabelText('click to filter assignees')).toBeInTheDocument();
+        expect(
+          within(screen.getByTestId('options-filter-popover-button-assignees')).queryByLabelText(
+            '1 active filters'
+          )
+        ).not.toBeInTheDocument();
       });
     });
   });

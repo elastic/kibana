@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  buildkite,
-  COMMIT_INFO_CTX,
-  CommitWithStatuses,
-  exec,
-  SELECTED_COMMIT_META_KEY,
-} from './shared';
+import { buildkite, COMMIT_INFO_CTX, CommitWithStatuses, SELECTED_COMMIT_META_KEY } from './shared';
 import {
   getArtifactBuild,
   getOnMergePRBuild,
@@ -30,12 +24,33 @@ async function main(commitCountArg: string) {
 
   console.log('--- Updating buildkite context with listed commits');
   const commitListWithBuildResultsHtml = makeCommitInfoWithBuildResultsHtml(commitsWithStatuses);
-  exec(`buildkite-agent annotate --style 'info' --context '${COMMIT_INFO_CTX}'`, {
-    input: commitListWithBuildResultsHtml,
-  });
+  buildkite.setAnnotation(COMMIT_INFO_CTX, 'info', commitListWithBuildResultsHtml);
 
-  console.log('--- Generating buildkite input step');
-  addBuildkiteInputStep();
+  if (process.env.AUTO_SELECT_COMMIT?.match(/(1|true)/i)) {
+    console.log('--- Finding suitable candidate for auto-promotion');
+
+    const passingCommitCandidate = commitsWithStatuses.find((commit) => {
+      return (
+        commit.checks.onMergeBuild?.success &&
+        commit.checks.ftrBuild?.success &&
+        commit.checks.artifactBuild?.success
+      );
+    });
+
+    if (!passingCommitCandidate) {
+      throw new Error(
+        `Could not find a suitable candidate for auto-promotion in the last ${commitCount} commits. Stopping.`
+      );
+    }
+
+    console.log('Selected candidate: ', passingCommitCandidate);
+
+    console.log('--- Setting buildkite meta-data for auto-promotion');
+    buildkite.setMetadata(SELECTED_COMMIT_META_KEY, passingCommitCandidate.sha);
+  } else {
+    console.log('--- Generating buildkite input step');
+    addBuildkiteInputStep();
+  }
 }
 
 async function collectAvailableCommits(commitCount: number): Promise<GitCommitExtract[]> {
@@ -92,7 +107,7 @@ function addBuildkiteInputStep() {
     key: 'select-commit',
     fields: [
       {
-        text: 'Enter the release candidate commit SHA',
+        text: 'Enter the selected commit SHA',
         key: SELECTED_COMMIT_META_KEY,
       },
     ],

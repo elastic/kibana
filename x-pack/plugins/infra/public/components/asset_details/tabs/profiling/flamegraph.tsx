@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { EmbeddableFlamegraph } from '@kbn/observability-shared-plugin/public';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
@@ -13,6 +14,7 @@ import { useProfilingFlamegraphData } from '../../hooks/use_profiling_flamegraph
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ContentTabIds } from '../../types';
 import { ErrorPrompt } from './error_prompt';
+import { ProfilingLinks } from './profiling_links';
 
 export function Flamegraph() {
   const { asset } = useAssetDetailsRenderPropsContext();
@@ -37,5 +39,11 @@ export function Flamegraph() {
     return <ErrorPrompt />;
   }
 
-  return <EmbeddableFlamegraph data={response ?? undefined} isLoading={loading} height="60vh" />;
+  return (
+    <>
+      <ProfilingLinks profilingPath="flamegraphs" hostname={asset.name} />
+      <EuiSpacer />
+      <EmbeddableFlamegraph data={response ?? undefined} isLoading={loading} height="60vh" />
+    </>
+  );
 }

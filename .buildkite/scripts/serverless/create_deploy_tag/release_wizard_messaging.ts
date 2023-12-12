@@ -11,6 +11,7 @@ import {
   COMMIT_INFO_CTX,
   CURRENT_COMMIT_META_KEY,
   DEPLOY_TAG_META_KEY,
+  DRY_RUN_CTX,
   octokit,
   SELECTED_COMMIT_META_KEY,
   sendSlackMessage,
@@ -20,6 +21,9 @@ import { getUsefulLinks } from './info_sections/useful_links';
 
 const WIZARD_CTX_INSTRUCTION = 'wizard-instruction';
 const WIZARD_CTX_DEFAULT = 'wizard-main';
+
+const IS_DRY_RUN = process.env.DRY_RUN?.match(/(1|true)/i);
+const IS_AUTOMATED_RUN = process.env.AUTO_SELECT_COMMIT?.match(/(1|true)/i);
 
 type StateNames =
   | 'start'
@@ -40,6 +44,7 @@ interface StateShape {
   instruction?: string;
   instructionStyle?: 'success' | 'warning' | 'error' | 'info';
   display: boolean;
+  skipWhenAutomated?: boolean;
   pre?: (state: StateShape) => Promise<void | boolean>;
   post?: (state: StateShape) => Promise<void | boolean>;
 }
@@ -50,7 +55,15 @@ const states: Record<StateNames, StateShape> = {
     description: 'No description',
     display: false,
     post: async () => {
-      buildkite.setAnnotation(COMMIT_INFO_CTX, 'info', `<h4>:kibana: Release candidates</h4>`);
+      if (IS_DRY_RUN) {
+        buildkite.setAnnotation(
+          DRY_RUN_CTX,
+          'warning',
+          `Dry run: tag won't be pushed, slack won't be notified.`
+        );
+      }
+
+      buildkite.setAnnotation(COMMIT_INFO_CTX, 'info', `<h4>:kibana: Recent commits...</h4>`);
     },
   },
   initialize: {
@@ -69,23 +82,20 @@ const states: Record<StateNames, StateShape> = {
   },
   wait_for_selection: {
     name: 'Waiting for selection',
-    description: 'Waiting for the Release Manager to select a release candidate commit.',
+    description: 'Waiting for the Release Manager to select a commit.',
     instruction: `Please find, copy and enter a commit SHA to the buildkite input box to proceed.`,
     instructionStyle: 'warning',
+    skipWhenAutomated: true,
     display: true,
   },
   collect_commit_info: {
     name: 'Collecting commit info',
     description: 'Collecting supplementary info about the selected commit.',
-    instruction: `Please wait, while we're collecting data about the commit, and the release candidate.`,
+    instruction: `Please wait, while we're collecting data about the commits.`,
     instructionStyle: 'info',
     display: true,
     pre: async () => {
-      buildkite.setAnnotation(
-        COMMIT_INFO_CTX,
-        'info',
-        `<h4>:kibana: Selected release candidate info:</h4>`
-      );
+      buildkite.setAnnotation(COMMIT_INFO_CTX, 'info', `<h4>:kibana: Selected commit info:</h4>`);
     },
   },
   wait_for_confirmation: {
@@ -93,6 +103,7 @@ const states: Record<StateNames, StateShape> = {
     description: 'Waiting for the Release Manager to confirm the release.',
     instruction: `Please review the collected information above and unblock the release on Buildkite, if you're satisfied.`,
     instructionStyle: 'warning',
+    skipWhenAutomated: true,
     display: true,
   },
   create_deploy_tag: {
@@ -227,10 +238,13 @@ export async function transition(targetStateName: StateNames, data?: any) {
 }
 
 function updateWizardState(stateData: Record<string, 'ok' | 'nok' | 'pending' | undefined>) {
-  const wizardHeader = `<h3>:kibana: Kibana Serverless deployment wizard :mage:</h3>`;
+  const wizardHeader = IS_AUTOMATED_RUN
+    ? `<h3>:kibana: Kibana Serverless automated promotion :robot_face:</h3>`
+    : `<h3>:kibana: Kibana Serverless deployment wizard :mage:</h3>`;
 
   const wizardSteps = Object.keys(states)
     .filter((stateName) => states[stateName].display)
+    .filter((stateName) => !(IS_AUTOMATED_RUN && states[stateName].skipWhenAutomated))
     .map((stateName) => {
       const stateInfo = states[stateName];
       const stateStatus = stateData[stateName];
@@ -259,7 +273,13 @@ ${wizardSteps.join('\n')}
 function updateWizardInstruction(targetState: string, stateData: any) {
   const { instructionStyle, instruction } = states[targetState];
 
-  if (instruction) {
+  if (IS_AUTOMATED_RUN) {
+    buildkite.setAnnotation(
+      WIZARD_CTX_INSTRUCTION,
+      'info',
+      `<i>It's an automated run, no action needed.</i>`
+    );
+  } else if (instruction) {
     buildkite.setAnnotation(
       WIZARD_CTX_INSTRUCTION,
       instructionStyle || 'info',
@@ -294,7 +314,6 @@ async function sendReleaseSlackAnnouncement({
   const textBlock = (...str: string[]) => ({ type: 'mrkdwn', text: str.join('\n') });
   const buildShortname = `kibana-serverless-release #${process.env.BUILDKITE_BUILD_NUMBER}`;
 
-  const isDryRun = process.env.DRY_RUN?.match('(1|true)');
   const mergedAtDate = targetCommitData.commit?.committer?.date;
   const mergedAtUtcString = mergedAtDate ? new Date(mergedAtDate).toUTCString() : 'unknown';
   const targetCommitSha = targetCommitData.sha;
@@ -309,19 +328,13 @@ async function sendReleaseSlackAnnouncement({
   ).data;
   const compareLink = currentCommitSha
     ? `<${compareResponse.html_url}|${compareResponse.total_commits} new commits>`
-    : 'a new release candidate';
+    : 'a new commit';
 
   const mainMessage = [
     `:ship_it_parrot: Promotion of ${compareLink} to QA has been <${process.env.BUILDKITE_BUILD_URL}|initiated>!\n`,
     `*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA.\n`,
+    `cc: @kibana-serverless-promotion-notify`,
   ];
-  if (isDryRun) {
-    mainMessage.unshift(
-      `*:memo:This is a dry run - no commit will actually be promoted. Please ignore!*\n`
-    );
-  } else {
-    mainMessage.push(`cc: @kibana-serverless-promotion-notify`);
-  }
 
   const linksSection = {
     'Initiated by': process.env.BUILDKITE_BUILD_CREATOR || 'unknown',
@@ -353,6 +366,19 @@ async function sendReleaseSlackAnnouncement({
           text:
             '*Useful links:*\n\n' +
             Object.entries(usefulLinksSection)
+              .filter(([name]) => !name.includes('GPCTL'))
+              .map(([name, link]) => ` • <${link}|${name}>`)
+              .join('\n'),
+        },
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text:
+            '*GPCTL Dashboards:*\n\n' +
+            Object.entries(usefulLinksSection)
+              .filter(([name]) => name.includes('GPCTL'))
               .map(([name, link]) => ` • <${link}|${name}>`)
               .join('\n'),
         },

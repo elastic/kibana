@@ -24,6 +24,7 @@ import { buildEmptyFilter, getFilterParams, BooleanRelation } from '@kbn/es-quer
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { cx } from '@emotion/css';
 
+import { css } from '@emotion/react';
 import { FieldInput } from './field_input';
 import { OperatorInput } from './operator_input';
 import { ParamsEditor } from './params_editor';
@@ -71,6 +72,7 @@ export interface FilterItemProps {
   /** @internal used for recursive rendering **/
   renderedLevel: number;
   reverseBackground: boolean;
+  filtersCount?: number;
 }
 
 const isMaxFilterNesting = (path: string) => {
@@ -89,6 +91,7 @@ export function FilterItem({
   index,
   renderedLevel,
   draggable = true,
+  filtersCount = 1,
 }: FilterItemProps) {
   const {
     dispatch,
@@ -253,6 +256,15 @@ export function FilterItem({
                       className={cx({
                         [cursorOrCss]: dropTarget === path && !hideOr,
                       })}
+                      css={
+                        // With a single filter there's a disabled cursor set at dragging level
+                        // so we need to revert such css directive for the rest of the editor row
+                        filtersCount === 1
+                          ? css`
+                              cursor: auto;
+                            `
+                          : undefined
+                      }
                     >
                       <EuiFlexItem
                         role="button"
@@ -301,7 +313,18 @@ export function FilterItem({
                           </EuiFlexItem>
                           <EuiFlexItem className={fieldAndParamCss(euiTheme)}>
                             <EuiFormRow>
-                              <div data-test-subj="filterParams">
+                              <div
+                                data-test-subj="filterParams"
+                                css={
+                                  // The disabled cursor downstream is unset
+                                  // so force the correct cursor here based on the operator
+                                  operator
+                                    ? undefined
+                                    : css`
+                                        cursor: not-allowed;
+                                      `
+                                }
+                              >
                                 <ParamsEditor
                                   dataView={dataView}
                                   field={field}

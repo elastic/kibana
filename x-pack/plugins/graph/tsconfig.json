@@ -48,6 +48,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/content-management-utils",
     "@kbn/logging",
+    "@kbn/content-management-table-list-view-common",
   ],
   "exclude": [
     "target/**/*",

@@ -26,6 +26,7 @@ export function LayerConfiguration({
   framePublicAPI,
   hasPadding,
   setIsInlineFlyoutVisible,
+  getUserMessages,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
@@ -58,6 +59,7 @@ export function LayerConfiguration({
     hideLayerHeader: datasourceId === 'textBased',
     indexPatternService,
     setIsInlineFlyoutVisible,
+    getUserMessages,
   };
   return (
     <div
