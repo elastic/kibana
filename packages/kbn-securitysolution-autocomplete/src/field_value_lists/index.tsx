@@ -125,7 +125,12 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
           <EuiLink
             external
             target="_blank"
-            href={getDocLinks({ kibanaBranch: 'main' }).securitySolution.exceptions.value_lists}
+            href={
+              getDocLinks({
+                kibanaBranch: 'main',
+                buildFlavor: 'traditional',
+              }).securitySolution.exceptions.value_lists
+            }
           >
             {i18n.SEE_DOCUMENTATION}
           </EuiLink>
