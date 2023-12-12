@@ -198,6 +198,7 @@ function renderTestCases(
 
       expect(getScriptPathsMock).toHaveBeenCalledTimes(1);
       expect(getScriptPathsMock).toHaveBeenCalledWith({
+        darkMode: true,
         baseHref: '/mock-server-basepath',
         buildNum: expect.any(Number),
       });
