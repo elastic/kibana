@@ -13,4 +13,6 @@ echo "--- AI Assistant Cypress Tests on Serverless"
 cd x-pack/test/security_solution_cypress
 
 set +e
-yarn cypress:ai_assistant:run:serverless; status=$?; yarn junit:merge || :; exit $status
+BK_ANALYTICS_API_KEY=$(retry 5 5 vault read -field=sec-sol-cypress-bk-api-key secret/kibana-issues/dev/security-solution-ci)
+
+BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY yarn cypress:ai_assistant:run:serverless; status=$?; yarn junit:merge || :; exit $status

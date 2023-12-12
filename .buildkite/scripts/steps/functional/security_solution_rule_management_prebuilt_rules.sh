@@ -13,4 +13,7 @@ echo "--- Rule Management - Prebuilt Rules - Security Solution Cypress Tests"
 cd x-pack/test/security_solution_cypress
 
 set +e
-yarn cypress:rule_management:prebuilt_rules:run:ess; status=$?; yarn junit:merge || :; exit $status
+
+BK_ANALYTICS_API_KEY=$(retry 5 5 vault read -field=sec-sol-cypress-bk-api-key secret/kibana-issues/dev/security-solution-ci)
+
+BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY yarn cypress:rule_management:prebuilt_rules:run:ess; status=$?; yarn junit:merge || :; exit $status

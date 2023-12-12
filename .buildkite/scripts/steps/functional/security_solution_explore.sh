@@ -13,4 +13,7 @@ echo "--- Explore Cypress Tests on Security Solution"
 cd x-pack/test/security_solution_cypress
 
 set +e
-yarn cypress:explore:run:ess; status=$?; yarn junit:merge || :; exit $status
+
+BK_ANALYTICS_API_KEY=$(retry 5 5 vault read -field=sec-sol-cypress-bk-api-key secret/kibana-issues/dev/security-solution-ci)
+
+BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY yarn cypress:explore:run:ess; status=$?; yarn junit:merge || :; exit $status
