@@ -24,6 +24,18 @@ export interface TelemetryEvent {
 export const MESSAGE_FEEDBACK_SCHEMA: TelemetryEvent = {
   eventType: MESSAGE_FEEDBACK,
   schema: {
+    '@timestamp': {
+      type: 'text',
+      _meta: {
+        description: 'The timestamp of the message.',
+      },
+    },
+    feedback: {
+      type: 'text',
+      _meta: {
+        description: 'Whether the user has deemed this response useful or not',
+      },
+    },
     message: {
       properties: {
         content: {

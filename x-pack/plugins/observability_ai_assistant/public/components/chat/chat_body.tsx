@@ -75,8 +75,6 @@ export function ChatBody({
   startedFrom?: StartedFrom;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
 }) {
-  const { analytics } = useKibana().services;
-
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
 
