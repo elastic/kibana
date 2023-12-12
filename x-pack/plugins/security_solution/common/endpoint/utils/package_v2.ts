@@ -7,7 +7,12 @@
 
 import semverLte from 'semver/functions/lte';
 
-const MIN_ENDPOINT_PACKAGE_V2_VERSION = '8.12.0';
+function parseSemver(semver: string) {
+  return semver.includes('-') ? semver.substring(0, semver.indexOf('-')) : semver;
+}
+
+const MIN_ENDPOINT_PACKAGE_V2_VERSION = '8.13.0';
 export function isEndpointPackageV2(version: string) {
-  return semverLte(MIN_ENDPOINT_PACKAGE_V2_VERSION, version);
+  const parsedVersion = parseSemver(version);
+  return semverLte(MIN_ENDPOINT_PACKAGE_V2_VERSION, parsedVersion);
 }
