@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { DiscoverMainRoute } from './discover_main_route';
+import { DiscoverMainRoute, MainRouteProps } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
 import { DiscoverMainApp } from './discover_main_app';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -20,6 +20,7 @@ import {
   createCustomizationService,
   DiscoverCustomizationService,
 } from '../../customizations/customization_service';
+import { DiscoverTopNavServerless } from './components/top_nav/discover_topnav_serverless';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
 
@@ -98,12 +99,26 @@ describe('DiscoverMainRoute', () => {
       expect(component.find(DiscoverMainApp).exists()).toBe(true);
     });
   });
+
+  test('should pass hideNavMenuItems=true to DiscoverTopNavServerless while loading', async () => {
+    const component = mountComponent(true, true);
+    expect(component.find(DiscoverTopNavServerless).prop('hideNavMenuItems')).toBe(true);
+    await waitFor(() => {
+      expect(component.update().find(DiscoverTopNavServerless).prop('hideNavMenuItems')).toBe(
+        false
+      );
+    });
+  });
 });
 
 const mountComponent = (hasESData = true, hasUserDataView = true) => {
-  const props = {
+  const props: MainRouteProps = {
     isDev: false,
     customizationCallbacks: [],
+    customizationContext: {
+      displayMode: 'standalone',
+      showLogExplorerTabs: false,
+    },
   };
 
   return mountWithIntl(

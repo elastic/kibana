@@ -73,7 +73,10 @@ export class ConfigService {
   ) {
     this.log = logger.get('config');
     this.deprecationLog = logger.get('config', 'deprecation');
-    this.docLinks = getDocLinks({ kibanaBranch: env.packageInfo.branch });
+    this.docLinks = getDocLinks({
+      kibanaBranch: env.packageInfo.branch,
+      buildFlavor: env.packageInfo.buildFlavor,
+    });
 
     this.config$ = combineLatest([
       this.rawConfigProvider.getConfig$(),
