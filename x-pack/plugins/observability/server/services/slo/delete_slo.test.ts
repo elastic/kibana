@@ -13,7 +13,7 @@ import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-} from '../../assets/constants';
+} from '../../../common/slo/constants';
 import { DeleteSLO } from './delete_slo';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { createSLORepositoryMock, createTransformManagerMock } from './mocks';

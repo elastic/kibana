@@ -57,12 +57,12 @@ const RULE_2 = createRuleAssetSavedObject({
 
 const loadPageAsReadOnlyUser = (url: string) => {
   login(ROLES.t1_analyst);
-  visit(url, { role: ROLES.t1_analyst });
+  visit(url);
 };
 
 const loginPageAsWriteAuthorizedUser = (url: string) => {
   login(ROLES.t3_analyst);
-  visit(url, { role: ROLES.t3_analyst });
+  visit(url);
 };
 
 describe(

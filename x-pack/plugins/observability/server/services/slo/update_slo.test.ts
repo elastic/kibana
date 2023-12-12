@@ -14,7 +14,7 @@ import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-} from '../../assets/constants';
+} from '../../../common/slo/constants';
 import { SLO } from '../../domain/models';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import {

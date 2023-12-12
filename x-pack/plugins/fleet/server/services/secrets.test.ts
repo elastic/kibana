@@ -18,11 +18,16 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { createAppContextStartContractMock } from '../mocks';
 
-import type { NewPackagePolicy, PackageInfo } from '../types';
+import type { NewPackagePolicy, PackageInfo, PackagePolicy, UpdatePackagePolicy } from '../types';
 
 import { appContextService } from './app_context';
-
-import { getPolicySecretPaths, diffSecretPaths, extractAndWriteSecrets } from './secrets';
+import {
+  getPolicySecretPaths,
+  diffSecretPaths,
+  diffOutputSecretPaths,
+  extractAndWriteSecrets,
+  extractAndUpdateSecrets,
+} from './secrets';
 
 describe('secrets', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
@@ -913,6 +918,320 @@ describe('secrets', () => {
         expect(esClientMock.transport.request).toHaveBeenCalledTimes(2);
         expect(result.secretReferences).toHaveLength(2);
       });
+    });
+  });
+
+  describe('extractAndUpdateSecrets', () => {
+    const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+    esClientMock.transport.request.mockImplementation(async (req) => {
+      return {
+        id: uuidv4(),
+      };
+    });
+
+    beforeEach(() => {
+      esClientMock.transport.request.mockClear();
+    });
+
+    const mockIntegrationPackage = {
+      name: 'mock-package',
+      title: 'Mock package',
+      version: '0.0.0',
+      description: 'description',
+      type: 'integration',
+      status: 'not_installed',
+      vars: [
+        { name: 'pkg-secret-1', type: 'text', secret: true, required: true },
+        { name: 'pkg-secret-2', type: 'text', secret: true, required: false },
+      ],
+      data_streams: [
+        {
+          dataset: 'somedataset',
+          streams: [
+            {
+              input: 'foo',
+              title: 'Foo',
+            },
+          ],
+        },
+      ],
+      policy_templates: [
+        {
+          name: 'pkgPolicy1',
+          title: 'Package policy 1',
+          description: 'test package policy',
+          inputs: [
+            {
+              type: 'foo',
+              title: 'Foo',
+              vars: [],
+            },
+          ],
+        },
+      ],
+    } as unknown as PackageInfo;
+
+    describe('when only required secret value is provided', () => {
+      it('returns single secret reference for required secret', async () => {
+        const oldPackagePolicy = {
+          vars: {
+            'pkg-secret-1': {
+              value: 'pkg-secret-1-val',
+            },
+            'pkg-secret-2': {},
+          },
+          inputs: [],
+        } as unknown as PackagePolicy;
+
+        const mockPackagePolicy = {
+          vars: {
+            'pkg-secret-1': {
+              value: 'pkg-secret-1-val-update',
+            },
+            'pkg-secret-2': {},
+          },
+          inputs: [],
+        } as unknown as UpdatePackagePolicy;
+
+        const result = await extractAndUpdateSecrets({
+          oldPackagePolicy,
+          packagePolicyUpdate: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        expect(esClientMock.transport.request).toHaveBeenCalledTimes(1);
+        expect(result.secretReferences).toHaveLength(1);
+        expect((result.packagePolicyUpdate.vars as any)['pkg-secret-1'].value.isSecretRef).toEqual(
+          true
+        );
+        expect((result.packagePolicyUpdate.vars as any)['pkg-secret-2'].value).toBeUndefined();
+      });
+    });
+
+    describe('when both required and optional secret values are provided', () => {
+      it('returns secret reference for both required and optional secret', async () => {
+        const oldPackagePolicy = {
+          vars: {
+            'pkg-secret-1': {
+              value: 'pkg-secret-1-val',
+            },
+            'pkg-secret-2': {
+              value: { id: '1234', isSecretRef: true },
+            },
+          },
+          inputs: [],
+        } as unknown as PackagePolicy;
+
+        const mockPackagePolicy = {
+          vars: {
+            'pkg-secret-1': {
+              value: 'pkg-secret-1-val-update',
+            },
+            'pkg-secret-2': {
+              value: 'pkg-secret-2-val-update',
+            },
+          },
+          inputs: [],
+        } as unknown as UpdatePackagePolicy;
+
+        const result = await extractAndUpdateSecrets({
+          oldPackagePolicy,
+          packagePolicyUpdate: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        expect(esClientMock.transport.request).toHaveBeenCalledTimes(2);
+        expect(result.secretReferences).toHaveLength(2);
+        expect((result.packagePolicyUpdate.vars as any)['pkg-secret-1'].value.isSecretRef).toEqual(
+          true
+        );
+        expect((result.packagePolicyUpdate.vars as any)['pkg-secret-2'].value.isSecretRef).toEqual(
+          true
+        );
+      });
+    });
+  });
+});
+
+describe('diffOutputSecretPaths', () => {
+  it('should return empty array if no secrets', () => {
+    expect(diffOutputSecretPaths([], [])).toEqual({
+      toCreate: [],
+      toDelete: [],
+      noChange: [],
+    });
+  });
+  it('should return empty array if single secret not changed', () => {
+    const paths = [
+      {
+        path: 'somepath',
+        value: {
+          id: 'secret-1',
+        },
+      },
+    ];
+    expect(diffOutputSecretPaths(paths, paths)).toEqual({
+      toCreate: [],
+      toDelete: [],
+      noChange: paths,
+    });
+  });
+  it('should return empty array if multiple secrets not changed', () => {
+    const paths = [
+      {
+        path: 'somepath',
+        value: {
+          id: 'secret-1',
+        },
+      },
+      {
+        path: 'somepath2',
+        value: {
+          id: 'secret-2',
+        },
+      },
+      {
+        path: 'somepath3',
+        value: {
+          id: 'secret-3',
+        },
+      },
+    ];
+
+    expect(diffOutputSecretPaths(paths, paths.slice().reverse())).toEqual({
+      toCreate: [],
+      toDelete: [],
+      noChange: paths,
+    });
+  });
+  it('single secret modified', () => {
+    const paths1 = [
+      {
+        path: 'somepath1',
+        value: {
+          id: 'secret-1',
+        },
+      },
+      {
+        path: 'somepath2',
+        value: {
+          id: 'secret-2',
+        },
+      },
+    ];
+
+    const paths2 = [
+      paths1[0],
+      {
+        path: 'somepath2',
+        value: 'newvalue',
+      },
+    ];
+
+    expect(diffOutputSecretPaths(paths1, paths2)).toEqual({
+      toCreate: [
+        {
+          path: 'somepath2',
+          value: 'newvalue',
+        },
+      ],
+      toDelete: [
+        {
+          path: 'somepath2',
+          value: {
+            id: 'secret-2',
+          },
+        },
+      ],
+      noChange: [paths1[0]],
+    });
+  });
+  it('double secret modified', () => {
+    const paths1 = [
+      {
+        path: 'somepath1',
+        value: {
+          id: 'secret-1',
+        },
+      },
+      {
+        path: 'somepath2',
+        value: {
+          id: 'secret-2',
+        },
+      },
+    ];
+
+    const paths2 = [
+      {
+        path: 'somepath1',
+        value: 'newvalue1',
+      },
+      {
+        path: 'somepath2',
+        value: 'newvalue2',
+      },
+    ];
+
+    expect(diffOutputSecretPaths(paths1, paths2)).toEqual({
+      toCreate: [
+        {
+          path: 'somepath1',
+          value: 'newvalue1',
+        },
+        {
+          path: 'somepath2',
+          value: 'newvalue2',
+        },
+      ],
+      toDelete: [
+        {
+          path: 'somepath1',
+          value: {
+            id: 'secret-1',
+          },
+        },
+        {
+          path: 'somepath2',
+          value: {
+            id: 'secret-2',
+          },
+        },
+      ],
+      noChange: [],
+    });
+  });
+
+  it('single secret added', () => {
+    const paths1 = [
+      {
+        path: 'somepath1',
+        value: {
+          id: 'secret-1',
+        },
+      },
+    ];
+
+    const paths2 = [
+      paths1[0],
+      {
+        path: 'somepath2',
+        value: 'newvalue',
+      },
+    ];
+
+    expect(diffOutputSecretPaths(paths1, paths2)).toEqual({
+      toCreate: [
+        {
+          path: 'somepath2',
+          value: 'newvalue',
+        },
+      ],
+      toDelete: [],
+      noChange: [paths1[0]],
     });
   });
 });

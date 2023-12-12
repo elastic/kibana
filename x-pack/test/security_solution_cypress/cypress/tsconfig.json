@@ -39,6 +39,7 @@
     "@kbn/security-plugin",
     "@kbn/management-settings-ids",
     "@kbn/es-query",
-    "@kbn/ml-plugin"
+    "@kbn/ml-plugin",
+    "@kbn/license-management-plugin"
   ]
 }

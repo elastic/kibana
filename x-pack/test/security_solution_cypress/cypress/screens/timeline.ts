@@ -261,6 +261,8 @@ export const TIMELINE_SAVE_MODAL = '[data-test-subj="save-timeline-modal"]';
 
 export const TIMELINE_EDIT_MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
 
+export const TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH = '[data-test-subj="save-as-new-switch"]';
+
 export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-screen"]';
 
 export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="flyout-pane"]';

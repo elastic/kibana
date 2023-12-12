@@ -16,11 +16,13 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { profilingUseLegacyCo2Calculation } from '@kbn/observability-plugin/common';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { calculateBaseComparisonDiff } from '../topn_functions/utils';
 import { SummaryItem } from './summary_item';
+import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 interface FrameValue {
   selfCPU: number;
@@ -28,6 +30,8 @@ interface FrameValue {
   totalCount: number;
   duration: number;
   scaleFactor?: number;
+  totalAnnualCO2Kgs: number;
+  totalAnnualCostUSD: number;
 }
 
 interface Props {
@@ -45,6 +49,12 @@ function getScaleFactor(scaleFactor: number = 1) {
 }
 
 export function FramesSummary({ baseValue, comparisonValue, isLoading }: Props) {
+  const {
+    start: { core },
+  } = useProfilingDependencies();
+  const shouldUseLegacyCo2Calculation = core.uiSettings.get<boolean>(
+    profilingUseLegacyCo2Calculation
+  );
   const calculateImpactEstimates = useCalculateImpactEstimate();
 
   const baselineScaledTotalSamples = baseValue
@@ -82,13 +92,25 @@ export function FramesSummary({ baseValue, comparisonValue, isLoading }: Props) 
         comparisonValue: comparisonScaledTotalSamples || 0,
       }),
       co2EmissionDiff: calculateBaseComparisonDiff({
-        baselineValue: baseImpactEstimates?.totalSamples?.annualizedCo2 || 0,
-        comparisonValue: comparisonImpactEstimates?.totalSamples.annualizedCo2 || 0,
-        formatValue: asWeight,
+        baselineValue:
+          (shouldUseLegacyCo2Calculation
+            ? baseImpactEstimates?.totalSamples?.annualizedCo2
+            : baseValue?.totalAnnualCO2Kgs) || 0,
+        comparisonValue:
+          (shouldUseLegacyCo2Calculation
+            ? comparisonImpactEstimates?.totalSamples.annualizedCo2
+            : comparisonValue?.totalAnnualCO2Kgs) || 0,
+        formatValue: (value) => asWeight(value, 'kgs'),
       }),
       costImpactDiff: calculateBaseComparisonDiff({
-        baselineValue: baseImpactEstimates?.totalSamples.annualizedDollarCost || 0,
-        comparisonValue: comparisonImpactEstimates?.totalSamples.annualizedDollarCost || 0,
+        baselineValue:
+          (shouldUseLegacyCo2Calculation
+            ? baseImpactEstimates?.totalSamples.annualizedDollarCost
+            : baseValue?.totalAnnualCostUSD) || 0,
+        comparisonValue:
+          (shouldUseLegacyCo2Calculation
+            ? comparisonImpactEstimates?.totalSamples.annualizedDollarCost
+            : comparisonValue?.totalAnnualCostUSD) || 0,
         formatValue: asCost,
       }),
     };
@@ -98,6 +120,7 @@ export function FramesSummary({ baseValue, comparisonValue, isLoading }: Props) 
     calculateImpactEstimates,
     comparisonScaledTotalSamples,
     comparisonValue,
+    shouldUseLegacyCo2Calculation,
   ]);
 
   const data = [

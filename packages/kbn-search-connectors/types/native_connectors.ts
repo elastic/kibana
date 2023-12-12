@@ -1378,6 +1378,84 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      ssl_enabled: {
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.sslEnabledLabel',
+          {
+            defaultMessage: 'SSL/TLS Connection',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.sslEnabledTooltip',
+          {
+            defaultMessage:
+              'This option establishes a secure connection to the MongoDB server using SSL/TLS encryption. Ensure that your MongoDB deployment supports SSL/TLS connections. Enable if MongoDB cluster uses DNS SRV records.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      ssl_ca: {
+        default_value: '',
+        depends_on: [{ field: 'ssl_enabled', value: true }],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.sslCaLabel',
+          {
+            defaultMessage: 'Certificate Authority (.pem)',
+          }
+        ),
+        options: [],
+        order: 8,
+        required: false,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.sslCaTooltip',
+          {
+            defaultMessage:
+              'Specifies the root certificate from the Certificate Authority. The value of the certificate is used to validate the certificate presented by the MongoDB instance.',
+          }
+        ),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      tls_insecure: {
+        default_value: false,
+        depends_on: [{ field: 'ssl_enabled', value: true }],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.tlsInsecureLabel',
+          {
+            defaultMessage: 'Skip certificate verification',
+          }
+        ),
+        options: [],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.tlsInsecureTooltip',
+          {
+            defaultMessage:
+              "This option skips certificate validation for TLS/SSL connections to your MongoDB server. We strongly recommend setting this option to 'disable'.",
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [FeatureName.FILTERING_ADVANCED_CONFIG]: true,
@@ -2039,6 +2117,243 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       },
     },
     serviceType: 'onedrive',
+  },
+  oracle: {
+    configuration: {
+      host: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.oracle.configuration.hostLabel', {
+          defaultMessage: 'Host',
+        }),
+        options: [],
+        order: 1,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      port: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate('searchConnectors.nativeConnectors.oracle.configuration.portLabel', {
+          defaultMessage: 'Port',
+        }),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.INTEGER,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      username: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.usernameLabel',
+          {
+            defaultMessage: 'Username',
+          }
+        ),
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      password: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.passwordLabel',
+          {
+            defaultMessage: 'Password',
+          }
+        ),
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: true,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      database: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.databaseLabel',
+          {
+            defaultMessage: 'Database',
+          }
+        ),
+        options: [],
+        order: 5,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      tables: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTAREA,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.tablesLabel',
+          {
+            defaultMessage: 'Comma-separated list of tables',
+          }
+        ),
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.LIST,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      fetch_size: {
+        default_value: 50,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.fetch_sizeLabel',
+          {
+            defaultMessage: 'Rows fetched per request',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 50,
+      },
+      retry_count: {
+        default_value: 3,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.retry_countLabel',
+          {
+            defaultMessage: 'Retries per request',
+          }
+        ),
+        options: [],
+        order: 8,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 3,
+      },
+      oracle_protocol: {
+        default_value: 'TCP',
+        depends_on: [],
+        display: DisplayType.DROPDOWN,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.oracle_protocolLabel',
+          {
+            defaultMessage: 'Oracle connection protocol',
+          }
+        ),
+        options: [
+          {
+            label: 'TCP',
+            value: 'TCP',
+          },
+          {
+            label: 'TCPS',
+            value: 'TCPS',
+          },
+        ],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 'TCP',
+      },
+      oracle_home: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.oracle_homeLabel',
+          {
+            defaultMessage: 'Path to Oracle Home',
+          }
+        ),
+        options: [],
+        order: 10,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: '',
+      },
+      wallet_configuration_path: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.wallet_configuration_pathLabel',
+          {
+            defaultMessage: 'Path to SSL Wallet configuration files',
+          }
+        ),
+        options: [],
+        order: 11,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: '',
+      },
+    },
+    features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: false },
+        basic: { enabled: true },
+      },
+    },
+    name: i18n.translate('searchConnectors.nativeConnectors.oracle.name', {
+      defaultMessage: 'Oracle',
+    }),
+    serviceType: 'oracle',
   },
   postgresql: {
     configuration: {

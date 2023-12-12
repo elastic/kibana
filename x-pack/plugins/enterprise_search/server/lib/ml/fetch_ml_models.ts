@@ -12,13 +12,20 @@ import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
 
 import {
   BASE_MODEL,
+  ELSER_LINUX_OPTIMIZED_MODEL_PLACEHOLDER,
   ELSER_MODEL_ID,
   ELSER_MODEL_PLACEHOLDER,
+  E5_LINUX_OPTIMIZED_MODEL_PLACEHOLDER,
   E5_MODEL_ID,
   E5_MODEL_PLACEHOLDER,
   LANG_IDENT_MODEL_ID,
   MODEL_TITLES_BY_TYPE,
+  E5_LINUX_OPTIMIZED_MODEL_ID,
+  ELSER_LINUX_OPTIMIZED_MODEL_ID,
 } from './utils';
+
+let compatibleElserModelId = ELSER_MODEL_ID;
+let compatibleE5ModelId = E5_MODEL_ID;
 
 /**
  * Fetches and enriches trained model information and deployment status. Pins promoted models (ELSER, E5) to the top. If a promoted model doesn't exist, a placeholder will be used.
@@ -33,8 +40,18 @@ export const fetchMlModels = async (
     throw new Error('Machine Learning is not enabled');
   }
 
-  // This array will contain all models, let's add placeholders first
-  const models: MlModel[] = [ELSER_MODEL_PLACEHOLDER, E5_MODEL_PLACEHOLDER];
+  // Set the compatible ELSER and E5 model IDs based on platform architecture
+  [compatibleElserModelId, compatibleE5ModelId] = await fetchCompatiblePromotedModelIds(
+    trainedModelsProvider
+  );
+
+  // This array will contain all models, let's add placeholders first (compatible variants only)
+  const models: MlModel[] = [
+    ELSER_MODEL_PLACEHOLDER,
+    ELSER_LINUX_OPTIMIZED_MODEL_PLACEHOLDER,
+    E5_MODEL_PLACEHOLDER,
+    E5_LINUX_OPTIMIZED_MODEL_PLACEHOLDER,
+  ].filter((model) => isCompatiblePromotedModelId(model.modelId));
 
   // Fetch all models and their deployment stats using the ML client
   const modelsResponse = await trainedModelsProvider.getTrainedModels({});
@@ -69,6 +86,27 @@ export const fetchMlModels = async (
   return models.sort(sortModels);
 };
 
+/**
+ * Fetches model IDs of promoted models (ELSER, E5) that are compatible with the platform architecture. The fetches
+ * are executed in parallel.
+ * Defaults to the cross-platform variant of a model if its ID is not present in the trained models client's response.
+ * @param trainedModelsProvider Trained ML models provider
+ * @returns Array of model IDs [0: ELSER, 1: E5]
+ */
+export const fetchCompatiblePromotedModelIds = async (trainedModelsProvider: MlTrainedModels) => {
+  const compatibleModelConfigs = await Promise.all([
+    trainedModelsProvider.getCuratedModelConfig('elser', { version: 2 }),
+    trainedModelsProvider.getCuratedModelConfig('e5'),
+  ]);
+
+  return [
+    compatibleModelConfigs.find((modelConfig) => modelConfig?.modelName === 'elser')?.model_id ??
+      ELSER_MODEL_ID,
+    compatibleModelConfigs.find((modelConfig) => modelConfig?.modelName === 'e5')?.model_id ??
+      E5_MODEL_ID,
+  ];
+};
+
 const getModel = (modelConfig: MlTrainedModelConfig, modelStats?: MlTrainedModelStats): MlModel => {
   {
     const modelId = modelConfig.model_id;
@@ -78,7 +116,12 @@ const getModel = (modelConfig: MlTrainedModelConfig, modelStats?: MlTrainedModel
       modelId,
       type,
       title: getUserFriendlyTitle(modelId, type),
-      isPromoted: [ELSER_MODEL_ID, E5_MODEL_ID].includes(modelId),
+      isPromoted: [
+        ELSER_MODEL_ID,
+        ELSER_LINUX_OPTIMIZED_MODEL_ID,
+        E5_MODEL_ID,
+        E5_LINUX_OPTIMIZED_MODEL_ID,
+      ].includes(modelId),
     };
 
     // Enrich deployment stats
@@ -127,7 +170,21 @@ const mergeModel = (model: MlModel, models: MlModel[]) => {
   }
 };
 
+const isCompatiblePromotedModelId = (modelId: string) =>
+  [compatibleElserModelId, compatibleE5ModelId].includes(modelId);
+
+/**
+ * A model is supported if:
+ * - The inference type is supported, AND
+ * - The model is the compatible variant of ELSER/E5, or it's a 3rd party model
+ */
 const isSupportedModel = (modelConfig: MlTrainedModelConfig) =>
+  isSupportedInferenceType(modelConfig) &&
+  ((!modelConfig.model_id.startsWith(ELSER_MODEL_ID) &&
+    !modelConfig.model_id.startsWith(E5_MODEL_ID)) ||
+    isCompatiblePromotedModelId(modelConfig.model_id));
+
+const isSupportedInferenceType = (modelConfig: MlTrainedModelConfig) =>
   Object.keys(modelConfig.inference_config || {}).some((inferenceType) =>
     Object.keys(MODEL_TITLES_BY_TYPE).includes(inferenceType)
   ) || modelConfig.model_id === LANG_IDENT_MODEL_ID;
@@ -136,13 +193,13 @@ const isSupportedModel = (modelConfig: MlTrainedModelConfig) =>
  * Sort function for models; makes ELSER go to the top, then E5, then the rest of the models sorted by title.
  */
 const sortModels = (m1: MlModel, m2: MlModel) =>
-  m1.modelId === ELSER_MODEL_ID
+  m1.modelId.startsWith(ELSER_MODEL_ID)
     ? -1
-    : m2.modelId === ELSER_MODEL_ID
+    : m2.modelId.startsWith(ELSER_MODEL_ID)
     ? 1
-    : m1.modelId === E5_MODEL_ID
+    : m1.modelId.startsWith(E5_MODEL_ID)
     ? -1
-    : m2.modelId === E5_MODEL_ID
+    : m2.modelId.startsWith(E5_MODEL_ID)
     ? 1
     : m1.title.localeCompare(m2.title);
 

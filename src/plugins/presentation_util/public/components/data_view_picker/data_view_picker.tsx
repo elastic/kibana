@@ -100,6 +100,9 @@ export function DataViewPicker({
           compressed: true,
           ...(selectableProps ? selectableProps.searchProps : undefined),
         }}
+        listProps={{
+          truncationProps: { truncation: 'middle' },
+        }}
       >
         {(list, search) => (
           <>

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
-import { assetDetailsDashboards, KPI_CHART_HEIGHT } from '../../../../../common/visualizations';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import useAsync from 'react-use/lib/useAsync';
+import { KPI_CHART_HEIGHT } from '../../../../../common/visualizations';
 import { Kpi } from './kpi';
 
 interface Props {
@@ -20,23 +21,35 @@ interface Props {
 }
 
 export const KPIGrid = ({ assetName, dataView, dateRange }: Props) => {
-  const euiTheme = useTheme();
+  const model = findInventoryModel('host');
+  const { euiTheme } = useEuiTheme();
 
+  const { value: dashboards } = useAsync(() => {
+    return model.metrics.getDashboards();
+  });
+
+  const charts = useMemo(
+    () =>
+      dashboards?.kpi.get({
+        metricsDataView: dataView,
+        options: {
+          backgroundColor: euiTheme.colors.lightestShade,
+        },
+      }).charts ?? [],
+    [dataView, euiTheme.colors.lightestShade, dashboards?.kpi]
+  );
   return (
     <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">
-      {assetDetailsDashboards.host
-        .hostKPICharts(euiTheme.eui.euiColorLightestShade)
-        .map((chartProps, index) => (
-          <EuiFlexItem key={index}>
-            <Kpi
-              {...chartProps}
-              dateRange={dateRange}
-              assetName={assetName}
-              dataView={dataView}
-              height={KPI_CHART_HEIGHT}
-            />
-          </EuiFlexItem>
-        ))}
+      {charts.map((chartProps, index) => (
+        <EuiFlexItem key={index}>
+          <Kpi
+            {...chartProps}
+            dateRange={dateRange}
+            assetName={assetName}
+            height={KPI_CHART_HEIGHT}
+          />
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };

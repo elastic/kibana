@@ -15,9 +15,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  EuiCallOut,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -110,42 +108,6 @@ export function MobileServiceOverview() {
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             <EuiHorizontalRule />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCallOut
-              title={i18n.translate(
-                'xpack.apm.serviceOverview.mobileCallOutTitle',
-                {
-                  defaultMessage: 'Mobile APM',
-                }
-              )}
-              iconType="mobile"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.apm.serviceOverview.mobileCallOutText"
-                  defaultMessage="This is a mobile service, which is currently released as a technical
-            preview. You can help us improve the experience by giving feedback. {feedbackLink}."
-                  values={{
-                    feedbackLink: (
-                      <EuiLink
-                        target={'_blank'}
-                        data-test-subj="apmMobileServiceOverviewGiveFeedbackLink"
-                        href="https://ela.st/feedback-apm-mobile"
-                      >
-                        {i18n.translate(
-                          'xpack.apm.serviceOverview.mobileCallOutLink',
-                          {
-                            defaultMessage: 'Give feedback',
-                          }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiCallOut>
-            <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem>
             <MobileStats

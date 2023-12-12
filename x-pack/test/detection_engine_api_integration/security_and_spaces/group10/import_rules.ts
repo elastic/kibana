@@ -411,11 +411,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.errors[0]).to.eql({
           rule_id: '(unknown id)',
-          error: {
-            message:
-              'type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "query", type: Invalid literal value, expected "saved_query", saved_id: Required, and 14 more',
-            status_code: 400,
-          },
+          error: { status_code: 400, message: 'threshold: Required' },
         });
       });
 

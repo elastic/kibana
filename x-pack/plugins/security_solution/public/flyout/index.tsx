@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, type FC } from 'react';
-import {
-  ExpandableFlyout,
-  type ExpandableFlyoutProps,
-  ExpandableFlyoutProvider,
-} from '@kbn/expandable-flyout';
+import React, { memo } from 'react';
+import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import {
   IsolateHostPanel,
@@ -23,10 +19,6 @@ import { RightPanelProvider } from './document_details/right/context';
 import type { LeftPanelProps } from './document_details/left';
 import { LeftPanel, DocumentDetailsLeftPanelKey } from './document_details/left';
 import { LeftPanelProvider } from './document_details/left/context';
-import {
-  SecuritySolutionFlyoutUrlSyncProvider,
-  useSecurityFlyoutUrlSync,
-} from './document_details/shared/context/url_sync';
 import type { PreviewPanelProps } from './document_details/preview';
 import { PreviewPanel, DocumentDetailsPreviewPanelKey } from './document_details/preview';
 import { PreviewPanelProvider } from './document_details/preview/context';
@@ -34,6 +26,11 @@ import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right
 import { UserPanel, UserPanelKey } from './entity_details/user_right';
 import type { RiskInputsExpandableFlyoutProps } from './entity_details/risk_inputs_left';
 import { RiskInputsPanel, RiskInputsPanelKey } from './entity_details/risk_inputs_left';
+import type { AssetDocumentLeftPanelProps } from './entity_details/asset_document_left';
+import {
+  AssetDocumentLeftPanel,
+  AssetDocumentLeftPanelKey,
+} from './entity_details/asset_document_left';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -45,6 +42,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => (
       <RightPanelProvider {...(props as RightPanelProps).params}>
         <RightPanel path={props.path as RightPanelProps['path']} />
+      </RightPanelProvider>
+    ),
+  },
+  {
+    key: AssetDocumentLeftPanelKey,
+    component: (props) => (
+      <RightPanelProvider {...(props as RightPanelProps).params}>
+        <AssetDocumentLeftPanel {...(props as AssetDocumentLeftPanelProps)} />
       </RightPanelProvider>
     ),
   },
@@ -84,42 +89,8 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   },
 ];
 
-const OuterProviders: FC = ({ children }) => {
-  return <SecuritySolutionFlyoutUrlSyncProvider>{children}</SecuritySolutionFlyoutUrlSyncProvider>;
-};
-
-const InnerProviders: FC = ({ children }) => {
-  const [flyoutRef, handleFlyoutChangedOrClosed] = useSecurityFlyoutUrlSync();
-
-  return (
-    <ExpandableFlyoutProvider
-      onChanges={handleFlyoutChangedOrClosed}
-      onClosePanels={handleFlyoutChangedOrClosed}
-      ref={flyoutRef}
-    >
-      {children}
-    </ExpandableFlyoutProvider>
-  );
-};
-
-export const SecuritySolutionFlyoutContextProvider: FC = ({ children }) => (
-  <OuterProviders>
-    <InnerProviders>{children}</InnerProviders>
-  </OuterProviders>
-);
-
-SecuritySolutionFlyoutContextProvider.displayName = 'SecuritySolutionFlyoutContextProvider';
-
-export const SecuritySolutionFlyout = memo(() => {
-  const [_flyoutRef, handleFlyoutChangedOrClosed] = useSecurityFlyoutUrlSync();
-
-  return (
-    <ExpandableFlyout
-      registeredPanels={expandableFlyoutDocumentsPanels}
-      handleOnFlyoutClosed={handleFlyoutChangedOrClosed}
-      paddingSize="none"
-    />
-  );
-});
+export const SecuritySolutionFlyout = memo(() => (
+  <ExpandableFlyout registeredPanels={expandableFlyoutDocumentsPanels} paddingSize="none" />
+));
 
 SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';

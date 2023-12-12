@@ -18,6 +18,7 @@ import {
   SPACE_IDS,
   VERSION,
   ALERT_WORKFLOW_TAGS,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -294,6 +295,7 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_UUID]: fullAlert[ALERT_UUID],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_WORKFLOW_TAGS]: [],
+        [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
         [SPACE_IDS]: ['default'],
         [VERSION]: fullAlert[VERSION],
         threat: {

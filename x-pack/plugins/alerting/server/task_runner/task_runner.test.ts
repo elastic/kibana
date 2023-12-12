@@ -798,6 +798,71 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
+  test('should update alerts with maintenance window if scoped query matches said alerts', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+
+    ruleType.executor.mockImplementation(async () => {
+      return { state: {} };
+    });
+
+    const mockMaintenanceWindows = [
+      {
+        ...getMockMaintenanceWindow(),
+        categoryIds: ['test'] as unknown as MaintenanceWindow['categoryIds'],
+        id: 'test-id-1',
+      } as unknown as MaintenanceWindow,
+      {
+        ...getMockMaintenanceWindow(),
+        categoryIds: ['test'] as unknown as MaintenanceWindow['categoryIds'],
+        scopedQuery: {
+          kql: "kibana.alert.rule.name: 'test123'",
+          filters: [],
+          dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"kibana.alert.rule.name":"test123"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+        },
+        id: 'test-id-2',
+      } as unknown as MaintenanceWindow,
+    ];
+
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(
+      mockMaintenanceWindows
+    );
+
+    alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery.mockResolvedValue({
+      alertIds: [],
+      maintenanceWindowIds: ['test-id-1', 'test-id-2'],
+    });
+
+    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    await taskRunner.run();
+    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
+
+    expect(alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery).toHaveBeenLastCalledWith({
+      executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+      maintenanceWindows: mockMaintenanceWindows,
+      ruleId: '1',
+      spaceId: 'default',
+    });
+
+    expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith(['test-id-1']);
+    expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith([
+      'test-id-1',
+      'test-id-2',
+    ]);
+  });
+
   test.each(ephemeralTestParams)(
     'skips firing actions for active alert if alert is muted %s',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {

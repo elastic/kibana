@@ -132,7 +132,7 @@ export type ArchivePackage = PackageSpecManifest &
 export interface BundledPackage {
   name: string;
   version: string;
-  buffer: Buffer;
+  getBuffer: () => Promise<Buffer>;
 }
 
 export type RegistryPackage = PackageSpecManifest &
@@ -618,6 +618,7 @@ export interface IndexTemplateMappings {
   properties: any;
   dynamic_templates?: any;
   runtime?: any;
+  subobjects?: boolean;
 }
 
 // This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101

@@ -16,7 +16,7 @@ import {
   SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_SUMMARY_INDEX_TEMPLATE_NAME,
   SLO_SUMMARY_INGEST_PIPELINE_NAME,
-} from '../../assets/constants';
+} from '../../../common/slo/constants';
 import { DefaultResourceInstaller } from './resource_installer';
 
 describe('resourceInstaller', () => {

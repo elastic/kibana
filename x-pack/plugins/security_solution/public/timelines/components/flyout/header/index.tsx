@@ -13,9 +13,9 @@ import styled from 'styled-components';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
 import type { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -27,8 +27,9 @@ import * as i18n from './translations';
 import { TimelineActionMenu } from '../action_menu';
 import { AddToFavoritesButton } from '../../timeline/properties/helpers';
 import { TimelineStatusInfo } from './timeline_status_info';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 
-export interface FlyoutHeaderPanelProps {
+interface FlyoutHeaderPanelProps {
   timelineId: string;
 }
 
@@ -117,6 +118,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   );
 
   const handleClose = useCallback(() => {
+    createHistoryEntry();
     dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
     focusActiveTimelineButton();
   }, [dispatch, timelineId]);

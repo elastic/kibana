@@ -32,10 +32,11 @@ import {
   type LatestTaskStateSchema,
   type TaskHealthStatus,
 } from './task_state';
+import { toBenchmarkMappingFieldKey } from '../lib/mapping_field_util';
 
 const CSPM_FINDINGS_STATS_TASK_ID = 'cloud_security_posture-findings_stats';
 const CSPM_FINDINGS_STATS_TASK_TYPE = 'cloud_security_posture-stats_task';
-const CSPM_FINDINGS_STATS_INTERVAL = '5m';
+export const CSPM_FINDINGS_STATS_INTERVAL = 5;
 
 export async function scheduleFindingsStatsTask(
   taskManager: TaskManagerStartContract,
@@ -47,7 +48,7 @@ export async function scheduleFindingsStatsTask(
       id: CSPM_FINDINGS_STATS_TASK_ID,
       taskType: CSPM_FINDINGS_STATS_TASK_TYPE,
       schedule: {
-        interval: CSPM_FINDINGS_STATS_INTERVAL,
+        interval: `${CSPM_FINDINGS_STATS_INTERVAL}m`,
       },
       state: emptyState,
       params: {},
@@ -177,6 +178,39 @@ const getScoreQuery = (): SearchRequest => ({
             },
           },
         },
+        score_by_benchmark_id: {
+          terms: {
+            field: 'rule.benchmark.id',
+          },
+          aggregations: {
+            benchmark_versions: {
+              terms: {
+                field: 'rule.benchmark.version',
+              },
+              aggs: {
+                total_findings: {
+                  value_count: {
+                    field: 'result.evaluation',
+                  },
+                },
+                passed_findings: {
+                  filter: {
+                    term: {
+                      'result.evaluation': 'passed',
+                    },
+                  },
+                },
+                failed_findings: {
+                  filter: {
+                    term: {
+                      'result.evaluation': 'failed',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
   },
@@ -255,6 +289,27 @@ const getFindingsScoresDocIndexingPromises = (
         ];
       })
     );
+    // creating score per benchmark id and version
+    const benchmarkStats = Object.fromEntries(
+      policyTemplateTrend.score_by_benchmark_id.buckets.map((benchmarkIdBucket) => {
+        const benchmarkId = benchmarkIdBucket.key;
+        const benchmarkVersions = Object.fromEntries(
+          benchmarkIdBucket.benchmark_versions.buckets.map((benchmarkVersionBucket) => {
+            const benchmarkVersion = toBenchmarkMappingFieldKey(benchmarkVersionBucket.key);
+            return [
+              benchmarkVersion,
+              {
+                total_findings: benchmarkVersionBucket.total_findings.value,
+                passed_findings: benchmarkVersionBucket.passed_findings.doc_count,
+                failed_findings: benchmarkVersionBucket.failed_findings.doc_count,
+              },
+            ];
+          })
+        );
+
+        return [benchmarkId, benchmarkVersions];
+      })
+    );
 
     // each document contains the policy template and its scores
     return esClient.index({
@@ -265,6 +320,7 @@ const getFindingsScoresDocIndexingPromises = (
         failed_findings: policyTemplateTrend.failed_findings.doc_count,
         total_findings: policyTemplateTrend.total_findings.value,
         score_by_cluster_id: clustersStats,
+        score_by_benchmark_id: benchmarkStats,
       },
     });
   });

@@ -13,6 +13,9 @@ import type {
   RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
 import merge from 'lodash/merge';
+import semverValid from 'semver/functions/valid';
+import semverCoerce from 'semver/functions/coerce';
+import semverLt from 'semver/functions/lt';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_EKS,
@@ -27,7 +30,7 @@ import {
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
 import { getDefaultAwsVarsGroup } from './aws_credentials_form/aws_credentials_form';
-import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
+import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types_old';
 import { cloudPostureIntegrations } from '../../common/constants';
 import { DEFAULT_EKS_VARS_GROUP } from './eks_credentials_form';
 
@@ -262,4 +265,10 @@ export const getCspmCloudShellDefaultValue = (packageInfo: PackageInfo): string 
   }, '');
 
   return cloudShellUrl;
+};
+
+export const isBelowMinVersion = (version: string, minVersion: string) => {
+  const semanticVersion = semverValid(version);
+  const versionNumberOnly = semverCoerce(semanticVersion) || '';
+  return semverLt(versionNumberOnly, minVersion);
 };
