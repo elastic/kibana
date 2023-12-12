@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -16,14 +18,15 @@ import {
   EuiTextArea,
   keys,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common';
-import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
 import { FunctionListPopover } from './function_list_popover';
+import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
+import type { ObservabilityAIAssistantChatService } from '../../types';
+import { USER_SENT_PROMPT } from '../../analytics/user_interaction';
 
 export interface ChatPromptEditorProps {
+  chatService: ObservabilityAIAssistantChatService;
   disabled: boolean;
   loading: boolean;
   initialPrompt?: string;
@@ -34,6 +37,7 @@ export interface ChatPromptEditorProps {
 }
 
 export function ChatPromptEditor({
+  chatService,
   disabled,
   loading,
   initialPrompt,
@@ -112,9 +116,11 @@ export function ChatPromptEditor({
     setFunctionPayload(undefined);
     handleResetTextArea();
 
+    let message: Message;
+
     try {
       if (selectedFunctionName) {
-        await onSubmit({
+        message = {
           '@timestamp': new Date().toISOString(),
           message: {
             role: MessageRole.Assistant,
@@ -125,20 +131,24 @@ export function ChatPromptEditor({
               arguments: currentPayload,
             },
           },
-        });
+        };
+        onSubmit(message);
 
         setFunctionPayload(undefined);
         setSelectedFunctionName(undefined);
       } else {
-        await onSubmit({
+        message = {
           '@timestamp': new Date().toISOString(),
           message: { role: MessageRole.User, content: currentPrompt },
-        });
+        };
+        onSubmit(message);
       }
+
+      chatService.analytics.reportEvent(USER_SENT_PROMPT, message);
     } catch (_) {
       setPrompt(currentPrompt);
     }
-  }, [functionPayload, loading, onSubmit, prompt, selectedFunctionName]);
+  }, [chatService, functionPayload, loading, onSubmit, prompt, selectedFunctionName]);
 
   useEffect(() => {
     setFunctionPayload(initialJsonString);

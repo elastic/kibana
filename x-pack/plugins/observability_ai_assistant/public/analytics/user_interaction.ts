@@ -5,25 +5,43 @@
  * 2.0.
  */
 
-import { RootSchema } from '@kbn/analytics-client';
-import { Message } from '../../common';
-import type { Feedback } from '../components/feedback_buttons';
+import type { RootSchema } from '@kbn/analytics-client';
+import type { Message } from '../../common';
 
-export const MESSAGE_FEEDBACK = 'observability_ai_assistant_chat_message_feedback' as const;
-export const INSIGHT_FEEDBACK = 'observability_ai_assistant_chat_insight_feedback' as const;
+export const USER_SENT_PROMPT = 'observability_ai_assistant_chat_user_sent_prompt' as const;
 
-export interface MessageFeedback extends Message {
-  feedback: Feedback;
+export interface UserInteractionTelemetryEvent {
+  eventType: typeof USER_SENT_PROMPT;
+  schema: RootSchema<Message>;
 }
 
-export interface TelemetryEvent {
-  eventType: typeof MESSAGE_FEEDBACK | typeof INSIGHT_FEEDBACK;
-  schema: RootSchema<MessageFeedback>;
-}
+// message = {
+//   '@timestamp': new Date().toISOString(),
+//   message: {
+//     role: MessageRole.Assistant,
+//     content: '',
+//     function_call: {
+//       name: selectedFunctionName,
+//       trigger: MessageRole.User,
+//       arguments: currentPayload,
+//     },
+//   },
+// };
 
-export const MESSAGE_FEEDBACK_SCHEMA: TelemetryEvent = {
-  eventType: MESSAGE_FEEDBACK,
+// message = {
+//   '@timestamp': new Date().toISOString(),
+//   message: { role: MessageRole.User, content: currentPrompt },
+// };
+
+export const USER_SENT_PROMPT_SCHEMA: UserInteractionTelemetryEvent = {
+  eventType: USER_SENT_PROMPT,
   schema: {
+    '@timestamp': {
+      type: 'text',
+      _meta: {
+        description: 'The timestamp of the message.',
+      },
+    },
     message: {
       properties: {
         content: {
@@ -54,12 +72,15 @@ export const MESSAGE_FEEDBACK_SCHEMA: TelemetryEvent = {
           },
         },
         function_call: {
+          _meta: {
+            description: 'The function call that was executed.',
+            optional: true,
+          },
           properties: {
             name: {
               type: 'text',
               _meta: {
                 description: 'The name of the function that was executed.',
-                optional: false,
               },
             },
             arguments: {
