@@ -25,12 +25,12 @@ export const useAgentVersion = (): string | undefined => {
         const availableVersions = res?.data?.items;
         let agentVersionToUse;
 
+        availableVersions?.sort(semverRcompare);
         if (
           availableVersions &&
           availableVersions.length > 0 &&
-          availableVersions.indexOf(kibanaVersion) === -1
+          availableVersions.indexOf(kibanaVersion) !== 0
         ) {
-          availableVersions.sort(semverRcompare);
           agentVersionToUse =
             availableVersions.find((version) => {
               return semverLt(version, kibanaVersion) || differsOnlyInPatch(version, kibanaVersion);
@@ -52,8 +52,8 @@ export const useAgentVersion = (): string | undefined => {
 };
 
 const differsOnlyInPatch = (versionA: string, versionB: string): boolean => {
-  const [majorA, minorA, patchA] = versionA.split('.');
-  const [majorB, minorB, patchB] = versionB.split('.');
+  const [majorA, minorA] = versionA.split('.');
+  const [majorB, minorB] = versionB.split('.');
 
-  return majorA === majorB && minorA === minorB && patchA !== patchB;
+  return majorA === majorB && minorA === minorB;
 };
