@@ -9,7 +9,6 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -219,46 +218,40 @@ export function CrashGroupDetails() {
 
   return (
     <>
-      <EuiSpacer size={'s'} />
-
+      <EuiSpacer size="m" />
       <CrashGroupHeader
         groupId={groupId}
         occurrencesCount={errorSamplesData?.occurrencesCount}
       />
-
-      <EuiSpacer size={'m'} />
-      <EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="s">
         <ChartPointerEventContextProvider>
           <EuiFlexItem grow={3}>
-            <EuiPanel hasBorder={true}>
-              <ErrorDistribution
-                fetchStatus={crashDistributionStatus}
-                distribution={crashDistributionData}
-                title={i18n.translate(
-                  'xpack.apm.serviceDetails.metrics.crashOccurrencesChart.title',
-                  { defaultMessage: 'Crash occurrences' }
-                )}
-                height={300}
-                tip={i18n.translate(
-                  'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.tip',
-                  {
-                    defaultMessage: `Crash occurrence is measured in crashes per minute.`,
-                  }
-                )}
-              />
-            </EuiPanel>
+            <ErrorDistribution
+              fetchStatus={crashDistributionStatus}
+              distribution={crashDistributionData}
+              title={i18n.translate(
+                'xpack.apm.serviceDetails.metrics.crashOccurrencesChart.title',
+                { defaultMessage: 'Crash occurrences' }
+              )}
+              height={300}
+              tip={i18n.translate(
+                'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.tip',
+                {
+                  defaultMessage: `Crash occurrence is measured in crashes per minute.`,
+                }
+              )}
+            />
           </EuiFlexItem>
         </ChartPointerEventContextProvider>
-        <EuiFlexItem grow={2}>
-          <EuiPanel hasBorder={true}>
-            <MobileErrorsAndCrashesTreemap
-              serviceName={serviceName}
-              kuery={`${kueryForTreemap}`}
-              environment={environment}
-              start={start}
-              end={end}
-            />
-          </EuiPanel>
+        <EuiFlexItem grow={3}>
+          <MobileErrorsAndCrashesTreemap
+            serviceName={serviceName}
+            kuery={`${kueryForTreemap}`}
+            environment={environment}
+            start={start}
+            end={end}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

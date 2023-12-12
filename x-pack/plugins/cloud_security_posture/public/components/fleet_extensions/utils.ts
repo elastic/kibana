@@ -30,7 +30,7 @@ import {
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
 import { getDefaultAwsVarsGroup } from './aws_credentials_form/aws_credentials_form';
-import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
+import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types_old';
 import { cloudPostureIntegrations } from '../../common/constants';
 import { DEFAULT_EKS_VARS_GROUP } from './eks_credentials_form';
 

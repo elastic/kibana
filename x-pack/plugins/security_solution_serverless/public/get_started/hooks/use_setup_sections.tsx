@@ -21,12 +21,10 @@ import type {
 
 import { CardItem } from '../card_item';
 import { getSections } from '../sections';
-import type { ProductLine } from '../../../common/product';
 
 export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => {
   const setUpCards = useCallback(
     ({
-      activeProducts,
       activeSections,
       expandedCardSteps,
       finishedSteps,
@@ -34,7 +32,6 @@ export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =
       onStepClicked,
       sectionId,
     }: {
-      activeProducts: Set<ProductLine>;
       activeSections: ActiveSections | null;
       expandedCardSteps: ExpandedCardSteps;
       finishedSteps: Record<CardId, Set<StepId>>;
@@ -65,14 +62,12 @@ export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =
 
   const setUpSections = useCallback(
     ({
-      activeProducts,
       activeSections,
       expandedCardSteps,
       finishedSteps,
       toggleTaskCompleteStatus,
       onStepClicked,
     }: {
-      activeProducts: Set<ProductLine>;
       activeSections: ActiveSections | null;
       expandedCardSteps: ExpandedCardSteps;
       finishedSteps: Record<CardId, Set<StepId>>;
@@ -81,7 +76,6 @@ export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =
     }) =>
       getSections().reduce<React.ReactNode[]>((acc, currentSection) => {
         const cardNodes = setUpCards({
-          activeProducts,
           activeSections,
           expandedCardSteps,
           finishedSteps,
@@ -117,10 +111,10 @@ export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =
               </span>
               <EuiSpacer size="l" />
               <EuiFlexGroup
-                gutterSize="m"
+                gutterSize="none"
                 direction="column"
                 css={css`
-                  ${euiTheme.size.base}
+                  gap: ${euiTheme.size.base};
                 `}
               >
                 {cardNodes}

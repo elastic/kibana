@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { SLOWithSummaryResponse, ALL_VALUE } from '@kbn/slo-schema';
 import { EuiFlexGridProps } from '@elastic/eui/src/components/flex/flex_grid';
-import { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
+import { ActiveAlerts } from '../../../../hooks/slo/active_alerts';
 import type { UseFetchRulesForSloResponse } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 import { useFetchHistoricalSummary } from '../../../../hooks/slo/use_fetch_historical_summary';
 import { SloCardItem } from './slo_card_item';

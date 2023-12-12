@@ -18,7 +18,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { createAppContextStartContractMock } from '../mocks';
 
-import type { NewPackagePolicy, PackageInfo } from '../types';
+import type { NewPackagePolicy, PackageInfo, PackagePolicy, UpdatePackagePolicy } from '../types';
 
 import { appContextService } from './app_context';
 import {
@@ -26,6 +26,7 @@ import {
   diffSecretPaths,
   diffOutputSecretPaths,
   extractAndWriteSecrets,
+  extractAndUpdateSecrets,
 } from './secrets';
 
 describe('secrets', () => {
@@ -916,6 +917,140 @@ describe('secrets', () => {
 
         expect(esClientMock.transport.request).toHaveBeenCalledTimes(2);
         expect(result.secretReferences).toHaveLength(2);
+      });
+    });
+  });
+
+  describe('extractAndUpdateSecrets', () => {
+    const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+    esClientMock.transport.request.mockImplementation(async (req) => {
+      return {
+        id: uuidv4(),
+      };
+    });
+
+    beforeEach(() => {
+      esClientMock.transport.request.mockClear();
+    });
+
+    const mockIntegrationPackage = {
+      name: 'mock-package',
+      title: 'Mock package',
+      version: '0.0.0',
+      description: 'description',
+      type: 'integration',
+      status: 'not_installed',
+      vars: [
+        { name: 'pkg-secret-1', type: 'text', secret: true, required: true },
+        { name: 'pkg-secret-2', type: 'text', secret: true, required: false },
+      ],
+      data_streams: [
+        {
+          dataset: 'somedataset',
+          streams: [
+            {
+              input: 'foo',
+              title: 'Foo',
+            },
+          ],
+        },
+      ],
+      policy_templates: [
+        {
+          name: 'pkgPolicy1',
+          title: 'Package policy 1',
+          description: 'test package policy',
+          inputs: [
+            {
+              type: 'foo',
+              title: 'Foo',
+              vars: [],
+            },
+          ],
+        },
+      ],
+    } as unknown as PackageInfo;
+
+    describe('when only required secret value is provided', () => {
+      it('returns single secret reference for required secret', async () => {
+        const oldPackagePolicy = {
+          vars: {
+            'pkg-secret-1': {
+              value: 'pkg-secret-1-val',
+            },
+            'pkg-secret-2': {},
+          },
+          inputs: [],
+        } as unknown as PackagePolicy;
+
+        const mockPackagePolicy = {
+          vars: {
+            'pkg-secret-1': {
+              value: 'pkg-secret-1-val-update',
+            },
+            'pkg-secret-2': {},
+          },
+          inputs: [],
+        } as unknown as UpdatePackagePolicy;
+
+        const result = await extractAndUpdateSecrets({
+          oldPackagePolicy,
+          packagePolicyUpdate: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        expect(esClientMock.transport.request).toHaveBeenCalledTimes(1);
+        expect(result.secretReferences).toHaveLength(1);
+        expect((result.packagePolicyUpdate.vars as any)['pkg-secret-1'].value.isSecretRef).toEqual(
+          true
+        );
+        expect((result.packagePolicyUpdate.vars as any)['pkg-secret-2'].value).toBeUndefined();
+      });
+    });
+
+    describe('when both required and optional secret values are provided', () => {
+      it('returns secret reference for both required and optional secret', async () => {
+        const oldPackagePolicy = {
+          vars: {
+            'pkg-secret-1': {
+              value: 'pkg-secret-1-val',
+            },
+            'pkg-secret-2': {
+              value: { id: '1234', isSecretRef: true },
+            },
+          },
+          inputs: [],
+        } as unknown as PackagePolicy;
+
+        const mockPackagePolicy = {
+          vars: {
+            'pkg-secret-1': {
+              value: 'pkg-secret-1-val-update',
+            },
+            'pkg-secret-2': {
+              value: 'pkg-secret-2-val-update',
+            },
+          },
+          inputs: [],
+        } as unknown as UpdatePackagePolicy;
+
+        const result = await extractAndUpdateSecrets({
+          oldPackagePolicy,
+          packagePolicyUpdate: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        expect(esClientMock.transport.request).toHaveBeenCalledTimes(2);
+        expect(result.secretReferences).toHaveLength(2);
+        expect((result.packagePolicyUpdate.vars as any)['pkg-secret-1'].value.isSecretRef).toEqual(
+          true
+        );
+        expect((result.packagePolicyUpdate.vars as any)['pkg-secret-2'].value.isSecretRef).toEqual(
+          true
+        );
       });
     });
   });

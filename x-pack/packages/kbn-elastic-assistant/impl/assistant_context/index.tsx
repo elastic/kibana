@@ -9,7 +9,7 @@ import { EuiCommentProps } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit, uniq } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -50,6 +50,7 @@ type ShowAssistantOverlay = ({
 }: ShowAssistantOverlayProps) => void;
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
+  alertsIndexPattern?: string;
   assistantAvailability: AssistantAvailability;
   assistantStreamingEnabled?: boolean;
   assistantTelemetry?: AssistantTelemetry;
@@ -87,14 +88,17 @@ export interface AssistantProviderProps {
   getInitialConversations: () => Record<string, Conversation>;
   modelEvaluatorEnabled?: boolean;
   nameSpace?: string;
+  ragOnAlerts?: boolean;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   title?: string;
+  toasts?: IToasts;
 }
 
 export interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
+  alertsIndexPattern: string | undefined;
   assistantAvailability: AssistantAvailability;
   assistantStreamingEnabled: boolean;
   assistantTelemetry?: AssistantTelemetry;
@@ -136,6 +140,7 @@ export interface UseAssistantContext {
   promptContexts: Record<string, PromptContext>;
   modelEvaluatorEnabled: boolean;
   nameSpace: string;
+  ragOnAlerts: boolean;
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: SettingsTabs;
   setAllQuickPrompts: React.Dispatch<React.SetStateAction<QuickPrompt[] | undefined>>;
@@ -149,6 +154,7 @@ export interface UseAssistantContext {
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
   title: string;
+  toasts: IToasts | undefined;
   unRegisterPromptContext: UnRegisterPromptContext;
 }
 
@@ -156,6 +162,7 @@ const AssistantContext = React.createContext<UseAssistantContext | undefined>(un
 
 export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   actionTypeRegistry,
+  alertsIndexPattern,
   assistantAvailability,
   assistantStreamingEnabled = false,
   assistantTelemetry,
@@ -175,10 +182,12 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   getInitialConversations,
   modelEvaluatorEnabled = false,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
+  ragOnAlerts = false,
   setConversations,
   setDefaultAllow,
   setDefaultAllowReplacement,
   title = DEFAULT_ASSISTANT_TITLE,
+  toasts,
 }) => {
   /**
    * Local storage for all quick prompts, prefixed by assistant nameSpace
@@ -286,6 +295,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   const value = useMemo(
     () => ({
       actionTypeRegistry,
+      alertsIndexPattern,
       assistantAvailability,
       assistantStreamingEnabled,
       assistantTelemetry,
@@ -309,6 +319,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       modelEvaluatorEnabled,
       promptContexts,
       nameSpace,
+      ragOnAlerts,
       registerPromptContext,
       selectedSettingsTab,
       setAllQuickPrompts: setLocalStorageQuickPrompts,
@@ -321,12 +332,14 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setShowAssistantOverlay,
       showAssistantOverlay,
       title,
+      toasts,
       unRegisterPromptContext,
       localStorageLastConversationId,
       setLastConversationId: setLocalStorageLastConversationId,
     }),
     [
       actionTypeRegistry,
+      alertsIndexPattern,
       assistantAvailability,
       assistantStreamingEnabled,
       assistantTelemetry,
@@ -352,6 +365,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       nameSpace,
       onConversationsUpdated,
       promptContexts,
+      ragOnAlerts,
       registerPromptContext,
       selectedSettingsTab,
       setDefaultAllow,
@@ -360,9 +374,9 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setLocalStorageLastConversationId,
       setLocalStorageQuickPrompts,
       setLocalStorageSystemPrompts,
-      setSelectedSettingsTab,
       showAssistantOverlay,
       title,
+      toasts,
       unRegisterPromptContext,
     ]
   );
