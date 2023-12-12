@@ -61,7 +61,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/securitysolution-grouping",
-    "@kbn/core-saved-objects-api-server-mocks",
   ],
   "exclude": ["target/**/*"]
 }
