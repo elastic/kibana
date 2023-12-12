@@ -28,7 +28,8 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { DataPublicPluginStart, ExecutionContextSearch } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ExecutionContextSearch } from '@kbn/es-query';
 import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
