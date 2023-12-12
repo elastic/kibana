@@ -29,8 +29,6 @@ export const CORRELATION_EVENT_TABLE_CELL =
 
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
-export const COMBO_BOX = 'button.euiFilterSelectItem[role="option"]';
-
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
@@ -109,9 +107,6 @@ export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
 export const OPEN_TIMELINE_MODAL = '[data-test-subj="open-timeline-modal"]';
 
 export const CLOSE_OPEN_TIMELINE_MODAL_BTN = `${OPEN_TIMELINE_MODAL} > button`;
-
-export const OPEN_TIMELINE_TEMPLATE_ICON =
-  '[data-test-subj="open-timeline-modal-body-filter-template"]';
 
 export const PIN_EVENT = '[data-test-subj="pin"]';
 
