@@ -22,5 +22,8 @@ export function getRuleType(): RuleTypeModel<UserDefinedRuleParams> {
     iconClass: 'visText',
     documentationUrl: null,
     requiresAppContext: false,
+    getAdditionalActionVariables: (params: UserDefinedRuleParams) => ({
+      context: params.customContextVariables ?? [],
+    }),
   };
 }

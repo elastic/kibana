@@ -34,14 +34,12 @@ export async function executor(
   const controller = new AbortController();
   let timeoutId: NodeJS.Timeout | null = null;
   async function checkTimeout() {
-    logger.info(`Checking timed out ${shouldStopExecution()}`);
     timeoutId = null;
 
     if (shouldStopExecution()) {
       logger.info(`Aborting exec`);
       controller.abort();
     } else {
-      logger.info(`Resetting setTimout to check again`);
       // check again in 30 seconds
       timeoutId = setTimeout(checkTimeout, 30000);
     }
@@ -88,8 +86,8 @@ export async function executor(
           alertsClient.report({
             id: alert.id,
             actionGroup: ActionGroupId,
-            state: {},
-            context: {},
+            state: alert.state,
+            context: alert.context,
           });
         } catch (e) {
           logger.warn(`Couldn't parse reported alert ${alertStr}`);

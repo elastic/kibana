@@ -71,6 +71,7 @@ import {
   ActionTypeRegistryContract,
   TriggersActionsUiConfig,
   RuleCreationValidConsumer,
+  ActionVariables,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
@@ -197,6 +198,7 @@ export const RuleForm = ({
   const canShowActions = hasShowActionsCapability(capabilities);
 
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
+  const [messageVariables, setMessageVariables] = useState<ActionVariables | undefined>(undefined);
   const flyoutBodyOverflowRef = useRef<HTMLDivElement | HTMLSpanElement | null>(null);
 
   const defaultRuleInterval = getInitialInterval(config.minimumScheduleInterval?.value);
@@ -461,6 +463,29 @@ export const RuleForm = ({
   }, [authorizedConsumers, rule, canShowConsumerSelection]);
 
   const selectedRuleType = rule?.ruleTypeId ? ruleTypeIndex?.get(rule?.ruleTypeId) : undefined;
+  useEffect(() => {
+    if (rule && ruleTypeModel && selectedRuleType) {
+      if (ruleTypeModel.getAdditionalActionVariables) {
+        const additionalActionVariables = ruleTypeModel.getAdditionalActionVariables(rule.params);
+        setMessageVariables({
+          context: [
+            ...(selectedRuleType.actionVariables.context ?? []),
+            ...(additionalActionVariables.context ?? []),
+          ],
+          state: [
+            ...(selectedRuleType.actionVariables.state ?? []),
+            ...(additionalActionVariables.state ?? []),
+          ],
+          params: [
+            ...(selectedRuleType.actionVariables.params ?? []),
+            ...(additionalActionVariables.params ?? []),
+          ],
+        });
+      } else {
+        setMessageVariables(selectedRuleType.actionVariables);
+      }
+    }
+  }, [rule, ruleTypeModel, selectedRuleType]);
   const recoveryActionGroup = selectedRuleType?.recoveryActionGroup?.id;
 
   const tagsOptions = rule.tags ? rule.tags.map((label: string) => ({ label })) : [];
@@ -841,7 +866,7 @@ export const RuleForm = ({
             actions={rule.actions}
             setHasActionsDisabled={setHasActionsDisabled}
             setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-            messageVariables={selectedRuleType.actionVariables}
+            messageVariables={messageVariables}
             defaultActionGroupId={defaultActionGroupId}
             hasAlertsMappings={selectedRuleType.hasAlertsMappings}
             featureId={connectorFeatureId}

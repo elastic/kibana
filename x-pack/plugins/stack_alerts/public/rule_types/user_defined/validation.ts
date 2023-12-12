@@ -10,11 +10,12 @@ import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { UserDefinedRuleParams } from './types';
 
 export const validateExpression = (ruleParams: UserDefinedRuleParams): ValidationResult => {
-  const { stringifiedUserCode } = ruleParams;
+  const { stringifiedUserCode, customContextVariables } = ruleParams;
 
   const validationResult = { errors: {} };
   const errors = {
     stringifiedUserCode: new Array<string>(),
+    customContextVariables: new Array<string>(),
   };
   validationResult.errors = errors;
 
