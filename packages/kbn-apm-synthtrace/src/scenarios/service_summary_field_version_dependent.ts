@@ -15,7 +15,7 @@ import { deleteSummaryFieldTransform } from '../lib/utils/transform_helpers';
 import { withClient } from '../lib/utils/with_client';
 
 const scenario: Scenario<ApmFields> = async ({ logger, versionOverride }) => {
-  const isLegacy = versionOverride && semver.lt(versionOverride, '8.7.0');
+  const isLegacy = versionOverride && semver.lt(versionOverride as string, '8.7.0');
   return {
     bootstrap: async ({ apmEsClient }) => {
       if (isLegacy) {
