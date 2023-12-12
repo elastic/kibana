@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
@@ -19,7 +18,12 @@ import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { isAgentUpgradeable } from '../../../common/services';
 import { AGENTS_INDEX } from '../../constants';
-import { FleetError, isESClientError, AgentNotFoundError } from '../../errors';
+import {
+  FleetError,
+  isESClientError,
+  AgentNotFoundError,
+  FleetUnauthorizedError,
+} from '../../errors';
 
 import { auditLoggingService } from '../audit_logging';
 
@@ -548,10 +552,10 @@ export async function getAgentByAccessAPIKeyId(
     throw new AgentNotFoundError('Agent not found');
   }
   if (agent.access_api_key_id !== accessAPIKeyId) {
-    throw new Error('Agent api key id is not matching');
+    throw new FleetError('Agent api key id is not matching');
   }
   if (!agent.active) {
-    throw Boom.forbidden('Agent inactive');
+    throw new FleetUnauthorizedError('Agent inactive');
   }
 
   return agent;
