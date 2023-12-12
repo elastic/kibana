@@ -57,12 +57,21 @@ const BasicAttachmentRequestRt = rt.union([
   PersistableStateAttachmentPayloadRt,
 ]);
 
-export const AttachmentRequestRt = rt.union([
-  rt.strict({
-    comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
-    type: rt.literal(AttachmentType.user),
-    owner: rt.string,
+export const UserCommentRequestRt = rt.intersection([
+  rt.exact(
+    rt.type({
+      comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
+      type: rt.literal(AttachmentType.user),
+      owner: rt.string,
+    })
+  ),
+  rt.partial({
+    attachments: rt.array(rt.type({ type: rt.string })),
   }),
+]);
+
+export const AttachmentRequestRt = rt.union([
+  UserCommentRequestRt,
   AlertAttachmentPayloadRt,
   rt.strict({
     type: rt.literal(AttachmentType.actions),

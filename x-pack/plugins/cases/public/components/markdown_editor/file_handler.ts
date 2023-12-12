@@ -8,9 +8,14 @@
 import type { EuiMarkdownDropHandler } from '@elastic/eui/src/components/markdown_editor/markdown_types';
 import type { BaseFilesClient } from '@kbn/shared-ux-file-types';
 import { createUploadState } from '@kbn/shared-ux-file-upload/src/upload_state';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+import { AttachmentType, ExternalReferenceStorageType } from '../../../common';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import type { Owner } from '../../../common/constants/types';
 import { ERROR_FILE_UPLOAD, IMAGES } from './translations';
+import type { UseCreateAttachments } from '../../containers/use_create_attachments';
+import { deleteFileAttachments } from '../../containers/api';
 
 /**
  * Most common image mime types.
@@ -30,10 +35,14 @@ export const createFileHandler = ({
   filesClient,
   owner,
   domain,
+  caseId,
+  createAttachments,
 }: {
   filesClient: BaseFilesClient;
   owner: Owner;
   domain: string;
+  caseId: string;
+  createAttachments: UseCreateAttachments['mutateAsync'];
 }): EuiMarkdownDropHandler => ({
   /**
    * This is the message being shown in the
@@ -53,14 +62,57 @@ export const createFileHandler = ({
         });
 
         uploadState.done$.subscribe((files) => {
-          const fileHref = filesClient.getDownloadHref({
-            id: files?.[0].id ?? '',
-            fileKind: kindId,
-          });
+          if (files == null || files.length === 0) {
+            reject(new Error(`${ERROR_FILE_UPLOAD}`));
+            return;
+          }
 
-          const src = `${domain}${fileHref}`;
+          const createAttachmentsReq = files.map((file) => ({
+            type: AttachmentType.externalReference as const,
+            externalReferenceId: file.id ?? '',
+            externalReferenceStorage: {
+              type: ExternalReferenceStorageType.savedObject as const,
+              soType: FILE_SO_TYPE,
+            },
+            externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+            externalReferenceMetadata: {
+              files: [
+                {
+                  name: file.fileJSON.name,
+                  extension: file.fileJSON.extension ?? '',
+                  mimeType: file.fileJSON.mimeType ?? '',
+                  created: file.fileJSON.created,
+                },
+              ],
+            },
+          }));
 
-          resolve({ text: `![${item.name}](${src})`, config: { block: true } });
+          createAttachments({
+            caseId,
+            caseOwner: owner,
+            attachments: createAttachmentsReq,
+          })
+            .then((_) => {
+              const markDownText = files.map((file) => {
+                const fileHref = filesClient.getDownloadHref({
+                  id: file.id,
+                  fileKind: kindId,
+                });
+
+                const src = `${domain}${fileHref}`;
+
+                return `![${item.name}](${src})`;
+              });
+
+              resolve({ text: markDownText.join('\n'), config: { block: true } });
+            })
+            .catch(async (error) => {
+              deleteFileAttachments({ caseId, fileIds: files.map((file) => file.id) }).finally(
+                () => {
+                  reject(new Error(`${ERROR_FILE_UPLOAD}. Error: ${error.message}`));
+                }
+              );
+            });
         });
 
         uploadState.error$.subscribe((error) => {
@@ -70,7 +122,7 @@ export const createFileHandler = ({
         });
 
         uploadState.setFiles([item]);
-        uploadState.upload();
+        uploadState.upload({ caseIds: [caseId], owner: [owner] });
       } catch (error) {
         reject(error);
       }

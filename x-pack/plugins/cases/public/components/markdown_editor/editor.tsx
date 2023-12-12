@@ -24,6 +24,8 @@ import { usePlugins } from './use_plugins';
 import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
 import { createFileHandler } from './file_handler';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { useCreateAttachments } from '../../containers/use_create_attachments';
+import { useCaseViewParams } from '../../common/navigation';
 
 interface MarkdownEditorProps {
   ariaLabel: string;
@@ -47,6 +49,9 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
   ({ ariaLabel, dataTestSubj, editorId, height, onChange, value, disabledUiPlugins }, ref) => {
     const { client: filesClient } = useFilesContext();
     const { owner } = useCasesContext();
+    const { mutateAsync: createAttachments } = useCreateAttachments();
+    const { detailName: caseId } = useCaseViewParams();
+
     const astRef = useRef<EuiMarkdownAstNode | undefined>(undefined);
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
     const onParse: EuiMarkdownEditorProps['onParse'] = useCallback((err, { messages, ast }) => {
@@ -66,9 +71,11 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
           filesClient,
           owner: fileOwner as Owner,
           domain,
+          caseId,
+          createAttachments,
         }),
       ];
-    }, [fileOwner, filesClient, domain]);
+    }, [fileOwner, filesClient, domain, createAttachments, caseId]);
 
     useLensButtonToggle({
       astRef,
