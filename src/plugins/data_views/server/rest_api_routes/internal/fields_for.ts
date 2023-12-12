@@ -116,6 +116,44 @@ const validate: FullValidationConfig<any, any, any> = {
 const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
   (isRollupsEnabled) => async (context, request, response) => {
     const { asCurrentUser } = (await context.core).elasticsearch.client;
+    if (request.query.type === 'esql') {
+      try {
+        const fields = await asCurrentUser.transport.request(
+          {
+            method: 'POST',
+            path: '/_query',
+            body: {
+              // query: 'FROM kibana*',
+              query: `${request.query.pattern} | LIMIT 0`,
+            },
+          },
+          { headers: { 'elastic-api-version': '1' } }
+        );
+
+        return response.ok({
+          body: {
+            fields: fields.columns.map((fld) => {
+              return {
+                name: fld.name,
+                type: 'string',
+                esTypes: [fld.type],
+                searchable: true,
+                aggregatable: true,
+                readFromDocValues: false,
+              };
+            }),
+            indices: [],
+          },
+        });
+      } catch (error) {
+        return response.ok({
+          body: {
+            fields: [],
+            indices: [],
+          },
+        });
+      }
+    }
     const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
     const {
       pattern,

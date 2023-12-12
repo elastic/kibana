@@ -374,6 +374,22 @@ export const IndexPatternTable = ({
 
   return (
     <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
+      <EuiButton
+        onClick={async function () {
+          const esql = await prompt("What's your ES|QL?", 'FROM kibana*');
+          const name = await prompt("What's your title?", 'My ES|QL');
+
+          const dataView = await dataViews.createAndSave({
+            title: esql!,
+            name: name!,
+            type: 'esql',
+            timeFieldName: '@timestamp',
+          });
+          history.push(`patterns/${dataView.id}`);
+        }}
+      >
+        Create esql data view
+      </EuiButton>
       {isLoadingDataState ? (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <EuiLoadingSpinner size="xxl" />

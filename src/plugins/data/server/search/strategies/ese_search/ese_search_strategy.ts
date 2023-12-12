@@ -7,6 +7,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import { map } from 'rxjs';
 import type { IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -37,6 +38,7 @@ import {
 } from '../es_search';
 import { SearchConfigSchema } from '../../../../config';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
+import { esqlSearchStrategyProvider } from '../esql_search';
 
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
@@ -45,6 +47,8 @@ export const enhancedEsSearchStrategyProvider = (
   usage?: SearchUsage,
   useInternalUser: boolean = false
 ): ISearchStrategy<IEsSearchRequest<IAsyncSearchRequestParams>> => {
+  const esqlSearchStrategy = esqlSearchStrategyProvider(logger, useInternalUser);
+
   function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     return client.asyncSearch.delete({ id });
@@ -170,12 +174,50 @@ export const enhancedEsSearchStrategyProvider = (
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
       logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
-      if (request.indexType && request.indexType !== 'rollup') {
+      if (request.indexType && request.indexType !== 'rollup' && request.indexType !== 'esql') {
         throw new KbnSearchError('Unknown indexType', 400);
+      }
+      if (request.indexType === 'esql') {
+        const req = { params: { query: request.params?.index } };
+        const obj = esqlSearchStrategy.search(req, options, deps).pipe(
+          map((result) => {
+            return {
+              ...result,
+              rawResponse: {
+                ...result.rawResponse,
+                hits: {
+                  // looping over docs
+                  hits: result.rawResponse.values.map((doc) => {
+                    // array of values, based on columns
+                    const fields = doc.reduce((col, v, i) => {
+                      col[result.rawResponse.columns[i].name] = [v];
+                      return col;
+                    }, {});
+                    return { fields };
+                  }),
+                },
+                _shards: { failed: 0 },
+              },
+            };
+          })
+        );
+        /*
+        obj.subscribe((res) => {
+          console.log('RES', res.rawResponse.hits?.hits[0]);
+        });
+        */
+        return obj;
       }
 
       if (request.indexType === undefined || !deps.rollupsEnabled) {
-        return asyncSearch(request, options, deps);
+        const async = asyncSearch(request, options, deps);
+        /*
+        async.subscribe((res) => {
+          // hits is an array of documents, { fields: { key: [ value ] } }
+          console.log('RES', res.rawResponse.hits?.hits[0]);
+        });
+        */
+        return async;
       } else {
         return from(rollupSearch(request, options, deps));
       }

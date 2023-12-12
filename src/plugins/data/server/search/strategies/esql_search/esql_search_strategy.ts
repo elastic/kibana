@@ -39,7 +39,7 @@ export const esqlSearchStrategyProvider = (
 
     // Only default index pattern type is supported here.
     // See ese for other type support.
-    if (request.indexType) {
+    if (request.indexType !== undefined && request.indexType !== 'esql') {
       throw new KbnSearchError(`Unsupported index pattern type ${request.indexType}`, 400);
     }
 
