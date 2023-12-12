@@ -15,6 +15,7 @@ cd x-pack/test/security_solution_api_integration
 set +e
 
 QA_API_KEY=$(vault_get security-solution-quality-gate qa_api_key)
+BK_ANALYTICS_API_KEY=$(retry 5 5 vault read -field=serverless-sec-sol-api-integration-bk-api-key secret/kibana-issues/dev/security-solution-quality-gate)
 
 # Generate a random 5-digit number
 random_number=$((10000 + $RANDOM % 90000))
@@ -72,7 +73,7 @@ FORMATTED_KB_URL="${KB_URL/https:\/\//}"
 # This is used in order to wait for the environment to be ready.
 sleep 150
 
-TEST_CLOUD=1 TEST_ES_URL="https://elastic:$PASSWORD@$FORMATTED_ES_URL:443" TEST_KIBANA_URL="https://elastic:$PASSWORD@$FORMATTED_KB_URL:443" yarn run $1
+BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY TEST_CLOUD=1 TEST_ES_URL="https://elastic:$PASSWORD@$FORMATTED_ES_URL:443" TEST_KIBANA_URL="https://elastic:$PASSWORD@$FORMATTED_KB_URL:443" yarn run $1
 cmd_status=$?
 echo "Exit code with status: $cmd_status"
 

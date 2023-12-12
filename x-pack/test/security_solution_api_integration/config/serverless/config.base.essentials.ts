@@ -46,6 +46,13 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ...svlSharedConfig.get('mochaOpts'),
         grep: '/^(?!.*@brokenInServerless).*@serverless.*/',
       },
+      reporterEnabled: 'mochawesome, mocha-junit-reporter, buildkite-test-collector/mocha/reporter',
+      buildkiteTestCollectorMochaReporterReporterOptions: {
+        token_name: 'BK_ANALYTICS_API_KEY',
+        'follow-symlinks': true,
+        timeout: 120,
+        'upload-concurrency': 50,
+      },
     };
   };
 }
