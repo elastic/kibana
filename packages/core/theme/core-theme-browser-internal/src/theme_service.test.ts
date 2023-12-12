@@ -206,7 +206,8 @@ describe('ThemeService', () => {
           expect(createStyleSheetMock).toHaveBeenCalledWith({ href: 'dark-1.css' });
         });
 
-        it('reacts to system theme change', async () => {
+        // unsupported and disabled for now
+        it.skip('reacts to system theme change', async () => {
           systemThemeIsDarkMock.mockReturnValue(false);
 
           let handler: (mode: boolean) => void;

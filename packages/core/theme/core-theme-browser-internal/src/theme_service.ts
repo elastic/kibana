@@ -12,11 +12,7 @@ import { _setDarkMode } from '@kbn/ui-theme';
 import type { InjectedMetadataTheme } from '@kbn/core-injected-metadata-common-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
-import {
-  systemThemeIsDark,
-  onSystemThemeChange,
-  browsersSupportsSystemTheme,
-} from './system_theme';
+import { systemThemeIsDark, browsersSupportsSystemTheme } from './system_theme';
 import { createStyleSheet } from './utils';
 
 /** @internal */
@@ -39,7 +35,7 @@ export class ThemeService {
     if (theme.darkMode === 'system' && browsersSupportsSystemTheme()) {
       const darkMode = systemThemeIsDark();
       this.applyTheme(darkMode);
-      onSystemThemeChange((mode) => this.applyTheme(mode));
+      // onSystemThemeChange((mode) => this.applyTheme(mode));
     } else {
       const darkMode = theme.darkMode === 'system' ? false : theme.darkMode;
       this.applyTheme(darkMode);
