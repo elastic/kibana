@@ -12,6 +12,10 @@ import { RuleExecutorOptions } from '../../types';
 import { StackAlertType } from '../types';
 import { ActionGroupId, Params } from './rule_type';
 const exec = promisify(ChildProcess.exec);
+const readFile = promisify(fs.readFile);
+
+// Cache the promise result so we only read once
+const childProcessTemplatePromise = readFile(`${__dirname}/child_process_template.tplt`, 'utf8');
 
 export async function executor(
   options: RuleExecutorOptions<Params, {}, {}, {}, typeof ActionGroupId, StackAlertType>
@@ -47,7 +51,7 @@ export async function executor(
 
   const userDefinedCode = params.stringifiedUserCode;
   // Wrap customCode with our own code file to provide utilities
-  const wrappedCode = wrapUserDefinedCode(userDefinedCode);
+  const wrappedCode = await wrapUserDefinedCode(userDefinedCode);
 
   const alertLimit = alertsClient.getAlertLimitValue();
   let hasReachedLimit = false;
@@ -115,8 +119,8 @@ export async function executor(
   return { state: {} };
 }
 
-function wrapUserDefinedCode(code: string) {
-  const template = fs.readFileSync(`${__dirname}/child_process_template.tplt`, 'utf8');
+async function wrapUserDefinedCode(code: string) {
+  const template = await childProcessTemplatePromise;
   return template.replace(
     '// INJECT CODE HERE',
     code
