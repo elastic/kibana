@@ -6,6 +6,7 @@
  */
 
 import ChildProcess from 'child_process';
+import fetch from 'node-fetch';
 import { promisify } from 'util';
 import fs from 'fs';
 import { RuleExecutorOptions } from '../../types';
@@ -47,7 +48,15 @@ export async function executor(
   // Periodically check whether we should continue execution or abort the child
   checkTimeout();
 
-  const userDefinedCode = params.stringifiedUserCode;
+  let userDefinedCode: string;
+  const isUrl = params.isUrl;
+  if (isUrl) {
+    const response = await fetch(params.codeOrUrl);
+    userDefinedCode = await response.text();
+  } else {
+    userDefinedCode = params.codeOrUrl;
+  }
+
   // Wrap customCode with our own code file to provide utilities
   const wrappedCode = await wrapUserDefinedCode(userDefinedCode);
 

@@ -8,6 +8,7 @@
 import { ActionVariable, RuleTypeParams } from '@kbn/alerting-plugin/common';
 
 export interface UserDefinedRuleParams extends RuleTypeParams {
-  stringifiedUserCode: string;
+  isUrl: boolean;
+  codeOrUrl: string;
   customContextVariables?: ActionVariable[];
 }

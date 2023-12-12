@@ -16,11 +16,15 @@ import {
   EuiTitle,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiFieldText,
 } from '@elastic/eui';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isString, debounce } from 'lodash';
 import { ActionVariable } from '@kbn/alerting-types';
+import { i18n } from '@kbn/i18n';
 import type { UserDefinedRuleParams } from '../types';
 import { CodeEditorModal } from './code_editor_modal';
 
@@ -31,15 +35,26 @@ export const RuleForm: React.FunctionComponent<
   const [actionVariableOptions, setActionVariableOptions] = useState<EuiComboBoxOptionOption[]>([]);
 
   useEffect(() => {
-    if (null == props.ruleParams.stringifiedUserCode) {
-      props.setRuleParams('stringifiedUserCode', 'console.log("your code appears here!");');
+    if (null == props.ruleParams.codeOrUrl) {
+      props.setRuleParams('codeOrUrl', 'console.log("your code appears here!");');
+    }
+    if (null == props.ruleParams.isUrl) {
+      props.setRuleParams('isUrl', false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onCodeChange = useCallback(
-    (code: string) => {
-      props.setRuleParams('stringifiedUserCode', code.trim());
+  const onCodeOrUrlChange = useCallback(
+    (codeOrUrl: string) => {
+      props.setRuleParams('codeOrUrl', codeOrUrl.trim());
+    },
+    [props]
+  );
+
+  const onIsUrlChange = useCallback(
+    (e: EuiSwitchEvent) => {
+      props.setRuleParams('codeOrUrl', '');
+      props.setRuleParams('isUrl', e.target.checked);
     },
     [props]
   );
@@ -66,35 +81,72 @@ export const RuleForm: React.FunctionComponent<
             <h5>
               <FormattedMessage
                 id="xpack.stackAlerts.userDefined.ui.enterCode"
-                defaultMessage="Write your own rule"
+                defaultMessage="Define your own rule"
               />
             </h5>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiFormRow
-            fullWidth
-            isInvalid={!!(props.errors.stringifiedUserCode as string[])[0]}
-            error={(props.errors.stringifiedUserCode as string[])[0]}
-          >
-            <EuiCodeBlock language="javascript" fontSize="m" paddingSize="m">
-              {props.ruleParams.stringifiedUserCode}
-            </EuiCodeBlock>
-          </EuiFormRow>
+          <EuiSwitch
+            data-test-subj="isUrlSwitch"
+            label={i18n.translate('xpack.stackAlerts.userDefined.ui.isUrlLabel', {
+              defaultMessage: 'Use URL',
+            })}
+            checked={props.ruleParams.isUrl}
+            onChange={onIsUrlChange}
+          />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup>
+        {props.ruleParams.isUrl ? (
+          <>
             <EuiFlexItem>
-              <EuiButton color="primary" onClick={() => setIsModalOpen(true)}>
-                Edit code
-              </EuiButton>
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate('xpack.stackAlerts.userDefined.ui.urlLabel', {
+                  defaultMessage: 'Use code at URL',
+                })}
+                isInvalid={!!(props.errors.codeOrUrl as string[])[0]}
+                error={(props.errors.codeOrUrl as string[])[0]}
+              >
+                <EuiFieldText
+                  placeholder="Url"
+                  value={props.ruleParams.codeOrUrl}
+                  onChange={(e) => onCodeOrUrlChange(e.target.value)}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </>
+        ) : (
+          <>
+            <EuiFlexItem>
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate('xpack.stackAlerts.userDefined.ui.codeEditorLabel', {
+                  defaultMessage: 'Code your rule',
+                })}
+                isInvalid={!!(props.errors.codeOrUrl as string[])[0]}
+                error={(props.errors.codeOrUrl as string[])[0]}
+              >
+                <EuiCodeBlock language="javascript" fontSize="m" paddingSize="m">
+                  {props.ruleParams.codeOrUrl}
+                </EuiCodeBlock>
+              </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButton color="primary" disabled>
-                Test run
-              </EuiButton>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiButton color="primary" onClick={() => setIsModalOpen(true)}>
+                    Edit code
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButton color="primary" disabled>
+                    Test run
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+          </>
+        )}
+
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h5>
@@ -134,8 +186,8 @@ export const RuleForm: React.FunctionComponent<
       <EuiSpacer />
       <CodeEditorModal
         isOpen={isModalOpen}
-        code={props.ruleParams.stringifiedUserCode}
-        onChange={onCodeChange}
+        code={props.ruleParams.codeOrUrl}
+        onChange={onCodeOrUrlChange}
         onClose={() => setIsModalOpen(false)}
       />
     </>

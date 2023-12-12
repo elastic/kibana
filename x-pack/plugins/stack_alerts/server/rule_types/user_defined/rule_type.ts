@@ -19,7 +19,8 @@ export const ActionGroupId = 'user defined threshold met';
 
 export type Params = TypeOf<typeof ParamsSchema>;
 export const ParamsSchema = schema.object({
-  stringifiedUserCode: schema.string(),
+  isUrl: schema.boolean(),
+  codeOrUrl: schema.string(),
   customContextVariables: schema.maybe(
     schema.arrayOf(
       schema.object({
