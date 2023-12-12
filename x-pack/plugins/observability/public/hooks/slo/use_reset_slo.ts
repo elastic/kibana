@@ -34,7 +34,7 @@ export function useResetSlo() {
       onError: (error, { name, id }) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.observability.slo.slo.reset.errorNotification', {
-            defaultMessage: 'Failed to reset {name} ({id})',
+            defaultMessage: 'Failed to reset {name} (id: {id})',
             values: { name, id },
           }),
         });
