@@ -118,14 +118,12 @@ export default ({ getPageObjects }: FtrProviderContext) => {
           shouldUseHashForSubUrl: false,
         });
 
-        let advancedSetting = await pageObjects.settings.getAdvancedSettingCheckbox(
-          'theme:darkMode'
-        );
-        expect(advancedSetting).to.be(null);
+        let advancedSetting = await pageObjects.settings.getAdvancedSettings('theme:darkMode');
+        expect(advancedSetting).to.be('disabled');
 
-        await pageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode', true);
-        advancedSetting = await pageObjects.settings.getAdvancedSettingCheckbox('theme:darkMode');
-        expect(advancedSetting).to.be('true');
+        await pageObjects.settings.setAdvancedSettingsSelect('theme:darkMode', 'enabled');
+        advancedSetting = await pageObjects.settings.getAdvancedSettings('theme:darkMode');
+        expect(advancedSetting).to.be('enabled');
 
         await pageObjects.common.navigateToApp('security_account');
 
@@ -151,9 +149,9 @@ export default ({ getPageObjects }: FtrProviderContext) => {
           shouldUseHashForSubUrl: false,
         });
 
-        await pageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode', false);
-        advancedSetting = await pageObjects.settings.getAdvancedSettingCheckbox('theme:darkMode');
-        expect(advancedSetting).to.be(null);
+        await pageObjects.settings.setAdvancedSettingsSelect('theme:darkMode', 'disabled');
+        advancedSetting = await pageObjects.settings.getAdvancedSettings('theme:darkMode');
+        expect(advancedSetting).to.be('disabled');
       });
     });
   });
