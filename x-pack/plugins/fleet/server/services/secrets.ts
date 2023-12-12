@@ -782,8 +782,6 @@ function getPolicyWithSecretReferences(
     secretPath.path.reduce((acc, val, secretPathComponentIndex) => {
       if (!acc[val]) {
         acc[val] = {};
-
-        return acc[val];
       }
 
       const isLast = secretPathComponentIndex === secretPath.path.length - 1;
