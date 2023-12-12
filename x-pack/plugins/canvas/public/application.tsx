@@ -34,6 +34,7 @@ import { CapabilitiesStrings } from '../i18n';
 
 import {
   startLegacyServices,
+  searchService,
   services,
   LegacyServicesProvider,
   CanvasPluginServices,
@@ -183,6 +184,9 @@ export const teardownCanvas = (coreStart: CoreStart) => {
   if (includes($.plot.plugins, text)) {
     remove($.plot.plugins, text);
   }
+
+  // clear search session when leaving canvas
+  searchService.getService().search.session.clear();
 
   // TODO: Not cleaning these up temporarily.
   // We have an issue where if requests are inflight, and you navigate away,
