@@ -22,6 +22,7 @@ import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
+// FLAKY: https://github.com/elastic/kibana/issues/172503
 describe.skip('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
   let timelineSavedObjectId: string | null = null;
   before(function () {

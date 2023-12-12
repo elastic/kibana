@@ -17,7 +17,7 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { useRiskScore } from '../../../explore/containers/risk_score';
-import { RiskScoreEntity } from '../../../../common/risk_engine';
+import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { RiskInputsPanelKey } from '../risk_inputs_left';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';

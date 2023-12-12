@@ -383,7 +383,7 @@ export class TaskStore {
       throw e;
     }
     const taskInstance = savedObjectToConcreteTaskInstance(result);
-    return this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
+    return taskInstance;
   }
 
   /**
@@ -407,9 +407,7 @@ export class TaskStore {
         return asErr({ id: task.id, type: task.type, error: task.error });
       }
       const taskInstance = savedObjectToConcreteTaskInstance(task);
-      const validatedTaskInstance =
-        this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
-      return asOk(validatedTaskInstance);
+      return asOk(taskInstance);
     });
   }
 
@@ -454,7 +452,6 @@ export class TaskStore {
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
           .map((doc) => savedObjectToConcreteTaskInstance(doc))
-          .map((doc) => this.taskValidator.getValidatedTaskInstanceFromReading(doc))
           .filter((doc): doc is ConcreteTaskInstance => !!doc),
       };
     } catch (e) {

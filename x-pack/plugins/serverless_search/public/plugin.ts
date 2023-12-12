@@ -24,6 +24,7 @@ import {
   ServerlessSearchPluginStart,
   ServerlessSearchPluginStartDependencies,
 } from './types';
+import { createIndexOverviewContent } from './application/components/index_documents/documents_tab';
 
 export class ServerlessSearchPlugin
   implements
@@ -80,14 +81,14 @@ export class ServerlessSearchPlugin
         return await renderApp(element, coreStart, { history, ...services });
       },
     });
-
     return {};
   }
 
   public start(
     core: CoreStart,
-    { serverless, management, cloud, indexManagement }: ServerlessSearchPluginStartDependencies
+    services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
+    const { serverless, management, cloud, indexManagement } = services;
     serverless.setProjectHome('/app/elasticsearch');
     serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
     management.setIsSidebarEnabled(false);
@@ -96,6 +97,10 @@ export class ServerlessSearchPlugin
       hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
     });
     indexManagement?.extensionsService.setIndexMappingsContent(createIndexMappingsContent(core));
+    indexManagement?.extensionsService.addIndexDetailsTab(
+      createIndexOverviewContent(core, services)
+    );
+
     return {};
   }
 

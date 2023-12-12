@@ -21,6 +21,7 @@ import {
   loadESOutput,
   loadKafkaOutput,
   loadLogstashOutput,
+  loadRemoteESOutput,
   resetKafkaOutputForm,
   selectESOutput,
   selectKafkaOutput,
@@ -131,6 +132,80 @@ describe('Outputs', () => {
           });
         }
       }
+    });
+  });
+
+  describe('Remote ES', () => {
+    it('displays proper error messages', () => {
+      selectRemoteESOutput();
+      cy.getBySel(SETTINGS_SAVE_BTN).click();
+
+      cy.contains('Name is required');
+      cy.contains('URL is required');
+      cy.contains('Service Token is required');
+      shouldDisplayError(SETTINGS_OUTPUTS.NAME_INPUT);
+      shouldDisplayError('serviceTokenSecretInput');
+    });
+
+    describe('Form submit', () => {
+      let outputId: string;
+
+      before(() => {
+        interceptOutputId((id) => {
+          outputId = id;
+        });
+      });
+
+      after(() => {
+        cleanupOutput(outputId);
+      });
+
+      it('saves the output', () => {
+        selectRemoteESOutput();
+
+        cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).type('name');
+        cy.get('[placeholder="Specify host URL"').clear().type('https://localhost:5000');
+        cy.getBySel('serviceTokenSecretInput').type('service_token');
+
+        cy.intercept('POST', '**/api/fleet/outputs').as('saveOutput');
+
+        cy.getBySel(SETTINGS_SAVE_BTN).click();
+
+        cy.wait('@saveOutput').then((interception) => {
+          const responseBody = interception.response?.body;
+          cy.visit(`/app/fleet/settings/outputs/${responseBody?.item?.id}`);
+          expect(responseBody?.item.service_token).to.equal(undefined);
+          expect(responseBody?.item.secrets.service_token.id).not.to.equal(undefined);
+        });
+
+        cy.get('[placeholder="Specify host URL"').should('have.value', 'https://localhost:5000');
+        cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).should('have.value', 'name');
+      });
+    });
+
+    describe('Form edit', () => {
+      let outputId: string;
+
+      before(() => {
+        loadRemoteESOutput().then((data) => {
+          outputId = data.item.id;
+        });
+      });
+      after(() => {
+        cleanupOutput(outputId);
+      });
+
+      it('edits the output', () => {
+        visit(`/app/fleet/settings/outputs/${outputId}`);
+
+        cy.get('[placeholder="Specify host URL"').clear().type('https://localhost:5001');
+
+        cy.getBySel(SETTINGS_SAVE_BTN).click();
+        cy.getBySel(SETTINGS_CONFIRM_MODAL_BTN).click();
+        visit(`/app/fleet/settings/outputs/${outputId}`);
+
+        cy.get('[placeholder="Specify host URL"').should('have.value', 'https://localhost:5001');
+      });
     });
   });
 
@@ -301,7 +376,7 @@ describe('Outputs', () => {
         cy.contains('Name is required');
         cy.contains('Host is required');
         cy.contains('Username is required');
-        // cy.contains('Password is required');
+        cy.contains('Password is required');
         cy.contains('Default topic is required');
         cy.contains('Topic is required');
         cy.contains(
@@ -310,7 +385,7 @@ describe('Outputs', () => {
         cy.contains('Must be a key, value pair i.e. "http.response.code: 200"');
         shouldDisplayError(SETTINGS_OUTPUTS.NAME_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_INPUT);
-        // shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT); // TODO
+        shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_DEFAULT_TOPIC_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT);
         shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT);

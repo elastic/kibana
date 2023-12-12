@@ -2371,6 +2371,18 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.SetupTechnology",
+        "type": "Enum",
+        "tags": [],
+        "label": "SetupTechnology",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/models/setup_technology.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -18175,17 +18187,19 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-common.BundledPackage.buffer",
-            "type": "Object",
+            "id": "def-common.BundledPackage.getBuffer",
+            "type": "Function",
             "tags": [],
-            "label": "buffer",
+            "label": "getBuffer",
             "description": [],
             "signature": [
-              "Buffer"
+              "() => Promise<Buffer>"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
