@@ -24,6 +24,7 @@ import {
   type EventAnnotationConfig,
   type EventAnnotationGroupConfig,
 } from '@kbn/event-annotation-common';
+import { mapSavedObjectToGroupConfig } from '../../common';
 import { EventAnnotationGroupSavedObjectFinder } from '../components/event_annotation_group_saved_object_finder';
 import { CONTENT_ID } from '../../common/content_management';
 import type {
@@ -40,29 +41,6 @@ import type {
   EventAnnotationGroupUpdateIn,
   EventAnnotationGroupUpdateOut,
 } from '../../common/content_management';
-
-export const mapSavedObjectToGroupConfig = (
-  savedObject: EventAnnotationGroupSavedObject
-): EventAnnotationGroupConfig => {
-  const adHocDataViewSpec = savedObject.attributes.dataViewSpec
-    ? DataViewPersistableStateService.inject(
-        savedObject.attributes.dataViewSpec,
-        savedObject.references
-      )
-    : undefined;
-
-  return {
-    title: savedObject.attributes.title,
-    description: savedObject.attributes.description,
-    tags: savedObject.references.filter((ref) => ref.type === 'tag').map(({ id }) => id),
-    ignoreGlobalFilters: savedObject.attributes.ignoreGlobalFilters,
-    indexPatternId: adHocDataViewSpec
-      ? adHocDataViewSpec.id!
-      : savedObject.references.find((ref) => ref.type === 'index-pattern')?.id!,
-    annotations: savedObject.attributes.annotations,
-    dataViewSpec: adHocDataViewSpec,
-  };
-};
 
 export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'empty';

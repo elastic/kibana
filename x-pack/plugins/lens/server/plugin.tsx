@@ -35,7 +35,7 @@ import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { NowProvider } from '@kbn/data-plugin/common';
 import type { EventAnnotationGroupSavedObjectAttributes } from '@kbn/event-annotation-plugin/common';
-import { mapSavedObjectToGroupConfig } from '@kbn/event-annotation-plugin/public/event_annotation_service/service';
+import { mapSavedObjectToGroupConfig } from '@kbn/event-annotation-plugin/common';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';

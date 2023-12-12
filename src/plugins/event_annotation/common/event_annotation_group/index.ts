@@ -8,8 +8,13 @@
 
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { IndexPatternExpressionType } from '@kbn/data-views-plugin/common';
+import {
+  DataViewPersistableStateService,
+  IndexPatternExpressionType,
+} from '@kbn/data-views-plugin/common';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { EventAnnotationOutput } from '../types';
+import { EventAnnotationGroupSavedObject } from '../content_management';
 
 export interface EventAnnotationGroupOutput {
   type: 'event_annotation_group';
@@ -79,3 +84,26 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
     },
   };
 }
+
+export const mapSavedObjectToGroupConfig = (
+  savedObject: EventAnnotationGroupSavedObject
+): EventAnnotationGroupConfig => {
+  const adHocDataViewSpec = savedObject.attributes.dataViewSpec
+    ? DataViewPersistableStateService.inject(
+        savedObject.attributes.dataViewSpec,
+        savedObject.references
+      )
+    : undefined;
+
+  return {
+    title: savedObject.attributes.title,
+    description: savedObject.attributes.description,
+    tags: savedObject.references.filter((ref) => ref.type === 'tag').map(({ id }) => id),
+    ignoreGlobalFilters: savedObject.attributes.ignoreGlobalFilters,
+    indexPatternId: adHocDataViewSpec
+      ? adHocDataViewSpec.id!
+      : savedObject.references.find((ref) => ref.type === 'index-pattern')?.id!,
+    annotations: savedObject.attributes.annotations,
+    dataViewSpec: adHocDataViewSpec,
+  };
+};
