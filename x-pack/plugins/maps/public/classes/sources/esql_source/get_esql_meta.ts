@@ -8,13 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { EsqlColumn } from '../../../../common/descriptor_types';
 import { getData, getIndexPatternService } from '../../../kibana_services';
 
 export async function getEsqlMeta(esql: string) {
+  const columns = await getColumns(esql);
+  const { dateFields, geoFields } = await getFields(esql);
   return {
-    columns: await getColumns(esql),
-    dateFields: await getDateFields(esql),
-    geoFields: await getGeoFields(esql),
+    columns,
+    dateFields,
+    geoFields,
   };
 }
 
@@ -30,7 +33,7 @@ async function getColumns(esql: string) {
       })
     );
 
-    return resp.rawResponse.columns;
+    return (resp.rawResponse as unknown as { columns: EsqlColumn[] }).columns;
   } catch (error) {
     throw new Error(i18n.translate('xpack.maps.source.esql.getColumnsErrorMsg', {
       defaultMessage: 'Unable to load columns. {errorMessage}',
@@ -39,28 +42,27 @@ async function getColumns(esql: string) {
   }
 }
 
-function getDateFields(esql: string) {
-  return getFields(esql, 'date');
-}
-
-function getGeoFields(esql: string) {
-  return getFields(esql, 'geo_point');
-}
-
-async function getFields(esql: string, type: string) {
+async function getFields(esql: string) {
   const pattern: string = getIndexPatternFromESQLQuery(esql);
-
   try {
-    const fields = await getIndexPatternService().getFieldsForWildcard({ pattern, type });
-    return fields.filter(field => {
-      // getFieldsForWildcard is not filtering by field type so need to filter client-side
-      return field.type === type;
-    }).map(field => {
-      return field.name;
+    const dateFields: string[] = [];
+    const geoFields: string[] = [];
+    // TODO pass field type filter to getFieldsForWildcard when field type filtering is supported
+    const fields = await getIndexPatternService().getFieldsForWildcard({ pattern });
+    fields.forEach(field => {
+      if (field.type === 'date') {
+        dateFields.push(field.name);
+      } else if (field.type === 'geo_point') {
+        geoFields.push(field.name);
+      }
     });
+    return {
+      dateFields,
+      geoFields
+    };
   } catch (error) {
     throw new Error(i18n.translate('xpack.maps.source.esql.getFieldsErrorMsg', {
-      defaultMessage: 'Unable to load fields from pattern: {pattern}. {errorMessage}',
+      defaultMessage: `Unable to load fields from pattern: {pattern}. {errorMessage}`,
       values: {
         errorMessage: error.message,
         pattern,

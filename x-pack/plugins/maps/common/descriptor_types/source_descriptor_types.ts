@@ -20,6 +20,12 @@ import {
   SOURCE_TYPES,
 } from '../constants';
 
+// TODO replace once type is defined in estypes
+export type EsqlColumn = {
+  name: string;
+  type: string;
+}
+
 export type AbstractSourceDescriptor = {
   id?: string;
   type: string;
