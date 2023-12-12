@@ -73,7 +73,7 @@ export function SlosOutdatedDefinitions() {
     <ObservabilityPageTemplate
       data-test-subj="slosOutdatedDefinitions"
       pageHeader={{
-        pageTitle: i18n.translate('xpack.observability.slo.slosOutdatedDefintions.pageTitle', {
+        pageTitle: i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.pageTitle', {
           defaultMessage: 'Outdated SLO Definitions',
         }),
       }}
@@ -91,7 +91,7 @@ export function SlosOutdatedDefinitions() {
           <p>
             {i18n.translate('xpack.observability.slo.slosOutdatedDefinitions.description', {
               defaultMessage:
-                'The following SLOs are from a previous version and need to either be reset to upgrade to the latest version OR deleted and removed from the system. When you reset the SLO, the transfrom will be updated to the latest version and the historical data will be regenerated from the source data.',
+                'The following SLOs are from a previous version and need to either be reset to upgrade to the latest version OR deleted and removed from the system. When you reset the SLO, the transform will be updated to the latest version and the historical data will be regenerated from the source data.',
             })}
           </p>
           <EuiSpacer size="l" />
