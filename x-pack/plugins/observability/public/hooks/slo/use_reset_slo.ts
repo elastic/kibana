@@ -18,19 +18,24 @@ export function useResetSlo() {
   } = useKibana().services;
   return useMutation<string, ServerError, { id: string; name: string }>(
     ['resetSlo'],
-    ({ id }) => {
+    ({ id, name }) => {
       try {
         return http.post(`/api/observability/slos/${id}/_reset`);
       } catch (error) {
-        return Promise.reject(`Something went wrong: ${String(error)}`);
+        return Promise.reject(
+          i18n.translate('xpack.observability.slo.slo.reset.errorMessage', {
+            defaultMessage: 'Failed to reset {name} ({id}), something went wrong: {error}',
+            values: { error: String(error), name, id },
+          })
+        );
       }
     },
     {
-      onError: (error, { name }) => {
+      onError: (error, { name, id }) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.observability.slo.slo.reset.errorNotification', {
-            defaultMessage: 'Failed to reset {name}',
-            values: { name },
+            defaultMessage: 'Failed to reset {name} ({id})',
+            values: { name, id },
           }),
         });
       },
