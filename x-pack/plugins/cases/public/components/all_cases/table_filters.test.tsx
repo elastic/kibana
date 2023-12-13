@@ -262,6 +262,9 @@ describe('CasesTableFilters ', () => {
 
   describe('Solution filter', () => {
     it('shows Solution filter when provided more than 1 availableSolutions', () => {
+      appMockRender = createAppMockRenderer({
+        owner: [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER],
+      });
       appMockRender.render(
         <CasesTableFilters
           {...props}
@@ -272,13 +275,17 @@ describe('CasesTableFilters ', () => {
     });
 
     it('does not show Solution filter when provided less than 1 availableSolutions', () => {
-      appMockRender.render(
-        <CasesTableFilters {...props} availableSolutions={[OBSERVABILITY_OWNER]} />
-      );
+      appMockRender = createAppMockRenderer({
+        owner: [],
+      });
+      appMockRender.render(<CasesTableFilters {...props} availableSolutions={[]} />);
       expect(screen.queryByTestId('options-filter-popover-button-owner')).not.toBeInTheDocument();
     });
 
     it('does not select a solution on initial render', () => {
+      appMockRender = createAppMockRenderer({
+        owner: [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER],
+      });
       appMockRender.render(
         <CasesTableFilters
           {...props}
@@ -291,11 +298,22 @@ describe('CasesTableFilters ', () => {
       );
     });
 
-    it('should reset the filter setting all available solutions when deactivated', async () => {
+    it('should reset the filter when deactivated', async () => {
+      appMockRender = createAppMockRenderer({
+        owner: [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER],
+      });
+
+      const overrideProps = {
+        ...props,
+        filterOptions: {
+          ...props.filterOptions,
+          owner: [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER],
+        },
+      };
+
       appMockRender.render(
         <CasesTableFilters
-          {...props}
-          initialFilterOptions={{ owner: [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER] }}
+          {...overrideProps}
           availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
         />
       );
@@ -306,8 +324,39 @@ describe('CasesTableFilters ', () => {
 
       expect(onFilterChanged).toHaveBeenCalledWith({
         ...DEFAULT_FILTER_OPTIONS,
+        owner: [],
+      });
+    });
+
+    it('should check all options when all options are selected', async () => {
+      appMockRender = createAppMockRenderer({
         owner: [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER],
       });
+
+      const overrideProps = {
+        ...props,
+        filterOptions: {
+          ...props.filterOptions,
+          owner: [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER],
+        },
+      };
+
+      appMockRender.render(
+        <CasesTableFilters
+          {...overrideProps}
+          availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
+        />
+      );
+
+      userEvent.click(screen.getByRole('button', { name: 'Solution' }));
+      await waitForEuiPopoverOpen();
+
+      const allOptions = screen.getAllByRole('option');
+      expect(allOptions).toHaveLength(2);
+      expect(allOptions[0]).toHaveAttribute('aria-checked', 'true');
+      expect(allOptions[0]).toHaveTextContent('Security');
+      expect(allOptions[1]).toHaveAttribute('aria-checked', 'true');
+      expect(allOptions[1]).toHaveTextContent('Observability');
     });
   });
 
