@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -211,6 +211,9 @@ describe('SLOs Page', () => {
         await act(async () => {
           render(<SlosPage />);
         });
+        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
+
+        fireEvent.click(screen.getByTestId('sloListViewButton'));
 
         expect(screen.queryByTestId('slosPage')).toBeTruthy();
         expect(screen.queryByTestId('sloList')).toBeTruthy();
@@ -229,8 +232,10 @@ describe('SLOs Page', () => {
         await act(async () => {
           render(<SlosPage />);
         });
+        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
+        fireEvent.click(screen.getByTestId('sloListViewButton'));
 
-        screen.getAllByLabelText('Actions').at(0)?.click();
+        screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();
 
@@ -256,8 +261,9 @@ describe('SLOs Page', () => {
         await act(async () => {
           render(<SlosPage />);
         });
-
-        screen.getAllByLabelText('Actions').at(0)?.click();
+        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
+        fireEvent.click(screen.getByTestId('sloListViewButton'));
+        screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();
 
@@ -281,8 +287,9 @@ describe('SLOs Page', () => {
         await act(async () => {
           render(<SlosPage />);
         });
-
-        screen.getAllByLabelText('Actions').at(0)?.click();
+        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
+        fireEvent.click(screen.getByTestId('sloListViewButton'));
+        screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();
 
@@ -307,7 +314,9 @@ describe('SLOs Page', () => {
           render(<SlosPage />);
         });
 
-        screen.getAllByLabelText('Actions').at(0)?.click();
+        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
+        fireEvent.click(screen.getByTestId('sloListViewButton'));
+        screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();
 
@@ -337,7 +346,9 @@ describe('SLOs Page', () => {
           render(<SlosPage />);
         });
 
-        screen.getAllByLabelText('Actions').at(0)?.click();
+        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
+        fireEvent.click(screen.getByTestId('sloListViewButton'));
+        screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();
 

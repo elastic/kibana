@@ -716,7 +716,7 @@
         "label": "FieldPicker",
         "description": [],
         "signature": [
-          "({\n  selectedOptions,\n  options,\n  onChoose,\n  onDelete,\n  fieldIsInvalid,\n  ['data-test-subj']: dataTestSub,\n  ...rest\n}: ",
+          "(props: ",
           "FieldPickerProps",
           "<T>) => JSX.Element"
         ],
@@ -729,7 +729,7 @@
             "id": "def-public.FieldPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  selectedOptions,\n  options,\n  onChoose,\n  onDelete,\n  fieldIsInvalid,\n  ['data-test-subj']: dataTestSub,\n  ...rest\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "FieldPickerProps",
@@ -1976,38 +1976,6 @@
           }
         ],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/visualization-ui-components",
-        "id": "def-public.TruncatedLabel",
-        "type": "Function",
-        "tags": [],
-        "label": "TruncatedLabel",
-        "description": [],
-        "signature": [
-          "React.NamedExoticComponent<{ label: string; search: string; width: number; font: string; }>"
-        ],
-        "path": "packages/kbn-visualization-ui-components/components/field_picker/truncated_label.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/visualization-ui-components",
-            "id": "def-public.TruncatedLabel.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {

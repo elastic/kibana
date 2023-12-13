@@ -256,7 +256,6 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
           </EuiLink>
         </EuiPanel>
       </EuiFlexItem>
-
       <EuiFlexItem
         grow={3}
         css={css`

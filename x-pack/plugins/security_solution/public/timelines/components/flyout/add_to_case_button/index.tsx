@@ -6,7 +6,7 @@
  */
 
 import { pick } from 'lodash/fp';
-import { EuiButton, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiContextMenuItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -15,7 +15,7 @@ import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
 import { timelineSelectors } from '../../../store/timeline';
 import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import { getCreateCaseUrl, getCaseDetailsUrl } from '../../../../common/components/link_to';
@@ -68,7 +68,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     [dispatch, graphEventId, navigateToApp, savedObjectId, timelineId, timelineTitle]
   );
 
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
 
   const handleButtonClick = useCallback(() => {
     setPopover((currentIsOpen) => !currentIsOpen);
@@ -118,8 +118,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
 
   const button = useMemo(
     () => (
-      <EuiButton
-        fill
+      <EuiButtonEmpty
         size="m"
         data-test-subj="attach-timeline-case-button"
         iconType="arrowDown"
@@ -128,7 +127,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
         disabled={timelineStatus === TimelineStatus.draft || timelineType !== TimelineType.default}
       >
         {i18n.ATTACH_TO_CASE}
-      </EuiButton>
+      </EuiButtonEmpty>
     ),
     [handleButtonClick, timelineStatus, timelineType]
   );

@@ -124,6 +124,7 @@ export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
         <EuiFlexGroup
           alignItems="center"
           gutterSize="s"
+          responsive={false}
           data-test-subj={`${dataTestSubj}LeftSection`}
         >
           <EuiFlexItem grow={false}>{expandable && children && toggleIcon}</EuiFlexItem>

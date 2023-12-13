@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { analyzeMarkdown } from '@kbn/elastic-assistant';
 import type { Conversation, CodeBlockDetails } from '@kbn/elastic-assistant';
 import React from 'react';
@@ -13,7 +13,6 @@ import React from 'react';
 import type { TimelineEventsDetailsItem } from '../../common/search_strategy';
 import type { Rule } from '../detection_engine/rule_management/logic';
 import { SendToTimelineButton } from './send_to_timeline';
-import { INVESTIGATE_IN_TIMELINE } from '../actions/add_to_timeline/constants';
 
 export const LOCAL_STORAGE_KEY = `securityAssistant`;
 
@@ -125,9 +124,7 @@ export const augmentMessageCodeBlocks = (
             ]}
             keepDataView={true}
           >
-            <EuiToolTip position="right" content={INVESTIGATE_IN_TIMELINE}>
-              <EuiIcon type="timeline" />
-            </EuiToolTip>
+            <EuiIcon type="timeline" />
           </SendToTimelineButton>
         ) : null,
       };

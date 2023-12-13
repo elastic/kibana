@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { isString, get, identity } from 'lodash';
-import { MetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
+import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
 import type { BucketKey } from './get_data';
 import { calculateCurrentTimeframe, createBaseFilters } from './metric_query';
 
@@ -19,7 +19,7 @@ export interface MissingGroupsRecord {
 
 export const checkMissingGroups = async (
   esClient: ElasticsearchClient,
-  metricParams: MetricExpressionParams,
+  metricParams: CustomMetricExpressionParams,
   indexPattern: string,
   timeFieldName: string,
   groupBy: string | undefined | string[],

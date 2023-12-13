@@ -531,6 +531,8 @@ export class DataViewsService {
       allowNoIndex: true,
       ...options,
       pattern: indexPattern.title as string,
+      allowHidden:
+        (indexPattern as DataViewSpec).allowHidden || (indexPattern as DataView)?.getAllowHidden(),
     });
 
   private getFieldsAndIndicesForDataView = async (dataView: DataView) => {
@@ -541,6 +543,7 @@ export class DataViewsService {
       allowNoIndex: true,
       pattern: dataView.getIndexPattern(),
       metaFields,
+      allowHidden: dataView.getAllowHidden(),
     });
   };
 
@@ -553,6 +556,7 @@ export class DataViewsService {
       rollupIndex: options.rollupIndex,
       allowNoIndex: true,
       indexFilter: options.indexFilter,
+      allowHidden: options.allowHidden,
     });
   };
 
@@ -704,6 +708,7 @@ export class DataViewsService {
         fieldAttrs,
         allowNoIndex,
         name,
+        allowHidden,
       },
     } = savedObject;
 
@@ -731,6 +736,7 @@ export class DataViewsService {
       allowNoIndex,
       runtimeFieldMap: parsedRuntimeFieldMap,
       name,
+      allowHidden,
     };
   };
 
@@ -763,6 +769,7 @@ export class DataViewsService {
         type,
         rollupIndex: typeMeta?.params?.rollup_index,
         allowNoIndex: spec.allowNoIndex,
+        allowHidden: spec.allowHidden,
       },
       spec.fieldAttrs,
       displayErrors

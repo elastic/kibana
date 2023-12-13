@@ -6,7 +6,7 @@
  */
 
 import { ILicense } from '@kbn/licensing-plugin/server';
-import { ExportType } from '../export_types/common';
+import { ExportType } from '@kbn/reporting-server';
 import { ExportTypesRegistry } from './export_types_registry';
 
 export interface LicenseCheckResult {

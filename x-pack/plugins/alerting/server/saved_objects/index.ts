@@ -24,10 +24,12 @@ import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import { RuleTypeRegistry } from '../rule_type_registry';
 export { partiallyUpdateAlert } from './partially_update_alert';
+export { getLatestRuleVersion, getMinimumCompatibleVersion } from './rule_model_versions';
 import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../common';
+import { ruleModelVersions } from './rule_model_versions';
 
 // Use caution when removing items from this array! Any field which has
 // ever existed in the rule SO must be included in this array to prevent
@@ -106,6 +108,7 @@ export function setupSavedObjects(
         return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
       },
     },
+    modelVersions: ruleModelVersions,
   });
 
   savedObjects.registerType({

@@ -42,7 +42,14 @@ export type {
   MigrationStatus,
   MigrateDocumentOptions,
 } from './src/migration';
-export { parseObjectKey, getObjectKey, getIndexForType } from './src/utils';
+export {
+  parseObjectKey,
+  getObjectKey,
+  getIndexForType,
+  getFieldListFromTypeMapping,
+  getFieldListMapFromMappingDefinitions,
+  type FieldListMap,
+} from './src/utils';
 export {
   modelVersionVirtualMajor,
   globalSwitchToModelVersionAt,
@@ -68,4 +75,6 @@ export {
   buildModelVersionTransformFn,
   aggregateMappingAdditions,
   convertModelVersionBackwardConversionSchema,
+  getVersionAddedMappings,
+  getVersionAddedFields,
 } from './src/model_version';

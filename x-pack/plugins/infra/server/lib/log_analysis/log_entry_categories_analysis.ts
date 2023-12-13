@@ -12,6 +12,7 @@ import {
   PersistedLogViewReference,
   ResolvedLogView,
 } from '@kbn/logs-shared-plugin/common';
+import { IdFormat } from '../../../common/http_api/latest';
 import {
   CategoriesSort,
   compareDatasetsByMaximumAnomalyScore,
@@ -51,6 +52,7 @@ export async function getTopLogEntryCategories(
     };
   },
   logView: PersistedLogViewReference,
+  idFormat: IdFormat,
   startTime: number,
   endTime: number,
   categoryCount: number,
@@ -63,6 +65,7 @@ export async function getTopLogEntryCategories(
   const logEntryCategoriesCountJobId = getJobId(
     context.infra.spaceId,
     logView.logViewId,
+    idFormat,
     logEntryCategoriesJobTypes[0]
   );
 
@@ -123,12 +126,14 @@ export async function getLogEntryCategoryDatasets(
     };
   },
   logView: PersistedLogViewReference,
+  idFormat: IdFormat,
   startTime: number,
   endTime: number
 ) {
   const logEntryCategoriesCountJobId = getJobId(
     context.infra.spaceId,
     logView.logViewId,
+    idFormat,
     logEntryCategoriesJobTypes[0]
   );
 
@@ -147,6 +152,7 @@ export async function getLogEntryCategoryExamples(
     };
   },
   logView: PersistedLogViewReference,
+  idFormat: IdFormat,
   startTime: number,
   endTime: number,
   categoryId: number,
@@ -158,6 +164,7 @@ export async function getLogEntryCategoryExamples(
   const logEntryCategoriesCountJobId = getJobId(
     context.infra.spaceId,
     logView.logViewId,
+    idFormat,
     logEntryCategoriesJobTypes[0]
   );
 

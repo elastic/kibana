@@ -13,7 +13,10 @@ import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../..
 import { useEnterpriseSearchApplicationNav } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
-export type EnterpriseSearchApplicationsPageTemplateProps = PageTemplateProps & {
+export type EnterpriseSearchApplicationsPageTemplateProps = Omit<
+  PageTemplateProps,
+  'useEndpointHeaderActions'
+> & {
   hasSchemaConflicts?: boolean;
   searchApplicationName?: string;
 };
@@ -42,6 +45,7 @@ export const EnterpriseSearchApplicationsPageTemplate: React.FC<
       }}
       restrictWidth
       setPageChrome={pageChrome && <SetEnterpriseSearchApplicationsChrome trail={pageChrome} />}
+      useEndpointHeaderActions={false}
     >
       {pageViewTelemetry && (
         <SendEnterpriseSearchTelemetry action="viewed" metric={pageViewTelemetry} />

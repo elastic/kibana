@@ -13,7 +13,7 @@ steps:
 
   - label: ":kibana: Kibana Serverless Tests for ${ENVIRONMENT}"
     trigger: appex-qa-serverless-kibana-ftr-tests # https://buildkite.com/elastic/appex-qa-serverless-kibana-ftr-tests
-    soft_fail: true # Remove this before release or when tests stabilize
+    soft_fail: true # Remove when tests stabilize
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}

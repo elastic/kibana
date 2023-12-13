@@ -441,6 +441,8 @@ describe('ingest_integration tests ', () => {
       licenseEmitter.next(Enterprise); // set license level to enterprise
     });
 
+    const validDateYesterday = moment.utc().subtract(1, 'day');
+
     it.each([
       {
         date: 'invalid',
@@ -457,13 +459,21 @@ describe('ingest_integration tests ', () => {
       },
       {
         date: '2100-10-01',
-        message: 'Global manifest version cannot be in the future. UTC time.',
+        message: `Global manifest version cannot be in the future. Latest selectable date is ${validDateYesterday.format(
+          'MMMM DD, YYYY'
+        )} UTC time.`,
+      },
+      {
+        date: validDateYesterday.clone().add(1, 'day').format('YYYY-MM-DD'),
+        message: `Global manifest version cannot be in the future. Latest selectable date is ${validDateYesterday.format(
+          'MMMM DD, YYYY'
+        )} UTC time.`,
       },
       {
         date: 'latest',
       },
       {
-        date: moment.utc().subtract(1, 'day').format('YYYY-MM-DD'), // Correct date
+        date: validDateYesterday.format('YYYY-MM-DD'), // Correct date
       },
     ])(
       'should return bad request for invalid endpoint package policy global manifest values',

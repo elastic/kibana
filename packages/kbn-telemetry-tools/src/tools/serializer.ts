@@ -102,7 +102,7 @@ export function getConstraints(node: ts.Node, program: ts.Program): any {
     return node.text;
   }
 
-  if (ts.isImportSpecifier(node)) {
+  if (ts.isImportSpecifier(node) || ts.isExportSpecifier(node)) {
     const source = node.getSourceFile();
     const importedModuleName = getModuleSpecifier(node);
 

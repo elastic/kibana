@@ -21,7 +21,7 @@ import {
   openKibanaNavigation,
 } from '../../../tasks/kibana_navigation';
 import { ALERTS_PAGE } from '../../../screens/kibana_navigation';
-import { postDataView } from '../../../tasks/common';
+import { postDataView } from '../../../tasks/api_calls/common';
 import { navigateToAlertsPageInServerless } from '../../../tasks/serverless/navigation';
 
 describe('ESS - pinned filters', { tags: ['@ess'] }, () => {

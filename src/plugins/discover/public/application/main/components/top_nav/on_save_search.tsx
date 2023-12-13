@@ -80,12 +80,14 @@ export async function onSaveSearch({
   savedSearch,
   services,
   state,
+  initialCopyOnSave,
   onClose,
   onSaveCb,
 }: {
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: DiscoverStateContainer;
+  initialCopyOnSave?: boolean;
   onClose?: () => void;
   onSaveCb?: () => void;
 }) {
@@ -173,6 +175,7 @@ export async function onSaveSearch({
       services={services}
       title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
+      initialCopyOnSave={initialCopyOnSave}
       description={savedSearch.description}
       timeRestore={savedSearch.timeRestore}
       tags={savedSearch.tags ?? []}
@@ -188,6 +191,7 @@ const SaveSearchObjectModal: React.FC<{
   services: DiscoverServices;
   title: string;
   showCopyOnSave: boolean;
+  initialCopyOnSave?: boolean;
   description?: string;
   timeRestore?: boolean;
   tags: string[];
@@ -200,6 +204,7 @@ const SaveSearchObjectModal: React.FC<{
   description,
   tags,
   showCopyOnSave,
+  initialCopyOnSave,
   timeRestore: savedTimeRestore,
   onSave,
   onClose,
@@ -263,6 +268,7 @@ const SaveSearchObjectModal: React.FC<{
     <SavedObjectSaveModal
       title={title}
       showCopyOnSave={showCopyOnSave}
+      initialCopyOnSave={initialCopyOnSave}
       description={description}
       objectType={i18n.translate('discover.localMenu.saveSaveSearchObjectType', {
         defaultMessage: 'search',

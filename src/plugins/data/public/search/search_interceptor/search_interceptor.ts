@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { memoize, once } from 'lodash';
 import {
   BehaviorSubject,
@@ -29,9 +30,11 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
+import { estypes } from '@elastic/elasticsearch';
+import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-import { BfetchRequestError } from '@kbn/bfetch-plugin/public';
+import { type Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 
 import {
   ApplicationStart,
@@ -46,6 +49,14 @@ import {
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import { BfetchRequestError } from '@kbn/bfetch-error';
+import {
+  EsError,
+  isEsError,
+  isPainlessError,
+  PainlessError,
+  renderSearchError,
+} from '@kbn/search-errors';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -59,27 +70,21 @@ import {
   type SanitizedConnectionRequestParams,
 } from '../../../common';
 import { SearchUsageCollector } from '../collectors';
-import {
-  EsError,
-  isEsError,
-  isPainlessError,
-  PainlessError,
-  SearchTimeoutError,
-  TimeoutErrorMode,
-  SearchSessionIncompleteWarning,
-} from '../errors';
+import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
+import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
-import { createRequestHash, getSearchErrorOverrideDisplay } from './utils';
 import { SearchAbortController } from './search_abort_controller';
 import { SearchConfigSchema } from '../../../config';
+import type { SearchServiceStartDependencies } from '../search_service';
+import { createRequestHash } from './create_request_hash';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
   http: HttpSetup;
   executionContext: ExecutionContextSetup;
   uiSettings: IUiSettingsClient;
-  startServices: Promise<[CoreStart, any, unknown]>;
+  startServices: Promise<[CoreStart, object, unknown]>;
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
   session: ISessionService;
@@ -114,6 +119,7 @@ export class SearchInterceptor {
     { request: IKibanaSearchRequest; options: ISearchOptionsSerializable },
     IKibanaSearchResponse
   >;
+  private inspector!: InspectorStart;
 
   /*
    * @internal
@@ -121,9 +127,10 @@ export class SearchInterceptor {
   constructor(private readonly deps: SearchInterceptorDeps) {
     this.deps.http.addLoadingCountSource(this.pendingCount$);
 
-    this.deps.startServices.then(([coreStart]) => {
+    this.deps.startServices.then(([coreStart, depsStart]) => {
       this.application = coreStart.application;
       this.docLinks = coreStart.docLinks;
+      this.inspector = (depsStart as SearchServiceStartDependencies).inspector;
     });
 
     this.batchedFetch = deps.bfetch.batchedFunction({
@@ -184,7 +191,8 @@ export class SearchInterceptor {
    */
   private handleSearchError(
     e: KibanaServerError | AbortError,
-    options?: ISearchOptions,
+    requestBody: estypes.SearchRequest,
+    options?: IAsyncSearchOptions,
     isTimeout?: boolean
   ): Error {
     if (isTimeout || e.message === 'Request timed out') {
@@ -203,7 +211,36 @@ export class SearchInterceptor {
     }
 
     if (isEsError(e)) {
-      return isPainlessError(e) ? new PainlessError(e, options?.indexPattern) : new EsError(e);
+      const openInInspector = () => {
+        const requestId = options?.inspector?.id ?? uuidv4();
+        const requestAdapter = options?.inspector?.adapter ?? new RequestAdapter();
+        if (!options?.inspector?.adapter) {
+          const requestResponder = requestAdapter.start(
+            i18n.translate('data.searchService.anonymousRequestTitle', {
+              defaultMessage: 'Request',
+            }),
+            {
+              id: requestId,
+            }
+          );
+          requestResponder.json(requestBody);
+          requestResponder.error({ json: e.attributes });
+        }
+        this.inspector.open(
+          {
+            requests: requestAdapter,
+          },
+          {
+            options: {
+              initialRequestId: requestId,
+              initialTabs: ['clusters', 'response'],
+            },
+          }
+        );
+      };
+      return isPainlessError(e)
+        ? new PainlessError(e, openInInspector, options?.indexPattern)
+        : new EsError(e, openInInspector);
     }
 
     return e instanceof Error ? e : new Error(e.message);
@@ -473,7 +510,12 @@ export class SearchInterceptor {
           takeUntil(aborted$),
           catchError((e) => {
             return throwError(
-              this.handleSearchError(e, searchOptions, searchAbortController.isTimeout())
+              this.handleSearchError(
+                e,
+                request?.params?.body ?? {},
+                searchOptions,
+                searchAbortController.isTimeout()
+              )
             );
           }),
           tap((response) => {
@@ -543,15 +585,15 @@ export class SearchInterceptor {
       return;
     }
 
-    const overrideDisplay = getSearchErrorOverrideDisplay({
+    const searchErrorDisplay = renderSearchError({
       error: e,
       application: this.application,
     });
 
-    if (overrideDisplay) {
+    if (searchErrorDisplay) {
       this.deps.toasts.addDanger({
-        title: overrideDisplay.title,
-        text: toMountPoint(overrideDisplay.body, { theme$: this.deps.theme.theme$ }),
+        title: searchErrorDisplay.title,
+        text: toMountPoint(searchErrorDisplay.body, { theme$: this.deps.theme.theme$ }),
       });
     } else {
       this.deps.toasts.addError(e, {

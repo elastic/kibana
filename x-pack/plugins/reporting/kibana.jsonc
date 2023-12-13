@@ -30,7 +30,7 @@
       "security",
       "spaces",
       "usageCollection",
-      "screenshotting",
+      "screenshotting"
     ],
     "requiredBundles": [
       "kibanaReact",

@@ -327,7 +327,7 @@ export const OverviewPage: React.FC<Props> = memo(
                 />
               </EuiFlexItem>
             ) : null}
-            <EuiFlexItem>
+            <EuiFlexItem className="eui-textBreakWord">
               <Details packageInfo={packageInfo} />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -7,7 +7,8 @@
  */
 
 import { pick, throttle, cloneDeep } from 'lodash';
-import type { HttpSetup, HttpFetchOptions } from '@kbn/core-http-browser';
+import type { HttpFetchOptions } from '@kbn/core-http-browser';
+import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBulkResolveResponse as SavedObjectsBulkResolveResponseServer,
@@ -106,7 +107,7 @@ const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
  * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export class SavedObjectsClient implements SavedObjectsClientContract {
-  private http: HttpSetup;
+  private http: InternalHttpSetup;
   private batchGetQueue: BatchGetQueueEntry[];
   private batchResolveQueue: BatchResolveQueueEntry[];
 
@@ -180,7 +181,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   );
 
   /** @internal */
-  constructor(http: HttpSetup) {
+  constructor(http: InternalHttpSetup) {
     this.http = http;
     this.batchGetQueue = [];
     this.batchResolveQueue = [];

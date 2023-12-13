@@ -52,8 +52,8 @@ export function LayerControl({
     if (isScreenshotMode()) {
       return null;
     }
-    const hasErrors = layerList.some((layer) => {
-      return layer.hasErrors();
+    const hasErrorsOrWarnings = layerList.some((layer) => {
+      return layer.hasErrors() || layer.hasWarnings();
     });
     const isLoading = layerList.some((layer) => {
       return layer.isLayerLoading(zoom);
@@ -67,7 +67,11 @@ export function LayerControl({
         })}
         position="left"
       >
-        <ExpandButton hasErrors={hasErrors} isLoading={isLoading} onClick={openLayerTOC} />
+        <ExpandButton
+          hasErrorsOrWarnings={hasErrorsOrWarnings}
+          isLoading={isLoading}
+          onClick={openLayerTOC}
+        />
       </EuiToolTip>
     );
   }

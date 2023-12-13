@@ -8,5 +8,3 @@
 
 export { TableListView } from './src/table_list_view';
 export type { TableListViewProps } from './src/table_list_view';
-
-export type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-table';

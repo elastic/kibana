@@ -21,7 +21,7 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       });
     },
 
-    async navigateToIndexPatternSelection() {
+    async navigateToDataViewSelection() {
       await testSubjects.click('mlMainTab logCategorization');
       await testSubjects.existOrFail('mlPageSourceSelection');
     },

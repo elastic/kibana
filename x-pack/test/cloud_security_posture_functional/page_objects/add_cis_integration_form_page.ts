@@ -144,7 +144,11 @@ export function AddCisIntegrationFormPageProvider({
   const navigateToIntegrationCspList = async () => {
     await PageObjects.common.navigateToActualUrl(
       'integrations', // Defined in Security Solution plugin
-      '/detail/cloud_security_posture/policies'
+      '/detail/cloud_security_posture/policies',
+      {
+        ensureCurrentUrl: false,
+        shouldLoginIfPrompted: false,
+      }
     );
   };
 

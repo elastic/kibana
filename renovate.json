@@ -458,11 +458,37 @@
       "matchPackagePatterns": [
         "^@storybook"
       ],
+      "excludePackageNames": [
+        "@storybook/testing-react"
+      ],
       "labels": [
         "Team:Operations",
-        "release_note:skip"
+        "release_note:skip",
+        "ci:build-storybooks",
+        "backport:skip"
       ],
-      "enabled": true
+      "enabled": true,
+      "allowedVersions": "<7.0"
+    },
+    {
+      "groupName": "@storybook/testing-react",
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "matchPackageNames": [
+        "@storybook/testing-react"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "ci:build-storybooks",
+        "backport:skip"
+      ],
+      "enabled": true,
+      "allowedVersions": "<2.0"
     },
     {
       "groupName": "react-query",

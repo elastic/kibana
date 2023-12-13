@@ -12,7 +12,7 @@ import {
   CodeEditorMode,
   CommonFields,
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   FormMonitorType,
   HTTPAdvancedFields,
   HTTPFields,
@@ -53,7 +53,7 @@ describe('validateMonitor', () => {
     testSchedule = { number: '5', unit: ScheduleUnit.MINUTES };
     testTags = ['tag1', 'tag2'];
     testCommonFields = {
-      [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
+      [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.ICMP,
       [ConfigKey.NAME]: 'test-monitor-name',
       [ConfigKey.CONFIG_ID]: 'test-monitor-id',
       [ConfigKey.MONITOR_QUERY_ID]: '',
@@ -90,7 +90,7 @@ describe('validateMonitor', () => {
       ...testCommonFields,
       [ConfigKey.HOSTS]: 'test-hosts',
       [ConfigKey.WAIT]: '',
-      [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
+      [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.ICMP,
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
     };
 
@@ -122,7 +122,7 @@ describe('validateMonitor', () => {
       ...testTCPSimpleFields,
       ...testTCPAdvancedFields,
       ...testTLSFields,
-      [ConfigKey.MONITOR_TYPE]: DataStream.TCP,
+      [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.TCP,
     };
 
     testHTTPSimpleFields = {
@@ -153,7 +153,7 @@ describe('validateMonitor', () => {
       ...testHTTPSimpleFields,
       ...testHTTPAdvancedFields,
       ...testTLSFields,
-      [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
+      [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
     };
 
     testBrowserSimpleFields = {
@@ -190,7 +190,7 @@ describe('validateMonitor', () => {
     testBrowserFields = {
       ...testBrowserSimpleFields,
       ...testBrowserAdvancedFields,
-      [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
+      [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
     };
   });
 
@@ -207,7 +207,7 @@ describe('validateMonitor', () => {
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
-        details: expect.stringMatching(/(?=.*invalid)(?=.*DataStream)/i),
+        details: 'Invalid value "undefined" supplied to "MonitorType"',
       });
     });
 
@@ -223,7 +223,7 @@ describe('validateMonitor', () => {
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
-        details: expect.stringMatching(/(?=.*invalid)(?=.*non-HTTP)(?=.*DataStream)/i),
+        details: 'Invalid value "non-HTTP" supplied to "MonitorType"',
       });
     });
 
@@ -318,7 +318,7 @@ describe('validateMonitor', () => {
       expect(result.details).toEqual(expect.stringContaining(ConfigKey.HOSTS));
       expect(result).toMatchObject({
         valid: false,
-        reason: `Monitor is not a valid monitor of type ${DataStream.ICMP}`,
+        reason: `Monitor is not a valid monitor of type ${MonitorTypeEnum.ICMP}`,
         payload: testMonitor,
       });
     });
@@ -337,7 +337,7 @@ describe('validateMonitor', () => {
       expect(result.details).toEqual(expect.stringContaining(ConfigKey.NAME));
       expect(result).toMatchObject({
         valid: false,
-        reason: `Monitor is not a valid monitor of type ${DataStream.TCP}`,
+        reason: `Monitor is not a valid monitor of type ${MonitorTypeEnum.TCP}`,
         payload: testMonitor,
       });
     });
@@ -356,7 +356,7 @@ describe('validateMonitor', () => {
       expect(result.details).toEqual(expect.stringContaining(ConfigKey.URLS));
       expect(result).toMatchObject({
         valid: false,
-        reason: `Monitor is not a valid monitor of type ${DataStream.HTTP}`,
+        reason: `Monitor is not a valid monitor of type ${MonitorTypeEnum.HTTP}`,
         payload: testMonitor,
       });
     });
@@ -375,7 +375,7 @@ describe('validateMonitor', () => {
       expect(result.details).toEqual(expect.stringContaining(ConfigKey.SOURCE_INLINE));
       expect(result).toMatchObject({
         valid: false,
-        reason: `Monitor is not a valid monitor of type ${DataStream.BROWSER}`,
+        reason: `Monitor is not a valid monitor of type ${MonitorTypeEnum.BROWSER}`,
         payload: testMonitor,
       });
     });

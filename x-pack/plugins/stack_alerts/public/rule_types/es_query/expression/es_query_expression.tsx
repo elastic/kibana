@@ -197,7 +197,7 @@ export const EsQueryExpression: React.FC<
         <h5>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectIndexPrompt"
-            defaultMessage="Select an index and time field"
+            defaultMessage="Select indices"
           />
         </h5>
       </EuiTitle>

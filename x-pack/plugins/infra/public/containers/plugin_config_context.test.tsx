@@ -28,6 +28,7 @@ describe('usePluginConfig()', () => {
         metricThresholdAlertRuleEnabled: true,
         logThresholdAlertRuleEnabled: true,
         alertsAndRulesDropdownEnabled: true,
+        profilingEnabled: false,
       },
     };
     const { result } = renderHook(() => usePluginConfig(), {

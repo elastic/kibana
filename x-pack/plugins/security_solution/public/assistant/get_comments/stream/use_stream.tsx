@@ -7,12 +7,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
-import { share } from 'rxjs';
 import { getPlaceholderObservable, getStreamObservable } from './stream_observable';
 
 interface UseStreamProps {
   amendMessage: (message: string) => void;
+  isError: boolean;
   content?: string;
+  connectorTypeTitle: string;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
 }
 interface UseStream {
@@ -33,8 +34,15 @@ interface UseStream {
  * @param amendMessage - handles the amended message
  * @param content - the content of the message. If provided, the function will not use the reader to stream data.
  * @param reader - The readable stream reader used to stream data. If provided, the function will use this reader to stream data.
+ * @param isError - indicates whether the reader response is an error message or not
  */
-export const useStream = ({ amendMessage, content, reader }: UseStreamProps): UseStream => {
+export const useStream = ({
+  amendMessage,
+  content,
+  connectorTypeTitle,
+  reader,
+  isError,
+}: UseStreamProps): UseStream => {
   const [pendingMessage, setPendingMessage] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -42,9 +50,9 @@ export const useStream = ({ amendMessage, content, reader }: UseStreamProps): Us
   const observer$ = useMemo(
     () =>
       content == null && reader != null
-        ? getStreamObservable(reader, setLoading)
+        ? getStreamObservable({ connectorTypeTitle, reader, setLoading, isError })
         : getPlaceholderObservable(),
-    [content, reader]
+    [content, isError, reader, connectorTypeTitle]
   );
   const onCompleteStream = useCallback(() => {
     subscription?.unsubscribe();
@@ -59,7 +67,7 @@ export const useStream = ({ amendMessage, content, reader }: UseStreamProps): Us
     }
   }, [complete, onCompleteStream]);
   useEffect(() => {
-    const newSubscription = observer$.pipe(share()).subscribe({
+    const newSubscription = observer$.subscribe({
       next: ({ message, loading: isLoading }) => {
         setLoading(isLoading);
         setPendingMessage(message);

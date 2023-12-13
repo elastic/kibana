@@ -10,7 +10,7 @@ import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { AuthenticatedUser } from '../../../common/model';
+import type { AuthenticatedUser } from '../../../common';
 
 export interface PersonalInfoProps {
   user: AuthenticatedUser;

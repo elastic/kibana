@@ -13,7 +13,10 @@ import { v4 as uuidv4 } from 'uuid';
 import SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { EcsRiskScore, RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
+import type {
+  EcsRiskScore,
+  RiskScore,
+} from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
 import type { KbnClient } from '@kbn/test';
 import {
@@ -21,6 +24,7 @@ import {
   RISK_ENGINE_DISABLE_URL,
   RISK_ENGINE_ENABLE_URL,
   RISK_ENGINE_STATUS_URL,
+  RISK_ENGINE_PRIVILEGES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import {
   createRule,
@@ -482,6 +486,7 @@ export const riskEngineRouteHelpersFactory = (
       .get(routeWithNamespace(RISK_ENGINE_STATUS_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200),
 
@@ -498,6 +503,20 @@ export const riskEngineRouteHelpersFactory = (
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_DISABLE_URL, namespace))
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send()
+      .expect(200),
+});
+
+export const riskEngineRouteHelpersFactoryNoAuth = (
+  supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>,
+  namespace?: string
+) => ({
+  privilegesForUser: async ({ username, password }: { username: string; password: string }) =>
+    await supertestWithoutAuth
+      .get(RISK_ENGINE_PRIVILEGES_URL)
+      .auth(username, password)
       .set('elastic-api-version', '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()

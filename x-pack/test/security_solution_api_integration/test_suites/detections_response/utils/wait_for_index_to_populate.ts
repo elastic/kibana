@@ -7,7 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
-import { waitFor } from '../../../../detection_engine_api_integration/utils/wait_for';
+import { waitFor } from './wait_for';
 
 /**
  * Waits for the given index to contain documents

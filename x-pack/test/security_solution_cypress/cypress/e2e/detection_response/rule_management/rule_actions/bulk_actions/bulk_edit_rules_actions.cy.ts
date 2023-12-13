@@ -20,7 +20,7 @@ import {
 } from '../../../../../screens/rules_bulk_actions';
 import { actionFormSelector } from '../../../../../screens/common/rule_actions';
 
-import { deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/api_calls/common';
 import type { RuleActionCustomFrequency } from '../../../../../tasks/common/rule_actions';
 import {
   addSlackRuleAction,
@@ -148,7 +148,7 @@ describe(
     context('Restricted action privileges', () => {
       it("User with no privileges can't add rule actions", () => {
         login(ROLES.hunter_no_actions);
-        visitRulesManagementTable(ROLES.hunter_no_actions);
+        visitRulesManagementTable();
 
         expectManagementTableRules([
           ruleNameToAssert,

@@ -186,11 +186,22 @@ export function DiscoverGridFlyout({
     renderDefaultContent()
   );
 
+  const defaultFlyoutTitle = isPlainRecord
+    ? i18n.translate('discover.grid.tableRow.textBasedDetailHeading', {
+        defaultMessage: 'Expanded row',
+      })
+    : i18n.translate('discover.grid.tableRow.detailHeading', {
+        defaultMessage: 'Expanded document',
+      });
+  const flyoutTitle = flyoutCustomization?.title ?? defaultFlyoutTitle;
+
+  const flyoutSize = flyoutCustomization?.size ?? 'm';
+
   return (
     <EuiPortal>
       <EuiFlyout
         onClose={onClose}
-        size="m"
+        size={flyoutSize}
         data-test-subj="docTableDetailsFlyout"
         onKeyDown={onKeyDown}
         ownFocus={false}
@@ -201,15 +212,7 @@ export function DiscoverGridFlyout({
             className="unifiedDataTable__flyoutHeader"
             data-test-subj="docTableRowDetailsTitle"
           >
-            <h2>
-              {isPlainRecord
-                ? i18n.translate('discover.grid.tableRow.textBasedDetailHeading', {
-                    defaultMessage: 'Expanded row',
-                  })
-                : i18n.translate('discover.grid.tableRow.detailHeading', {
-                    defaultMessage: 'Expanded document',
-                  })}
-            </h2>
+            <h2>{flyoutTitle}</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">

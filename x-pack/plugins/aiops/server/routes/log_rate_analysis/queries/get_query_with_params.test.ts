@@ -5,34 +5,33 @@
  * 2.0.
  */
 
+import { paramsMock } from './__mocks__/params_match_all';
+import { paramsSearchQueryMock } from './__mocks__/params_search_query';
+
 import { getQueryWithParams } from './get_query_with_params';
 
 describe('getQueryWithParams', () => {
   it('returns the most basic query filtering', () => {
     const query = getQueryWithParams({
-      params: {
-        index: 'the-index',
-        timeFieldName: 'the-time-field-name',
-        start: 1577836800000,
-        end: 1609459200000,
-        baselineMin: 10,
-        baselineMax: 20,
-        deviationMin: 30,
-        deviationMax: 40,
-        includeFrozen: false,
-        searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
-      },
+      params: paramsSearchQueryMock,
     });
     expect(query).toEqual({
       bool: {
         filter: [
-          { bool: { filter: [], must: [{ match_all: {} }], must_not: [] } },
+          {
+            bool: {
+              filter: [],
+              minimum_should_match: 1,
+              must_not: [],
+              should: [{ term: { 'the-term': { value: 'the-value' } } }],
+            },
+          },
           {
             range: {
               'the-time-field-name': {
                 format: 'epoch_millis',
-                gte: 1577836800000,
-                lte: 1609459200000,
+                gte: 0,
+                lte: 50,
               },
             },
           },
@@ -43,18 +42,7 @@ describe('getQueryWithParams', () => {
 
   it('returns a query considering a custom field/value pair', () => {
     const query = getQueryWithParams({
-      params: {
-        index: 'the-index',
-        timeFieldName: 'the-time-field-name',
-        start: 1577836800000,
-        end: 1609459200000,
-        baselineMin: 10,
-        baselineMax: 20,
-        deviationMin: 30,
-        deviationMax: 40,
-        includeFrozen: false,
-        searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
-      },
+      params: paramsSearchQueryMock,
       termFilters: [
         {
           fieldName: 'actualFieldName',
@@ -65,19 +53,47 @@ describe('getQueryWithParams', () => {
     expect(query).toEqual({
       bool: {
         filter: [
-          { bool: { filter: [], must: [{ match_all: {} }], must_not: [] } },
+          {
+            bool: {
+              filter: [],
+              minimum_should_match: 1,
+              must_not: [],
+              should: [{ term: { 'the-term': { value: 'the-value' } } }],
+            },
+          },
           {
             range: {
               'the-time-field-name': {
                 format: 'epoch_millis',
-                gte: 1577836800000,
-                lte: 1609459200000,
+                gte: 0,
+                lte: 50,
               },
             },
           },
           {
             term: {
               actualFieldName: 'actualFieldValue',
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it("should not add `searchQuery` if it's just a match_all query", () => {
+    const query = getQueryWithParams({
+      params: paramsMock,
+    });
+    expect(query).toEqual({
+      bool: {
+        filter: [
+          {
+            range: {
+              'the-time-field-name': {
+                format: 'epoch_millis',
+                gte: 0,
+                lte: 50,
+              },
             },
           },
         ],

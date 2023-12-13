@@ -34,10 +34,6 @@ export const getTemplateCloneLink = (name: string, isLegacy?: boolean) => {
   return encodeURI(url);
 };
 
-export const getILMPolicyPath = (policyName: string) => {
-  return `/data/index_lifecycle_management/policies/edit/${encodeURIComponent(policyName)}`;
-};
-
 export const getIndexListUri = (filter?: string, includeHiddenIndices?: boolean) => {
   const hiddenIndicesParam =
     typeof includeHiddenIndices !== 'undefined' ? includeHiddenIndices : false;

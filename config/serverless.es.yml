@@ -9,10 +9,7 @@ xpack.observabilityLogExplorer.enabled: false
 xpack.observability.enabled: false
 xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
-xpack.uptime.enabled: false
-xpack.legacy_uptime.enabled: false
 enterpriseSearch.enabled: false
-monitoring.ui.enabled: false
 xpack.fleet.enabled: false
 
 ## Cloud settings

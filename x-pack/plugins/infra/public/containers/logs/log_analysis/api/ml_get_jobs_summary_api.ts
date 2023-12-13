@@ -8,26 +8,28 @@
 import * as rt from 'io-ts';
 import type { HttpHandler } from '@kbn/core/public';
 
+import { IdFormat, JobType } from '../../../../../common/http_api/latest';
 import { getJobId, jobCustomSettingsRT } from '../../../../../common/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
-interface RequestArgs<JobType extends string> {
+interface RequestArgs<T extends JobType> {
   spaceId: string;
   logViewId: string;
-  jobTypes: JobType[];
+  idFormat: IdFormat;
+  jobTypes: T[];
 }
 
-export const callJobsSummaryAPI = async <JobType extends string>(
-  requestArgs: RequestArgs<JobType>,
+export const callJobsSummaryAPI = async <T extends JobType>(
+  requestArgs: RequestArgs<T>,
   fetch: HttpHandler
 ) => {
-  const { spaceId, logViewId, jobTypes } = requestArgs;
+  const { spaceId, logViewId, idFormat, jobTypes } = requestArgs;
   const response = await fetch('/internal/ml/jobs/jobs_summary', {
     method: 'POST',
     version: '1',
     body: JSON.stringify(
       fetchJobStatusRequestPayloadRT.encode({
-        jobIds: jobTypes.map((jobType) => getJobId(spaceId, logViewId, jobType)),
+        jobIds: jobTypes.map((jobType) => getJobId(spaceId, logViewId, idFormat, jobType)),
       })
     ),
   });

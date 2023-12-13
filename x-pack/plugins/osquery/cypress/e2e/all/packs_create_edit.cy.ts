@@ -197,18 +197,21 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       const queries = {
         Query1: {
           interval: 3600,
+          timeout: 60,
           query: 'select * from uptime;',
           removed: true,
           snapshot: false,
         },
         Query2: {
           interval: 3600,
+          timeout: 60,
           query: 'select * from uptime;',
           removed: false,
           snapshot: false,
         },
         Query3: {
           interval: 3600,
+          timeout: 60,
           query: 'select * from uptime;',
         },
       };

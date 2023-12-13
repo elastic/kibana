@@ -25,13 +25,19 @@ import {
 } from './actions';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
-import type { ActionTimeline, TimelineById } from './types';
+import type { TimelineById } from './types';
 import { persistPinnedEvent } from '../../containers/pinned_event/api';
 
-export const timelinePinnedEventActionsType = new Set([pinEvent.type, unPinEvent.type]);
+type PinnedEventAction = ReturnType<typeof pinEvent | typeof unPinEvent>;
+
+const timelinePinnedEventActionsType = new Set([pinEvent.type, unPinEvent.type]);
+
+export function isPinnedEventAction(action: Action): action is PinnedEventAction {
+  return timelinePinnedEventActionsType.has(action.type);
+}
 
 export const epicPersistPinnedEvent = (
-  action: ActionTimeline,
+  action: PinnedEventAction,
   timeline: TimelineById,
   action$: Observable<Action>,
   timeline$: Observable<TimelineById>,
@@ -129,7 +135,7 @@ export const createTimelinePinnedEventEpic =
   <State>(): Epic<Action, Action, State> =>
   (action$) =>
     action$.pipe(
-      filter((action) => timelinePinnedEventActionsType.has(action.type)),
+      filter(isPinnedEventAction),
       mergeMap((action) => {
         dispatcherTimelinePersistQueue.next({ action });
         return EMPTY;

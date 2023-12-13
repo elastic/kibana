@@ -7,6 +7,8 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
+import { IncomingMessage } from 'http';
+import { PassThrough } from 'stream';
 import {
   RunActionParamsSchema,
   RunActionResponseSchema,
@@ -29,7 +31,7 @@ import {
   InvokeAIActionParams,
   InvokeAIActionResponse,
 } from '../../../common/openai/types';
-import { initDashboard } from './create_dashboard';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   getAxiosOptions,
   getRequestWithStreamOption,
@@ -80,6 +82,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     this.registerSubAction({
       name: SUB_ACTION.INVOKE_AI,
       method: 'invokeAI',
+      schema: InvokeAIActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.INVOKE_STREAM,
+      method: 'invokeStream',
       schema: InvokeAIActionParamsSchema,
     });
   }
@@ -179,15 +187,31 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
       dashboardId,
+      genAIProvider: 'OpenAI',
     });
 
     return { available: response.success };
   }
 
   /**
-   * takes an array of messages and a model as input and returns a promise that resolves to a string.
-   * Sends the stringified input to the runApi method. Returns the trimmed completion from the response.
-   * @param body An object containing array of message objects, and possible other OpenAI properties
+   * Responsible for invoking the streamApi method with the provided body and
+   * stream parameters set to true. It then returns a Transform stream that processes
+   * the response from the streamApi method and returns the response string alone.
+   * @param body - the OpenAI Invoke request body
+   */
+  public async invokeStream(body: InvokeAIActionParams): Promise<PassThrough> {
+    const res = (await this.streamApi({
+      body: JSON.stringify(body),
+      stream: true,
+    })) as unknown as IncomingMessage;
+
+    return res.pipe(new PassThrough());
+  }
+
+  /**
+   * Deprecated. Use invokeStream instead.
+   * TODO: remove once streaming work is implemented in langchain mode for security solution
+   * tracked here: https://github.com/elastic/security-team/issues/7363
    */
   public async invokeAI(body: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({ body: JSON.stringify(body) });

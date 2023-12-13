@@ -9,8 +9,10 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('core', () => {
+  describe('console', () => {
     loadTestFile(require.resolve('./proxy_route'));
     loadTestFile(require.resolve('./autocomplete_entities'));
+    loadTestFile(require.resolve('./es_config'));
+    loadTestFile(require.resolve('./spec_definitions'));
   });
 }

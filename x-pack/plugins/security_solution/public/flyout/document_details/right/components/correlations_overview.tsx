@@ -22,7 +22,7 @@ import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { CORRELATIONS_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
-import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { DocumentDetailsLeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 
 /**
@@ -43,7 +43,7 @@ export const CorrelationsOverview: React.FC = () => {
 
   const goToCorrelationsTab = useCallback(() => {
     openLeftPanel({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: {
         tab: LeftPanelInsightsTab,
         subTab: CORRELATIONS_TAB_ID,
