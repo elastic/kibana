@@ -6,11 +6,9 @@
  */
 
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
-import { profilingUseLegacyCo2Calculation } from '@kbn/observability-plugin/common';
 import React from 'react';
 import { Frame, FrameInformationWindow } from '.';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
-import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { EmptyFrame } from './empty_frame';
 import { getComparisonImpactRow } from './get_impact_rows';
 
@@ -42,12 +40,6 @@ export function ComparisonFrameInformationTooltip({
   comparisonRank,
 }: Props) {
   const calculateImpactEstimates = useCalculateImpactEstimate();
-  const {
-    start: { core },
-  } = useProfilingDependencies();
-  const shouldUseLegacyCo2Calculation = core.uiSettings.get<boolean>(
-    profilingUseLegacyCo2Calculation
-  );
 
   if (!frame) {
     return <EmptyFrame />;
@@ -65,7 +57,6 @@ export function ComparisonFrameInformationTooltip({
       totalSamples,
       totalSeconds,
       calculateImpactEstimates,
-      shouldUseLegacyCo2Calculation,
     },
     comparison: comparisonFrame
       ? {
@@ -79,7 +70,6 @@ export function ComparisonFrameInformationTooltip({
           totalSamples: comparisonTotalSamples,
           totalSeconds: comparisonTotalSeconds,
           calculateImpactEstimates,
-          shouldUseLegacyCo2Calculation,
         }
       : undefined,
   });

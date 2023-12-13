@@ -597,10 +597,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:profilingUseLegacyCo2Calculation': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:profilingCostPervCPUPerHour': {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },

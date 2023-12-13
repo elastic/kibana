@@ -44,7 +44,6 @@ export {
   profilingCo2PerKWH,
   profilingDatacenterPUE,
   profilingPervCPUWattX86,
-  profilingUseLegacyCo2Calculation,
   profilingPervCPUWattArm64,
   profilingAWSCostDiscountRate,
   profilingCostPervCPUPerHour,
