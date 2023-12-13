@@ -7,15 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { SOURCE_TYPES } from '../../../../common/constants'
 import type { EsqlSourceDescriptor, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { AbstractVectorSource } from '../vector_source';
+import { getLayerFeaturesRequestName } from '../vector_source';
 import type { IVectorSource, GeoJsonWithMeta } from '../vector_source';
 import { getData } from '../../../kibana_services';
-import { convertToGeoJson } from './convert_to_geojson';
+import { convertToGeoJson, type ESQLSearchReponse } from './convert_to_geojson';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
@@ -61,16 +63,33 @@ export class EsqlSource extends AbstractVectorSource implements IVectorSource {
       query: this._descriptor.esql
     };
 
-    const { rawResponse } = await lastValueFrom(
+
+    const requestResponder = inspectorAdapters.requests!.start(
+      getLayerFeaturesRequestName(layerName),
+      {
+        id: this.getId()
+      }
+    );
+    requestResponder.json(params);
+
+    const { rawResponse, requestParams } = await lastValueFrom(
       getData().search.search({ params }, {
         strategy: 'esql',
-      })
+      }).pipe(
+        tap({
+          error(error) {
+            requestResponder.error({
+              json: 'attributes' in error ? error.attributes : { message: error.message },
+            });
+          },
+        })
+      )
     );
 
-    console.log(rawResponse);
+    requestResponder.ok({ json: rawResponse, requestParams });
 
     return {
-      data: convertToGeoJson(rawResponse),
+      data: convertToGeoJson(rawResponse as unknown as ESQLSearchReponse),
     }
   }
 }

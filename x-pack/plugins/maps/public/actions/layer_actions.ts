@@ -849,7 +849,7 @@ export function setTileState(
 }
 
 function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
-  if (isLayerGroup(layer) || !layer.getSource().isESSource()) {
+  if (isLayerGroup(layer)) {
     return;
   }
 
@@ -857,10 +857,13 @@ function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
     adapters.vectorTiles.removeLayer(layer.getId());
   }
 
+  const source = layer.getSource();
+  if ('getId' in source) {
+    adapters.requests!.resetRequest((source as IESSource).getId());
+  }
+
   if (adapters.requests && 'getValidJoins' in layer) {
-    const vectorLayer = layer as IVectorLayer;
-    adapters.requests!.resetRequest((layer.getSource() as IESSource).getId());
-    vectorLayer.getValidJoins().forEach((join) => {
+    (layer as IVectorLayer).getValidJoins().forEach((join) => {
       adapters.requests!.resetRequest(join.getRightJoinSource().getId());
     });
   }

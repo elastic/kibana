@@ -13,12 +13,12 @@ import { getGeometryColumnIndex } from './get_esql_meta';
 
 // TODO replace once types are defined in estypes
 type Hit = unknown[];
-interface EsqlResponse {
+export interface ESQLSearchReponse {
   columns: EsqlColumn[];
   values: Hit[];
 }
 
-export function convertToGeoJson(resp: EsqlResponse): FeatureCollection {
+export function convertToGeoJson(resp: ESQLSearchReponse): FeatureCollection {
   const geometryIndex = getGeometryColumnIndex(resp.columns);
   const features: Feature[] = [];
   for (let i = 0; i < resp.values.length; i++) {
