@@ -166,7 +166,7 @@ const CustomStyles: React.FC = ({ children }) => {
       font-weight: bold;
       background: rgb(255, 215, 213);
     }
-    .${DARK_THEME_CLASS_NAME}.${GUTTER_CLASS_NAME}.diff-gutter-delete {
+    .${DARK_THEME_CLASS_NAME} .${GUTTER_CLASS_NAME}.diff-gutter-delete {
       background: rgba(248, 81, 73, 0.3);
     }
 
@@ -176,7 +176,7 @@ const CustomStyles: React.FC = ({ children }) => {
       font-weight: bold;
       background: rgb(204, 255, 216);
     }
-    .${DARK_THEME_CLASS_NAME}.${GUTTER_CLASS_NAME}.diff-gutter-insert {
+    .${DARK_THEME_CLASS_NAME} .${GUTTER_CLASS_NAME}.diff-gutter-insert {
       background: rgba(63, 185, 80, 0.3);
     }
 
@@ -184,7 +184,7 @@ const CustomStyles: React.FC = ({ children }) => {
     .${CODE_CLASS_NAME}.diff-code-delete {
       background: rgb(255, 235, 233);
     }
-    .${DARK_THEME_CLASS_NAME}.${CODE_CLASS_NAME}.diff-code-delete {
+    .${DARK_THEME_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-delete {
       background: rgba(248, 81, 73, 0.1);
     }
 
@@ -192,7 +192,7 @@ const CustomStyles: React.FC = ({ children }) => {
     .${CODE_CLASS_NAME}.diff-code-insert {
       background: rgb(230, 255, 236);
     }
-    .${DARK_THEME_CLASS_NAME}.${CODE_CLASS_NAME}.diff-code-insert {
+    .${DARK_THEME_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-insert {
       background: rgba(46, 160, 67, 0.15);
     }
 
