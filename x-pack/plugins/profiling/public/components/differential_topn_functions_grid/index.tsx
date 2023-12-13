@@ -143,7 +143,7 @@ export function DifferentialTopNFunctionsGrid({
       baseRows: getFunctionsRows({
         calculateImpactEstimates,
         topNFunctions: base,
-        totalSeconds: 900,
+        totalSeconds,
       }),
       comparisonRows: getFunctionsRows({
         baselineScaleFactor,
