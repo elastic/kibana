@@ -96,8 +96,6 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(TIMELINES_DESCRIPTION).first().should('have.text', getTimeline().description);
       cy.get(TIMELINES_FAVORITE).first().should('exist');
       cy.get(TIMELINE_QUERY).should('contain.text', getTimeline().query);
-      // Comments this assertion until we agreed what to do with the filters.
-      // cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
     });
   });
 
