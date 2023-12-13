@@ -7,10 +7,11 @@
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { sloSchema } from '@kbn/slo-schema';
+import { Paginated, Pagination, sloSchema } from '@kbn/slo-schema';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
+import { SLO_MODEL_VERSION } from '../../../common/slo/constants';
 import { SLO, StoredSLO } from '../../domain/models';
 import { SLOIdConflict, SLONotFound } from '../../errors';
 import { SO_SLO_TYPE } from '../../saved_objects';
@@ -20,7 +21,11 @@ export interface SLORepository {
   findAllByIds(ids: string[]): Promise<SLO[]>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
-  search(search: string): Promise<SLO[]>;
+  search(
+    search: string,
+    pagination: Pagination,
+    options?: { includeOutdatedOnly?: boolean }
+  ): Promise<Paginated<SLO>>;
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
@@ -99,19 +104,28 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     }
   }
 
-  async search(search: string): Promise<SLO[]> {
-    try {
-      const response = await this.soClient.find<StoredSLO>({
-        type: SO_SLO_TYPE,
-        page: 1,
-        perPage: 25,
-        search,
-        searchFields: ['name'],
-      });
-      return response.saved_objects.map((slo) => toSLO(slo.attributes));
-    } catch (err) {
-      throw err;
-    }
+  async search(
+    search: string,
+    pagination: Pagination,
+    options: { includeOutdatedOnly?: boolean } = { includeOutdatedOnly: false }
+  ): Promise<Paginated<SLO>> {
+    const response = await this.soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: pagination.page,
+      perPage: pagination.perPage,
+      search,
+      searchFields: ['name'],
+      ...(!!options.includeOutdatedOnly && {
+        filter: `slo.attributes.version < ${SLO_MODEL_VERSION}`,
+      }),
+    });
+
+    return {
+      total: response.total,
+      perPage: response.per_page,
+      page: response.page,
+      results: response.saved_objects.map((slo) => toSLO(slo.attributes)),
+    };
   }
 }
 
@@ -121,7 +135,13 @@ function toStoredSLO(slo: SLO): StoredSLO {
 
 function toSLO(storedSLO: StoredSLO): SLO {
   return pipe(
-    sloSchema.decode(storedSLO),
+    sloSchema.decode({
+      ...storedSLO,
+      // version was added in 8.12.0. This is a safeguard against SO migration issue.
+      // if not present, we considered the version to be 1, e.g. not migrated.
+      // We would need to call the _reset api on this SLO.
+      version: storedSLO.version ?? 1,
+    }),
     fold(() => {
       throw new Error('Invalid Stored SLO');
     }, t.identity)
