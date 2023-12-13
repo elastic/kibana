@@ -11,11 +11,11 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButtonIcon, EuiPanel, EuiTextColor, EuiTitle } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 
 import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 
-import { InferencePipelineCard } from './inference_pipeline_card';
+import { InferencePipelineCard, TrainedModelHealthPopover } from './inference_pipeline_card';
 import { MLModelTypeBadge } from './ml_model_type_badge';
 
 export const DEFAULT_VALUES: InferencePipeline = {
@@ -40,7 +40,7 @@ describe('InferencePipelineCard', () => {
   it('renders pipeline as title', () => {
     const wrapper = shallow(<InferencePipelineCard {...mockValues} />);
     expect(wrapper.find(EuiTitle)).toHaveLength(1);
-    const title = wrapper.find(EuiTitle).dive();
+    const title = wrapper.find(EuiTitle).at(0).children();
     expect(title.text()).toBe(DEFAULT_VALUES.pipelineName);
   });
   it('renders pipeline as title with unknown model type', () => {
@@ -51,14 +51,14 @@ describe('InferencePipelineCard', () => {
     const wrapper = shallow(<InferencePipelineCard {...values} />);
     expect(wrapper.find(EuiTitle)).toHaveLength(1);
     // does not render subtitle
-    expect(wrapper.find(EuiTextColor)).toHaveLength(0);
-    const title = wrapper.find(EuiTitle).dive();
+    expect(wrapper.find(EuiText)).toHaveLength(0);
+    const title = wrapper.find(EuiTitle).at(0).children();
     expect(title.text()).toBe(DEFAULT_VALUES.pipelineName);
   });
   it('renders model ID as subtitle', () => {
     const wrapper = shallow(<InferencePipelineCard {...mockValues} />);
-    expect(wrapper.find(EuiTextColor)).toHaveLength(1);
-    const subtitle = wrapper.find(EuiTextColor).dive();
+    expect(wrapper.find(EuiText)).toHaveLength(1);
+    const subtitle = wrapper.find(EuiText).at(0).children();
     expect(subtitle.text()).toBe(DEFAULT_VALUES.modelId);
   });
   it('renders model type as badge', () => {
@@ -67,20 +67,28 @@ describe('InferencePipelineCard', () => {
     const badge = wrapper.find(MLModelTypeBadge).render();
     expect(badge.text()).toBe('ner');
   });
-  it('renders fix button when model not deployed', () => {
+});
+
+describe('TrainedModelHealthPopover', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setMockValues(mockValues);
+  });
+  it('popover renders fix button when model not deployed', () => {
     const values = {
       ...DEFAULT_VALUES,
       modelState: TrainedModelState.NotDeployed,
     };
-    const wrapper = shallow(<InferencePipelineCard {...values} />);
-    expect(wrapper.find(EuiButtonIcon)).toHaveLength(1);
+    const wrapper = shallow(<TrainedModelHealthPopover {...values} />);
+    expect(wrapper.find(EuiButtonEmpty)).toHaveLength(3);
 
-    const fixButton = wrapper.find(EuiButtonIcon);
+    const fixButton = wrapper.find(EuiButtonEmpty).at(0);
     expect(fixButton.prop('iconType')).toBe('wrench');
     expect(fixButton.prop('href')).toBe('/app/ml/trained_models');
+    expect(fixButton.children().text()).toBe('Fix issue in Trained Models');
   });
-  it('does not render fix button when model deployed', () => {
-    const wrapper = shallow(<InferencePipelineCard {...mockValues} />);
-    expect(wrapper.find(EuiButtonIcon)).toHaveLength(0);
+  it('popover does not render fix button when model deployed', () => {
+    const wrapper = shallow(<TrainedModelHealthPopover {...mockValues} />);
+    expect(wrapper.find(EuiButtonEmpty)).toHaveLength(2);
   });
 });
