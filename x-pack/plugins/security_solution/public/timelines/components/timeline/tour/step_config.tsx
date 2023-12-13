@@ -26,7 +26,7 @@ export const timelineTourSteps = [
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.timeline.tour.newTimeline.description"
-          defaultMessage="Click {newButton} to create a new timeline. Click {openButton} to open an existing one"
+          defaultMessage="Click {newButton} to create a new timeline. Click {openButton} to open an existing one."
           values={{
             newButton: <EuiCode>{i18n.TIMELINE_TOUR_NEW}</EuiCode>,
             openButton: <EuiCode>{i18n.TIMELINE_TOUR_OPEN}</EuiCode>,
@@ -42,10 +42,7 @@ export const timelineTourSteps = [
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.timeline.tour.addToFavorites.description"
-          defaultMessage="Click {addToFavoritesButton} to effortlessly curate and quickly access your most important timelines"
-          values={{
-            addToFavoritesButton: <EuiCode>{i18n.TIMELINE_TOUR_ADD_TO_FAV}</EuiCode>,
-          }}
+          defaultMessage="Click to favorite your Timeline so you can quickly find it later."
         />
       </EuiText>
     ),
@@ -58,7 +55,7 @@ export const timelineTourSteps = [
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.timeline.tour.changeDataView.description"
-          defaultMessage="Click the {dataViewButton} menu to choose the event or alert data that you want to display"
+          defaultMessage="Click the {dataViewButton} menu to choose the event or alert data that you want to display."
           values={{
             dataViewButton: <EuiCode> {i18n.TIMELINE_TOUR_DATA_VIEW}</EuiCode>,
           }}
@@ -79,7 +76,7 @@ export const timelineTourSteps = [
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.timeline.tour.saveTimeline.description"
-          defaultMessage="Click {saveButton} to manually save new changes. While saving your Timeline, you can {editButton} its name and description or save it as a new Timeline"
+          defaultMessage="Click {saveButton} to manually save new changes. While saving your Timeline, you can {editButton} its name and description or save it as a new Timeline."
           values={{
             saveButton: <EuiCode>{i18n.TIMELINE_TOUR_SAVE}</EuiCode>,
             editButton: <EuiCode>{i18n.TIMELINE_TOUR_EDIT}</EuiCode>,
