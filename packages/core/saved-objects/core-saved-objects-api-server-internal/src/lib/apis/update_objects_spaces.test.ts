@@ -8,14 +8,20 @@
 
 import {
   pointInTimeFinderMock,
+  mockUpdateObjectsSpaces,
   mockGetCurrentTime,
   mockGetSearchDsl,
-} from './repository.test.mock';
+} from '../repository.test.mock';
 
-import { SavedObjectsRepository } from './repository';
+import type {
+  SavedObjectsUpdateObjectsSpacesResponse,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+} from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { kibanaMigratorMock } from '../mocks';
+import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
@@ -24,9 +30,9 @@ import {
   createRegistry,
   createDocumentMigrator,
   createSpySerializer,
-} from '../test_helpers/repository.test.common';
+} from '../../test_helpers/repository.test.common';
 
-describe('SavedObjectsRepository', () => {
+describe('#updateObjectsSpaces', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
@@ -67,23 +73,41 @@ describe('SavedObjectsRepository', () => {
     mockGetSearchDsl.mockClear();
   });
 
-  describe('#getCurrentNamespace', () => {
-    it('returns `undefined` for `undefined` namespace argument', async () => {
-      expect(repository.getCurrentNamespace()).toBeUndefined();
+  describe('performUpdateObjectsSpaces', () => {
+    afterEach(() => {
+      mockUpdateObjectsSpaces.mockReset();
     });
 
-    it('throws if `*` namespace argument is provided', async () => {
-      expect(() => repository.getCurrentNamespace('*')).toThrowErrorMatchingInlineSnapshot(
-        `"\\"options.namespace\\" cannot be \\"*\\": Bad Request"`
+    it('passes arguments to the updateObjectsSpaces module and returns the result', async () => {
+      const objects: SavedObjectsUpdateObjectsSpacesObject[] = [{ type: 'type', id: 'id' }];
+      const spacesToAdd = ['to-add', 'also-to-add'];
+      const spacesToRemove = ['to-remove'];
+      const options: SavedObjectsUpdateObjectsSpacesOptions = { namespace: 'ns-1' };
+      const expectedResult: SavedObjectsUpdateObjectsSpacesResponse = {
+        objects: [
+          {
+            type: 'type',
+            id: 'id',
+            spaces: ['foo', 'bar'],
+          },
+        ],
+      };
+      mockUpdateObjectsSpaces.mockResolvedValue(expectedResult);
+
+      await expect(
+        repository.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options)
+      ).resolves.toEqual(expectedResult);
+      expect(mockUpdateObjectsSpaces).toHaveBeenCalledTimes(1);
+      expect(mockUpdateObjectsSpaces).toHaveBeenCalledWith(
+        expect.objectContaining({ objects, spacesToAdd, spacesToRemove, options })
       );
     });
 
-    it('properly handles `default` namespace', async () => {
-      expect(repository.getCurrentNamespace('default')).toBeUndefined();
-    });
+    it('returns an error from the updateObjectsSpaces module', async () => {
+      const expectedResult = new Error('Oh no!');
+      mockUpdateObjectsSpaces.mockRejectedValue(expectedResult);
 
-    it('properly handles non-`default` namespace', async () => {
-      expect(repository.getCurrentNamespace('space-a')).toBe('space-a');
+      await expect(repository.updateObjectsSpaces([], [], [])).rejects.toEqual(expectedResult);
     });
   });
 });

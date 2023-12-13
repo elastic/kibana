@@ -8,14 +8,18 @@
 
 import {
   pointInTimeFinderMock,
+  mockInternalBulkResolve,
   mockGetCurrentTime,
   mockGetSearchDsl,
-} from './repository.test.mock';
+} from '../repository.test.mock';
 
-import { SavedObjectsRepository } from './repository';
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
+import { type BulkResolveError } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { kibanaMigratorMock } from '../mocks';
+import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
@@ -24,7 +28,7 @@ import {
   createRegistry,
   createDocumentMigrator,
   createSpySerializer,
-} from '../test_helpers/repository.test.common';
+} from '../../test_helpers/repository.test.common';
 
 describe('SavedObjectsRepository', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -67,23 +71,38 @@ describe('SavedObjectsRepository', () => {
     mockGetSearchDsl.mockClear();
   });
 
-  describe('#getCurrentNamespace', () => {
-    it('returns `undefined` for `undefined` namespace argument', async () => {
-      expect(repository.getCurrentNamespace()).toBeUndefined();
+  describe('#resolve', () => {
+    afterEach(() => {
+      mockInternalBulkResolve.mockReset();
     });
 
-    it('throws if `*` namespace argument is provided', async () => {
-      expect(() => repository.getCurrentNamespace('*')).toThrowErrorMatchingInlineSnapshot(
-        `"\\"options.namespace\\" cannot be \\"*\\": Bad Request"`
+    it('passes arguments to the internalBulkResolve module and returns the result', async () => {
+      const expectedResult: SavedObjectsResolveResponse = {
+        saved_object: { type: 'type', id: 'id', attributes: {}, references: [] },
+        outcome: 'exactMatch',
+      };
+      mockInternalBulkResolve.mockResolvedValue({ resolved_objects: [expectedResult] });
+
+      await expect(repository.resolve('obj-type', 'obj-id')).resolves.toEqual(expectedResult);
+      expect(mockInternalBulkResolve).toHaveBeenCalledTimes(1);
+      expect(mockInternalBulkResolve).toHaveBeenCalledWith(
+        expect.objectContaining({ objects: [{ type: 'obj-type', id: 'obj-id' }] })
       );
     });
 
-    it('properly handles `default` namespace', async () => {
-      expect(repository.getCurrentNamespace('default')).toBeUndefined();
+    it('throws when internalBulkResolve result is an error', async () => {
+      const error = SavedObjectsErrorHelpers.decorateBadRequestError(new Error('Oh no!'));
+      const expectedResult: BulkResolveError = { type: 'obj-type', id: 'obj-id', error };
+      mockInternalBulkResolve.mockResolvedValue({ resolved_objects: [expectedResult] });
+
+      await expect(repository.resolve('foo', '2')).rejects.toEqual(error);
     });
 
-    it('properly handles non-`default` namespace', async () => {
-      expect(repository.getCurrentNamespace('space-a')).toBe('space-a');
+    it('throws when internalBulkResolve throws', async () => {
+      const error = new Error('Oh no!');
+      mockInternalBulkResolve.mockRejectedValue(error);
+
+      await expect(repository.resolve('foo', '2')).rejects.toEqual(error);
     });
   });
 });

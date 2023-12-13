@@ -8,14 +8,19 @@
 
 import {
   pointInTimeFinderMock,
+  mockCollectMultiNamespaceReferences,
   mockGetCurrentTime,
   mockGetSearchDsl,
-} from './repository.test.mock';
+} from '../repository.test.mock';
 
-import { SavedObjectsRepository } from './repository';
+import type {
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+} from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { kibanaMigratorMock } from '../mocks';
+import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
@@ -24,9 +29,9 @@ import {
   createRegistry,
   createDocumentMigrator,
   createSpySerializer,
-} from '../test_helpers/repository.test.common';
+} from '../../test_helpers/repository.test.common';
 
-describe('SavedObjectsRepository', () => {
+describe('#collectMultiNamespaceReferences', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
@@ -67,23 +72,34 @@ describe('SavedObjectsRepository', () => {
     mockGetSearchDsl.mockClear();
   });
 
-  describe('#getCurrentNamespace', () => {
-    it('returns `undefined` for `undefined` namespace argument', async () => {
-      expect(repository.getCurrentNamespace()).toBeUndefined();
+  describe('performCollectMultiNamespaceReferences', () => {
+    afterEach(() => {
+      mockCollectMultiNamespaceReferences.mockReset();
     });
 
-    it('throws if `*` namespace argument is provided', async () => {
-      expect(() => repository.getCurrentNamespace('*')).toThrowErrorMatchingInlineSnapshot(
-        `"\\"options.namespace\\" cannot be \\"*\\": Bad Request"`
+    it('passes arguments to the collectMultiNamespaceReferences module and returns the result', async () => {
+      const objects: SavedObjectsCollectMultiNamespaceReferencesObject[] = [
+        { type: 'foo', id: 'bar' },
+      ];
+      const expectedResult: SavedObjectsCollectMultiNamespaceReferencesResponse = {
+        objects: [{ type: 'foo', id: 'bar', spaces: ['ns-1'], inboundReferences: [] }],
+      };
+      mockCollectMultiNamespaceReferences.mockResolvedValue(expectedResult);
+
+      await expect(repository.collectMultiNamespaceReferences(objects)).resolves.toEqual(
+        expectedResult
+      );
+      expect(mockCollectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
+      expect(mockCollectMultiNamespaceReferences).toHaveBeenCalledWith(
+        expect.objectContaining({ objects })
       );
     });
 
-    it('properly handles `default` namespace', async () => {
-      expect(repository.getCurrentNamespace('default')).toBeUndefined();
-    });
+    it('returns an error from the collectMultiNamespaceReferences module', async () => {
+      const expectedResult = new Error('Oh no!');
+      mockCollectMultiNamespaceReferences.mockRejectedValue(expectedResult);
 
-    it('properly handles non-`default` namespace', async () => {
-      expect(repository.getCurrentNamespace('space-a')).toBe('space-a');
+      await expect(repository.collectMultiNamespaceReferences([])).rejects.toEqual(expectedResult);
     });
   });
 });
