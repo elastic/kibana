@@ -11,11 +11,7 @@ import { uniq } from 'lodash';
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import type { IntegrationPreferenceType } from '../../../components/integration_preference';
-import {
-  useGetPackagesQuery,
-  useGetCategoriesQuery,
-  useGetSettingsQuery,
-} from '../../../../../hooks';
+import { useGetPackagesQuery, useGetCategoriesQuery } from '../../../../../hooks';
 import {
   useGetAppendCustomIntegrationsQuery,
   useGetReplacementCustomIntegrationsQuery,
@@ -107,10 +103,12 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
   }, []);
 };
 
-export const useAvailablePackages = () => {
+export const useAvailablePackages = ({
+  prereleaseIntegrationsEnabled,
+}: {
+  prereleaseIntegrationsEnabled: boolean;
+}) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
-  const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery();
-  const prereleaseIntegrationsEnabled = settings?.item.prerelease_integrations_enabled ?? false;
 
   const { showIntegrationsSubcategories } = ExperimentalFeaturesService.get();
 
@@ -135,12 +133,7 @@ export const useAvailablePackages = () => {
     data: eprPackages,
     isLoading: isLoadingAllPackages,
     error: eprPackageLoadingError,
-  } = useGetPackagesQuery(
-    { prerelease: prereleaseIntegrationsEnabled },
-    {
-      enabled: isSettingsFetched,
-    }
-  );
+  } = useGetPackagesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {

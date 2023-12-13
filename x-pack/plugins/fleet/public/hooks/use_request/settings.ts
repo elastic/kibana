@@ -15,14 +15,17 @@ import { API_VERSIONS } from '../../../common/constants';
 import type { RequestError } from './use_request';
 import { sendRequest, sendRequestForRq, useRequest } from './use_request';
 
-export function useGetSettingsQuery() {
-  return useQuery<GetSettingsResponse, RequestError>(['settings'], () =>
-    sendRequestForRq<GetSettingsResponse>({
-      method: 'get',
-      path: settingsRoutesService.getInfoPath(),
-      version: API_VERSIONS.public.v1,
-    })
-  );
+export function useGetSettingsQuery(options?: { enabled?: boolean }) {
+  return useQuery<GetSettingsResponse, RequestError>({
+    queryKey: ['settings'],
+    enabled: options?.enabled,
+    queryFn: () =>
+      sendRequestForRq<GetSettingsResponse>({
+        method: 'get',
+        path: settingsRoutesService.getInfoPath(),
+        version: API_VERSIONS.public.v1,
+      }),
+  });
 }
 
 export function useGetSettings() {
