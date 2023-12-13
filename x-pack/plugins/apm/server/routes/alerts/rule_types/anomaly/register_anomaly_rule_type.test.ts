@@ -10,6 +10,7 @@ import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import * as GetServiceAnomalies from '../../../service_map/get_service_anomalies';
 import { createRuleTypeMocks } from '../../test_utils';
 import { ApmMlJob } from '../../../../../common/anomaly_detection/apm_ml_job';
+import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
 describe('Transaction duration anomaly alert', () => {
   afterEach(() => {
@@ -24,7 +25,10 @@ describe('Transaction duration anomaly alert', () => {
         ml: undefined,
       });
 
-      const params = { anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR };
+      const params = {
+        anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR,
+        anomalyDetectorTypes: [ApmMlDetectorType.txLatency],
+      };
 
       await executor({ params });
 
@@ -52,7 +56,10 @@ describe('Transaction duration anomaly alert', () => {
         ml,
       });
 
-      const params = { anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR };
+      const params = {
+        anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR,
+        anomalyDetectorTypes: [ApmMlDetectorType.txLatency],
+      };
 
       await executor({ params });
       expect(
@@ -105,6 +112,7 @@ describe('Transaction duration anomaly alert', () => {
 
       const params = {
         anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR,
+        anomalyDetectorTypes: [ApmMlDetectorType.txLatency],
         windowSize: 5,
         windowUnit: 'm',
       };
@@ -185,6 +193,7 @@ describe('Transaction duration anomaly alert', () => {
 
       const params = {
         anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR,
+        anomalyDetectorTypes: [ApmMlDetectorType.txLatency],
         windowSize: 5,
         windowUnit: 'm',
       };
@@ -204,7 +213,7 @@ describe('Transaction duration anomaly alert', () => {
         threshold: 'minor',
         triggerValue: 'critical',
         reason:
-          'critical anomaly with a score of 80 was detected in the last 5 mins for foo.',
+          'critical anomaly with a score of 80 and detector type txLatency, was detected in the last 5 mins for foo.',
         viewInAppUrl:
           'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=development',
         alertDetailsUrl: 'mockedAlertsLocator > getLocation',

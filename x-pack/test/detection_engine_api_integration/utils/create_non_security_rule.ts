@@ -18,7 +18,7 @@ const SIMPLE_APM_RULE_DATA = {
     windowSize: 30,
     windowUnit: 'm',
     anomalySeverityType: 'critical',
-    anomalyDetectorTypes: ['latency'],
+    anomalyDetectorTypes: [ApmMlDetectorType.txLatency],
     environment: 'ENVIRONMENT_ALL',
   },
   schedule: {

@@ -29,7 +29,7 @@ import {
 import { SelectAnomalyDetector } from './select_anomaly_detector';
 import { ANOMALY_DETECTOR_SELECTOR_OPTIONS } from '../../../../../common/rules/apm_rule_types';
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
-import { getApmMlDetectorLabel } from './helpers';
+import { getApmMlDetectorLabel } from './get_apm_ml_detector_label';
 
 interface AlertParams {
   anomalySeverityType?:

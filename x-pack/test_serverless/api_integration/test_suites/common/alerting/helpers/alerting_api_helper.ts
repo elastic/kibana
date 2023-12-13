@@ -153,7 +153,7 @@ export async function createAnomalyRule({
       enabled,
       params: params || {
         anomalySeverityType: 'critical',
-        anomalyDetectorTypes: ['latency'],
+        anomalyDetectorTypes: [ApmMlDetectorType.txLatency],
         environment: 'ENVIRONMENT_ALL',
         windowSize: 30,
         windowUnit: 'm',

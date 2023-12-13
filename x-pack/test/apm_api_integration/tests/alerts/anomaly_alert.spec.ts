@@ -86,7 +86,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               windowSize: 5,
               windowUnit: 'h',
               anomalySeverityType: ML_ANOMALY_SEVERITY.WARNING,
-              anomalyDetectorTypes: ['latency'],
+              anomalyDetectorTypes: [ApmMlDetectorType.txLatency],
             },
             ruleTypeId: ApmRuleType.Anomaly,
           });
