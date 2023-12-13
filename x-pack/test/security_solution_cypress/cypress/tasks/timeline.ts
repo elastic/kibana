@@ -94,7 +94,7 @@ import {
   SAVE_TIMELINE_ACTION_BTN,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
-import { drag, drop } from './common';
+import { drag, drop, waitForTabToBeLoaded } from './common';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
@@ -155,15 +155,7 @@ export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
   return cy.get(NOTES_TAB_BUTTON);
 };
 
-export const goToEsqlTab = () => {
-  recurse(
-    () => cy.get(ESQL_TAB).should('be.visible').click(),
-    ($el) => expect($el).to.have.class('euiTab-isSelected'),
-    {
-      delay: 500,
-    }
-  );
-};
+export const goToEsqlTab = () => waitForTabToBeLoaded(ESQL_TAB);
 
 export const goToCorrelationTab = () => {
   cy.get(TIMELINE_CORRELATION_TAB).click();
