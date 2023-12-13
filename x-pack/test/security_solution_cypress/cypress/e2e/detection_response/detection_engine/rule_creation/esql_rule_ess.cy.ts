@@ -20,6 +20,7 @@ import { getDetails, goBackToRulesTable } from '../../../../tasks/rule_details';
 import { expectNumberOfRules } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
+  expandEsqlQueryBar,
   fillAboutRuleAndContinue,
   fillDefineEsqlRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -92,7 +93,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     });
     it('shows error when ES|QL query is empty', function () {
       selectEsqlRuleType();
-
+      expandEsqlQueryBar();
       getDefineContinueButton().click();
 
       cy.get(ESQL_QUERY_BAR).contains('ES|QL query is required');
@@ -100,7 +101,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
 
     it('proceeds further once invalid query is fixed', function () {
       selectEsqlRuleType();
-
+      expandEsqlQueryBar();
       getDefineContinueButton().click();
 
       cy.get(ESQL_QUERY_BAR).contains('required');
@@ -115,7 +116,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     it('shows error when non-aggregating ES|QL query does not [metadata] operator', function () {
       const invalidNonAggregatingQuery = 'from auditbeat* | limit 5';
       selectEsqlRuleType();
-
+      expandEsqlQueryBar();
       fillEsqlQueryBar(invalidNonAggregatingQuery);
       getDefineContinueButton().click();
 
@@ -129,7 +130,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
         'from auditbeat* [metadata _id, _version, _index] | keep agent.* | limit 5';
 
       selectEsqlRuleType();
-
+      expandEsqlQueryBar();
       fillEsqlQueryBar(invalidNonAggregatingQuery);
       getDefineContinueButton().click();
 
@@ -144,7 +145,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       visit(CREATE_RULE_URL);
 
       selectEsqlRuleType();
-
+      expandEsqlQueryBar();
       fillEsqlQueryBar(invalidEsqlQuery);
       getDefineContinueButton().click();
 
