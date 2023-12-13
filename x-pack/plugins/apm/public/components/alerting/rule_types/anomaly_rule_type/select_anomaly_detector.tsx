@@ -7,18 +7,16 @@
 
 import React, { useCallback } from 'react';
 import { EuiSelectable, EuiSelectableOption } from '@elastic/eui';
-import {
-  AnomalyAlertDetectorType,
-  ANOMALY_ALERT_DETECTORS,
-} from '../../../../../common/rules/apm_rule_types';
+import { ANOMALY_DETECTOR_SELECTOR_OPTIONS } from '../../../../../common/rules/apm_rule_types';
+import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
 interface Props {
-  values: AnomalyAlertDetectorType[];
-  onChange: (values?: AnomalyAlertDetectorType[]) => void;
+  values: ApmMlDetectorType[];
+  onChange: (values?: ApmMlDetectorType[]) => void;
 }
 
 export function SelectAnomalyDetector({ values, onChange }: Props) {
-  const options: EuiSelectableOption[] = ANOMALY_ALERT_DETECTORS.map(
+  const options: EuiSelectableOption[] = ANOMALY_DETECTOR_SELECTOR_OPTIONS.map(
     (option) => ({
       key: option.type,
       label: option.label,
@@ -28,13 +26,17 @@ export function SelectAnomalyDetector({ values, onChange }: Props) {
 
   const onOptionSelect = useCallback(
     (selectedOptions: EuiSelectableOption[]) => {
-      onChange(
-        selectedOptions
-          .filter(({ checked }) => checked === 'on')
-          .map(({ key }) => key) as AnomalyAlertDetectorType[]
-      );
+      const selectedTypes = selectedOptions
+        .filter(({ checked }) => checked === 'on')
+        .map(({ key }) => key) as ApmMlDetectorType[];
+      if (selectedTypes.length === 0) {
+        // we don't change last selection if all the options has been unchecked, at least one detector needs to be selected
+        onChange(values);
+      } else {
+        onChange(selectedTypes);
+      }
     },
-    [onChange]
+    [onChange, values]
   );
 
   return (

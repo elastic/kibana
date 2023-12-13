@@ -159,6 +159,10 @@ export function registerAnomalyRuleType({
 
         const { dateStart } = getTimeRange(window);
 
+        const detectorIndices = ruleParams.anomalyDetectorTypes.map((type) =>
+          getApmMlDetectorIndex(type)
+        );
+
         const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
           body: {
@@ -185,10 +189,7 @@ export function registerAnomalyRuleType({
                   ...termQuery('by_field_value', ruleParams.transactionType, {
                     queryEmptyString: false,
                   }),
-                  ...termsQuery(
-                    'detector_index',
-                    getApmMlDetectorIndex(ruleParams.anomalyDetectorTypes)
-                  ),
+                  ...termsQuery('detector_index', detectorIndices),
                 ] as QueryDslQueryContainer[],
               },
             },
@@ -279,7 +280,7 @@ export function registerAnomalyRuleType({
 
           const severityLevel = getSeverity(score);
           const reasonMessage = formatAnomalyReason({
-            measured: score,
+            anomalyScore: score,
             serviceName,
             severityLevel,
             windowSize: params.windowSize,

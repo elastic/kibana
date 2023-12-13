@@ -27,10 +27,9 @@ import {
   SelectAnomalySeverity,
 } from './select_anomaly_severity';
 import { SelectAnomalyDetector } from './select_anomaly_detector';
-import {
-  AnomalyAlertDetectorType,
-  ANOMALY_ALERT_DETECTORS,
-} from '../../../../../common/rules/apm_rule_types';
+import { ANOMALY_DETECTOR_SELECTOR_OPTIONS } from '../../../../../common/rules/apm_rule_types';
+import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
+import { getApmMlDetectorLabel } from './helpers';
 
 interface AlertParams {
   anomalySeverityType?:
@@ -38,7 +37,7 @@ interface AlertParams {
     | ML_ANOMALY_SEVERITY.MAJOR
     | ML_ANOMALY_SEVERITY.MINOR
     | ML_ANOMALY_SEVERITY.WARNING;
-  anomalyDetectorTypes?: AnomalyAlertDetectorType[];
+  anomalyDetectorTypes?: ApmMlDetectorType[];
   environment?: string;
   serviceName?: string;
   transactionType?: string;
@@ -70,11 +69,15 @@ export function AnomalyRuleType(props: Props) {
       windowSize: 30,
       windowUnit: TIME_UNITS.MINUTE,
       anomalySeverityType: ML_ANOMALY_SEVERITY.CRITICAL,
-      anomalyDetectorTypes: ANOMALY_ALERT_DETECTORS.map(
+      anomalyDetectorTypes: ANOMALY_DETECTOR_SELECTOR_OPTIONS.map(
         (detector) => detector.type
       ),
       environment: ENVIRONMENT_ALL.value,
     }
+  );
+
+  const anomalyDetectorsSelectedLabels = params.anomalyDetectorTypes.map(
+    (type) => getApmMlDetectorLabel(type)
   );
 
   const fields = [
@@ -99,7 +102,7 @@ export function AnomalyRuleType(props: Props) {
       serviceName={params.serviceName}
     />,
     <PopoverExpression
-      value={params.anomalyDetectorTypes.toString()}
+      value={anomalyDetectorsSelectedLabels.join(', ')}
       title={i18n.translate('xpack.apm.anomalyRuleType.anomalyDetector', {
         defaultMessage: 'Detector types',
       })}
