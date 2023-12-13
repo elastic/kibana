@@ -25,7 +25,7 @@ export const LATEST_AND_RISKIEST_OPEN_ALERTS = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.latestAndRiskiestOpenAlertsLabel',
   {
     defaultMessage:
-      'latest and riskiest open alerts in your environment. Your Anonymization settings will be applied to the alerts',
+      'latest and riskiest open and acknowledged alerts in your environment. Your Anonymization settings will be applied to the alerts.',
   }
 );
 
