@@ -67,9 +67,23 @@ export default function ({ getService }: FtrProviderContext) {
       await dataViewApi.delete({
         id: DATA_VIEW_ID,
       });
-      // Oops TODO delete all created SLOs
       await supertest
-        .delete('/api/observability/slos/my-custom-id')
+        .delete('/api/observability/slos/my-custom-id1')
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
+
+      await supertest
+        .delete('/api/observability/slos/my-custom-id2')
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
+
+      await supertest
+        .delete('/api/observability/slos/my-custom-id3')
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
+
+      await supertest
+        .delete('/api/observability/slos/my-custom-id4')
         .set('kbn-xsrf', 'foo')
         .set('x-elastic-internal-origin', 'foo');
 
@@ -80,9 +94,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('non partition by SLO', () => {
-      const sloId = 'my-custom-id';
+      const sloId = 'my-custom-id1';
 
-      it('saves the SLO definition', async () => {
+      before(async () => {
         await sloApi.create({
           id: sloId,
           name: 'my custom name',
@@ -106,6 +120,9 @@ export default function ({ getService }: FtrProviderContext) {
           },
           groupBy: ALL_VALUE,
         });
+      });
+
+      it('saves the SLO definition', async () => {
         const savedObject = await kibanaServer.savedObjects.find({
           type: SO_SLO_TYPE,
         });
@@ -117,9 +134,9 @@ export default function ({ getService }: FtrProviderContext) {
       it('creates the rollup and summary transforms', async () => {
         const expectedTransforms = {
           count: 2,
-          transform0: { id: 'slo-my-custom-id-1', destIndex: '.slo-observability.sli-v3' },
+          transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3' },
           transform1: {
-            id: 'slo-summary-my-custom-id-1',
+            id: 'slo-summary-my-custom-id1-1',
             destIndex: '.slo-observability.summary-v3',
           },
           typeOfVersion: 'string',
@@ -163,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('SLO with long description', () => {
       it('creates an SLO with description over 256 characters', async () => {
-        const sloId = 'my-custom-id-2';
+        const sloId = 'my-custom-id2';
         await sloApi.create({
           id: sloId,
           name: 'my super long SLO name and description',
@@ -196,7 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('SLO with special characters in the description', () => {
       it("creates an SLO that has ' character in the description", async () => {
-        const sloId = 'my-custom-id-3';
+        const sloId = 'my-custom-id3';
         await sloApi.create({
           id: sloId,
           name: 'my SLO with weird characters in the description',
@@ -228,7 +245,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('partition by SLO', () => {
       it('creates a partition by SLO', async () => {
-        const sloId = 'my-custom-id-4';
+        const sloId = 'my-custom-id4';
         await sloApi.create({
           id: sloId,
           name: 'Group by SLO',
@@ -263,24 +280,24 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns all the transforms for above created SLOs', async () => {
         const expectedTransforms = {
           count: 8,
-          transform0: { id: 'slo-my-custom-id-1', destIndex: '.slo-observability.sli-v3' },
-          transform1: { id: 'slo-my-custom-id-2-1', destIndex: '.slo-observability.sli-v3' },
-          transform2: { id: 'slo-my-custom-id-3-1', destIndex: '.slo-observability.sli-v3' },
-          transform3: { id: 'slo-my-custom-id-4-1', destIndex: '.slo-observability.sli-v3' },
+          transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3' },
+          transform1: { id: 'slo-my-custom-id2-1', destIndex: '.slo-observability.sli-v3' },
+          transform2: { id: 'slo-my-custom-id3-1', destIndex: '.slo-observability.sli-v3' },
+          transform3: { id: 'slo-my-custom-id4-1', destIndex: '.slo-observability.sli-v3' },
           transform4: {
-            id: 'slo-summary-my-custom-id-1',
+            id: 'slo-summary-my-custom-id1-1',
             destIndex: '.slo-observability.summary-v3',
           },
           transform5: {
-            id: 'slo-summary-my-custom-id-2-1',
+            id: 'slo-summary-my-custom-id2-1',
             destIndex: '.slo-observability.summary-v3',
           },
           transform6: {
-            id: 'slo-summary-my-custom-id-3-1',
+            id: 'slo-summary-my-custom-id3-1',
             destIndex: '.slo-observability.summary-v3',
           },
           transform7: {
-            id: 'slo-summary-my-custom-id-4-1',
+            id: 'slo-summary-my-custom-id4-1',
             destIndex: '.slo-observability.summary-v3',
           },
           typeOfVersion: 'string',

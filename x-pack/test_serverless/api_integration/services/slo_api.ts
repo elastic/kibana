@@ -72,7 +72,30 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
 
     async find() {},
 
-    async delete() {},
+    async delete(sloId: string) {
+      const response = await supertest
+        .delete(`/api/observability/slos/${sloId}`)
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
+      return response;
+    },
+
+    async waitForSloToBeDeleted(sloId: string) {
+      if (!sloId) {
+        throw new Error(`sloId is undefined`);
+      }
+      return await retry.tryForTime(retryTimeout, async () => {
+        const response = await supertest
+          .delete(`/api/observability/slos/${sloId}`)
+          .set('kbn-xsrf', 'foo')
+          .set('x-elastic-internal-origin', 'foo')
+          .timeout(requestTimeout);
+        if (!response.ok) {
+          throw new Error(`slodId [${sloId}] was not deleted`);
+        }
+        return response;
+      });
+    },
 
     async waitForSloCreated({ sloId }: { sloId: string }) {
       if (!sloId) {
@@ -102,6 +125,32 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
           throw new Error(`index ${index} should exist`);
         }
         return indexExists;
+      });
+    },
+
+    async waitForSloInIndex<T>({
+      indexName,
+    }: {
+      indexName: string;
+    }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
+      if (!ruleId) {
+        throw new Error(`'ruleId' is undefined`);
+      }
+      return await retry.tryForTime(retryTimeout, async () => {
+        const response = await es.search<T>({
+          index: indexName,
+          body: {
+            query: {
+              term: {
+                'kibana.alert.rule.uuid': ruleId,
+              },
+            },
+          },
+        });
+        if (response.hits.hits.length === 0) {
+          throw new Error('No hits found');
+        }
+        return response;
       });
     },
   };
