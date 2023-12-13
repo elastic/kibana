@@ -44,6 +44,7 @@ export const ModelSelect: React.FC = () => {
       ...configuration,
       inferenceConfig: undefined,
       modelID: selectedOption?.modelId ?? '',
+      isModelPlaceholderSelected: selectedOption?.isPlaceholder ?? false,
       fieldMappings: undefined,
       pipelineName: isPipelineNameUserSupplied
         ? pipelineName
