@@ -162,7 +162,6 @@ const CustomStyles: React.FC = ({ children }) => {
 
     /* Gutter of a line with deletions */
     .${GUTTER_CLASS_NAME}.diff-gutter-delete {
-      color: ${euiTheme.colors.dangerText};
       font-weight: bold;
       background: rgb(255, 215, 213);
     }
@@ -172,7 +171,6 @@ const CustomStyles: React.FC = ({ children }) => {
 
     /* Gutter of a line with insertions */
     .${GUTTER_CLASS_NAME}.diff-gutter-insert {
-      color: ${euiTheme.colors.successText};
       font-weight: bold;
       background: rgb(204, 255, 216);
     }
