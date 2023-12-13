@@ -20,11 +20,12 @@
       "serverless",
       "observability",
       "observabilityShared",
-      "kibanaReact",
       "management",
       "cloud"
     ],
     "optionalPlugins": [],
-    "requiredBundles": []
+    "requiredBundles": [
+      "kibanaReact",
+    ]
   }
 }
