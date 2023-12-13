@@ -18,11 +18,12 @@ import { useOsqueryPolicies } from './use_osquery_policies';
 interface RequestOptions {
   perPage?: number;
   page?: number;
+  agentIds?: string[];
 }
 
 // TODO: break out the paginated vs all cases into separate hooks
 export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage: 9000 }) => {
-  const { perPage } = opts;
+  const { perPage, agentIds } = opts;
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
@@ -33,7 +34,7 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
     groups: ReturnType<typeof processAggregations>;
     total: number;
   }>(
-    ['agents', osqueryPolicies, searchValue, perPage],
+    ['agents', osqueryPolicies, searchValue, perPage, agentIds],
     () => {
       let kuery = '';
 
@@ -43,7 +44,9 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
         if (searchValue) {
           kuery += ` and (local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*)`;
         } else {
-          kuery += ` and (status:online)`;
+          kuery += ` and (status:online ${
+            agentIds?.length ? `or local_metadata.elastic.agent.id:(${agentIds.join(' or ')})` : ''
+          })`;
         }
       }
 

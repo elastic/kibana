@@ -74,6 +74,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     isFetched: agentsFetched,
   } = useAllAgents(debouncedSearchValue, {
     perPage,
+    agentIds: agentSelection?.agents,
   });
 
   // option related

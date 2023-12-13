@@ -73,6 +73,7 @@ export const generateAgentSelection = (selection: GroupOption[]) => {
     allAgentsSelected: false,
     platformsSelected: [],
     policiesSelected: [],
+    offlineAgentsSelected: false,
   };
   // parse through the selections to be able to determine how many are actually selected
   const selectedAgents: AgentOptionValue[] = [];
@@ -116,6 +117,7 @@ export const generateAgentSelection = (selection: GroupOption[]) => {
         }
 
         newAgentSelection.agents.push(key);
+        newAgentSelection.offlineAgentsSelected = opt.disabled ?? false;
         break;
       default:
         // this should never happen!
