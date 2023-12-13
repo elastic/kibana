@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { FlamegraphLocator } from '@kbn/observability-shared-plugin/public/locators/profiling/flamegraph_locator';
+import { TopNFunctionsLocator } from '@kbn/observability-shared-plugin/public/locators/profiling/topn_functions_locator';
 import { HOST_FIELD } from '../../../../../common/constants';
 
 const PROFILING_FEEDBACK_URL = 'https://ela.st/profiling-feedback';
@@ -18,7 +18,7 @@ interface Props {
   hostname: string;
   from: string;
   to: string;
-  profilingLinkLocator: LocatorPublic<SerializableRecord>;
+  profilingLinkLocator: FlamegraphLocator | TopNFunctionsLocator;
   profilingLinkLabel: string;
 }
 

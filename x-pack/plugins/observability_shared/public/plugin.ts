@@ -5,33 +5,32 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import type { CoreStart, Plugin, CoreSetup } from '@kbn/core/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type {
   BrowserUrlService,
-  LocatorPublic,
   SharePluginSetup,
   SharePluginStart,
 } from '@kbn/share-plugin/public';
-import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
-import { updateGlobalNavigation } from './services/update_global_navigation';
+import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import {
+  type FlamegraphLocator,
   FlamegraphLocatorDefinition,
-  FlamegraphLocatorParams,
 } from './locators/profiling/flamegraph_locator';
 import {
-  TopNFunctionsLocatorDefinition,
-  TopNFunctionsLocatorParams,
-} from './locators/profiling/topn_functions_locator';
-import {
+  type StacktracesLocator,
   StacktracesLocatorDefinition,
-  StacktracesLocatorParams,
 } from './locators/profiling/stacktraces_locator';
+import {
+  type TopNFunctionsLocator,
+  TopNFunctionsLocatorDefinition,
+} from './locators/profiling/topn_functions_locator';
+import { updateGlobalNavigation } from './services/update_global_navigation';
 
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
@@ -52,9 +51,9 @@ export type ProfilingLocators = ObservabilitySharedPluginSetup['locators']['prof
 
 interface ObservabilitySharedLocators {
   profiling: {
-    flamegraphLocator: LocatorPublic<FlamegraphLocatorParams>;
-    topNFunctionsLocator: LocatorPublic<TopNFunctionsLocatorParams>;
-    stacktracesLocator: LocatorPublic<StacktracesLocatorParams>;
+    flamegraphLocator: FlamegraphLocator;
+    topNFunctionsLocator: TopNFunctionsLocator;
+    stacktracesLocator: StacktracesLocator;
   };
 }
 
