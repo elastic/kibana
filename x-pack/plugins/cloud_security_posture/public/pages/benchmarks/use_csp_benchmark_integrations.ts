@@ -12,7 +12,8 @@ import { useKibana } from '../../common/hooks/use_kibana';
 import type { GetBenchmarkResponse } from '../../../common/types/latest';
 import type { GetBenchmarkResponse as GetBenchmarkResponseV1 } from '../../../common/types/benchmarks/v1';
 
-const QUERY_KEY = 'csp_benchmark_integrations';
+const QUERY_KEY_V1 = 'csp_benchmark_integrations_v1';
+const QUERY_KEY_V2 = 'csp_benchmark_integrations_v2';
 
 export interface UseCspBenchmarkIntegrationsProps {
   name: string;
@@ -39,7 +40,7 @@ export const useCspBenchmarkIntegrationsV1 = ({
   };
 
   return useQuery(
-    [QUERY_KEY, query],
+    [QUERY_KEY_V1, query],
     () =>
       http.get<GetBenchmarkResponseV1>(BENCHMARKS_ROUTE_PATH, {
         query,
@@ -53,7 +54,7 @@ export const useCspBenchmarkIntegrationsV2 = () => {
   const { http } = useKibana().services;
 
   return useQuery(
-    [QUERY_KEY],
+    [QUERY_KEY_V2],
     () =>
       http.get<GetBenchmarkResponse>(BENCHMARKS_ROUTE_PATH, {
         version: '2',
