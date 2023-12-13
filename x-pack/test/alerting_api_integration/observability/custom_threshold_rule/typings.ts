@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Query, TimeRange } from '@kbn/es-query';
+
 export interface ActionDocument {
   ruleType: string;
   alertDetailsUrl: string;
@@ -13,4 +15,10 @@ export interface ActionDocument {
   viewInAppUrl: string;
   host?: string;
   group?: string;
+}
+
+export interface LogExplorerLocatorParsedParams {
+  dataset: string;
+  timeRange: TimeRange;
+  query: Query;
 }

@@ -23,7 +23,7 @@ import {
   waitForRuleStatus,
 } from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ActionDocument } from './typings';
+import { ActionDocument, LogExplorerLocatorParsedParams } from './typings';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -221,14 +221,13 @@ export default function ({ getService }: FtrProviderContext) {
           `Average system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATE_VIEW_NAME})`
         );
         expect(resp.hits.hits[0]._source?.value).eql('250%');
-        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOG_EXPLORER_LOCATOR');
+
         const parsedViewInAppUrl = parseSearchParams(
-          (resp.hits.hits[0]._source?.viewInAppUrl || '').replace(
-            'https://localhost:5601/app/r',
-            ''
-          )
-        );
+          new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
+        ) as { params: LogExplorerLocatorParsedParams };
         const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOG_EXPLORER_LOCATOR');
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
           dataset: DATE_VIEW,
           timeRange: { to: 'now' },
