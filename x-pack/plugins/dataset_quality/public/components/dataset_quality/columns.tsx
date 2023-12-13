@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiSkeletonRectangle,
   EuiText,
   EuiToolTip,
@@ -28,6 +29,7 @@ import {
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import loggingIcon from '../../icons/logging.svg';
 import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicator';
+import { useLinkToLogExplorer } from '../../hooks/use_link_to_log_explorer';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Dataset Name',
@@ -39,6 +41,17 @@ const sizeColumnName = i18n.translate('xpack.datasetQuality.sizeColumnName', {
 
 const degradedDocsColumnName = i18n.translate('xpack.datasetQuality.degradedDocsColumnName', {
   defaultMessage: 'Degraded Docs',
+});
+
+const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivityColumnName', {
+  defaultMessage: 'Last Activity',
+});
+
+const actionsColumnName = i18n.translate('xpack.datasetQuality.actionsColumnName', {
+  defaultMessage: 'Actions',
+});
+const openActionName = i18n.translate('xpack.datasetQuality.openActionName', {
+  defaultMessage: 'Open',
 });
 
 const degradedDocsDescription = (minimimPercentage: number) =>
@@ -82,10 +95,6 @@ const degradedDocsColumnTooltip = (
     }}
   />
 );
-
-const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivityColumnName', {
-  defaultMessage: 'Last Activity',
-});
 
 export const getDatasetQualitTableColumns = ({
   fieldFormats,
@@ -164,5 +173,17 @@ export const getDatasetQualitTableColumns = ({
           .convert(timestamp),
       sortable: true,
     },
+    {
+      name: actionsColumnName,
+      render: (dataStreamStat: DataStreamStat) => (
+        <LinkToLogExplorer dataStreamStat={dataStreamStat} />
+      ),
+      width: '100px',
+    },
   ];
+};
+
+const LinkToLogExplorer = ({ dataStreamStat }: { dataStreamStat: DataStreamStat }) => {
+  const url = useLinkToLogExplorer({ dataStreamStat });
+  return <EuiLink href={url}>{openActionName}</EuiLink>;
 };

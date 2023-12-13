@@ -9,7 +9,10 @@ import { EuiHeaderLink } from '@elastic/eui';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { hydrateDatasetSelection } from '@kbn/log-explorer-plugin/common';
-import { getDiscoverColumnsFromDisplayOptions } from '@kbn/log-explorer-plugin/public';
+import {
+  getDiscoverColumnsFromDisplayOptions,
+  getDiscoverFiltersFromState,
+} from '@kbn/log-explorer-plugin/public';
 import { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';
@@ -54,7 +57,7 @@ export const DiscoverLinkForValidState = React.memo(
       () => ({
         breakdownField: logExplorerState.chart.breakdownField ?? undefined,
         columns: getDiscoverColumnsFromDisplayOptions(logExplorerState),
-        filters: logExplorerState.filters,
+        filters: getDiscoverFiltersFromState(logExplorerState.filters, logExplorerState.controls),
         query: logExplorerState.query,
         refreshInterval: logExplorerState.refreshInterval,
         timeRange: logExplorerState.time,
