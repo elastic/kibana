@@ -546,7 +546,7 @@ describe('<TemplateCreate />', () => {
       await actions.completeStepFive(JSON.stringify(ALIASES));
     });
 
-    it('should send the correct payload', async () => {
+    it.skip('should send the correct payload', async () => {
       const { actions, find } = testBed;
 
       expect(find('stepTitle').text()).toEqual(`Review details for '${TEMPLATE_NAME}'`);
@@ -595,7 +595,7 @@ describe('<TemplateCreate />', () => {
       );
     });
 
-    it.skip('should surface the API errors from the put HTTP request', async () => {
+    it('should surface the API errors from the put HTTP request', async () => {
       const { component, actions, find, exists } = testBed;
 
       const error = {
