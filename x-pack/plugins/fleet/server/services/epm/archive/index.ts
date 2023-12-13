@@ -6,7 +6,11 @@
  */
 
 import type { AssetParts } from '../../../../common/types';
-import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
+import {
+  PackageInvalidArchiveError,
+  PackageUnsupportedMediaTypeError,
+  PackageNotFoundError,
+} from '../../../errors';
 
 import {
   getArchiveEntry,
@@ -41,10 +45,10 @@ export async function unpackBufferToCache({
   contentType: string;
   archiveBuffer: Buffer;
 }): Promise<string[]> {
+  const entries = await unpackBufferEntries(archiveBuffer, contentType);
   // Make sure any buffers from previous installations from registry or upload are deleted first
   clearPackageFileCache({ name, version });
 
-  const entries = await unpackBufferEntries(archiveBuffer, contentType);
   const paths: string[] = [];
   entries.forEach((entry) => {
     const { path, buffer } = entry;
@@ -149,7 +153,7 @@ export function getPathParts(path: string): AssetParts {
 
 export function getAsset(key: string) {
   const buffer = getArchiveEntry(key);
-  if (buffer === undefined) throw new Error(`Cannot find asset ${key}`);
+  if (buffer === undefined) throw new PackageNotFoundError(`Cannot find asset ${key}`);
 
   return buffer;
 }
