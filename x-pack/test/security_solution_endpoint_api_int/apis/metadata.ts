@@ -47,8 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/151854
-  describe.skip('test metadata apis', function () {
+  describe('test metadata apis', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     describe('list endpoints GET route', () => {

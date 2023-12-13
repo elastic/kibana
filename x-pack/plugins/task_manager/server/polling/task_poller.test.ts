@@ -90,6 +90,57 @@ describe('TaskPoller', () => {
     expect(work).toHaveBeenCalledTimes(4);
   });
 
+  test('poller ignores null pollInterval values', async () => {
+    const pollInterval = 100;
+    const pollInterval$ = new BehaviorSubject(pollInterval);
+
+    const work = jest.fn(async () => true);
+    const logger = loggingSystemMock.create().get();
+    createTaskPoller<void, boolean>({
+      initialPollInterval: pollInterval,
+      logger,
+      pollInterval$,
+      pollIntervalDelay$: of(0),
+      getCapacity: () => 1,
+      work,
+    }).start();
+
+    expect(work).toHaveBeenCalledTimes(1);
+
+    // `work` is async, we have to force a node `tick`
+    await new Promise((resolve) => setImmediate(resolve));
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(2);
+
+    pollInterval$.next(pollInterval * 2);
+
+    // `work` is async, we have to force a node `tick`
+    await new Promise((resolve) => setImmediate(resolve));
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(2);
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(3);
+
+    // Force null into the events
+    pollInterval$.next(null as unknown as number);
+
+    // `work` is async, we have to force a node `tick`
+    await new Promise((resolve) => setImmediate(resolve));
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(3);
+
+    // `work` is async, we have to force a node `tick`
+    await new Promise((resolve) => setImmediate(resolve));
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(4);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      new Error(
+        'Expected the new interval to be a number > 0, received: null but poller will keep using: 200'
+      )
+    );
+  });
+
   test('filters interval polling on capacity', async () => {
     const pollInterval = 100;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 import type { FilterOptions } from '../../../../common/ui';
 import type { CaseStatuses } from '../../../../common/types/domain';
@@ -17,7 +17,6 @@ import * as i18n from '../translations';
 import { SeverityFilter } from '../severity_filter';
 import { AssigneesFilterPopover } from '../assignees_filter';
 import type { CurrentUserProfile } from '../../types';
-import type { AssigneesFilteringSelection } from '../../user_profiles/types';
 import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from './types';
 
 interface UseFilterConfigProps {
@@ -28,13 +27,11 @@ interface UseFilterConfigProps {
   countInProgressCases: number | null;
   countOpenCases: number | null;
   currentUserProfile: CurrentUserProfile;
-  handleSelectedAssignees: (newAssignees: AssigneesFilteringSelection[]) => void;
   hiddenStatuses?: CaseStatuses[];
   initialFilterOptions: Partial<FilterOptions>;
   isLoading: boolean;
   isSelectorView?: boolean;
   onFilterOptionsChange: FilterChangeHandler;
-  selectedAssignees: AssigneesFilteringSelection[];
   tags: string[];
 }
 
@@ -46,13 +43,11 @@ export const getSystemFilterConfig = ({
   countInProgressCases,
   countOpenCases,
   currentUserProfile,
-  handleSelectedAssignees,
   hiddenStatuses,
   initialFilterOptions,
   isLoading,
   isSelectorView,
   onFilterOptionsChange,
-  selectedAssignees,
   tags,
 }: UseFilterConfigProps): FilterConfig[] => {
   const onSystemFilterChange = ({
@@ -60,7 +55,7 @@ export const getSystemFilterConfig = ({
     selectedOptionKeys,
   }: {
     filterId: string;
-    selectedOptionKeys: string[];
+    selectedOptionKeys: Array<string | null>;
   }) => {
     onFilterOptionsChange({
       [filterId]: selectedOptionKeys,
@@ -118,10 +113,10 @@ export const getSystemFilterConfig = ({
       render: ({ filterOptions }: FilterConfigRenderParams) => {
         return (
           <AssigneesFilterPopover
-            selectedAssignees={selectedAssignees}
+            selectedAssignees={filterOptions?.assignees}
             currentUserProfile={currentUserProfile}
             isLoading={isLoading}
-            onSelectionChange={handleSelectedAssignees}
+            onSelectionChange={onSystemFilterChange}
           />
         );
       },
@@ -199,56 +194,14 @@ export const useSystemFilterConfig = ({
   countInProgressCases,
   countOpenCases,
   currentUserProfile,
-  handleSelectedAssignees,
   hiddenStatuses,
   initialFilterOptions,
   isLoading,
   isSelectorView,
   onFilterOptionsChange,
-  selectedAssignees,
   tags,
 }: UseFilterConfigProps) => {
-  const [filterConfig, setFilterConfig] = useState<FilterConfig[]>(() =>
-    getSystemFilterConfig({
-      availableSolutions,
-      caseAssignmentAuthorized,
-      categories,
-      countClosedCases,
-      countInProgressCases,
-      countOpenCases,
-      currentUserProfile,
-      handleSelectedAssignees,
-      hiddenStatuses,
-      initialFilterOptions,
-      isLoading,
-      isSelectorView,
-      onFilterOptionsChange,
-      selectedAssignees,
-      tags,
-    })
-  );
-
-  useEffect(() => {
-    setFilterConfig(
-      getSystemFilterConfig({
-        availableSolutions,
-        caseAssignmentAuthorized,
-        categories,
-        countClosedCases,
-        countInProgressCases,
-        countOpenCases,
-        currentUserProfile,
-        handleSelectedAssignees,
-        hiddenStatuses,
-        initialFilterOptions,
-        isLoading,
-        isSelectorView,
-        onFilterOptionsChange,
-        selectedAssignees,
-        tags,
-      })
-    );
-  }, [
+  const filterConfig = getSystemFilterConfig({
     availableSolutions,
     caseAssignmentAuthorized,
     categories,
@@ -256,15 +209,13 @@ export const useSystemFilterConfig = ({
     countInProgressCases,
     countOpenCases,
     currentUserProfile,
-    handleSelectedAssignees,
     hiddenStatuses,
     initialFilterOptions,
     isLoading,
     isSelectorView,
     onFilterOptionsChange,
-    selectedAssignees,
     tags,
-  ]);
+  });
 
   return {
     systemFilterConfig: filterConfig,

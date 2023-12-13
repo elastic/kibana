@@ -1854,6 +1854,10 @@
             }
           }
         }
+      },
+      "preset": {
+        "type": "keyword",
+        "index": false
       }
     }
   },
@@ -2375,6 +2379,9 @@
       },
       "tags": {
         "type": "keyword"
+      },
+      "version": {
+        "type": "long"
       }
     }
   },
