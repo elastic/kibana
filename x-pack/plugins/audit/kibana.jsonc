@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/audit-plugin",
+  "owner": "@elastic/response-ops",
+  "plugin": {
+    "id": "audit",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "audit"
+    ],
+    "requiredPlugins": [
+      "data",
+      "security",
+      "uiActions",
+    ],
+    "optionalPlugins": [
+    ],
+    "extraPublicDirs": [
+      "common",
+    ]
+  }
+}

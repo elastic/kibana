@@ -3224,5 +3224,28 @@
         "type": "boolean"
       }
     }
+  },
+  "audit": {
+    "dynamic": false,
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "namespace": {
+        "type": "keyword"
+      },
+      "operation": {
+        "type": "keyword"
+      },
+      "user": {
+        "type": "keyword"
+      },
+      "subject": {
+        "type": "keyword"
+      },
+      "subjectId": {
+        "type": "keyword"
+      }
+    }
   }
 }

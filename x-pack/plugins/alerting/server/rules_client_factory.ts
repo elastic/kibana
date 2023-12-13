@@ -22,6 +22,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { AuditService } from '@kbn/audit-plugin/server/service';
 import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -47,6 +48,7 @@ export interface RulesClientFactoryOpts {
   maxScheduledPerMinute: AlertingRulesConfig['maxScheduledPerMinute'];
   getAlertIndicesAlias: GetAlertIndicesAlias;
   alertsService: AlertsService | null;
+  auditService: AuditService;
 }
 
 export class RulesClientFactory {
@@ -69,6 +71,7 @@ export class RulesClientFactory {
   private maxScheduledPerMinute!: AlertingRulesConfig['maxScheduledPerMinute'];
   private getAlertIndicesAlias!: GetAlertIndicesAlias;
   private alertsService!: AlertsService | null;
+  private auditService!: AuditService;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -93,6 +96,7 @@ export class RulesClientFactory {
     this.maxScheduledPerMinute = options.maxScheduledPerMinute;
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
     this.alertsService = options.alertsService;
+    this.auditService = options.auditService;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
@@ -123,6 +127,7 @@ export class RulesClientFactory {
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       getAlertIndicesAlias: this.getAlertIndicesAlias,
       alertsService: this.alertsService,
+      auditService: this.auditService,
       async getUserName() {
         if (!securityPluginStart) {
           return null;

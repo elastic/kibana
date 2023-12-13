@@ -21,6 +21,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
+import { AuditService } from '@kbn/audit-plugin/server/service';
 import { RegistryRuleType } from '../rule_type_registry';
 import {
   RuleTypeRegistry,
@@ -78,6 +79,7 @@ export interface RulesClientContext {
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
   readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   readonly alertsService: AlertsService | null;
+  readonly auditService: AuditService;
 }
 
 export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;

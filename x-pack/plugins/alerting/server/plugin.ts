@@ -58,6 +58,7 @@ import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/ser
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { ServerlessPluginSetup } from '@kbn/serverless/server';
 
+import { AuditPluginSetup, AuditPluginStart } from '@kbn/audit-plugin/server/types';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
@@ -176,6 +177,7 @@ export interface AlertingPluginsSetup {
   features: FeaturesPluginSetup;
   unifiedSearch: UnifiedSearchServerPluginSetup;
   serverless?: ServerlessPluginSetup;
+  audit: AuditPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -191,6 +193,7 @@ export interface AlertingPluginsStart {
   dataViews: DataViewsPluginStart;
   share: SharePluginStart;
   serverless?: ServerlessPluginSetup;
+  audit: AuditPluginStart;
 }
 
 export class AlertingPlugin {
@@ -485,6 +488,8 @@ export class AlertingPlugin {
       features: plugins.features,
     });
 
+    const auditService = plugins.audit.createAuditService('alerting');
+
     rulesClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
       logger,
@@ -506,6 +511,7 @@ export class AlertingPlugin {
       maxScheduledPerMinute: this.config.rules.maxScheduledPerMinute,
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       alertsService: this.alertsService,
+      auditService,
     });
 
     rulesSettingsClientFactory.initialize({

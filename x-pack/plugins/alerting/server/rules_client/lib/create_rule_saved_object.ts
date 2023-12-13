@@ -7,6 +7,8 @@
 
 import { SavedObjectReference, SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { AuditLogOperation, AuditSubject } from '@kbn/audit-plugin/common';
+import { omit } from 'lodash';
 import { Rule, RuleWithLegacyId, RawRule, RuleTypeParams } from '../../types';
 import { RuleAttributes } from '../../data/rule/types';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
@@ -134,6 +136,17 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
       `Rule schedule interval (${rawRule.schedule.interval}) for "${createdAlert.attributes.alertTypeId}" rule type with ID "${createdAlert.id}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
     );
   }
+
+  await context.auditService.log({
+    user: (await context.getUserName()) || '',
+    operation: AuditLogOperation.CREATE,
+    subject: AuditSubject.RULE,
+    subjectId: createdAlert.id,
+    data: {
+      old: null,
+      new: omit(createdAlert.attributes, ['monitoring', 'lastRun', 'executionStatus']),
+    },
+  });
 
   // TODO (http-versioning): Remove casts
   if (returnRuleAttributes) {

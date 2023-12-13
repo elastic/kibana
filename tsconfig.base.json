@@ -94,6 +94,8 @@
       "@kbn/assetManager-plugin/*": ["x-pack/plugins/asset_manager/*"],
       "@kbn/audit-log-plugin": ["x-pack/test/security_api_integration/plugins/audit_log"],
       "@kbn/audit-log-plugin/*": ["x-pack/test/security_api_integration/plugins/audit_log/*"],
+      "@kbn/audit-plugin": ["x-pack/plugins/audit"],
+      "@kbn/audit-plugin/*": ["x-pack/plugins/audit/*"],
       "@kbn/axe-config": ["packages/kbn-axe-config"],
       "@kbn/axe-config/*": ["packages/kbn-axe-config/*"],
       "@kbn/babel-preset": ["packages/kbn-babel-preset"],

@@ -3123,6 +3123,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/audit-plugin@link:x-pack/plugins/audit":
+  version "0.0.0"
+  uid ""
+
 "@kbn/axe-config@link:packages/kbn-axe-config":
   version "0.0.0"
   uid ""
