@@ -11,6 +11,7 @@ import { benchmarksQueryParamsSchema } from '../../../common/types/benchmarks/v1
 import { CspRouter } from '../../types';
 import { getBenchmarks as getBenchmarksV1 } from './v1';
 import { getBenchmarks as getBenchmarksV2 } from './v2';
+import { benchmarkResponseSchema } from '../../../common/types/latest';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
@@ -63,8 +64,10 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
       {
         version: '2',
         validate: {
-          request: {
-            query: benchmarksQueryParamsSchema,
+          response: {
+            200: {
+              body: benchmarkResponseSchema,
+            },
           },
         },
       },

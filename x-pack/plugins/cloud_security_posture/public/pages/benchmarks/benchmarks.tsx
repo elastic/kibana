@@ -201,9 +201,7 @@ export const Benchmarks = () => {
           }));
         }}
         noItemsMessage={
-          queryResult.isSuccess && !queryResult.data.total ? (
-            <BenchmarkEmptyState name={query.name} />
-          ) : undefined
+          queryResult.isSuccess ? <BenchmarkEmptyState name={query.name} /> : undefined
         }
       />
     </CloudPosturePage>
