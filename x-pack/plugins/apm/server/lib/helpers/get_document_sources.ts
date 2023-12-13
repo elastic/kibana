@@ -158,7 +158,7 @@ export async function getDocumentSources({
     // this time range to mark this source as available. If we don't do that,
     // users that upgrade to a version that starts generating service tx metrics
     // will see a mostly empty screen for a while after upgrading.
-    // If we only check before, users with a new deployment will use raw transactionp
+    // If we only check before, users with a new deployment will use raw transaction
     // events.
     const hasDocs = hasAnySourceDocBefore ? hasDocBefore : hasDocBeforeOrAfter;
 
