@@ -42,7 +42,7 @@ export const useTabs = (managedUser: ManagedUserHits, alertIds: string[]): LeftP
         'data-test-subj': RISK_INPUTS_TAB_TEST_ID,
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetailsLeft.riskInputs.tabLabel"
+            id="xpack.securitySolution.flyout.entityDetails.userDetails.riskInputs.tabLabel"
             defaultMessage="Risk Inputs"
           />
         ),
@@ -56,7 +56,7 @@ export const useTabs = (managedUser: ManagedUserHits, alertIds: string[]): LeftP
         'data-test-subj': OKTA_TAB_TEST_ID,
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetailsLeft.okta.tabLabel"
+            id="xpack.securitySolution.flyout.entityDetails.userDetails.okta.tabLabel"
             defaultMessage="Okta Data"
           />
         ),
@@ -78,7 +78,7 @@ export const useTabs = (managedUser: ManagedUserHits, alertIds: string[]): LeftP
         'data-test-subj': ENTRA_TAB_TEST_ID,
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetailsLeft.entra.tabLabel"
+            id="xpack.securitySolution.flyout.entityDetails.userDetails.entra.tabLabel"
             defaultMessage="Entra Data"
           />
         ),
@@ -96,5 +96,3 @@ export const useTabs = (managedUser: ManagedUserHits, alertIds: string[]): LeftP
 
     return tabs;
   }, [alertIds, managedUser]);
-
-// </RightPanelProvider>

@@ -6,16 +6,16 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiButtonGroup } from '@elastic/eui';
-import type { RightPanelTabsType } from '../../../document_details/right/tabs';
-import { PanelContent } from '../../../document_details/right/content';
+import { i18n } from '@kbn/i18n';
 import { JsonTab } from '../../../document_details/right/tabs/json_tab';
 import { TableTab } from '../../../document_details/right/tabs/table_tab';
-import { JSON_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './test_ids';
+import { FLYOUT_BODY_TEST_ID, JSON_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './test_ids';
+import { FlyoutBody } from '../../../shared/components/flyout_body';
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 
 export interface AssetDocumentPanelProps extends FlyoutPanelProps {
@@ -27,24 +27,24 @@ export interface AssetDocumentPanelProps extends FlyoutPanelProps {
   };
 }
 
-const tabs: RightPanelTabsType = [
+const tabs = [
   {
-    id: 'table',
+    id: TABLE_TAB_TEST_ID,
     'data-test-subj': TABLE_TAB_TEST_ID,
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.header.tableTabLabel"
+        id="xpack.securitySolution.flyout.entityDetails.userDetails.tableTabLabel"
         defaultMessage="Table"
       />
     ),
     content: <TableTab />,
   },
   {
-    id: 'json',
+    id: JSON_TAB_TEST_ID,
     'data-test-subj': JSON_TAB_TEST_ID,
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.header.jsonTabLabel"
+        id="xpack.securitySolution.flyout.entityDetails.userDetails.jsonTabLabel"
         defaultMessage="JSON"
       />
     ),
@@ -52,51 +52,43 @@ const tabs: RightPanelTabsType = [
   },
 ];
 
-enum ASSET_DOCUMENT_TABS {
-  TABLE = 'table',
-  JSON = 'json',
-}
-
-const buttonButtons: EuiButtonGroupOptionProps[] = [
-  {
-    id: ASSET_DOCUMENT_TABS.TABLE,
-    label: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.left.insights.entitiesButtonLabel"
-        defaultMessage="Table"
-      />
-    ),
-    // 'data-test-subj': INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
-  },
-  {
-    id: ASSET_DOCUMENT_TABS.JSON,
-    label: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.left.insights.threatIntelligenceButtonLabel"
-        defaultMessage="JSON"
-      />
-    ),
-    // 'data-test-subj': INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON_TEST_ID,
-  },
-];
+const useFilterOptions = (): EuiButtonGroupOptionProps[] =>
+  useMemo(
+    () =>
+      tabs.map((tab) => {
+        return {
+          id: tab.id,
+          label: tab.name,
+        };
+      }),
+    []
+  );
 
 export const AssetDocumentTab: FC<Partial<AssetDocumentPanelProps>> = memo(() => {
-  const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
+  const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
+  const buttonButtons = useFilterOptions();
+  const selectedTab = useMemo(() => {
+    return tabs.find((tab) => tab.id === selectedTabId);
+  }, [selectedTabId]);
 
   return (
     <>
       <EuiButtonGroup
         color="primary"
         name="coarsness"
-        legend={'test 1 2 3'}
+        legend={i18n.translate(
+          'xpack.securitySolution.flyout.entityDetails.userDetails.tabsLegend',
+          {
+            defaultMessage: 'Asset document tabs',
+          }
+        )}
         options={buttonButtons}
         idSelected={selectedTabId}
         onChange={setSelectedTabId}
         buttonSize="compressed"
         isFullWidth
-        // data-test-subj={INSIGHTS_TAB_BUTTON_GROUP_TEST_ID}
       />
-      <PanelContent tabs={tabs} selectedTabId={selectedTabId} />
+      <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>{selectedTab?.content}</FlyoutBody>
     </>
   );
 });

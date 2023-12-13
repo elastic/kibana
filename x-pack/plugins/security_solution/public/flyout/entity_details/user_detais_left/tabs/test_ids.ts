@@ -9,3 +9,4 @@ import { PREFIX } from '../../../shared/test_ids';
 
 export const TABLE_TAB_TEST_ID = `${PREFIX}AssetTableTab` as const;
 export const JSON_TAB_TEST_ID = `${PREFIX}AssetJsonTab` as const;
+export const FLYOUT_BODY_TEST_ID = `${PREFIX}AssetBody` as const;

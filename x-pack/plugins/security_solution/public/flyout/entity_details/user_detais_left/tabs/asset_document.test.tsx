@@ -9,11 +9,16 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { AssetDocumentTab } from './asset_document';
-import { JSON_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './test_ids';
+import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import { RightPanelContext } from '../../../document_details/right/context';
 import { mockContextValue } from '../../../document_details/right/mocks/mock_context';
+import userEvent from '@testing-library/user-event';
+import {
+  JSON_TAB_CONTENT_TEST_ID,
+  TABLE_TAB_CONTENT_TEST_ID,
+} from '../../../document_details/right/tabs/test_ids';
 
-describe('<AssetDocumentLeftPanel />', () => {
+describe('AssetDocumentTab', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
@@ -23,8 +28,7 @@ describe('<AssetDocumentLeftPanel />', () => {
       </TestProviders>
     );
 
-    expect(getByTestId(TABLE_TAB_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(JSON_TAB_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(FLYOUT_BODY_TEST_ID)).toBeInTheDocument();
   });
 
   it('should preselect the table tab', () => {
@@ -36,29 +40,25 @@ describe('<AssetDocumentLeftPanel />', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('securitySolutionFlyoutAssetTableTab')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
+    expect(getByTestId(TABLE_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should select json tab when path tab is json', () => {
-    const { getByTestId } = render(
+  it('should select json tab when clicked', async () => {
+    const { getByTestId, getByTitle } = render(
       <TestProviders>
         <RightPanelContext.Provider value={mockContextValue}>
-          <AssetDocumentTab path={{ tab: 'json' }} />
+          <AssetDocumentTab />
         </RightPanelContext.Provider>
       </TestProviders>
     );
 
-    expect(getByTestId('securitySolutionFlyoutAssetJsonTab')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
+    await userEvent.click(getByTitle('JSON'));
+
+    expect(getByTestId(JSON_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should select table tab when path tab is table', () => {
-    const { getByTestId } = render(
+  it('should select table tab when path tab is table', async () => {
+    const { getByTestId, getByTitle } = render(
       <TestProviders>
         <RightPanelContext.Provider value={mockContextValue}>
           <AssetDocumentTab path={{ tab: 'table' }} />
@@ -66,9 +66,9 @@ describe('<AssetDocumentLeftPanel />', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('securitySolutionFlyoutAssetTableTab')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
+    await userEvent.click(getByTitle('JSON')); // make sure Table isn't selected
+    await userEvent.click(getByTitle('Table'));
+
+    expect(getByTestId(TABLE_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 });

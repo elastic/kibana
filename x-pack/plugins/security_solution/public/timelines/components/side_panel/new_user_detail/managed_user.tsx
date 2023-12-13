@@ -34,6 +34,10 @@ import { useAppUrl } from '../../../../common/lib/kibana';
 import { ManagedUserAccordion } from './managed_user_accordion';
 import { useManagedUserItems } from './hooks/use_managed_user_items';
 
+const accordionStyle = css`
+  width: 100%;
+`;
+
 export const ManagedUser = ({
   managedUser,
   contextID,
@@ -75,9 +79,7 @@ export const ManagedUser = ({
               title={i18n.MANAGED_USER_INSPECT_TITLE}
             />
           }
-          css={css`
-            width: 100%;
-          `}
+          css={accordionStyle}
         >
           <EuiSpacer size="m" />
 
