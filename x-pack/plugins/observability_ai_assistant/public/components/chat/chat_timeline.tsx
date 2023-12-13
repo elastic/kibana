@@ -14,11 +14,8 @@ import type { Message } from '../../../common';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import type { ChatActionClickHandler } from './types';
 import type { ObservabilityAIAssistantChatService } from '../../types';
-<<<<<<< HEAD
-=======
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
->>>>>>> 3fbd25ba3da646f89892c4d0718ac6a5dc880c85
 import { ChatState } from '../../hooks/use_chat';
 import {
   getTimelineItemsfromConversation,
@@ -113,47 +110,10 @@ export function ChatTimeline({
         padding-bottom: 32px;
       `}
     >
-<<<<<<< HEAD
-      {items.length <= 1 ? (
-        <ChatWelcomePanel knowledgeBase={knowledgeBase} />
-      ) : (
-        items.map((item, index) => {
-          return Array.isArray(item) ? (
-            <ChatConsolidatedItems
-              key={index}
-              chatService={chatService}
-              consolidatedItem={item}
-              onFeedback={onFeedback}
-              onRegenerate={onRegenerate}
-              onEditSubmit={onEdit}
-              onStopGenerating={onStopGenerating}
-              onActionClick={onActionClick}
-            />
-          ) : (
-            <ChatItem
-              // use index, not id to prevent unmounting of component when message is persisted
-              key={index}
-              {...item}
-              chatService={chatService}
-              onFeedbackClick={(feedback) => {
-                onFeedback(item.message, feedback);
-              }}
-              onRegenerateClick={() => {
-                onRegenerate(item.message);
-              }}
-              onEditSubmit={(message) => {
-                onEdit(item.message, message);
-              }}
-              onStopGeneratingClick={onStopGenerating}
-              onActionClick={onActionClick}
-            />
-          );
-        })
-      )}
-=======
       {items.map((item, index) => {
         return Array.isArray(item) ? (
           <ChatConsolidatedItems
+            chatService={chatService}
             key={index}
             consolidatedItem={item}
             onFeedback={onFeedback}
@@ -167,6 +127,7 @@ export function ChatTimeline({
             // use index, not id to prevent unmounting of component when message is persisted
             key={index}
             {...item}
+            chatService={chatService}
             onFeedbackClick={(feedback) => {
               onFeedback(item.message, feedback);
             }}
@@ -181,7 +142,6 @@ export function ChatTimeline({
           />
         );
       })}
->>>>>>> 3fbd25ba3da646f89892c4d0718ac6a5dc880c85
     </EuiCommentList>
   );
 }
