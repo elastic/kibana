@@ -7,15 +7,21 @@
 import React from 'react';
 import { Message } from '../../common';
 import { useObservabilityAIAssistantChatService } from '../hooks/use_observability_ai_assistant_chat_service';
+import type { ChatActionClickHandler } from './chat/types';
 
 interface Props {
   name: string;
   arguments: string | undefined;
   response: Message['message'];
+  onActionClick: ChatActionClickHandler;
 }
 
 export function RenderFunction(props: Props) {
   const chatService = useObservabilityAIAssistantChatService();
 
-  return <>{chatService.renderFunction(props.name, props.arguments, props.response)}</>;
+  return (
+    <>
+      {chatService.renderFunction(props.name, props.arguments, props.response, props.onActionClick)}
+    </>
+  );
 }

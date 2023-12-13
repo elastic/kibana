@@ -16,6 +16,7 @@ interface Context {
   attributes?: TypedLensByValueInput['attributes'];
   id?: string;
   onUpdate?: (input: TypedLensByValueInput['attributes']) => void;
+  onApply?: (input: TypedLensByValueInput['attributes']) => void;
 }
 
 export const getAsyncHelpers = async () => await import('../../async_services');
@@ -46,7 +47,7 @@ export class EditLensEmbeddableAction implements Action<Context> {
     return isEmbeddableEditActionCompatible(this.core);
   }
 
-  public async execute({ attributes, id, onUpdate }: Context) {
+  public async execute({ attributes, id, onUpdate, onApply }: Context) {
     const { executeEditEmbeddableAction } = await getAsyncHelpers();
     if (attributes) {
       executeEditEmbeddableAction({
@@ -55,6 +56,7 @@ export class EditLensEmbeddableAction implements Action<Context> {
         attributes,
         embeddableId: id,
         onUpdate,
+        onApply,
       });
     }
   }

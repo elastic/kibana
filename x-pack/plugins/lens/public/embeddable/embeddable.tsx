@@ -852,7 +852,8 @@ export class Embeddable
 
   async openConfingPanel(
     startDependencies: LensPluginStartDependencies,
-    onUpdate?: (input: TypedLensByValueInput['attributes']) => void
+    onUpdate?: (input: TypedLensByValueInput['attributes']) => void,
+    onApply?: (input: TypedLensByValueInput['attributes']) => void
   ) {
     const { getEditLensConfiguration } = await import('../async_services');
     const Component = await getEditLensConfiguration(
@@ -885,6 +886,7 @@ export class Embeddable
           }
           displayFlyoutHeader={true}
           canEditTextBasedQuery={this.isTextBasedLanguage()}
+          onApplyCb={onApply}
         />
       );
     }

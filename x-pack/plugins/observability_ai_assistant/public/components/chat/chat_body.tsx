@@ -223,6 +223,30 @@ export function ChatBody({
                 onActionClick={(payload) => {
                   setStickToBottom(true);
                   switch (payload.type) {
+                    case ChatActionClickType.updateVisualization:
+                      const visualizeQueryMessagesIndex = messages.findIndex(
+                        ({ message }) => message.name === 'visualize_query'
+                      );
+                      next(
+                        messages.slice(0, visualizeQueryMessagesIndex).concat({
+                          '@timestamp': new Date().toISOString(),
+                          message: {
+                            role: MessageRole.Assistant,
+                            content: '',
+                            function_call: {
+                              name: 'visualize_query',
+                              arguments: JSON.stringify({
+                                query: payload.query,
+                                // possibly is better to not pass the entire input here
+                                // but only the overrides
+                                newInput: payload.newInput,
+                              }),
+                              trigger: MessageRole.User,
+                            },
+                          },
+                        })
+                      );
+                      break;
                     case ChatActionClickType.executeEsqlQuery:
                       next(
                         messages.concat({

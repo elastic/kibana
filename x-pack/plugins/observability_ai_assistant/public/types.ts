@@ -39,6 +39,7 @@ import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { PendingMessage } from '../common/types';
 import type { StreamingChatResponseEvent } from '../common/conversation_complete';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
+import { type ChatActionClickHandler } from './components/chat/types';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -65,7 +66,8 @@ export interface ObservabilityAIAssistantChatService {
   renderFunction: (
     name: string,
     args: string | undefined,
-    response: { data?: string; content?: string }
+    response: { data?: string; content?: string },
+    onActionClick: ChatActionClickHandler
   ) => React.ReactNode;
 }
 
@@ -82,6 +84,7 @@ export interface ObservabilityAIAssistantService {
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
   arguments: TArguments;
   response: TResponse;
+  onActionClick: ChatActionClickHandler;
 }) => React.ReactNode;
 
 export type RegisterRenderFunctionDefinition<

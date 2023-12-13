@@ -133,7 +133,7 @@ export async function createChatService({
 
   return {
     analytics,
-    renderFunction: (name, args, response) => {
+    renderFunction: (name, args, response, onActionClick) => {
       const fn = renderFunctionRegistry.get(name);
 
       if (!fn) {
@@ -147,7 +147,7 @@ export async function createChatService({
         data: JSON.parse(response.data ?? '{}'),
       };
 
-      return fn?.({ response: parsedResponse, arguments: parsedArguments });
+      return fn?.({ response: parsedResponse, arguments: parsedArguments, onActionClick });
     },
     getContexts: () => contextDefinitions,
     getFunctions,

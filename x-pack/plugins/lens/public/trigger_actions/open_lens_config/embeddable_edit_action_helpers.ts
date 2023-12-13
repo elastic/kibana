@@ -32,12 +32,14 @@ export async function executeEditEmbeddableAction({
   attributes,
   embeddableId,
   onUpdate,
+  onApply,
 }: {
   deps: LensPluginStartDependencies;
   core: CoreStart;
   attributes: TypedLensByValueInput['attributes'];
   embeddableId?: string;
   onUpdate?: (input: TypedLensByValueInput['attributes']) => void;
+  onApply?: (input: TypedLensByValueInput['attributes']) => void;
 }) {
   const isCompatibleAction = isEmbeddableEditActionCompatible(core);
   const defaultDataView = await deps.dataViews.getDefaultDataView({
@@ -65,6 +67,7 @@ export async function executeEditEmbeddableAction({
       overlays: core.overlays,
       theme: core.theme,
       onUpdate,
+      onApply,
     });
   }
 }

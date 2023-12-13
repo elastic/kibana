@@ -28,6 +28,7 @@ import type {
   RegisterRenderFunctionDefinition,
   RenderFunction,
 } from '../types';
+import { type ChatActionClickHandler, ChatActionClickType } from '../components/chat/types';
 
 interface VisualizeLensResponse {
   content: DatatableColumn[];
@@ -36,18 +37,22 @@ function generateId() {
   return uuidv4();
 }
 
-function ESQLLens({
+function VisualizeESQL({
   lens,
   dataViews,
   uiActions,
   columns,
   query,
+  onActionClick,
+  initialInput,
 }: {
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
   uiActions: UiActionsStart;
   columns: DatatableColumn[];
   query: string;
+  onActionClick: ChatActionClickHandler;
+  initialInput?: unknown;
 }) {
   // fetch the pattern from the query
   const indexPattern = getIndexPatternFromESQLQuery(query);
@@ -62,7 +67,9 @@ function ESQLLens({
   }, [indexPattern]);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-  const [lensInput, setLensInput] = useState<TypedLensByValueInput | null>(null);
+  const [lensInput, setLensInput] = useState<TypedLensByValueInput | undefined>(
+    initialInput as TypedLensByValueInput
+  );
 
   // initialization
   useEffect(() => {
@@ -110,6 +117,14 @@ function ESQLLens({
         attributes: newAttributes,
       };
       setLensInput(newInput);
+    },
+    onApply: (newAttributes: TypedLensByValueInput['attributes']) => {
+      const newInput = {
+        ...lensInput,
+        attributes: newAttributes,
+      };
+      // this should run on apply and close
+      onActionClick({ type: ChatActionClickType.updateVisualization, newInput, query });
     },
   };
 
@@ -190,17 +205,20 @@ export function registerVisualizeQueryRenderFunction({
   registerRenderFunction(
     'visualize_query',
     ({
-      arguments: { query },
+      arguments: { query, newInput },
       response,
+      onActionClick,
     }: Parameters<RenderFunction<VisualizeESQLFunctionArguments, {}>>[0]) => {
       const { content } = response as VisualizeLensResponse;
       return (
-        <ESQLLens
+        <VisualizeESQL
           lens={pluginsStart.lens}
           dataViews={pluginsStart.dataViews}
           uiActions={pluginsStart.uiActions}
           columns={content}
           query={query}
+          onActionClick={onActionClick}
+          initialInput={newInput}
         />
       );
     }

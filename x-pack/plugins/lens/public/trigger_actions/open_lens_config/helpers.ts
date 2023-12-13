@@ -20,6 +20,7 @@ interface Context {
   overlays: OverlayStart;
   theme: ThemeServiceStart;
   onUpdate?: (input: TypedLensByValueInput['attributes']) => void;
+  onApply?: (input: TypedLensByValueInput['attributes']) => void;
 }
 
 export async function isActionCompatible(embeddable: IEmbeddable) {
@@ -34,6 +35,7 @@ export async function executeAction({
   overlays,
   theme,
   onUpdate,
+  onApply,
 }: Context) {
   const isCompatibleAction = await isActionCompatible(embeddable);
   if (!isCompatibleAction || !isLensEmbeddable(embeddable)) {
@@ -41,7 +43,7 @@ export async function executeAction({
   }
   const rootEmbeddable = embeddable.getRoot();
   const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-  const ConfigPanel = await embeddable.openConfingPanel(startDependencies, onUpdate);
+  const ConfigPanel = await embeddable.openConfingPanel(startDependencies, onUpdate, onApply);
   if (ConfigPanel) {
     const handle = overlays.openFlyout(
       toMountPoint(
@@ -61,7 +63,7 @@ export async function executeAction({
         'data-test-subj': 'customizeLens',
         type: 'push',
         paddingSize: 'm',
-        hideCloseButton: true,
+        hideCloseButton: false,
         onClose: (overlayRef) => {
           if (overlayTracker) overlayTracker.clearOverlays();
           overlayRef.close();

@@ -8,10 +8,12 @@ import { FromSchema } from 'json-schema-to-ts';
 
 export const visualizeESQLFunction = {
   name: 'visualize_query',
-  description: 'Use this function suggest charts for ES|QL queries.',
+  description:
+    'Use this function to visualize charts for ES|QL queries. DO NOT run the lens function after.',
+  descriptionForUser: 'Use this function to visualize charts for ES|QL queries.',
   parameters: {
     type: 'object',
-    additionalProperties: false,
+    additionalProperties: true,
     properties: {
       query: {
         type: 'string',
