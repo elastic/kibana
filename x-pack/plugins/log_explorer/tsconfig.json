@@ -40,7 +40,6 @@
     "@kbn/xstate-utils",
     "@kbn/ecs",
     "@kbn/react-field",
-    "@kbn/observability-shared-plugin",
     "@kbn/router-utils",
   ],
   "exclude": [
