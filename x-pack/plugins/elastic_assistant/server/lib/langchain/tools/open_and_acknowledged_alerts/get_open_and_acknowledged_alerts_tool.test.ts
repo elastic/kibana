@@ -10,12 +10,12 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { DynamicTool } from 'langchain/tools';
 import { omit } from 'lodash/fp';
 
-import { getOpenAlertsTool } from './get_open_alerts_tool';
+import { getOpenAndAcknowledgedAlertsTool } from './get_open_and_acknowledged_alerts_tool';
 import { mockAlertsFieldsApi } from '../../../../__mocks__/alerts';
 import type { RequestBody } from '../../types';
 import { MAX_SIZE } from './helpers';
 
-describe('getOpenAlertsTool', () => {
+describe('getOpenAndAcknowledgedAlertsTool', () => {
   const alertsIndexPattern = 'alerts-index';
   const esClient = {
     search: jest.fn().mockResolvedValue(mockAlertsFieldsApi),
@@ -37,7 +37,7 @@ describe('getOpenAlertsTool', () => {
   });
 
   it('returns a `DynamicTool` with a `func` that calls `esClient.search()` with the expected query', async () => {
-    const tool: DynamicTool = getOpenAlertsTool({
+    const tool: DynamicTool = getOpenAndAcknowledgedAlertsTool({
       alertsIndexPattern,
       allow: request.body.allow,
       allowReplacement: request.body.allowReplacement,
@@ -75,8 +75,20 @@ describe('getOpenAlertsTool', () => {
                 bool: {
                   filter: [
                     {
-                      match_phrase: {
-                        'kibana.alert.workflow_status': 'open',
+                      bool: {
+                        should: [
+                          {
+                            match_phrase: {
+                              'kibana.alert.workflow_status': 'open',
+                            },
+                          },
+                          {
+                            match_phrase: {
+                              'kibana.alert.workflow_status': 'acknowledged',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
                       },
                     },
                     {
@@ -130,7 +142,7 @@ describe('getOpenAlertsTool', () => {
       RequestBody
     >;
 
-    const tool = getOpenAlertsTool({
+    const tool = getOpenAndAcknowledgedAlertsTool({
       alertsIndexPattern,
       allow: requestWithMissingParams.body.allow,
       allowReplacement: requestWithMissingParams.body.allowReplacement,
@@ -145,7 +157,7 @@ describe('getOpenAlertsTool', () => {
   });
 
   it('returns null when alertsIndexPattern is undefined', () => {
-    const tool = getOpenAlertsTool({
+    const tool = getOpenAndAcknowledgedAlertsTool({
       // alertsIndexPattern is undefined
       allow: request.body.allow,
       allowReplacement: request.body.allowReplacement,
@@ -160,7 +172,7 @@ describe('getOpenAlertsTool', () => {
   });
 
   it('returns null when size is undefined', () => {
-    const tool = getOpenAlertsTool({
+    const tool = getOpenAndAcknowledgedAlertsTool({
       alertsIndexPattern,
       allow: request.body.allow,
       allowReplacement: request.body.allowReplacement,
@@ -175,7 +187,7 @@ describe('getOpenAlertsTool', () => {
   });
 
   it('returns null when size out of range', () => {
-    const tool = getOpenAlertsTool({
+    const tool = getOpenAndAcknowledgedAlertsTool({
       alertsIndexPattern,
       allow: request.body.allow,
       allowReplacement: request.body.allowReplacement,
@@ -190,7 +202,7 @@ describe('getOpenAlertsTool', () => {
   });
 
   it('returns a tool instance with the expected tags', () => {
-    const tool = getOpenAlertsTool({
+    const tool = getOpenAndAcknowledgedAlertsTool({
       alertsIndexPattern,
       allow: request.body.allow,
       allowReplacement: request.body.allowReplacement,
