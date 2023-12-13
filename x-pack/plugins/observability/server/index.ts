@@ -10,7 +10,7 @@
 
 import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { ObservabilityPlugin, ObservabilityPluginSetup } from './plugin';
+import type { ObservabilityPluginSetup } from './plugin';
 import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
 import { createOrUpdateIndexTemplate } from './utils/create_or_update_index_template';
 import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
@@ -36,8 +36,7 @@ const configSchema = schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
       logs: schema.object({
-        // Enable it by default: https://github.com/elastic/kibana/issues/159945
-        enabled: schema.boolean({ defaultValue: true }),
+        enabled: schema.boolean({ defaultValue: false }),
       }),
       uptime: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
@@ -49,7 +48,7 @@ const configSchema = schema.object({
     thresholdRule: schema.object({
       enabled: offeringBasedSchema({
         serverless: schema.boolean({ defaultValue: false }),
-        traditional: schema.boolean({ defaultValue: true }),
+        traditional: schema.boolean({ defaultValue: false }),
       }),
     }),
   }),
@@ -71,12 +70,18 @@ export const config: PluginConfigDescriptor = {
     },
   },
   schema: configSchema,
+  deprecations: ({ unused }) => [
+    unused('unsafe.thresholdRule.enabled', { level: 'warning' }),
+    unused('unsafe.alertDetails.logs.enabled', { level: 'warning' }),
+  ],
 };
 
 export type ObservabilityConfig = TypeOf<typeof configSchema>;
 
-export const plugin = (initContext: PluginInitializerContext) =>
-  new ObservabilityPlugin(initContext);
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { ObservabilityPlugin } = await import('./plugin');
+  return new ObservabilityPlugin(initContext);
+};
 
 export type { Mappings, ObservabilityPluginSetup, ScopedAnnotationsClient };
 export {

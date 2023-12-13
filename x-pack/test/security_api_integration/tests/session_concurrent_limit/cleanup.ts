@@ -150,7 +150,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
   }
 
-  describe('Session Concurrent Limit cleanup', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/149091
+  describe.skip('Session Concurrent Limit cleanup', () => {
     before(async () => {
       await security.user.create('anonymous_user', {
         password: 'changeme',

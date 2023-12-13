@@ -35,7 +35,7 @@ import type {
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
-import type { DatasourceStates, VisualizationState } from '../../state_management';
+import type { DatasourceState, DatasourceStates, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
 import { getDatasourceLayers } from '../../state_management/utils';
@@ -461,7 +461,7 @@ export async function persistedStateToExpression(
 
 export function getMissingIndexPattern(
   currentDatasource: Datasource | null | undefined,
-  currentDatasourceState: { isLoading: boolean; state: unknown } | null,
+  currentDatasourceState: DatasourceState | null,
   indexPatterns: IndexPatternMap
 ) {
   if (

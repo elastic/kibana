@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/apm-plugin",
-  "owner": "@elastic/apm-ui",
+  "owner": "@elastic/obs-ux-infra_services-team",
   "description": "The user interface for Elastic APM",
   "plugin": {
     "id": "apm",

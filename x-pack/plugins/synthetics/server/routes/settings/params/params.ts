@@ -37,7 +37,11 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
       const canSave =
-        (await server.coreStart?.capabilities.resolveCapabilities(request)).uptime.save ?? false;
+        (
+          await server.coreStart?.capabilities.resolveCapabilities(request, {
+            capabilityPath: 'uptime.*',
+          })
+        ).uptime.save ?? false;
 
       if (canSave) {
         if (paramId) {

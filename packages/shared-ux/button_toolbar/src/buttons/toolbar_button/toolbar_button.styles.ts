@@ -8,12 +8,39 @@
 
 import { UseEuiTheme } from '@elastic/eui';
 
+export const fontWeightDefinitions = (euiTheme: UseEuiTheme['euiTheme']) => ({
+  bold: euiTheme.font.weight.bold,
+  normal: euiTheme.font.weight.regular,
+});
+
 export const ToolbarButtonStyles = ({ euiTheme }: UseEuiTheme) => {
   return {
+    default: {
+      // style declaration carried over from https://github.com/elastic/kibana/blob/v8.10.4/src/plugins/kibana_react/public/toolbar_button/toolbar_button.scss
+      // informed by issue https://github.com/elastic/eui/issues/4730
+      borderStyle: 'solid',
+      border: euiTheme.border.thin,
+      borderColor: euiTheme.border.color,
+    },
     emptyButton: {
       backgroundColor: euiTheme.colors.emptyShade,
-      border: `${euiTheme.border.thin} !important`,
+      border: `${euiTheme.border.thin}`,
       color: `${euiTheme.colors.text}`,
+    },
+    buttonPositions: {
+      left: {
+        borderTopRightRadius: 0,
+        borderBottomRightRadius: 0,
+      },
+      right: {
+        borderTopLeftRadius: 0,
+        borderBottomLeftRadius: 0,
+        borderLeft: 'none',
+      },
+      center: {
+        borderRadius: 0,
+        borderLeft: 'none',
+      },
     },
   };
 };

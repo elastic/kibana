@@ -38,7 +38,6 @@ import type {
   IndexPatternRef,
   DataSourceInfo,
   UserMessage,
-  FrameDatasourceAPI,
   StateSetter,
   IndexPatternMap,
 } from '../../types';
@@ -749,18 +748,12 @@ export function getFormBasedDatasource({
     getDatasourceSuggestionsForVisualizeField,
     getDatasourceSuggestionsForVisualizeCharts,
 
-    getUserMessages(state, { frame: frameDatasourceAPI, setState, visualizationInfo }) {
+    getUserMessages(state, { frame: framePublicAPI, setState, visualizationInfo }) {
       if (!state) {
         return [];
       }
 
-      const layerErrorMessages = getLayerErrorMessages(
-        state,
-        frameDatasourceAPI,
-        setState,
-        core,
-        data
-      );
+      const layerErrorMessages = getLayerErrorMessages(state, framePublicAPI, setState, core, data);
 
       const dimensionErrorMessages = getInvalidDimensionErrorMessages(
         state,
@@ -770,8 +763,8 @@ export function getFormBasedDatasource({
           return !isColumnInvalid(
             layer,
             columnId,
-            frameDatasourceAPI.dataViews.indexPatterns[layer.indexPatternId],
-            frameDatasourceAPI.dateRange,
+            framePublicAPI.dataViews.indexPatterns[layer.indexPatternId],
+            framePublicAPI.dateRange,
             uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
           );
         }
@@ -779,11 +772,8 @@ export function getFormBasedDatasource({
 
       const warningMessages = [
         ...[
-          ...(getStateTimeShiftWarningMessages(
-            data.datatableUtilities,
-            state,
-            frameDatasourceAPI
-          ) || []),
+          ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, framePublicAPI) ||
+            []),
         ].map((longMessage) => {
           const message: UserMessage = {
             severity: 'warning',
@@ -798,14 +788,14 @@ export function getFormBasedDatasource({
         ...getPrecisionErrorWarningMessages(
           data.datatableUtilities,
           state,
-          frameDatasourceAPI,
+          framePublicAPI,
           core.docLinks,
           setState
         ),
-        ...getUnsupportedOperationsWarningMessage(state, frameDatasourceAPI, core.docLinks),
+        ...getUnsupportedOperationsWarningMessage(state, framePublicAPI, core.docLinks),
       ];
 
-      const infoMessages = getNotifiableFeatures(state, frameDatasourceAPI, visualizationInfo);
+      const infoMessages = getNotifiableFeatures(state, framePublicAPI, visualizationInfo);
 
       return layerErrorMessages.concat(dimensionErrorMessages, warningMessages, infoMessages);
     },
@@ -922,12 +912,12 @@ function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedL
 
 function getLayerErrorMessages(
   state: FormBasedPrivateState,
-  frameDatasourceAPI: FrameDatasourceAPI,
+  framePublicAPI: FramePublicAPI,
   setState: StateSetter<FormBasedPrivateState, unknown>,
   core: CoreStart,
   data: DataPublicPluginStart
 ) {
-  const indexPatterns = frameDatasourceAPI.dataViews.indexPatterns;
+  const indexPatterns = framePublicAPI.dataViews.indexPatterns;
 
   const layerErrors: UserMessage[][] = Object.entries(state.layers)
     .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
@@ -954,7 +944,7 @@ function getLayerErrorMessages(
                   <EuiButton
                     data-test-subj="errorFixAction"
                     onClick={async () => {
-                      const newState = await error.fixAction?.newState(frameDatasourceAPI);
+                      const newState = await error.fixAction?.newState(framePublicAPI);
                       if (newState) {
                         setState(newState);
                       }

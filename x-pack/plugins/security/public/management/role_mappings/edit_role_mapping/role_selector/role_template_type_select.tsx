@@ -10,7 +10,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type { RoleTemplate } from '../../../../../common/model';
+import type { RoleTemplate } from '../../../../../common';
 import { isInlineRoleTemplate, isStoredRoleTemplate } from '../services/role_template_type';
 
 const templateTypeOptions = [

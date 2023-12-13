@@ -1,1 +1,3 @@
-[]
+[
+  "x-pack/plugins/index_management/jest.config.js"
+]

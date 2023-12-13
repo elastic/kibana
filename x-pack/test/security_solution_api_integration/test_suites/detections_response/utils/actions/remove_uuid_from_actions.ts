@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RuleAction } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
 
-export const removeUUIDFromActions = (actions: RuleAction[]): RuleAction[] => {
+export const removeUUIDFromActions = (actions: RuleActionArray): RuleActionArray => {
   return actions.map(({ uuid, ...restOfAction }) => ({
     ...restOfAction,
   }));

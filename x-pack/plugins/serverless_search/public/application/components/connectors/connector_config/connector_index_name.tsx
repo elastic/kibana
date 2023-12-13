@@ -92,6 +92,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
         <EuiFlexItem grow={false}>
           <span>
             <EuiButton
+              data-test-subj="serverlessSearchConnectorIndexNameButton"
               color="primary"
               isDisabled={!isValidIndexName(newIndexName)}
               isLoading={isLoading}
@@ -104,6 +105,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
         <EuiFlexItem grow={false}>
           <span>
             <EuiButton
+              data-test-subj="serverlessSearchConnectorIndexNameSaveAndSyncButton"
               color="primary"
               disabled={
                 !(

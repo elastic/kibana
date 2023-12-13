@@ -14,7 +14,7 @@ import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
 import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
-import { createInternalESClientWithContext } from '../../lib/helpers/create_es_client/create_internal_es_client';
+import { createInternalESClientWithResources } from '../../lib/helpers/create_es_client/create_internal_es_client';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { createCloudApmPackgePolicy } from './create_cloud_apm_package_policy';
@@ -172,13 +172,9 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       throw Boom.forbidden(CLOUD_SUPERUSER_REQUIRED_MESSAGE);
     }
 
-    const internalESClient = await createInternalESClientWithContext({
-      context,
-      request,
-      debug: resources.params.query._inspect,
-      apmIndices,
-    });
-
+    const internalESClient = await createInternalESClientWithResources(
+      resources
+    );
     const cloudApmPackagePolicy = await createCloudApmPackgePolicy({
       cloudPluginSetup,
       fleetPluginStart,
@@ -186,6 +182,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       esClient,
       logger,
       internalESClient,
+      apmIndices,
       request,
     });
 

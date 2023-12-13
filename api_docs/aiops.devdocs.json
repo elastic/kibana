@@ -575,6 +575,29 @@
           },
           {
             "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [
+              "\nUI actions."
+            ],
+            "signature": [
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsStart",
+                "text": "UiActionsStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
             "id": "def-public.AiopsAppDependencies.i18n",
             "type": "Object",
             "tags": [],
@@ -1337,10 +1360,10 @@
           },
           {
             "parentPluginId": "aiops",
-            "id": "def-public.LogRateAnalysisResultsData.significantTerms",
+            "id": "def-public.LogRateAnalysisResultsData.significantItems",
             "type": "Array",
             "tags": [],
-            "label": "significantTerms",
+            "label": "significantItems",
             "description": [
               "Statistically significant field/value items."
             ],
@@ -1349,8 +1372,8 @@
                 "pluginId": "@kbn/ml-agg-utils",
                 "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.SignificantTerm",
-                "text": "SignificantTerm"
+                "section": "def-common.SignificantItem",
+                "text": "SignificantItem"
               },
               "[]"
             ],
@@ -1360,10 +1383,10 @@
           },
           {
             "parentPluginId": "aiops",
-            "id": "def-public.LogRateAnalysisResultsData.significantTermsGroups",
+            "id": "def-public.LogRateAnalysisResultsData.significantItemsGroups",
             "type": "Array",
             "tags": [],
-            "label": "significantTermsGroups",
+            "label": "significantItemsGroups",
             "description": [
               "Statistically significant groups of field/value items."
             ],
@@ -1372,8 +1395,8 @@
                 "pluginId": "@kbn/ml-agg-utils",
                 "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.SignificantTermGroup",
-                "text": "SignificantTermGroup"
+                "section": "def-common.SignificantItemGroup",
+                "text": "SignificantItemGroup"
               },
               "[]"
             ],

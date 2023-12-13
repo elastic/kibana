@@ -43,7 +43,7 @@ import { useTrainedModelsApiService } from '../../../../../services/ml_api_servi
 import { useExplorationDataGrid } from './use_exploration_data_grid';
 
 export const useExplorationResults = (
-  indexPattern: DataView | undefined,
+  dataView: DataView | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
   searchQuery: estypes.QueryDslQueryContainer,
   toastNotifications: CoreSetup['notifications']['toasts'],
@@ -54,7 +54,7 @@ export const useExplorationResults = (
   const trainedModelsApiService = useTrainedModelsApiService();
 
   const needsDestIndexFields =
-    indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
+    dataView !== undefined && dataView.title === jobConfig?.source.index[0];
 
   const columns: EuiDataGridColumn[] = [];
 
@@ -90,10 +90,9 @@ export const useExplorationResults = (
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
-    () =>
-      indexPattern !== undefined ? new DataLoader(indexPattern, toastNotifications) : undefined,
+    () => (dataView !== undefined ? new DataLoader(dataView, toastNotifications) : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [indexPattern]
+    [dataView]
   );
 
   const fetchColumnChartsData = async function () {
@@ -179,7 +178,7 @@ export const useExplorationResults = (
 
   const resultsField = jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD;
   const renderCellValue = useRenderCellValue(
-    indexPattern,
+    dataView,
     dataGrid.pagination,
     dataGrid.tableItems,
     resultsField

@@ -166,10 +166,9 @@ describe('TutorialsRegistry', () => {
 
   describe('start', () => {
     test('exposes proper contract', () => {
-      const start = new TutorialsRegistry(mockInitContext).start(
-        coreMock.createStart(),
-        mockCustomIntegrationsPluginSetup
-      );
+      const registry = new TutorialsRegistry(mockInitContext);
+      registry.setup(mockCoreSetup, mockCustomIntegrationsPluginSetup);
+      const start = registry.start(coreMock.createStart(), mockCustomIntegrationsPluginSetup);
       expect(start).toBeDefined();
     });
   });

@@ -6,7 +6,7 @@
  */
 
 import { Role } from '@kbn/security-plugin/common';
-import { rootRequest } from '../tasks/common';
+import { rootRequest } from '../tasks/api_calls/common';
 
 /**
  * Utility function creates roles and corresponding users per each role with names

@@ -4,7 +4,7 @@ exports[`GetHistogramIndicatorAggregation should generate a aggregation for good
 Object {
   "_good_A": Object {
     "aggs": Object {
-      "sum": Object {
+      "metric": Object {
         "sum": Object {
           "field": "total",
         },
@@ -16,7 +16,7 @@ Object {
   },
   "_good_B": Object {
     "aggs": Object {
-      "sum": Object {
+      "metric": Object {
         "sum": Object {
           "field": "processed",
         },
@@ -29,8 +29,8 @@ Object {
   "goodEvents": Object {
     "bucket_script": Object {
       "buckets_path": Object {
-        "A": "_good_A>sum",
-        "B": "_good_B>sum",
+        "A": "_good_A>metric",
+        "B": "_good_B>metric",
       },
       "script": Object {
         "lang": "painless",
@@ -45,7 +45,7 @@ exports[`GetHistogramIndicatorAggregation should generate a aggregation for tota
 Object {
   "_total_A": Object {
     "aggs": Object {
-      "sum": Object {
+      "metric": Object {
         "sum": Object {
           "field": "total",
         },
@@ -58,7 +58,7 @@ Object {
   "totalEvents": Object {
     "bucket_script": Object {
       "buckets_path": Object {
-        "A": "_total_A>sum",
+        "A": "_total_A>metric",
       },
       "script": Object {
         "lang": "painless",

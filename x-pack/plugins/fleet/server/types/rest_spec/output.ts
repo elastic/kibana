@@ -33,3 +33,9 @@ export const PutOutputRequestSchema = {
   }),
   body: UpdateOutputSchema,
 };
+
+export const GetLatestOutputHealthRequestSchema = {
+  params: schema.object({
+    outputId: schema.string(),
+  }),
+};

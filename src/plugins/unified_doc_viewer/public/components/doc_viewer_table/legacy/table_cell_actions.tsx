@@ -36,11 +36,11 @@ export const TableActions = ({
   return (
     <div className="kbnDocViewer__buttons">
       <DocViewTableRowBtnFilterAdd
-        disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue}
+        disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue || !onFilter}
         onClick={() => onFilter(fieldMapping, flattenedField, '+')}
       />
       <DocViewTableRowBtnFilterRemove
-        disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue}
+        disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue || !onFilter}
         onClick={() => onFilter(fieldMapping, flattenedField, '-')}
       />
       <DocViewTableRowBtnToggleColumn
@@ -49,7 +49,7 @@ export const TableActions = ({
         onClick={() => onToggleColumn(field)}
       />
       <DocViewTableRowBtnFilterExists
-        disabled={!fieldMapping || !fieldMapping.filterable}
+        disabled={!fieldMapping || !fieldMapping.filterable || !onFilter}
         onClick={() => onFilter('_exists_', field, '+')}
         scripted={fieldMapping && fieldMapping.scripted}
       />

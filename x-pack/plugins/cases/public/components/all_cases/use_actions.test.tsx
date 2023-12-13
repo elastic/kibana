@@ -6,7 +6,7 @@
  */
 
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks/dom';
 
 import { useActions } from './use_actions';
@@ -43,6 +43,7 @@ describe('useActions', () => {
           "align": "right",
           "name": "Actions",
           "render": [Function],
+          "width": "100px",
         },
       }
     `);

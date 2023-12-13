@@ -75,3 +75,10 @@ export interface DataStreamIndex {
   preferILM: boolean;
   managedBy: string;
 }
+
+export interface DataRetention {
+  enabled: boolean;
+  infiniteDataRetention?: boolean;
+  value?: number;
+  unit?: string;
+}

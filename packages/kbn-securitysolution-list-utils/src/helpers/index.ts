@@ -48,6 +48,8 @@ import {
   isNotOneOfOperator,
   isInListOperator,
   isNotInListOperator,
+  matchesOperator,
+  doesNotMatchOperator,
 } from '../autocomplete_operators';
 
 import {
@@ -696,8 +698,14 @@ export const getOperatorOptions = (
 ): OperatorOption[] => {
   if (item.nested === 'parent' || item.field == null) {
     return [isOperator];
-  } else if ((item.nested != null && listType === 'endpoint') || listType === 'endpoint') {
-    return isBoolean ? [isOperator] : [isOperator, isOneOfOperator];
+  } else if (listType === 'endpoint') {
+    if (isBoolean) {
+      return [isOperator];
+    } else {
+      return fieldSupportsMatches(item.field)
+        ? [isOperator, isOneOfOperator, matchesOperator, doesNotMatchOperator]
+        : [isOperator, isOneOfOperator];
+    }
   } else if (item.nested != null && listType === 'detection') {
     return isBoolean ? [isOperator, existsOperator] : [isOperator, isOneOfOperator, existsOperator];
   } else if (isBoolean) {

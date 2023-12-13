@@ -7,8 +7,12 @@
 
 import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import { getNewRule } from '../../../objects/rule';
-import { PROVIDER_BADGE, QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../../screens/timeline';
-import { FILTER_BADGE } from '../../../screens/alerts';
+import {
+  PROVIDER_BADGE,
+  QUERY_TAB_BUTTON,
+  TIMELINE_FILTER_BADGE,
+  TIMELINE_TITLE,
+} from '../../../screens/timeline';
 
 import { expandFirstAlert, investigateFirstAlertInTimeline } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -65,10 +69,12 @@ describe('Investigate in timeline', { tags: ['@ess', '@serverless'] }, () => {
 
       // Click on the last button that lets us investigate in timeline.
       // We expect this to be the `process.args` row.
+      cy.get(ALERT_FLYOUT).find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON).eq(5).scrollIntoView();
       cy.get(ALERT_FLYOUT)
         .find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON)
-        .last()
-        .should('have.text', alertCount)
+        .eq(5)
+        .should('be.visible')
+        .and('have.text', alertCount)
         .click();
 
       // Make sure a new timeline is created and opened
@@ -78,7 +84,7 @@ describe('Investigate in timeline', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
 
       // The correct filter is applied to the timeline query
-      cy.get(FILTER_BADGE).should(
+      cy.get(TIMELINE_FILTER_BADGE).should(
         'have.text',
         ' {"bool":{"must":[{"term":{"process.args":"-zsh"}},{"term":{"process.args":"unique"}}]}}'
       );

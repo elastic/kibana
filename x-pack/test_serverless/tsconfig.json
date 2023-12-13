@@ -2,8 +2,18 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "rootDirs": [".", "../test"],
-    "types": ["node", "@kbn/ambient-ftr-types", "cypress", "cypress-file-upload", "cypress-real-events", "cypress-recurse"],
+    "rootDirs": [
+      ".",
+      "../test"
+    ],
+    "types": [
+      "node",
+      "@kbn/ambient-ftr-types",
+      "cypress",
+      "cypress-file-upload",
+      "cypress-real-events",
+      "cypress-recurse"
+    ],
   },
   "include": [
     "**/*",
@@ -17,7 +27,9 @@
     "*/*/packages/**/*",
   ],
   "kbn_references": [
-    { "path": "../test/tsconfig.json" },
+    {
+      "path": "../test/tsconfig.json"
+    },
     "@kbn/expect",
     "@kbn/test",
     "@kbn/repo-info",
@@ -48,7 +60,7 @@
     "@kbn/rison",
     "@kbn/discover-plugin",
     "@kbn/data-plugin",
-    "@kbn/security-api-integration-helpers",
+    "@kbn/std",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/data-plugin",
     "@kbn/dev-utils",
@@ -63,5 +75,13 @@
     "@kbn/cloud-security-posture-plugin",
     "@kbn/reporting-plugin",
     "@kbn/management-settings-ids",
+    "@kbn/fleet-plugin",
+    "@kbn/apm-synthtrace",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/reporting-export-types-csv-common",
+    "@kbn/mock-idp-plugin",
+    "@kbn/io-ts-utils",
+    "@kbn/log-explorer-plugin",
+    "@kbn/index-management-plugin",
   ]
 }

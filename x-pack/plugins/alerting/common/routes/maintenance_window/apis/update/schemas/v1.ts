@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowCategoryIdsSchemaV1 } from '../../../shared';
 import { rRuleRequestSchemaV1 } from '../../../../r_rule';
+import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
 
 export const updateParamsSchema = schema.object({
   id: schema.string(),
@@ -19,4 +20,5 @@ export const updateBodySchema = schema.object({
   duration: schema.maybe(schema.number()),
   r_rule: schema.maybe(rRuleRequestSchemaV1),
   category_ids: maintenanceWindowCategoryIdsSchemaV1,
+  scoped_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
 });

@@ -37,6 +37,15 @@
   display: 'inline-block';
 }
 
+.mlJobMapLegend__analyticsMissing {
+  height: $euiSizeM;
+  width: $euiSizeM;
+  background-color: $euiColorGhost;
+  border: $euiBorderWidthThick solid $euiColorFullShade;
+  border-radius: 50%;
+  display: 'inline-block';
+}
+
 .mlJobMapLegend__sourceNode {
   height: $euiSizeM;
   width: $euiSizeM;

@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.clickCopyColumnName('@timestamp');
       if (canReadClipboard) {
         const copiedTimestampName = await browser.getClipboardValue();
-        expect(copiedTimestampName).to.be('"\'@timestamp"');
+        expect(copiedTimestampName).to.be('@timestamp');
       }
 
       expect(await toasts.getToastCount()).to.be(1);

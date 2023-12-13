@@ -98,7 +98,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
       }),
       inventoryThresholdAlertRuleEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
-        serverless: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean({ defaultValue: true }),
       }),
       metricThresholdAlertRuleEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
@@ -109,6 +109,15 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
         serverless: schema.boolean({ defaultValue: false }),
       }),
       alertsAndRulesDropdownEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: true }),
+      }),
+      /**
+       * This flag depends on profilingDataAccess optional plugin,
+       * make sure to enable it with `xpack.profiling.enabled: true`
+       * before enabling this flag.
+       */
+      profilingEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
         serverless: schema.boolean({ defaultValue: false }),
       }),

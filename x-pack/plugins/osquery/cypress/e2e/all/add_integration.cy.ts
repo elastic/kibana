@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import {
   ADD_PACK_HEADER_BUTTON,
   ADD_QUERY_BUTTON,
   formFieldInputSelector,
+  SAVED_QUERY_DROPDOWN_SELECT,
   TABLE_ROWS,
 } from '../../screens/packs';
 import {
@@ -178,11 +180,15 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
 
       navigateTo('app/osquery/packs');
       cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+
       cy.get(formFieldInputSelector('name')).type(`${packName}{downArrow}{enter}`);
       cy.getBySel('policyIdsComboBox').type(`${policyName} {downArrow}{enter}`);
 
       cy.getBySel(ADD_QUERY_BUTTON).click();
-      cy.getBySel('savedQuerySelect').click().type('{downArrow}{enter}');
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
+      cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).click().type('{downArrow}{enter}');
       cy.contains(/^Save$/).click();
       cy.contains(/^Save pack$/).click();
       cy.contains(`Successfully created "${packName}" pack`).click();

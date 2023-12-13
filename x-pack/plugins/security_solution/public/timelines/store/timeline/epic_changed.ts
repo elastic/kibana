@@ -32,6 +32,7 @@ import {
   setFilters,
   setSavedQueryId,
   setChanged,
+  updateSavedSearch,
 } from './actions';
 
 /**
@@ -59,6 +60,8 @@ const timelineChangedTypes = new Set([
   updateSort.type,
   updateRange.type,
   upsertColumn.type,
+
+  updateSavedSearch.type,
 ]);
 
 /**

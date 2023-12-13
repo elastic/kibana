@@ -26,7 +26,10 @@ import {
   Field,
   Forms,
   JsonEditorField,
+  NumericField,
 } from '../../../../shared_imports';
+import { UnitField, timeUnits } from '../../shared';
+import { DataRetention } from '../../../../../common';
 import { documentationService } from '../../../services/documentation';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
 
@@ -112,6 +115,19 @@ function getFieldsMeta(esDocsBase: string) {
       }),
       testSubject: 'versionField',
     },
+    dataRetention: {
+      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.dataRetentionTitle', {
+        defaultMessage: 'Data retention',
+      }),
+      description: i18n.translate(
+        'xpack.idxMgmt.templateForm.stepLogistics.dataRetentionDescription',
+        {
+          defaultMessage:
+            'Data will be kept at least this long before being automatically deleted.',
+        }
+      ),
+      unitTestSubject: 'unitDataRetentionField',
+    },
     allowAutoCreate: {
       title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.allowAutoCreateTitle', {
         defaultMessage: 'Allow auto create',
@@ -177,9 +193,18 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       getFormData,
     } = form;
 
-    const [{ addMeta }] = useFormData<{ addMeta: boolean }>({
+    const [{ addMeta, doCreateDataStream, lifecycle }] = useFormData<{
+      addMeta: boolean;
+      lifecycle: DataRetention;
+      doCreateDataStream: boolean;
+    }>({
       form,
-      watch: 'addMeta',
+      watch: [
+        'addMeta',
+        'lifecycle.enabled',
+        'lifecycle.infiniteDataRetention',
+        'doCreateDataStream',
+      ],
     });
 
     /**
@@ -198,8 +223,16 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       });
     }, [onChange, isFormValid, validate, getFormData]);
 
-    const { name, indexPatterns, createDataStream, order, priority, version, allowAutoCreate } =
-      getFieldsMeta(documentationService.getEsDocsBase());
+    const {
+      name,
+      indexPatterns,
+      createDataStream,
+      order,
+      priority,
+      version,
+      dataRetention,
+      allowAutoCreate,
+    } = getFieldsMeta(documentationService.getEsDocsBase());
 
     return (
       <>
@@ -269,6 +302,61 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                 path="doCreateDataStream"
                 componentProps={{ 'data-test-subj': createDataStream.testSubject }}
               />
+            </FormRow>
+          )}
+
+          {/*
+            Since data stream and data retention are settings that are only allowed for non legacy,
+            we only need to check if data stream is set to true to show the data retention.
+          */}
+          {doCreateDataStream && (
+            <FormRow
+              title={dataRetention.title}
+              description={
+                <>
+                  {dataRetention.description}
+                  <EuiSpacer size="m" />
+                  <UseField
+                    path="lifecycle.enabled"
+                    componentProps={{ 'data-test-subj': 'dataRetentionToggle' }}
+                  />
+                </>
+              }
+            >
+              {lifecycle?.enabled && (
+                <UseField
+                  path="lifecycle.value"
+                  component={NumericField}
+                  labelAppend={
+                    <UseField
+                      path="lifecycle.infiniteDataRetention"
+                      data-test-subj="infiniteDataRetentionToggle"
+                      componentProps={{
+                        euiFieldProps: {
+                          compressed: true,
+                        },
+                      }}
+                    />
+                  }
+                  componentProps={{
+                    euiFieldProps: {
+                      disabled: lifecycle?.infiniteDataRetention,
+                      'data-test-subj': 'valueDataRetentionField',
+                      min: 1,
+                      append: (
+                        <UnitField
+                          path="lifecycle.unit"
+                          options={timeUnits}
+                          disabled={lifecycle?.infiniteDataRetention}
+                          euiFieldProps={{
+                            'data-test-subj': 'unitDataRetentionField',
+                          }}
+                        />
+                      ),
+                    },
+                  }}
+                />
+              )}
             </FormRow>
           )}
 

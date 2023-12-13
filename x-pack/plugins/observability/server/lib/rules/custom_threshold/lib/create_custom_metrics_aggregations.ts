@@ -8,25 +8,16 @@
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import { CustomThresholdExpressionMetric } from '../../../../../common/custom_threshold_rule/types';
-import { MetricsExplorerCustomMetric } from './metrics_explorer';
-
-const isMetricExpressionCustomMetric = (
-  subject: MetricsExplorerCustomMetric | CustomThresholdExpressionMetric
-): subject is CustomThresholdExpressionMetric => {
-  return 'aggType' in subject;
-};
 
 export const createCustomMetricsAggregations = (
   id: string,
-  customMetrics: Array<MetricsExplorerCustomMetric | CustomThresholdExpressionMetric>,
+  customMetrics: CustomThresholdExpressionMetric[],
   equation?: string
 ) => {
   const bucketsPath: { [id: string]: string } = {};
   const metricAggregations = customMetrics.reduce((acc, metric) => {
     const key = `${id}_${metric.name}`;
-    const aggregation = isMetricExpressionCustomMetric(metric)
-      ? metric.aggType
-      : metric.aggregation;
+    const aggregation = metric.aggType;
 
     if (aggregation === 'count') {
       bucketsPath[metric.name] = `${key}>_count`;

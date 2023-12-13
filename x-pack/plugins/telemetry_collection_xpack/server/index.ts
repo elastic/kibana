@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { TelemetryCollectionXpackPlugin } from './plugin';
-
 export type { ESLicense } from './telemetry_collection';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 
-export function plugin() {
+export async function plugin() {
+  const { TelemetryCollectionXpackPlugin } = await import('./plugin');
   return new TelemetryCollectionXpackPlugin();
 }

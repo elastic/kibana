@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { significantTermGroups } from '../../../../common/__mocks__/farequote/significant_term_groups';
+import { significantItemGroups } from '../../../../common/__mocks__/farequote/significant_item_groups';
 import { fields } from '../../../../common/__mocks__/artificial_logs/fields';
 import { filteredFrequentItemSets } from '../../../../common/__mocks__/artificial_logs/filtered_frequent_item_sets';
 import { significantTerms } from '../../../../common/__mocks__/artificial_logs/significant_terms';
@@ -16,9 +16,9 @@ import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 import { getSimpleHierarchicalTreeLeaves } from './get_simple_hierarchical_tree_leaves';
 
 describe('markDuplicates', () => {
-  it('marks duplicates based on significant terms groups for farequote', () => {
-    const fieldValuePairCounts = getFieldValuePairCounts(significantTermGroups);
-    const markedDuplicates = getMarkedDuplicates(significantTermGroups, fieldValuePairCounts);
+  it('marks duplicates based on significant items groups for farequote', () => {
+    const fieldValuePairCounts = getFieldValuePairCounts(significantItemGroups);
+    const markedDuplicates = getMarkedDuplicates(significantItemGroups, fieldValuePairCounts);
 
     expect(markedDuplicates).toEqual([
       {
@@ -74,7 +74,7 @@ describe('markDuplicates', () => {
     ]);
   });
 
-  it('marks duplicates based on significant terms groups for artificial logs', () => {
+  it('marks duplicates based on significant items groups for artificial logs', () => {
     const simpleHierarchicalTree = getSimpleHierarchicalTree(
       filteredFrequentItemSets,
       true,

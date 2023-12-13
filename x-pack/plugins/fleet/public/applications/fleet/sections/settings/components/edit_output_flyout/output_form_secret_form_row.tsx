@@ -29,8 +29,19 @@ export const SecretFormRow: React.FC<{
   clear: () => void;
   initialValue?: any;
   onUsePlainText: () => void;
-}> = ({ fullWidth, error, isInvalid, children, clear, title, initialValue, onUsePlainText }) => {
-  const hasInitialValue = initialValue !== undefined;
+  cancelEdit: () => void;
+}> = ({
+  fullWidth,
+  error,
+  isInvalid,
+  children,
+  clear,
+  title,
+  initialValue,
+  onUsePlainText,
+  cancelEdit,
+}) => {
+  const hasInitialValue = !!initialValue;
   const [editMode, setEditMode] = useState(!initialValue);
   const valueHiddenPanel = (
     <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
@@ -66,7 +77,7 @@ export const SecretFormRow: React.FC<{
     <EuiButtonEmpty
       onClick={() => {
         setEditMode(false);
-        clear();
+        cancelEdit();
       }}
       color="primary"
       iconType="refresh"
@@ -87,7 +98,7 @@ export const SecretFormRow: React.FC<{
     <>
       {children}
       {hasInitialValue && (
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="flexEnd" data-test-subj="secretCancelChangeBtn">
           <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>
         </EuiFlexGroup>
       )}

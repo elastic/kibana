@@ -5,31 +5,4 @@
  * 2.0.
  */
 
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { FlyoutContentProps } from '@kbn/discover-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-
-export interface FlyoutProps extends FlyoutContentProps {
-  dataView: DataView;
-}
-
-export interface LogDocument extends DataTableRecord {
-  flattened: {
-    '@timestamp': string;
-    'log.level'?: string;
-    message?: string;
-  };
-}
-
-export interface FlyoutDoc {
-  '@timestamp': string;
-  'log.level'?: string;
-  message?: string;
-}
-
-export interface FlyoutHighlightField {
-  label: string;
-  value: string;
-  iconType?: EuiIconType;
-}
+export type { FlyoutDoc, LogDocument, LogExplorerFlyoutContentProps } from '../../controller';

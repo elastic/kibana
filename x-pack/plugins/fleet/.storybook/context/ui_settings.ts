@@ -26,6 +26,9 @@ const uiSettings: IUiSettingsClient = {
   set: async () => true,
   getUpdate$: () => of({ key: 'setting', newValue: get('setting'), oldValue: get('setting') }),
   getUpdateErrors$: () => of(new Error()),
+  validateValue: async () => {
+    return { successfulValidation: true, valid: true };
+  },
 };
 
 export const getUiSettings = () => uiSettings;

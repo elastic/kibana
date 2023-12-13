@@ -28,7 +28,7 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { getRiskEntityTranslation } from '../translations';
+
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../../helper_hooks';
 import { RiskScoreLevel } from '../severity/common';
@@ -36,7 +36,7 @@ import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_stra
 import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
 import { BETA } from '../risk_score_onboarding/translations';
 
-const getTableColumns = (riskEntity: RiskScoreEntity): Array<EuiBasicTableColumn<TableItem>> => [
+const getTableColumns = (riskEntity?: RiskScoreEntity): Array<EuiBasicTableColumn<TableItem>> => [
   {
     field: 'level',
     name: i18n.INFORMATION_LEVEL_HEADER,
@@ -85,9 +85,7 @@ export const RiskInformationButtonIcon = ({ riskEntity }: { riskEntity: RiskScor
         }
         data-test-subj="open-risk-information-flyout-trigger"
       />
-      {isFlyoutVisible && (
-        <RiskInformationFlyout riskEntity={riskEntity} handleOnClose={handleOnClose} />
-      )}
+      {isFlyoutVisible && <RiskInformationFlyout handleOnClose={handleOnClose} />}
     </>
   );
 };
@@ -100,20 +98,12 @@ export const RiskInformationButtonEmpty = ({ riskEntity }: { riskEntity: RiskSco
       <EuiButtonEmpty onClick={handleOnOpen} data-test-subj="open-risk-information-flyout-trigger">
         {i18n.INFO_BUTTON_TEXT}
       </EuiButtonEmpty>
-      {isFlyoutVisible && (
-        <RiskInformationFlyout riskEntity={riskEntity} handleOnClose={handleOnClose} />
-      )}
+      {isFlyoutVisible && <RiskInformationFlyout handleOnClose={handleOnClose} />}
     </>
   );
 };
 
-const RiskInformationFlyout = ({
-  handleOnClose,
-  riskEntity,
-}: {
-  handleOnClose: () => void;
-  riskEntity: RiskScoreEntity;
-}) => {
+export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => void }) => {
   const { euiTheme } = useEuiTheme();
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'RiskInformation',
@@ -157,15 +147,13 @@ const RiskInformationFlyout = ({
           <p>
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.riskScoreFieldText"
-              defaultMessage="The {riskScoreField} field represents the normalized risk of the {riskEntity} as a single numerical value. You can use this value as a relative indicator of risk in triaging and response playbooks."
+              defaultMessage="The {riskScoreField} field represents the normalized risk of the Entity as a single numerical value. You can use this value as a relative indicator of risk in triaging and response playbooks."
               values={{
-                riskEntity,
                 riskScoreField: (
                   <b>
                     <FormattedMessage
                       id="xpack.securitySolution.riskInformation.riskScoreFieldLabel"
-                      defaultMessage="{riskEntity} risk score"
-                      values={{ riskEntity }}
+                      defaultMessage="Entity risk score"
                     />
                   </b>
                 ),
@@ -176,15 +164,13 @@ const RiskInformationFlyout = ({
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.riskScoreLevelText"
               defaultMessage="The {riskLevelField} field represents one of the six risk level of
-              the {riskEntity} based on a predefined risk metrics."
+              the Entity based on a predefined risk metrics."
               values={{
-                riskEntity,
                 riskLevelField: (
                   <b>
                     <FormattedMessage
                       id="xpack.securitySolution.riskInformation.riskScoreLevelLabel"
-                      defaultMessage="{riskEntity} risk level"
-                      values={{ riskEntity }}
+                      defaultMessage="Entity risk level"
                     />
                   </b>
                 ),
@@ -236,26 +222,22 @@ const RiskInformationFlyout = ({
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.intro"
               defaultMessage="Finally, the engine assigns a risk level by mapping the normalized risk score to the
-            below 6 risk levels."
+            below 5 risk levels."
             />
           </p>
         </EuiText>
         <EuiSpacer />
         <EuiBasicTable
-          columns={getTableColumns(riskEntity)}
+          columns={getTableColumns()}
           items={tableItems}
           data-test-subj="risk-information-table"
         />
         <EuiSpacer size="l" />
         <RiskScoreDocLink
-          riskScoreEntity={riskEntity}
           title={
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.learnMore"
-              defaultMessage="Learn more about {riskEntity} risk"
-              values={{
-                riskEntity: getRiskEntityTranslation(riskEntity, true),
-              }}
+              defaultMessage="Learn more about Entity risk"
             />
           }
         />

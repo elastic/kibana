@@ -15,6 +15,7 @@ import {
   EndpointDocGenerator,
   Event,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { targetTags } from '../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { InsertedEvents, processEventsIndex } from '../services/resolver';
 import { deleteEventsStream } from './data_stream_helper';
@@ -70,7 +71,9 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/114885
-  describe.skip('Endpoint package', () => {
+  describe.skip('Endpoint package', function () {
+    targetTags(this, ['@ess']);
+
     describe('network processors', () => {
       let networkIndexData: InsertedEvents;
 

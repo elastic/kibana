@@ -13,13 +13,6 @@ import { defineUpdateApiKeyRoutes } from './update';
 import type { RouteDefinitionParams } from '..';
 
 export type {
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
-  CreateRestAPIKeyParams,
-  CreateCrossClusterAPIKeyParams,
-  CreateRestAPIKeyWithKibanaPrivilegesParams,
-} from './create';
-export type {
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
   UpdateRestAPIKeyParams,

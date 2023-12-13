@@ -265,7 +265,7 @@ describe('#toExpression', () => {
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('c');
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('d');
     expect(
-      (expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.columnToLabel
+      (expression.chain[0].arguments.layers[0] as Ast).chain[1].arguments.columnToLabel
     ).toEqual([
       JSON.stringify({
         b: 'col_b',
@@ -536,13 +536,18 @@ describe('#toExpression', () => {
       datasourceExpressionsByLayers
     ) as Ast;
 
-    function getYConfigColorForLayer(ast: Ast, index: number) {
+    function getYConfigColorForDataLayer(ast: Ast, index: number) {
+      return (
+        (ast.chain[0].arguments.layers[index] as Ast).chain[1].arguments.decorations[0] as Ast
+      ).chain[0].arguments?.color;
+    }
+    function getYConfigColorForReferenceLayer(ast: Ast, index: number) {
       return (
         (ast.chain[0].arguments.layers[index] as Ast).chain[0].arguments.decorations[0] as Ast
-      ).chain[0].arguments.color;
+      ).chain[0].arguments?.color;
     }
-    expect(getYConfigColorForLayer(expression, 0)).toBeUndefined();
-    expect(getYConfigColorForLayer(expression, 1)).toEqual([defaultReferenceLineColor]);
+    expect(getYConfigColorForDataLayer(expression, 0)).toBeUndefined();
+    expect(getYConfigColorForReferenceLayer(expression, 1)).toEqual([defaultReferenceLineColor]);
   });
 
   it('should ignore annotation layers with no event configured', () => {

@@ -7,21 +7,21 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { type SignificantTermGroup, SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
+import { type SignificantItemGroup, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 
 import { getCategoryQuery } from '../../../../common/api/log_categorization/get_category_query';
 
-// Transforms a list of significant terms from a group in a query filter.
+// Transforms a list of significant items from a group in a query filter.
 // Uses a `term` filter for single field value combinations.
 // For fields with multiple values it creates a single `terms` filter that includes
 // all values. This avoids queries not returning any results otherwise because
 // separate `term` filter for multiple values for the same field would rule each other out.
 export function getGroupFilter(
-  significantTermGroup: SignificantTermGroup
+  significantItemGroup: SignificantItemGroup
 ): estypes.QueryDslQueryContainer[] {
   const groupKeywordFilter = Object.entries(
-    significantTermGroup.group
-      .filter((d) => d.type === SIGNIFICANT_TERM_TYPE.KEYWORD)
+    significantItemGroup.group
+      .filter((d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD)
       .reduce<Record<string, Array<string | number>>>((p, c) => {
         if (p[c.fieldName]) {
           p[c.fieldName].push(c.fieldValue);
@@ -35,8 +35,8 @@ export function getGroupFilter(
     return p;
   }, []);
 
-  const groupLogPatternFilter = significantTermGroup.group
-    .filter((d) => d.type === SIGNIFICANT_TERM_TYPE.LOG_PATTERN)
+  const groupLogPatternFilter = significantItemGroup.group
+    .filter((d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN)
     .map((d) =>
       getCategoryQuery(d.fieldName, [
         {

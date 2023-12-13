@@ -13,25 +13,13 @@ import { act } from 'react-dom/test-utils';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { RenderOptions, render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-// imported to prevent a type error from testing library https://github.com/testing-library/react-testing-library/issues/587
-import * as ___ from '@testing-library/dom';
-
 import { LensAppServices } from '../app_plugin/types';
-import {
-  makeConfigureStore,
-  LensAppState,
-  LensState,
-  LensStoreDeps,
-  LensRootStore,
-} from '../state_management';
+import { makeConfigureStore, LensAppState, LensState, LensStoreDeps } from '../state_management';
 import { getResolvedDateRange } from '../utils';
 import { DatasourceMap, VisualizationMap } from '../types';
 import { mockVisualizationMap } from './visualization_mock';
 import { mockDatasourceMap } from './datasource_mock';
 import { makeDefaultServices } from './services_mock';
-
-// preventing a type error from testing library https://github.com/testing-library/react-testing-library/issues/587
-export const unusedFn = () => ___;
 
 export const mockStoreDeps = (deps?: {
   lensServices?: LensAppServices;
@@ -85,7 +73,8 @@ export const renderWithReduxStore = (
     preloadedState: {},
     storeDeps: mockStoreDeps(),
   }
-): ReturnType<typeof render> & { store: LensRootStore } => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): any => {
   const { store } = makeLensStore({ preloadedState, storeDeps });
 
   const Wrapper: React.FC<{

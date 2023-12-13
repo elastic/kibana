@@ -8,4 +8,4 @@
 
 import { SavedObjectImportWarningsPlugin } from './plugin';
 
-export const plugin = () => new SavedObjectImportWarningsPlugin();
+export const plugin = async () => new SavedObjectImportWarningsPlugin();

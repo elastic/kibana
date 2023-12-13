@@ -7,12 +7,14 @@
 
 import type { Logger } from '@kbn/core/server';
 import moment from 'moment';
-import { TaskManagerStartContract, TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
+import type {
+  TaskManagerStartContract,
+  TaskRunCreatorFunction,
+} from '@kbn/task-manager-plugin/server';
+import { JOB_STATUS, numberToDuration } from '@kbn/reporting-common';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 import { ReportingStore } from '..';
 import { ReportingCore } from '../..';
-import { numberToDuration } from '../../../common/schema_utils';
-import { ReportingConfigType } from '../../config';
-import { statuses } from '../statuses';
 import { SavedReport } from '../store';
 import { ReportingTask, ReportingTaskStatus, REPORTING_MONITOR_TYPE, ReportTaskParams } from '.';
 
@@ -96,7 +98,7 @@ export class MonitorReportsTask implements ReportingTask {
             const { _id: jobId, process_expiration: processExpiration, status } = report;
             const eventLog = this.reporting.getEventLogger(report);
 
-            if (![statuses.JOB_STATUS_PENDING, statuses.JOB_STATUS_PROCESSING].includes(status)) {
+            if (![JOB_STATUS.PENDING, JOB_STATUS.PROCESSING].includes(status)) {
               const invalidStatusError = new Error(
                 `Invalid job status in the monitoring search result: ${status}`
               ); // only pending or processing jobs possibility need rescheduling
@@ -107,7 +109,7 @@ export class MonitorReportsTask implements ReportingTask {
               throw invalidStatusError;
             }
 
-            if (status === statuses.JOB_STATUS_PENDING) {
+            if (status === JOB_STATUS.PENDING) {
               const migratingJobError = new Error(
                 `${jobId} was scheduled in a previous version and left in [${status}] status. Rescheduling...`
               );
@@ -115,7 +117,7 @@ export class MonitorReportsTask implements ReportingTask {
               eventLog.logError(migratingJobError);
             }
 
-            if (status === statuses.JOB_STATUS_PROCESSING) {
+            if (status === JOB_STATUS.PROCESSING) {
               const expirationTime = moment(processExpiration);
               const overdueValue = moment().valueOf() - expirationTime.valueOf();
               const overdueExpirationError = new Error(

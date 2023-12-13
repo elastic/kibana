@@ -8,10 +8,11 @@
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import { configSchema, ConfigSchema } from '../config';
-import { GraphPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new GraphPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { GraphPlugin } = await import('./plugin');
+  return new GraphPlugin(initializerContext);
+};
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {

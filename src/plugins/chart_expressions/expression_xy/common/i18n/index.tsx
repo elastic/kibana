@@ -121,6 +121,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.xAxisInterval.help', {
       defaultMessage: 'Specifies the min interval for time bar chart',
     }),
+  getMinBarHeightHelp: () =>
+    i18n.translate('expressionXY.xyVis.minBarHeight.help', {
+      defaultMessage: 'Specifies the min bar height in pixels for bar chart',
+    }),
   getSplitColumnAccessorHelp: () =>
     i18n.translate('expressionXY.xyVis.splitColumnAccessor.help', {
       defaultMessage: 'Specifies split column of the xy chart',

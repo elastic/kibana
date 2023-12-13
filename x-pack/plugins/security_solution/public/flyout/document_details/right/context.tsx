@@ -8,6 +8,7 @@
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 import { useEventDetails } from '../shared/hooks/use_event_details';
 import { FlyoutError } from '../../shared/components/flyout_error';
@@ -59,6 +60,10 @@ export interface RightPanelContext {
    * Retrieves searchHit values for the provided field
    */
   getFieldsData: GetFieldsData;
+  /**
+   * Boolean to indicate whether it is a preview flyout
+   */
+  isPreview: boolean;
 }
 
 export const RightPanelContext = createContext<RightPanelContext | undefined>(undefined);
@@ -104,6 +109,7 @@ export const RightPanelProvider = memo(
               investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
               refetchFlyoutData,
               getFieldsData,
+              isPreview: scopeId === TableId.rulePreview,
             }
           : undefined,
       [

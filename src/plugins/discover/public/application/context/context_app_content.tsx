@@ -151,7 +151,7 @@ export function ContextAppContent({
   return (
     <Fragment>
       <WrapperWithPadding>
-        {interceptedWarnings.length && (
+        {Boolean(interceptedWarnings.length) && (
           <>
             <SearchResponseWarningsCallout warnings={interceptedWarnings} />
             <EuiSpacer size="s" />

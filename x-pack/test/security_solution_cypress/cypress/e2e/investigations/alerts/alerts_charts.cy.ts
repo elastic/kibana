@@ -37,16 +37,18 @@ describe(
       selectAlertsHistogram();
     });
 
-    it('Filter in/out should add a filter to KQL bar', function () {
-      const expectedNumberOfAlerts = 2;
+    it('Filter in should add a filter to KQL bar', function () {
+      const expectedNumberOfAlerts = 1;
       clickAlertsHistogramLegend();
       clickAlertsHistogramLegendFilterFor(ruleConfigs.name);
       cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
         'have.text',
         `kibana.alert.rule.name: ${ruleConfigs.name}`
       );
-      cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
+      cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alert`);
+    });
 
+    it('Filter out should add a filter to KQL bar', function () {
       clickAlertsHistogramLegend();
       clickAlertsHistogramLegendFilterOut(ruleConfigs.name);
       cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(

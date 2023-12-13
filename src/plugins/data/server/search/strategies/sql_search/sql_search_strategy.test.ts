@@ -124,6 +124,33 @@ describe('SQL search strategy', () => {
           signal: undefined,
         });
       });
+
+      it('should delete when aborted', async () => {
+        mockSqlQuery.mockResolvedValueOnce({
+          ...mockSqlResponse,
+          body: {
+            ...mockSqlResponse.body,
+            is_running: true,
+          },
+        });
+        const esSearch = await sqlSearchStrategyProvider(mockSearchConfig, mockLogger);
+        const abortController = new AbortController();
+        const abortSignal = abortController.signal;
+
+        // Abort after an incomplete first response is returned
+        setTimeout(() => abortController.abort(), 100);
+
+        let err: any;
+        try {
+          await esSearch.search({ params: {} }, { abortSignal }, mockDeps).toPromise();
+        } catch (e) {
+          err = e;
+        }
+
+        expect(mockSqlQuery).toBeCalled();
+        expect(err).not.toBeUndefined();
+        expect(mockSqlDelete).toBeCalled();
+      });
     });
 
     // skip until full search session support https://github.com/elastic/kibana/issues/127880
