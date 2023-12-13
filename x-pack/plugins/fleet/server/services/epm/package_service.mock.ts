@@ -10,6 +10,7 @@ import type { PackageClient, PackageService } from './package_service';
 const createClientMock = (): jest.Mocked<PackageClient> => ({
   getInstallation: jest.fn(),
   ensureInstalledPackage: jest.fn(),
+  installPackage: jest.fn(),
   fetchFindLatestPackage: jest.fn(),
   readBundledPackage: jest.fn(),
   getPackage: jest.fn(),
