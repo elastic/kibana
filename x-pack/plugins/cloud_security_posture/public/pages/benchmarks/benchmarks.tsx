@@ -26,10 +26,10 @@ import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { BenchmarksTable } from './benchmarks_table';
 import {
-  useCspBenchmarkIntegrations,
+  useCspBenchmarkIntegrationsV2,
   UseCspBenchmarkIntegrationsProps,
 } from './use_csp_benchmark_integrations';
-import { extractErrorMessage } from '../../../common/utils/helpers';
+import { extractErrorMessage, getBenchmarkCisName } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
 import { LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
@@ -102,7 +102,7 @@ const TotalIntegrationsCount = ({
     <EuiTextColor color="subdued">
       <FormattedMessage
         id="xpack.csp.benchmarks.totalIntegrationsCountMessage"
-        defaultMessage="Showing {pageCount} of {totalCount, plural, one {# integration} other {# integrations}}"
+        defaultMessage="Showing {pageCount} of {totalCount, plural, one {# benchmark} other {# benchmarks}}"
         values={{ pageCount, totalCount }}
       />
     </EuiTextColor>
@@ -126,7 +126,7 @@ const BenchmarkSearchField = ({
           isLoading={isLoading}
           placeholder={i18n.translate(
             'xpack.csp.benchmarks.benchmarkSearchField.searchPlaceholder',
-            { defaultMessage: 'Search by Integration Name' }
+            { defaultMessage: 'Search by benchmark Name' }
           )}
           incremental
         />
@@ -145,8 +145,11 @@ export const Benchmarks = () => {
     sortOrder: 'asc',
   });
 
-  const queryResult = useCspBenchmarkIntegrations(query);
-  const totalItemCount = queryResult.data?.total || 0;
+  const queryResult = useCspBenchmarkIntegrationsV2();
+  const benchmarkResult =
+    queryResult.data?.items.filter((obj) => getBenchmarkCisName(obj.id)?.includes(query.name)) ||
+    [];
+  const totalItemCount = queryResult.data?.items.length || 0;
 
   return (
     <CloudPosturePage>
@@ -154,8 +157,8 @@ export const Benchmarks = () => {
         data-test-subj={TEST_SUBJ.BENCHMARKS_PAGE_HEADER}
         pageTitle={
           <CloudPosturePageTitle
-            title={i18n.translate('xpack.csp.benchmarks.benchmarksPageHeader.benchmarkRulesTitle', {
-              defaultMessage: 'Benchmark Rules',
+            title={i18n.translate('xpack.csp.benchmarks.benchmarksPageHeader.benchmarksTitle', {
+              defaultMessage: 'Benchmarks',
             })}
           />
         }
@@ -174,7 +177,7 @@ export const Benchmarks = () => {
       />
       <EuiSpacer size="s" />
       <BenchmarksTable
-        benchmarks={queryResult.data?.items || []}
+        benchmarks={benchmarkResult}
         data-test-subj={TEST_SUBJ.BENCHMARKS_TABLE_DATA_TEST_SUBJ}
         error={queryResult.error ? extractErrorMessage(queryResult.error) : undefined}
         loading={queryResult.isFetching}
@@ -198,9 +201,7 @@ export const Benchmarks = () => {
           }));
         }}
         noItemsMessage={
-          queryResult.isSuccess && !queryResult.data.total ? (
-            <BenchmarkEmptyState name={query.name} />
-          ) : undefined
+          queryResult.isSuccess ? <BenchmarkEmptyState name={query.name} /> : undefined
         }
       />
     </CloudPosturePage>
