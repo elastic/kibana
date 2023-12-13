@@ -53,7 +53,6 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('Creates a timeline template', () => {
-    createTimeline(getTimeline());
     visit(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
     openTimelineUsingToggle();
