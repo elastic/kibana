@@ -13,7 +13,10 @@ In {ecloud}, {fleet} flags are already configured.
 You can configure `xpack.fleet` settings in your `kibana.yml`.
 By default, {fleet} is enabled. To use {fleet}, you also need to configure {kib} and {es} hosts.
 
-See the {fleet-guide}/index.html[{fleet}] docs for more information.
+Many {fleet} settings can also be configured directly through the {fleet} UI.
+See {fleet-guide}/fleet-settings.html[Fleet UI settings] for details.
+
+See the {fleet-guide}/index.html[{fleet}] docs for more information about {fleet}.
 
 [[general-fleet-settings-kb]]
 ==== General {fleet} settings
@@ -225,7 +228,7 @@ NOTE: The `xpack.fleet.outputs` settings are intended for advanced configuration
 =======
 =====
 +
-Example `xpack.fleet.outputs`` configuration:
+Example `xpack.fleet.outputs` configuration:
 +
 [source,yaml]
 ----
