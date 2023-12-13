@@ -6,8 +6,8 @@
  */
 
 import { EuiBadge, EuiButton, EuiHorizontalRule } from '@elastic/eui';
-import { getRouterLinkProps } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { DiscoverEsqlUrlProps } from '../../../hooks/use_esql';
 import { technicalPreview, tryEsql } from '../constants';
 

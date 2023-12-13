@@ -26,7 +26,8 @@
     "@kbn/io-ts-utils",
     "@kbn/observability-plugin",
     "@kbn/es-types",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/router-utils",
   ],
   "exclude": [
     "target/**/*",

@@ -10,7 +10,7 @@ import {
   ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability/locators';
-import { getRouterLinkProps } from '@kbn/observability-shared-plugin/public';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { BrowserUrlService } from '@kbn/share-plugin/public';
 import React from 'react';
 import { onboardingLinkTitle } from '../../common/translations';

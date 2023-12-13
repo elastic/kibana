@@ -13,7 +13,7 @@ import {
   getDiscoverColumnsFromDisplayOptions,
   getDiscoverFiltersFromState,
 } from '@kbn/log-explorer-plugin/public';
-import { getRouterLinkProps } from '@kbn/observability-shared-plugin/public';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';

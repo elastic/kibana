@@ -7,7 +7,7 @@
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { getRouterLinkProps } from '@kbn/observability-shared-plugin/public';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import {
   SingleDatasetLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
