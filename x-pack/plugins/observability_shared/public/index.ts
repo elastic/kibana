@@ -90,3 +90,4 @@ export {
 } from './components/profiling/embeddables';
 
 export { ProfilingEmptyState } from './components/profiling/profiling_empty_state';
+export { FeatureFeedbackButton } from './components/feature_feedback_button/feature_feedback_button';

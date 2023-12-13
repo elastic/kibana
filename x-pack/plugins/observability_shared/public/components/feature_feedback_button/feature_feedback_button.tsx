@@ -8,12 +8,11 @@
 import React, { ReactElement } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
 const KIBANA_VERSION_QUERY_PARAM = 'entry.548460210';
 const KIBANA_DEPLOYMENT_TYPE_PARAM = 'entry.573002982';
 
-const getDeploymentType = (isCloudEnv: boolean, isServerlessEnv: boolean): string | undefined => {
+const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): string | undefined => {
   if (isServerlessEnv) {
     return 'Serverless (fully-managed projects)';
   }
@@ -41,6 +40,9 @@ interface FeatureFeedbackButtonProps {
   surveyButtonText?: ReactElement;
   onClickCapture?: () => void;
   defaultButton?: boolean;
+  kibanaVersion?: string;
+  isCloudEnv?: boolean;
+  isServerlessEnv?: boolean;
 }
 
 export const FeatureFeedbackButton = ({
@@ -48,6 +50,9 @@ export const FeatureFeedbackButton = ({
   'data-test-subj': dts,
   onClickCapture,
   defaultButton,
+  kibanaVersion,
+  isCloudEnv,
+  isServerlessEnv,
   surveyButtonText = (
     <FormattedMessage
       id="xpack.infra.homePage.tellUsWhatYouThinkLink"
@@ -55,11 +60,11 @@ export const FeatureFeedbackButton = ({
     />
   ),
 }: FeatureFeedbackButtonProps) => {
-  const {
-    services: { kibanaVersion, isCloudEnv, isServerlessEnv },
-  } = useKibanaContextForPlugin();
+  const deploymentType =
+    isCloudEnv !== undefined || isServerlessEnv !== undefined
+      ? getDeploymentType(isCloudEnv, isServerlessEnv)
+      : undefined;
 
-  const deploymentType = getDeploymentType(isCloudEnv, isServerlessEnv);
   return (
     <EuiButton
       href={getSurveyFeedbackURL(formUrl, kibanaVersion, deploymentType)}
