@@ -4,14 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 
 import { uniq } from 'lodash';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import type { IntegrationPreferenceType } from '../../../components/integration_preference';
-import { useGetPackagesQuery, useGetCategoriesQuery } from '../../../../../hooks';
+import {
+  useGetPackagesQuery,
+  useGetCategoriesQuery,
+  useGetSettingsQuery,
+} from '../../../../../hooks';
 import {
   useGetAppendCustomIntegrationsQuery,
   useGetReplacementCustomIntegrationsQuery,
@@ -105,9 +109,9 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
 
 export const useAvailablePackages = () => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
-  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
-    boolean | undefined
-  >(undefined);
+  const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery();
+  const prereleaseIntegrationsEnabled = settings?.item.prerelease_integrations_enabled ?? false;
+
   const { showIntegrationsSubcategories } = ExperimentalFeaturesService.get();
 
   const {
@@ -131,7 +135,12 @@ export const useAvailablePackages = () => {
     data: eprPackages,
     isLoading: isLoadingAllPackages,
     error: eprPackageLoadingError,
-  } = useGetPackagesQuery({ prerelease: prereleaseIntegrationsEnabled });
+  } = useGetPackagesQuery(
+    { prerelease: prereleaseIntegrationsEnabled },
+    {
+      enabled: isSettingsFetched,
+    }
+  );
 
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {
@@ -245,6 +254,5 @@ export const useAvailablePackages = () => {
     eprPackageLoadingError,
     eprCategoryLoadingError,
     filteredCards,
-    setPrereleaseIntegrationsEnabled,
   };
 };

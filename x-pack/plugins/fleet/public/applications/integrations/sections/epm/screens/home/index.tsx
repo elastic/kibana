@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { installationStatuses } from '../../../../../../../common/constants';
@@ -14,7 +14,7 @@ import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../.
 import { DefaultLayout } from '../../../../layouts';
 import { isPackageUpdatable } from '../../../../services';
 
-import { useGetPackagesQuery } from '../../../../hooks';
+import { useGetPackagesQuery, useGetSettingsQuery } from '../../../../hooks';
 
 import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 
@@ -41,12 +41,18 @@ export const categoryExists = (category: string, categories: CategoryFacet[]) =>
 };
 
 export const EPMHomePage: React.FC = () => {
-  const [prereleaseEnabled, setPrereleaseEnabled] = useState<boolean>(false);
+  const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery();
+  const prereleaseEnabled = settings?.item.prerelease_integrations_enabled ?? false;
 
   // loading packages to find installed ones
-  const { data: allPackages, isLoading } = useGetPackagesQuery({
-    prerelease: prereleaseEnabled,
-  });
+  const { data: allPackages, isLoading } = useGetPackagesQuery(
+    {
+      prerelease: prereleaseEnabled,
+    },
+    {
+      enabled: isSettingsFetched,
+    }
+  );
 
   const installedPackages = useMemo(
     () =>
@@ -85,7 +91,7 @@ export const EPMHomePage: React.FC = () => {
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
         <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
-          <AvailablePackages setPrereleaseEnabled={setPrereleaseEnabled} />
+          <AvailablePackages />
         </DefaultLayout>
       </Route>
     </Routes>

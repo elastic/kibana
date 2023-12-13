@@ -23,7 +23,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import { sendPutSettings, useGetSettings, useStartServices } from '../../../hooks';
+import { useGetSettingsQuery, usePutSettingsMutation, useStartServices } from '../../../hooks';
 
 export type IntegrationPreferenceType = 'recommended' | 'beats' | 'agent';
 
@@ -35,7 +35,6 @@ interface Option {
 export interface Props {
   initialType: IntegrationPreferenceType;
   onChange: (type: IntegrationPreferenceType) => void;
-  onPrereleaseEnabledChange: (prerelease: boolean) => void;
 }
 
 const recommendedTooltip = (
@@ -83,11 +82,7 @@ const options: Option[] = [
   },
 ];
 
-export const IntegrationPreference = ({
-  initialType,
-  onChange,
-  onPrereleaseEnabledChange,
-}: Props) => {
+export const IntegrationPreference = ({ initialType, onChange }: Props) => {
   const [idSelected, setIdSelected] = React.useState<IntegrationPreferenceType>(initialType);
 
   const { docLinks } = useStartServices();
@@ -96,7 +91,9 @@ export const IntegrationPreference = ({
     boolean | undefined
   >(undefined);
 
-  const { data: settings, error: settingsError } = useGetSettings();
+  const { data: settings, error: settingsError } = useGetSettingsQuery();
+
+  const putSettingsMutation = usePutSettingsMutation();
 
   useEffect(() => {
     const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
@@ -107,21 +104,24 @@ export const IntegrationPreference = ({
     }
   }, [settings?.item, settingsError]);
 
-  useEffect(() => {
-    if (prereleaseIntegrationsEnabled !== undefined) {
-      onPrereleaseEnabledChange(prereleaseIntegrationsEnabled);
-    }
-  }, [onPrereleaseEnabledChange, prereleaseIntegrationsEnabled]);
+  // useEffect(() => {
+  //   if (prereleaseIntegrationsEnabled !== undefined) {
+  //     onPrereleaseEnabledChange(prereleaseIntegrationsEnabled);
+  //   }
+  // }, [onPrereleaseEnabledChange, prereleaseIntegrationsEnabled]);
 
-  const updateSettings = useCallback(async (prerelease: boolean) => {
-    const res = await sendPutSettings({
-      prerelease_integrations_enabled: prerelease,
-    });
+  const updateSettings = useCallback(
+    async (prerelease: boolean) => {
+      const res = await putSettingsMutation.mutateAsync({
+        prerelease_integrations_enabled: prerelease,
+      });
 
-    if (res.error) {
-      throw res.error;
-    }
-  }, []);
+      if (res.error) {
+        throw res.error;
+      }
+    },
+    [putSettingsMutation]
+  );
 
   const link = (
     <EuiLink href={docLinks.links.fleet.beatsAgentComparison}>

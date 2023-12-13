@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { settingsRoutesService } from '../../services';
 import type { PutSettingsResponse, PutSettingsRequest, GetSettingsResponse } from '../../types';
@@ -38,6 +38,17 @@ export function sendGetSettings() {
     method: 'get',
     path: settingsRoutesService.getInfoPath(),
     version: API_VERSIONS.public.v1,
+  });
+}
+
+export function usePutSettingsMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: sendPutSettings,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(['settings']);
+    },
   });
 }
 
