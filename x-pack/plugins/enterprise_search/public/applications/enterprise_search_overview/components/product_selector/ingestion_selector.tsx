@@ -82,33 +82,6 @@ export const IngestionSelector: React.FC = () => {
             )}
           />
         </EuiFlexItem>
-        {productFeatures.hasConnectors && (
-          <EuiFlexItem>
-            <IngestionCard
-              buttonLabel={i18n.translate(
-                'xpack.enterpriseSearch.ingestSelector.method.connectorButtonLabel',
-                {
-                  defaultMessage: 'Create a connector',
-                }
-              )}
-              buttonIcon={connectorIcon}
-              description={i18n.translate(
-                'xpack.enterpriseSearch.ingestSelector.method.connectors.description',
-                {
-                  defaultMessage:
-                    'Extract, transform, index and sync data from a third-party data source.',
-                }
-              )}
-              href={generatePath(
-                ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_SELECT_CONNECTOR_PATH
-              )}
-              logo={connectorLogo}
-              title={i18n.translate('xpack.enterpriseSearch.ingestSelector.method.connectors', {
-                defaultMessage: 'Connectors',
-              })}
-            />
-          </EuiFlexItem>
-        )}
         {productFeatures.hasWebCrawler && (
           <EuiFlexItem>
             <IngestionCard
@@ -133,6 +106,33 @@ export const IngestionSelector: React.FC = () => {
               logo={crawlerLogo}
               title={i18n.translate('xpack.enterpriseSearch.ingestSelector.method.crawler', {
                 defaultMessage: 'Web Crawler',
+              })}
+            />
+          </EuiFlexItem>
+        )}
+        {productFeatures.hasConnectors && (
+          <EuiFlexItem>
+            <IngestionCard
+              buttonLabel={i18n.translate(
+                'xpack.enterpriseSearch.ingestSelector.method.connectorButtonLabel',
+                {
+                  defaultMessage: 'Create a connector',
+                }
+              )}
+              buttonIcon={connectorIcon}
+              description={i18n.translate(
+                'xpack.enterpriseSearch.ingestSelector.method.connectors.description',
+                {
+                  defaultMessage:
+                    'Extract, transform, index and sync data from a third-party data source.',
+                }
+              )}
+              href={generatePath(
+                ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_SELECT_CONNECTOR_PATH
+              )}
+              logo={connectorLogo}
+              title={i18n.translate('xpack.enterpriseSearch.ingestSelector.method.connectors', {
+                defaultMessage: 'Connectors',
               })}
             />
           </EuiFlexItem>

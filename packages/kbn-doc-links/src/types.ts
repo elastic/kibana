@@ -355,6 +355,7 @@ export interface DocLinks {
       readonly userRiskScore: string;
       readonly entityRiskScoring: string;
     };
+    readonly detectionEngineOverview: string;
   };
   readonly query: {
     readonly eql: string;
@@ -473,6 +474,7 @@ export interface DocLinks {
   readonly security: Readonly<{
     apiKeyServiceSettings: string;
     clusterPrivileges: string;
+    definingRoles: string;
     elasticsearchSettings: string;
     elasticsearchEnableSecurity: string;
     elasticsearchEnableApiKeys: string;
@@ -534,6 +536,7 @@ export interface DocLinks {
     elasticAgentInputConfiguration: string;
     policySecrets: string;
     remoteESOoutput: string;
+    performancePresets: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -631,3 +634,5 @@ export interface DocLinks {
     readonly settings: string;
   };
 }
+
+export type BuildFlavor = 'serverless' | 'traditional';

@@ -19,10 +19,9 @@ import {
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { generatePath } from 'react-router-dom';
-import type { BenchmarkVersion2, BenchmarkScore } from '../../../common/types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { BenchmarkScore, Benchmark, BenchmarksCisId } from '../../../common/types/latest';
 import * as TEST_SUBJ from './test_subjects';
 import { isCommonError } from '../../components/cloud_posture_page';
 import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
@@ -34,23 +33,12 @@ import { benchmarksNavigation } from '../../common/navigation/constants';
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
 
 interface BenchmarksTableProps
-  extends Pick<
-      EuiBasicTableProps<BenchmarkVersion2>,
-      'loading' | 'error' | 'noItemsMessage' | 'sorting'
-    >,
+  extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage' | 'sorting'>,
     Pagination {
-  benchmarks: BenchmarkVersion2[];
-  setQuery(pagination: CriteriaWithPagination<BenchmarkVersion2>): void;
+  benchmarks: Benchmark[];
+  setQuery(pagination: CriteriaWithPagination<Benchmark>): void;
   'data-test-subj'?: string;
 }
-
-// Commented Out until the full table is made
-// const AgentPolicyButtonLink = ({ name, id: policyId }: { name: string; id: string }) => {
-//   const { http } = useKibana().services;
-//   const [fleetBase, path] = pagePathGetters.policy_details({ policyId });
-
-//   return <EuiLink href={http.basePath.prepend([fleetBase, path].join(''))}>{name}</EuiLink>;
-// };
 
 const IntegrationButtonLink = ({
   packageName,
@@ -155,7 +143,7 @@ const ErrorMessageComponent = (error: { error: unknown }) => (
   </FullSizeCenteredPage>
 );
 
-const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVersion2>> = [
+const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
   {
     field: 'id',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkCisName', {
@@ -164,12 +152,9 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     truncateText: true,
     width: '17.5%',
     sortable: true,
-    // render: (benchmarkId: string) => {
-    //   return getBenchmarkCisName(benchmarkId);
-    // },
-    render: (complianceScore: BenchmarkVersion2['id'], benchmarkId) => (
+    render: (complianceScore: Benchmark['id'], benchmarkId) => (
       <IntegrationButtonLink
-        packageName={getBenchmarkCisName(benchmarkId.id)}
+        packageName={getBenchmarkCisName(benchmarkId.id) || ''}
         benchmarkId={benchmarkId.id || ''}
         benchmarkVersion={benchmarkId.version || ''}
       />
@@ -194,7 +179,7 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     truncateText: true,
     width: '30%',
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.APPLICABLE_TO,
-    render: (benchmarkId: string) => {
+    render: (benchmarkId: BenchmarksCisId) => {
       return (
         <>
           <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -208,7 +193,7 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     },
   },
   {
-    field: 'benchmark_evaluation',
+    field: 'evaluation',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.evaluated', {
       defaultMessage: 'Evaluated',
     }),
@@ -216,7 +201,7 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     truncateText: true,
     width: '17.5%',
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.EVALUATED,
-    render: (complianceScore: BenchmarkVersion2['evaluation'], data) => {
+    render: (complianceScore: Benchmark['evaluation'], data) => {
       return getBenchmarkPlurals(data.id, data.evaluation);
     },
   },
@@ -262,7 +247,7 @@ export const BenchmarksTable = ({
     totalItemCount,
   };
 
-  const onChange = ({ page }: CriteriaWithPagination<BenchmarkVersion2>) => {
+  const onChange = ({ page }: CriteriaWithPagination<Benchmark>) => {
     setQuery({ page: { ...page, index: page.index + 1 } });
   };
 
@@ -274,7 +259,7 @@ export const BenchmarksTable = ({
     <EuiBasicTable
       data-test-subj={rest['data-test-subj']}
       items={benchmarks}
-      columns={BENCHMARKS_TABLE_COLUMNS_VERSION_2}
+      columns={BENCHMARKS_TABLE_COLUMNS}
       itemId={(item) => [item.id, item.version].join('/')}
       pagination={pagination}
       onChange={onChange}

@@ -32,7 +32,6 @@ import { asDuration } from '../../../../common/utils/formatters';
 import { TopAlert } from '../../../typings/alerts';
 import { ExperimentalBadge } from '../../../components/experimental_badge';
 import {
-  LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '../alert_details';
@@ -58,7 +57,6 @@ export function PageTitle({ alert, dataTestSubj }: PageTitleProps) {
   if (!alert) return <EuiLoadingSpinner />;
 
   const showExperimentalBadge =
-    alert.fields[ALERT_RULE_TYPE_ID] === LOG_DOCUMENT_COUNT_RULE_TYPE_ID ||
     alert.fields[ALERT_RULE_TYPE_ID] === METRIC_THRESHOLD_ALERT_TYPE_ID ||
     alert.fields[ALERT_RULE_TYPE_ID] === METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID;
 

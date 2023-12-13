@@ -35,13 +35,10 @@ export interface ChatItemProps extends ChatTimelineItem {
 }
 
 const normalMessageClassName = css`
-  .euiCommentEvent__header {
-    padding: 4px 8px;
-  }
-
   .euiCommentEvent__body {
     padding: 0;
   }
+
   /* targets .*euiTimelineItemEvent-top, makes sure text properly wraps and doesn't overflow */
   > :last-child {
     overflow-x: hidden;
@@ -56,6 +53,10 @@ const noPanelMessageClassName = css`
   .euiCommentEvent__header {
     background: transparent;
     border-block-end: none;
+
+    > .euiPanel {
+      background: none;
+    }
   }
 
   .euiCommentEvent__body {
@@ -89,10 +90,6 @@ export function ChatItem({
   const actions = [canCopy, collapsed, canCopy].filter(Boolean);
 
   const noBodyMessageClassName = css`
-    .euiCommentEvent__header {
-      padding: 4px 8px;
-    }
-
     .euiCommentEvent__body {
       padding: 0;
       height: ${expanded ? 'fit-content' : '0px'};

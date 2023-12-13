@@ -17,7 +17,7 @@ import {
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CLOUDBEAT_VANILLA,
-  CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP,
   GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP,
   AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP,
@@ -30,7 +30,8 @@ import type {
   GcpCredentialsType,
   AzureCredentialsType,
   RuleSection,
-} from '../types';
+} from '../types_old';
+import type { BenchmarksCisId } from '../types/latest';
 
 /**
  * @example
@@ -50,9 +51,9 @@ export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'
 };
 
 export const getBenchmarkFilter = (type: BenchmarkId, section?: RuleSection): string =>
-  `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"${
+  `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"${
     section
-      ? ` AND ${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${section}"`
+      ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${section}"`
       : ''
   }`;
 
@@ -176,7 +177,7 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
   return packagePolicy;
 };
 
-export const getBenchmarkCisName = (benchmarkId: string) => {
+export const getBenchmarkCisName = (benchmarkId: BenchmarksCisId) => {
   switch (benchmarkId) {
     case 'cis_k8s':
       return 'CIS Kubernetes';
@@ -189,10 +190,10 @@ export const getBenchmarkCisName = (benchmarkId: string) => {
     case 'cis_gcp':
       return 'CIS GCP';
   }
-  return 'undefined';
+  return null;
 };
 
-export const getBenchmarkApplicableTo = (benchmarkId: string) => {
+export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
   switch (benchmarkId) {
     case 'cis_k8s':
       return 'Kubernetes';
@@ -205,5 +206,5 @@ export const getBenchmarkApplicableTo = (benchmarkId: string) => {
     case 'cis_gcp':
       return 'Google Cloud Provider';
   }
-  return 'undefined';
+  return null;
 };

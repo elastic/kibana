@@ -6,13 +6,14 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { ListResult } from '@kbn/fleet-plugin/common';
 import { BENCHMARKS_ROUTE_PATH } from '../../../common/constants';
-import type { BenchmarksQueryParams } from '../../../common/schemas/benchmark';
+import type { BenchmarksQueryParams } from '../../../common/types/benchmarks/v1';
 import { useKibana } from '../../common/hooks/use_kibana';
-import type { Benchmark, BenchmarkVersion2 } from '../../../common/types';
+import type { GetBenchmarkResponse } from '../../../common/types/latest';
+import type { GetBenchmarkResponse as GetBenchmarkResponseV1 } from '../../../common/types/benchmarks/v1';
 
-const QUERY_KEY = 'csp_benchmark_integrations';
+const QUERY_KEY_V1 = 'csp_benchmark_integrations_v1';
+const QUERY_KEY_V2 = 'csp_benchmark_integrations_v2';
 
 export interface UseCspBenchmarkIntegrationsProps {
   name: string;
@@ -22,10 +23,7 @@ export interface UseCspBenchmarkIntegrationsProps {
   sortOrder: BenchmarksQueryParams['sort_order'];
 }
 
-export interface BenchmarkDetails extends ListResult<BenchmarkVersion2> {
-  items_policies_information: Benchmark[];
-}
-export const useCspBenchmarkIntegrations = ({
+export const useCspBenchmarkIntegrationsV1 = ({
   name,
   perPage,
   page,
@@ -42,10 +40,23 @@ export const useCspBenchmarkIntegrations = ({
   };
 
   return useQuery(
-    [QUERY_KEY, query],
+    [QUERY_KEY_V1, query],
     () =>
-      http.get<BenchmarkDetails>(BENCHMARKS_ROUTE_PATH, {
+      http.get<GetBenchmarkResponseV1>(BENCHMARKS_ROUTE_PATH, {
         query,
+        version: '1',
+      }),
+    { keepPreviousData: true }
+  );
+};
+
+export const useCspBenchmarkIntegrationsV2 = () => {
+  const { http } = useKibana().services;
+
+  return useQuery(
+    [QUERY_KEY_V2],
+    () =>
+      http.get<GetBenchmarkResponse>(BENCHMARKS_ROUTE_PATH, {
         version: '2',
       }),
     { keepPreviousData: true }

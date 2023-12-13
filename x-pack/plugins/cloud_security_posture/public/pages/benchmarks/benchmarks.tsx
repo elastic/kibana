@@ -26,7 +26,7 @@ import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { BenchmarksTable } from './benchmarks_table';
 import {
-  useCspBenchmarkIntegrations,
+  useCspBenchmarkIntegrationsV2,
   UseCspBenchmarkIntegrationsProps,
 } from './use_csp_benchmark_integrations';
 import { extractErrorMessage, getBenchmarkCisName } from '../../../common/utils/helpers';
@@ -150,7 +150,7 @@ export const Benchmarks = () => {
     sortOrder: 'asc',
   });
 
-  const queryResult = useCspBenchmarkIntegrations(query);
+  const queryResult = useCspBenchmarkIntegrationsV2();
   const benchmarkResult =
     queryResult.data?.items.filter((obj) => getBenchmarkCisName(obj.id)?.includes(query.name)) ||
     [];
@@ -202,7 +202,6 @@ export const Benchmarks = () => {
             pageIndex={query.page}
             pageSize={pageSize || query.perPage}
             sorting={{
-              // @ts-expect-error - EUI types currently do not support sorting by nested fields
               sort: { field: query.sortField, direction: query.sortOrder },
               allowNeutralSort: false,
             }}
@@ -220,9 +219,7 @@ export const Benchmarks = () => {
               }));
             }}
             noItemsMessage={
-              queryResult.isSuccess && !queryResult.data.total ? (
-                <BenchmarkEmptyState name={query.name} />
-              ) : undefined
+              queryResult.isSuccess ? <BenchmarkEmptyState name={query.name} /> : undefined
             }
           />
         </>

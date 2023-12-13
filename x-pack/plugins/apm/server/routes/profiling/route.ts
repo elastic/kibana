@@ -8,7 +8,6 @@
 import { toNumberRt } from '@kbn/io-ts-utils';
 import type { BaseFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
 import * as t from 'io-ts';
-import { profilingUseLegacyFlamegraphAPI } from '@kbn/observability-plugin/common';
 import { HOST_NAME } from '../../../common/es_fields/apm';
 import {
   mergeKueries,
@@ -42,13 +41,10 @@ const profilingFlamegraphRoute = createApmServerRoute({
     { flamegraph: BaseFlameGraph; hostNames: string[] } | undefined
   > => {
     const { context, plugins, params } = resources;
-    const useLegacyFlamegraphAPI = await (
-      await context.core
-    ).uiSettings.client.get<boolean>(profilingUseLegacyFlamegraphAPI);
-
+    const core = await context.core;
     const [esClient, apmEventClient, profilingDataAccessStart] =
       await Promise.all([
-        (await context.core).elasticsearch.client,
+        core.elasticsearch.client,
         await getApmEventClient(resources),
         await plugins.profilingDataAccess?.start(),
       ]);
@@ -73,6 +69,7 @@ const profilingFlamegraphRoute = createApmServerRoute({
 
       const flamegraph =
         await profilingDataAccessStart?.services.fetchFlamechartData({
+          core,
           esClient: esClient.asCurrentUser,
           rangeFromMs: start,
           rangeToMs: end,
@@ -80,7 +77,6 @@ const profilingFlamegraphRoute = createApmServerRoute({
             `(${toKueryFilterFormat(HOST_NAME, serviceHostNames)})`,
             kuery,
           ]),
-          useLegacyFlamegraphAPI,
         });
 
       return { flamegraph, hostNames: serviceHostNames };
@@ -107,9 +103,10 @@ const profilingFunctionsRoute = createApmServerRoute({
     resources
   ): Promise<{ functions: TopNFunctions; hostNames: string[] } | undefined> => {
     const { context, plugins, params } = resources;
+    const core = await context.core;
     const [esClient, apmEventClient, profilingDataAccessStart] =
       await Promise.all([
-        (await context.core).elasticsearch.client,
+        core.elasticsearch.client,
         await getApmEventClient(resources),
         await plugins.profilingDataAccess?.start(),
       ]);
@@ -141,6 +138,7 @@ const profilingFunctionsRoute = createApmServerRoute({
       }
 
       const functions = await profilingDataAccessStart?.services.fetchFunction({
+        core,
         esClient: esClient.asCurrentUser,
         rangeFromMs: start,
         rangeToMs: end,
