@@ -66,7 +66,7 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
     waitForAlertsToPopulate();
   });
 
-  context.only('Basic rendering', () => {
+  context('Basic rendering', () => {
     it('alert with no assignees in alerts table', () => {
       checkEmptyAssigneesStateInAlertsTable();
     });
