@@ -9,7 +9,6 @@
 const isFieldLensCompatible = () => true;
 import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
-import { sortDataViewRefs } from '../doc_to_expression';
 import type {
   IndexPattern,
   IndexPatternField,
@@ -20,6 +19,11 @@ import { documentField } from '../document_field';
 
 type ErrorHandler = (err: Error) => void;
 type MinimalDataViewsContract = Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
+
+export const sortDataViewRefs = (dataViewRefs: IndexPatternRef[]) =>
+  dataViewRefs.sort((a, b) => {
+    return a.title.localeCompare(b.title);
+  });
 
 /**
  * All these functions will be used by the Embeddable instance too,

@@ -33,7 +33,6 @@ import {
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
-import { NowProvider } from '@kbn/data-plugin/common';
 import type { EventAnnotationGroupSavedObjectAttributes } from '@kbn/event-annotation-plugin/common';
 import { mapSavedObjectToGroupConfig } from '@kbn/event-annotation-plugin/common';
 import { toExpression } from '@kbn/interpreter';
@@ -146,9 +145,9 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
         '',
         { from: '', to: '' },
         loadAnnotationGroup,
+        new Date(),
         {
           dataViews: dataViewsService,
-          nowProvider: new NowProvider(),
         }
       );
 

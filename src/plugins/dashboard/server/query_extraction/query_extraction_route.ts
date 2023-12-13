@@ -63,7 +63,8 @@ export const setupQueryExtractionRoute = (
             supportedPanels[0]
           );
 
-          const attributes = panelState.explicitInput.attributes;
+          // TODO not sure if this is type safe
+          const attributes = panelState.explicitInput.attributes!;
 
           // copied from initializeSavedVis in Lens embeddable
           const savedVis = {
@@ -79,7 +80,7 @@ export const setupQueryExtractionRoute = (
 
           return response.ok({
             body: {
-              panels,
+              expression,
             },
           });
         } catch (e) {

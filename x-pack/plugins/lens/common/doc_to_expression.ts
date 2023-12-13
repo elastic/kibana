@@ -6,12 +6,11 @@
  */
 
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
-import { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import type { NowProvider } from '@kbn/data-plugin/common';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import {
   DataViewPersistableStateService,
-  DataViewSpec,
-  DataViewsService,
+  type DataViewSpec,
+  type DataViewsService,
 } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import {
@@ -36,7 +35,11 @@ import type {
   VisualizeEditorContext,
 } from '../public/types';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from './constants';
-import { loadIndexPatternRefs, loadIndexPatterns } from './data_views_service/loader';
+import {
+  loadIndexPatternRefs,
+  loadIndexPatterns,
+  sortDataViewRefs,
+} from './data_views_service/loader';
 import { buildExpression } from './expression_helpers';
 import { getDatasourceLayers } from './get_datasource_layers';
 import { readFromStorage } from './settings_storage';
@@ -94,11 +97,6 @@ const COLORING_METHOD: SuggestionRequest['mainPalette'] = COLOR_MAPPING_OFF_BY_D
       },
     }
   : { type: 'colorMapping', value: { ...DEFAULT_COLOR_MAPPING_CONFIG } };
-
-export const sortDataViewRefs = (dataViewRefs: IndexPatternRef[]) =>
-  dataViewRefs.sort((a, b) => {
-    return a.title.localeCompare(b.title);
-  });
 
 function initializeVisualization({
   visualizationMap,
@@ -379,10 +377,10 @@ export async function docToExpression(
   defaultIndexPatternId: string,
   currentTimeRange: TimeRange,
   loadAnnotationGroup: (id: string) => Promise<EventAnnotationGroupConfig>,
+  nowInstant: Date,
   services: {
     storage?: IStorageWrapper;
     dataViews: DataViewsService;
-    nowProvider: NowProvider;
   }
 ): Promise<DocumentToExpressionReturnType> {
   const {
@@ -463,7 +461,7 @@ export async function docToExpression(
       datasourceLayers,
       indexPatterns,
       dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
-      nowInstant: services.nowProvider.get(),
+      nowInstant,
     }),
     activeVisualizationState,
     indexPatterns,
