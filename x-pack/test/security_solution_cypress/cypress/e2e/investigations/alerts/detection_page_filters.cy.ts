@@ -41,7 +41,6 @@ import { ALERTS_COUNT, ALERTS_REFRESH_BTN, EMPTY_ALERT_TABLE } from '../../../sc
 import { kqlSearch } from '../../../tasks/security_header';
 import {
   addNewFilterGroupControlValues,
-  cancelFieldEditing,
   deleteFilterGroupControl,
   discardFilterGroupControls,
   editFilterGroupControl,
@@ -117,7 +116,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     waitForAlerts();
   });
 
-  it('Default page filters are populated when nothing is provided in the URL', () => {
+  it('should populate page filters with default values when nothing is provided in the URL', () => {
     assertFilterControlsWithFilterObject();
   });
 
@@ -168,7 +167,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  it('Page filters are loaded with custom values provided in the URL', () => {
+  it('should load page filters with custom values provided in the URL', () => {
     const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.filter((item) => item.persist).map(
       (filter) => {
         return {
@@ -189,7 +188,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  it('Page filters are loaded with custom filters and values', () => {
+  it('should load page filters with custom filters and values', () => {
     const CUSTOM_URL_FILTER = [
       {
         title: 'Process',
@@ -222,7 +221,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   });
 
   context('with data modificiation', () => {
-    it(`Alert list is updated when the alerts are updated`, () => {
+    it(`should update alert status list when the alerts are updated`, () => {
       // mark status of one alert to be acknowledged
       selectCountTable();
       cy.get(ALERTS_COUNT)
@@ -242,9 +241,8 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  it(`URL is updated when filters are updated`, () => {
+  it(`should update URL when filters are updated`, () => {
     openPageFilterPopover(1);
-    cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
     cy.get(OPTION_SELECTABLE(1, 'high')).click();
     closePageFilterPopover(1);
 
@@ -258,10 +256,9 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     cy.url().should('include', expectedVal);
   });
 
-  it(`Filters are restored from localstorage when user navigates back to the page.`, () => {
+  it(`should restore Filters from localstorage when user navigates back to the page.`, () => {
     cy.get(OPTION_LIST_VALUES(1)).click();
-    cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
-    cy.get(OPTION_SELECTABLE(1, 'high')).click({});
+    cy.get(OPTION_SELECTABLE(1, 'high')).click();
 
     // high should be scuccessfully selected.
     cy.get(OPTION_LIST_VALUES(1)).contains('high');
@@ -276,7 +273,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     cy.get(OPTION_LIST_VALUES(1)).contains('high'); // severity should be low as previously selected
   });
 
-  it('Custom filters from URLS are populated & changed banner is displayed', () => {
+  it('should populate Custom filters & display the changed banner', () => {
     visitAlertsPageWithCustomFilters(customFilters);
     waitForPageFilters();
 
@@ -285,7 +282,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
   });
 
-  it('Changed banner should hide on saving changes', () => {
+  it('should hide Changed banner on saving changes', () => {
     visitAlertsPageWithCustomFilters(customFilters);
     waitForPageFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
@@ -293,7 +290,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
 
-  it('Changed banner should hide on discarding changes', () => {
+  it('should hide Changed banner on discarding changes', () => {
     visitAlertsPageWithCustomFilters(customFilters);
     waitForPageFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
@@ -301,7 +298,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
 
-  it('Changed banner should hide on Reset', () => {
+  it('should hide Changed banner on Reset', () => {
     visitAlertsPageWithCustomFilters(customFilters);
     waitForPageFilters();
     resetFilters();
@@ -311,7 +308,6 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   context('Impact of inputs', () => {
     it('should recover from invalid kql Query result', () => {
       // do an invalid search
-      //
       kqlSearch('\\');
       cy.get(ALERTS_REFRESH_BTN).click();
       waitForPageFilters();
@@ -356,7 +352,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
       cy.get(EMPTY_ALERT_TABLE).should('be.visible');
     });
   });
-  it('Number fields are not visible in field edit panel', () => {
+  it('should not show number fields are not visible in field edit panel', () => {
     const idx = 3;
     const { FILTER_FIELD_TYPE, FIELD_TYPES } = FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS;
     editFilterGroupControls();
@@ -367,7 +363,5 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     cy.get(FIELD_TYPES.BOOLEAN).should('be.visible');
     cy.get(FIELD_TYPES.IP).should('be.visible');
     cy.get(FIELD_TYPES.NUMBER).should('not.exist');
-    cancelFieldEditing();
-    discardFilterGroupControls();
   });
 });
