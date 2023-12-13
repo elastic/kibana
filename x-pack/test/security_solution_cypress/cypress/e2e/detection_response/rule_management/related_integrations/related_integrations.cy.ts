@@ -45,7 +45,8 @@ import {
   waitForPageToBeLoaded,
 } from '../../../../tasks/rule_details';
 
-describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/173307
+describe.skip('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] }, () => {
   const DATA_STREAM_NAME = 'logs-related-integrations-test';
   const PREBUILT_RULE_NAME = 'Prebuilt rule with related integrations';
   const RULE_RELATED_INTEGRATIONS: IntegrationDefinition[] = [
