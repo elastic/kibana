@@ -34,12 +34,11 @@ import { visit } from '../../../../tasks/navigation';
 
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
-describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
+describe.only('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
   const rule = getEsqlRule();
   const expectedNumberOfRules = 1;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172618
-  describe.skip('creation', () => {
+  describe('creation', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
       login();
