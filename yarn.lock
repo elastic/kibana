@@ -1582,7 +1582,7 @@
   resolved "https://registry.yarnpkg.com/@elastic/ecs-helpers/-/ecs-helpers-2.1.1.tgz#8a375b307c33a959938d9ae8f9abb466eb9fb3bf"
   integrity sha512-ItoNazMnYdlUCmkBYTXc3SG6PF7UlVTbvMdHPvXkfTMPdwGv2G1Xtp5CjDHaGHGOZSwaDrW4RSCXvA/lMSU+rg==
 
-"@elastic/ecs-pino-format@^1.2.0", "@elastic/ecs-pino-format@^1.4.0":
+"@elastic/ecs-pino-format@^1.2.0", "@elastic/ecs-pino-format@^1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@elastic/ecs-pino-format/-/ecs-pino-format-1.5.0.tgz#48610e06e939b50bfa3629da0d2fcb1c74a69a20"
   integrity sha512-7MMVmT50ucEl7no8mUgCIl+pffBVNRl36uZi0vmalWa2xPWISBxM9k9WSP/WTgOkmGj9G35e5g3UfCS1zxshBg==
@@ -15383,12 +15383,12 @@ elastic-apm-node@3.46.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.2.0.tgz#0b9fe675b94902734965d3b9da5424260e4e45a2"
-  integrity sha512-GbSjtQ+Q9lBZpY6bikatPCL7cMWPuBxHQ2yD0msfuP7JYXhWon42L8N7cqyepmp/F/YF++X8WJxuZM2G7J3kYQ==
+elastic-apm-node@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.3.0.tgz#449cd3d3154858fbe0bbf223d3a1442aa5a354bd"
+  integrity sha512-LLB+RH12cFIdKZxxW6oOt3aL+8oEYNaHILol31dFb2SFdCKCWceMfUSzESTuPiImdyRTi5A+2Iw+46Fgt4caPQ==
   dependencies:
-    "@elastic/ecs-pino-format" "^1.4.0"
+    "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"
     "@opentelemetry/core" "^1.11.0"
     "@opentelemetry/sdk-metrics" "^1.12.0"
@@ -15406,7 +15406,7 @@ elastic-apm-node@^4.2.0:
     fast-safe-stringify "^2.0.7"
     fast-stream-to-buffer "^1.0.0"
     http-headers "^3.0.2"
-    import-in-the-middle "1.4.2"
+    import-in-the-middle "1.5.0"
     json-bigint "^1.0.0"
     lru-cache "^10.0.1"
     measured-reporting "^1.51.1"
@@ -18743,10 +18743,10 @@ import-fresh@^3.1.0, import-fresh@^3.2.1, import-fresh@^3.3.0:
     parent-module "^1.0.0"
     resolve-from "^4.0.0"
 
-import-in-the-middle@1.4.2:
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.4.2.tgz#2a266676e3495e72c04bbaa5ec14756ba168391b"
-  integrity sha512-9WOz1Yh/cvO/p69sxRmhyQwrIGGSp7EIdcb+fFNVi7CzQGQB8U1/1XrKVSbEd/GNOAeM0peJtmi7+qphe7NvAw==
+import-in-the-middle@1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.5.0.tgz#db939aa2b7220f6149124885160916be715d1cae"
+  integrity sha512-H2hqR0jImhqe9+1k8pYewDKWJHnDeRsWZk5aSztv6MIWD5glmbEOqy1JZrMUC6SJiO1M4A+nVvUUYtWzP5wPYg==
   dependencies:
     acorn "^8.8.2"
     acorn-import-assertions "^1.9.0"
