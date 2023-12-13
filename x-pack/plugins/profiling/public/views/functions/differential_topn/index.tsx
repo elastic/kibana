@@ -54,9 +54,7 @@ export function DifferentialTopNFunctionsView() {
 
   const totalSeconds = timeRange.inSeconds.end - timeRange.inSeconds.start;
   const totalComparisonSeconds =
-    (new Date(comparisonTimeRange.end!).getTime() -
-      new Date(comparisonTimeRange.start!).getTime()) /
-    1000;
+    comparisonTimeRange.inSeconds.end! - comparisonTimeRange.inSeconds.start!;
 
   const comparisonTime = totalSeconds / totalComparisonSeconds;
 
@@ -209,18 +207,19 @@ export function DifferentialTopNFunctionsView() {
           >
             <DifferentialTopNFunctionsGrid
               base={state.data}
-              comparison={comparisonState.data}
               baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
+              comparison={comparisonState.data}
               comparisonScaleFactor={isNormalizedByTime ? baselineTime : baseline}
-              totalSeconds={totalSeconds}
-              pageIndex={pageIndex}
-              onChangePage={handlePageChange}
-              onChangeSort={handleOnSort}
-              sortField={sortField}
-              sortDirection={sortDirection}
-              onFrameClick={handleOnFrameClick}
               comparisonSortDirection={comparisonSortDirection}
               comparisonSortField={comparisonSortField}
+              comparisonTotalSeconds={totalComparisonSeconds}
+              onChangePage={handlePageChange}
+              onChangeSort={handleOnSort}
+              onFrameClick={handleOnFrameClick}
+              pageIndex={pageIndex}
+              sortDirection={sortDirection}
+              sortField={sortField}
+              totalSeconds={totalSeconds}
             />
           </AsyncComponent>
         </EuiFlexItem>

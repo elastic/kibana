@@ -17,6 +17,7 @@ import {
   ANNUAL_SECONDS,
   CalculateImpactEstimates,
 } from '../../hooks/use_calculate_impact_estimates';
+import { NOT_AVAILABLE_LABEL } from '../../../common';
 
 interface Params {
   countInclusive: number;
@@ -29,6 +30,48 @@ interface Params {
   totalAnnualCO2Kgs: number;
   selfAnnualCostUSD: number;
   totalAnnualCostUSD: number;
+  rank?: number;
+}
+
+export interface ImpactRow {
+  'data-test-subj': string;
+  label: React.ReactNode;
+  value: string;
+}
+
+const getComparisonValue = <T,>(value: T, comparisonValue?: T) =>
+  `${value ?? NOT_AVAILABLE_LABEL} vs ${comparisonValue ?? NOT_AVAILABLE_LABEL}`;
+
+/**
+ * e.g.:
+ * label: 'foo',
+ * value: 'abc' vs 'xyz'
+ */
+export function getComparisonImpactRow({
+  base,
+  comparison,
+}: {
+  base: Params;
+  comparison?: Params;
+}) {
+  const baseImpactRows = getImpactRows(base);
+  const comparisonImpactRows = comparison ? getImpactRows(comparison) : [];
+  return [
+    {
+      'data-test-subj': 'rank',
+      label: i18n.translate('xpack.profiling.flameGraphInformationWindow.rank', {
+        defaultMessage: 'Rank',
+      }),
+      value: getComparisonValue(base.rank, comparison?.rank),
+    },
+    ...baseImpactRows.map((baseItem, index) => {
+      const comparisonValue = comparisonImpactRows[index]?.value;
+      return {
+        ...baseItem,
+        value: getComparisonValue(baseItem.value, comparisonValue),
+      };
+    }),
+  ];
 }
 
 export function getImpactRows({
@@ -42,7 +85,7 @@ export function getImpactRows({
   totalAnnualCO2Kgs,
   selfAnnualCostUSD,
   totalAnnualCostUSD,
-}: Params) {
+}: Params): ImpactRow[] {
   const { selfCPU, totalCPU } = calculateImpactEstimates({
     countInclusive,
     countExclusive,

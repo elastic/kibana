@@ -28,7 +28,7 @@ import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { LabelWithHint } from '../label_with_hint';
 import { FunctionRow } from './function_row';
-import { getFunctionsRows, IFunctionRow } from './utils';
+import { convertRowToFrame, getFunctionsRows, IFunctionRow } from './utils';
 
 interface Props {
   topNFunctions?: TopNFunctions;
@@ -366,21 +366,7 @@ export const TopNFunctionsGrid = forwardRef(
             onClose={() => {
               setSelectedRow(undefined);
             }}
-            frame={{
-              addressOrLine: selectedRow.frame.AddressOrLine,
-              countExclusive: selectedRow.selfCPU,
-              countInclusive: selectedRow.totalCPU,
-              exeFileName: selectedRow.frame.ExeFileName,
-              fileID: selectedRow.frame.FileID,
-              frameType: selectedRow.frame.FrameType,
-              functionName: selectedRow.frame.FunctionName,
-              sourceFileName: selectedRow.frame.SourceFilename,
-              sourceLine: selectedRow.frame.SourceLine,
-              selfAnnualCO2Kgs: selectedRow.selfAnnualCO2kgs,
-              totalAnnualCO2Kgs: selectedRow.totalAnnualCO2kgs,
-              selfAnnualCostUSD: selectedRow.selfAnnualCostUSD,
-              totalAnnualCostUSD: selectedRow.totalAnnualCostUSD,
-            }}
+            frame={convertRowToFrame(selectedRow)}
             totalSeconds={totalSeconds}
             totalSamples={totalCount}
             showAIAssistant={!isEmbedded}
