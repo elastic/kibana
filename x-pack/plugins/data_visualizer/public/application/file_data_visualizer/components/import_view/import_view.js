@@ -491,7 +491,11 @@ export class ImportView extends Component {
         </EuiPageHeader>
         <EuiSpacer size="m" />
         {initialized === false ? (
-          <EuiPanel data-test-subj="dataVisualizerFileImportSettingsPanel">
+          <EuiPanel
+            data-test-subj="dataVisualizerFileImportSettingsPanel"
+            hasShadow={false}
+            hasBorder
+          >
             <EuiTitle size="s">
               <h2>
                 <FormattedMessage
@@ -567,7 +571,7 @@ export class ImportView extends Component {
           <React.Fragment>
             <EuiSpacer size="m" />
 
-            <EuiPanel>
+            <EuiPanel hasShadow={false} hasBorder>
               <ImportProgress statuses={statuses} />
 
               <DocCountChart
