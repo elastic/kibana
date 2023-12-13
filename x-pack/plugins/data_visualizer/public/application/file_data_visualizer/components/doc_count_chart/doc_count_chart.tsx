@@ -52,7 +52,7 @@ export const DocCountChart: FC<{
   // const [actualEnd, setActualEnd] = useState<Moment | undefined>(undefined);
   const [timeRange, setTimeRange] = useState<{ start: Moment; end: Moment } | undefined>(undefined);
   const [timeRangeAttempts, setTimeRangeAttempts] = useState(ATTEMPTS);
-  const incrementFailedAttempts = useCallback(() => {
+  const recordFailure = useCallback(() => {
     // eslint-disable-next-line no-console
     console.log('incrementFailedAttempts');
     setTimeRangeAttempts(timeRangeAttempts - 1);
@@ -207,11 +207,11 @@ export const DocCountChart: FC<{
     } catch (error) {
       // console.log('error', error);
       setLoading(false);
-      incrementFailedAttempts();
+      recordFailure();
     }
 
     // console.log('resp', resp);
-  }, [dataStart.search, incrementFailedAttempts, index, timeBuckets, timeFieldName, timeRange]);
+  }, [dataStart.search, recordFailure, index, timeBuckets, timeFieldName, timeRange]);
 
   const finishedChecks = useCallback(
     async (counter: number) => {
@@ -277,17 +277,9 @@ export const DocCountChart: FC<{
       setTimeRange({ start: moment(startMs), end: moment(endMs) });
     } catch (error) {
       // console.log('loadTimeRange', error);
-      incrementFailedAttempts();
+      recordFailure();
     }
-  }, [
-    fileUpload,
-    firstReadDoc,
-    incrementFailedAttempts,
-    index,
-    lastReadDoc,
-    pipelineString,
-    timeFieldName,
-  ]);
+  }, [fileUpload, firstReadDoc, recordFailure, index, lastReadDoc, pipelineString, timeFieldName]);
 
   useEffect(() => {
     // console.log(statuses);
@@ -326,7 +318,8 @@ export const DocCountChart: FC<{
     timeFieldName === undefined ||
     statuses.indexCreatedStatus === IMPORT_STATUS.INCOMPLETE ||
     statuses.ingestPipelineCreatedStatus === IMPORT_STATUS.INCOMPLETE ||
-    timeRangeAttempts === 0
+    timeRangeAttempts === 0 ||
+    eventRateChartData.length === 0
   ) {
     return null;
   }
