@@ -13,6 +13,9 @@ import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
 import { getCases } from './api';
 import type { ServerError } from '../types';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
+import { useAvailableCasesOwners } from '../components/app/use_available_owners';
+import { getAllPermissionsExceptFrom } from '../utils/permissions';
 
 export const initialData: CasesFindResponseUI = {
   cases: [],
@@ -31,6 +34,17 @@ export const useGetCases = (
   } = {}
 ): UseQueryResult<CasesFindResponseUI> => {
   const toasts = useToasts();
+  const { owner } = useCasesContext();
+  const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
+
+  const hasOwner = !!owner.length;
+  const initialOwner = hasOwner ? owner : availableSolutions;
+
+  const ownerFilter =
+    params.filterOptions?.owner != null && params.filterOptions.owner.length > 0
+      ? { owner: params.filterOptions.owner }
+      : { owner: initialOwner };
+
   return useQuery(
     casesQueriesKeys.cases(params),
     ({ signal }) => {
@@ -38,6 +52,7 @@ export const useGetCases = (
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
           ...(params.filterOptions ?? {}),
+          ...ownerFilter,
         },
         queryParams: {
           ...DEFAULT_QUERY_PARAMS,
